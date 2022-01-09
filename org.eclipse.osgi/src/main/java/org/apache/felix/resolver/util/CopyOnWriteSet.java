@@ -238,7 +238,7 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
     @SuppressWarnings("unchecked")
     public static <T,U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
         T[] copy;
-        if (newType == Object[].class) {
+        if ((Object) newType == Object[].class) {
             copy = (T[]) new Object[newLength];
         } else {
             copy = (T[]) Array.newInstance(newType.getComponentType(), newLength);
