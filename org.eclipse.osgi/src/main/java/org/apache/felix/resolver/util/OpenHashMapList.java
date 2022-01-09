@@ -24,7 +24,6 @@ public class OpenHashMapList extends OpenHashMap<Requirement, CandidateSelector>
     private static final long serialVersionUID = 0L;
 
     public OpenHashMapList() {
-        super();
     }
 
     public OpenHashMapList(int initialCapacity) {

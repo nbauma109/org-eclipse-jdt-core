@@ -37,12 +37,12 @@ public class ParentVariableResolver extends PathVariableResolver {
 	@Override
 	public String getValue(String variable, IResource resource) {
 		int index = variable.indexOf('-');
-		if (index == -1 || index == (variable.length() - 1))
+		if (index == -1 || index == variable.length() - 1)
 			return null;
 
 		String countRemaining = variable.substring(index + 1);
 		index = countRemaining.indexOf('-');
-		if (index == -1 || index == (variable.length() - 1))
+		if (index == -1 || index == variable.length() - 1)
 			return null;
 
 		String countString = countRemaining.substring(0, index);

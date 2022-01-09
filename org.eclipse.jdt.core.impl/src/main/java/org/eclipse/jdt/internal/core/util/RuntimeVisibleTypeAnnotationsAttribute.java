@@ -27,7 +27,7 @@ public class RuntimeVisibleTypeAnnotationsAttribute
 	extends ClassFileAttribute
 	implements IRuntimeVisibleTypeAnnotationsAttribute {
 
-	private static final IExtendedAnnotation[] NO_ENTRIES = new IExtendedAnnotation[0];
+	private static final IExtendedAnnotation[] NO_ENTRIES = {};
 	private int extendedAnnotationsNumber;
 	private IExtendedAnnotation[] extendedAnnotations;
 

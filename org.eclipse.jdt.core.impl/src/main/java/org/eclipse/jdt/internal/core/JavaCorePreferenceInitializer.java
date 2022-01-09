@@ -138,7 +138,8 @@ public class JavaCorePreferenceInitializer extends AbstractPreferenceInitializer
 	 *
 	 * @deprecated As using deprecated options
 	 */
-	private void initializeDeprecatedOptions() {
+	@Deprecated
+    private void initializeDeprecatedOptions() {
 		Map deprecatedOptions = JavaModelManager.getJavaModelManager().deprecatedOptions;
 		deprecatedOptions.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER,
 			new String[] {

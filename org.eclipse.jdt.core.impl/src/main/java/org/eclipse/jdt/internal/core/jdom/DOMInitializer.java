@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.core.util.Util;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 class DOMInitializer extends DOMMember implements IDOMInitializer {
 
 	/**
@@ -140,15 +141,13 @@ protected void appendSimpleContents(CharArrayBuffer buffer) {
 @Override
 public String getBody() {
 	becomeDetailed();
-	if (hasBody()) {
-		if (this.fBody != null) {
-			return this.fBody;
-		} else {
-			return new String(this.fDocument, this.fBodyRange[0], this.fBodyRange[1] + 1 - this.fBodyRange[0]);
-		}
-	} else {
+	if (!hasBody()) {
 		return null;
 	}
+    if (this.fBody != null) {
+    	return this.fBody;
+    }
+    return new String(this.fDocument, this.fBodyRange[0], this.fBodyRange[1] + 1 - this.fBodyRange[0]);
 }
 /**
  * @see DOMNode#getDetailedNode()
@@ -162,19 +161,18 @@ protected DOMNode getDetailedNode() {
  */
 @Override
 public IJavaElement getJavaElement(IJavaElement parent) throws IllegalArgumentException {
-	if (parent.getElementType() == IJavaElement.TYPE) {
-		int count = 1;
-		IDOMNode previousNode = getPreviousNode();
-		while (previousNode != null) {
-			if (previousNode instanceof DOMInitializer) {
-				count++;
-			}
-			previousNode = previousNode.getPreviousNode();
-		}
-		return ((IType) parent).getInitializer(count);
-	} else {
+	if (parent.getElementType() != IJavaElement.TYPE) {
 		throw new IllegalArgumentException(Messages.element_illegalParent);
 	}
+    int count = 1;
+    IDOMNode previousNode = getPreviousNode();
+    while (previousNode != null) {
+    	if (previousNode instanceof DOMInitializer) {
+    		count++;
+    	}
+    	previousNode = previousNode.getPreviousNode();
+    }
+    return ((IType) parent).getInitializer(count);
 }
 /**
  * @see DOMMember#getMemberDeclarationStartPosition()

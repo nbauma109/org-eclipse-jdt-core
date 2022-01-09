@@ -71,16 +71,14 @@ public class RecoveredModule extends RecoveredElement {
 		if (this.exports == null) {
 			this.exports = new RecoveredExportsStatement[5];
 			this.exportCount = 0;
-		} else {
-			if (this.exportCount == this.exports.length) {
-				System.arraycopy(
-					this.exports,
-					0,
-					(this.exports = new RecoveredExportsStatement[2 * this.exportCount]),
-					0,
-					this.exportCount);
-			}
-		}
+		} else if (this.exportCount == this.exports.length) {
+        	System.arraycopy(
+        		this.exports,
+        		0,
+        		this.exports = new RecoveredExportsStatement[2 * this.exportCount],
+        		0,
+        		this.exportCount);
+        }
 		RecoveredExportsStatement element = new RecoveredExportsStatement(exportsStatement, this, bracketBalanceValue);
 		this.exports[this.exportCount++] = element;
 
@@ -92,16 +90,14 @@ public class RecoveredModule extends RecoveredElement {
 		if (this.opens == null) {
 			this.opens = new RecoveredOpensStatement[5];
 			this.opensCount = 0;
-		} else {
-			if (this.opensCount == this.opens.length) {
-				System.arraycopy(
-					this.opens,
-					0,
-					(this.opens = new RecoveredOpensStatement[2 * this.opensCount]),
-					0,
-					this.opensCount);
-			}
-		}
+		} else if (this.opensCount == this.opens.length) {
+        	System.arraycopy(
+        		this.opens,
+        		0,
+        		this.opens = new RecoveredOpensStatement[2 * this.opensCount],
+        		0,
+        		this.opensCount);
+        }
 		RecoveredOpensStatement element = new RecoveredOpensStatement(opensStatement, this, bracketBalanceValue);
 		this.opens[this.opensCount++] = element;
 
@@ -111,16 +107,14 @@ public class RecoveredModule extends RecoveredElement {
 		if (this.requires == null) {
 			this.requires = new RecoveredRequiresStatement[5];
 			this.requiresCount = 0;
-		} else {
-			if (this.requiresCount == this.requires.length) {
-				System.arraycopy(
-					this.requires,
-					0,
-					(this.requires = new RecoveredRequiresStatement[2 * this.requiresCount]),
-					0,
-					this.requiresCount);
-			}
-		}
+		} else if (this.requiresCount == this.requires.length) {
+        	System.arraycopy(
+        		this.requires,
+        		0,
+        		this.requires = new RecoveredRequiresStatement[2 * this.requiresCount],
+        		0,
+        		this.requiresCount);
+        }
 		RecoveredRequiresStatement element = new RecoveredRequiresStatement(requiresStatement, this, bracketBalanceValue);
 		this.requires[this.requiresCount++] = element;
 		return this;
@@ -129,16 +123,14 @@ public class RecoveredModule extends RecoveredElement {
 		if (this.services == null) {
 			this.services = new RecoveredProvidesStatement[5];
 			this.servicesCount = 0;
-		} else {
-			if (this.servicesCount == this.services.length) {
-				System.arraycopy(
-					this.services,
-					0,
-					(this.services = new RecoveredProvidesStatement[2 * this.servicesCount]),
-					0,
-					this.servicesCount);
-			}
-		}
+		} else if (this.servicesCount == this.services.length) {
+        	System.arraycopy(
+        		this.services,
+        		0,
+        		this.services = new RecoveredProvidesStatement[2 * this.servicesCount],
+        		0,
+        		this.servicesCount);
+        }
 		RecoveredProvidesStatement element = new RecoveredProvidesStatement(providesStatement, this, bracketBalanceValue);
 		this.services[this.servicesCount++] = element;
 		return element;
@@ -151,16 +143,14 @@ public class RecoveredModule extends RecoveredElement {
 		if (this.uses == null) {
 			this.uses = new RecoveredUsesStatement[5];
 			this.usesCount = 0;
-		} else {
-			if (this.usesCount == this.uses.length) {
-				System.arraycopy(
-					this.uses,
-					0,
-					(this.uses = new RecoveredUsesStatement[2 * this.usesCount]),
-					0,
-					this.usesCount);
-			}
-		}
+		} else if (this.usesCount == this.uses.length) {
+        	System.arraycopy(
+        		this.uses,
+        		0,
+        		this.uses = new RecoveredUsesStatement[2 * this.usesCount],
+        		0,
+        		this.usesCount);
+        }
 		RecoveredUsesStatement element = new RecoveredUsesStatement(usesStatement, this, bracketBalanceValue);
 		this.uses[this.usesCount++] = element;
 	}

@@ -30,7 +30,7 @@ public class InternalTeamHook {
 	 */
 	@SuppressWarnings("javadoc") // Suppress the "method in not visible" warning.
 	protected void setRuleFactory(IProject project, IResourceRuleFactory factory) {
-		Workspace workspace = ((Workspace) project.getWorkspace());
+		Workspace workspace = (Workspace) project.getWorkspace();
 		((Rules) workspace.getRuleFactory()).setRuleFactory(project, factory);
 	}
 }

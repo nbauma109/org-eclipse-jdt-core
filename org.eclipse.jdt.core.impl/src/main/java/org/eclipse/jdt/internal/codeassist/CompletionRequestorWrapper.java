@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
  * @since 3.1
  * @deprecated
  */
+@Deprecated
 public class CompletionRequestorWrapper extends CompletionRequestor {
 	private static boolean DECODE_SIGNATURE = false;
 
@@ -84,27 +85,25 @@ public class CompletionRequestorWrapper extends CompletionRequestor {
 								internalCompletionProposal.getReplaceEnd(),
 								internalCompletionProposal.getRelevance());
 					}
-				} else {
-					if(DECODE_SIGNATURE) {
-						this.requestor.acceptClass(
-								internalCompletionProposal.getDeclarationSignature(),
-								Signature.getSignatureSimpleName(internalCompletionProposal.getSignature()),
-								internalCompletionProposal.getCompletion(),
-								internalCompletionProposal.getFlags(),
-								internalCompletionProposal.getReplaceStart(),
-								internalCompletionProposal.getReplaceEnd(),
-								internalCompletionProposal.getRelevance());
-					} else {
-						this.requestor.acceptClass(
-								internalCompletionProposal.getPackageName() == null ? CharOperation.NO_CHAR : internalCompletionProposal.getPackageName(),
-								internalCompletionProposal.getTypeName(),
-								internalCompletionProposal.getCompletion(),
-								internalCompletionProposal.getFlags(),
-								internalCompletionProposal.getReplaceStart(),
-								internalCompletionProposal.getReplaceEnd(),
-								internalCompletionProposal.getRelevance());
-					}
-				}
+				} else if(DECODE_SIGNATURE) {
+                	this.requestor.acceptClass(
+                			internalCompletionProposal.getDeclarationSignature(),
+                			Signature.getSignatureSimpleName(internalCompletionProposal.getSignature()),
+                			internalCompletionProposal.getCompletion(),
+                			internalCompletionProposal.getFlags(),
+                			internalCompletionProposal.getReplaceStart(),
+                			internalCompletionProposal.getReplaceEnd(),
+                			internalCompletionProposal.getRelevance());
+                } else {
+                	this.requestor.acceptClass(
+                			internalCompletionProposal.getPackageName() == null ? CharOperation.NO_CHAR : internalCompletionProposal.getPackageName(),
+                			internalCompletionProposal.getTypeName(),
+                			internalCompletionProposal.getCompletion(),
+                			internalCompletionProposal.getFlags(),
+                			internalCompletionProposal.getReplaceStart(),
+                			internalCompletionProposal.getReplaceEnd(),
+                			internalCompletionProposal.getRelevance());
+                }
 				break;
 			case CompletionProposal.FIELD_REF:
 				if(DECODE_SIGNATURE) {

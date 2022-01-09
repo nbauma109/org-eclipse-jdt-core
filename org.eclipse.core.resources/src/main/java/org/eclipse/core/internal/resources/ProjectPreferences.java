@@ -67,10 +67,8 @@ public class ProjectPreferences extends EclipsePreferences {
 	static void deleted(IFile file) throws CoreException {
 		IPath path = file.getFullPath();
 		int count = path.segmentCount();
-		if (count != 3)
-			return;
 		// check if we are in the .settings directory
-		if (!EclipsePreferences.DEFAULT_PREFERENCES_DIRNAME.equals(path.segment(1)))
+		if (count != 3 || !EclipsePreferences.DEFAULT_PREFERENCES_DIRNAME.equals(path.segment(1)))
 			return;
 		Preferences root = Platform.getPreferencesService().getRootNode();
 		String project = path.segment(0);
@@ -95,10 +93,8 @@ public class ProjectPreferences extends EclipsePreferences {
 	static void deleted(IFolder folder) throws CoreException {
 		IPath path = folder.getFullPath();
 		int count = path.segmentCount();
-		if (count != 2)
-			return;
 		// check if we are the .settings directory
-		if (!EclipsePreferences.DEFAULT_PREFERENCES_DIRNAME.equals(path.segment(1)))
+		if (count != 2 || !EclipsePreferences.DEFAULT_PREFERENCES_DIRNAME.equals(path.segment(1)))
 			return;
 		Preferences root = Platform.getPreferencesService().getRootNode();
 		// The settings dir has been removed/moved so remove all project prefs
@@ -143,7 +139,6 @@ public class ProjectPreferences extends EclipsePreferences {
 				return;
 			case IResource.PROJECT :
 				deleted((IProject) resource);
-				return;
 		}
 	}
 
@@ -171,14 +166,13 @@ public class ProjectPreferences extends EclipsePreferences {
         ) {
 			result.load(input);
 		} catch (CoreException e) {
-			if (e.getStatus().getCode() == IResourceStatus.RESOURCE_NOT_FOUND) {
-				if (Policy.DEBUG_PREFERENCES)
-					Policy.debug(MessageFormat.format("Preference file {0} does not exist.", file.getFullPath())); //$NON-NLS-1$
-			} else {
+			if (e.getStatus().getCode() != IResourceStatus.RESOURCE_NOT_FOUND) {
 				String message = NLS.bind(Messages.preferences_loadException, file.getFullPath());
 				log(new Status(IStatus.ERROR, ResourcesPlugin.PI_RESOURCES, IStatus.ERROR, message, e));
 				throw new BackingStoreException(message);
 			}
+            if (Policy.DEBUG_PREFERENCES)
+            	Policy.debug(MessageFormat.format("Preference file {0} does not exist.", file.getFullPath())); //$NON-NLS-1$
 		} catch (IOException e) {
 			String message = NLS.bind(Messages.preferences_loadException, file.getFullPath());
 			log(new Status(IStatus.ERROR, ResourcesPlugin.PI_RESOURCES, IStatus.ERROR, message, e));
@@ -188,7 +182,7 @@ public class ProjectPreferences extends EclipsePreferences {
 	}
 
 	private static void preferencesChanged(IProject project) {
-		Workspace workspace = ((Workspace) ResourcesPlugin.getWorkspace());
+		Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
 		workspace.getCharsetManager().projectPreferencesChanged(project);
 		workspace.getContentDescriptionManager().projectPreferencesChanged(project);
 	}
@@ -443,24 +437,19 @@ public class ProjectPreferences extends EclipsePreferences {
 		// illegal state if this node has been removed
 		checkRemoved();
 		silentLoad();
-		if ((segmentCount == 3) && PREFS_REGULAR_QUALIFIER.equals(qualifier) && (project != null)) {
-			if (ResourcesPlugin.PREF_SEPARATE_DERIVED_ENCODINGS.equals(key)) {
-				CharsetManager charsetManager = ((Workspace) ResourcesPlugin.getWorkspace()).getCharsetManager();
-				if (Boolean.parseBoolean(newValue))
-					charsetManager.splitEncodingPreferences(project);
-				else
-					charsetManager.mergeEncodingPreferences(project);
-			}
-		}
+		if (segmentCount == 3 && PREFS_REGULAR_QUALIFIER.equals(qualifier) && project != null && ResourcesPlugin.PREF_SEPARATE_DERIVED_ENCODINGS.equals(key)) {
+        	CharsetManager charsetManager = ((Workspace) ResourcesPlugin.getWorkspace()).getCharsetManager();
+        	if (Boolean.parseBoolean(newValue))
+        		charsetManager.splitEncodingPreferences(project);
+        	else
+        		charsetManager.mergeEncodingPreferences(project);
+        }
 		return super.internalPut(key, newValue);
 	}
 
 	private void initialize() {
-		if (segmentCount != 2)
-			return;
-
 		// if already initialized, then skip this initialization
-		if (initialized)
+		if (segmentCount != 2 || initialized)
 			return;
 
 		// initialize the children only if project is opened
@@ -552,13 +541,7 @@ public class ProjectPreferences extends EclipsePreferences {
 		checkRemoved();
 		initialize();
 		silentLoad();
-		if (segmentCount != 1)
-			return super.nodeExists(path);
-		if (path.length() == 0)
-			return super.nodeExists(path);
-		if (path.charAt(0) == IPath.SEPARATOR)
-			return super.nodeExists(path);
-		if (path.indexOf(IPath.SEPARATOR) != -1)
+		if (segmentCount != 1 || path.length() == 0 || path.charAt(0) == IPath.SEPARATOR || path.indexOf(IPath.SEPARATOR) != -1)
 			return super.nodeExists(path);
 		// if we are checking existance of a single segment child of /project, base the answer on
 		// whether or not it exists in the workspace.
@@ -571,15 +554,13 @@ public class ProjectPreferences extends EclipsePreferences {
 		checkRemoved();
 		silentLoad();
 		super.remove(key);
-		if ((segmentCount == 3) && PREFS_REGULAR_QUALIFIER.equals(qualifier) && (project != null)) {
-			if (ResourcesPlugin.PREF_SEPARATE_DERIVED_ENCODINGS.equals(key)) {
-				CharsetManager charsetManager = ((Workspace) ResourcesPlugin.getWorkspace()).getCharsetManager();
-				if (ResourcesPlugin.DEFAULT_PREF_SEPARATE_DERIVED_ENCODINGS)
-					charsetManager.splitEncodingPreferences(project);
-				else
-					charsetManager.mergeEncodingPreferences(project);
-			}
-		}
+		if (segmentCount == 3 && PREFS_REGULAR_QUALIFIER.equals(qualifier) && project != null && ResourcesPlugin.PREF_SEPARATE_DERIVED_ENCODINGS.equals(key)) {
+        	CharsetManager charsetManager = ((Workspace) ResourcesPlugin.getWorkspace()).getCharsetManager();
+        	if (ResourcesPlugin.DEFAULT_PREF_SEPARATE_DERIVED_ENCODINGS)
+        		charsetManager.splitEncodingPreferences(project);
+        	else
+        		charsetManager.mergeEncodingPreferences(project);
+        }
 	}
 
 	@Override
@@ -622,7 +603,7 @@ public class ProjectPreferences extends EclipsePreferences {
 					String fileLineSeparator = FileUtil.getLineSeparator(fileInWorkspace);
 					if (!systemLineSeparator.equals(fileLineSeparator))
 						s = s.replaceAll(systemLineSeparator, fileLineSeparator);
-					InputStream input = new BufferedInputStream(new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8))); //$NON-NLS-1$
+					InputStream input = new BufferedInputStream(new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8)));
 					// make sure that preference folder and file are in sync
 					fileInWorkspace.getParent().refreshLocal(IResource.DEPTH_ZERO, null);
 					fileInWorkspace.refreshLocal(IResource.DEPTH_ZERO, null);
@@ -685,9 +666,7 @@ public class ProjectPreferences extends EclipsePreferences {
 
 	private void silentLoad() {
 		ProjectPreferences node = (ProjectPreferences) getLoadLevel();
-		if (node == null)
-			return;
-		if (isAlreadyLoaded(node) || node.isLoading())
+		if (node == null || isAlreadyLoaded(node) || node.isLoading())
 			return;
 		try {
 			node.setLoading(true);

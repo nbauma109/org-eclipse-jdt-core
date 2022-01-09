@@ -171,7 +171,7 @@ public final class ModuleRevision implements BundleRevision {
 	public boolean hasLazyActivatePolicy() {
 		Boolean currentPolicy = lazyActivationPolicy;
 		if (currentPolicy != null) {
-			return currentPolicy.booleanValue();
+			return currentPolicy;
 		}
 		boolean lazyPolicy = false;
 		List<Capability> data = getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
@@ -179,7 +179,7 @@ public final class ModuleRevision implements BundleRevision {
 			Capability moduleData = data.get(0);
 			lazyPolicy = EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(moduleData.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY));
 		}
-		lazyActivationPolicy = Boolean.valueOf(lazyPolicy);
+		lazyActivationPolicy = lazyPolicy;
 		return lazyPolicy;
 	}
 

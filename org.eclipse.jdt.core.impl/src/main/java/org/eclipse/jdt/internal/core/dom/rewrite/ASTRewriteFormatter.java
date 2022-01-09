@@ -183,16 +183,15 @@ public final class ASTRewriteFormatter {
 		String unformatted= flattener.getResult();
 		TextEdit edit= formatNode(node, unformatted, initialIndentationLevel);
 		if (edit == null) {
-		    if (initialIndentationLevel > 0) {
-		        // at least correct the indent
-		        String indentString = createIndentString(initialIndentationLevel);
-				ReplaceEdit[] edits = IndentManipulation.getChangeIndentEdits(unformatted, 0, this.tabWidth, this.indentWidth, indentString);
-				edit= new MultiTextEdit();
-				edit.addChild(new InsertEdit(0, indentString));
-				edit.addChildren(edits);
-		    } else {
+		    if (initialIndentationLevel <= 0) {
 		       return unformatted;
 		    }
+            // at least correct the indent
+            String indentString = createIndentString(initialIndentationLevel);
+            ReplaceEdit[] edits = IndentManipulation.getChangeIndentEdits(unformatted, 0, this.tabWidth, this.indentWidth, indentString);
+            edit= new MultiTextEdit();
+            edit.addChild(new InsertEdit(0, indentString));
+            edit.addChildren(edits);
 		}
 		return evaluateFormatterEdit(unformatted, edit, markers);
 	}
@@ -227,8 +226,8 @@ public final class ASTRewriteFormatter {
 			Document doc= createDocument(string, positions);
 			edit.apply(doc, 0);
 			if (positions != null) {
-				for (int i= 0; i < positions.length; i++) {
-					Assert.isTrue(!positions[i].isDeleted, "Position got deleted"); //$NON-NLS-1$
+				for (Position position : positions) {
+					Assert.isTrue(!position.isDeleted, "Position got deleted"); //$NON-NLS-1$
 				}
 			}
 			return doc.get();
@@ -401,8 +400,8 @@ public final class ASTRewriteFormatter {
 			return null; // not supported
 		}
 		TextEdit[] children= oldEdit.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			TextEdit shifted= shifEdit(children[i], diff);
+		for (TextEdit child : children) {
+			TextEdit shifted= shifEdit(child, diff);
 			if (shifted != null) {
 				newEdit.addChild(shifted);
 			}
@@ -422,18 +421,18 @@ public final class ASTRewriteFormatter {
 					protected boolean notDeleted() {
 						int start= this.fOffset;
 						int end= start + this.fLength;
-						if (start < this.fPosition.offset && (this.fPosition.offset + this.fPosition.length < end)) {
+						if (start < this.fPosition.offset && this.fPosition.offset + this.fPosition.length < end) {
 							this.fPosition.offset= end; // deleted positions: set to end of remove
 							return false;
 						}
 						return true;
 					}
 				});
-				for (int i= 0; i < positions.length; i++) {
+				for (Position position : positions) {
 					try {
-						doc.addPosition(POS_CATEGORY, positions[i]);
+						doc.addPosition(POS_CATEGORY, position);
 					} catch (BadLocationException e) {
-						throw new IllegalArgumentException("Position outside of string. offset: " + positions[i].offset + ", length: " + positions[i].length + ", string size: " + string.length(), e);   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+						throw new IllegalArgumentException("Position outside of string. offset: " + position.offset + ", length: " + position.length + ", string size: " + string.length(), e);   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 					}
 				}
 			}

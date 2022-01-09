@@ -40,8 +40,8 @@ class MethodBinding implements IMethodBinding {
 	private static final int VALID_MODIFIERS = Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE |
 		Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL | Modifier.SYNCHRONIZED | Modifier.NATIVE |
 		Modifier.STRICTFP | Modifier.DEFAULT;
-	private static final ITypeBinding[] NO_TYPE_BINDINGS = new ITypeBinding[0];
-	static final IVariableBinding[] NO_VARIABLE_BINDINGS = new IVariableBinding[0];
+	private static final ITypeBinding[] NO_TYPE_BINDINGS = {};
+	static final IVariableBinding[] NO_VARIABLE_BINDINGS = {};
 	protected org.eclipse.jdt.internal.compiler.lookup.MethodBinding binding;
 	protected BindingResolver resolver;
 	private volatile ITypeBinding[] parameterTypes;
@@ -192,27 +192,25 @@ class MethodBinding implements IMethodBinding {
 		int length = parameters == null ? 0 : parameters.length;
 		if (length == 0) {
 			return this.parameterTypes = NO_TYPE_BINDINGS;
-		} else {
-			ITypeBinding[] paramTypes = new ITypeBinding[length];
-			for (int i = 0; i < length; i++) {
-				final TypeBinding parameterBinding = parameters[i];
-				if (parameterBinding != null) {
-					ITypeBinding typeBinding = this.resolver.getTypeBinding(parameterBinding);
-					if (typeBinding == null) {
-						return this.parameterTypes = NO_TYPE_BINDINGS;
-					}
-					paramTypes[i] = typeBinding;
-				} else {
-					// log error
-					StringBuilder message = new StringBuilder("Report method binding where a parameter is null:\n");  //$NON-NLS-1$
-					message.append(this);
-					Util.log(new IllegalArgumentException(), message.toString());
-					// report no binding since one or more parameter has no binding
-					return this.parameterTypes = NO_TYPE_BINDINGS;
-				}
-			}
-			return this.parameterTypes = paramTypes;
 		}
+        ITypeBinding[] paramTypes = new ITypeBinding[length];
+        for (int i = 0; i < length; i++) {
+        	final TypeBinding parameterBinding = parameters[i];
+        	if (parameterBinding == null) {
+        		// log error
+        		StringBuilder message = new StringBuilder("Report method binding where a parameter is null:\n");  //$NON-NLS-1$
+        		message.append(this);
+        		Util.log(new IllegalArgumentException(), message.toString());
+        		// report no binding since one or more parameter has no binding
+        		return this.parameterTypes = NO_TYPE_BINDINGS;
+        	}
+            ITypeBinding typeBinding = this.resolver.getTypeBinding(parameterBinding);
+            if (typeBinding == null) {
+            	return this.parameterTypes = NO_TYPE_BINDINGS;
+            }
+            paramTypes[i] = typeBinding;
+        }
+        return this.parameterTypes = paramTypes;
 	}
 
 	/**
@@ -246,7 +244,7 @@ class MethodBinding implements IMethodBinding {
 
 				// Exclude all other targets including TYPE_USE, even though TYPE_USE is accepted.
 				if (isConstructor && (metaTagBits & TagBits.AnnotationForConstructor) == 0 &&
-						((metaTagBits & TagBits.AnnotationTargetMASK) != 0)) {
+						(metaTagBits & TagBits.AnnotationTargetMASK) != 0) {
 					continue;
 				}
 
@@ -259,7 +257,7 @@ class MethodBinding implements IMethodBinding {
 			if (convertedAnnotationCount == length) return tempAnnotations;
 			if (convertedAnnotationCount == 0) return AnnotationBinding.NoAnnotations;
 
-			System.arraycopy(tempAnnotations, 0, (tempAnnotations = new IAnnotationBinding[convertedAnnotationCount]), 0, convertedAnnotationCount);
+			System.arraycopy(tempAnnotations, 0, tempAnnotations = new IAnnotationBinding[convertedAnnotationCount], 0, convertedAnnotationCount);
 			return tempAnnotations;
 		}
 		return AnnotationBinding.NoAnnotations;
@@ -305,10 +303,7 @@ class MethodBinding implements IMethodBinding {
 	}
 
 	private JavaElement getUnresolvedJavaElement() {
-		if (JavaCore.getPlugin() == null) {
-			return null;
-		}
-		if (!(this.resolver instanceof DefaultBindingResolver)) return null;
+		if (JavaCore.getPlugin() == null || !(this.resolver instanceof DefaultBindingResolver)) return null;
 
 		DefaultBindingResolver defaultBindingResolver = (DefaultBindingResolver) this.resolver;
 		if (!defaultBindingResolver.fromJavaProject) return null;
@@ -388,11 +383,7 @@ class MethodBinding implements IMethodBinding {
 			// identical binding - equal (key or no key)
 			return true;
 		}
-		if (other == null) {
-			// other binding missing
-			return false;
-		}
-		if (!(other instanceof MethodBinding)) {
+		if (other == null || !(other instanceof MethodBinding)) {
 			return false;
 		}
 		org.eclipse.jdt.internal.compiler.lookup.MethodBinding otherBinding = ((MethodBinding) other).binding;
@@ -434,7 +425,7 @@ class MethodBinding implements IMethodBinding {
 			return this.typeParameters.length > 0;
 		}
 		TypeVariableBinding[] typeVariableBindings = this.binding.typeVariables();
-		return (typeVariableBindings != null && typeVariableBindings.length > 0);
+		return typeVariableBindings != null && typeVariableBindings.length > 0;
 	}
 
 	/**
@@ -470,7 +461,7 @@ class MethodBinding implements IMethodBinding {
 	 */
 	@Override
 	public boolean isParameterizedMethod() {
-		return (this.binding instanceof ParameterizedGenericMethodBinding)
+		return this.binding instanceof ParameterizedGenericMethodBinding
 			&& !((ParameterizedGenericMethodBinding) this.binding).isRaw;
 	}
 
@@ -479,7 +470,7 @@ class MethodBinding implements IMethodBinding {
 	 */
 	@Override
 	public boolean isRawMethod() {
-		return (this.binding instanceof ParameterizedGenericMethodBinding)
+		return this.binding instanceof ParameterizedGenericMethodBinding
 			&& ((ParameterizedGenericMethodBinding) this.binding).isRaw;
 	}
 
@@ -611,7 +602,7 @@ class MethodBinding implements IMethodBinding {
 
 	@Override
 	public boolean isSyntheticRecordMethod() {
-		return ((getDeclaringClass().isRecord()) &&
-				(this.binding instanceof SyntheticMethodBinding));
+		return getDeclaringClass().isRecord() &&
+				this.binding instanceof SyntheticMethodBinding;
 	}
 }

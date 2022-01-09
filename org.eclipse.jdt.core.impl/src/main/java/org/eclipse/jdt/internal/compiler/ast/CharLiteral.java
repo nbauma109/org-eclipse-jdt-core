@@ -73,14 +73,13 @@ private void computeValue() {
 			break;
 		default : //octal (well-formed: ended by a ' )
 			int number = ScannerHelper.getNumericValue(digit);
-			if ((digit = this.source[3]) != '\'')
-				number = (number * 8) + ScannerHelper.getNumericValue(digit);
-			else {
+			if ((digit = this.source[3]) == '\'') {
 				this.constant = CharConstant.fromValue(this.value = (char) number);
 				break;
 			}
+            number = number * 8 + ScannerHelper.getNumericValue(digit);
 			if ((digit = this.source[4]) != '\'')
-				number = (number * 8) + ScannerHelper.getNumericValue(digit);
+				number = number * 8 + ScannerHelper.getNumericValue(digit);
 			this.value = (char) number;
 			break;
 	}

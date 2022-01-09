@@ -37,7 +37,7 @@ public class Tokenizer {
 
 		for (; cur < max; cur++) {
 			char c = val[cur];
-			if ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r')) {
+			if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
 				continue;
 			}
 			break;
@@ -53,7 +53,7 @@ public class Tokenizer {
 		int begin = cur;
 		for (; cur < max; cur++) {
 			char c = val[cur];
-			if ((terminals.indexOf(c) != -1)) {
+			if (terminals.indexOf(c) != -1) {
 				break;
 			}
 		}
@@ -63,9 +63,9 @@ public class Tokenizer {
 			skipWhiteSpace();
 			while (count > 0 && (val[begin + count - 1] == ' ' || val[begin + count - 1] == '\t'))
 				count--;
-			return (new String(val, begin, count));
+			return new String(val, begin, count);
 		}
-		return (null);
+		return null;
 	}
 
 	public String getEscapedToken(String terminals) {
@@ -141,7 +141,7 @@ public class Tokenizer {
 			/* not a quoted string; same as token */
 			return getToken(terminals);
 		}
-		return (null);
+		return null;
 	}
 
 	public String getString(String terminals) {
@@ -152,9 +152,9 @@ public class Tokenizer {
 		int cur = cursor;
 		if (cur < max) {
 			cursor = cur + 1;
-			return (value[cur]);
+			return value[cur];
 		}
-		return ('\0'); /* end of value */
+		return '\0'; /* end of value */
 	}
 
 	public boolean hasMoreTokens() {

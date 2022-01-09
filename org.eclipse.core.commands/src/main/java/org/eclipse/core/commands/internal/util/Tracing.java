@@ -46,13 +46,13 @@ public final class Tracing {
 	 * @param message
 	 *            The message to print to standard out; may be <code>null</code>.
 	 */
-	public static final void printTrace(final String component,
+	public static void printTrace(final String component,
 			final String message) {
 		StringBuilder buffer = new StringBuilder();
 		if (component != null) {
 			buffer.append(component);
 		}
-		if ((component != null) && (message != null)) {
+		if (component != null && message != null) {
 			buffer.append(SEPARATOR);
 		}
 		if (message != null) {

@@ -118,7 +118,7 @@ public class ElementTreeWriter {
 			for (Enumeration<Integer> e = Collections.enumeration(indices); e.hasMoreElements();) {
 				Integer next = e.nextElement();
 				sorted[i] = oldest;
-				order[i] = next.intValue();
+				order[i] = next;
 				i--;
 			}
 			if (i >= 0) {
@@ -163,7 +163,7 @@ public class ElementTreeWriter {
 		 */
 		DeltaDataTree completeTree = newerTree.getDataTree();
 		DeltaDataTree derivedTree = olderTree.getDataTree();
-		DeltaDataTree deltaToWrite = null;
+		DeltaDataTree deltaToWrite;
 
 		deltaToWrite = completeTree.forwardDeltaWith(derivedTree, comparator);
 

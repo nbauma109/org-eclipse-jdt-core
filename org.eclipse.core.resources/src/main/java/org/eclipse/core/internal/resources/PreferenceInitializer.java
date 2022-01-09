@@ -36,14 +36,14 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	public static final String PREF_BUILD_ORDER_DEFAULT = ""; //$NON-NLS-1$
 	public static final int PREF_MAX_BUILD_ITERATIONS_DEFAULT = 10;
 	public static final boolean PREF_DEFAULT_BUILD_ORDER_DEFAULT = true;
-	public final static long PREF_SNAPSHOT_INTERVAL_DEFAULT = 5 * 60 * 1000l; // 5 min
+	public final static long PREF_SNAPSHOT_INTERVAL_DEFAULT = 5 * 60 * 1000L; // 5 min
 	public static final int PREF_OPERATIONS_PER_SNAPSHOT_DEFAULT = 100;
 	public static final boolean PREF_APPLY_FILE_STATE_POLICY_DEFAULT = true;
-	public static final long PREF_FILE_STATE_LONGEVITY_DEFAULT = 7 * 24 * 3600 * 1000l; // 7 days
-	public static final long PREF_MAX_FILE_STATE_SIZE_DEFAULT = 1024 * 1024l; // 1 MB
+	public static final long PREF_FILE_STATE_LONGEVITY_DEFAULT = 7 * 24 * 3600 * 1000L; // 7 days
+	public static final long PREF_MAX_FILE_STATE_SIZE_DEFAULT = 1024 * 1024L; // 1 MB
 	public static final boolean PREF_KEEP_DERIVED_STATE_DEFAULT = false;
 	public static final int PREF_MAX_FILE_STATES_DEFAULT = 50;
-	public static final long PREF_DELTA_EXPIRATION_DEFAULT = 30 * 24 * 3600 * 1000l; // 30 days
+	public static final long PREF_DELTA_EXPIRATION_DEFAULT = 30 * 24 * 3600 * 1000L; // 30 days
 	/**
 	 * Default setting for {@value ResourcesPlugin#PREF_MISSING_NATURE_MARKER_SEVERITY}.
 	 *
@@ -57,7 +57,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	public static final int PREF_MAX_CONCURRENT_BUILDS_DEFAULT = 1;
 
 	public PreferenceInitializer() {
-		super();
 	}
 
 	@Override

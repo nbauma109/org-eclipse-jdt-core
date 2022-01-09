@@ -43,7 +43,6 @@ public class NullFileSystem extends FileSystem {
 	 * Creates the null file system.
 	 */
 	public NullFileSystem() {
-		super();
 		instance = this;
 	}
 

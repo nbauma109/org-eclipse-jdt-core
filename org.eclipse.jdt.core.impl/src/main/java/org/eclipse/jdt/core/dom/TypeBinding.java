@@ -52,11 +52,11 @@ import org.eclipse.jdt.internal.core.PackageFragment;
 class TypeBinding implements ITypeBinding {
 	private static final StringLiteral EXPRESSION = new org.eclipse.jdt.internal.compiler.ast.StringLiteral(0,0);
 
-	protected static final IMethodBinding[] NO_METHOD_BINDINGS = new IMethodBinding[0];
+	protected static final IMethodBinding[] NO_METHOD_BINDINGS = {};
 
 	private static final String NO_NAME = ""; //$NON-NLS-1$
-	protected static final ITypeBinding[] NO_TYPE_BINDINGS = new ITypeBinding[0];
-	protected static final IVariableBinding[] NO_VARIABLE_BINDINGS = new IVariableBinding[0];
+	protected static final ITypeBinding[] NO_TYPE_BINDINGS = {};
+	protected static final IVariableBinding[] NO_VARIABLE_BINDINGS = {};
 
 	private static final int VALID_MODIFIERS = Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE |
 		Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL | Modifier.STRICTFP;
@@ -143,7 +143,7 @@ class TypeBinding implements ITypeBinding {
 				if (convertedAnnotationCount == 0) {
 					return this.annotations = AnnotationBinding.NoAnnotations;
 				}
-				System.arraycopy(tempAnnotations, 0, (tempAnnotations = new IAnnotationBinding[convertedAnnotationCount]), 0, convertedAnnotationCount);
+				System.arraycopy(tempAnnotations, 0, tempAnnotations = new IAnnotationBinding[convertedAnnotationCount], 0, convertedAnnotationCount);
 			}
 			return tempAnnotations;
 		}
@@ -154,7 +154,8 @@ class TypeBinding implements ITypeBinding {
 	public String getBinaryName() {
 		if (this.binding.isCapture()) {
 			return null; // no binary name for capture binding
-		} else if (this.binding.isTypeVariable()) {
+		}
+        if (this.binding.isTypeVariable()) {
 			TypeVariableBinding typeVariableBinding = (TypeVariableBinding) this.binding;
 			org.eclipse.jdt.internal.compiler.lookup.Binding declaring = typeVariableBinding.declaringElement;
 			StringBuffer binaryName = new StringBuffer();
@@ -263,7 +264,7 @@ class TypeBinding implements ITypeBinding {
 						if (convertedFieldCount == 0) {
 							return this.fields = NO_VARIABLE_BINDINGS;
 						}
-						System.arraycopy(newFields, 0, (newFields = new IVariableBinding[convertedFieldCount]), 0, convertedFieldCount);
+						System.arraycopy(newFields, 0, newFields = new IVariableBinding[convertedFieldCount], 0, convertedFieldCount);
 					}
 					return this.fields = newFields;
 				}
@@ -297,7 +298,7 @@ class TypeBinding implements ITypeBinding {
 					IMethodBinding[] newMethods = new IMethodBinding[length];
 					for (int i = 0; i < length; i++) {
 						org.eclipse.jdt.internal.compiler.lookup.MethodBinding methodBinding = internalMethods[i];
-						if (methodBinding.isDefaultAbstract() || methodBinding.isSynthetic() || (methodBinding.isConstructor() && isInterface())) {
+						if (methodBinding.isDefaultAbstract() || methodBinding.isSynthetic() || methodBinding.isConstructor() && isInterface()) {
 							continue;
 						}
 						IMethodBinding methodBinding2 = this.resolver.getMethodBinding(methodBinding);
@@ -309,7 +310,7 @@ class TypeBinding implements ITypeBinding {
 						if (convertedMethodCount == 0) {
 							return this.methods = NO_METHOD_BINDINGS;
 						}
-						System.arraycopy(newMethods, 0, (newMethods = new IMethodBinding[convertedMethodCount]), 0, convertedMethodCount);
+						System.arraycopy(newMethods, 0, newMethods = new IMethodBinding[convertedMethodCount], 0, convertedMethodCount);
 					}
 					return this.methods = newMethods;
 				}
@@ -530,7 +531,7 @@ class TypeBinding implements ITypeBinding {
 				newInterfaces[interfacesCounter++] = typeBinding;
 			}
 			if (length != interfacesCounter) {
-				System.arraycopy(newInterfaces, 0, (newInterfaces = new ITypeBinding[interfacesCounter]), 0, interfacesCounter);
+				System.arraycopy(newInterfaces, 0, newInterfaces = new ITypeBinding[interfacesCounter], 0, interfacesCounter);
 			}
 			return this.interfaces = newInterfaces;
 		}
@@ -538,7 +539,7 @@ class TypeBinding implements ITypeBinding {
 	}
 
 	private ITypeBinding[] getIntersectingTypes() {
-		ITypeBinding[] intersectionBindings = TypeBinding.NO_TYPE_BINDINGS;
+		ITypeBinding[] intersectionBindings;
 		ReferenceBinding[] intersectingTypes = this.binding.getIntersectingTypes();
 		int l = intersectingTypes.length;
 		intersectionBindings = new ITypeBinding[l];
@@ -562,7 +563,6 @@ class TypeBinding implements ITypeBinding {
 					return ((PackageFragment) javaElement).getCompilationUnit(new String(this.binding.sourceName()) + SuffixConstants.SUFFIX_STRING_java).getType(this.getName());
 				}
 			}
-			return null;
 		}
 		return null;
 	}
@@ -607,24 +607,26 @@ class TypeBinding implements ITypeBinding {
 				return accessFlags & ~Modifier.FINAL;
 			}
 			return accessFlags;
-		} else if (isAnnotation()) {
+		}
+        if (isAnnotation()) {
 			ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 			final int accessFlags = referenceBinding.getAccessFlags() & VALID_MODIFIERS;
 			// clear the AccAbstract, AccAnnotation and the AccInterface bits
 			return accessFlags & ~(ClassFileConstants.AccAbstract | ClassFileConstants.AccInterface | ClassFileConstants.AccAnnotation);
-		} else if (isInterface()) {
+		}
+        if (isInterface()) {
 			ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 			final int accessFlags = referenceBinding.getAccessFlags() & VALID_MODIFIERS;
 			// clear the AccAbstract and the AccInterface bits
 			return accessFlags & ~(ClassFileConstants.AccAbstract | ClassFileConstants.AccInterface);
-		} else if (isEnum()) {
+		}
+        if (isEnum()) {
 			ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 			final int accessFlags = referenceBinding.getAccessFlags() & VALID_MODIFIERS;
 			// clear the AccEnum bits
 			return accessFlags & ~ClassFileConstants.AccEnum;
-		} else {
-			return Modifier.NONE;
 		}
+        return Modifier.NONE;
 	}
 
 	@Override
@@ -930,15 +932,11 @@ class TypeBinding implements ITypeBinding {
 					firstClassOrArrayBound = varSuperclass;
 					boundsLength++;
 				}
-			} else  {
-				if (org.eclipse.jdt.internal.compiler.lookup.TypeBinding.equalsEquals(firstClassOrArrayBound, varSuperclass)) {
-					boundsLength++;
-				} else if (firstClassOrArrayBound.isArrayType()) { // capture of ? extends/super arrayType
-					boundsLength++;
-				} else {
-					firstClassOrArrayBound = null;
-				}
-			}
+			} else if (org.eclipse.jdt.internal.compiler.lookup.TypeBinding.equalsEquals(firstClassOrArrayBound, varSuperclass) || firstClassOrArrayBound.isArrayType()) {
+            	boundsLength++;
+            } else {
+            	firstClassOrArrayBound = null;
+            }
 			ReferenceBinding[] superinterfaces = typeVariableBinding.superInterfaces();
 			int superinterfacesLength = 0;
 			if (superinterfaces != null) {
@@ -1015,7 +1013,7 @@ class TypeBinding implements ITypeBinding {
 			return false;
 		}
 		TypeVariableBinding[] typeVariableBindings = this.binding.typeVariables();
-		return (typeVariableBindings != null && typeVariableBindings.length > 0);
+		return typeVariableBindings != null && typeVariableBindings.length > 0;
 	}
 
 	@Override
@@ -1062,8 +1060,7 @@ class TypeBinding implements ITypeBinding {
 	public boolean isCastCompatible(ITypeBinding type) {
 		try {
 			Scope scope = this.resolver.scope();
-			if (scope == null) return false;
-			if (!(type instanceof TypeBinding)) return false;
+			if (scope == null || !(type instanceof TypeBinding)) return false;
 			org.eclipse.jdt.internal.compiler.lookup.TypeBinding expressionType = ((TypeBinding) type).binding;
 			// simulate capture in case checked binding did not properly get extracted from a reference
 			expressionType = expressionType.capture(scope, 0, 0);
@@ -1111,11 +1108,7 @@ class TypeBinding implements ITypeBinding {
 			// identical binding - equal (key or no key)
 			return true;
 		}
-		if (other == null) {
-			// other binding missing
-			return false;
-		}
-		if (!(other instanceof TypeBinding)) {
+		if (other == null || !(other instanceof TypeBinding)) {
 			return false;
 		}
 		org.eclipse.jdt.internal.compiler.lookup.TypeBinding otherBinding = ((TypeBinding) other).binding;
@@ -1132,34 +1125,33 @@ class TypeBinding implements ITypeBinding {
 			ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 			if (referenceBinding.isRawType()) {
 				return !((RawTypeBinding) referenceBinding).genericType().isBinaryBinding();
-			} else if (referenceBinding.isParameterizedType()) {
-				ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) referenceBinding;
-				org.eclipse.jdt.internal.compiler.lookup.TypeBinding erasure = parameterizedTypeBinding.erasure();
-				if (erasure instanceof ReferenceBinding) {
-					return !((ReferenceBinding) erasure).isBinaryBinding();
-				}
-				return false;
-			} else {
+			}
+            if (!referenceBinding.isParameterizedType()) {
 				return !referenceBinding.isBinaryBinding();
 			}
+            ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) referenceBinding;
+            org.eclipse.jdt.internal.compiler.lookup.TypeBinding erasure = parameterizedTypeBinding.erasure();
+            if (erasure instanceof ReferenceBinding) {
+            	return !((ReferenceBinding) erasure).isBinaryBinding();
+            }
 		} else if (isTypeVariable()) {
 			final TypeVariableBinding typeVariableBinding = (TypeVariableBinding) this.binding;
 			final Binding declaringElement = typeVariableBinding.declaringElement;
 			if (declaringElement instanceof MethodBinding) {
 				MethodBinding methodBinding = (MethodBinding) declaringElement;
 				return !methodBinding.declaringClass.isBinaryBinding();
-			} else {
-				final org.eclipse.jdt.internal.compiler.lookup.TypeBinding typeBinding = (org.eclipse.jdt.internal.compiler.lookup.TypeBinding) declaringElement;
-				if (typeBinding instanceof ReferenceBinding) {
-					return !((ReferenceBinding) typeBinding).isBinaryBinding();
-				} else if (typeBinding instanceof ArrayBinding) {
-					final ArrayBinding arrayBinding = (ArrayBinding) typeBinding;
-					final org.eclipse.jdt.internal.compiler.lookup.TypeBinding leafComponentType = arrayBinding.leafComponentType;
-					if (leafComponentType instanceof ReferenceBinding) {
-						return !((ReferenceBinding) leafComponentType).isBinaryBinding();
-					}
-				}
 			}
+            final org.eclipse.jdt.internal.compiler.lookup.TypeBinding typeBinding = (org.eclipse.jdt.internal.compiler.lookup.TypeBinding) declaringElement;
+            if (typeBinding instanceof ReferenceBinding) {
+            	return !((ReferenceBinding) typeBinding).isBinaryBinding();
+            }
+            if (typeBinding instanceof ArrayBinding) {
+            	final ArrayBinding arrayBinding = (ArrayBinding) typeBinding;
+            	final org.eclipse.jdt.internal.compiler.lookup.TypeBinding leafComponentType = arrayBinding.leafComponentType;
+            	if (leafComponentType instanceof ReferenceBinding) {
+            		return !((ReferenceBinding) leafComponentType).isBinaryBinding();
+            	}
+            }
 
 		} else if (isCapture()) {
 			CaptureBinding captureBinding = (CaptureBinding) this.binding;
@@ -1244,8 +1236,7 @@ class TypeBinding implements ITypeBinding {
 	public boolean isSubTypeCompatible(ITypeBinding type) {
 		try {
 			if (this == type) return true; //$IDENTITY-COMPARISON$
-			if (this.binding.isBaseType()) return false;
-			if (!(type instanceof TypeBinding)) return false;
+			if (this.binding.isBaseType() || !(type instanceof TypeBinding)) return false;
 			TypeBinding other = (TypeBinding) type;
 			if (other.binding.isBaseType()) return false;
 			return this.binding.isCompatibleWith(other.binding);

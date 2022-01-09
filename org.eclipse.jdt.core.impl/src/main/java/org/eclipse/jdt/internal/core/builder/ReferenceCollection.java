@@ -102,6 +102,7 @@ private static String qualifiedNamesToString(char[][][] qualifiedNames) {
 /**
  * @deprecated
  */
+@Deprecated
 public boolean includes(char[][][] qualifiedNames, char[][] simpleNames) {
 	return includes(qualifiedNames, simpleNames, null);
 }
@@ -115,17 +116,16 @@ public boolean includes(char[][][] qualifiedNames, char[][] simpleNames, char[][
 }
 
 private boolean doIncludes(char[][][] qualifiedNames, char[][] simpleNames, char[][] rootNames) {
-	if (rootNames != null) {
-		if (!includesRootName(rootNames))
-			return false;
-	}
+	if (rootNames != null && !includesRootName(rootNames))
+    	return false;
 	// if either collection of names is null, it means it contained a well known name so we know it already has a match
 	if (simpleNames == null || qualifiedNames == null) {
 		if (simpleNames == null && qualifiedNames == null) {
 			if (JavaBuilder.DEBUG)
 				System.out.println("Found well known match"); //$NON-NLS-1$
 			return true;
-		} else if (qualifiedNames == null) {
+		}
+        if (qualifiedNames == null) {
 			return includesSimpleName(simpleNames);
 		}
 		return includesQualifiedName(qualifiedNames);
@@ -133,20 +133,17 @@ private boolean doIncludes(char[][][] qualifiedNames, char[][] simpleNames, char
 
 	if (simpleNames.length <= qualifiedNames.length) {
 		return includesSimpleName(simpleNames) && includesQualifiedName(qualifiedNames);
-	} else {
-		return includesQualifiedName(qualifiedNames) && includesSimpleName(simpleNames);
 	}
+    return includesQualifiedName(qualifiedNames) && includesSimpleName(simpleNames);
 }
 
 public boolean insideRoot(char[] rootName) {
 	boolean result = sortedArrayContains(this.rootReferences, rootName, SortedCharArrays.CHAR_ARR_COMPARATOR);
-	if (REFERENCE_COLLECTION_DEBUG) {
-		if (result != debugIncludes(rootName)) {
-			String message = "Mismatch: " + String.valueOf(rootName) + (result ? " should not " : " should ") + " be included in "  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-					+ Arrays.asList(CharOperation.toStrings(this.rootReferences));
-			throw new IllegalStateException(message);
-		}
-	}
+	if (REFERENCE_COLLECTION_DEBUG && result != debugIncludes(rootName)) {
+    	String message = "Mismatch: " + String.valueOf(rootName) + (result ? " should not " : " should ") + " be included in "  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    			+ Arrays.asList(CharOperation.toStrings(this.rootReferences));
+    	throw new IllegalStateException(message);
+    }
 	return result;
 }
 
@@ -194,7 +191,8 @@ private static <T> boolean intersects(T[] firstSortedArr, T[] secondSortedArr, C
 		int compare = comparator.compare(firstElement, secondElement);
 		if (compare == 0) {
 			return true;
-		} else if (compare < 0) {
+		}
+        if (compare < 0) {
 			/*
 			 * left side is smaller than the right side, but not exactly the right side.
 			 * Take the next element from the left and proceed.
@@ -231,8 +229,7 @@ private static char[][] ensureContainedInSortedOrder(char[][] sortedArray, char[
 	int idx = Arrays.binarySearch(sortedArray, entry, SortedCharArrays.CHAR_ARR_COMPARATOR);
 	if (idx < 0) {
 		idx = -(idx + 1);
-		char[][] result = SortedCharArrays.insertIntoArray(sortedArray, new char[sortedArray.length + 1][], entry, idx, sortedArray.length);
-		return result;
+		return SortedCharArrays.insertIntoArray(sortedArray, new char[sortedArray.length + 1][], entry, idx, sortedArray.length);
 	}
 	return sortedArray;
 }
@@ -253,7 +250,7 @@ private static boolean isWellKnownQualifiedName(char[][] qualifiedName) {
 // the MethodVerifier requests 3 well known types which end up in the reference collection
 // having WellKnownQualifiedNames & WellKnownSimpleNames, saves every type 40 bytes
 // NOTE: These collections are sorted by length
-static final char[][][] WellKnownQualifiedNames = new char[][][] {
+static final char[][][] WellKnownQualifiedNames = {
 	TypeConstants.JAVA_LANG_RUNTIMEEXCEPTION,
 	TypeConstants.JAVA_LANG_THROWABLE,
 	TypeConstants.JAVA_LANG_OBJECT,
@@ -262,7 +259,7 @@ static final char[][][] WellKnownQualifiedNames = new char[][][] {
 	new char[][] {new char[] {'o', 'r', 'g'}},
 	new char[][] {new char[] {'c', 'o', 'm'}},
 	CharOperation.NO_CHAR_CHAR}; // default package
-static final char[][] WellKnownSimpleNames = new char[][] {
+static final char[][] WellKnownSimpleNames = {
 	TypeConstants.JAVA_LANG_RUNTIMEEXCEPTION[2],
 	TypeConstants.JAVA_LANG_THROWABLE[2],
 	TypeConstants.JAVA_LANG_OBJECT[2],
@@ -271,7 +268,7 @@ static final char[][] WellKnownSimpleNames = new char[][] {
 	new char[] {'o', 'r', 'g'},
 	new char[] {'c', 'o', 'm'}};
 
-static final char[][][] EmptyQualifiedNames = new char[0][][];
+static final char[][][] EmptyQualifiedNames = {};
 static final char[][] EmptySimpleNames = CharOperation.NO_CHAR_CHAR;
 
 // each array contains qualified char[][], one for size 2, 3, 4, 5, 6, 7 & the rest
@@ -308,9 +305,9 @@ public static char[][][] internQualifiedNames(StringSet qualifiedStrings) {
 
 	char[][][] result = new char[length][][];
 	String[] strings = qualifiedStrings.values;
-	for (int i = 0, l = strings.length; i < l; i++)
-		if (strings[i] != null)
-			result[--length] = CharOperation.splitOn('/', strings[i].toCharArray());
+	for (String string : strings)
+        if (string != null)
+			result[--length] = CharOperation.splitOn('/', string.toCharArray());
 	return internQualifiedNames(result, false);
 }
 
@@ -349,8 +346,7 @@ static char[][][] internQualifiedNames(char[][][] qualifiedNames, boolean keepWe
 	next : for (int i = 0; i < length; i++) {
 		char[][] qualifiedName = qualifiedNames[i];
 		int qLength = qualifiedName.length;
-		for (int j = 0, m = WellKnownQualifiedNames.length; j < m; j++) {
-			char[][] wellKnownName = WellKnownQualifiedNames[j];
+		for (char[][] wellKnownName : WellKnownQualifiedNames) {
 			if (qLength > wellKnownName.length)
 				break; // all remaining well known names are shorter
 			if (CharOperation.equals(qualifiedName, wellKnownName)) {
@@ -395,6 +391,7 @@ static char[][][] internQualifiedNames(char[][][] qualifiedNames, boolean keepWe
 /**
  * @deprecated
  */
+@Deprecated
 public static char[][] internSimpleNames(Set<String> simpleStrings) {
 	return internSimpleNames(simpleStrings, true);
 }
@@ -420,9 +417,9 @@ public static char[][] internSimpleNames(StringSet simpleStrings, boolean remove
 
 	char[][] result = new char[length][];
 	String[] strings = simpleStrings.values;
-	for (int i = 0, l = strings.length; i < l; i++)
-		if (strings[i] != null)
-			result[--length] = strings[i].toCharArray();
+	for (String string : strings)
+        if (string != null)
+			result[--length] = string.toCharArray();
 	return internSimpleNames(result, removeWellKnown);
 }
 /**
@@ -451,8 +448,7 @@ static char[][] internSimpleNames(char[][] simpleNames, boolean removeWellKnown,
 	next : for (int i = 0; i < length; i++) {
 		char[] name = simpleNames[i];
 		int sLength = name.length;
-		for (int j = 0, m = WellKnownSimpleNames.length; j < m; j++) {
-			char[] wellKnownName = WellKnownSimpleNames[j];
+		for (char[] wellKnownName : WellKnownSimpleNames) {
 			if (sLength > wellKnownName.length)
 				break; // all remaining well known names are shorter
 			if (CharOperation.equals(name, wellKnownName)) {
@@ -540,17 +536,17 @@ private boolean debugIncludes(char[][][] qualifiedNames, char[][] simpleNames, c
 			if (JavaBuilder.DEBUG)
 				System.out.println("Found well known match"); //$NON-NLS-1$
 			return true;
-		} else if (qualifiedNames == null) {
-			for (int i = 0, l = simpleNames.length; i < l; i++) {
-				if (debugIncludes(simpleNames[i])) {
+		}
+        if (qualifiedNames == null) {
+			for (char[] simpleName : simpleNames) {
+				if (debugIncludes(simpleName)) {
 					if (JavaBuilder.DEBUG)
-						System.out.println("Found match in well known package to " + new String(simpleNames[i])); //$NON-NLS-1$
+						System.out.println("Found match in well known package to " + new String(simpleName)); //$NON-NLS-1$
 					return true;
 				}
 			}
 		} else {
-			for (int i = 0, l = qualifiedNames.length; i < l; i++) {
-				char[][] qualifiedName = qualifiedNames[i];
+			for (char[][] qualifiedName : qualifiedNames) {
 				if (qualifiedName.length == 1 ? debugIncludes(qualifiedName[0]) : debugIncludes(qualifiedName)) {
 					if (JavaBuilder.DEBUG)
 						System.out.println("Found well known match in " + CharOperation.toString(qualifiedName)); //$NON-NLS-1$
@@ -598,20 +594,20 @@ private boolean debugIncludes(char[][][] qualifiedNames, char[][] simpleNames, c
 }
 
 private boolean debugInsideRoot(char[] rootName) {
-	for (int i = 0, l = this.rootReferences.length; i < l; i++)
-		if (rootName == this.rootReferences[i]) return true;
+	for (char[] element : this.rootReferences)
+        if (rootName == element) return true;
 	return false;
 }
 
 private boolean debugIncludes(char[] simpleName) {
-	for (int i = 0, l = this.simpleNameReferences.length; i < l; i++)
-		if (simpleName == this.simpleNameReferences[i]) return true;
+	for (char[] element : this.simpleNameReferences)
+        if (simpleName == element) return true;
 	return false;
 }
 
 private boolean debugIncludes(char[][] qualifiedName) {
-	for (int i = 0, l = this.qualifiedNameReferences.length; i < l; i++)
-		if (qualifiedName == this.qualifiedNameReferences[i]) return true;
+	for (char[][] element : this.qualifiedNameReferences)
+        if (qualifiedName == element) return true;
 	return false;
 }
 

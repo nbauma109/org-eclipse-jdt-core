@@ -119,7 +119,7 @@ public class JarIndexLocation extends IndexLocation {
 
 	@Override
 	public boolean startsWith(IPath path) {
-		return (path.isPrefixOf(new Path(this.localUrl.getPath())));
+		return path.isPrefixOf(new Path(this.localUrl.getPath()));
 	}
 
 }

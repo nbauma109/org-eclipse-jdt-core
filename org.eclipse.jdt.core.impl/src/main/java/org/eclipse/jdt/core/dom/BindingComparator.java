@@ -75,27 +75,31 @@ class BindingComparator {
 			return isEqual((org.eclipse.jdt.internal.compiler.lookup.TypeBinding) declaringElement,
 					(org.eclipse.jdt.internal.compiler.lookup.TypeBinding) declaringElement2,
 					visitedTypes);
-		} else if (declaringElement instanceof org.eclipse.jdt.internal.compiler.lookup.MethodBinding) {
+		}
+        if (declaringElement instanceof org.eclipse.jdt.internal.compiler.lookup.MethodBinding) {
 			if (!(declaringElement2 instanceof org.eclipse.jdt.internal.compiler.lookup.MethodBinding)) {
 				return false;
 			}
 			return isEqual((org.eclipse.jdt.internal.compiler.lookup.MethodBinding) declaringElement,
 					(org.eclipse.jdt.internal.compiler.lookup.MethodBinding) declaringElement2,
 					visitedTypes);
-		} else if (declaringElement instanceof VariableBinding) {
+		}
+        if (declaringElement instanceof VariableBinding) {
 			if (!(declaringElement2 instanceof VariableBinding)) {
 				return false;
 			}
 			return isEqual((VariableBinding) declaringElement,
 					(VariableBinding) declaringElement2);
-		} else if (declaringElement instanceof org.eclipse.jdt.internal.compiler.lookup.PackageBinding) {
+		}
+        if (declaringElement instanceof org.eclipse.jdt.internal.compiler.lookup.PackageBinding) {
 			if (!(declaringElement2 instanceof org.eclipse.jdt.internal.compiler.lookup.PackageBinding)) {
 				return false;
 			}
 			org.eclipse.jdt.internal.compiler.lookup.PackageBinding packageBinding = (org.eclipse.jdt.internal.compiler.lookup.PackageBinding) declaringElement;
 			org.eclipse.jdt.internal.compiler.lookup.PackageBinding packageBinding2 = (org.eclipse.jdt.internal.compiler.lookup.PackageBinding) declaringElement2;
 			return CharOperation.equals(packageBinding.compoundName, packageBinding2.compoundName);
-		} else if (declaringElement instanceof ImportBinding) {
+		}
+        if (declaringElement instanceof ImportBinding) {
 			if (!(declaringElement2 instanceof ImportBinding)) {
 				return false;
 			}
@@ -104,7 +108,8 @@ class BindingComparator {
 			return importBinding.isStatic() == importBinding2.isStatic()
 				&& importBinding.onDemand == importBinding2.onDemand
 				&& CharOperation.equals(importBinding.compoundName, importBinding2.compoundName);
-		} else if (declaringElement instanceof org.eclipse.jdt.internal.compiler.lookup.ModuleBinding) {
+		}
+        if (declaringElement instanceof org.eclipse.jdt.internal.compiler.lookup.ModuleBinding) {
 			if (!(declaringElement2 instanceof org.eclipse.jdt.internal.compiler.lookup.ModuleBinding)) {
 				return false;
 			}
@@ -151,7 +156,7 @@ class BindingComparator {
 		return (variableBinding.modifiers & ExtraCompilerModifiers.AccJustFlag) == (variableBinding2.modifiers & ExtraCompilerModifiers.AccJustFlag)
 				&& CharOperation.equals(variableBinding.name, variableBinding2.name)
 				&& isEqual(variableBinding.type, variableBinding2.type)
-				&& (variableBinding.id == variableBinding2.id);
+				&& variableBinding.id == variableBinding2.id;
 	}
 
 	static boolean isEqual(FieldBinding fieldBinding, FieldBinding fieldBinding2) {
@@ -245,11 +250,11 @@ class BindingComparator {
 					&& isEqual(intersectionBinding.otherBounds, intersectionBinding2.otherBounds, visitedTypes);
 
 			case Binding.TYPE_PARAMETER :
-				if (!(typeBinding2.isTypeVariable())) {
+				if (!typeBinding2.isTypeVariable()) {
 					return false;
 				}
 				if (typeBinding.isCapture()) {
-					if (!(typeBinding2.isCapture())) {
+					if (!typeBinding2.isCapture()) {
 						return false;
 					}
 					CaptureBinding captureBinding = (CaptureBinding) typeBinding;
@@ -297,25 +302,17 @@ class BindingComparator {
 				char[] constantPoolName2 = referenceBinding2.constantPoolName();
 				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=116833
 				if (constantPoolName == null) {
-					if (constantPoolName2 != null) {
+					if (constantPoolName2 != null || !CharOperation.equals(referenceBinding.computeUniqueKey(), referenceBinding2.computeUniqueKey())) {
 						return false;
 					}
-					if (!CharOperation.equals(referenceBinding.computeUniqueKey(), referenceBinding2.computeUniqueKey())) {
-						return false;
-					}
-				} else {
-					if (constantPoolName2 == null) {
-						return false;
-					}
-					if (!CharOperation.equals(constantPoolName, constantPoolName2)) {
-						return false;
-					}
-				}
+				} else if (constantPoolName2 == null || !CharOperation.equals(constantPoolName, constantPoolName2)) {
+                	return false;
+                }
 				return CharOperation.equals(referenceBinding.compoundName, referenceBinding2.compoundName)
-					&& (!referenceBinding2.isGenericType())
-					&& (referenceBinding.isRawType() == referenceBinding2.isRawType())
-					&& ((referenceBinding.modifiers & ~ClassFileConstants.AccSuper) & (ExtraCompilerModifiers.AccJustFlag | ClassFileConstants.AccInterface | ClassFileConstants.AccEnum | ClassFileConstants.AccAnnotation))
-							== ((referenceBinding2.modifiers & ~ClassFileConstants.AccSuper) & (ExtraCompilerModifiers.AccJustFlag | ClassFileConstants.AccInterface | ClassFileConstants.AccEnum | ClassFileConstants.AccAnnotation))
+					&& !referenceBinding2.isGenericType()
+					&& referenceBinding.isRawType() == referenceBinding2.isRawType()
+					&& (referenceBinding.modifiers & ~ClassFileConstants.AccSuper & (ExtraCompilerModifiers.AccJustFlag | ClassFileConstants.AccInterface | ClassFileConstants.AccEnum | ClassFileConstants.AccAnnotation))
+							== (referenceBinding2.modifiers & ~ClassFileConstants.AccSuper & (ExtraCompilerModifiers.AccJustFlag | ClassFileConstants.AccInterface | ClassFileConstants.AccEnum | ClassFileConstants.AccAnnotation))
 					&& isEqual(referenceBinding.enclosingType(), referenceBinding2.enclosingType(), visitedTypes);
 		}
 	}

@@ -289,7 +289,7 @@ public abstract class ResolveContext {
 	 */
 	public List<Wire> getSubstitutionWires(Wiring wiring) {
 		// Keep track of the declared capability package names
-		Set<String> exportNames = new HashSet<String>();
+		Set<String> exportNames = new HashSet<>();
 
 		// Add packages declared as provided by the wiring host
 		for (Capability cap : wiring.getResource().getCapabilities(null)) {
@@ -316,16 +316,14 @@ public abstract class ResolveContext {
 
 		// collect the package wires that substitute one of the declared
 		// export package names
-		List<Wire> substitutionWires = new ArrayList<Wire>();
+		List<Wire> substitutionWires = new ArrayList<>();
 		for (Wire wire : wiring.getRequiredResourceWires(null)) {
 			if (PackageNamespace.PACKAGE_NAMESPACE
-					.equals(wire.getCapability().getNamespace())) {
-				if (exportNames
-						.contains(wire.getCapability().getAttributes().get(
-								PackageNamespace.PACKAGE_NAMESPACE))) {
-					substitutionWires.add(wire);
-				}
-			}
+            		.equals(wire.getCapability().getNamespace()) && exportNames
+            		.contains(wire.getCapability().getAttributes().get(
+            				PackageNamespace.PACKAGE_NAMESPACE))) {
+            	substitutionWires.add(wire);
+            }
 		}
 		return substitutionWires;
 	}

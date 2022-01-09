@@ -131,7 +131,7 @@ public final class ExecutionEvent {
 	 *
 	 * @return The application context; may be <code>null</code>.
 	 */
-	public final Object getApplicationContext() {
+	public Object getApplicationContext() {
 		return applicationContext;
 	}
 
@@ -141,7 +141,7 @@ public final class ExecutionEvent {
 	 * @return The command being executed.
 	 * @since 3.2
 	 */
-	public final Command getCommand() {
+	public Command getCommand() {
 		return command;
 	}
 
@@ -162,7 +162,7 @@ public final class ExecutionEvent {
 	 *             reason
 	 * @since 3.2
 	 */
-	public final Object getObjectParameterForExecution(final String parameterId) throws ExecutionException {
+	public Object getObjectParameterForExecution(final String parameterId) throws ExecutionException {
 		if (command == null) {
 			throw new ExecutionException("No command is associated with this execution event"); //$NON-NLS-1$
 		}
@@ -193,7 +193,7 @@ public final class ExecutionEvent {
 	 * @return The parameter value; <code>null</code> if the parameter cannot
 	 *         be found.
 	 */
-	public final String getParameter(final String parameterId) {
+	public String getParameter(final String parameterId) {
 		return parameters.get(parameterId);
 	}
 
@@ -203,7 +203,7 @@ public final class ExecutionEvent {
 	 * @return The parameters; never <code>null</code>, but may be empty.
 	 */
 	@SuppressWarnings("rawtypes")
-	public final Map getParameters() {
+	public Map getParameters() {
 		return parameters;
 	}
 
@@ -212,7 +212,7 @@ public final class ExecutionEvent {
 	 *
 	 * @return The trigger; <code>null</code> if there was no trigger.
 	 */
-	public final Object getTrigger() {
+	public Object getTrigger() {
 		return trigger;
 	}
 
@@ -223,7 +223,7 @@ public final class ExecutionEvent {
 	 * @return The string representation; never <code>null</code>.
 	 */
 	@Override
-	public final String toString() {
+	public String toString() {
 		final StringBuilder stringBuffer = new StringBuilder("ExecutionEvent("); //$NON-NLS-1$
 		stringBuffer.append(command);
 		stringBuffer.append(',');

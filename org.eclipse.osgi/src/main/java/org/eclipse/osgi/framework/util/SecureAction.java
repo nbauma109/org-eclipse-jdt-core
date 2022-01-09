@@ -364,12 +364,12 @@ public class SecureAction {
 	public Class<?> loadSystemClass(final String name) throws ClassNotFoundException {
 		if (System.getSecurityManager() == null) {
 			ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-			return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
+			return systemClassLoader != null ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
 		}
 		try {
 			return doPrivilegedWithException(() -> {
 				ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-				return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
+				return systemClassLoader != null ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
 			if (e.getException() instanceof ClassNotFoundException)

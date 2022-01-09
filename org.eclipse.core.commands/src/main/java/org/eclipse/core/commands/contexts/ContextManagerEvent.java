@@ -106,7 +106,7 @@ public final class ContextManagerEvent extends AbstractBitSetEvent {
 	 *         be <code>null</code> if no context identifier was added or
 	 *         removed.
 	 */
-	public final String getContextId() {
+	public String getContextId() {
 		return contextId;
 	}
 
@@ -116,7 +116,7 @@ public final class ContextManagerEvent extends AbstractBitSetEvent {
 	 * @return the instance of the interface that changed. Guaranteed not to be
 	 *         <code>null</code>.
 	 */
-	public final ContextManager getContextManager() {
+	public ContextManager getContextManager() {
 		return contextManager;
 	}
 
@@ -132,7 +132,7 @@ public final class ContextManagerEvent extends AbstractBitSetEvent {
 	 *         haveActiveContextsChanged() is <code>true</code>.
 	 */
 	@SuppressWarnings("rawtypes")
-	public final Set getPreviouslyActiveContextIds() {
+	public Set getPreviouslyActiveContextIds() {
 		return previouslyActiveContextIds;
 	}
 
@@ -142,8 +142,8 @@ public final class ContextManagerEvent extends AbstractBitSetEvent {
 	 * @return <code>true</code> if the collection of active contexts changed;
 	 *         <code>false</code> otherwise.
 	 */
-	public final boolean isActiveContextsChanged() {
-		return ((changedValues & CHANGED_CONTEXTS_ACTIVE) != 0);
+	public boolean isActiveContextsChanged() {
+		return (changedValues & CHANGED_CONTEXTS_ACTIVE) != 0;
 	}
 
 	/**
@@ -152,8 +152,8 @@ public final class ContextManagerEvent extends AbstractBitSetEvent {
 	 * @return <code>true</code> if the list of context identifiers has
 	 *         changed; <code>false</code> otherwise.
 	 */
-	public final boolean isContextChanged() {
-		return (contextId != null);
+	public boolean isContextChanged() {
+		return contextId != null;
 	}
 
 	/**
@@ -163,7 +163,7 @@ public final class ContextManagerEvent extends AbstractBitSetEvent {
 	 * @return <code>true</code> if the context identifier became defined;
 	 *         <code>false</code> if the context identifier became undefined.
 	 */
-	public final boolean isContextDefined() {
-		return (((changedValues & CHANGED_CONTEXT_DEFINED) != 0) && (contextId != null));
+	public boolean isContextDefined() {
+		return (changedValues & CHANGED_CONTEXT_DEFINED) != 0 && contextId != null;
 	}
 }

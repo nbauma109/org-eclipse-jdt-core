@@ -266,7 +266,7 @@ public class DefaultBytecodeVisitor implements IBytecodeVisitor {
 		for (int i = 0, max = this.localVariableAttributeLength; i < max; i++) {
 			final ILocalVariableTableEntry entry = this.localVariableTableEntries[i];
 			final int startPC = entry.getStartPC();
-			if (entry.getIndex() == index && (startPC <= nextPC) && ((startPC + entry.getLength()) > nextPC)) {
+			if (entry.getIndex() == index && startPC <= nextPC && startPC + entry.getLength() > nextPC) {
 				final StringBuffer stringBuffer = new StringBuffer();
 				if (showIndex) {
 					stringBuffer.append(' ').append(index);
@@ -276,13 +276,11 @@ public class DefaultBytecodeVisitor implements IBytecodeVisitor {
 			}
 		}
 		if (this.parameterNames != null) {
-			if (index == 0) {
-				if (!this.isStatic) {
-					final StringBuffer stringBuffer = new StringBuffer();
-					stringBuffer.append(' ').append('[').append("this").append(']'); //$NON-NLS-1$
-					return String.valueOf(stringBuffer);
-				}
-			}
+			if (index == 0 && !this.isStatic) {
+            	final StringBuffer stringBuffer = new StringBuffer();
+            	stringBuffer.append(' ').append('[').append("this").append(']'); //$NON-NLS-1$
+            	return String.valueOf(stringBuffer);
+            }
 			int indexInParameterNames = index;
 			if (index != 0) {
 				int resolvedPosition = 0;
@@ -2802,7 +2800,8 @@ public class DefaultBytecodeVisitor implements IBytecodeVisitor {
 	private String returnClassName(char[] classInfoName) {
 		if (classInfoName.length == 0) {
 			return EMPTY_CLASS_NAME;
-		} else if (isCompact()) {
+		}
+        if (isCompact()) {
 			int lastIndexOfSlash = CharOperation.lastIndexOf('/', classInfoName);
 			if (lastIndexOfSlash != -1) {
 				return new String(classInfoName, lastIndexOfSlash + 1, classInfoName.length - lastIndexOfSlash - 1);

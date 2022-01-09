@@ -98,7 +98,7 @@ public class OrderedLock implements ILock, ISchedulingRule {
 		if (Thread.interrupted())
 			throw new InterruptedException();
 
-		boolean success = false;
+		boolean success;
 		if (delay <= 0)
 			return attempt();
 		Semaphore semaphore = createSemaphore();
@@ -123,7 +123,7 @@ public class OrderedLock implements ILock, ISchedulingRule {
 	private synchronized boolean attempt() {
 		//return true if we already own the lock
 		//also, if nobody is waiting, grant the lock immediately
-		if ((currentOperationThread == Thread.currentThread()) || (currentOperationThread == null && operations.isEmpty())) {
+		if (currentOperationThread == Thread.currentThread() || currentOperationThread == null && operations.isEmpty()) {
 			depth++;
 			setCurrentOperationThread(Thread.currentThread());
 			return true;
@@ -253,7 +253,7 @@ public class OrderedLock implements ILock, ISchedulingRule {
 	 * If newThread is not null, grant this lock to newThread.
 	 */
 	private void setCurrentOperationThread(Thread newThread) {
-		if ((currentOperationThread != null) && (newThread == null))
+		if (currentOperationThread != null && newThread == null)
 			manager.removeLockThread(currentOperationThread, this);
 		this.currentOperationThread = newThread;
 		if (currentOperationThread != null)

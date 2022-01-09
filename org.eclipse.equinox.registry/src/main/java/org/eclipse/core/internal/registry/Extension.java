@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IContributor;
  * An object which represents the user-defined extension in a plug-in manifest.
  */
 public class Extension extends RegistryObject {
-	public static final Extension[] EMPTY_ARRAY = new Extension[0];
+	public static final Extension[] EMPTY_ARRAY = {};
 
 	//Extension simple identifier
 	private String simpleId;
@@ -85,7 +85,7 @@ public class Extension extends RegistryObject {
 
 		//The extension has been loaded from the cache.
 		String[] result = null;
-		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference<?>) extraInformation).get() : (String[]) extraInformation)) == null) {
+		if (extraInformation == null || (result = extraInformation instanceof SoftReference ? (String[]) ((SoftReference<?>) extraInformation).get() : (String[]) extraInformation) == null) {
 			result = registry.getTableReader().loadExtensionExtraData(getExtraDataOffset());
 			extraInformation = new SoftReference<>(result);
 		}

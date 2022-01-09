@@ -160,7 +160,7 @@ public class DataTree extends AbstractDataTree {
 		if (this.isImmutable())
 			handleImmutableTree();
 		DataTreeNode node = findNodeAt(parentKey);
-		if (node == null || (!node.includesChild(localName))) {
+		if (node == null || !node.includesChild(localName)) {
 			handleNotFound(node == null ? parentKey : parentKey.append(localName));
 		} else {
 			this.replaceNode(parentKey, node.copyWithoutChild(localName));
@@ -240,7 +240,7 @@ public class DataTree extends AbstractDataTree {
 	 */
 	@Override
 	public boolean includes(IPath key) {
-		return (findNodeAt(key) != null);
+		return findNodeAt(key) != null;
 	}
 
 	/**

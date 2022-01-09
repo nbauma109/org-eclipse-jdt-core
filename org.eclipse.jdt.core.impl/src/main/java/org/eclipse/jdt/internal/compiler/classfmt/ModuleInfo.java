@@ -139,7 +139,7 @@ public class ModuleInfo extends ClassFileStruct implements IBinaryModule {
 			name_index = this.constantPoolOffsets[u2At(moduleOffset)];
 			utf8Offset = this.constantPoolOffsets[u2At(name_index + 1)];
 			char[] requiresNames = utf8At(utf8Offset + 3, u2At(utf8Offset + 1));
-			this.requires[i] = this.new ModuleReferenceInfo();
+			this.requires[i] = new ModuleReferenceInfo();
 			CharOperation.replace(requiresNames, '/', '.');
 			this.requires[i].refName = requiresNames;
 			moduleOffset += 2;
@@ -163,7 +163,7 @@ public class ModuleInfo extends ClassFileStruct implements IBinaryModule {
 			utf8Offset = this.constantPoolOffsets[u2At(name_index + 1)];
 			char[] exported = utf8At(utf8Offset + 3, u2At(utf8Offset + 1));
 			CharOperation.replace(exported, '/', '.');
-			PackageExportInfo pack = this.new PackageExportInfo();
+			PackageExportInfo pack = new PackageExportInfo();
 			this.exports[i] = pack;
 			pack.packageName = exported;
 			moduleOffset += 2;
@@ -193,7 +193,7 @@ public class ModuleInfo extends ClassFileStruct implements IBinaryModule {
 			utf8Offset = this.constantPoolOffsets[u2At(name_index + 1)];
 			char[] exported = utf8At(utf8Offset + 3, u2At(utf8Offset + 1));
 			CharOperation.replace(exported, '/', '.');
-			PackageExportInfo pack = this.new PackageExportInfo();
+			PackageExportInfo pack = new PackageExportInfo();
 			this.opens[i] = pack;
 			pack.packageName = exported;
 			moduleOffset += 2;
@@ -235,7 +235,7 @@ public class ModuleInfo extends ClassFileStruct implements IBinaryModule {
 			utf8Offset = this.constantPoolOffsets[u2At(classIndex + 1)];
 			char[] inf = utf8At(utf8Offset + 3, u2At(utf8Offset + 1));
 			CharOperation.replace(inf, '/', '.');
-			ServiceInfo service = this.new ServiceInfo();
+			ServiceInfo service = new ServiceInfo();
 			this.provides[i] = service;
 			service.serviceName = inf;
 			moduleOffset += 2;
@@ -259,13 +259,13 @@ public class ModuleInfo extends ClassFileStruct implements IBinaryModule {
 		this.annotations = annotationInfos;
 		this.tagBits = tagBits;
 		if (fullyInitialize) {
-			for (int i = 0, max = annotationInfos.length; i < max; i++) {
-				annotationInfos[i].initialize();
+			for (AnnotationInfo element : annotationInfos) {
+				element.initialize();
 			}
 		}
 	}
 
-	class ModuleReferenceInfo implements IModule.IModuleReference {
+	static class ModuleReferenceInfo implements IModule.IModuleReference {
 		char[] refName;
 		boolean isTransitive = false;
 		int modifiers;
@@ -298,7 +298,7 @@ public class ModuleInfo extends ClassFileStruct implements IBinaryModule {
 			return this.modifiers;
 		}
 	}
-	class PackageExportInfo implements IModule.IPackageExport {
+	static class PackageExportInfo implements IModule.IPackageExport {
 		char[] packageName;
 		char[][] exportedTo;
 		int exportedToCount;
@@ -330,7 +330,7 @@ public class ModuleInfo extends ClassFileStruct implements IBinaryModule {
 			buffer.append(';').append('\n');
 		}
 	}
-	class ServiceInfo implements IModule.IService {
+	static class ServiceInfo implements IModule.IService {
 		char[] serviceName;
 		char[][] with;
 		@Override
@@ -360,8 +360,7 @@ public class ModuleInfo extends ClassFileStruct implements IBinaryModule {
 		int c = CharOperation.hashCode(this.name);
 		result = 31 * result + c;
 		c =  Arrays.hashCode(this.requires);
-		result = 31 * result + c;
-		return result;
+		return 31 * result + c;
 	}
 	@Override
 	public String toString() {

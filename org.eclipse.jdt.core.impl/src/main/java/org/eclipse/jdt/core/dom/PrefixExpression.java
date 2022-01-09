@@ -103,8 +103,8 @@ public class PrefixExpression extends Expression {
 					COMPLEMENT,
 					NOT,
 				};
-			for (int i = 0; i < ops.length; i++) {
-				CODES.put(ops[i].toString(), ops[i]);
+			for (Operator op : ops) {
+				CODES.put(op.toString(), op);
 			}
 		}
 
@@ -202,10 +202,9 @@ public class PrefixExpression extends Expression {
 		if (property == OPERATOR_PROPERTY) {
 			if (get) {
 				return getOperator();
-			} else {
-				setOperator((Operator) value);
-				return null;
 			}
+            setOperator((Operator) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
@@ -216,10 +215,9 @@ public class PrefixExpression extends Expression {
 		if (property == OPERAND_PROPERTY) {
 			if (get) {
 				return getOperand();
-			} else {
-				setOperand((Expression) child);
-				return null;
 			}
+            setOperand((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

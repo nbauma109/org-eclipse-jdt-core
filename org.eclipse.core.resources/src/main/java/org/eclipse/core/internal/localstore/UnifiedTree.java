@@ -136,11 +136,8 @@ public class UnifiedTree {
 
 		// is there a possibility to have children?
 		int parentType = parent.getType();
-		if (parentType == IResource.FILE && !node.isFolder())
-			return;
-
 		//don't refresh resources in closed or non-existent projects
-		if (!parent.getProject().isAccessible())
+		if (parentType == IResource.FILE && !node.isFolder() || !parent.getProject().isAccessible())
 			return;
 
 		// get the list of resources in the file system
@@ -576,7 +573,6 @@ public class UnifiedTree {
 			quickSort(infos, originalLeft, right);
 		if (left < originalRight)
 			quickSort(infos, left, originalRight);
-		return;
 	}
 
 	/**

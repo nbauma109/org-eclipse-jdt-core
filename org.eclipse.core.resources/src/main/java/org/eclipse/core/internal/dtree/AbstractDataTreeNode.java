@@ -28,7 +28,7 @@ public abstract class AbstractDataTreeNode {
 	/**
 	 * Singleton indicating no children.
 	 */
-	static final AbstractDataTreeNode[] NO_CHILDREN = new AbstractDataTreeNode[0];
+	static final AbstractDataTreeNode[] NO_CHILDREN = {};
 	protected AbstractDataTreeNode[] children;
 	protected String name;
 
@@ -96,7 +96,7 @@ public abstract class AbstractDataTreeNode {
 		int resultIndex = 0;
 		while (oldIndex < oldNodes.length && newIndex < newNodes.length) {
 			int log2 = 31 - Integer.numberOfLeadingZeros(oldNodes.length - oldIndex);
-			if (log2 > 1 && (newNodes.length - newIndex) <= (oldNodes.length - oldIndex) / log2) {
+			if (log2 > 1 && newNodes.length - newIndex <= (oldNodes.length - oldIndex) / log2) {
 				// We can expect to fare better using binary search. In particular, this will optimize the case of a folder refresh (new linked
 				// folder with many files in a flat hierarchy), where this is called repeatedly, with oldNodes containing the files added so far,
 				// and newNodes containing exactly one new node for the next file to be added. The old algorithm has quadratic performance
@@ -269,10 +269,9 @@ public abstract class AbstractDataTreeNode {
 		for (AbstractDataTreeNode element : children) {
 			if (element.getName().equalsIgnoreCase(localName)) {
 				//if we find a deleted child, keep looking for a real child
-				if (element.isDeleted())
-					result = element;
-				else
-					return element;
+				if (!element.isDeleted())
+                    return element;
+                result = element;
 			}
 		}
 		return result;
@@ -300,24 +299,25 @@ public abstract class AbstractDataTreeNode {
 					comparedNodes[count++] = convertToRemovedComparisonNode(oldNode, userComparison);
 				}
 				++oldIndex;
-			} else if (compare > 0) {
-				/* give the client a chance to say whether it should be in the delta */
-				int userComparison = comparator.compare(null, newNode.getData());
-				if (userComparison != 0) {
-					comparedNodes[count++] = convertToAddedComparisonNode(newNode, userComparison);
-				}
-				++newIndex;
 			} else {
-				AbstractDataTreeNode comparedNode = oldNode.compareWith(newNode, comparator);
-				NodeComparison comparison = (NodeComparison) comparedNode.getData();
+                if (compare > 0) {
+                	/* give the client a chance to say whether it should be in the delta */
+                	int userComparison = comparator.compare(null, newNode.getData());
+                	if (userComparison != 0) {
+                		comparedNodes[count++] = convertToAddedComparisonNode(newNode, userComparison);
+                	}
+                } else {
+                	AbstractDataTreeNode comparedNode = oldNode.compareWith(newNode, comparator);
+                	NodeComparison comparison = (NodeComparison) comparedNode.getData();
 
-				/* skip empty comparisons */
-				if (!(comparison.isUnchanged() && comparedNode.size() == 0)) {
-					comparedNodes[count++] = comparedNode;
-				}
-				++oldIndex;
-				++newIndex;
-			}
+                	/* skip empty comparisons */
+                	if (!comparison.isUnchanged() || comparedNode.size() != 0) {
+                		comparedNodes[count++] = comparedNode;
+                	}
+                	++oldIndex;
+                }
+                ++newIndex;
+            }
 		}
 		while (oldIndex < oldLen) {
 			DataTreeNode oldNode = (DataTreeNode) oldNodes[oldIndex++];
@@ -357,7 +357,7 @@ public abstract class AbstractDataTreeNode {
 			AbstractDataTreeNode comparedNode = node.compareWithParent(key.append(node.getName()), parent, comparator);
 			NodeComparison comparison = (NodeComparison) comparedNode.getData();
 			// Skip it if it's an empty comparison (and no children).
-			if (!(comparison.isUnchanged() && comparedNode.size() == 0)) {
+			if (!comparison.isUnchanged() || comparedNode.size() != 0) {
 				comparedNodes[count++] = comparedNode;
 			}
 		}
@@ -514,11 +514,10 @@ public abstract class AbstractDataTreeNode {
 	 */
 	void replaceChild(String localName, DataTreeNode node) {
 		int i = indexOfChild(localName);
-		if (i >= 0) {
-			children[i] = node;
-		} else {
+		if (i < 0) {
 			throw new ObjectNotFoundException(NLS.bind(Messages.dtree_missingChild, localName));
 		}
+        children[i] = node;
 	}
 
 	/**

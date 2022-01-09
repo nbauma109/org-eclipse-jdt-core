@@ -99,6 +99,7 @@ public interface IExtensionPoint {
 	 * elements belonging to the <code>org.abc</code> namespace would fall into this category.
 	 * </p>
 	 */
+    @Deprecated
     String getNamespace() throws InvalidRegistryObjectException;
 
 	/**

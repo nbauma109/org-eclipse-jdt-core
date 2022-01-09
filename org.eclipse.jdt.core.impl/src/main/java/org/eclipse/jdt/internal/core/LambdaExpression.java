@@ -135,7 +135,7 @@ public class LambdaExpression extends SourceType {
 		elementInfo.addCategories(handle, null);
 
 		JavaModelManager manager = JavaModelManager.getJavaModelManager();
-		char[][] superinterfaces = new char [][] { manager.intern(Signature.toString(interphase).toCharArray()) }; // drops marker interfaces - to fix.
+		char[][] superinterfaces = { manager.intern(Signature.toString(interphase).toCharArray()) }; // drops marker interfaces - to fix.
 		elementInfo.setSuperInterfaceNames(superinterfaces);
 		return elementInfo;
 	}
@@ -211,8 +211,7 @@ public class LambdaExpression extends SourceType {
 		// ----
 		if (!memento.hasMoreTokens()) return this;
 		String selector = memento.nextToken();
-		if (!memento.hasMoreTokens() || memento.nextToken().charAt(0) != JEM_COUNT) return this;
-		if (!memento.hasMoreTokens()) return this;
+		if (!memento.hasMoreTokens() || memento.nextToken().charAt(0) != JEM_COUNT || !memento.hasMoreTokens()) return this;
 		int length = Integer.parseInt(memento.nextToken());
 		String [] parameterTypes = new String[length];
 		String [] parameterNames = new String[length];
@@ -258,8 +257,7 @@ public class LambdaExpression extends SourceType {
 
 	@Override
 	public JavaElement resolved(Binding binding) {
-		ResolvedLambdaExpression resolvedHandle = new ResolvedLambdaExpression(this.getParent(), this, new String(binding.computeUniqueKey()));
-		return resolvedHandle;
+		return new ResolvedLambdaExpression(this.getParent(), this, new String(binding.computeUniqueKey()));
 	}
 
 	public IMethod getMethod() {

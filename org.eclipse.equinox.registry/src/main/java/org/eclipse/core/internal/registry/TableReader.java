@@ -123,7 +123,7 @@ public class TableReader {
 			if (!checkCacheValidity(tableInput, expectedTimestamp))
 				return null;
 
-			Integer nextId = Integer.valueOf(tableInput.readInt());
+			Integer nextId = tableInput.readInt();
 			OffsetTable offsets = OffsetTable.load(tableInput);
 			extensionPoints = new HashtableOfStringAndInt();
 			extensionPoints.load(tableInput);
@@ -163,24 +163,24 @@ public class TableReader {
 			String localeStamp = readUTF(in, OBJECT);
 			boolean multiLanguage = in.readBoolean();
 
-			boolean validTime = (expectedTimestamp == 0 || expectedTimestamp == registryStamp);
-			boolean validInstall = (installStamp == registry.computeState());
-			boolean validOS = (osStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_OS, RegistryProperties.empty)));
-			boolean validWS = (windowsStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_WS, RegistryProperties.empty)));
-			boolean validNL = (localeStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NL, RegistryProperties.empty)));
-			boolean validMultiLang = (registry.isMultiLanguage() == multiLanguage);
+			boolean validTime = expectedTimestamp == 0 || expectedTimestamp == registryStamp;
+			boolean validInstall = installStamp == registry.computeState();
+			boolean validOS = osStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_OS, RegistryProperties.empty));
+			boolean validWS = windowsStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_WS, RegistryProperties.empty));
+			boolean validNL = localeStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NL, RegistryProperties.empty));
+			boolean validMultiLang = registry.isMultiLanguage() == multiLanguage;
 
 			if (!validTime || !validInstall || !validOS || !validWS || !validNL || !validMultiLang)
 				return false;
 
-			boolean validMain = (mainDataFileSize == mainDataFile.length());
-			boolean validExtra = (extraDataFileSize == extraDataFile.length());
-			boolean validContrib = (contributionsFileSize == contributionsFile.length());
-			boolean validContributors = (contributorsFileSize == contributorsFile.length());
-			boolean validNamespace = (namespacesFileSize == namespacesFile.length());
-			boolean validOrphan = (orphansFileSize == orphansFile.length());
+			boolean validMain = mainDataFileSize == mainDataFile.length();
+			boolean validExtra = extraDataFileSize == extraDataFile.length();
+			boolean validContrib = contributionsFileSize == contributionsFile.length();
+			boolean validContributors = contributorsFileSize == contributorsFile.length();
+			boolean validNamespace = namespacesFileSize == namespacesFile.length();
+			boolean validOrphan = orphansFileSize == orphansFile.length();
 
-			return (validMain && validExtra && validContrib && validContributors && validNamespace && validOrphan);
+			return validMain && validExtra && validContrib && validContributors && validNamespace && validOrphan;
 		} catch (IOException e) {
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheInconsistent, e));
 			return false;

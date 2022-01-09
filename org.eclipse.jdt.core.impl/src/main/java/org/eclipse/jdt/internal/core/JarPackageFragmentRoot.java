@@ -152,7 +152,7 @@ public class JarPackageFragmentRoot extends PackageFragmentRoot {
 				for (Enumeration<? extends ZipEntry> e= jar.entries(); e.hasMoreElements();) {
 					ZipEntry member= e.nextElement();
 					String name = member.getName();
-					if (this.multiVersion && name.length() > (length + 2) && name.startsWith(version)) {
+					if (this.multiVersion && name.length() > length + 2 && name.startsWith(version)) {
 						int end = name.indexOf('/', length);
 						if (end >= name.length()) continue;
 						String versionPath = name.substring(0, end);
@@ -171,8 +171,8 @@ public class JarPackageFragmentRoot extends PackageFragmentRoot {
 			// and cache the entry names in the rawPackageInfo table
 			children = new IJavaElement[rawPackageInfo.size()];
 			int index = 0;
-			for (int i = 0, length = rawPackageInfo.keyTable.length; i < length; i++) {
-				String[] pkgName = (String[]) rawPackageInfo.keyTable[i];
+			for (Object[] element : rawPackageInfo.keyTable) {
+				String[] pkgName = (String[]) element;
 				if (pkgName == null) continue;
 				children[index++] = getPackageFragment(pkgName);
 			}
@@ -198,8 +198,8 @@ public class JarPackageFragmentRoot extends PackageFragmentRoot {
 		// and cache the entry names in the rawPackageInfo table
 		children = new IJavaElement[rawPackageInfo.size()];
 		int index = 0;
-		for (int i = 0, length = rawPackageInfo.keyTable.length; i < length; i++) {
-			String[] pkgName = (String[]) rawPackageInfo.keyTable[i];
+		for (Object[] element : rawPackageInfo.keyTable) {
+			String[] pkgName = (String[]) element;
 			if (pkgName == null) continue;
 			children[index++] = getPackageFragment(pkgName);
 		}
@@ -314,9 +314,8 @@ public class JarPackageFragmentRoot extends PackageFragmentRoot {
 	public IPath internalPath() {
 		if (isExternal()) {
 			return this.jarPath;
-		} else {
-			return super.internalPath();
 		}
+        return super.internalPath();
 	}
 	@Override
 	public IResource resource(PackageFragmentRoot root) {
@@ -333,12 +332,11 @@ public class JarPackageFragmentRoot extends PackageFragmentRoot {
 	 */
 	@Override
 	public IResource getUnderlyingResource() throws JavaModelException {
-		if (isExternal()) {
-			if (!exists()) throw newNotPresentException();
-			return null;
-		} else {
+		if (!isExternal()) {
 			return super.getUnderlyingResource();
 		}
+        if (!exists()) throw newNotPresentException();
+        return null;
 	}
 	@Override
 	public int hashCode() {
@@ -367,11 +365,7 @@ public class JarPackageFragmentRoot extends PackageFragmentRoot {
 		JavaModelManager manager = JavaModelManager.getJavaModelManager();
 		for (int i = existingLength; i < length; i++) {
 			// sourceLevel must be null because we know nothing about it based on a jar file
-			if (Util.isValidFolderNameForPackage(pkgName[i], null, compliance)) {
-				System.arraycopy(existing, 0, existing = new String[i+1], 0, i);
-				existing[i] = manager.intern(pkgName[i]);
-				rawPackageInfo.put(existing, new ArrayList[] { EMPTY_LIST, EMPTY_LIST });
-			} else {
+			if (!Util.isValidFolderNameForPackage(pkgName[i], null, compliance)) {
 				// non-Java resource folder
 				if (!isDirectory) {
 					ArrayList[] children = (ArrayList[]) rawPackageInfo.get(existing);
@@ -380,6 +374,9 @@ public class JarPackageFragmentRoot extends PackageFragmentRoot {
 				}
 				return;
 			}
+            System.arraycopy(existing, 0, existing = new String[i+1], 0, i);
+            existing[i] = manager.intern(pkgName[i]);
+            rawPackageInfo.put(existing, new ArrayList[] { EMPTY_LIST, EMPTY_LIST });
 		}
 		if (isDirectory)
 			return;
@@ -427,9 +424,8 @@ public class JarPackageFragmentRoot extends PackageFragmentRoot {
 				JavaModel.getExternalTarget(
 					getPath()/*don't make the path relative as this is an external archive*/,
 					true/*check existence*/) != null;
-		} else {
-			return super.resourceExists(underlyingResource);
 		}
+        return super.resourceExists(underlyingResource);
 	}
 
 	@Override

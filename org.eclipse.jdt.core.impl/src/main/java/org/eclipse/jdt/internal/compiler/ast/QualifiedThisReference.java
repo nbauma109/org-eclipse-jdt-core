@@ -112,9 +112,8 @@ public class QualifiedThisReference extends ThisReference {
 				scope.problemReporter().noSuchEnclosingInstance(type, this, false);
 			// otherwise problem will be reported by the caller
 			return this.resolvedType;
-		} else {
-			scope.tagAsAccessingEnclosingInstanceStateOf(this.currentCompatibleType, false /* type variable access */);
 		}
+        scope.tagAsAccessingEnclosingInstanceStateOf(this.currentCompatibleType, false /* type variable access */);
 
 		// Ensure one cannot write code like: B() { super(B.this); }
 		if (depth == 0) {

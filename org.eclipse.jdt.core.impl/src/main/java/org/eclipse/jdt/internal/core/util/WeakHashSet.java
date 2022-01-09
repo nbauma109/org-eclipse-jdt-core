@@ -169,8 +169,8 @@ public class WeakHashSet {
 		WeakHashSet newHashSet = new WeakHashSet(this.elementSize * 2);		// double the number of expected elements
 		newHashSet.referenceQueue = this.referenceQueue;
 		HashableWeakReference currentValue;
-		for (int i = 0, length = this.values.length; i < length; i++)
-			if ((currentValue = this.values[i]) != null)
+		for (HashableWeakReference value : this.values)
+            if ((currentValue = value) != null)
 				newHashSet.addValue(currentValue);
 
 		this.values = newHashSet.values;
@@ -209,8 +209,7 @@ public class WeakHashSet {
 	@Override
 	public String toString() {
 		StringBuilder buffer = new StringBuilder("{"); //$NON-NLS-1$
-		for (int i = 0, length = this.values.length; i < length; i++) {
-			HashableWeakReference value = this.values[i];
+		for (HashableWeakReference value : this.values) {
 			if (value != null) {
 				Object ref = value.get();
 				if (ref != null) {

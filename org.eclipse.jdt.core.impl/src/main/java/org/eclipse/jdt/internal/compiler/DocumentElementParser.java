@@ -76,7 +76,7 @@ public void checkComment() {
 		int commentSourceStart = this.scanner.commentStarts[lastCommentIndex];
 		if (commentSourceStart < 0 || // line comment
 			this.scanner.commentStops[lastCommentIndex] < 0 || // block comment
-			(this.modifiersSourceStart != -1 && this.modifiersSourceStart < commentSourceStart)) // the comment is after the modifier
+			this.modifiersSourceStart != -1 && this.modifiersSourceStart < commentSourceStart) // the comment is after the modifier
 		{
 			continue nextComment;
 		}
@@ -461,7 +461,7 @@ protected void consumeEnterCompilationUnit() {
 protected void consumeEnterVariable() {
 	// EnterVariable ::= $empty
 	boolean isLocalDeclaration = isLocalDeclaration();
-	if (!isLocalDeclaration && (this.variablesCounter[this.nestedType] != 0)) {
+	if (!isLocalDeclaration && this.variablesCounter[this.nestedType] != 0) {
 		this.requestor.exitField(this.lastFieldBodyEndPosition, this.lastFieldEndPosition);
 	}
 	char[] varName = this.identifierStack[this.identifierPtr];
@@ -526,7 +526,7 @@ protected void consumeEnterVariable() {
 	}
 
 	declaration.type = extendedTypeDimension != 0 ? augmentTypeWithAdditionalDimensions(type, extendedTypeDimension, annotationsOnExtendedDimensions, false) : type;
-	declaration.bits |= (type.bits & ASTNode.HasTypeAnnotations);
+	declaration.bits |= type.bits & ASTNode.HasTypeAnnotations;
 
 	this.variablesCounter[this.nestedType]++;
 	this.nestedMethod[this.nestedType]++;
@@ -597,7 +597,7 @@ protected void consumeEnhancedForStatementHeaderInit(boolean hasModifiers) {
 		localDeclaration.declarationSourceStart = type.sourceStart;
 	}
 	localDeclaration.type = type;
-	localDeclaration.bits |= (type.bits & ASTNode.HasTypeAnnotations);
+	localDeclaration.bits |= type.bits & ASTNode.HasTypeAnnotations;
 	ForeachStatement iteratorForStatement =
 		new ForeachStatement(
 			localDeclaration,
@@ -627,7 +627,7 @@ protected void consumeMethodHeaderNameWithTypeParameters(boolean isAnnotationMet
 	md.returnType = getTypeReference(this.intStack[this.intPtr--]);
 	if (isAnnotationMethod)
 		rejectIllegalLeadingTypeAnnotations(md.returnType);
-	md.bits |= (md.returnType.bits & ASTNode.HasTypeAnnotations);
+	md.bits |= md.returnType.bits & ASTNode.HasTypeAnnotations;
 	// consume type parameters
 	int length = this.genericsLengthStack[this.genericsLengthPtr--];
 	this.genericsPtr -= length;
@@ -662,8 +662,8 @@ protected void consumeMethodHeaderNameWithTypeParameters(boolean isAnnotationMet
 		boolean isType;
 		if ((isType = this.currentElement instanceof RecoveredType)
 			//|| md.modifiers != 0
-			|| (Util.getLineNumber(md.returnType.sourceStart, this.scanner.lineEnds, 0, this.scanner.linePtr)
-					== Util.getLineNumber(md.sourceStart, this.scanner.lineEnds, 0, this.scanner.linePtr))){
+			|| Util.getLineNumber(md.returnType.sourceStart, this.scanner.lineEnds, 0, this.scanner.linePtr)
+					== Util.getLineNumber(md.sourceStart, this.scanner.lineEnds, 0, this.scanner.linePtr)){
 			if(isType) {
 				((RecoveredType) this.currentElement).pendingTypeParameters = null;
 			}
@@ -1070,7 +1070,7 @@ protected void consumeMethodHeaderExtendedDims() {
 	if (extendedDims != 0) {
 		md.sourceEnd = this.endPosition;
 		md.returnType = augmentTypeWithAdditionalDimensions(md.returnType, extendedDims, getAnnotationsOnDimensions(extendedDims), false);
-		md.bits |= (md.returnType.bits & ASTNode.HasTypeAnnotations);
+		md.bits |= md.returnType.bits & ASTNode.HasTypeAnnotations;
 		if (this.currentToken == TokenNameLBRACE) {
 			md.bodyStart = this.endPosition + 1;
 		}
@@ -1091,7 +1091,7 @@ protected void consumeMethodHeaderName(boolean isAnnotationMethod) {
 	this.identifierLengthPtr--;
 	//type
 	md.returnType = getTypeReference(this.typeDims = this.intStack[this.intPtr--]);
-	md.bits |= (md.returnType.bits & ASTNode.HasTypeAnnotations);
+	md.bits |= md.returnType.bits & ASTNode.HasTypeAnnotations;
 	//modifiers
 	md.declarationSourceStart = this.intStack[this.intPtr--];
 	md.modifiersSourceStart = this.intStack[this.intPtr--];
@@ -1589,7 +1589,7 @@ private char[] returnTypeName(TypeReference type) {
 		char[] dimensionsArray = new char[dimension * 2];
 		for (int i = 0; i < dimension; i++) {
 			dimensionsArray[i*2] = '[';
-			dimensionsArray[(i*2) + 1] = ']';
+			dimensionsArray[i*2 + 1] = ']';
 		}
 		return CharOperation.concat(
 			CharOperation.concatWith(type.getTypeName(), '.'),

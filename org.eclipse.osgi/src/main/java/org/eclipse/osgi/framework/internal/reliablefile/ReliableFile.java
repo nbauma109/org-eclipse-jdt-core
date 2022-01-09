@@ -117,11 +117,9 @@ public class ReliableFile {
 
 		prop = System.getProperty(PROP_OSGI_LOCKING);
 		boolean tmpFileSharing = true;
-		if (prop != null) {
-			if (prop.equals("none")) { //$NON-NLS-1$
-				tmpFileSharing = false;
-			}
-		}
+		if (prop != null && prop.equals("none")) { //$NON-NLS-1$
+        	tmpFileSharing = false;
+        }
 		fileSharing = tmpFileSharing;
 	}
 
@@ -180,11 +178,9 @@ public class ReliableFile {
 	private static int[] getFileGenerations(File file) {
 		if (!fileSharing) {
 			synchronized (lastGenerationLock) {
-				if (lastGenerationFile != null) {
-					//shortcut maybe, only if filesharing is not supported
-					if (file.equals(lastGenerationFile))
-						return lastGenerations;
-				}
+				//shortcut maybe, only if filesharing is not supported
+                if (lastGenerationFile != null && file.equals(lastGenerationFile))
+                	return lastGenerations;
 			}
 		}
 		int[] generations = null;
@@ -198,12 +194,12 @@ public class ReliableFile {
 				return null;
 			List<Integer> list = new ArrayList<>(defaultMaxGenerations);
 			if (file.exists())
-				list.add(Integer.valueOf(0)); //base file exists
+				list.add(0); //base file exists
 			for (String candidateFile : files) {
 				if (candidateFile.startsWith(prefix)) {
 					try {
 						int id = Integer.parseInt(candidateFile.substring(prefixLen));
-						list.add(Integer.valueOf(id));
+						list.add(id);
 					}catch (NumberFormatException e) {/*ignore*/
 					}
 				}
@@ -214,7 +210,7 @@ public class ReliableFile {
 			Arrays.sort(array);
 			generations = new int[array.length];
 			for (int i = 0, j = array.length - 1; i < array.length; i++, j--) {
-				generations[i] = ((Integer) array[j]).intValue();
+				generations[i] = (Integer) array[j];
 			}
 			return generations;
 		} finally {
@@ -253,14 +249,12 @@ public class ReliableFile {
 
 		File textFile = null;
 		InputStream textIS = null;
-		for (int idx = 0; idx < generations.length; idx++) {
-			if (generation != 0) {
-				if (generations[idx] > generation || (failOnPrimary && generations[idx] != generation))
-					continue;
-			}
+		for (int generation2 : generations) {
+			if (generation != 0 && (generation2 > generation || failOnPrimary && generation2 != generation))
+            	continue;
 			File file;
-			if (generations[idx] != 0)
-				file = new File(parent, name + '.' + generations[idx]);
+			if (generation2 != 0)
+				file = new File(parent, name + '.' + generation2);
 			else
 				file = referenceFile;
 			InputStream is = null;
@@ -463,10 +457,8 @@ public class ReliableFile {
 			for (int idx = 0, count = generationCount - rmCount; idx < count; idx++) {
 				File file = new File(parent, name + '.' + generations[idx]);
 				CacheInfo info = cacheFiles.get(file);
-				if (info != null) {
-					if (info.filetype == FILETYPE_CORRUPT)
-						rmCount--;
-				}
+				if (info != null && info.filetype == FILETYPE_CORRUPT)
+                	rmCount--;
 			}
 			for (int idx = generationCount - 1; rmCount > 0; idx--, rmCount--) {
 				File rmFile = new File(parent, name + '.' + generations[idx]);
@@ -512,7 +504,7 @@ public class ReliableFile {
 				long size = 0;
 				int count;
 				while ((count = in.read(buffer, 0, bufferSize)) > 0) {
-					if ((size + count) >= length)
+					if (size + count >= length)
 						count = (int) (length - size);
 					out.write(buffer, 0, count);
 					size += count;
@@ -616,11 +608,11 @@ public class ReliableFile {
 		String name = deleteFile.getName();
 		File parent = new File(deleteFile.getParent());
 		synchronized (cacheFiles) {
-			for (int idx = 0; idx < generations.length; idx++) {
+			for (int generation : generations) {
 				// base files (.0 in generations[]) will never be deleted
-				if (generations[idx] == 0)
+				if (generation == 0)
 					continue;
-				File file = new File(parent, name + '.' + generations[idx]);
+				File file = new File(parent, name + '.' + generation);
 				if (file.exists()) {
 					file.delete();
 				}
@@ -825,7 +817,7 @@ public class ReliableFile {
 					crc.update(data, 0, 16); // update crc w/ sig bytes
 					return FILETYPE_NOSIGNATURE;
 				}
-			long crccmp = Long.valueOf(new String(data, 4, 8, StandardCharsets.UTF_8), 16).longValue();
+			long crccmp = Long.parseLong(new String(data, 4, 8, StandardCharsets.UTF_8), 16);
 			if (crccmp == crc.getValue()) {
 				return FILETYPE_VALID;
 			}
@@ -842,7 +834,7 @@ public class ReliableFile {
 		int count = 8;
 
 		do {
-			int ch = (l & 0xf);
+			int ch = l & 0xf;
 			if (ch > 9)
 				ch = ch - 10 + 'a';
 			else
@@ -853,7 +845,7 @@ public class ReliableFile {
 		return buffer;
 	}
 
-	private class CacheInfo {
+	private static class CacheInfo {
 		int filetype;
 		Checksum checksum;
 		long timeStamp;

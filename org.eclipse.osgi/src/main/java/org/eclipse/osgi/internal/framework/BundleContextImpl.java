@@ -151,7 +151,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			sm.checkPropertyAccess(key);
 		}
 
-		return (container.getConfiguration().getProperty(key));
+		return container.getConfiguration().getProperty(key);
 	}
 
 	/**
@@ -506,7 +506,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	@Override
 	public ServiceRegistration<?> registerService(String clazz, Object service, Dictionary<String, ?> properties) {
-		String[] clazzes = new String[] {clazz};
+		String[] clazzes = {clazz};
 
 		return registerService(clazzes, service, properties);
 	}
@@ -649,8 +649,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (reference == null)
 			throw new NullPointerException("A null service reference is not allowed."); //$NON-NLS-1$
 		provisionServicesInUseMap();
-		S service = container.getServiceRegistry().getService(this, (ServiceReferenceImpl<S>) reference);
-		return service;
+		return container.getServiceRegistry().getService(this, (ServiceReferenceImpl<S>) reference);
 	}
 
 	/**
@@ -744,7 +743,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			}
 			activator = loadBundleActivator();
 			if (debug.DEBUG_BUNDLE_TIME) {
-				Debug.println((System.currentTimeMillis() - start) + " ms to load the activator of " + bundle); //$NON-NLS-1$
+				Debug.println(System.currentTimeMillis() - start + " ms to load the activator of " + bundle); //$NON-NLS-1$
 			}
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
@@ -762,7 +761,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				throw be;
 			} finally {
 				if (debug.DEBUG_BUNDLE_TIME) {
-					Debug.println((System.currentTimeMillis() - start) + " ms to load and start the activator of " + bundle); //$NON-NLS-1$
+					Debug.println(System.currentTimeMillis() - start + " ms to load and start the activator of " + bundle); //$NON-NLS-1$
 				}
 			}
 		}
@@ -822,7 +821,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				Debug.printStackTrace(t);
 			}
 
-			String clazz = null;
+			String clazz;
 			clazz = bundleActivator.getClass().getName();
 
 			throw new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$ //$NON-NLS-2$
@@ -876,7 +875,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				Debug.printStackTrace(t);
 			}
 
-			String clazz = (activator == null) ? "" : activator.getClass().getName(); //$NON-NLS-1$
+			String clazz = activator == null ? "" : activator.getClass().getName(); //$NON-NLS-1$
 
 			throw new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {clazz, "stop", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$ //$NON-NLS-2$
 		} finally {
@@ -1029,23 +1028,17 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 
 	@Override
 	public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
-		@SuppressWarnings("unchecked")
-		ServiceRegistration<S> registration = (ServiceRegistration<S>) registerService(clazz.getName(), service, properties);
-		return registration;
+		return (ServiceRegistration<S>) registerService(clazz.getName(), service, properties);
 	}
 
 	@Override
 	public <S> ServiceRegistration<S> registerService(Class<S> clazz, ServiceFactory<S> factory, Dictionary<String, ?> properties) {
-		@SuppressWarnings("unchecked")
-		ServiceRegistration<S> registration = (ServiceRegistration<S>) registerService(clazz.getName(), factory, properties);
-		return registration;
+		return (ServiceRegistration<S>) registerService(clazz.getName(), factory, properties);
 	}
 
 	@Override
 	public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
-		@SuppressWarnings("unchecked")
-		ServiceReference<S> reference = (ServiceReference<S>) getServiceReference(clazz.getName());
-		return reference;
+		return (ServiceReference<S>) getServiceReference(clazz.getName());
 	}
 
 	@Override
@@ -1070,7 +1063,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (reference == null)
 			throw new NullPointerException("A null service reference is not allowed."); //$NON-NLS-1$
 		provisionServicesInUseMap();
-		ServiceObjects<S> serviceObjects = container.getServiceRegistry().getServiceObjects(this, (ServiceReferenceImpl<S>) reference);
-		return serviceObjects;
+		return container.getServiceRegistry().getServiceObjects(this, (ServiceReferenceImpl<S>) reference);
 	}
 }

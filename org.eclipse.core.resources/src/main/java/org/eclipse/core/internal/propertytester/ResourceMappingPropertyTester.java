@@ -26,9 +26,7 @@ import org.eclipse.core.runtime.QualifiedName;
 public class ResourceMappingPropertyTester extends ResourcePropertyTester {
 	@Override
 	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
-		if (!(receiver instanceof ResourceMapping))
-			return false;
-		if (!method.equals(PROJECT_PERSISTENT_PROPERTY))
+		if (!(receiver instanceof ResourceMapping) || !method.equals(PROJECT_PERSISTENT_PROPERTY))
 			return false;
 		//Note: we currently say the test is satisfied if any project associated
 		//with the mapping satisfies the test.
@@ -36,21 +34,20 @@ public class ResourceMappingPropertyTester extends ResourcePropertyTester {
 		if (projects.length == 0)
 			return false;
 		String propertyName;
-		String expectedVal;
-		switch (args.length) {
-			case 0:
-				propertyName = toString(expectedValue);
-				expectedVal = null;//any value will do
-				break;
-			case 1:
-				propertyName = toString(args[0]);
-				expectedVal = null;//any value will do
-				break;
-			default:
-				propertyName = toString(args[0]);
-				expectedVal = toString(args[1]);
-				break;
-		}
+		String expectedVal = switch (args.length) {
+            case 0 -> {
+                propertyName = toString(expectedValue);
+                yield null; //any value will do
+            }
+            case 1 -> {
+                propertyName = toString(args[0]);
+                yield null; //any value will do
+            }
+            default -> {
+                propertyName = toString(args[0]);
+                yield toString(args[1]);
+            }
+        };
 		QualifiedName key = toQualifedName(propertyName);
 		boolean found = false;
 		for (IProject project : projects) {

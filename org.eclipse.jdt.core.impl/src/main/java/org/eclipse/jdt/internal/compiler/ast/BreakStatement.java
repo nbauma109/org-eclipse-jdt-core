@@ -32,7 +32,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	// to each of the traversed try statements, so that execution will terminate properly.
 
 	// lookup the label, this should answer the returnContext
-	FlowContext targetContext = (this.label == null)
+	FlowContext targetContext = this.label == null
 		? flowContext.getTargetContextForDefaultBreak()
 		: flowContext.getTargetContextForBreakLabel(this.label);
 
@@ -65,7 +65,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		SubRoutineStatement sub;
 		if ((sub = traversedContext.subroutine()) != null) {
 			if (subCount == this.subroutines.length) {
-				System.arraycopy(this.subroutines, 0, (this.subroutines = new SubRoutineStatement[subCount*2]), 0, subCount); // grow
+				System.arraycopy(this.subroutines, 0, this.subroutines = new SubRoutineStatement[subCount*2], 0, subCount); // grow
 			}
 			this.subroutines[subCount++] = sub;
 			if (sub.isSubRoutineEscaping()) {
@@ -90,7 +90,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	// resize subroutines
 	if (subCount != this.subroutines.length) {
-		System.arraycopy(this.subroutines, 0, (this.subroutines = new SubRoutineStatement[subCount]), 0, subCount);
+		System.arraycopy(this.subroutines, 0, this.subroutines = new SubRoutineStatement[subCount], 0, subCount);
 	}
 	return FlowInfo.DEAD_END;
 }

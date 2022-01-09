@@ -143,7 +143,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 	 * This is used to guard the event topic argument which is passed to an application
 	 * when we are launching it from a scheduling.
 	 */
-	public class TriggerGuard implements Guard {
+	public static class TriggerGuard implements Guard {
 		String eventTopic;
 
 		public TriggerGuard(String topic) {

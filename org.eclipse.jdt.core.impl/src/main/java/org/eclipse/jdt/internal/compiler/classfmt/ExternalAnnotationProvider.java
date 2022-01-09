@@ -138,7 +138,7 @@ public class ExternalAnnotationProvider {
 						this.fieldAnnotationSources = new HashMap<>();
 					this.fieldAnnotationSources.put(selector+':'+rawSig, annotSig);
 				}
-			} while (((line = pendingLine) != null) || (line = reader.readLine()) != null);
+			} while ((line = pendingLine) != null || (line = reader.readLine()) != null);
 		}
 	}
 
@@ -146,11 +146,10 @@ public class ExternalAnnotationProvider {
 	 * Assert that the given line is a class header for 'typeName' (slash-separated qualified name).
 	 */
 	public static void assertClassHeader(String line, String typeName) throws IOException {
-		if (line != null && line.startsWith(CLASS_PREFIX)) {
-			line = line.substring(CLASS_PREFIX.length());
-		} else {
+		if (line == null || !line.startsWith(CLASS_PREFIX)) {
 			throw new IOException("missing class header in annotation file for "+typeName); //$NON-NLS-1$
 		}
+        line = line.substring(CLASS_PREFIX.length());
 		if (!trimTail(line).equals(typeName)) {
 			throw new IOException("mismatching class name in annotation file, expected "+typeName+", but header said "+line); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -468,7 +467,7 @@ public class ExternalAnnotationProvider {
 									break scanVariables;
 								break;
 							case Util.C_NAME_END :
-								if ((depth == 0) && (i +1 < length) && (this.source[i+1] != Util.C_COLON))
+								if (depth == 0 && i +1 < length && this.source[i+1] != Util.C_COLON)
 									pendingVariable = true;
 								break;
 							case Util.C_COLON :
@@ -618,8 +617,7 @@ public class ExternalAnnotationProvider {
 				start = skipNullAnnotation(start);
 			}
 			SignatureWrapper wrapper1 = wrapperWithStart(start);
-			int end = wrapper1.skipAngleContents(wrapper1.computeEnd());
-			return end;
+			return wrapper1.skipAngleContents(wrapper1.computeEnd());
 		}
 
 		@Override

@@ -66,8 +66,8 @@ public class ClasspathJMod extends ClasspathJar {
 	@Override
 	public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPackageName, String moduleName, String qualifiedBinaryFileName,
 											boolean asBinaryOnly, Predicate<String> moduleNameFilter) {
-		if (!isPackage(qualifiedPackageName, moduleName)) return null; // most common case
-		if (moduleNameFilter != null && this.module != null && !moduleNameFilter.test(String.valueOf(this.module.name())))
+		 // most common case
+		if (!isPackage(qualifiedPackageName, moduleName) || moduleNameFilter != null && this.module != null && !moduleNameFilter.test(String.valueOf(this.module.name())))
 			return null;
 
 		try {
@@ -100,11 +100,9 @@ public class ClasspathJMod extends ClasspathJar {
 				char[] folder = CharOperation.subarray(entryName, 0, index);
 				if (CharOperation.equals(CLASSES, folder)) {
 					char[] fileName = CharOperation.subarray(entryName, index + 1, entryName.length);
-					if (modInfo == null && fileName.length == MODULE_DESCRIPTOR_NAME_LENGTH) {
-						if (CharOperation.equals(fileName, IModule.MODULE_INFO_CLASS.toCharArray())) {
-							modInfo = new String(entryName);
-						}
-					}
+					if (modInfo == null && fileName.length == MODULE_DESCRIPTOR_NAME_LENGTH && CharOperation.equals(fileName, IModule.MODULE_INFO_CLASS.toCharArray())) {
+                    	modInfo = new String(entryName);
+                    }
 					addToPackageSet(packageSet, new String(fileName), false);
 				}
 			}

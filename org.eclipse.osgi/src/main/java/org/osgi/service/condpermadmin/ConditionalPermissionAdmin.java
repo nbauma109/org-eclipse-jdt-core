@@ -60,7 +60,8 @@ public interface ConditionalPermissionAdmin {
 	 * @deprecated As of 1.1. Use {@link #newConditionalPermissionUpdate()}
 	 *             instead.
 	 */
-	ConditionalPermissionInfo addConditionalPermissionInfo(ConditionInfo[] conditions, PermissionInfo[] permissions);
+	@Deprecated
+    ConditionalPermissionInfo addConditionalPermissionInfo(ConditionInfo[] conditions, PermissionInfo[] permissions);
 
 	/**
 	 * Set or create a Conditional Permission Info with a specified name in the
@@ -96,7 +97,8 @@ public interface ConditionalPermissionAdmin {
 	 * @deprecated As of 1.1. Use {@link #newConditionalPermissionUpdate()}
 	 *             instead.
 	 */
-	ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conditions, PermissionInfo[] permissions);
+	@Deprecated
+    ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conditions, PermissionInfo[] permissions);
 
 	/**
 	 * Returns the Conditional Permission Infos from the Conditional Permission
@@ -115,7 +117,8 @@ public interface ConditionalPermissionAdmin {
 	 * @deprecated As of 1.1. Use {@link #newConditionalPermissionUpdate()}
 	 *             instead.
 	 */
-	Enumeration<ConditionalPermissionInfo> getConditionalPermissionInfos();
+	@Deprecated
+    Enumeration<ConditionalPermissionInfo> getConditionalPermissionInfos();
 
 	/**
 	 * Return the Conditional Permission Info with the specified name.
@@ -127,7 +130,8 @@ public interface ConditionalPermissionAdmin {
 	 * @deprecated As of 1.1. Use {@link #newConditionalPermissionUpdate()}
 	 *             instead.
 	 */
-	ConditionalPermissionInfo getConditionalPermissionInfo(String name);
+	@Deprecated
+    ConditionalPermissionInfo getConditionalPermissionInfo(String name);
 
 	/**
 	 * Returns the Access Control Context that corresponds to the specified

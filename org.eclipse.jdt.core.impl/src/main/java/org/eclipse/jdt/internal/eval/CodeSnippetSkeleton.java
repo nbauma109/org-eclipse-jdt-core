@@ -111,7 +111,7 @@ public class CodeSnippetSkeleton implements IBinaryType, EvaluationConstants {
 		}
 }
 
-	IBinaryMethod[] methods = new IBinaryMethod[] {
+	IBinaryMethod[] methods = {
 		new BinaryMethodSkeleton(
 			"<init>".toCharArray(), //$NON-NLS-1$
 			"()V".toCharArray(), //$NON-NLS-1$
@@ -136,7 +136,6 @@ public class CodeSnippetSkeleton implements IBinaryType, EvaluationConstants {
  * CodeSnippetSkeleton constructor comment.
  */
 public CodeSnippetSkeleton() {
-	super();
 }
 @Override
 public IBinaryAnnotation[] getAnnotations() {

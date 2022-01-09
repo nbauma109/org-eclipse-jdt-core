@@ -40,7 +40,7 @@ public abstract class BinaryContainer extends IndexRequest {
 		}
 	}
 	protected boolean isValidPackageNameForClassOrisModule(String className) {
-		if (className.substring(0, className.length() - (SuffixConstants.SUFFIX_CLASS.length)).equals(new String(IIndexConstants.MODULE_INFO)))
+		if (className.substring(0, className.length() - SuffixConstants.SUFFIX_CLASS.length).equals(new String(IIndexConstants.MODULE_INFO)))
 			return true;
 		char[] classNameArray = className.toCharArray();
 		// use 1.7 as the source level as there are more valid identifiers in 1.7 mode
@@ -54,10 +54,7 @@ public abstract class BinaryContainer extends IndexRequest {
 		try {
 			if (isIdentifier()) {
 				while (this.scanner.eofPosition > this.scanner.currentPosition) {
-					if (this.scanner.getNextChar() != '/' || this.scanner.eofPosition <= this.scanner.currentPosition) {
-						return false;
-					}
-					if (!isIdentifier()) return false;
+					if (this.scanner.getNextChar() != '/' || this.scanner.eofPosition <= this.scanner.currentPosition || !isIdentifier()) return false;
 				}
 				return true;
 			}

@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.compiler.util.*;
  * Internal class
  */
 class AnnotationBinding implements IAnnotationBinding {
-	static final AnnotationBinding[] NoAnnotations = new AnnotationBinding[0];
+	static final AnnotationBinding[] NoAnnotations = {};
 	private org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding binding;
 	private BindingResolver bindingResolver;
 	private String key;
@@ -49,14 +49,13 @@ class AnnotationBinding implements IAnnotationBinding {
 
 	@Override
 	public ITypeBinding getAnnotationType() {
-		ITypeBinding typeBinding = this.bindingResolver.getTypeBinding(this.binding.getAnnotationType());
-        return typeBinding;
+		return this.bindingResolver.getTypeBinding(this.binding.getAnnotationType());
 	}
 
 	@Override
 	public IMemberValuePairBinding[] getDeclaredMemberValuePairs() {
 		ReferenceBinding typeBinding = this.binding.getAnnotationType();
-		if (typeBinding == null || ((typeBinding.tagBits & TagBits.HasMissingType) != 0)) {
+		if (typeBinding == null || (typeBinding.tagBits & TagBits.HasMissingType) != 0) {
 			return MemberValuePairBinding.NoPair;
 		}
 		ElementValuePair[] internalPairs = this.binding.getElementValuePairs();
@@ -71,7 +70,7 @@ class AnnotationBinding implements IAnnotationBinding {
 		if (counter == 0) return MemberValuePairBinding.NoPair;
 		if (counter != length) {
 			// resize
-			System.arraycopy(pairs, 0, (pairs = new MemberValuePairBinding[counter]), 0, counter);
+			System.arraycopy(pairs, 0, pairs = new MemberValuePairBinding[counter], 0, counter);
 		}
 		return pairs;
 	}
@@ -80,7 +79,7 @@ class AnnotationBinding implements IAnnotationBinding {
 	public IMemberValuePairBinding[] getAllMemberValuePairs() {
 		IMemberValuePairBinding[] pairs = getDeclaredMemberValuePairs();
 		ReferenceBinding typeBinding = this.binding.getAnnotationType();
-		if (typeBinding == null || ((typeBinding.tagBits & TagBits.HasMissingType) != 0)) return pairs;
+		if (typeBinding == null || (typeBinding.tagBits & TagBits.HasMissingType) != 0) return pairs;
 		MethodBinding[] methods = typeBinding.availableMethods(); // resilience
 		int methodLength = methods == null ? 0 : methods.length;
 		if (methodLength == 0) return pairs;
@@ -155,7 +154,7 @@ class AnnotationBinding implements IAnnotationBinding {
 			return null;
 		}
 		if (! (parentElement instanceof IAnnotatable)) return null;
-		if ((parentElement instanceof IMember) && ((IMember) parentElement).isBinary()) {
+		if (parentElement instanceof IMember && ((IMember) parentElement).isBinary()) {
 			return ((IAnnotatable) parentElement).getAnnotation(getAnnotationType().getQualifiedName());
 		}
 		return ((IAnnotatable) parentElement).getAnnotation(getName());
@@ -215,9 +214,8 @@ class AnnotationBinding implements IAnnotationBinding {
 		ITypeBinding annotationType = getAnnotationType();
 		if (annotationType == null) {
 			return new String(this.binding.getAnnotationType().sourceName());
-		} else {
-			return annotationType.getName();
 		}
+        return annotationType.getName();
 	}
 
 	@Override

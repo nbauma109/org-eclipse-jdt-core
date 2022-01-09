@@ -74,9 +74,8 @@ protected TypeBinding getTypeBinding(Scope scope) {
     }
 	if(this.isCompletionNode) {
 		throw new CompletionNodeFound(this, scope);
-	} else {
-		return super.getTypeBinding(scope);
 	}
+    return super.getTypeBinding(scope);
 }
 public boolean isClass(){
 	return this.kind == K_CLASS;
@@ -115,9 +114,8 @@ public TypeBinding resolveTypeEnclosing(BlockScope scope, ReferenceBinding enclo
     }
 	if(this.isCompletionNode) {
 		throw new CompletionNodeFound(this, enclosingType, scope);
-	} else {
-		return super.resolveTypeEnclosing(scope, enclosingType);
 	}
+    return super.resolveTypeEnclosing(scope, enclosingType);
 }
 public void setKind(int kind) {
 	this.kind = kind;

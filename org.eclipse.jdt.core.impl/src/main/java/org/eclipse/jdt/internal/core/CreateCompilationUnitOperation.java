@@ -91,24 +91,23 @@ protected void executeOperation() throws JavaModelException {
 		IFile compilationUnitFile = folder.getFile(new Path(this.name));
 		if (compilationUnitFile.exists()) {
 			// update the contents of the existing unit if fForce is true
-			if (this.force) {
-				IBuffer buffer = unit.getBuffer();
-				if (buffer == null) return;
-				buffer.setContents(this.source);
-				unit.save(new NullProgressMonitor(), false);
-				this.resultElements = new IJavaElement[] {unit};
-				if (!Util.isExcluded(unit)
-						&& unit.getParent().exists()) {
-					for (int i = 0; i < this.resultElements.length; i++) {
-						delta.changed(this.resultElements[i], IJavaElementDelta.F_CONTENT);
-					}
-					addDelta(delta);
-				}
-			} else {
+			if (!this.force) {
 				throw new JavaModelException(new JavaModelStatus(
 					IJavaModelStatusConstants.NAME_COLLISION,
 					Messages.bind(Messages.status_nameCollision, compilationUnitFile.getFullPath().toString())));
 			}
+            IBuffer buffer = unit.getBuffer();
+            if (buffer == null) return;
+            buffer.setContents(this.source);
+            unit.save(new NullProgressMonitor(), false);
+            this.resultElements = new IJavaElement[] {unit};
+            if (!Util.isExcluded(unit)
+            		&& unit.getParent().exists()) {
+            	for (IJavaElement resultElement : this.resultElements) {
+            		delta.changed(resultElement, IJavaElementDelta.F_CONTENT);
+            	}
+            	addDelta(delta);
+            }
 		} else {
 			try {
 				String encoding = null;
@@ -123,8 +122,8 @@ protected void executeOperation() throws JavaModelException {
 				this.resultElements = new IJavaElement[] {unit};
 				if (!Util.isExcluded(unit)
 						&& unit.getParent().exists()) {
-					for (int i = 0; i < this.resultElements.length; i++) {
-						delta.added(this.resultElements[i]);
+					for (IJavaElement resultElement : this.resultElements) {
+						delta.added(resultElement);
 					}
 					addDelta(delta);
 				}
@@ -149,9 +148,8 @@ protected ISchedulingRule getSchedulingRule() {
 	IWorkspace workspace = resource.getWorkspace();
 	if (resource.exists()) {
 		return workspace.getRuleFactory().modifyRule(resource);
-	} else {
-		return workspace.getRuleFactory().createRule(resource);
 	}
+    return workspace.getRuleFactory().createRule(resource);
 }
 /**
  * Possible failures: <ul>

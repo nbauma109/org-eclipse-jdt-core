@@ -41,7 +41,6 @@ public class CompletionOnFieldType extends FieldDeclaration {
 	public boolean isLocalVariable;
 
 public CompletionOnFieldType(TypeReference type, boolean isLocalVariable){
-	super();
 	this.sourceStart = type.sourceStart;
 	this.sourceEnd = type.sourceEnd;
 	this.type = type;

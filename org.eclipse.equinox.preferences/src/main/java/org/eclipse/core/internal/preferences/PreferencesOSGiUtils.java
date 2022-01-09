@@ -43,7 +43,6 @@ public class PreferencesOSGiUtils {
 	 * Private constructor to block instance creation.
 	 */
 	private PreferencesOSGiUtils() {
-		super();
 	}
 
 	void openServices() {

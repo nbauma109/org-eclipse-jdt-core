@@ -25,8 +25,8 @@ public class StackMapAttribute
 	extends ClassFileAttribute
 	implements IStackMapAttribute {
 
-	private static final IStackMapFrame[] NO_FRAMES = new IStackMapFrame[0];
-	private static final byte[] NO_ENTRIES = new byte[0];
+	private static final IStackMapFrame[] NO_FRAMES = {};
+	private static final byte[] NO_ENTRIES = {};
 
 	private int numberOfEntries;
 	private IStackMapFrame[] frames;

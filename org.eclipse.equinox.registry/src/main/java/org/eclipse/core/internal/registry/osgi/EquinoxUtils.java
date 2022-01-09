@@ -78,7 +78,7 @@ public class EquinoxUtils {
 			org.osgi.framework.Bundle bundle = OSGIUtils.getDefault().getBundle(bundleId);
 			if (bundle == null)
 				return false; // should never happen
-			return (bundle.getState() == Bundle.ACTIVE);
+			return bundle.getState() == Bundle.ACTIVE;
 		} catch (NoClassDefFoundError noClass) {
 			// expected if OSGi is not available; behave as if contributor is active
 			return true;

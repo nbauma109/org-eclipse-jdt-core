@@ -76,13 +76,11 @@ public final class LineComment extends Comment {
 		super(ast);
 	}
 
-	@Override
-	final List internalStructuralPropertiesForType(int apiLevel) {
+	@Override List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
 
-	@Override
-	final int getNodeType0() {
+	@Override int getNodeType0() {
 		return LINE_COMMENT;
 	}
 
@@ -93,8 +91,7 @@ public final class LineComment extends Comment {
 		return result;
 	}
 
-	@Override
-	final boolean subtreeMatch0(ASTMatcher matcher, Object other) {
+	@Override boolean subtreeMatch0(ASTMatcher matcher, Object other) {
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}

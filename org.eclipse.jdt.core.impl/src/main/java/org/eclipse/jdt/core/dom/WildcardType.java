@@ -150,10 +150,9 @@ public class WildcardType extends AnnotatableType {
 		if (property == UPPER_BOUND_PROPERTY) {
 			if (get) {
 				return isUpperBound();
-			} else {
-				setUpperBound(value);
-				return false;
 			}
+            setUpperBound(value);
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
@@ -173,10 +172,9 @@ public class WildcardType extends AnnotatableType {
 		if (property == BOUND_PROPERTY) {
 			if (get) {
 				return getBound();
-			} else {
-				setBound((Type) child);
-				return null;
 			}
+            setBound((Type) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.util.IOpcodeMnemonics;
  * Default implementation of ICodeAttribute.
  */
 public class CodeAttribute extends ClassFileAttribute implements ICodeAttribute {
-	private static final IExceptionTableEntry[] NO_EXCEPTION_TABLE = new IExceptionTableEntry[0];
+	private static final IExceptionTableEntry[] NO_EXCEPTION_TABLE = {};
 	private IClassFileAttribute[] attributes;
 	private int attributesCount;
 	private byte[] bytecodes;
@@ -98,7 +98,7 @@ public class CodeAttribute extends ClassFileAttribute implements ICodeAttribute 
 			} else {
 				this.attributes[attributesIndex++] = new ClassFileAttribute(classFileBytes, constantPool, offset + readOffset);
 			}
-			readOffset += (6 + u4At(classFileBytes, readOffset + 2, offset));
+			readOffset += 6 + u4At(classFileBytes, readOffset + 2, offset);
 		}
 	}
 	/**
@@ -123,7 +123,7 @@ public class CodeAttribute extends ClassFileAttribute implements ICodeAttribute 
 	@Override
 	public byte[] getBytecodes() {
 		if (this.bytecodes == null) {
-			System.arraycopy(this.classFileBytes, this.codeOffset, (this.bytecodes = new byte[(int) this.codeLength]), 0, (int) this.codeLength);
+			System.arraycopy(this.classFileBytes, this.codeOffset, this.bytecodes = new byte[(int) this.codeLength], 0, (int) this.codeLength);
 		}
 		return this.bytecodes;
 	}
@@ -919,7 +919,7 @@ public class CodeAttribute extends ClassFileAttribute implements ICodeAttribute 
 				case IOpcodeMnemonics.TABLESWITCH :
 					int startpc = pc;
 					pc++;
-					while (((pc - this.codeOffset) & 0x03) != 0) { // faster than % 4
+					while ((pc - this.codeOffset & 0x03) != 0) { // faster than % 4
 						pc++;
 					}
 					int defaultOffset = i4At(this.classFileBytes, 0, pc);
@@ -939,7 +939,7 @@ public class CodeAttribute extends ClassFileAttribute implements ICodeAttribute 
 				case IOpcodeMnemonics.LOOKUPSWITCH :
 					startpc = pc;
 					pc++;
-					while (((pc - this.codeOffset) & 0x03) != 0) {
+					while ((pc - this.codeOffset & 0x03) != 0) {
 						pc++;
 					}
 					defaultOffset = i4At(this.classFileBytes, 0, pc);
@@ -1185,7 +1185,7 @@ public class CodeAttribute extends ClassFileAttribute implements ICodeAttribute 
 				default:
 					throw new ClassFormatException(ClassFormatException.INVALID_BYTECODE);
 			}
-			if (pc >= (this.codeLength + this.codeOffset)) {
+			if (pc >= this.codeLength + this.codeOffset) {
 				break;
 			}
 		}

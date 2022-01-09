@@ -39,7 +39,7 @@ public class ResourceDelta extends PlatformObject implements IResourceDelta {
 
 	//
 	protected static int KIND_MASK = 0xFF;
-	private static IMarkerDelta[] EMPTY_MARKER_DELTAS = new IMarkerDelta[0];
+	private static IMarkerDelta[] EMPTY_MARKER_DELTAS = {};
 
 	protected ResourceDelta(IPath path, ResourceDeltaInfo deltaInfo) {
 		this.path = path;
@@ -62,15 +62,11 @@ public class ResourceDelta extends PlatformObject implements IResourceDelta {
 		final boolean includeTeamPrivate = (memberFlags & IContainer.INCLUDE_TEAM_PRIVATE_MEMBERS) != 0;
 		final boolean includeHidden = (memberFlags & IContainer.INCLUDE_HIDDEN) != 0;
 		int mask = includePhantoms ? ALL_WITH_PHANTOMS : REMOVED | ADDED | CHANGED;
-		if ((getKind() & mask) == 0)
-			return;
-		if (!visitor.visit(this))
+		if ((getKind() & mask) == 0 || !visitor.visit(this))
 			return;
 		for (ResourceDelta childDelta : children) {
 			// quietly exclude team-private, hidden and phantom members unless explicitly included
-			if (!includeTeamPrivate && childDelta.isTeamPrivate())
-				continue;
-			if (!includePhantoms && childDelta.isPhantom())
+			if (!includeTeamPrivate && childDelta.isTeamPrivate() || !includePhantoms && childDelta.isPhantom())
 				continue;
 			if (!includeHidden && childDelta.isHidden())
 				continue;
@@ -140,7 +136,7 @@ public class ResourceDelta extends PlatformObject implements IResourceDelta {
 						// Replace change flags by comparing old info with new info,
 						// Note that we want to retain the kind flag, but replace all other flags
 						// This is done only for MOVED_FROM, not MOVED_TO, since a resource may be both.
-						status = (status & KIND_MASK) | (deltaInfo.getComparator().compare(actualOldInfo, newInfo) & ~KIND_MASK);
+						status = status & KIND_MASK | deltaInfo.getComparator().compare(actualOldInfo, newInfo) & ~KIND_MASK;
 						status |= MOVED_FROM;
 						//our API states that MOVED_FROM must be in conjunction with ADDED | (CHANGED + REPLACED)
 						if (kind == CHANGED)
@@ -198,13 +194,11 @@ public class ResourceDelta extends PlatformObject implements IResourceDelta {
 		//first count the number of matches so we can allocate the exact array size
 		int matching = 0;
 		for (int i = 0; i < numChildren; i++) {
-			if ((children[i].getKind() & kindMask) == 0)
-				continue;// child has wrong kind
-			if (!includePhantoms && children[i].isPhantom())
+			// child has wrong kind
+			if ((children[i].getKind() & kindMask) == 0 || !includePhantoms && children[i].isPhantom())
 				continue;
-			if (!includeTeamPrivate && children[i].isTeamPrivate())
-				continue; // child has is a team-private member which are not included
-			if (!includeHidden && children[i].isHidden())
+			 // child has is a team-private member which are not included
+			if (!includeTeamPrivate && children[i].isTeamPrivate() || !includeHidden && children[i].isHidden())
 				continue;
 			matching++;
 		}
@@ -218,13 +212,11 @@ public class ResourceDelta extends PlatformObject implements IResourceDelta {
 		IResourceDelta[] result = new IResourceDelta[matching];
 		int nextPosition = 0;
 		for (int i = 0; i < numChildren; i++) {
-			if ((children[i].getKind() & kindMask) == 0)
-				continue; // child has wrong kind
-			if (!includePhantoms && children[i].isPhantom())
+			 // child has wrong kind
+			if ((children[i].getKind() & kindMask) == 0 || !includePhantoms && children[i].isPhantom())
 				continue;
-			if (!includeTeamPrivate && children[i].isTeamPrivate())
-				continue; // child has is a team-private member which are not included
-			if (!includeHidden && children[i].isHidden())
+			 // child has is a team-private member which are not included
+			if (!includeTeamPrivate && children[i].isTeamPrivate() || !includeHidden && children[i].isHidden())
 				continue;
 			result[nextPosition++] = children[i];
 		}

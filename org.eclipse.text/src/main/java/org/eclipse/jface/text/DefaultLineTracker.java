@@ -53,21 +53,20 @@ public class DefaultLineTracker extends AbstractLineTracker {
 			ch= text.charAt(i);
 			if (ch == '\r') {
 
-				if (i + 1 < length) {
-					if (text.charAt(i + 1) == '\n') {
-						fDelimiterInfo.delimiter= DELIMITERS[2];
-						fDelimiterInfo.delimiterIndex= i;
-						fDelimiterInfo.delimiterLength= 2;
-						return fDelimiterInfo;
-					}
-				}
+				if (i + 1 < length && text.charAt(i + 1) == '\n') {
+                	fDelimiterInfo.delimiter= DELIMITERS[2];
+                	fDelimiterInfo.delimiterIndex= i;
+                	fDelimiterInfo.delimiterLength= 2;
+                	return fDelimiterInfo;
+                }
 
 				fDelimiterInfo.delimiter= DELIMITERS[0];
 				fDelimiterInfo.delimiterIndex= i;
 				fDelimiterInfo.delimiterLength= 1;
 				return fDelimiterInfo;
 
-			} else if (ch == '\n') {
+			}
+            if (ch == '\n') {
 
 				fDelimiterInfo.delimiter= DELIMITERS[1];
 				fDelimiterInfo.delimiterIndex= i;

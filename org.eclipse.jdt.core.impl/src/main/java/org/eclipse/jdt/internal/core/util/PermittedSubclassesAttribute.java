@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.util.IPermittedSubclassesAttribute;
  * Default implementation of IPermittedSubclassesAttribute.
  */
 public class PermittedSubclassesAttribute extends ClassFileAttribute implements IPermittedSubclassesAttribute {
-	private static final IPermittedSubclassesAttributeEntry[] NO_ENTRIES = new IPermittedSubclassesAttributeEntry[0];
+	private static final IPermittedSubclassesAttributeEntry[] NO_ENTRIES = {};
 
 	private int permittedSubclasses;
 	private IPermittedSubclassesAttributeEntry[] entries;

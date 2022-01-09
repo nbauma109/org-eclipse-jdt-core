@@ -53,10 +53,10 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 
 		Long threadId = threadIds.get(thread);
 		if (threadId == null) {
-			threadId = Long.valueOf(nextThreadId++);
+			threadId = nextThreadId++;
 			threadIds.put(thread, threadId);
 		}
-		return threadId.longValue();
+		return threadId;
 	}
 
 	public ExtendedLogEntryImpl(Bundle bundle, String loggerName, StackTraceElement stackTraceElement, Object contextObject, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable throwable) {

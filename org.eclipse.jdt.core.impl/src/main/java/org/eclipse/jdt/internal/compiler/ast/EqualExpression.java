@@ -44,7 +44,7 @@ public class EqualExpression extends BinaryExpression {
 		// - method/field annotated @NonNull
 		// - allocation expression, some literals, this reference (see inside expressionNonNullComparison(..))
 		// these checks do not leverage the flowInfo.
-		boolean checkEquality = ((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL;
+		boolean checkEquality = (this.bits & OperatorMASK) >> OperatorSHIFT == EQUAL_EQUAL;
 		if ((flowContext.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING_MASK) == 0) {
 			if (leftStatus == FlowInfo.NON_NULL && rightStatus == FlowInfo.NULL) {
 				leftNonNullChecked = scope.problemReporter().expressionNonNullComparison(this.left, checkEquality);
@@ -53,7 +53,7 @@ public class EqualExpression extends BinaryExpression {
 			}
 		}
 
-		boolean contextualCheckEquality = checkEquality ^ ((flowContext.tagBits & FlowContext.INSIDE_NEGATION) != 0);
+		boolean contextualCheckEquality = checkEquality ^ (flowContext.tagBits & FlowContext.INSIDE_NEGATION) != 0;
 		// perform flowInfo-based checks for variables and record info for syntactic null analysis for fields:
 		if (!leftNonNullChecked) {
 			LocalVariableBinding local = this.left.localVariableBinding();
@@ -62,7 +62,7 @@ public class EqualExpression extends BinaryExpression {
 					checkVariableComparison(scope, flowContext, flowInfo, initsWhenTrue, initsWhenFalse, local, rightStatus, this.left);
 				}
 			} else if (this.left instanceof Reference
-							&& ((contextualCheckEquality ? rightStatus == FlowInfo.NON_NULL : rightStatus == FlowInfo.NULL))
+							&& (contextualCheckEquality ? rightStatus == FlowInfo.NON_NULL : rightStatus == FlowInfo.NULL)
 							&& scope.compilerOptions().enableSyntacticNullAnalysisForFields)
 			{
 				FieldBinding field = ((Reference)this.left).lastFieldBinding();
@@ -78,7 +78,7 @@ public class EqualExpression extends BinaryExpression {
 					checkVariableComparison(scope, flowContext, flowInfo, initsWhenTrue, initsWhenFalse, local, leftStatus, this.right);
 				}
 			} else if (this.right instanceof Reference
-							&& ((contextualCheckEquality ? leftStatus == FlowInfo.NON_NULL : leftStatus == FlowInfo.NULL))
+							&& (contextualCheckEquality ? leftStatus == FlowInfo.NON_NULL : leftStatus == FlowInfo.NULL)
 							&& scope.compilerOptions().enableSyntacticNullAnalysisForFields)
 			{
 				FieldBinding field = ((Reference)this.right).lastFieldBinding();
@@ -101,7 +101,7 @@ public class EqualExpression extends BinaryExpression {
 	private void checkVariableComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, FlowInfo initsWhenTrue, FlowInfo initsWhenFalse, LocalVariableBinding local, int nullStatus, Expression reference) {
 		switch (nullStatus) {
 			case FlowInfo.NULL :
-				if (((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL) {
+				if ((this.bits & OperatorMASK) >> OperatorSHIFT == EQUAL_EQUAL) {
 					flowContext.recordUsingNullReference(scope, local, reference,
 							FlowContext.CAN_ONLY_NULL_NON_NULL | FlowContext.IN_COMPARISON_NULL, flowInfo);
 					initsWhenTrue.markAsComparedEqualToNull(local); // from thereon it is set
@@ -114,7 +114,7 @@ public class EqualExpression extends BinaryExpression {
 				}
 				break;
 			case FlowInfo.NON_NULL :
-				if (((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL) {
+				if ((this.bits & OperatorMASK) >> OperatorSHIFT == EQUAL_EQUAL) {
 					flowContext.recordUsingNullReference(scope, local, reference,
 							FlowContext.CAN_ONLY_NULL | FlowContext.IN_COMPARISON_NON_NULL, flowInfo);
 					initsWhenTrue.markAsComparedEqualToNonNull(local); // from thereon it is set
@@ -140,8 +140,8 @@ public class EqualExpression extends BinaryExpression {
 	@Override
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 		FlowInfo result;
-		if (((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL) {
-			if ((this.left.constant != Constant.NotAConstant) && (this.left.constant.typeID() == T_boolean)) {
+		if ((this.bits & OperatorMASK) >> OperatorSHIFT == EQUAL_EQUAL) {
+			if (this.left.constant != Constant.NotAConstant && this.left.constant.typeID() == T_boolean) {
 				if (this.left.constant.booleanValue()) { //  true == anything
 					//  this is equivalent to the right argument inits
 					result = this.right.analyseCode(currentScope, flowContext, flowInfo);
@@ -151,7 +151,7 @@ public class EqualExpression extends BinaryExpression {
 					analyzeLocalVariable(this.left, flowInfo);
 				}
 			}
-			else if ((this.right.constant != Constant.NotAConstant) && (this.right.constant.typeID() == T_boolean)) {
+			else if (this.right.constant != Constant.NotAConstant && this.right.constant.typeID() == T_boolean) {
 				if (this.right.constant.booleanValue()) { //  anything == true
 					//  this is equivalent to the left argument inits
 					result = this.left.analyseCode(currentScope, flowContext, flowInfo);
@@ -166,35 +166,33 @@ public class EqualExpression extends BinaryExpression {
 					currentScope, flowContext,
 					this.left.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits()).unconditionalInits();
 			}
-		} else { //NOT_EQUAL :
-			if ((this.left.constant != Constant.NotAConstant) && (this.left.constant.typeID() == T_boolean)) {
-				if (!this.left.constant.booleanValue()) { //  false != anything
-					//  this is equivalent to the right argument inits
-					result = this.right.analyseCode(currentScope, flowContext, flowInfo);
-					analyzeLocalVariable(this.left, flowInfo);
-				} else { // true != anything
-					//  this is equivalent to the right argument inits negated
-					result = this.right.analyseCode(currentScope, flowContext, flowInfo).asNegatedCondition();
-				}
-			}
-			else if ((this.right.constant != Constant.NotAConstant) && (this.right.constant.typeID() == T_boolean)) {
-				if (!this.right.constant.booleanValue()) { //  anything != false
-					//  this is equivalent to the right argument inits
-					result = this.left.analyseCode(currentScope, flowContext, flowInfo);
-					analyzeLocalVariable(this.right, flowInfo);
-				} else { // anything != true
-					//  this is equivalent to the right argument inits negated
-					result = this.left.analyseCode(currentScope, flowContext, flowInfo).asNegatedCondition();
-				}
-			}
-			else {
-				result = this.right.analyseCode(
-					currentScope, flowContext,
-					this.left.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits()).
-					/* unneeded since we flatten it: asNegatedCondition(). */
-					unconditionalInits();
-			}
-		}
+		} else if (this.left.constant != Constant.NotAConstant && this.left.constant.typeID() == T_boolean) {
+        	if (!this.left.constant.booleanValue()) { //  false != anything
+        		//  this is equivalent to the right argument inits
+        		result = this.right.analyseCode(currentScope, flowContext, flowInfo);
+        		analyzeLocalVariable(this.left, flowInfo);
+        	} else { // true != anything
+        		//  this is equivalent to the right argument inits negated
+        		result = this.right.analyseCode(currentScope, flowContext, flowInfo).asNegatedCondition();
+        	}
+        }
+        else if (this.right.constant != Constant.NotAConstant && this.right.constant.typeID() == T_boolean) {
+        	if (!this.right.constant.booleanValue()) { //  anything != false
+        		//  this is equivalent to the right argument inits
+        		result = this.left.analyseCode(currentScope, flowContext, flowInfo);
+        		analyzeLocalVariable(this.right, flowInfo);
+        	} else { // anything != true
+        		//  this is equivalent to the right argument inits negated
+        		result = this.left.analyseCode(currentScope, flowContext, flowInfo).asNegatedCondition();
+        	}
+        }
+        else {
+        	result = this.right.analyseCode(
+        		currentScope, flowContext,
+        		this.left.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits()).
+        		/* unneeded since we flatten it: asNegatedCondition(). */
+        		unconditionalInits();
+        }
 		if (result instanceof UnconditionalFlowInfo &&
 				(result.tagBits & FlowInfo.UNREACHABLE) == 0) { // the flow info is flat
 			result = FlowInfo.conditional(result.copy(), result.copy());
@@ -205,14 +203,14 @@ public class EqualExpression extends BinaryExpression {
 	}
 
 	public final void computeConstant(TypeBinding leftType, TypeBinding rightType) {
-		if ((this.left.constant != Constant.NotAConstant) && (this.right.constant != Constant.NotAConstant)) {
+		if (this.left.constant != Constant.NotAConstant && this.right.constant != Constant.NotAConstant) {
 			this.constant =
 				Constant.computeConstantOperationEQUAL_EQUAL(
 					this.left.constant,
 					leftType.id,
 					this.right.constant,
 					rightType.id);
-			if (((this.bits & OperatorMASK) >> OperatorSHIFT) == NOT_EQUAL)
+			if ((this.bits & OperatorMASK) >> OperatorSHIFT == NOT_EQUAL)
 				this.constant = BooleanConstant.fromValue(!this.constant.booleanValue());
 		} else {
 			this.constant = Constant.NotAConstant;
@@ -258,19 +256,17 @@ public class EqualExpression extends BinaryExpression {
 			super.generateOptimizedBoolean(currentScope, codeStream, trueLabel, falseLabel, valueRequired);
 			return;
 		}
-		if (((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL) {
+		if ((this.bits & OperatorMASK) >> OperatorSHIFT == EQUAL_EQUAL) {
 			if ((this.left.implicitConversion & COMPILE_TYPE_MASK) /*compile-time*/ == T_boolean) {
 				generateOptimizedBooleanEqual(currentScope, codeStream, trueLabel, falseLabel, valueRequired);
 			} else {
 				generateOptimizedNonBooleanEqual(currentScope, codeStream, trueLabel, falseLabel, valueRequired);
 			}
-		} else {
-			if ((this.left.implicitConversion & COMPILE_TYPE_MASK) /*compile-time*/ == T_boolean) {
-				generateOptimizedBooleanEqual(currentScope, codeStream, falseLabel, trueLabel, valueRequired);
-			} else {
-				generateOptimizedNonBooleanEqual(currentScope, codeStream, falseLabel, trueLabel, valueRequired);
-			}
-		}
+		} else if ((this.left.implicitConversion & COMPILE_TYPE_MASK) /*compile-time*/ == T_boolean) {
+        	generateOptimizedBooleanEqual(currentScope, codeStream, falseLabel, trueLabel, valueRequired);
+        } else {
+        	generateOptimizedNonBooleanEqual(currentScope, codeStream, falseLabel, trueLabel, valueRequired);
+        }
 	}
 
 	/**
@@ -282,7 +278,7 @@ public class EqualExpression extends BinaryExpression {
 
 		// optimized cases: <something equivalent to true> == x, <something equivalent to false> == x,
 		// optimized cases: <something equivalent to false> != x, <something equivalent to true> != x,
-		boolean isEqualOperator = ((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL;
+		boolean isEqualOperator = (this.bits & OperatorMASK) >> OperatorSHIFT == EQUAL_EQUAL;
 		Constant cst = this.left.optimizedBooleanConstant();
 		if (cst != Constant.NotAConstant) {
 			Constant rightCst = this.right.optimizedBooleanConstant();
@@ -300,52 +296,48 @@ public class EqualExpression extends BinaryExpression {
 						} else {
 							codeStream.iconst_0();
 						}
-					} else {
-						if (leftBool != rightBool) {
-							codeStream.iconst_1();
-						} else {
-							codeStream.iconst_0();
-						}
-					}
+					} else if (leftBool != rightBool) {
+                    	codeStream.iconst_1();
+                    } else {
+                    	codeStream.iconst_0();
+                    }
 				}
 			} else if (cst.booleanValue() == isEqualOperator) {
 				// <something equivalent to true> == x, <something equivalent to false> != x
 				this.left.generateCode(currentScope, codeStream, false);
 				this.right.generateCode(currentScope, codeStream, valueRequired);
-			} else {
-				// <something equivalent to false> == x, <something equivalent to true> != x
-				if (valueRequired) {
-					BranchLabel falseLabel = new BranchLabel(codeStream);
-					this.left.generateCode(currentScope, codeStream, false);
-					this.right.generateOptimizedBoolean(currentScope, codeStream, null, falseLabel, valueRequired);
-					// comparison is TRUE
-					codeStream.iconst_0();
-					if ((this.bits & IsReturnedValue) != 0){
-						codeStream.generateImplicitConversion(this.implicitConversion);
-						codeStream.generateReturnBytecode(this);
-						// comparison is FALSE
-						falseLabel.place();
-						codeStream.iconst_1();
-					} else {
-						BranchLabel endLabel = new BranchLabel(codeStream);
-						codeStream.goto_(endLabel);
-						codeStream.decrStackSize(1);
-						// comparison is FALSE
-						falseLabel.place();
-						codeStream.iconst_1();
-						endLabel.place();
-					}
-				} else {
-					this.left.generateCode(currentScope, codeStream, false);
-					this.right.generateCode(currentScope, codeStream, false);
-				}
+			} else // <something equivalent to false> == x, <something equivalent to true> != x
+            if (valueRequired) {
+            	BranchLabel falseLabel = new BranchLabel(codeStream);
+            	this.left.generateCode(currentScope, codeStream, false);
+            	this.right.generateOptimizedBoolean(currentScope, codeStream, null, falseLabel, valueRequired);
+            	// comparison is TRUE
+            	codeStream.iconst_0();
+            	if ((this.bits & IsReturnedValue) != 0){
+            		codeStream.generateImplicitConversion(this.implicitConversion);
+            		codeStream.generateReturnBytecode(this);
+            		// comparison is FALSE
+            		falseLabel.place();
+            		codeStream.iconst_1();
+            	} else {
+            		BranchLabel endLabel = new BranchLabel(codeStream);
+            		codeStream.goto_(endLabel);
+            		codeStream.decrStackSize(1);
+            		// comparison is FALSE
+            		falseLabel.place();
+            		codeStream.iconst_1();
+            		endLabel.place();
+            	}
+            } else {
+            	this.left.generateCode(currentScope, codeStream, false);
+            	this.right.generateCode(currentScope, codeStream, false);
+            }
 //				left.generateCode(currentScope, codeStream, false);
 //				right.generateCode(currentScope, codeStream, valueRequired);
 //				if (valueRequired) {
 //					codeStream.iconst_1();
 //					codeStream.ixor(); // negate
 //				}
-			}
 			return;
 		}
 		cst = this.right.optimizedBooleanConstant();
@@ -354,40 +346,38 @@ public class EqualExpression extends BinaryExpression {
 				// x == <something equivalent to true>, x != <something equivalent to false>
 				this.left.generateCode(currentScope, codeStream, valueRequired);
 				this.right.generateCode(currentScope, codeStream, false);
-			} else {
-				// x == <something equivalent to false>, x != <something equivalent to true>
-				if (valueRequired) {
-					BranchLabel falseLabel = new BranchLabel(codeStream);
-					this.left.generateOptimizedBoolean(currentScope, codeStream, null, falseLabel, valueRequired);
-					this.right.generateCode(currentScope, codeStream, false);
-					// comparison is TRUE
-					codeStream.iconst_0();
-					if ((this.bits & IsReturnedValue) != 0){
-						codeStream.generateImplicitConversion(this.implicitConversion);
-						codeStream.generateReturnBytecode(this);
-						// comparison is FALSE
-						falseLabel.place();
-						codeStream.iconst_1();
-					} else {
-						BranchLabel endLabel = new BranchLabel(codeStream);
-						codeStream.goto_(endLabel);
-						codeStream.decrStackSize(1);
-						// comparison is FALSE
-						falseLabel.place();
-						codeStream.iconst_1();
-						endLabel.place();
-					}
-				} else {
-					this.left.generateCode(currentScope, codeStream, false);
-					this.right.generateCode(currentScope, codeStream, false);
-				}
+			} else // x == <something equivalent to false>, x != <something equivalent to true>
+            if (valueRequired) {
+            	BranchLabel falseLabel = new BranchLabel(codeStream);
+            	this.left.generateOptimizedBoolean(currentScope, codeStream, null, falseLabel, valueRequired);
+            	this.right.generateCode(currentScope, codeStream, false);
+            	// comparison is TRUE
+            	codeStream.iconst_0();
+            	if ((this.bits & IsReturnedValue) != 0){
+            		codeStream.generateImplicitConversion(this.implicitConversion);
+            		codeStream.generateReturnBytecode(this);
+            		// comparison is FALSE
+            		falseLabel.place();
+            		codeStream.iconst_1();
+            	} else {
+            		BranchLabel endLabel = new BranchLabel(codeStream);
+            		codeStream.goto_(endLabel);
+            		codeStream.decrStackSize(1);
+            		// comparison is FALSE
+            		falseLabel.place();
+            		codeStream.iconst_1();
+            		endLabel.place();
+            	}
+            } else {
+            	this.left.generateCode(currentScope, codeStream, false);
+            	this.right.generateCode(currentScope, codeStream, false);
+            }
 //				left.generateCode(currentScope, codeStream, valueRequired);
 //				right.generateCode(currentScope, codeStream, false);
 //				if (valueRequired) {
 //					codeStream.iconst_1();
 //					codeStream.ixor(); // negate
 //				}
-			}
 			return;
 		}
 		// default case
@@ -431,12 +421,12 @@ public class EqualExpression extends BinaryExpression {
 		// optimized cases: true == x, false == x
 		if (this.left.constant != Constant.NotAConstant) {
 			boolean inline = this.left.constant.booleanValue();
-			this.right.generateOptimizedBoolean(currentScope, codeStream, (inline ? trueLabel : falseLabel), (inline ? falseLabel : trueLabel), valueRequired);
+			this.right.generateOptimizedBoolean(currentScope, codeStream, inline ? trueLabel : falseLabel, inline ? falseLabel : trueLabel, valueRequired);
 			return;
 		} // optimized cases: x == true, x == false
 		if (this.right.constant != Constant.NotAConstant) {
 			boolean inline = this.right.constant.booleanValue();
-			this.left.generateOptimizedBoolean(currentScope, codeStream, (inline ? trueLabel : falseLabel), (inline ? falseLabel : trueLabel), valueRequired);
+			this.left.generateOptimizedBoolean(currentScope, codeStream, inline ? trueLabel : falseLabel, inline ? falseLabel : trueLabel, valueRequired);
 			return;
 		}
 		// default case
@@ -449,14 +439,12 @@ public class EqualExpression extends BinaryExpression {
 					// implicit falling through the FALSE case
 					codeStream.if_icmpeq(trueLabel);
 				}
-			} else {
-				// implicit falling through the TRUE case
-				if (trueLabel == null) {
-					codeStream.if_icmpne(falseLabel);
-				} else {
-					// no implicit fall through TRUE/FALSE --> should never occur
-				}
-			}
+			} else // implicit falling through the TRUE case
+            if (trueLabel == null) {
+            	codeStream.if_icmpne(falseLabel);
+            } else {
+            	// no implicit fall through TRUE/FALSE --> should never occur
+            }
 		}
 		codeStream.recordPositionsFrom(pc, this.sourceEnd);
 	}
@@ -466,8 +454,8 @@ public class EqualExpression extends BinaryExpression {
 	 */
 	public void generateNonBooleanEqual(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 
-		boolean isEqualOperator = ((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL;
-		if (((this.left.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4) == T_int) {
+		boolean isEqualOperator = (this.bits & OperatorMASK) >> OperatorSHIFT == EQUAL_EQUAL;
+		if ((this.left.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4 == T_int) {
 			Constant cst;
 			if ((cst = this.left.constant) != Constant.NotAConstant && cst.intValue() == 0) {
 				// optimized case: 0 == x, 0 != x
@@ -572,7 +560,8 @@ public class EqualExpression extends BinaryExpression {
 				}
 			}
 			return;
-		} else if (this.left instanceof NullLiteral) {
+		}
+        if (this.left instanceof NullLiteral) {
 			// null = x, null != x
 			this.right.generateCode(currentScope, codeStream, valueRequired);
 			if (valueRequired) {
@@ -677,66 +666,54 @@ public class EqualExpression extends BinaryExpression {
 
 		int pc = codeStream.position;
 		Constant inline;
-		if ((inline = this.right.constant) != Constant.NotAConstant) {
-			// optimized case: x == 0
-			if ((((this.left.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4) == T_int) && (inline.intValue() == 0)) {
-				this.left.generateCode(currentScope, codeStream, valueRequired);
-				if (valueRequired) {
-					if (falseLabel == null) {
-						if (trueLabel != null) {
-							// implicit falling through the FALSE case
-							codeStream.ifeq(trueLabel);
-						}
-					} else {
-						// implicit falling through the TRUE case
-						if (trueLabel == null) {
-							codeStream.ifne(falseLabel);
-						} else {
-							// no implicit fall through TRUE/FALSE --> should never occur
-						}
-					}
-				}
-				codeStream.recordPositionsFrom(pc, this.sourceStart);
-				return;
-			}
-		}
-		if ((inline = this.left.constant) != Constant.NotAConstant) {
-			// optimized case: 0 == x
-			if ((((this.left.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4) == T_int)
-				&& (inline.intValue() == 0)) {
-				this.right.generateCode(currentScope, codeStream, valueRequired);
-				if (valueRequired) {
-					if (falseLabel == null) {
-						if (trueLabel != null) {
-							// implicit falling through the FALSE case
-							codeStream.ifeq(trueLabel);
-						}
-					} else {
-						// implicit falling through the TRUE case
-						if (trueLabel == null) {
-							codeStream.ifne(falseLabel);
-						} else {
-							// no implicit fall through TRUE/FALSE --> should never occur
-						}
-					}
-				}
-				codeStream.recordPositionsFrom(pc, this.sourceStart);
-				return;
-			}
-		}
+		// optimized case: x == 0
+        if ((inline = this.right.constant) != Constant.NotAConstant && (this.left.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4 == T_int && inline.intValue() == 0) {
+        	this.left.generateCode(currentScope, codeStream, valueRequired);
+        	if (valueRequired) {
+        		if (falseLabel == null) {
+        			if (trueLabel != null) {
+        				// implicit falling through the FALSE case
+        				codeStream.ifeq(trueLabel);
+        			}
+        		} else // implicit falling through the TRUE case
+                if (trueLabel == null) {
+                	codeStream.ifne(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
+        	}
+        	codeStream.recordPositionsFrom(pc, this.sourceStart);
+        	return;
+        }
+		// optimized case: 0 == x
+        if ((inline = this.left.constant) != Constant.NotAConstant && (this.left.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4 == T_int
+        	&& inline.intValue() == 0) {
+        	this.right.generateCode(currentScope, codeStream, valueRequired);
+        	if (valueRequired) {
+        		if (falseLabel == null) {
+        			if (trueLabel != null) {
+        				// implicit falling through the FALSE case
+        				codeStream.ifeq(trueLabel);
+        			}
+        		} else // implicit falling through the TRUE case
+                if (trueLabel == null) {
+                	codeStream.ifne(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
+        	}
+        	codeStream.recordPositionsFrom(pc, this.sourceStart);
+        	return;
+        }
 		// null cases
 		// optimized case: x == null
 		if (this.right instanceof NullLiteral) {
 			if (this.left instanceof NullLiteral) {
 				// null == null
-				if (valueRequired) {
-					if (falseLabel == null) {
-						// implicit falling through the FALSE case
-						if (trueLabel != null) {
-							codeStream.goto_(trueLabel);
-						}
-					}
-				}
+				// implicit falling through the FALSE case
+                if (valueRequired && falseLabel == null && trueLabel != null) {
+                	codeStream.goto_(trueLabel);
+                }
 			} else {
 				this.left.generateCode(currentScope, codeStream, valueRequired);
 				if (valueRequired) {
@@ -745,19 +722,18 @@ public class EqualExpression extends BinaryExpression {
 							// implicit falling through the FALSE case
 							codeStream.ifnull(trueLabel);
 						}
-					} else {
-						// implicit falling through the TRUE case
-						if (trueLabel == null) {
-							codeStream.ifnonnull(falseLabel);
-						} else {
-							// no implicit fall through TRUE/FALSE --> should never occur
-						}
-					}
+					} else // implicit falling through the TRUE case
+                    if (trueLabel == null) {
+                    	codeStream.ifnonnull(falseLabel);
+                    } else {
+                    	// no implicit fall through TRUE/FALSE --> should never occur
+                    }
 				}
 			}
 			codeStream.recordPositionsFrom(pc, this.sourceStart);
 			return;
-		} else if (this.left instanceof NullLiteral) { // optimized case: null == x
+		}
+        if (this.left instanceof NullLiteral) { // optimized case: null == x
 			this.right.generateCode(currentScope, codeStream, valueRequired);
 			if (valueRequired) {
 				if (falseLabel == null) {
@@ -765,14 +741,12 @@ public class EqualExpression extends BinaryExpression {
 						// implicit falling through the FALSE case
 						codeStream.ifnull(trueLabel);
 					}
-				} else {
-					// implicit falling through the TRUE case
-					if (trueLabel == null) {
-						codeStream.ifnonnull(falseLabel);
-					} else {
-						// no implicit fall through TRUE/FALSE --> should never occur
-					}
-				}
+				} else // implicit falling through the TRUE case
+                if (trueLabel == null) {
+                	codeStream.ifnonnull(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
 			}
 			codeStream.recordPositionsFrom(pc, this.sourceStart);
 			return;
@@ -805,32 +779,30 @@ public class EqualExpression extends BinaryExpression {
 							codeStream.if_acmpeq(trueLabel);
 					}
 				}
-			} else {
-				// implicit falling through the TRUE case
-				if (trueLabel == null) {
-					switch ((this.left.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4) { // operand runtime type
-						case T_int :
-							codeStream.if_icmpne(falseLabel);
-							break;
-						case T_float :
-							codeStream.fcmpl();
-							codeStream.ifne(falseLabel);
-							break;
-						case T_long :
-							codeStream.lcmp();
-							codeStream.ifne(falseLabel);
-							break;
-						case T_double :
-							codeStream.dcmpl();
-							codeStream.ifne(falseLabel);
-							break;
-						default :
-							codeStream.if_acmpne(falseLabel);
-					}
-				} else {
-					// no implicit fall through TRUE/FALSE --> should never occur
-				}
-			}
+			} else // implicit falling through the TRUE case
+            if (trueLabel == null) {
+            	switch ((this.left.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4) { // operand runtime type
+            		case T_int :
+            			codeStream.if_icmpne(falseLabel);
+            			break;
+            		case T_float :
+            			codeStream.fcmpl();
+            			codeStream.ifne(falseLabel);
+            			break;
+            		case T_long :
+            			codeStream.lcmp();
+            			codeStream.ifne(falseLabel);
+            			break;
+            		case T_double :
+            			codeStream.dcmpl();
+            			codeStream.ifne(falseLabel);
+            			break;
+            		default :
+            			codeStream.if_acmpne(falseLabel);
+            	}
+            } else {
+            	// no implicit fall through TRUE/FALSE --> should never occur
+            }
 		}
 		codeStream.recordPositionsFrom(pc, this.sourceStart);
 	}
@@ -846,11 +818,9 @@ public class EqualExpression extends BinaryExpression {
 			if (this.left instanceof NullLiteral && this.right instanceof NullLiteral) {
 				return BooleanConstant.fromValue(true);
 			}
-		} else if (operator == OperatorIds.NOT_EQUAL) {
-			if (this.left instanceof NullLiteral && this.right instanceof NullLiteral) {
-				return BooleanConstant.fromValue(false);
-			}
-		}
+		} else if (operator == OperatorIds.NOT_EQUAL && this.left instanceof NullLiteral && this.right instanceof NullLiteral) {
+        	return BooleanConstant.fromValue(false);
+        }
 		return Constant.NotAConstant;
 	}
 
@@ -858,10 +828,10 @@ public class EqualExpression extends BinaryExpression {
 	public TypeBinding resolveType(BlockScope scope) {
 
 			boolean leftIsCast, rightIsCast;
-			if ((leftIsCast = this.left instanceof CastExpression) == true) this.left.bits |= DisableUnnecessaryCastCheck; // will check later on
+			if (leftIsCast = this.left instanceof CastExpression) this.left.bits |= DisableUnnecessaryCastCheck; // will check later on
 			TypeBinding originalLeftType = this.left.resolveType(scope);
 
-			if ((rightIsCast = this.right instanceof CastExpression) == true) this.right.bits |= DisableUnnecessaryCastCheck; // will check later on
+			if (rightIsCast = this.right instanceof CastExpression) this.right.bits |= DisableUnnecessaryCastCheck; // will check later on
 			TypeBinding originalRightType = this.right.resolveType(scope);
 
 		// always return BooleanBinding
@@ -882,11 +852,9 @@ public class EqualExpression extends BinaryExpression {
 				if (!rightType.isBaseType()) {
 					rightType = scope.environment().computeBoxingType(rightType);
 				}
-			} else {
-				if (rightType != TypeBinding.NULL && rightType.isBaseType()) {
-					leftType = scope.environment().computeBoxingType(leftType);
-				}
-			}
+			} else if (rightType != TypeBinding.NULL && rightType.isBaseType()) {
+            	leftType = scope.environment().computeBoxingType(leftType);
+            }
 		}
 		// both base type
 		if (leftType.isBaseType() && rightType.isBaseType()) {
@@ -898,8 +866,8 @@ public class EqualExpression extends BinaryExpression {
 			//  0000   0000       0000   0000      0000
 			//  <<16   <<12       <<8    <<4       <<0
 			int operatorSignature = OperatorSignatures[EQUAL_EQUAL][ (leftTypeID << 4) + rightTypeID];
-			this.left.computeConversion(scope, TypeBinding.wellKnownType(scope, (operatorSignature >>> 16) & 0x0000F), originalLeftType);
-			this.right.computeConversion(scope, TypeBinding.wellKnownType(scope, (operatorSignature >>> 8) & 0x0000F), originalRightType);
+			this.left.computeConversion(scope, TypeBinding.wellKnownType(scope, operatorSignature >>> 16 & 0x0000F), originalLeftType);
+			this.right.computeConversion(scope, TypeBinding.wellKnownType(scope, operatorSignature >>> 8 & 0x0000F), originalRightType);
 			this.bits |= operatorSignature & 0xF;
 			if ((operatorSignature & 0x0000F) == T_undefined) {
 				this.constant = Constant.NotAConstant;
@@ -916,13 +884,13 @@ public class EqualExpression extends BinaryExpression {
 			Binding leftDirect = Expression.getDirectBinding(this.left);
 			if (leftDirect != null && leftDirect == Expression.getDirectBinding(this.right)) {
 				if (leftTypeID != TypeIds.T_double && leftTypeID != TypeIds.T_float
-						&&(!(this.right instanceof Assignment))) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=281776
+						&&!(this.right instanceof Assignment)) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=281776
 					scope.problemReporter().comparingIdenticalExpressions(this);
 			} else if (this.constant != Constant.NotAConstant) {
 				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=276740
 				int operator = (this.bits & OperatorMASK) >> OperatorSHIFT;
-				if ((operator == EQUAL_EQUAL && this.constant == BooleanConstant.fromValue(true))
-						|| (operator == NOT_EQUAL && this.constant == BooleanConstant.fromValue(false)))
+				if (operator == EQUAL_EQUAL && this.constant == BooleanConstant.fromValue(true)
+						|| operator == NOT_EQUAL && this.constant == BooleanConstant.fromValue(false))
 					scope.problemReporter().comparingIdenticalExpressions(this);
 			}
 			return this.resolvedType = TypeBinding.BOOLEAN;
@@ -936,7 +904,7 @@ public class EqualExpression extends BinaryExpression {
 						|| checkCastTypesCompatibility(scope, rightType, leftType, null, true))) {
 
 			// (special case for String)
-			if ((rightType.id == T_JavaLangString) && (leftType.id == T_JavaLangString)) {
+			if (rightType.id == T_JavaLangString && leftType.id == T_JavaLangString) {
 				computeConstant(leftType, rightType);
 			} else {
 				this.constant = Constant.NotAConstant;
@@ -951,21 +919,17 @@ public class EqualExpression extends BinaryExpression {
 				TypeBinding alternateLeftType = unnecessaryLeftCast ? ((CastExpression)this.left).expression.resolvedType : leftType;
 				TypeBinding alternateRightType = unnecessaryRightCast ? ((CastExpression)this.right).expression.resolvedType : rightType;
 				// Bug 543727 - check if either cast is really needed
-				if (!isCastNeeded(alternateLeftType, alternateRightType)) {
-					if (checkCastTypesCompatibility(scope, alternateLeftType, alternateRightType, null, false)
-							|| checkCastTypesCompatibility(scope, alternateRightType, alternateLeftType, null, false)) {
-						if (unnecessaryLeftCast) scope.problemReporter().unnecessaryCast((CastExpression)this.left);
-						if (unnecessaryRightCast) scope.problemReporter().unnecessaryCast((CastExpression)this.right);
-					}
-				}
+				if (!isCastNeeded(alternateLeftType, alternateRightType) && (checkCastTypesCompatibility(scope, alternateLeftType, alternateRightType, null, false)
+                		|| checkCastTypesCompatibility(scope, alternateRightType, alternateLeftType, null, false))) {
+                	if (unnecessaryLeftCast) scope.problemReporter().unnecessaryCast((CastExpression)this.left);
+                	if (unnecessaryRightCast) scope.problemReporter().unnecessaryCast((CastExpression)this.right);
+                }
 			}
 			// check whether comparing identical expressions
 			Binding leftDirect = Expression.getDirectBinding(this.left);
-			if (leftDirect != null && leftDirect == Expression.getDirectBinding(this.right)) {
-				if (!(this.right instanceof Assignment)) {
-					scope.problemReporter().comparingIdenticalExpressions(this);
-				}
-			}
+			if (leftDirect != null && leftDirect == Expression.getDirectBinding(this.right) && !(this.right instanceof Assignment)) {
+            	scope.problemReporter().comparingIdenticalExpressions(this);
+            }
 			return this.resolvedType = TypeBinding.BOOLEAN;
 		}
 		this.constant = Constant.NotAConstant;

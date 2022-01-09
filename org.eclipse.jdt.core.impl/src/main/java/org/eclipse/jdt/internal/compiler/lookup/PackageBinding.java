@@ -59,7 +59,7 @@ public PackageBinding(char[][] compoundName, PackageBinding parent, LookupEnviro
 	this.parent = parent;
 	this.environment = environment;
 	this.knownTypes = null; // initialized if used... class counts can be very large 300-600
-	this.knownPackages = new HashtableOfPackage<PackageBinding>(3); // sub-package counts are typically 0-3
+	this.knownPackages = new HashtableOfPackage<>(3); // sub-package counts are typically 0-3
 
 	if (compoundName != CharOperation.NO_CHAR_CHAR)
 		checkIfNullAnnotationPackage();
@@ -152,8 +152,7 @@ PackageBinding getPackage(char[] name, ModuleBinding mod) {
 	if (binding != null) {
 		if (binding == LookupEnvironment.TheNotFoundPackage)
 			return null;
-		else
-			return binding;
+        return binding;
 	}
 	if ((binding = findPackage(name, mod)) != null)
 		return binding;
@@ -191,13 +190,11 @@ PackageBinding getPackage0Any(char[] name) {
 
 ReferenceBinding getType(char[] name, ModuleBinding mod) {
 	ReferenceBinding referenceBinding = getType0(name);
-	if (referenceBinding == null) {
-		if ((referenceBinding = this.environment.askForType(this, name, mod)) == null) {
-			// not found so remember a problem type binding in the cache for future lookups
-			addNotFoundType(name);
-			return null;
-		}
-	}
+	if (referenceBinding == null && (referenceBinding = this.environment.askForType(this, name, mod)) == null) {
+    	// not found so remember a problem type binding in the cache for future lookups
+    	addNotFoundType(name);
+    	return null;
+    }
 
 	if (referenceBinding == LookupEnvironment.TheNotFoundType)
 		return null;
@@ -253,7 +250,7 @@ public Binding getTypeOrPackage(char[] name, ModuleBinding mod, boolean splitPac
 		if (referenceBinding.isNestedType()) {
 			return new ProblemReferenceBinding(new char[][]{name}, referenceBinding, ProblemReasons.InternalNameProvided);
 		}
-		boolean isSameModule = (this instanceof SplitPackageBinding) ? referenceBinding.module() == mod : this.enclosingModule == mod;
+		boolean isSameModule = this instanceof SplitPackageBinding ? referenceBinding.module() == mod : this.enclosingModule == mod;
 		if (!isSameModule && referenceBinding.isValidBinding() && !mod.canAccess(referenceBinding.fPackage)) {
 			problemBinding = new ProblemReferenceBinding(referenceBinding.compoundName, referenceBinding, ProblemReasons.NotAccessible);
 			break lookForType0;
@@ -280,9 +277,8 @@ public Binding getTypeOrPackage(char[] name, ModuleBinding mod, boolean splitPac
 			if (referenceBinding.isValidBinding() && !mod.canAccess(referenceBinding.fPackage)) {
 				problemBinding = new ProblemReferenceBinding(referenceBinding.compoundName, referenceBinding, ProblemReasons.NotAccessible);
 				break lookForType;
-			} else {
-				return referenceBinding;
 			}
+            return referenceBinding;
 		}
 
 		// Since name could not be found, add a problem binding
@@ -427,7 +423,7 @@ public String toString() {
 	if (this.compoundName == CharOperation.NO_CHAR_CHAR) {
 		str = "The Default Package"; //$NON-NLS-1$
 	} else {
-		str = "package " + ((this.compoundName != null) ? CharOperation.toString(this.compoundName) : "UNNAMED"); //$NON-NLS-1$ //$NON-NLS-2$
+		str = "package " + (this.compoundName != null ? CharOperation.toString(this.compoundName) : "UNNAMED"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	if ((this.tagBits & TagBits.HasMissingType) != 0) {
 		str += "[MISSING]"; //$NON-NLS-1$

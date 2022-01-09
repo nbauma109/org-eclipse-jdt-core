@@ -32,8 +32,8 @@ import org.eclipse.osgi.util.NLS;
 public class MarkerManager implements IManager {
 
 	// singletons
-	private static final MarkerInfo[] NO_MARKER_INFO = new MarkerInfo[0];
-	private static final IMarker[] NO_MARKERS = new IMarker[0];
+	private static final MarkerInfo[] NO_MARKER_INFO = {};
+	private static final IMarker[] NO_MARKERS = {};
 	protected MarkerTypeDefinitionCache cache = new MarkerTypeDefinitionCache();
 	private long changeId = 0;
 	protected Map<IPath, MarkerSet> currentDeltas = null;
@@ -108,15 +108,11 @@ public class MarkerManager implements IManager {
 			// if the type is null then we are looking for all types of markers
 			if (type == null)
 				result.add(marker);
-			else {
-				if (includeSubtypes) {
-					if (cache.isSubtype(marker.getType(), type))
-						result.add(marker);
-				} else {
-					if (marker.getType().equals(type))
-						result.add(marker);
-				}
-			}
+            else if (includeSubtypes) {
+            	if (cache.isSubtype(marker.getType(), type))
+            		result.add(marker);
+            } else if (marker.getType().equals(type))
+            	result.add(marker);
 		}
 		size = result.size();
 		if (size <= 0)
@@ -135,15 +131,11 @@ public class MarkerManager implements IManager {
 			// if the type is null then we are looking for all types of markers
 			if (type == null)
 				max = Math.max(max, getSeverity(marker));
-			else {
-				if (includeSubtypes) {
-					if (cache.isSubtype(marker.getType(), type))
-						max = Math.max(max, getSeverity(marker));
-				} else {
-					if (marker.getType().equals(type))
-						max = Math.max(max, getSeverity(marker));
-				}
-			}
+            else if (includeSubtypes) {
+            	if (cache.isSubtype(marker.getType(), type))
+            		max = Math.max(max, getSeverity(marker));
+            } else if (marker.getType().equals(type))
+            	max = Math.max(max, getSeverity(marker));
 			if (max >= IMarker.SEVERITY_ERROR) {
 				break;
 			}
@@ -154,8 +146,7 @@ public class MarkerManager implements IManager {
 	private int getSeverity(MarkerInfo marker) {
 		Object o = marker.getAttribute(IMarker.SEVERITY);
 		if (o instanceof Integer) {
-			Integer i = (Integer) o;
-			return i.intValue();
+			return (Integer) o;
 		}
 		return -1;
 	}
@@ -204,7 +195,6 @@ public class MarkerManager implements IManager {
 		for (int i = 0; i < matching.length; i++)
 			changes[i] = new MarkerDelta(IResourceDelta.REMOVED, resource, (MarkerInfo) matching[i]);
 		changedMarkers(resource, changes);
-		return;
 	}
 
 	/**
@@ -493,7 +483,7 @@ public class MarkerManager implements IManager {
 		if (markers.size() != size) {
 			if (isPersistent(markerInfo))
 				info.set(ICoreConstants.M_MARKERS_SNAP_DIRTY);
-			IMarkerSetElement[] change = new IMarkerSetElement[] {
+			IMarkerSetElement[] change = {
 					new MarkerDelta(IResourceDelta.REMOVED, resource, markerInfo) };
 			changedMarkers(resource, change);
 		}

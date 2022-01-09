@@ -223,11 +223,10 @@ public class ClasspathJep247 extends ClasspathJrt {
 			try (DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(this.releasePath)) {
 				for (final java.nio.file.Path subdir: stream) {
 					String rel = JRTUtil.sanitizedFileName(subdir);
-					if (rel.contains(this.releaseInHex)) {
-						sub.add(rel);
-					} else {
+					if (!rel.contains(this.releaseInHex)) {
 						continue;
 					}
+                    sub.add(rel);
 					Files.walkFileTree(subdir, new FileVisitor<java.nio.file.Path>() {
 						@Override
 						public FileVisitResult preVisitDirectory(java.nio.file.Path dir, BasicFileAttributes attrs) throws IOException {

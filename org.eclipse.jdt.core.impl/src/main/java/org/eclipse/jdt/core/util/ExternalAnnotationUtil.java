@@ -17,7 +17,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.resources.IContainer;
@@ -475,7 +474,7 @@ public final class ExternalAnnotationUtil {
 			SignatureWrapper wrapper = new SignatureWrapper(originalSignature.toCharArray(), true, true); // may already contain annotations
 			wrapper.start = 1; // skip '<'
 			// skip preceding type parameters:
-			for (int i = 0; i < (-updatePosition+POSITION_TYPE_PARAMETER); i++) {
+			for (int i = 0; i < -updatePosition+POSITION_TYPE_PARAMETER; i++) {
 				wrapper.skipTypeParameter();
 			}
 			int start = wrapper.start;
@@ -656,11 +655,11 @@ public final class ExternalAnnotationUtil {
 			sig1.start++;
 			sig2.start++;
 			return true;
-		} else if (force) {
-			throw new IllegalArgumentException("Expected char "+expected+" not found in "+new String(sig1.signature)); //$NON-NLS-1$ //$NON-NLS-2$
-		} else {
-			return false;
 		}
+        if (force) {
+			throw new IllegalArgumentException("Expected char "+expected+" not found in "+new String(sig1.signature)); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+        return false;
 	}
 
 	/**
@@ -722,14 +721,14 @@ public final class ExternalAnnotationUtil {
 		String line;
 		while ((line = tailReader.readLine()) != null)
 			head.append(line).append('\n');
-		ByteArrayInputStream newContent = new ByteArrayInputStream(head.toString().getBytes(StandardCharsets.UTF_8)); //$NON-NLS-1$
+		ByteArrayInputStream newContent = new ByteArrayInputStream(head.toString().getBytes(StandardCharsets.UTF_8));
 		annotationFile.setContents(newContent, IResource.KEEP_HISTORY, monitor);
 	}
 
 	private static void createNewFile(IFile file, String newContent, IProgressMonitor monitor) throws CoreException {
 		ensureExists(file.getParent(), monitor);
 
-        file.create(new ByteArrayInputStream(newContent.getBytes(StandardCharsets.UTF_8)), false, monitor); //$NON-NLS-1$
+        file.create(new ByteArrayInputStream(newContent.getBytes(StandardCharsets.UTF_8)), false, monitor);
     }
 
 	private static void ensureExists(IContainer container, IProgressMonitor monitor) throws CoreException {
@@ -766,18 +765,15 @@ public final class ExternalAnnotationUtil {
 								return ExternalAnnotationProvider.extractSignature(reader.readLine());
 							}
 						}
-					} else if (line != null && line.trim().startsWith("<")) { //$NON-NLS-1$
-						// original signature:
-						if (originalSignature.equals(ExternalAnnotationProvider.extractSignature(line))) {
-							// annotated signature:
-							return ExternalAnnotationProvider.extractSignature(reader.readLine());
-						}
-					}
+					} else // original signature:
+                    if (line != null && line.trim().startsWith("<") && originalSignature.equals(ExternalAnnotationProvider.extractSignature(line))) {
+                    	// annotated signature:
+                    	return ExternalAnnotationProvider.extractSignature(reader.readLine());
+                    }
 					if (line == null)
 						break;
 				}
 			} catch (IOException | CoreException e) {
-				return null;
 			}
 		}
 		return null;

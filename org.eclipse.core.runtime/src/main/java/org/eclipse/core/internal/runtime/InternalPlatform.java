@@ -122,7 +122,6 @@ public final class InternalPlatform {
 	 * Private constructor to block instance creation.
 	 */
 	private InternalPlatform() {
-		super();
 	}
 
 	/**

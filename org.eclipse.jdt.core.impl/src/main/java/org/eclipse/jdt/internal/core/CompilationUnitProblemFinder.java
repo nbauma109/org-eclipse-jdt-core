@@ -205,12 +205,9 @@ public class CompilationUnitProblemFinder extends Compiler {
 	 * Answer the component to which will be handed back compilation results from the compiler
 	 */
 	protected static ICompilerRequestor getRequestor() {
-		return new ICompilerRequestor() {
-			@Override
-			public void acceptResult(CompilationResult compilationResult) {
-				// default requestor doesn't handle compilation results back
-			}
-		};
+		return compilationResult -> {
+        	// default requestor doesn't handle compilation results back
+        };
 	}
 
 	private static boolean isTestSource(IJavaProject project, ICompilationUnit cu) {
@@ -218,13 +215,9 @@ public class CompilationUnitProblemFinder extends Compiler {
 			IClasspathEntry[] resolvedClasspath = project.getResolvedClasspath(true);
 			final IPath resourcePath = cu.getResource().getFullPath();
 			for (IClasspathEntry e : resolvedClasspath) {
-				if (e.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-					if (e.isTest()) {
-						if (e.getPath().isPrefixOf(resourcePath)) {
-							return true;
-						}
-					}
-				}
+				if (e.getEntryKind() == IClasspathEntry.CPE_SOURCE && e.isTest() && e.getPath().isPrefixOf(resourcePath)) {
+                	return true;
+                }
 			}
 		} catch (JavaModelException e) {
 			Util.log(e, "Exception while determining if compilation unit \"" + cu.getElementName() //$NON-NLS-1$
@@ -254,7 +247,7 @@ public class CompilationUnitProblemFinder extends Compiler {
 		try {
 			environment = new CancelableNameEnvironment(project, workingCopyOwner, monitor, !isTestSource(unitElement.getJavaProject(), unitElement));
 			problemFactory = new CancelableProblemFactory(monitor);
-			CompilerOptions compilerOptions = getCompilerOptions(project.getOptions(true), creatingAST, ((reconcileFlags & ICompilationUnit.ENABLE_STATEMENTS_RECOVERY) != 0));
+			CompilerOptions compilerOptions = getCompilerOptions(project.getOptions(true), creatingAST, (reconcileFlags & ICompilationUnit.ENABLE_STATEMENTS_RECOVERY) != 0);
 			boolean ignoreMethodBodies = (reconcileFlags & ICompilationUnit.IGNORE_METHOD_BODIES) != 0;
 			compilerOptions.ignoreMethodBodies = ignoreMethodBodies;
 			problemFinder = new CompilationUnitProblemFinder(

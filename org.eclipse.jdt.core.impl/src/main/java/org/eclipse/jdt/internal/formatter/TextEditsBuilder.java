@@ -43,8 +43,8 @@ public class TextEditsBuilder extends TokenTraverser {
 	private final DefaultCodeFormatterOptions options;
 	private final StringBuilder buffer;
 
-	private final List<Token> stringLiteralsInLine = new ArrayList<Token>();
-	private final List<TextEdit> edits = new ArrayList<TextEdit>();
+	private final List<Token> stringLiteralsInLine = new ArrayList<>();
+	private final List<TextEdit> edits = new ArrayList<>();
 
 	private final List<IRegion> regions;
 	private int currentRegion = 0;
@@ -80,7 +80,7 @@ public class TextEditsBuilder extends TokenTraverser {
 
 	private List<IRegion> adaptRegions(List<IRegion> givenRegions) {
 		// make sure regions don't begin or end inside multiline comments
-		ArrayList<IRegion> result = new ArrayList<IRegion>();
+		ArrayList<IRegion> result = new ArrayList<>();
 		IRegion previous = null;
 		for (IRegion region : givenRegions) {
 			int start = region.getOffset();
@@ -162,7 +162,7 @@ public class TextEditsBuilder extends TokenTraverser {
 						boolean isBlockIndent = token.getWrapPolicy() != null
 								&& token.getWrapPolicy().wrapMode == WrapMode.BLOCK_INDENT;
 						Token previous = this.tm.get(this.tm.findFirstTokenInLine(index - 1, true, !isBlockIndent));
-						indentToken = (token.getIndent() > previous.getIndent()) ? token : previous;
+						indentToken = token.getIndent() > previous.getIndent() ? token : previous;
 					}
 				}
 				for (int i = 1; i < getLineBreaksBefore(); i++) {
@@ -176,10 +176,8 @@ public class TextEditsBuilder extends TokenTraverser {
 			bufferIndent(token, index);
 		} else if (index == 0 && this.parent == null) {
 			bufferIndent(token, index);
-		} else {
-			if (!bufferAlign(token, index) && isSpaceBefore())
-				this.buffer.append(' ');
-		}
+		} else if (!bufferAlign(token, index) && isSpaceBefore())
+        	this.buffer.append(' ');
 	}
 
 	private void bufferLineSeparator(Token token, boolean emptyLine) {
@@ -191,13 +189,11 @@ public class TextEditsBuilder extends TokenTraverser {
 		boolean isTextBlock = token != null && token.tokenType == TokenNameTextBlock;
 		this.parent.counter = this.counter;
 		this.parent.bufferLineSeparator(null, false);
-		if (!(isTextBlock && emptyLine && !this.options.indent_empty_lines))
+		if (!isTextBlock || !emptyLine || this.options.indent_empty_lines)
 			this.parent.bufferIndent(this.parent.tm.get(this.parentTokenIndex), this.parentTokenIndex);
 		this.counter = this.parent.counter;
 
-		if (isTextBlock)
-			return;
-		if (token != null && token.tokenType == TokenNameNotAToken)
+		if (isTextBlock || token != null && token.tokenType == TokenNameNotAToken)
 			return; // this is an unformatted block comment, don't force asterisk
 		if (getNext() == null && !emptyLine)
 			return; // this is the last token of block comment, asterisk is included
@@ -213,7 +209,7 @@ public class TextEditsBuilder extends TokenTraverser {
 					i++;
 				this.counter = i + 1;
 				c = this.source.charAt(i + 1);
-				if ((c != '\r' && c != '\n') || !emptyLine)
+				if (c != '\r' && c != '\n' || !emptyLine)
 					this.buffer.append(' ');
 				asteriskFound = true;
 				break;

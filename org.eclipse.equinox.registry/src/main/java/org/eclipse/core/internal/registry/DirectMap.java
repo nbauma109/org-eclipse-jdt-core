@@ -29,9 +29,7 @@ public class DirectMap {
 	private int size;
 
 	public DirectMap(int initialSize, float growthFactor) {
-		if (initialSize < 1)
-			throw new IllegalArgumentException();
-		if (growthFactor <= 0)
+		if (initialSize < 1 || growthFactor <= 0)
 			throw new IllegalArgumentException();
 		this.growthFactor = growthFactor;
 		keyArray = new String[initialSize];
@@ -67,7 +65,7 @@ public class DirectMap {
 	public synchronized boolean containsKey(String key) {
 		if (key == null)
 			throw new IllegalArgumentException();
-		return (findKey(key) != -1);
+		return findKey(key) != -1;
 	}
 
 	public synchronized String[] get(String key) {

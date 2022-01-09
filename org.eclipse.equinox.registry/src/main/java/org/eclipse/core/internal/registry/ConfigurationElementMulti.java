@@ -37,10 +37,10 @@ public class ConfigurationElementMulti extends ConfigurationElement {
 		if (propertiesAndValue.length <= 1)
 			return null;
 		//round down to an even size
-		int size = propertiesAndValue.length - (propertiesAndValue.length % 2);
+		int size = propertiesAndValue.length - propertiesAndValue.length % 2;
 		int index = -1;
 		for (int i = 0, j = 0; i < size; i += 2, j++) {
-			if (!(propertiesAndValue[i].equals(attrName)))
+			if (!propertiesAndValue[i].equals(attrName))
 				continue;
 			index = j;
 			break;
@@ -79,7 +79,7 @@ public class ConfigurationElementMulti extends ConfigurationElement {
 
 	private String[] getNonTranslated() {
 		int size = propertiesAndValue.length / 2;
-		boolean hasValue = ((propertiesAndValue.length % 2) == 1);
+		boolean hasValue = propertiesAndValue.length % 2 == 1;
 		if (hasValue)
 			size++;
 		String[] propertiesNonTranslated = new String[size];

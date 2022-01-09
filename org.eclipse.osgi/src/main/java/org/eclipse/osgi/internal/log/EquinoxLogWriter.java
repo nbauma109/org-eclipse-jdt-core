@@ -220,10 +220,8 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 				writeln(key + "=" + value); //$NON-NLS-1$
 				key = "java.vendor"; //$NON-NLS-1$
 				value = System.getProperty(key);
-				writeln(key + "=" + value); //$NON-NLS-1$
-			} else {
-				writeln(key + "=" + value); //$NON-NLS-1$
 			}
+            writeln(key + "=" + value); //$NON-NLS-1$
 		} catch (Exception e) {
 			// If we're not allowed to get the values of these properties
 			// then just skip over them.
@@ -275,23 +273,19 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * If a File is used to log messages to then the writer is closed.
 	 */
 	private void closeFile() {
-		if (outFile != null) {
-			if (writer != null) {
-				try {
-					writer.close();
-				} catch (IOException e) {
-					// we cannot log here; just print the stacktrace.
-					e.printStackTrace();
-				}
-				writer = null;
-			}
-		}
+		if (outFile != null && writer != null) {
+        	try {
+        		writer.close();
+        	} catch (IOException e) {
+        		// we cannot log here; just print the stacktrace.
+        		e.printStackTrace();
+        	}
+        	writer = null;
+        }
 	}
 
 	private synchronized void log(FrameworkLogEntry logEntry) {
-		if (logEntry == null)
-			return;
-		if (!isLoggable(logEntry.getSeverity()))
+		if (logEntry == null || !isLoggable(logEntry.getSeverity()))
 			return;
 		try {
 			checkLogFileSize();
@@ -600,54 +594,50 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			return true; // no size limitation.
 
 		boolean isBackupOK = true;
-		if (outFile != null) {
-			if ((ExtendedLogServiceFactory.secureAction.length(outFile) >> 10) > maxLogSize) { // Use KB as file size unit.
-				String logFilename = outFile.getAbsolutePath();
+		if (outFile != null && ExtendedLogServiceFactory.secureAction.length(outFile) >> 10 > maxLogSize) { // Use KB as file size unit.
+        	String logFilename = outFile.getAbsolutePath();
 
-				// Delete old backup file that will be replaced.
-				String backupFilename = ""; //$NON-NLS-1$
-				if (logFilename.toLowerCase().endsWith(LOG_EXT)) {
-					backupFilename = logFilename.substring(0, logFilename.length() - LOG_EXT.length()) + BACKUP_MARK + backupIdx + LOG_EXT;
-				} else {
-					backupFilename = logFilename + BACKUP_MARK + backupIdx;
-				}
-				File backupFile = new File(backupFilename);
-				if (backupFile.exists()) {
-					if (!backupFile.delete()) {
-						System.err.println("Error when trying to delete old log file: " + backupFile.getName());//$NON-NLS-1$
-						if (backupFile.renameTo(new File(backupFile.getAbsolutePath() + System.currentTimeMillis()))) {
-							System.err.println("So we rename it to filename: " + backupFile.getName()); //$NON-NLS-1$
-						} else {
-							System.err.println("And we also cannot rename it!"); //$NON-NLS-1$
-							isBackupOK = false;
-						}
-					}
-				}
+        	// Delete old backup file that will be replaced.
+        	String backupFilename = ""; //$NON-NLS-1$
+        	if (logFilename.toLowerCase().endsWith(LOG_EXT)) {
+        		backupFilename = logFilename.substring(0, logFilename.length() - LOG_EXT.length()) + BACKUP_MARK + backupIdx + LOG_EXT;
+        	} else {
+        		backupFilename = logFilename + BACKUP_MARK + backupIdx;
+        	}
+        	File backupFile = new File(backupFilename);
+        	if (backupFile.exists() && !backupFile.delete()) {
+            	System.err.println("Error when trying to delete old log file: " + backupFile.getName());//$NON-NLS-1$
+            	if (backupFile.renameTo(new File(backupFile.getAbsolutePath() + System.currentTimeMillis()))) {
+            		System.err.println("So we rename it to filename: " + backupFile.getName()); //$NON-NLS-1$
+            	} else {
+            		System.err.println("And we also cannot rename it!"); //$NON-NLS-1$
+            		isBackupOK = false;
+            	}
+            }
 
-				// Rename current log file to backup one.
-				boolean isRenameOK = outFile.renameTo(backupFile);
-				if (!isRenameOK) {
-					System.err.println("Error when trying to rename log file to backup one."); //$NON-NLS-1$
-					isBackupOK = false;
-				}
-				File newFile = new File(logFilename);
-				setOutput(newFile, null, false);
+        	// Rename current log file to backup one.
+        	boolean isRenameOK = outFile.renameTo(backupFile);
+        	if (!isRenameOK) {
+        		System.err.println("Error when trying to rename log file to backup one."); //$NON-NLS-1$
+        		isBackupOK = false;
+        	}
+        	File newFile = new File(logFilename);
+        	setOutput(newFile, null, false);
 
-				// Write a new SESSION header to new log file.
-				openFile();
-				try {
-					writeSession();
-					writeln();
-					writeln("This is a continuation of log file " + backupFile.getAbsolutePath());//$NON-NLS-1$
-					writeln("Created Time: " + getDate(new Date(System.currentTimeMillis()))); //$NON-NLS-1$
-					writer.flush();
-				} catch (IOException ioe) {
-					ioe.printStackTrace(System.err);
-				}
-				closeFile();
-				backupIdx = (++backupIdx) % maxLogFiles;
-			}
-		}
+        	// Write a new SESSION header to new log file.
+        	openFile();
+        	try {
+        		writeSession();
+        		writeln();
+        		writeln("This is a continuation of log file " + backupFile.getAbsolutePath());//$NON-NLS-1$
+        		writeln("Created Time: " + getDate(new Date(System.currentTimeMillis()))); //$NON-NLS-1$
+        		writer.flush();
+        	} catch (IOException ioe) {
+        		ioe.printStackTrace(System.err);
+        	}
+        	closeFile();
+        	backupIdx = ++backupIdx % maxLogFiles;
+        }
 		return isBackupOK;
 	}
 
@@ -733,11 +723,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			return false;
 		if (loggerName.equals(loggableName))
 			return isLoggable(convertSeverity(loggableLevel));
-		if (EquinoxLogServices.PERF_LOGGER_NAME.equals(loggableName))
-			// we don't want to do anything with performance logger unless
-			// this is the performance logger (check done above).
-			return false;
-		if (!EquinoxLogServices.EQUINOX_LOGGER_NAME.equals(loggerName))
+		if (EquinoxLogServices.PERF_LOGGER_NAME.equals(loggableName) || !EquinoxLogServices.EQUINOX_LOGGER_NAME.equals(loggerName))
 			// only the equinox log writer should pay attention to other logs
 			return false;
 		// for now only log errors; probably need this to be configurable

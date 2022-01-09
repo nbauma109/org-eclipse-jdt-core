@@ -87,10 +87,7 @@ public class ShortConstant extends Constant {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
 		}
 		ShortConstant other = (ShortConstant) obj;

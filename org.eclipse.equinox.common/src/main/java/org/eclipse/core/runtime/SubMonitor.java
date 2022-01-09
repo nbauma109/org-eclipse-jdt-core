@@ -403,7 +403,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 */
 	private SubMonitor(RootInfo rootInfo, int totalWork, int availableToChildren, int flags) {
 		root = rootInfo;
-		totalParent = (totalWork > 0) ? totalWork : 0;
+		totalParent = totalWork > 0 ? totalWork : 0;
 		this.totalForChildren = availableToChildren;
 		this.flags = flags;
 		ticksAllocated = availableToChildren > 0;
@@ -516,10 +516,11 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 */
 	public SubMonitor setWorkRemaining(int workRemaining) {
 		if (TracingOptions.debugProgressMonitors && ticksAllocated && usedForChildren >= totalForChildren && workRemaining > 0) {
-			logProblem("Attempted to allocate ticks on a SubMonitor which had no space available. " //$NON-NLS-1$
-					+ "This may indicate that a SubMonitor was reused inappropriately (which is a bug) " //$NON-NLS-1$
-					+ "or may indicate that the caller was implementing infinite progress and overflowed " //$NON-NLS-1$
-					+ "(which may not be a bug but may require selecting a higher ratio)"); //$NON-NLS-1$
+			logProblem("""
+            	Attempted to allocate ticks on a SubMonitor which had no space available. \
+            	This may indicate that a SubMonitor was reused inappropriately (which is a bug) \
+            	or may indicate that the caller was implementing infinite progress and overflowed \
+            	(which may not be a bug but may require selecting a higher ratio)""");
 		}
 
 		// Ensure we don't try to allocate negative ticks
@@ -532,8 +533,8 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		// Ensure we don't cause division by zero
 		if (totalForChildren > 0 && totalParent > usedForParent) {
 			// Note: We want the following value to remain invariant after this method returns
-			double remainForParent = totalParent * (1.0d - (usedForChildren / totalForChildren));
-			usedForChildren = (workRemaining * (1.0d - remainForParent / (totalParent - usedForParent)));
+			double remainForParent = totalParent * (1.0d - usedForChildren / totalForChildren);
+			usedForChildren = workRemaining * (1.0d - remainForParent / (totalParent - usedForParent));
 		} else
 			usedForChildren = 0.0d;
 
@@ -656,7 +657,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	public void internalWorked(double work) {
 		cleanupActiveChild();
 
-		int delta = consume((work > 0.0d) ? work : 0.0d);
+		int delta = consume(work > 0.0d ? work : 0.0d);
 		if (delta != 0)
 			root.worked(delta);
 	}
@@ -765,7 +766,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @return new sub progress monitor that may be used in place of a new SubMonitor
 	 */
 	public SubMonitor newChild(int totalWork, int suppressFlags) {
-		double totalWorkDouble = (totalWork > 0) ? totalWork : 0.0d;
+		double totalWorkDouble = totalWork > 0 ? totalWork : 0.0d;
 		totalWorkDouble = Math.min(totalWorkDouble, totalForChildren - usedForChildren);
 		SubMonitor oldActiveChild = lastSubMonitor;
 		cleanupActiveChild();
@@ -786,7 +787,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 
 		// Note: the SUPPRESS_BEGINTASK flag does not affect the child since there
 		// is no method on the child that would delegate to beginTask on the parent.
-		childFlags |= (suppressFlags & ALL_PUBLIC_FLAGS);
+		childFlags |= suppressFlags & ALL_PUBLIC_FLAGS;
 
 		int consumed = consume(totalWorkDouble);
 
@@ -1010,7 +1011,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 
 	protected static boolean eq(Object o1, Object o2) {
 		if (o1 == null)
-			return (o2 == null);
+			return o2 == null;
 		if (o2 == null)
 			return false;
 		return o1.equals(o2);

@@ -46,14 +46,8 @@ public final class FileStoreUtil {
 	private static int compareNormalisedUri(URI uri1, URI uri2) {
 		int c;
 		// avoid to use IPath here due to high ephemeral memory allocation (Bug 570896)
-		if ((c = compareStringOrNull(uri1.getAuthority(), uri2.getAuthority())) != 0)
-			return c;
-		if ((c = compareStringOrNull(uri1.getScheme(), uri2.getScheme())) != 0)
-			return c;
-		if ((c = comparePathSegments(uri1.getPath(), uri2.getPath())) != 0)
-			return c;
-		if ((c = compareStringOrNull(uri1.getQuery(), uri2.getQuery())) != 0)
-			return c;
+		if ((c = compareStringOrNull(uri1.getAuthority(), uri2.getAuthority())) != 0 || (c = compareStringOrNull(uri1.getScheme(), uri2.getScheme())) != 0 || (c = comparePathSegments(uri1.getPath(), uri2.getPath())) != 0 || (c = compareStringOrNull(uri1.getQuery(), uri2.getQuery())) != 0) {
+        }
 		return c;
 	}
 
@@ -76,8 +70,7 @@ public final class FileStoreUtil {
 		// all segments are equal, so compare based on number of segments
 		int segmentCount1 = countCharButNotAtEnd(p1, '/');
 		int segmentCount2 = countCharButNotAtEnd(p2, '/');
-		compare = segmentCount1 - segmentCount2;
-		return compare;
+		return segmentCount1 - segmentCount2;
 	}
 
 	static int compareSlashFirst(String value, String other) {

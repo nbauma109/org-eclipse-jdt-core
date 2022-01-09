@@ -105,12 +105,12 @@ public final class StorageManager {
 	private static final String LOCK_FILE = ".fileTableLock"; //$NON-NLS-1$
 	private static final int MAX_LOCK_WAIT = 5000; // 5 seconds
 	// these should be static but the tests expect to be able to create new managers after changing this setting dynamically
-	private final boolean useReliableFiles = Boolean.valueOf(System.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
-	private final boolean tempCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
-	private final boolean openCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
-	private final boolean saveCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnSave")).booleanValue(); //$NON-NLS-1$
+	private final boolean useReliableFiles = Boolean.getBoolean("osgi.useReliableFiles"); //$NON-NLS-1$
+	private final boolean tempCleanup = Boolean.getBoolean("osgi.embedded.cleanTempFiles"); //$NON-NLS-1$
+	private final boolean openCleanup = Boolean.getBoolean("osgi.embedded.cleanupOnOpen"); //$NON-NLS-1$
+	private final boolean saveCleanup = Boolean.getBoolean("osgi.embedded.cleanupOnSave"); //$NON-NLS-1$
 
-	private class Entry {
+	private static class Entry {
 		int readId;
 		int writeId;
 		int fileType;
@@ -245,13 +245,11 @@ public final class StorageManager {
 				if (oldestGeneration != 0)
 					entry.setWriteId(oldestGeneration + 1);
 				save();
-			} else {
-				if (entry.getFileType() != fileType) {
-					entry.setFileType(fileType);
-					updateTable();
-					save();
-				}
-			}
+			} else if (entry.getFileType() != fileType) {
+            	entry.setFileType(fileType);
+            	updateTable();
+            	save();
+            }
 		} finally {
 			release();
 		}
@@ -440,12 +438,11 @@ public final class StorageManager {
 			throw new IOException(Msg.fileManager_notOpen);
 		Entry entry = (Entry) table.get(managedFile);
 		if (entry == null) {
-			if (add) {
-				add(managedFile);
-				entry = (Entry) table.get(managedFile);
-			} else {
+			if (!add) {
 				return null;
 			}
+            add(managedFile);
+            entry = (Entry) table.get(managedFile);
 		}
 		return new File(getAbsolutePath(managedFile + '.' + entry.getReadId()));
 	}
@@ -623,14 +620,13 @@ public final class StorageManager {
 				for (String file : files) {
 					if (file.endsWith(".instance") && (instanceFile == null || !file.equalsIgnoreCase(instanceFile.getName()))) { //$NON-NLS-1$
 						Locker tmpLocker = LocationHelper.createLocker(new File(managerRoot, file), lockMode, false);
-						if (tmpLocker.lock()) {
-							//If I can lock it is a file that has been left behind by a crash
-							tmpLocker.release();
-							new File(managerRoot, file).delete();
-						} else {
+						if (!tmpLocker.lock()) {
 							tmpLocker.release();
 							return; //The file is still being locked by somebody else
 						}
+                        //If I can lock it is a file that has been left behind by a crash
+                        tmpLocker.release();
+                        new File(managerRoot, file).delete();
 					}
 				}
 			}
@@ -741,10 +737,10 @@ public final class StorageManager {
 	public File createTempFile(String file) throws IOException {
 		if (readOnly)
 			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
-		File tmpFile = File.createTempFile(file, ReliableFile.tmpExt, base);
+		
 		// bug 350106: do not use deleteOnExit()  If clients really want that the
 		// they can call it themselves.
-		return tmpFile;
+		return File.createTempFile(file, ReliableFile.tmpExt, base);
 	}
 
 	/**

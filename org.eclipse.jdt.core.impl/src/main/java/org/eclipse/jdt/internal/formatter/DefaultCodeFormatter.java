@@ -481,11 +481,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		int lastOffset = first.getOffset() + first.getLength() - 1;
 		for (int i = 1; i < regionsLength; i++) {
 			IRegion current = regions[i];
-			if (lastOffset > current.getOffset()) {
-				return false;
-			}
-
-			if (current.getOffset() < 0 || current.getLength() < 0
+			if (lastOffset > current.getOffset() || current.getOffset() < 0 || current.getLength() < 0
 					|| current.getOffset() + current.getLength() > maxLength) {
 				return false;
 			}

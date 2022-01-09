@@ -145,9 +145,8 @@ public class MementoTokenizer {
 		if (buffer != null) {
 			buffer.append(this.memento, start, this.index - start);
 			return buffer.toString();
-		} else {
-			return new String(this.memento, start, this.index - start);
 		}
+        return new String(this.memento, start, this.index - start);
 	}
 
 	public String getStringDelimitedBy(String delimiter) {

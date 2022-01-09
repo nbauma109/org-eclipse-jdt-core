@@ -39,7 +39,7 @@ abstract class NamedHandleObjectWithState extends NamedHandleObject implements
 	 * An empty string array, which can be returned from {@link #getStateIds()}
 	 * if there is no state.
 	 */
-	private static final String[] NO_STATE = new String[0];
+	private static final String[] NO_STATE = {};
 
 	/**
 	 * The map of states currently held by this command. If this command has no
@@ -101,7 +101,7 @@ abstract class NamedHandleObjectWithState extends NamedHandleObject implements
 
 	@Override
 	public final State getState(final String stateId) {
-		if ((states == null) || (states.isEmpty())) {
+		if (states == null || states.isEmpty()) {
 			return null;
 		}
 
@@ -110,7 +110,7 @@ abstract class NamedHandleObjectWithState extends NamedHandleObject implements
 
 	@Override
 	public final String[] getStateIds() {
-		if ((states == null) || (states.isEmpty())) {
+		if (states == null || states.isEmpty()) {
 			return NO_STATE;
 		}
 

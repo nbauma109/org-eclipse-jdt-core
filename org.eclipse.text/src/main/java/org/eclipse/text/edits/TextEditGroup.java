@@ -46,7 +46,6 @@ public class TextEditGroup {
 	 *  a human readable string
 	 */
 	public TextEditGroup(String name) {
-		super();
 		Assert.isNotNull(name);
 		fDescription= name;
 		fEdits= new ArrayList<>(3);
@@ -77,7 +76,6 @@ public class TextEditGroup {
 	 * @param edits the array of edits
 	 */
 	public TextEditGroup(String name, TextEdit[] edits) {
-		super();
 		Assert.isNotNull(name);
 		Assert.isNotNull(edits);
 		fDescription= name;
@@ -158,10 +156,10 @@ public class TextEditGroup {
 		int size= fEdits.size();
 		if (size == 0) {
 			return null;
-		} else if (size == 1) {
-			return fEdits.get(0).getRegion();
-		} else {
-			return TextEdit.getCoverage(fEdits.toArray(new TextEdit[fEdits.size()]));
 		}
+        if (size == 1) {
+			return fEdits.get(0).getRegion();
+		}
+        return TextEdit.getCoverage(fEdits.toArray(new TextEdit[fEdits.size()]));
 	}
 }

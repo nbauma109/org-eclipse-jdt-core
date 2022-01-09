@@ -144,7 +144,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		this.context = context;
 		this.trackReference = reference;
 		this.trackClass = null;
-		this.customizer = (customizer == null) ? this : customizer;
+		this.customizer = customizer == null ? this : customizer;
 		this.listenerFilter = "(" + Constants.SERVICE_ID + "=" + reference.getProperty(Constants.SERVICE_ID).toString() + ")";
 		try {
 			this.filter = context.createFilter(listenerFilter);
@@ -179,7 +179,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		this.context = context;
 		this.trackReference = null;
 		this.trackClass = clazz;
-		this.customizer = (customizer == null) ? this : customizer;
+		this.customizer = customizer == null ? this : customizer;
 		// we call clazz.toString to verify clazz is non-null!
 		this.listenerFilter = "(" + Constants.OBJECTCLASS + "=" + clazz + ")";
 		try {
@@ -217,8 +217,8 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		this.trackClass = null;
 		this.listenerFilter = filter.toString();
 		this.filter = filter;
-		this.customizer = (customizer == null) ? this : customizer;
-		if ((context == null) || (filter == null)) {
+		this.customizer = customizer == null ? this : customizer;
+		if (context == null || filter == null) {
 			/*
 			 * we throw a NPE here to be consistent with the other constructors
 			 */
@@ -296,17 +296,15 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 					ServiceReference<S>[] references = null;
 					if (trackClass != null) {
 						references = getInitialReferences(trackAllServices, trackClass, null);
-					} else {
-						if (trackReference != null) {
-							if (trackReference.getBundle() != null) {
-								@SuppressWarnings("unchecked")
-								ServiceReference<S>[] single = new ServiceReference[] {trackReference};
-								references = single;
-							}
-						} else { /* user supplied filter */
-							references = getInitialReferences(trackAllServices, null, listenerFilter);
-						}
-					}
+					} else if (trackReference != null) {
+                    	if (trackReference.getBundle() != null) {
+                    		@SuppressWarnings("unchecked")
+                    		ServiceReference<S>[] single = new ServiceReference[] {trackReference};
+                    		references = single;
+                    	}
+                    } else { /* user supplied filter */
+                    	references = getInitialReferences(trackAllServices, null, listenerFilter);
+                    }
 					/* set tracked with the initial references */
 					t.setInitial(references);
 				} catch (InvalidSyntaxException e) {
@@ -333,9 +331,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	 *         invalid syntax.
 	 */
 	private ServiceReference<S>[] getInitialReferences(boolean trackAllServices, String className, String filterString) throws InvalidSyntaxException {
-		@SuppressWarnings("unchecked")
-		ServiceReference<S>[] result = (ServiceReference<S>[]) ((trackAllServices) ? context.getAllServiceReferences(className, filterString) : context.getServiceReferences(className, filterString));
-		return result;
+		return (ServiceReference<S>[]) (trackAllServices ? context.getAllServiceReferences(className, filterString) : context.getServiceReferences(className, filterString));
 	}
 
 	/**
@@ -374,15 +370,13 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 			outgoing.notifyAll(); /* wake up any waiters */
 		}
 		if (references != null) {
-			for (int i = 0; i < references.length; i++) {
-				outgoing.untrack(references[i], null);
+			for (ServiceReference<S> element : references) {
+				outgoing.untrack(element, null);
 			}
 		}
-		if (DEBUG) {
-			if ((cachedReference == null) && (cachedService == null)) {
-				System.out.println("ServiceTracker.close[cached cleared]: " + filter);
-			}
-		}
+		if (DEBUG && cachedReference == null && cachedService == null) {
+        	System.out.println("ServiceTracker.close[cached cleared]: " + filter);
+        }
 	}
 
 	/**
@@ -410,9 +404,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	 */
 	@Override
 	public T addingService(ServiceReference<S> reference) {
-		@SuppressWarnings("unchecked")
-		T result = (T) context.getService(reference);
-		return result;
+		return (T) context.getService(reference);
 	}
 
 	/**
@@ -491,7 +483,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 			return object;
 		}
 
-		final long endTime = (timeout == 0) ? 0 : (System.currentTimeMillis() + timeout);
+		final long endTime = timeout == 0 ? 0 : System.currentTimeMillis() + timeout;
 		do {
 			final Tracked t = tracked();
 			if (t == null) { /* if ServiceTracker is not open */
@@ -567,7 +559,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 			System.out.println("ServiceTracker.getServiceReference: " + filter);
 		}
 		ServiceReference<S>[] references = getServiceReferences();
-		int length = (references == null) ? 0 : references.length;
+		int length = references == null ? 0 : references.length;
 		if (length == 0) { /* if no service is being tracked */
 			return null;
 		}
@@ -578,23 +570,21 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 			int maxRanking = Integer.MIN_VALUE;
 			for (int i = 0; i < length; i++) {
 				Object property = references[i].getProperty(Constants.SERVICE_RANKING);
-				int ranking = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
+				int ranking = property instanceof Integer ? (Integer) property : 0;
 				rankings[i] = ranking;
 				if (ranking > maxRanking) {
 					index = i;
 					maxRanking = ranking;
 					count = 1;
-				} else {
-					if (ranking == maxRanking) {
-						count++;
-					}
-				}
+				} else if (ranking == maxRanking) {
+                	count++;
+                }
 			}
 			if (count > 1) { /* if still more than one service, select lowest id */
 				long minId = Long.MAX_VALUE;
 				for (int i = 0; i < length; i++) {
 					if (rankings[i] == maxRanking) {
-						long id = ((Long) (references[i].getProperty(Constants.SERVICE_ID))).longValue();
+						long id = (Long) references[i].getProperty(Constants.SERVICE_ID);
 						if (id < minId) {
 							index = i;
 							minId = id;
@@ -645,7 +635,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		}
 		synchronized (t) {
 			ServiceReference<S>[] references = getServiceReferences();
-			int length = (references == null) ? 0 : references.length;
+			int length = references == null ? 0 : references.length;
 			if (length == 0) {
 				return null;
 			}
@@ -780,7 +770,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	 * @since 1.5
 	 */
 	public SortedMap<ServiceReference<S>, T> getTracked() {
-		SortedMap<ServiceReference<S>, T> map = new TreeMap<ServiceReference<S>, T>(Collections.reverseOrder());
+		SortedMap<ServiceReference<S>, T> map = new TreeMap<>(Collections.reverseOrder());
 		final Tracked t = tracked();
 		if (t == null) { /* if ServiceTracker is not open */
 			return map;
@@ -838,7 +828,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		}
 		synchronized (t) {
 			ServiceReference<S>[] references = getServiceReferences();
-			int length = (references == null) ? 0 : references.length;
+			int length = references == null ? 0 : references.length;
 			if (length == 0) {
 				if (array.length > 0) {
 					array[0] = null;
@@ -871,7 +861,6 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		 * Tracked constructor.
 		 */
 		Tracked() {
-			super();
 		}
 
 		/**
@@ -980,7 +969,6 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		 * AllTracked constructor.
 		 */
 		AllTracked() {
-			super();
 		}
 	}
 }

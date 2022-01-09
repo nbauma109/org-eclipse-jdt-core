@@ -143,7 +143,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				}
 			}
 		}
-		return (result.size() == 0 ? null : result.toArray(new ExportedPackage[result.size()]));
+		return result.size() == 0 ? null : result.toArray(new ExportedPackage[result.size()]);
 	}
 
 	@Override
@@ -370,7 +370,8 @@ public class PackageAdminImpl implements PackageAdmin {
 		/**
 		 * @deprecated
 		 */
-		@Override
+		@Deprecated
+        @Override
 		public String getSpecificationVersion() {
 			return getVersion().toString();
 		}

@@ -82,7 +82,6 @@ public class CompletionOnExplicitConstructorCall extends ExplicitConstructorCall
 		}
 		if (receiverType == null)
 			throw new CompletionNodeFound();
-		else
-			throw new CompletionNodeFound(this, receiverType, scope);
+        throw new CompletionNodeFound(this, receiverType, scope);
 	}
 }

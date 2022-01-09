@@ -86,7 +86,7 @@ public final class Context extends NamedHandleObject implements Comparable {
 	 *            an attempt is made to register an instance which is already
 	 *            registered with this instance, no operation is performed.
 	 */
-	public final void addContextListener(final IContextListener listener) {
+	public void addContextListener(final IContextListener listener) {
 		if (listener == null) {
 			throw new NullPointerException();
 		}
@@ -99,7 +99,7 @@ public final class Context extends NamedHandleObject implements Comparable {
 	}
 
 	@Override
-	public final int compareTo(final Object object) {
+	public int compareTo(final Object object) {
 		final Context scheme = (Context) object;
 		int compareTo = Util.compare(this.id, scheme.id);
 		if (compareTo == 0) {
@@ -136,7 +136,7 @@ public final class Context extends NamedHandleObject implements Comparable {
 	 *            The parent identifier for this context; may be
 	 *            <code>null</code>.
 	 */
-	public final void define(final String name, final String description, final String parentId) {
+	public void define(final String name, final String description, final String parentId) {
 		if (name == null) {
 			throw new NullPointerException("The name of a context cannot be null"); //$NON-NLS-1$
 		}
@@ -165,7 +165,7 @@ public final class Context extends NamedHandleObject implements Comparable {
 	 *            The event to send to the listeners; must not be
 	 *            <code>null</code>.
 	 */
-	private final void fireContextChanged(final ContextEvent event) {
+	private void fireContextChanged(final ContextEvent event) {
 		if (event == null) {
 			throw new NullPointerException("Cannot send a null event to listeners."); //$NON-NLS-1$
 		}
@@ -193,7 +193,7 @@ public final class Context extends NamedHandleObject implements Comparable {
 	 * @throws NotDefinedException
 	 *             if this instance is not defined.
 	 */
-	public final String getParentId() throws NotDefinedException {
+	public String getParentId() throws NotDefinedException {
 		if (!defined) {
 			throw new NotDefinedException("Cannot get the parent identifier from an undefined context. " //$NON-NLS-1$
 					+ id);
@@ -212,7 +212,7 @@ public final class Context extends NamedHandleObject implements Comparable {
 	 *            already registered with this instance, no operation is
 	 *            performed.
 	 */
-	public final void removeContextListener(final IContextListener contextListener) {
+	public void removeContextListener(final IContextListener contextListener) {
 		if (contextListener == null) {
 			throw new NullPointerException("Cannot remove a null listener."); //$NON-NLS-1$
 		}
@@ -235,7 +235,7 @@ public final class Context extends NamedHandleObject implements Comparable {
 	 * @return The string representation; never <code>null</code>.
 	 */
 	@Override
-	public final String toString() {
+	public String toString() {
 		if (string == null) {
 			final StringBuilder stringBuffer = new StringBuilder("Context("); //$NON-NLS-1$
 			stringBuffer.append(id);
@@ -259,7 +259,7 @@ public final class Context extends NamedHandleObject implements Comparable {
 	 * Notification is sent to all listeners.
 	 */
 	@Override
-	public final void undefine() {
+	public void undefine() {
 		string = null;
 
 		final boolean definedChanged = defined;

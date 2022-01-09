@@ -147,8 +147,8 @@ public abstract class AbstractClassFile extends Openable implements IClassFile, 
 		if (elt instanceof IParent) {
 			try {
 				IJavaElement[] children = ((IParent) elt).getChildren();
-				for (int i = 0; i < children.length; i++) {
-					IJavaElement match = findElement(children[i], position, mapper);
+				for (IJavaElement child : children) {
+					IJavaElement match = findElement(child, position, mapper);
 					if (match != null) {
 						return match;
 					}
@@ -170,49 +170,45 @@ public abstract class AbstractClassFile extends Openable implements IClassFile, 
 	 */
 	public String getPathIdentifier() {
 		JavaElement pkg = getParent();
-		if (pkg instanceof JarPackageFragment) {
-			JarPackageFragmentRoot root = (JarPackageFragmentRoot) pkg.getParent();
-			String entryName = Util.concatWith(((PackageFragment) pkg).names, getElementName(), '/');
-			entryName = root.getClassFilePath(entryName);
-			String rootPath = root.getPath().toOSString();
-			if (org.eclipse.jdt.internal.compiler.util.Util.isJrt(rootPath)) {
-				// container + module + class
-				return rootPath + '/' + root.getElementName() + '/' +entryName;
-			} else {
-				// container + class
-				return rootPath + '/' + entryName;
-			}
-		} else {
+		if (!(pkg instanceof JarPackageFragment)) {
 			IFile file = (IFile) resource();
 			IPath location = file.getLocation();
 			return location == null? file.getFullPath().toPortableString() : location.toOSString();
 		}
+        JarPackageFragmentRoot root = (JarPackageFragmentRoot) pkg.getParent();
+        String entryName = Util.concatWith(((PackageFragment) pkg).names, getElementName(), '/');
+        entryName = root.getClassFilePath(entryName);
+        String rootPath = root.getPath().toOSString();
+        if (org.eclipse.jdt.internal.compiler.util.Util.isJrt(rootPath)) {
+        	// container + module + class
+        	return rootPath + '/' + root.getElementName() + '/' +entryName;
+        }
+        // container + class
+        return rootPath + '/' + entryName;
 	}
 
 	@Override
 	public byte[] getBytes() throws JavaModelException {
 		JavaElement pkg = getParent();
-		if (pkg instanceof JarPackageFragment) {
-			JarPackageFragmentRoot root = (JarPackageFragmentRoot) pkg.getParent();
-			try {
-				String entryName = Util.concatWith(((PackageFragment) pkg).names, getElementName(), '/');
-				entryName = root.getClassFilePath(entryName);
-				return getClassFileContent(root, entryName);
-				// Java 9 - The below exception is not thrown in new scheme of things. Could cause issues?
-	//			throw new JavaModelException(new JavaModelStatus(IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST, this));
-			} catch (IOException ioe) {
-				throw new JavaModelException(ioe, IJavaModelStatusConstants.IO_EXCEPTION);
-			} catch (CoreException e) {
-				if (e instanceof JavaModelException) {
-					throw (JavaModelException)e;
-				} else {
-					throw new JavaModelException(e);
-				}
-			}
-		} else {
+		if (!(pkg instanceof JarPackageFragment)) {
 			IFile file = (IFile) resource();
 			return Util.getResourceContentsAsByteArray(file);
 		}
+        JarPackageFragmentRoot root = (JarPackageFragmentRoot) pkg.getParent();
+        try {
+        	String entryName = Util.concatWith(((PackageFragment) pkg).names, getElementName(), '/');
+        	entryName = root.getClassFilePath(entryName);
+        	return getClassFileContent(root, entryName);
+        	// Java 9 - The below exception is not thrown in new scheme of things. Could cause issues?
+//			throw new JavaModelException(new JavaModelStatus(IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST, this));
+        } catch (IOException ioe) {
+        	throw new JavaModelException(ioe, IJavaModelStatusConstants.IO_EXCEPTION);
+        } catch (CoreException e) {
+        	if (e instanceof JavaModelException) {
+        		throw (JavaModelException)e;
+        	}
+            throw new JavaModelException(e);
+        }
 	}
 	protected byte[] getClassFileContent(JarPackageFragmentRoot root, String className) throws CoreException, IOException {
 		byte[] contents = null;
@@ -243,15 +239,14 @@ public abstract class AbstractClassFile extends Openable implements IClassFile, 
 		IStatus status = validateClassFile();
 		if (status.isOK()) {
 			return super.getBuffer();
-		} else {
-			switch (status.getCode()) {
-			case IJavaModelStatusConstants.ELEMENT_NOT_ON_CLASSPATH: // don't throw a JavaModelException to be able to open .class file outside the classpath (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=138507 )
-			case IJavaModelStatusConstants.INVALID_ELEMENT_TYPES: // don't throw a JavaModelException to be able to open .class file in proj==src case without source (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=221904 )
-				return null;
-			default:
-				throw new JavaModelException(status);
-			}
 		}
+        switch (status.getCode()) {
+        case IJavaModelStatusConstants.ELEMENT_NOT_ON_CLASSPATH: // don't throw a JavaModelException to be able to open .class file outside the classpath (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=138507 )
+        case IJavaModelStatusConstants.INVALID_ELEMENT_TYPES: // don't throw a JavaModelException to be able to open .class file in proj==src case without source (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=221904 )
+        	return null;
+        default:
+        	throw new JavaModelException(status);
+        }
 	}
 	/**
 	 * @see IMember#getTypeRoot()
@@ -271,17 +266,14 @@ public abstract class AbstractClassFile extends Openable implements IClassFile, 
 		IPackageFragmentRoot root= (IPackageFragmentRoot)getParent().getParent();
 		if (root.isArchive()) {
 			return null;
-		} else {
-			return getUnderlyingResource();
 		}
+        return getUnderlyingResource();
 	}
 	public IJavaElement getElementAtConsideringSibling(int position) throws JavaModelException {
 		IPackageFragment fragment = (IPackageFragment)getParent();
 		PackageFragmentRoot root = (PackageFragmentRoot) fragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 		SourceMapper mapper = root.getSourceMapper();
-		if (mapper == null) {
-			return null;
-		} else {
+		if (mapper != null) {
 			int index = this.name.indexOf('$');
 			int prefixLength = index < 0 ? this.name.length() : index;
 
@@ -289,9 +281,9 @@ public abstract class AbstractClassFile extends Openable implements IClassFile, 
 			int start = -1;
 			int end = Integer.MAX_VALUE;
 			IJavaElement[] children = fragment.getChildren();
-			for (int i = 0; i < children.length; i++) {
-				if (children[i] instanceof IOrdinaryClassFile) {
-					IOrdinaryClassFile classFile = (IOrdinaryClassFile) children[i];
+			for (IJavaElement child : children) {
+				if (child instanceof IOrdinaryClassFile) {
+					IOrdinaryClassFile classFile = (IOrdinaryClassFile) child;
 					String childName = classFile.getElementName();
 
 					int childIndex = childName.indexOf('$');
@@ -317,8 +309,8 @@ public abstract class AbstractClassFile extends Openable implements IClassFile, 
 			if(type != null) {
 				return findElement(type, position, mapper);
 			}
-			return null;
 		}
+        return null;
 	}
 	@Override
 	public String getElementName() {
@@ -340,9 +332,8 @@ public abstract class AbstractClassFile extends Openable implements IClassFile, 
 		PackageFragmentRoot root = getPackageFragmentRoot();
 		if (root.isArchive()) {
 			return root.getPath();
-		} else {
-			return getParent().getPath().append(getElementName());
 		}
+        return getParent().getPath().append(getElementName());
 	}
 
 	/*
@@ -369,13 +360,12 @@ public abstract class AbstractClassFile extends Openable implements IClassFile, 
 	@Override
 	public ISourceRange getSourceRange() throws JavaModelException {
 		IBuffer buffer = getBuffer();
-		if (buffer != null) {
-			String contents = buffer.getContents();
-			if (contents == null) return null;
-			return new SourceRange(0, contents.length());
-		} else {
+		if (buffer == null) {
 			return null;
 		}
+        String contents = buffer.getContents();
+        if (contents == null) return null;
+        return new SourceRange(0, contents.length());
 	}
 	/**
 	 * @see IClassFile
@@ -502,7 +492,7 @@ public abstract class AbstractClassFile extends Openable implements IClassFile, 
 			if (!underlyingResource.isAccessible())
 				return newDoesNotExistStatus();
 			PackageFragmentRoot root;
-			if ((underlyingResource instanceof IFolder) && (root = getPackageFragmentRoot()).isArchive()) { // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=204652
+			if (underlyingResource instanceof IFolder && (root = getPackageFragmentRoot()).isArchive()) { // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=204652
 				return root.newDoesNotExistStatus();
 			}
 		}

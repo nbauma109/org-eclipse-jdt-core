@@ -143,9 +143,7 @@ public class ClasspathJrt extends ClasspathLocation implements IMultiModuleEntry
 				@Override
 				public FileVisitResult visitFile(java.nio.file.Path dir, java.nio.file.Path modPath, BasicFileAttributes attrs) throws IOException {
 					Path parent = dir.getParent();
-					if (parent == null)
-						return FileVisitResult.CONTINUE;
-					if (!parent.toString().equals(qualifiedPackageName)) {
+					if (parent == null || !parent.toString().equals(qualifiedPackageName)) {
 						return FileVisitResult.CONTINUE;
 					}
 					String fileName = dir.getName(dir.getNameCount() - 1).toString();
@@ -344,16 +342,14 @@ public class ClasspathJrt extends ClasspathLocation implements IMultiModuleEntry
 //	}
 	@Override
 	public void reset() {
-		if (this.closeZipFileAtEnd) {
-			if (this.annotationZipFile != null) {
-				try {
-					this.annotationZipFile.close();
-				} catch(IOException e) {
-					// ignore
-				}
-				this.annotationZipFile = null;
-			}
-		}
+		if (this.closeZipFileAtEnd && this.annotationZipFile != null) {
+        	try {
+        		this.annotationZipFile.close();
+        	} catch(IOException e) {
+        		// ignore
+        	}
+        	this.annotationZipFile = null;
+        }
 		if (this.annotationPaths != null) {
 			//this.packageCache = null;
 			this.annotationPaths = null;

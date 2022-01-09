@@ -126,17 +126,15 @@ public class FloatUtil {
 		int next = 0;
 		char nextChar = source[next];
 		nextChar = source[next];
-		if (nextChar == '0') {
-			next++;
-		} else {
+		if (nextChar != '0') {
 			throw new NumberFormatException();
 		}
+        next++;
 		nextChar = source[next];
-		if (nextChar == 'X' || nextChar == 'x') {
-			next++;
-		} else {
+		if (nextChar != 'X' && nextChar != 'x') {
 			throw new NumberFormatException();
 		}
+        next++;
 
 		// Step 2: process leading '0's either before or after the '.'
 		int binaryPointPosition = -1;
@@ -181,7 +179,7 @@ public class FloatUtil {
 			case 'd':
 			case 'e':
 			case 'f':
-				hexdigit = (nextChar - 'a') + 10;
+				hexdigit = nextChar - 'a' + 10;
 				break;
 			case 'A':
 			case 'B':
@@ -189,7 +187,7 @@ public class FloatUtil {
 			case 'D':
 			case 'E':
 			case 'F':
-				hexdigit = (nextChar - 'A') + 10;
+				hexdigit = nextChar - 'A' + 10;
 				break;
 			case '.':
 				binaryPointPosition = next;
@@ -223,11 +221,10 @@ public class FloatUtil {
 
 		// Step 4: process the 'P'
 		nextChar = source[next];
-		if (nextChar == 'P' || nextChar == 'p') {
-			next++;
-		} else {
+		if (nextChar != 'P' && nextChar != 'p') {
 			throw new NumberFormatException();
 		}
+        next++;
 
 		// Step 5: process the exponent
 		int exponent = 0;
@@ -254,7 +251,7 @@ public class FloatUtil {
 			case '8':
 			case '9':
 				int digit = nextChar - '0';
-				exponent = (exponent * 10) + digit;
+				exponent = exponent * 10 + digit;
 				next++;
 				continue loop;
 			default:
@@ -292,7 +289,7 @@ public class FloatUtil {
 		// mantissa is in right-hand mantissaBits
 		// ensure that top bit (as opposed to hex digit) is 1
 		int scaleFactorCompensation = 0;
-		long top = (mantissa >>> (mantissaBits - 4));
+		long top = mantissa >>> mantissaBits - 4;
 		if ((top & 0x8) == 0) {
 			mantissaBits--;
 			scaleFactorCompensation++;
@@ -314,17 +311,17 @@ public class FloatUtil {
 				// more bits than we can keep
 				int extraBits = mantissaBits - DOUBLE_PRECISION;
 				// round to DOUBLE_PRECISION bits
-				fraction = mantissa >>> (extraBits - 1);
+				fraction = mantissa >>> extraBits - 1;
 				long lowBit = fraction & 0x1;
 				fraction += lowBit;
 				fraction = fraction >>> 1;
-				if ((fraction & (1L << DOUBLE_PRECISION)) != 0) {
+				if ((fraction & 1L << DOUBLE_PRECISION) != 0) {
 					fraction = fraction >>> 1;
 					scaleFactorCompensation -= 1;
 				}
 			} else {
 				// less bits than the faction can hold - pad on right with 0s
-				fraction = mantissa << (DOUBLE_PRECISION - mantissaBits);
+				fraction = mantissa << DOUBLE_PRECISION - mantissaBits;
 			}
 
 			int scaleFactor = 0; // how many bits to move '.' to before leading hex digit
@@ -332,18 +329,16 @@ public class FloatUtil {
 				if (leadingDigitPosition < binaryPointPosition) {
 					// e.g., 0x80.0p0 has scaleFactor == +8
 					scaleFactor = 4 * (binaryPointPosition - leadingDigitPosition);
-					// e.g., 0x10.0p0 has scaleFactorCompensation == +3
-					scaleFactor -= scaleFactorCompensation;
 				} else {
 					// e.g., 0x0.08p0 has scaleFactor == -4
 					scaleFactor = -4
 							* (leadingDigitPosition - binaryPointPosition - 1);
-					// e.g., 0x0.01p0 has scaleFactorCompensation == +3
-					scaleFactor -= scaleFactorCompensation;
 				}
+                // e.g., 0x10.0p0 has scaleFactorCompensation == +3
+                scaleFactor -= scaleFactorCompensation;
 			}
 
-			int e = (exponentSign * exponent) + scaleFactor;
+			int e = exponentSign * exponent + scaleFactor;
 			if (e - 1 > MAX_DOUBLE_EXPONENT) {
 				// overflow to +infinity
 				result = Double.doubleToLongBits(Double.POSITIVE_INFINITY);
@@ -352,12 +347,12 @@ public class FloatUtil {
 				// the left most bit must be discarded (it's always a 1)
 				long biasedExponent = e - 1 + DOUBLE_EXPONENT_BIAS;
 				result = fraction & ~(1L << DOUBLE_FRACTION_WIDTH);
-				result |= (biasedExponent << DOUBLE_EXPONENT_SHIFT);
+				result |= biasedExponent << DOUBLE_EXPONENT_SHIFT;
 			} else if (e - 1 > MIN_UNNORMALIZED_DOUBLE_EXPONENT) {
 				// can be represented as an unnormalized double
 				long biasedExponent = 0;
-				result = fraction >>> (MIN_NORMALIZED_DOUBLE_EXPONENT - e + 1);
-				result |= (biasedExponent << DOUBLE_EXPONENT_SHIFT);
+				result = fraction >>> MIN_NORMALIZED_DOUBLE_EXPONENT - e + 1;
+				result |= biasedExponent << DOUBLE_EXPONENT_SHIFT;
 			} else {
 				// underflow - return Double.NaN
 				result = Double.doubleToLongBits(Double.NaN);
@@ -371,17 +366,17 @@ public class FloatUtil {
 			// more bits than we can keep
 			int extraBits = mantissaBits - SINGLE_PRECISION;
 			// round to DOUBLE_PRECISION bits
-			fraction = mantissa >>> (extraBits - 1);
+			fraction = mantissa >>> extraBits - 1;
 			long lowBit = fraction & 0x1;
 			fraction += lowBit;
 			fraction = fraction >>> 1;
-			if ((fraction & (1L << SINGLE_PRECISION)) != 0) {
+			if ((fraction & 1L << SINGLE_PRECISION) != 0) {
 				fraction = fraction >>> 1;
 				scaleFactorCompensation -= 1;
 			}
 		} else {
 			// less bits than the faction can hold - pad on right with 0s
-			fraction = mantissa << (SINGLE_PRECISION - mantissaBits);
+			fraction = mantissa << SINGLE_PRECISION - mantissaBits;
 		}
 
 		int scaleFactor = 0; // how many bits to move '.' to before leading hex digit
@@ -389,18 +384,16 @@ public class FloatUtil {
 			if (leadingDigitPosition < binaryPointPosition) {
 				// e.g., 0x80.0p0 has scaleFactor == +8
 				scaleFactor = 4 * (binaryPointPosition - leadingDigitPosition);
-				// e.g., 0x10.0p0 has scaleFactorCompensation == +3
-				scaleFactor -= scaleFactorCompensation;
 			} else {
 				// e.g., 0x0.08p0 has scaleFactor == -4
 				scaleFactor = -4
 						* (leadingDigitPosition - binaryPointPosition - 1);
-				// e.g., 0x0.01p0 has scaleFactorCompensation == +3
-				scaleFactor -= scaleFactorCompensation;
 			}
+            // e.g., 0x10.0p0 has scaleFactorCompensation == +3
+            scaleFactor -= scaleFactorCompensation;
 		}
 
-		int e = (exponentSign * exponent) + scaleFactor;
+		int e = exponentSign * exponent + scaleFactor;
 		if (e - 1 > MAX_SINGLE_EXPONENT) {
 			// overflow to +infinity
 			result = Float.floatToIntBits(Float.POSITIVE_INFINITY);
@@ -409,12 +402,12 @@ public class FloatUtil {
 			// the left most bit must be discarded (it's always a 1)
 			long biasedExponent = e - 1 + SINGLE_EXPONENT_BIAS;
 			result = fraction & ~(1L << SINGLE_FRACTION_WIDTH);
-			result |= (biasedExponent << SINGLE_EXPONENT_SHIFT);
+			result |= biasedExponent << SINGLE_EXPONENT_SHIFT;
 		} else if (e - 1 > MIN_UNNORMALIZED_SINGLE_EXPONENT) {
 			// can be represented as an unnormalized single
 			long biasedExponent = 0;
-			result = fraction >>> (MIN_NORMALIZED_SINGLE_EXPONENT - e + 1);
-			result |= (biasedExponent << SINGLE_EXPONENT_SHIFT);
+			result = fraction >>> MIN_NORMALIZED_SINGLE_EXPONENT - e + 1;
+			result |= biasedExponent << SINGLE_EXPONENT_SHIFT;
 		} else {
 			// underflow - return Float.NaN
 			result = Float.floatToIntBits(Float.NaN);

@@ -33,7 +33,7 @@ public class FilePath {
 	private static final byte HAS_LEADING = 1;
 	private static final byte HAS_TRAILING = 4;
 	// Constant value indicating no segments
-	private static final String[] NO_SEGMENTS = new String[0];
+	private static final String[] NO_SEGMENTS = {};
 	private final static String PARENT_DIR = ".."; //$NON-NLS-1$
 	private final static char SEPARATOR = '/';
 	private final static String UNC_SLASHES = "//"; //$NON-NLS-1$
@@ -69,7 +69,7 @@ public class FilePath {
 	 */
 	private int computeSegmentCount(String path) {
 		int len = path.length();
-		if (len == 0 || (len == 1 && path.charAt(0) == SEPARATOR))
+		if (len == 0 || len == 1 && path.charAt(0) == SEPARATOR)
 			return 0;
 		int count = 1;
 		int prev = -1;
@@ -168,12 +168,11 @@ public class FilePath {
 				int uncPrefixEnd = original.indexOf(SEPARATOR, 2);
 				if (uncPrefixEnd >= 0)
 					uncPrefixEnd = original.indexOf(SEPARATOR, uncPrefixEnd + 1);
-				if (uncPrefixEnd >= 0) {
-					device = original.substring(0, uncPrefixEnd);
-					original = original.substring(uncPrefixEnd);
-				} else
-					// not a valid UNC
+				if (uncPrefixEnd < 0)
+                    // not a valid UNC
 					throw new IllegalArgumentException("Not a valid UNC: " + original); //$NON-NLS-1$
+                device = original.substring(0, uncPrefixEnd);
+                original = original.substring(uncPrefixEnd);
 			}
 		}
 		// device names letters and UNCs properly stripped off
@@ -209,7 +208,7 @@ public class FilePath {
 		int baseCount = this.segments.length;
 		int count = this.matchingFirstSegments(base);
 		if (baseCount == count && count == base.segments.length)
-			return base.hasTrailingSlash() ? ("." + SEPARATOR) : "."; //$NON-NLS-1$ //$NON-NLS-2$
+			return base.hasTrailingSlash() ? "." + SEPARATOR : "."; //$NON-NLS-1$ //$NON-NLS-2$
 		StringBuilder relative = new StringBuilder(); //
 		for (int j = 0; j < baseCount - count; j++)
 			relative.append(PARENT_DIR + SEPARATOR);

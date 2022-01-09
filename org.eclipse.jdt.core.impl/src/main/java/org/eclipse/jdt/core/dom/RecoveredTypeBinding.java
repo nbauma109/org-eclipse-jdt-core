@@ -155,9 +155,8 @@ class RecoveredTypeBinding implements ITypeBinding {
 			if (this.binding.isArrayType()) {
 				ArrayBinding arrayBinding = (ArrayBinding) this.binding;
 				return new RecoveredTypeBinding(this.resolver, arrayBinding.leafComponentType);
-			} else {
-				return new RecoveredTypeBinding(this.resolver, this.binding);
 			}
+            return new RecoveredTypeBinding(this.resolver, this.binding);
 		}
 		if (this.innerTypeBinding != null) {
 			return this.innerTypeBinding.getElementType();
@@ -263,19 +262,18 @@ class RecoveredTypeBinding implements ITypeBinding {
 	@Override
 	public String getQualifiedName() {
 		ReferenceBinding referenceBinding = getReferenceBinding();
-		if (referenceBinding != null) {
-			StringBuffer buffer = new StringBuffer();
-			char[] brackets = new char[this.dimensions * 2];
-			for (int i = this.dimensions * 2 - 1; i >= 0; i -= 2) {
-				brackets[i] = ']';
-				brackets[i - 1] = '[';
-			}
-			buffer.append(CharOperation.toString(referenceBinding.compoundName));
-			buffer.append(brackets);
-			return String.valueOf(buffer);
-		} else {
+		if (referenceBinding == null) {
 			return getName();
 		}
+        StringBuffer buffer = new StringBuffer();
+        char[] brackets = new char[this.dimensions * 2];
+        for (int i = this.dimensions * 2 - 1; i >= 0; i -= 2) {
+        	brackets[i] = ']';
+        	brackets[i - 1] = '[';
+        }
+        buffer.append(CharOperation.toString(referenceBinding.compoundName));
+        buffer.append(brackets);
+        return String.valueOf(buffer);
 	}
 
 	private ReferenceBinding getReferenceBinding() {

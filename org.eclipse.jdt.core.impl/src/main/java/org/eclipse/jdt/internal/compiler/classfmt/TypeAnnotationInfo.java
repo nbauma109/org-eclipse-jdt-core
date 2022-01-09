@@ -180,8 +180,8 @@ public int hashCode() {
 	result = prime * result + this.info;
 	result = prime * result + this.info2;
 	if (this.typePath != null) {
-		for (int i = 0, max = this.typePath.length; i < max; i++) {
-			result = prime * result + this.typePath[i];
+		for (int element : this.typePath) {
+			result = prime * result + element;
 		}
 	}
 	return result;
@@ -192,28 +192,13 @@ public boolean equals(Object obj) {
 	if (this == obj) {
 		return true;
 	}
-	if (obj == null) {
-		return false;
-	}
-	if (getClass() != obj.getClass()) {
+	if (obj == null || getClass() != obj.getClass()) {
 		return false;
 	}
 
 	TypeAnnotationInfo other = (TypeAnnotationInfo) obj;
 
-	if (this.targetType != other.targetType) {
-		return false;
-	}
-
-	if (this.info != other.info) {
-		return false;
-	}
-
-	if (this.info2 != other.info2) {
-		return false;
-	}
-
-	if (!Arrays.equals(this.typePath, other.typePath)) {
+	if (this.targetType != other.targetType || this.info != other.info || this.info2 != other.info2 || !Arrays.equals(this.typePath, other.typePath)) {
 		return false;
 	}
 

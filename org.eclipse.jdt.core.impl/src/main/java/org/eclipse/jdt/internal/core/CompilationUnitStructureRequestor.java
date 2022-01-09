@@ -146,7 +146,7 @@ protected CompilationUnitStructureRequestor(ICompilationUnit unit, CompilationUn
 @Override
 public void acceptImport(int declarationStart, int declarationEnd, int nameSourceStart, int nameSourceEnd, char[][] tokens, boolean onDemand, int modifiers) {
 	JavaElement parentHandle= (JavaElement) this.handleStack.peek();
-	if (!(parentHandle.getElementType() == IJavaElement.COMPILATION_UNIT)) {
+	if (parentHandle.getElementType() != IJavaElement.COMPILATION_UNIT) {
 		Assert.isTrue(false); // Should not happen
 	}
 
@@ -214,8 +214,7 @@ public void acceptPackage(ImportReference importReference) {
 		this.newElements.put(handle, info);
 
 		if (importReference.annotations != null) {
-			for (int i = 0, length = importReference.annotations.length; i < length; i++) {
-				org.eclipse.jdt.internal.compiler.ast.Annotation annotation = importReference.annotations[i];
+			for (org.eclipse.jdt.internal.compiler.ast.Annotation annotation : importReference.annotations) {
 				acceptAnnotation(annotation, info, handle);
 			}
 		}
@@ -241,13 +240,12 @@ protected SourceField createField(JavaElement parent, FieldInfo fieldInfo) {
 }
 protected SourceField createRecordComponent(JavaElement parent, FieldInfo compInfo) {
 	String name = JavaModelManager.getJavaModelManager().intern(new String(compInfo.name));
-	SourceField field = new SourceField(parent, name) {
+	return new SourceField(parent, name) {
 		@Override
 		public boolean isRecordComponent() throws JavaModelException {
 			return true;
 		}
 	};
-	return field;
 }
 protected ImportContainer createImportContainer(ICompilationUnit parent) {
 	return (ImportContainer)parent.getImportContainer();
@@ -460,8 +458,7 @@ private SourceMethodElementInfo createMethodInfo(MethodInfo methodInfo, SourceMe
 	this.newElements.put(handle, info);
 
 	if (methodInfo.typeParameters != null) {
-		for (int i = 0, length = methodInfo.typeParameters.length; i < length; i++) {
-			TypeParameterInfo typeParameterInfo = methodInfo.typeParameters[i];
+		for (TypeParameterInfo typeParameterInfo : methodInfo.typeParameters) {
 			acceptTypeParameter(typeParameterInfo, info);
 		}
 	}
@@ -512,8 +509,7 @@ private LocalVariable[] acceptMethodParameters(Argument[] arguments, JavaElement
 		this.handleStack.push(result[i]);
 		if (argument.annotations != null) {
 			paramAnnotations[i] = new Annotation[argument.annotations.length];
-			for (int  j = 0; j < argument.annotations.length; j++ ) {
-				org.eclipse.jdt.internal.compiler.ast.Annotation annotation = argument.annotations[j];
+			for (org.eclipse.jdt.internal.compiler.ast.Annotation annotation : argument.annotations) {
 				acceptAnnotation(annotation, localVarInfo, result[i]);
 			}
 		}
@@ -601,8 +597,7 @@ private SourceTypeElementInfo createTypeInfo(TypeInfo typeInfo, SourceType handl
 	this.newElements.put(handle, info);
 
 	if (typeInfo.typeParameters != null) {
-		for (int i = 0, length = typeInfo.typeParameters.length; i < length; i++) {
-			TypeParameterInfo typeParameterInfo = typeInfo.typeParameters[i];
+		for (TypeParameterInfo typeParameterInfo : typeInfo.typeParameters) {
 			acceptTypeParameter(typeParameterInfo, info);
 		}
 	}
@@ -716,8 +711,8 @@ public void exitField(int initializationStart, int declarationEnd, int declarati
 		int flags = info.flags;
 		Object typeInfo;
 		if (Flags.isFinal(flags)
-				|| ((typeInfo = this.infoStack.peek()) instanceof TypeInfo
-					 && (Flags.isInterface(((TypeInfo)typeInfo).modifiers)))) {
+				|| (typeInfo = this.infoStack.peek()) instanceof TypeInfo
+					 && Flags.isInterface(((TypeInfo)typeInfo).modifiers)) {
 			int length = declarationEnd - initializationStart;
 			if (length > 0) {
 				char[] initializer = new char[length];
@@ -848,9 +843,9 @@ public void exitType(int declarationEnd) {
 protected void resolveDuplicates(SourceRefElement handle) {
 	Integer occurenceCount = this.occurenceCounts.get(handle);
 	if (occurenceCount == null)
-		this.occurenceCounts.put(handle, Integer.valueOf(1));
+		this.occurenceCounts.put(handle, 1);
 	else {
-		this.occurenceCounts.put(handle, Integer.valueOf(occurenceCount.intValue() + 1));
+		this.occurenceCounts.put(handle, occurenceCount.intValue() + 1);
 		handle.occurrenceCount = occurenceCount.intValue() + 1;
 	}
 
@@ -861,9 +856,9 @@ protected void resolveDuplicates(SourceRefElement handle) {
 		Object key = handle.getParent().getAncestor(IJavaElement.TYPE);
 		occurenceCount = this.localOccurrenceCounts.get(key);
 		if (occurenceCount == null)
-			this.localOccurrenceCounts.put(key, Integer.valueOf(1));
+			this.localOccurrenceCounts.put(key, 1);
 		else {
-			this.localOccurrenceCounts.put(key, Integer.valueOf(occurenceCount.intValue() + 1));
+			this.localOccurrenceCounts.put(key, occurenceCount.intValue() + 1);
 			((SourceType)handle).localOccurrenceCount = occurenceCount.intValue() + 1;
 		}
 	}
@@ -895,24 +890,29 @@ private IJavaElement[] getChildren(Object info) {
 protected Object getMemberValue(org.eclipse.jdt.internal.core.MemberValuePair memberValuePair, Expression expression) {
 	if (expression instanceof NullLiteral) {
 		return null;
-	} else if (expression instanceof Literal) {
+	}
+    if (expression instanceof Literal) {
 		((Literal) expression).computeConstant();
 		return Util.getAnnotationMemberValue(memberValuePair, expression.constant);
-	} else if (expression instanceof org.eclipse.jdt.internal.compiler.ast.Annotation) {
+	}
+    if (expression instanceof org.eclipse.jdt.internal.compiler.ast.Annotation) {
 		org.eclipse.jdt.internal.compiler.ast.Annotation annotation = (org.eclipse.jdt.internal.compiler.ast.Annotation) expression;
 		Object handle = acceptAnnotation(annotation, null, (JavaElement) this.handleStack.peek());
 		memberValuePair.valueKind = IMemberValuePair.K_ANNOTATION;
 		return handle;
-	} else if (expression instanceof ClassLiteralAccess) {
+	}
+    if (expression instanceof ClassLiteralAccess) {
 		ClassLiteralAccess classLiteral = (ClassLiteralAccess) expression;
 		char[] name = CharOperation.concatWith(classLiteral.type.getTypeName(), '.');
 		memberValuePair.valueKind = IMemberValuePair.K_CLASS;
 		return new String(name);
-	} else if (expression instanceof QualifiedNameReference) {
+	}
+    if (expression instanceof QualifiedNameReference) {
 		char[] qualifiedName = CharOperation.concatWith(((QualifiedNameReference) expression).tokens, '.');
 		memberValuePair.valueKind = IMemberValuePair.K_QUALIFIED_NAME;
 		return new String(qualifiedName);
-	} else if (expression instanceof SingleNameReference) {
+	}
+    if (expression instanceof SingleNameReference) {
 		char[] simpleName = ((SingleNameReference) expression).token;
 		if (simpleName == RecoveryScanner.FAKE_IDENTIFIER) {
 			memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
@@ -920,7 +920,8 @@ protected Object getMemberValue(org.eclipse.jdt.internal.core.MemberValuePair me
 		}
 		memberValuePair.valueKind = IMemberValuePair.K_SIMPLE_NAME;
 		return new String(simpleName);
-	} else if (expression instanceof ArrayInitializer) {
+	}
+    if (expression instanceof ArrayInitializer) {
 		memberValuePair.valueKind = -1; // modified below by the first call to getMemberValue(...)
 		Expression[] expressions = ((ArrayInitializer) expression).expressions;
 		int length = expressions == null ? 0 : expressions.length;
@@ -937,20 +938,16 @@ protected Object getMemberValue(org.eclipse.jdt.internal.core.MemberValuePair me
 		if (memberValuePair.valueKind == -1)
 			memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
 		return values;
-	} else if (expression instanceof UnaryExpression) {			// to deal with negative numerals (see bug - 248312)
-		UnaryExpression unaryExpression = (UnaryExpression) expression;
-		if ((unaryExpression.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT == OperatorIds.MINUS) {
-			if (unaryExpression.expression instanceof Literal) {
-				Literal subExpression = (Literal) unaryExpression.expression;
-				subExpression.computeConstant();
-				return Util.getNegativeAnnotationMemberValue(memberValuePair, subExpression.constant);
-			}
-		}
-		memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
-		return null;
-	} else {
-		memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
-		return null;
 	}
+    if (expression instanceof UnaryExpression) {			// to deal with negative numerals (see bug - 248312)
+    	UnaryExpression unaryExpression = (UnaryExpression) expression;
+    	if ((unaryExpression.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT == OperatorIds.MINUS && unaryExpression.expression instanceof Literal) {
+        	Literal subExpression = (Literal) unaryExpression.expression;
+        	subExpression.computeConstant();
+        	return Util.getNegativeAnnotationMemberValue(memberValuePair, subExpression.constant);
+        }
+    }
+    memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
+    return null;
 }
 }

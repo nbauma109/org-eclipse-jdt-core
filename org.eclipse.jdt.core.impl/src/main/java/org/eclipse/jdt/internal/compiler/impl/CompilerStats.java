@@ -41,6 +41,6 @@ public int compareTo(Object o) {
 	CompilerStats otherStats = (CompilerStats) o;
 	long time1 = elapsedTime();
 	long time2 = otherStats.elapsedTime();
-	return time1 < time2 ? -1 : (time1 == time2 ? 0 : 1);
+	return time1 < time2 ? -1 : time1 == time2 ? 0 : 1;
 }
 }

@@ -115,6 +115,7 @@ public interface IEvaluationContext {
 	 * @since 2.0
 	 * @deprecated Use {@link #codeComplete(String,int,CompletionRequestor)} instead.
 	 */
+    @Deprecated
     void codeComplete(
             String codeSnippet,
             int position,
@@ -148,6 +149,7 @@ public interface IEvaluationContext {
 	 * @since 3.0
 	 * @deprecated Use {@link #codeComplete(String,int,CompletionRequestor,WorkingCopyOwner)} instead.
 	 */
+    @Deprecated
     void codeComplete(
             String codeSnippet,
             int position,
@@ -556,6 +558,7 @@ public interface IEvaluationContext {
 	 *  </ul>
 	 * @deprecated - use codeComplete(String, int, ICompletionRequestor) instead
 	 */
+    @Deprecated
     void codeComplete(
             String codeSnippet,
             int position,

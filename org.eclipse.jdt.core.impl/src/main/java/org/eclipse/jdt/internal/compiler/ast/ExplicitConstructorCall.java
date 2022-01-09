@@ -101,16 +101,16 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 			// process arguments
 			if (this.arguments != null) {
 				boolean analyseResources = currentScope.compilerOptions().analyseResourceLeaks;
-				for (int i = 0, max = this.arguments.length; i < max; i++) {
+				for (Expression argument : this.arguments) {
 					flowInfo =
-						this.arguments[i]
+						argument
 							.analyseCode(currentScope, flowContext, flowInfo)
 							.unconditionalInits();
 					if (analyseResources) {
 						// if argument is an AutoCloseable insert info that it *may* be closed (by the target constructor, i.e.)
-						flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.arguments[i], flowInfo, flowContext, false);
+						flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, argument, flowInfo, flowContext, false);
 					}
-					this.arguments[i].checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
+					argument.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
 				}
 				analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
 			}
@@ -124,7 +124,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 				// check exceptions
 				flowContext.checkExceptionHandlers(
 					thrownExceptions,
-					(this.accessMode == ExplicitConstructorCall.ImplicitSuper)
+					this.accessMode == ExplicitConstructorCall.ImplicitSuper
 						? (ASTNode) currentScope.methodScope().referenceContext
 						: this,
 					flowInfo,
@@ -209,7 +209,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 	}
 
 	public boolean isImplicitSuper() {
-		return (this.accessMode == ExplicitConstructorCall.ImplicitSuper);
+		return this.accessMode == ExplicitConstructorCall.ImplicitSuper;
 	}
 
 	@Override
@@ -232,9 +232,8 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 	void manageEnclosingInstanceAccessIfNecessary(BlockScope currentScope, FlowInfo flowInfo) {
 		ReferenceBinding superTypeErasure = (ReferenceBinding) this.binding.declaringClass.erasure();
 
-		if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) == 0)	{
 		// perform some emulation work in case there is some and we are inside a local type only
-		if (superTypeErasure.isNestedType()
+		if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) == 0 && superTypeErasure.isNestedType()
 			&& currentScope.enclosingSourceType().isLocalType()) {
 
 			if (superTypeErasure.isLocalType()) {
@@ -243,7 +242,6 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 				// locally propagate, since we already now the desired shape for sure
 				currentScope.propagateInnerEmulation(superTypeErasure, this.qualification != null);
 			}
-		}
 		}
 	}
 
@@ -308,10 +306,8 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 		try {
 			AbstractMethodDeclaration methodDeclaration = methodScope.referenceMethod();
 			if (methodDeclaration != null && methodDeclaration.binding != null
-					&& methodDeclaration.binding.isCanonicalConstructor()) {
-				if (!checkAndFlagExplicitConstructorCallInCanonicalConstructor(methodDeclaration, scope))
-					return;
-			}
+            		&& methodDeclaration.binding.isCanonicalConstructor() && !checkAndFlagExplicitConstructorCallInCanonicalConstructor(methodDeclaration, scope))
+            	return;
 			if (methodDeclaration == null
 					|| !methodDeclaration.isConstructor()
 					|| ((ConstructorDeclaration) methodDeclaration).constructorCall != this) {
@@ -322,13 +318,13 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 					this.qualification.resolveType(scope);
 				}
 				if (this.typeArguments != null) {
-					for (int i = 0, max = this.typeArguments.length; i < max; i++) {
-						this.typeArguments[i].resolveType(scope, true /* check bounds*/);
+					for (TypeReference typeArgument : this.typeArguments) {
+						typeArgument.resolveType(scope, true /* check bounds*/);
 					}
 				}
 				if (this.arguments != null) {
-					for (int i = 0, max = this.arguments.length; i < max; i++) {
-						this.arguments[i].resolveType(scope);
+					for (Expression argument : this.arguments) {
+						argument.resolveType(scope);
 					}
 				}
 				return;
@@ -384,8 +380,8 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 				}
 				if (argHasError) {
 					if (this.arguments != null) { // still attempt to resolve arguments
-						for (int i = 0, max = this.arguments.length; i < max; i++) {
-							this.arguments[i].resolveType(scope);
+						for (Expression argument : this.arguments) {
+							argument.resolveType(scope);
 						}
 					}
 					return;
@@ -447,11 +443,9 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 			this.binding = findConstructorBinding(scope, this, receiverType, argumentTypes);
 
 			if (this.binding.isValidBinding()) {
-				if ((this.binding.tagBits & TagBits.HasMissingType) != 0) {
-					if (!methodScope.enclosingSourceType().isAnonymousType()) {
-						scope.problemReporter().missingTypeInConstructor(this, this.binding);
-					}
-				}
+				if ((this.binding.tagBits & TagBits.HasMissingType) != 0 && !methodScope.enclosingSourceType().isAnonymousType()) {
+                	scope.problemReporter().missingTypeInConstructor(this, this.binding);
+                }
 				if (isMethodUseDeprecated(this.binding, scope, this.accessMode != ExplicitConstructorCall.ImplicitSuper, this)) {
 					scope.problemReporter().deprecatedMethod(this.binding, this);
 				}
@@ -515,13 +509,13 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 				this.qualification.traverse(visitor, scope);
 			}
 			if (this.typeArguments != null) {
-				for (int i = 0, typeArgumentsLength = this.typeArguments.length; i < typeArgumentsLength; i++) {
-					this.typeArguments[i].traverse(visitor, scope);
+				for (TypeReference typeArgument : this.typeArguments) {
+					typeArgument.traverse(visitor, scope);
 				}
 			}
 			if (this.arguments != null) {
-				for (int i = 0, argumentLength = this.arguments.length; i < argumentLength; i++)
-					this.arguments[i].traverse(visitor, scope);
+				for (Expression argument : this.arguments)
+                    argument.traverse(visitor, scope);
 			}
 		}
 		visitor.endVisit(this, scope);

@@ -53,6 +53,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * @deprecated Use {@link ICompilationUnit} instead
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@Deprecated
 public interface IWorkingCopy {
 
 	/**
@@ -85,7 +86,8 @@ public interface IWorkingCopy {
 	 * </ul>
 	 * @deprecated Use {@link ICompilationUnit#commitWorkingCopy(boolean, IProgressMonitor)} instead.
 	 */
-	void commit(boolean force, IProgressMonitor monitor) throws JavaModelException;
+	@Deprecated
+    void commit(boolean force, IProgressMonitor monitor) throws JavaModelException;
 
 	/**
 	 * Destroys this working copy, closing its buffer and discarding
@@ -102,7 +104,8 @@ public interface IWorkingCopy {
 	 * </p>
 	 * @deprecated Use {@link ICompilationUnit#discardWorkingCopy()} instead.
 	 */
-	void destroy();
+	@Deprecated
+    void destroy();
 
 	/**
 	 * Finds the shared working copy for this element, given a <code>IBuffer</code> factory.
@@ -118,7 +121,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ICompilationUnit#findWorkingCopy(WorkingCopyOwner)} instead.
 	 */
-	IJavaElement findSharedWorkingCopy(IBufferFactory bufferFactory);
+	@Deprecated
+    IJavaElement findSharedWorkingCopy(IBufferFactory bufferFactory);
 
 	/**
 	 * Returns the original element the specified working copy element was created from,
@@ -131,7 +135,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link IJavaElement#getPrimaryElement()} instead.
 	 */
-	IJavaElement getOriginal(IJavaElement workingCopyElement);
+	@Deprecated
+    IJavaElement getOriginal(IJavaElement workingCopyElement);
 
 	/**
 	 * Returns the original element this working copy was created from,
@@ -142,7 +147,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ICompilationUnit#getPrimaryElement()} instead.
 	 */
-	IJavaElement getOriginalElement();
+	@Deprecated
+    IJavaElement getOriginalElement();
 
 	/**
 	 * Finds the elements in this compilation unit that correspond to
@@ -165,7 +171,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ICompilationUnit#findElements(IJavaElement)} instead.
 	 */
-	IJavaElement[] findElements(IJavaElement element);
+	@Deprecated
+    IJavaElement[] findElements(IJavaElement element);
 
 	/**
 	 * Finds the primary type of this compilation unit (that is, the type with the same name as the
@@ -176,7 +183,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ITypeRoot#findPrimaryType()} instead.
 	 */
-	IType findPrimaryType();
+	@Deprecated
+    IType findPrimaryType();
 
 	/**
 	 * Returns a shared working copy on this element using the given factory to create
@@ -219,7 +227,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ICompilationUnit#getWorkingCopy(WorkingCopyOwner, IProblemRequestor, IProgressMonitor)} instead.
 	 */
-	IJavaElement getSharedWorkingCopy(
+	@Deprecated
+    IJavaElement getSharedWorkingCopy(
 		IProgressMonitor monitor,
 		IBufferFactory factory,
 		IProblemRequestor problemRequestor)
@@ -246,7 +255,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ICompilationUnit#getWorkingCopy(IProgressMonitor)} instead.
 	 */
-	IJavaElement getWorkingCopy() throws JavaModelException;
+	@Deprecated
+    IJavaElement getWorkingCopy() throws JavaModelException;
 
 	/**
 	 * Returns a new working copy of this element using the given factory to create
@@ -281,7 +291,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ICompilationUnit#getWorkingCopy(WorkingCopyOwner, IProblemRequestor, IProgressMonitor)} instead.
 	 */
-	IJavaElement getWorkingCopy(
+	@Deprecated
+    IJavaElement getWorkingCopy(
 		IProgressMonitor monitor,
 		IBufferFactory factory,
 		IProblemRequestor problemRequestor)
@@ -297,7 +308,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ICompilationUnit#hasResourceChanged()} instead.
 	 */
-	boolean isBasedOn(IResource resource);
+	@Deprecated
+    boolean isBasedOn(IResource resource);
 
 	/**
 	 * Returns whether this element is a working copy.
@@ -306,7 +318,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ICompilationUnit#isWorkingCopy()} instead.
 	 */
-	boolean isWorkingCopy();
+	@Deprecated
+    boolean isWorkingCopy();
 
 	/**
 	 * Reconciles the contents of this working copy.
@@ -334,7 +347,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ICompilationUnit#reconcile(int, boolean, WorkingCopyOwner, IProgressMonitor)} instead.
 	 */
-	IMarker[] reconcile() throws JavaModelException;
+	@Deprecated
+    IMarker[] reconcile() throws JavaModelException;
 
 	/**
 	 * Reconciles the contents of this working copy.
@@ -365,7 +379,8 @@ public interface IWorkingCopy {
 	 *
 	 * @deprecated Use {@link ICompilationUnit#reconcile(int, boolean, WorkingCopyOwner, IProgressMonitor)} instead.
 	 */
-	void reconcile(boolean forceProblemDetection, IProgressMonitor monitor) throws JavaModelException;
+	@Deprecated
+    void reconcile(boolean forceProblemDetection, IProgressMonitor monitor) throws JavaModelException;
 
 	/**
 	 * Restores the contents of this working copy to the current contents of
@@ -382,5 +397,6 @@ public interface IWorkingCopy {
 	 * </ul>
 	 * @deprecated Use {@link ICompilationUnit#restore()} instead.
 	 */
-	void restore() throws JavaModelException;
+	@Deprecated
+    void restore() throws JavaModelException;
 }

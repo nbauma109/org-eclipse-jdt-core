@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.util.IRecordAttribute;
  * Default implementation of {@link IRecordAttribute}.
  */
 public class RecordAttribute extends ClassFileAttribute implements IRecordAttribute {
-	private static final IComponentInfo[] NO_ENTRIES = new IComponentInfo[0];
+	private static final IComponentInfo[] NO_ENTRIES = {};
 
 	private int nComponents;
 	private IComponentInfo[] entries;

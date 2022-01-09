@@ -26,6 +26,7 @@ package org.eclipse.jdt.core.jdom;
  * org.eclipse.jdt.core.dom package.
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@Deprecated
 public interface IDOMMethod extends IDOMMember {
 /**
  * Adds the given exception to the end of the list of exceptions this method

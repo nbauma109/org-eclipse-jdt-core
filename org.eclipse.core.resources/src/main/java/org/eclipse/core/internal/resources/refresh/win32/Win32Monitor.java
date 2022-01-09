@@ -250,10 +250,10 @@ class Win32Monitor extends Job implements IRefreshMonitor {
 			int size = fileHandleChain.size();
 			for (int i = 0; i < size; i++) {
 				ChainedHandle handle = fileHandleChain.get(i);
-				handle.setPrevious((i > 0) ? fileHandleChain.get(i - 1) : null);
-				handle.setNext((i + 1 < size) ? fileHandleChain.get(i + 1) : this);
+				handle.setPrevious(i > 0 ? fileHandleChain.get(i - 1) : null);
+				handle.setNext(i + 1 < size ? fileHandleChain.get(i + 1) : this);
 			}
-			setPrevious((size > 0) ? fileHandleChain.get(size - 1) : null);
+			setPrevious(size > 0 ? fileHandleChain.get(size - 1) : null);
 		}
 
 		@Override
@@ -306,7 +306,6 @@ class Win32Monitor extends Job implements IRefreshMonitor {
 		private IResource resource;
 
 		public ResourceHandle(IResource resource) {
-			super();
 			this.resource = resource;
 		}
 
@@ -386,7 +385,7 @@ class Win32Monitor extends Job implements IRefreshMonitor {
 	private long[][] balancedSplit(final long[] array, final int max) {
 		int elementCount = array.length;
 		// want to handle [1, max] rather than [0, max)
-		int subArrayCount = ((elementCount - 1) / max) + 1;
+		int subArrayCount = (elementCount - 1) / max + 1;
 		int subArrayBaseLength = elementCount / subArrayCount;
 		int overflow = elementCount % subArrayCount;
 		long[][] result = new long[subArrayCount][];
@@ -428,7 +427,7 @@ class Win32Monitor extends Job implements IRefreshMonitor {
 			handles = new long[size];
 			int count = 0;
 			for (Long long2 : keys) {
-				handles[count++] = long2.longValue();
+				handles[count++] = long2;
 			}
 		}
 		return balancedSplit(handles, Win32Natives.MAXIMUM_WAIT_OBJECTS);

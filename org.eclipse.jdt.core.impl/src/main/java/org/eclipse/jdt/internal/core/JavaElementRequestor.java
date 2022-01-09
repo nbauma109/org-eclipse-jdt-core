@@ -79,12 +79,12 @@ public class JavaElementRequestor implements IJavaElementRequestor {
 	/**
 	 * Empty arrays used for efficiency
 	 */
-	protected static final IField[] EMPTY_FIELD_ARRAY= new IField[0];
-	protected static final IInitializer[] EMPTY_INITIALIZER_ARRAY= new IInitializer[0];
-	protected static final IType[] EMPTY_TYPE_ARRAY= new IType[0];
-	protected static final IPackageFragment[] EMPTY_PACKAGE_FRAGMENT_ARRAY= new IPackageFragment[0];
-	protected static final IMethod[] EMPTY_METHOD_ARRAY= new IMethod[0];
-	protected static final IModuleDescription[] EMPTY_MODULE_ARRAY= new IModuleDescription[0];
+	protected static final IField[] EMPTY_FIELD_ARRAY= {};
+	protected static final IInitializer[] EMPTY_INITIALIZER_ARRAY= {};
+	protected static final IType[] EMPTY_TYPE_ARRAY= {};
+	protected static final IPackageFragment[] EMPTY_PACKAGE_FRAGMENT_ARRAY= {};
+	protected static final IMethod[] EMPTY_METHOD_ARRAY= {};
+	protected static final IModuleDescription[] EMPTY_MODULE_ARRAY= {};
 /**
  * @see IJavaElementRequestor
  */

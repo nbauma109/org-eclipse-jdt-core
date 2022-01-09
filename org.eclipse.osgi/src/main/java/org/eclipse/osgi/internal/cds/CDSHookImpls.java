@@ -22,7 +22,6 @@
 
 package org.eclipse.osgi.internal.cds;
 
-import com.ibm.oti.shared.HelperAlreadyDefinedException;
 import com.ibm.oti.shared.Shared;
 import com.ibm.oti.shared.SharedClassHelperFactory;
 import com.ibm.oti.shared.SharedClassURLHelper;
@@ -67,7 +66,7 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		// 2) the class has the magic class number CAFEBABE indicating a real class
 		// 3) the bundle file for the classpath entry is of type CDSBundleFile
 		// 4) class bytes is same as passed to weaving hook i.e. weaving hook did not modify the class bytes
-		if ((null == clazz) || (false == hasMagicClassNumber(classbytes)) || (null == getCDSBundleFile(classpathEntry.getBundleFile()))) {
+		if (null == clazz || !hasMagicClassNumber(classbytes) || null == getCDSBundleFile(classpathEntry.getBundleFile())) {
 			return;
 		}
 		try {
@@ -174,7 +173,7 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 	public boolean addClassPathEntry(ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostmanager, Generation sourceGeneration) {
 		CDSBundleFile hostFile = getCDSBundleFile(hostmanager.getGeneration().getBundleFile());
 		CDSBundleFile sourceFile = getCDSBundleFile(sourceGeneration.getBundleFile());
-		if ((hostFile != sourceFile) && (null != hostFile) && (null != sourceFile)) {
+		if (hostFile != sourceFile && null != hostFile && null != sourceFile) {
 			// Set the helper that got set on the host base bundle file in classLoaderCreated.
 			// This is to handle the case where fragments are dynamically attached
 			SharedClassURLHelper urlHelper = hostFile.getURLHelper();

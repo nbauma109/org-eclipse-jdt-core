@@ -296,14 +296,14 @@ public class TokenManager implements Iterable<Token> {
 		char c;
 		while (lineStartPosition > 0 && (c = charAt(lineStartPosition)) != '\r' && c != '\n')
 			lineStartPosition--;
-		int positionInLine = getLength(lineStartPosition, position - 1, 0);
-		return positionInLine;
+		return getLength(lineStartPosition, position - 1, 0);
 	}
 
 	private String getEscapedTokenString(Token token) {
 		if (token.getLineBreaksBefore() > 0 && charAt(token.originalStart) == '@') {
 			return "&#64;" + this.source.substring(token.originalStart + 1, token.originalEnd + 1); //$NON-NLS-1$
-		} else if (token.tokenType == TokenNameNotAToken) {
+		}
+        if (token.tokenType == TokenNameNotAToken) {
 			String text = token.toString(this.source);
 			Matcher matcher = COMMENT_LINE_ANNOTATION_PATTERN.matcher(text);
 			if (matcher.find()) {
@@ -365,11 +365,11 @@ public class TokenManager implements Iterable<Token> {
 	 * @return actual indentation that can be achieved with current settings
 	 */
 	public int toIndent(int indent, boolean isWrapped) {
-		if (this.tabChar == DefaultCodeFormatterOptions.TAB && !(isWrapped && this.wrapWithSpaces)) {
+		if (this.tabChar == DefaultCodeFormatterOptions.TAB && (!isWrapped || !this.wrapWithSpaces)) {
 			int tab = this.tabSize;
 			if (tab <= 0)
 				return 0;
-			indent = ((indent + tab - 1) / tab) * tab;
+			indent = (indent + tab - 1) / tab * tab;
 		}
 		return indent;
 	}
@@ -409,9 +409,7 @@ public class TokenManager implements Iterable<Token> {
 		operands.add(node.getLeftOperand());
 		operands.add(node.getRightOperand());
 		for (Expression o : operands) {
-			if (o instanceof StringLiteral)
-				return true;
-			if ((o instanceof InfixExpression) && isStringConcatenation((InfixExpression) o))
+			if (o instanceof StringLiteral || o instanceof InfixExpression && isStringConcatenation((InfixExpression) o))
 				return true;
 		}
 		return false;
@@ -424,7 +422,7 @@ public class TokenManager implements Iterable<Token> {
 
 	public void addNLSAlignIndex(int index, int align) {
 		if (this.tokenIndexToNLSAlign == null)
-			this.tokenIndexToNLSAlign = new HashMap<Integer, Integer>();
+			this.tokenIndexToNLSAlign = new HashMap<>();
 		this.tokenIndexToNLSAlign.put(index, align);
 	}
 

@@ -99,22 +99,20 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 			if (fieldConstant == Constant.NotAConstant) {
 				if (codegenBinding.declaringClass == null) { // array length
 					codeStream.arraylength();
-				} else {
-					if (codegenBinding.canBeSeenBy(this.actualReceiverType, this, currentScope)) {
-						TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenBinding, this.actualReceiverType, this.receiver.isImplicitThis());
-						if (isStatic) {
-							codeStream.fieldAccess(Opcodes.OPC_getstatic , codegenBinding, constantPoolDeclaringClass);
-						} else {
-							codeStream.fieldAccess(Opcodes.OPC_getfield, codegenBinding, constantPoolDeclaringClass);
-						}
-					} else {
-						if (isStatic) {
-							// we need a null on the stack to use the reflect emulation
-							codeStream.aconst_null();
-						}
-						codeStream.generateEmulatedReadAccessForField(codegenBinding);
-					}
-				}
+				} else if (codegenBinding.canBeSeenBy(this.actualReceiverType, this, currentScope)) {
+                	TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenBinding, this.actualReceiverType, this.receiver.isImplicitThis());
+                	if (isStatic) {
+                		codeStream.fieldAccess(Opcodes.OPC_getstatic , codegenBinding, constantPoolDeclaringClass);
+                	} else {
+                		codeStream.fieldAccess(Opcodes.OPC_getfield, codegenBinding, constantPoolDeclaringClass);
+                	}
+                } else {
+                	if (isStatic) {
+                		// we need a null on the stack to use the reflect emulation
+                		codeStream.aconst_null();
+                	}
+                	codeStream.generateEmulatedReadAccessForField(codegenBinding);
+                }
 				codeStream.generateImplicitConversion(this.implicitConversion);
 			} else {
 				if (!isStatic) {
@@ -123,12 +121,10 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 				}
 				codeStream.generateConstant(fieldConstant, this.implicitConversion);
 			}
-		} else {
-			if (!isStatic){
-				codeStream.invokeObjectGetClass(); // perform null check
-				codeStream.pop();
-			}
-		}
+		} else if (!isStatic){
+        	codeStream.invokeObjectGetClass(); // perform null check
+        	codeStream.pop();
+        }
 	}
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 }
@@ -177,7 +173,6 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 
 			// used to retrieve the actual value
 			codeStream.aconst_null();
-			codeStream.generateEmulatedReadAccessForField(codegenBinding);
 		} else {
 			// used to store the value
 			codeStream.generateEmulationForField(this.binding);
@@ -185,8 +180,8 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 
 			// used to retrieve the actual value
 			codeStream.dup();
-			codeStream.generateEmulatedReadAccessForField(codegenBinding);
 		}
+        codeStream.generateEmulatedReadAccessForField(codegenBinding);
 		int operationTypeID;
 		if ((operationTypeID = (this.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4) == T_JavaLangString) {
 			codeStream.generateStringConcatenationAppend(currentScope, null, expression);
@@ -207,7 +202,7 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 		// current stack is:
 		// field receiver value
 		if (valueRequired) {
-			if ((TypeBinding.equalsEquals(codegenBinding.type, TypeBinding.LONG)) || (TypeBinding.equalsEquals(codegenBinding.type, TypeBinding.DOUBLE))) {
+			if (TypeBinding.equalsEquals(codegenBinding.type, TypeBinding.LONG) || TypeBinding.equalsEquals(codegenBinding.type, TypeBinding.DOUBLE)) {
 				codeStream.dup2_x2();
 			} else {
 				codeStream.dup_x2();
@@ -288,7 +283,8 @@ public void generatePostIncrement(BlockScope currentScope, CodeStream codeStream
 public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo flowInfo, boolean isReadAccess){
 	// The private access will be managed through the code generation
 
-	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0) return;
+	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0) {
+    }
 }
 @Override
 public TypeBinding resolveType(BlockScope scope) {
@@ -306,27 +302,24 @@ public TypeBinding resolveType(BlockScope scope) {
 	this.binding = scope.getField(this.actualReceiverType, this.token, this);
 	FieldBinding firstAttempt = this.binding;
 	boolean isNotVisible = false;
-	if (!this.binding.isValidBinding()) {
-		if (this.binding instanceof ProblemFieldBinding
-			&& this.binding.problemId() == NotVisible) {
-				isNotVisible = true;
-				if (this.evaluationContext.declaringTypeName != null) {
-					this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
-					if (this.delegateThis == null){  // if not found then internal error, field should have been found
-						this.constant = Constant.NotAConstant;
-						scope.problemReporter().invalidField(this, this.actualReceiverType);
-						return null;
-					}
-					this.actualReceiverType = this.delegateThis.type;
-				} else {
-					this.constant = Constant.NotAConstant;
-					scope.problemReporter().invalidField(this, this.actualReceiverType);
-					return null;
-				}
-			CodeSnippetScope localScope = new CodeSnippetScope(scope);
-			this.binding = localScope.getFieldForCodeSnippet(this.delegateThis.type, this.token, this);
-		}
-	}
+	if (!this.binding.isValidBinding() && this.binding instanceof ProblemFieldBinding
+    	&& this.binding.problemId() == NotVisible) {
+    		isNotVisible = true;
+    		if (this.evaluationContext.declaringTypeName == null) {
+    			this.constant = Constant.NotAConstant;
+    			scope.problemReporter().invalidField(this, this.actualReceiverType);
+    			return null;
+    		}
+            this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
+            if (this.delegateThis == null){  // if not found then internal error, field should have been found
+            	this.constant = Constant.NotAConstant;
+            	scope.problemReporter().invalidField(this, this.actualReceiverType);
+            	return null;
+            }
+            this.actualReceiverType = this.delegateThis.type;
+    	CodeSnippetScope localScope = new CodeSnippetScope(scope);
+    	this.binding = localScope.getFieldForCodeSnippet(this.delegateThis.type, this.token, this);
+    }
 
 	if (!this.binding.isValidBinding()) {
 		this.constant = Constant.NotAConstant;

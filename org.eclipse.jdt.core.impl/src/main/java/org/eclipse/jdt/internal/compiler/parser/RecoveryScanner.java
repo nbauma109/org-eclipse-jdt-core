@@ -83,10 +83,7 @@ public class RecoveryScanner extends Scanner {
 	public void insertTokens(int[] tokens, int completedToken, int position) {
 		if(!this.record) return;
 		tokens = filterTokens(tokens);
-		if (tokens.length == 0)
-			return;
-
-		if(completedToken > -1 && Parser.statements_recovery_filter[completedToken] != 0) return;
+		if(tokens.length == 0 || completedToken > -1 && Parser.statements_recovery_filter[completedToken] != 0) return;
 
 		this.data.insertedTokensPtr++;
 		if(this.data.insertedTokens == null) {
@@ -105,8 +102,7 @@ public class RecoveryScanner extends Scanner {
 	}
 
 	public void insertTokenAhead(int token, int index) {
-		if(!this.record) return;
-		if (token == TerminalTokens.TokenNameRestrictedIdentifierrecord)
+		if (!this.record || token == TerminalTokens.TokenNameRestrictedIdentifierrecord)
 			return;
 		int length = this.data.insertedTokens[index].length;
 		int [] tokens = new int [length + 1];

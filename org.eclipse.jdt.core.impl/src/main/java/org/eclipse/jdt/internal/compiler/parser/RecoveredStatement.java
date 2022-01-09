@@ -74,7 +74,7 @@ public void updateSourceEndIfNecessary(int bodyStart, int bodyEnd){
 }
 @Override
 public RecoveredElement updateOnClosingBrace(int braceStart, int braceEnd){
-	if ((--this.bracketBalance <= 0) && (this.parent != null)){
+	if (--this.bracketBalance <= 0 && this.parent != null){
 		this.updateSourceEndIfNecessary(braceStart, braceEnd);
 		return this.parent.updateOnClosingBrace(braceStart, braceEnd);
 	}
@@ -82,33 +82,32 @@ public RecoveredElement updateOnClosingBrace(int braceStart, int braceEnd){
 }
 @Override
 public RecoveredElement add(Block nestedBlockDeclaration, int bracketBalanceValue) {
-	if (this.statement instanceof ForeachStatement) {
-		ForeachStatement foreach = (ForeachStatement) this.statement;
-
-		// see RecoveredBlock.add(Block, int):
-		resetPendingModifiers();
-
-		/* do not consider a nested block starting passed the block end (if set)
-			it must be belonging to an enclosing block */
-		if (foreach.sourceEnd != 0
-			&& foreach.action != null // if action is unassigned then foreach.sourceEnd is not yet the real end.
-			&& nestedBlockDeclaration.sourceStart > foreach.sourceEnd) {
-			return this.parent.add(nestedBlockDeclaration, bracketBalanceValue);
-		}
-		foreach.action = nestedBlockDeclaration;
-
-		RecoveredBlock element = new RecoveredBlock(nestedBlockDeclaration, this, bracketBalanceValue);
-
-		if(parser().statementRecoveryActivated) {
-			addBlockStatement(element);
-		}
-		this.nestedBlock = element;
-
-		if (nestedBlockDeclaration.sourceEnd == 0) return element;
-		return this;
-	} else {
+	if (!(this.statement instanceof ForeachStatement)) {
 		return super.add(nestedBlockDeclaration, bracketBalanceValue);
 	}
+    ForeachStatement foreach = (ForeachStatement) this.statement;
+
+    // see RecoveredBlock.add(Block, int):
+    resetPendingModifiers();
+
+    /* do not consider a nested block starting passed the block end (if set)
+    	it must be belonging to an enclosing block */
+    if (foreach.sourceEnd != 0
+    	&& foreach.action != null // if action is unassigned then foreach.sourceEnd is not yet the real end.
+    	&& nestedBlockDeclaration.sourceStart > foreach.sourceEnd) {
+    	return this.parent.add(nestedBlockDeclaration, bracketBalanceValue);
+    }
+    foreach.action = nestedBlockDeclaration;
+
+    RecoveredBlock element = new RecoveredBlock(nestedBlockDeclaration, this, bracketBalanceValue);
+
+    if(parser().statementRecoveryActivated) {
+    	addBlockStatement(element);
+    }
+    this.nestedBlock = element;
+
+    if (nestedBlockDeclaration.sourceEnd == 0) return element;
+    return this;
 }
 @Override
 public RecoveredElement add(Statement stmt, int bracketBalanceValue) {

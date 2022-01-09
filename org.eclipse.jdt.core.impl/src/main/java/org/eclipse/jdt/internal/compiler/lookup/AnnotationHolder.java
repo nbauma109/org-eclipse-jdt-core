@@ -56,7 +56,6 @@ static class MethodHolder extends AnnotationHolder {
 	AnnotationBinding[][] parameterAnnotations; // is null if empty
 
 MethodHolder(AnnotationBinding[] annotations, AnnotationBinding[][] parameterAnnotations) {
-	super();
 	setAnnotations(annotations);
 	this.parameterAnnotations = parameterAnnotations;
 }

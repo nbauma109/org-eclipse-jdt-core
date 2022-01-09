@@ -186,7 +186,7 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 	}
 
 	private int determineSortPosition(ImportName importName) {
-		String name = (importName.isOnDemand() ? importName.containerName : importName.qualifiedName);
+		String name = importName.isOnDemand() ? importName.containerName : importName.qualifiedName;
 
 		NavigableMap<String, ImportGroup> groupsByName = importName.isStatic
 				? this.indexedImportGroups.staticImportGroupByName

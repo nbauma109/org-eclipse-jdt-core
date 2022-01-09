@@ -66,22 +66,20 @@ protected IJavaElement generateResultHandle() {
 		getType().getCompilationUnit().close();
 		if (this.anchorElement == null) {
 			return getType().getInitializer(this.numberOfInitializers);
-		} else {
-			IJavaElement[] children = getType().getChildren();
-			int count = 0;
-			for (int i = 0; i < children.length; i++) {
-				IJavaElement child = children[i];
-				if (child.equals(this.anchorElement)) {
-					if (child .getElementType() == IJavaElement.INITIALIZER && this.insertionPolicy == CreateElementInCUOperation.INSERT_AFTER) {
-						count++;
-					}
-					return getType().getInitializer(count);
-				} else
-					if (child.getElementType() == IJavaElement.INITIALIZER) {
-						count++;
-					}
-			}
 		}
+        IJavaElement[] children = getType().getChildren();
+        int count = 0;
+        for (IJavaElement child : children) {
+        	if (child.equals(this.anchorElement)) {
+        		if (child .getElementType() == IJavaElement.INITIALIZER && this.insertionPolicy == CreateElementInCUOperation.INSERT_AFTER) {
+        			count++;
+        		}
+        		return getType().getInitializer(count);
+        	}
+            if (child.getElementType() == IJavaElement.INITIALIZER) {
+            	count++;
+            }
+        }
 	} catch (JavaModelException e) {
 		// type doesn't exist: ignore
 	}

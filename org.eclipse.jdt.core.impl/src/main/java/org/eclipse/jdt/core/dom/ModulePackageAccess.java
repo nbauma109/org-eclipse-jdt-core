@@ -107,10 +107,9 @@ public abstract class ModulePackageAccess extends ModuleDirective {
 		if (property == internalNameProperty()) {
 			if (get) {
 				return getName();
-			} else {
-				setName((Name) child);
-				return null;
 			}
+            setName((Name) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

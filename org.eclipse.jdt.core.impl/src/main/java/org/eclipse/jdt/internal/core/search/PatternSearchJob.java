@@ -231,8 +231,7 @@ public boolean search(Index index, IndexQueryRequestor queryRequestor, IProgress
 		}
 
 		boolean isFromJar = index.isIndexForJar();
-		boolean resolveDocumentName = (isFromJar && this.resolveDocumentForJar)
-			|| (!isFromJar && this.resolveDocumentForSourceFiles);
+		boolean resolveDocumentName = isFromJar ? this.resolveDocumentForJar : this.resolveDocumentForSourceFiles;
 		if (resolveDocumentName) {
 			// fall back to the default behavior in case some pattern implementation doesn't adapt to the new index search API.
 			MatchLocator.findIndexMatches(searchPattern, index, queryRequestor, this.participant, searchScope, progressMonitor);

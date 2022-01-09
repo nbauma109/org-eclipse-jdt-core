@@ -19,11 +19,11 @@ package org.eclipse.jdt.internal.core.util;
 public abstract class ClassFileStruct {
 
 	protected double doubleAt(byte[] reference, int relativeOffset, int structOffset) {
-		return (Double.longBitsToDouble(i8At(reference, relativeOffset, structOffset)));
+		return Double.longBitsToDouble(i8At(reference, relativeOffset, structOffset));
 	}
 
 	protected float floatAt(byte[] reference, int relativeOffset, int structOffset) {
-		return (Float.intBitsToFloat(i4At(reference, relativeOffset, structOffset)));
+		return Float.intBitsToFloat(i4At(reference, relativeOffset, structOffset));
 	}
 	protected int i1At(byte[] reference, int relativeOffset, int structOffset) {
 		return reference[relativeOffset + structOffset];
@@ -41,18 +41,18 @@ public abstract class ClassFileStruct {
 	}
 	protected long i8At(byte[] reference, int relativeOffset, int structOffset) {
 		int position = relativeOffset + structOffset;
-		return (((long) (reference[position++] & 0xFF)) << 56)
-						+ (((long) (reference[position++] & 0xFF)) << 48)
-						+ (((long) (reference[position++] & 0xFF)) << 40)
-						+ (((long) (reference[position++] & 0xFF)) << 32)
-						+ (((long) (reference[position++] & 0xFF)) << 24)
-						+ (((long) (reference[position++] & 0xFF)) << 16)
-						+ (((long) (reference[position++] & 0xFF)) << 8)
+		return ((long) (reference[position++] & 0xFF) << 56)
+						+ ((long) (reference[position++] & 0xFF) << 48)
+						+ ((long) (reference[position++] & 0xFF) << 40)
+						+ ((long) (reference[position++] & 0xFF) << 32)
+						+ ((long) (reference[position++] & 0xFF) << 24)
+						+ ((long) (reference[position++] & 0xFF) << 16)
+						+ ((long) (reference[position++] & 0xFF) << 8)
 						+ (reference[position++] & 0xFF);
 	}
 
 	protected int u1At(byte[] reference, int relativeOffset, int structOffset) {
-		return (reference[relativeOffset + structOffset] & 0xFF);
+		return reference[relativeOffset + structOffset] & 0xFF;
 	}
 	protected int u2At(byte[] reference, int relativeOffset, int structOffset) {
 		int position = relativeOffset + structOffset;
@@ -60,11 +60,10 @@ public abstract class ClassFileStruct {
 	}
 	protected long u4At(byte[] reference, int relativeOffset, int structOffset) {
 		int position = relativeOffset + structOffset;
-		return (
-			((reference[position++] & 0xFFL) << 24)
-				+ ((reference[position++] & 0xFF) << 16)
-				+ ((reference[position++] & 0xFF) << 8)
-				+ (reference[position] & 0xFF));
+		return ((reference[position++] & 0xFFL) << 24)
+        	+ ((reference[position++] & 0xFF) << 16)
+        	+ ((reference[position++] & 0xFF) << 8)
+        	+ (reference[position] & 0xFF);
 	}
 	protected char[] utf8At(byte[] reference, int relativeOffset, int structOffset, int bytesAvailable) {
 		int length = bytesAvailable;
@@ -88,7 +87,7 @@ public abstract class ClassFileStruct {
 		}
 
 		if (outputPos != bytesAvailable) {
-			System.arraycopy(outputBuf, 0, (outputBuf = new char[outputPos]), 0, outputPos);
+			System.arraycopy(outputBuf, 0, outputBuf = new char[outputPos], 0, outputPos);
 		}
 		return outputBuf;
 	}
@@ -96,9 +95,7 @@ public abstract class ClassFileStruct {
 	final boolean equals(char[] first, char[] second) {
 		if (first == second)
 			return true;
-		if (first == null || second == null)
-			return false;
-		if (first.length != second.length)
+		if (first == null || second == null || first.length != second.length)
 			return false;
 
 		for (int i = first.length; --i >= 0;)

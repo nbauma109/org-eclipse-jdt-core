@@ -79,8 +79,8 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, 	boolea
 		}
 		// generate the arguments for constructor
 		if (this.arguments != null) {
-			for (int i = 0, count = this.arguments.length; i < count; i++) {
-				this.arguments[i].generateCode(currentScope, codeStream, true);
+			for (Expression argument : this.arguments) {
+				argument.generateCode(currentScope, codeStream, true);
 			}
 		}
 		// handling innerclass instance allocation - outer local arguments
@@ -148,8 +148,7 @@ public TypeBinding resolveType(BlockScope scope) {
 			if (currentType == null) return currentType;
 			do {
 				// isStatic() is answering true for toplevel types
-				if ((currentType.modifiers & ClassFileConstants.AccStatic) != 0) break checkParameterizedAllocation;
-				if (currentType.isRawType()) break checkParameterizedAllocation;
+				if ((currentType.modifiers & ClassFileConstants.AccStatic) != 0 || currentType.isRawType()) break checkParameterizedAllocation;
 			} while ((currentType = currentType.enclosingType())!= null);
 			ParameterizedQualifiedTypeReference qRef = (ParameterizedQualifiedTypeReference) this.type;
 			for (int i = qRef.typeArguments.length - 2; i >= 0; i--) {
@@ -181,8 +180,8 @@ public TypeBinding resolveType(BlockScope scope) {
 		}
 		if (this.argumentsHaveErrors) {
 			if (this.arguments != null) { // still attempt to resolve arguments
-				for (int i = 0, max = this.arguments.length; i < max; i++) {
-					this.arguments[i].resolveType(scope);
+				for (Expression argument : this.arguments) {
+					argument.resolveType(scope);
 				}
 			}
 			return null;
@@ -230,54 +229,40 @@ public TypeBinding resolveType(BlockScope scope) {
 	this.binding = findConstructorBinding(scope, this, allocatedType, this.argumentTypes);
 
 	if (!this.binding.isValidBinding()) {
-		if (this.binding instanceof ProblemMethodBinding
-			&& this.binding.problemId() == NotVisible) {
-			if (this.evaluationContext.declaringTypeName != null) {
-				this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
-				if (this.delegateThis == null) {
-					if (this.binding.declaringClass == null) {
-						this.binding.declaringClass = allocatedType;
-					}
-					if (this.type != null && !this.type.resolvedType.isValidBinding()) {
-						return null;
-					}
-					scope.problemReporter().invalidConstructor(this, this.binding);
-					return this.resolvedType;
-				}
-			} else {
-				if (this.binding.declaringClass == null) {
-					this.binding.declaringClass = allocatedType;
-				}
-				if (this.type != null && !this.type.resolvedType.isValidBinding()) {
-					return null;
-				}
-				scope.problemReporter().invalidConstructor(this, this.binding);
-				return this.resolvedType;
-			}
-			CodeSnippetScope localScope = new CodeSnippetScope(scope);
-			MethodBinding privateBinding = localScope.getConstructor((ReferenceBinding)this.delegateThis.type, this.argumentTypes, this);
-			if (!privateBinding.isValidBinding()) {
-				if (this.binding.declaringClass == null) {
-					this.binding.declaringClass = allocatedType;
-				}
-				if (this.type != null && !this.type.resolvedType.isValidBinding()) {
-					return null;
-				}
-				scope.problemReporter().invalidConstructor(this, this.binding);
-				return this.resolvedType;
-			} else {
-				this.binding = privateBinding;
-			}
-		} else {
-			if (this.binding.declaringClass == null) {
-				this.binding.declaringClass = allocatedType;
-			}
-			if (this.type != null && !this.type.resolvedType.isValidBinding()) {
-				return null;
-			}
-			scope.problemReporter().invalidConstructor(this, this.binding);
-			return this.resolvedType;
-		}
+		if (!(this.binding instanceof ProblemMethodBinding) || this.binding.problemId() != NotVisible || this.evaluationContext.declaringTypeName == null) {
+        	if (this.binding.declaringClass == null) {
+        		this.binding.declaringClass = allocatedType;
+        	}
+        	if (this.type != null && !this.type.resolvedType.isValidBinding()) {
+        		return null;
+        	}
+        	scope.problemReporter().invalidConstructor(this, this.binding);
+        	return this.resolvedType;
+        }
+        this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
+        if (this.delegateThis == null) {
+        	if (this.binding.declaringClass == null) {
+        		this.binding.declaringClass = allocatedType;
+        	}
+        	if (this.type != null && !this.type.resolvedType.isValidBinding()) {
+        		return null;
+        	}
+        	scope.problemReporter().invalidConstructor(this, this.binding);
+        	return this.resolvedType;
+        }
+        CodeSnippetScope localScope = new CodeSnippetScope(scope);
+        MethodBinding privateBinding = localScope.getConstructor((ReferenceBinding)this.delegateThis.type, this.argumentTypes, this);
+        if (!privateBinding.isValidBinding()) {
+        	if (this.binding.declaringClass == null) {
+        		this.binding.declaringClass = allocatedType;
+        	}
+        	if (this.type != null && !this.type.resolvedType.isValidBinding()) {
+        		return null;
+        	}
+        	scope.problemReporter().invalidConstructor(this, this.binding);
+        	return this.resolvedType;
+        }
+        this.binding = privateBinding;
 	}
 	if (isMethodUseDeprecated(this.binding, scope, true, this)) {
 		scope.problemReporter().deprecatedMethod(this.binding, this);

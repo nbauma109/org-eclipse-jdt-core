@@ -105,7 +105,7 @@ public static boolean isMatch(char[] pattern, char[] word, int matchRule) {
 		case SearchPattern.R_CAMELCASE_MATCH | SearchPattern.R_CASE_SENSITIVE :
 		// same part count is not activated because index key may have uppercase letters after the type name
 		case SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH | SearchPattern.R_CASE_SENSITIVE :
-			return (pattern[0] == word[0] && CharOperation.camelCaseMatch(pattern, word, false));
+			return pattern[0] == word[0] && CharOperation.camelCaseMatch(pattern, word, false);
 	}
 	return false;
 }
@@ -176,8 +176,8 @@ public EntryResult[] query(char[][] categories, char[] key, int matchRule) throw
 	EntryResult[] entryResults = new EntryResult[results.elementSize];
 	int count = 0;
 	Object[] values = results.valueTable;
-	for (int i = 0, l = values.length; i < l; i++) {
-		EntryResult result = (EntryResult) values[i];
+	for (Object value : values) {
+		EntryResult result = (EntryResult) value;
 		if (result != null)
 			entryResults[count++] = result;
 	}
@@ -199,9 +199,9 @@ public String[] queryDocumentNames(String substring) throws IOException {
 	String[] documentNames = new String[results.elementSize];
 	int count = 0;
 	Object[] paths = results.values;
-	for (int i = 0, l = paths.length; i < l; i++)
-		if (paths[i] != null)
-			documentNames[count++] = (String) paths[i];
+	for (Object path : paths)
+        if (path != null)
+			documentNames[count++] = (String) path;
 	return documentNames;
 }
 public void remove(String containerRelativePath) {
@@ -254,8 +254,8 @@ public List<IndexQualifier> getMetaIndexQualifications() throws IOException {
 					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 			if(results != null) {
 				qualifiers.ensureCapacity(results.length); // minimize array resize
-				for (int i = 0; i < results.length; i++) {
-					qualifiers.add(IndexQualifier.qualifier(category, results[i].getWord()));
+				for (EntryResult result : results) {
+					qualifiers.add(IndexQualifier.qualifier(category, result.getWord()));
 				}
 			}
 		}

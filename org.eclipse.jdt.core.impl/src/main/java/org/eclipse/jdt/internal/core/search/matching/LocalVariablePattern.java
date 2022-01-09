@@ -42,7 +42,7 @@ public void findIndexMatches(Index index, IndexQueryRequestor requestor, SearchP
 	String relativePath;
     if (root.isArchive()) {
         IType type = (IType)this.localVariable.getAncestor(IJavaElement.TYPE);
-        relativePath = (type.getFullyQualifiedName('$')).replace('.', '/') + SuffixConstants.SUFFIX_STRING_class;
+        relativePath = type.getFullyQualifiedName('$').replace('.', '/') + SuffixConstants.SUFFIX_STRING_class;
         IModuleDescription md = root.getModuleDescription();
         if(md != null) {
         	String module = md.getElementName();
@@ -62,14 +62,10 @@ public void findIndexMatches(Index index, IndexQueryRequestor requestor, SearchP
 		// Get document path access restriction from java search scope
 		// Note that requestor has to verify if needed whether the document violates the access restriction or not
 		AccessRuleSet access = javaSearchScope.getAccessRuleSet(relativePath, index.containerPath);
-		if (access != JavaSearchScope.NOT_ENCLOSED) { // scope encloses the path
-			if (!requestor.acceptIndexMatch(documentPath, this, participant, access))
-				throw new OperationCanceledException();
-		}
-	} else if (scope.encloses(documentPath)) {
-		if (!requestor.acceptIndexMatch(documentPath, this, participant, null))
-			throw new OperationCanceledException();
-	}
+		if (access != JavaSearchScope.NOT_ENCLOSED && !requestor.acceptIndexMatch(documentPath, this, participant, access))
+        	throw new OperationCanceledException();
+	} else if (scope.encloses(documentPath) && !requestor.acceptIndexMatch(documentPath, this, participant, null))
+    	throw new OperationCanceledException();
 }
 
 @Override

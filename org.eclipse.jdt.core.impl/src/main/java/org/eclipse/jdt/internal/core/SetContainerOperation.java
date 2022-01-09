@@ -70,8 +70,7 @@ public class SetContainerOperation extends ChangeClasspathOperation {
 				boolean found = false;
 				if (JavaProject.hasJavaNature(affectedProject.getProject())){
 					IClasspathEntry[] rawClasspath = affectedProject.getRawClasspath();
-					for (int j = 0, cpLength = rawClasspath.length; j <cpLength; j++) {
-						IClasspathEntry entry = rawClasspath[j];
+					for (IClasspathEntry entry : rawClasspath) {
 						if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER && entry.getPath().equals(this.containerPath)){
 							found = true;
 							break;
@@ -87,8 +86,8 @@ public class SetContainerOperation extends ChangeClasspathOperation {
 				if (oldContainer == JavaModelManager.CONTAINER_INITIALIZATION_IN_PROGRESS) {
 					oldContainer = null;
 				}
-				if ((oldContainer != null && oldContainer.equals(this.respectiveContainers[i]))
-						|| (oldContainer == this.respectiveContainers[i])/*handle case where old and new containers are null (see bug 149043*/) {
+				if (oldContainer != null && oldContainer.equals(this.respectiveContainers[i])
+						|| oldContainer == this.respectiveContainers[i]/*handle case where old and new containers are null (see bug 149043*/) {
 					modifiedProjects[i] = null; // filter out this project - container did not change
 					continue;
 				}
@@ -134,9 +133,8 @@ public class SetContainerOperation extends ChangeClasspathOperation {
 					verbose_failure(e);
 				if (e instanceof JavaModelException) {
 					throw (JavaModelException)e;
-				} else {
-					throw new JavaModelException(e);
 				}
+                throw new JavaModelException(e);
 			} finally {
 				for (int i = 0; i < projectLength; i++) {
 					if (this.respectiveContainers[i] == null) {
@@ -171,36 +169,30 @@ public class SetContainerOperation extends ChangeClasspathOperation {
 			"	projects: {" +//$NON-NLS-1$
 			org.eclipse.jdt.internal.compiler.util.Util.toString(
 				this.affectedProjects,
-				new org.eclipse.jdt.internal.compiler.util.Util.Displayable(){
-					@Override
-					public String displayString(Object o) { return ((IJavaProject) o).getElementName(); }
-				}) +
+				o -> ((IJavaProject) o).getElementName()) +
 			"}\n	values: {\n"  +//$NON-NLS-1$
 			org.eclipse.jdt.internal.compiler.util.Util.toString(
 				this.respectiveContainers,
-				new org.eclipse.jdt.internal.compiler.util.Util.Displayable(){
-					@Override
-					public String displayString(Object o) {
-						StringBuilder buffer = new StringBuilder("		"); //$NON-NLS-1$
-						if (o == null) {
-							buffer.append("<null>"); //$NON-NLS-1$
-							return buffer.toString();
-						}
-						IClasspathContainer container = (IClasspathContainer) o;
-						buffer.append(container.getDescription());
-						buffer.append(" {\n"); //$NON-NLS-1$
-						IClasspathEntry[] entries = container.getClasspathEntries();
-						if (entries != null){
-							for (int i = 0; i < entries.length; i++){
-								buffer.append(" 			"); //$NON-NLS-1$
-								buffer.append(entries[i]);
-								buffer.append('\n');
-							}
-						}
-						buffer.append(" 		}"); //$NON-NLS-1$
-						return buffer.toString();
-					}
-				}) +
+				o -> {
+                	StringBuilder buffer = new StringBuilder("		"); //$NON-NLS-1$
+                	if (o == null) {
+                		buffer.append("<null>"); //$NON-NLS-1$
+                		return buffer.toString();
+                	}
+                	IClasspathContainer container = (IClasspathContainer) o;
+                	buffer.append(container.getDescription());
+                	buffer.append(" {\n"); //$NON-NLS-1$
+                	IClasspathEntry[] entries = container.getClasspathEntries();
+                	if (entries != null){
+                		for (IClasspathEntry entry : entries) {
+                			buffer.append(" 			"); //$NON-NLS-1$
+                			buffer.append(entry);
+                			buffer.append('\n');
+                		}
+                	}
+                	buffer.append(" 		}"); //$NON-NLS-1$
+                	return buffer.toString();
+                }) +
 			"\n	}");//$NON-NLS-1$
 	}
 

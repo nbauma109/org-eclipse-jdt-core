@@ -170,11 +170,12 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 		if (resolve) {
 			resolveClass(clazz);
 		}
-		return (clazz);
+		return clazz;
 	}
 
 	// preparing for Java 9
-	protected Class<?> findClass(String moduleName, String name) {
+	@Override
+    protected Class<?> findClass(String moduleName, String name) {
 		try {
 			return findLocalClass(name);
 		} catch (ClassNotFoundException e) {
@@ -204,17 +205,18 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 
 		URL url = getBundleLoader().findResource(name);
 		if (url != null)
-			return (url);
+			return url;
 
 		if (getDebug().DEBUG_LOADER) {
 			Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		return (null);
+		return null;
 	}
 
 	// preparing for Java 9
-	protected URL findResource(String moduleName, String name) {
+	@Override
+    protected URL findResource(String moduleName, String name) {
 		return findLocalResource(name);
 	}
 
@@ -238,11 +240,9 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 			Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		Enumeration<URL> result = getBundleLoader().findResources(name);
-		if (getDebug().DEBUG_LOADER) {
-			if (result == null || !result.hasMoreElements()) {
-				Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-		}
+		if (getDebug().DEBUG_LOADER && (result == null || !result.hasMoreElements())) {
+        	Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
 		return result;
 	}
 

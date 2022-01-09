@@ -121,16 +121,13 @@ public class ObjectMap<K, V> implements Map<K, V>, IStringPoolParticipant {
 			return false;
 		Map<Object, Object> other = (Map<Object, Object>) o;
 		//must be same size
-		if (count != other.size())
-			return false;
-
 		//keysets must be equal
-		if (!keySet().equals(other.keySet()))
+		if (count != other.size() || !keySet().equals(other.keySet()))
 			return false;
 
 		//values for each key must be equal
 		for (int i = 0; i < elements.length; i = i + 2) {
-			if (elements[i] != null && (!elements[i + 1].equals(other.get(elements[i]))))
+			if (elements[i] != null && !elements[i + 1].equals(other.get(elements[i])))
 				return false;
 		}
 		return true;
@@ -239,7 +236,7 @@ public class ObjectMap<K, V> implements Map<K, V>, IStringPoolParticipant {
 
 		// otherwise add it to the list of elements.
 		// grow if necessary
-		if (elements.length <= (count * 2))
+		if (elements.length <= count * 2)
 			grow();
 		elements[emptyIndex] = key;
 		elements[emptyIndex + 1] = value;

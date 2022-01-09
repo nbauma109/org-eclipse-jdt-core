@@ -27,7 +27,6 @@ public class MarkerSet implements Cloneable, IStringPoolParticipant {
 	}
 
 	public MarkerSet(int capacity) {
-		super();
 		this.elements = new IMarkerSetElement[Math.max(MINIMUM_SIZE, capacity * 2)];
 	}
 
@@ -172,9 +171,9 @@ public class MarkerSet implements Cloneable, IStringPoolParticipant {
 			int hashIndex = hashFor(element.getId()) % elements.length;
 			boolean match;
 			if (index < target)
-				match = !(hashIndex > target || hashIndex <= index);
+				match = hashIndex <= target && hashIndex > index;
 			else
-				match = !(hashIndex > target && hashIndex <= index);
+				match = hashIndex <= target || hashIndex > index;
 			if (match) {
 				elements[target] = element;
 				target = index;

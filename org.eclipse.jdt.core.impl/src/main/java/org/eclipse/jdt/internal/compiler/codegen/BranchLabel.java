@@ -54,7 +54,7 @@ void addForwardReference(int pos) {
 		if (previousValue < pos) {
 			int length;
 			if (count >= (length = this.forwardReferences.length))
-				System.arraycopy(this.forwardReferences, 0, (this.forwardReferences = new int[2*length]), 0, length);
+				System.arraycopy(this.forwardReferences, 0, this.forwardReferences = new int[2*length], 0, length);
 			this.forwardReferences[this.forwardReferenceCount++] = pos;
 		} else if (previousValue > pos) {
 			int[] refs = this.forwardReferences;
@@ -64,14 +64,14 @@ void addForwardReference(int pos) {
 			}
 			int length;
 			if (count >= (length = refs.length))
-				System.arraycopy(refs, 0, (this.forwardReferences = new int[2*length]), 0, length);
+				System.arraycopy(refs, 0, this.forwardReferences = new int[2*length], 0, length);
 			this.forwardReferences[this.forwardReferenceCount++] = pos;
 			Arrays.sort(this.forwardReferences, 0, this.forwardReferenceCount);
 		}
 	} else {
 		int length;
 		if (count >= (length = this.forwardReferences.length))
-			System.arraycopy(this.forwardReferences, 0, (this.forwardReferences = new int[2*length]), 0, length);
+			System.arraycopy(this.forwardReferences, 0, this.forwardReferences = new int[2*length], 0, length);
 		this.forwardReferences[this.forwardReferenceCount++] = pos;
 	}
 }
@@ -100,13 +100,13 @@ public void becomeDelegateFor(BranchLabel otherLabel) {
 			if (value1 < value2) {
 				mergedForwardReferences[indexInMerge++] = value1;
 				continue loop1;
-			} else if (value1 == value2) {
+			}
+            if (value1 == value2) {
 				mergedForwardReferences[indexInMerge++] = value1;
 				j++;
 				continue loop1;
-			} else {
-				mergedForwardReferences[indexInMerge++] = value2;
 			}
+            mergedForwardReferences[indexInMerge++] = value2;
 		}
 		mergedForwardReferences[indexInMerge++] = value1;
 	}
@@ -196,12 +196,12 @@ public void place() { // Currently lacking wide support.
 		int oldPosition = this.position;
 		boolean isOptimizedBranch = false;
 		if (this.forwardReferenceCount != 0) {
-			isOptimizedBranch = (this.forwardReferences[this.forwardReferenceCount - 1] + 2 == this.position) && (this.codeStream.bCodeStream[this.codeStream.classFileOffset - 3] == Opcodes.OPC_goto);
+			isOptimizedBranch = this.forwardReferences[this.forwardReferenceCount - 1] + 2 == this.position && this.codeStream.bCodeStream[this.codeStream.classFileOffset - 3] == Opcodes.OPC_goto;
 			if (isOptimizedBranch) {
 				if (this.codeStream.lastAbruptCompletion == this.position) {
 					this.codeStream.lastAbruptCompletion = -1;
 				}
-				this.codeStream.position = (this.position -= 3);
+				this.codeStream.position = this.position -= 3;
 				this.codeStream.classFileOffset -= 3;
 				this.forwardReferenceCount--;
 				if (this.codeStream.lastEntryPC == oldPosition) {
@@ -210,16 +210,16 @@ public void place() { // Currently lacking wide support.
 				// end of new code
 				if ((this.codeStream.generateAttributes & (ClassFileConstants.ATTR_VARS | ClassFileConstants.ATTR_STACK_MAP_TABLE | ClassFileConstants.ATTR_STACK_MAP)) != 0) {
 					LocalVariableBinding[] locals = this.codeStream.locals;
-					for (int i = 0, max = locals.length; i < max; i++) {
-						LocalVariableBinding local = locals[i];
-						if ((local != null) && (local.initializationCount > 0)) {
-							if (local.initializationPCs[((local.initializationCount - 1) << 1) + 1] == oldPosition) {
+					for (LocalVariableBinding local2 : locals) {
+						LocalVariableBinding local = local2;
+						if (local != null && local.initializationCount > 0) {
+							if (local.initializationPCs[(local.initializationCount - 1 << 1) + 1] == oldPosition) {
 								// we want to prevent interval of size 0 to have a negative size.
 								// see PR 1GIRQLA: ITPJCORE:ALL - ClassFormatError for local variable attribute
-								local.initializationPCs[((local.initializationCount - 1) << 1) + 1] = this.position;
+								local.initializationPCs[(local.initializationCount - 1 << 1) + 1] = this.position;
 							}
-							if (local.initializationPCs[(local.initializationCount - 1) << 1] == oldPosition) {
-								local.initializationPCs[(local.initializationCount - 1) << 1] = this.position;
+							if (local.initializationPCs[local.initializationCount - 1 << 1] == oldPosition) {
+								local.initializationPCs[local.initializationCount - 1 << 1] = this.position;
 							}
 						}
 					}

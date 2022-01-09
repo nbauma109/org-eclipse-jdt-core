@@ -156,7 +156,7 @@ public class WorkspaceDescription extends ModelObject implements IWorkspaceDescr
 	 */
 	@Override
 	public void setBuildOrder(String[] value) {
-		buildOrder = (value == null) ? null : value.clone();
+		buildOrder = value == null ? null : value.clone();
 	}
 
 	/**

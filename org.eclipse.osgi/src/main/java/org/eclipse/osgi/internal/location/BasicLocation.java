@@ -105,7 +105,8 @@ public class BasicLocation implements Location {
 	/**
 	 * @deprecated
 	 */
-	@Override
+	@Deprecated
+    @Override
 	public boolean setURL(URL value, boolean lock) throws IllegalStateException {
 		try {
 			return set(value, lock);
@@ -144,10 +145,8 @@ public class BasicLocation implements Location {
 			}
 		}
 		lock = lock && !isReadOnly;
-		if (lock) {
-			if (!lock(file, value))
-				return false;
-		}
+		if (lock && !lock(file, value))
+        	return false;
 		lockFile = file;
 		location = value;
 		if (property != null)

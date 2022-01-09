@@ -81,7 +81,7 @@ public class BundleSignerCondition {
 		Map<X509Certificate, List<X509Certificate>> signers = bundle.getSignerCertificates(Bundle.SIGNERS_TRUSTED);
 		boolean match = false;
 		for (List<X509Certificate> signerCerts : signers.values()) {
-			List<String> dnChain = new ArrayList<String>(signerCerts.size());
+			List<String> dnChain = new ArrayList<>(signerCerts.size());
 			for (X509Certificate signer : signerCerts) {
 				dnChain.add(signer.getSubjectDN().getName());
 			}

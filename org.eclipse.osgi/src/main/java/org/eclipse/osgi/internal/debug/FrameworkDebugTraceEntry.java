@@ -125,7 +125,7 @@ public class FrameworkDebugTraceEntry {
 				 * stack element is not that class, then we assume this stack element
 				 * is the caller of the trace API.
 				 */
-				if ((traceClass == null) || !fullClassName.equals(traceClass)) {
+				if (traceClass == null || !fullClassName.equals(traceClass)) {
 					determineClassName = stackElements[i].getClassName();
 					determineMethodName = stackElements[i].getMethodName();
 					determineLineNumber = stackElements[i].getLineNumber();

@@ -54,16 +54,14 @@ public RecoveredElement addAnnotationName(int identifierPtr, int identifierLengt
 	if (this.pendingAnnotations == null) {
 		this.pendingAnnotations = new RecoveredAnnotation[5];
 		this.pendingAnnotationCount = 0;
-	} else {
-		if (this.pendingAnnotationCount == this.pendingAnnotations.length) {
-			System.arraycopy(
-				this.pendingAnnotations,
-				0,
-				(this.pendingAnnotations = new RecoveredAnnotation[2 * this.pendingAnnotationCount]),
-				0,
-				this.pendingAnnotationCount);
-		}
-	}
+	} else if (this.pendingAnnotationCount == this.pendingAnnotations.length) {
+    	System.arraycopy(
+    		this.pendingAnnotations,
+    		0,
+    		this.pendingAnnotations = new RecoveredAnnotation[2 * this.pendingAnnotationCount],
+    		0,
+    		this.pendingAnnotationCount);
+    }
 
 	RecoveredAnnotation element = new RecoveredAnnotation(identifierPtr, identifierLengthPtr, annotationStart, this, bracketBalanceValue);
 
@@ -148,16 +146,14 @@ public RecoveredElement add(ImportReference importReference, int bracketBalanceV
 	if (this.imports == null) {
 		this.imports = new RecoveredImport[5];
 		this.importCount = 0;
-	} else {
-		if (this.importCount == this.imports.length) {
-			System.arraycopy(
-				this.imports,
-				0,
-				(this.imports = new RecoveredImport[2 * this.importCount]),
-				0,
-				this.importCount);
-		}
-	}
+	} else if (this.importCount == this.imports.length) {
+    	System.arraycopy(
+    		this.imports,
+    		0,
+    		this.imports = new RecoveredImport[2 * this.importCount],
+    		0,
+    		this.importCount);
+    }
 	RecoveredImport element = new RecoveredImport(importReference, this, bracketBalanceValue);
 	this.imports[this.importCount++] = element;
 
@@ -173,33 +169,29 @@ public RecoveredElement add(ModuleDeclaration moduleDeclaration, int bracketBala
 @Override
 public RecoveredElement add(TypeDeclaration typeDeclaration, int bracketBalanceValue) {
 
-	if ((typeDeclaration.bits & ASTNode.IsAnonymousType) != 0){
-		if (this.typeCount > 0) {
-			// add it to the last type
-			RecoveredType lastType = this.types[this.typeCount-1];
-			lastType.bodyEnd = 0; // reopen type
-			lastType.typeDeclaration.bodyEnd = 0; // reopen type
-			lastType.typeDeclaration.declarationSourceEnd = 0; // reopen type
-			lastType.bracketBalance++; // expect one closing brace
+	if ((typeDeclaration.bits & ASTNode.IsAnonymousType) != 0 && this.typeCount > 0) {
+    	// add it to the last type
+    	RecoveredType lastType = this.types[this.typeCount-1];
+    	lastType.bodyEnd = 0; // reopen type
+    	lastType.typeDeclaration.bodyEnd = 0; // reopen type
+    	lastType.typeDeclaration.declarationSourceEnd = 0; // reopen type
+    	lastType.bracketBalance++; // expect one closing brace
 
-			resetPendingModifiers();
+    	resetPendingModifiers();
 
-			return lastType.add(typeDeclaration, bracketBalanceValue);
-		}
-	}
+    	return lastType.add(typeDeclaration, bracketBalanceValue);
+    }
 	if (this.types == null) {
 		this.types = new RecoveredType[5];
 		this.typeCount = 0;
-	} else {
-		if (this.typeCount == this.types.length) {
-			System.arraycopy(
-				this.types,
-				0,
-				(this.types = new RecoveredType[2 * this.typeCount]),
-				0,
-				this.typeCount);
-		}
-	}
+	} else if (this.typeCount == this.types.length) {
+    	System.arraycopy(
+    		this.types,
+    		0,
+    		this.types = new RecoveredType[2 * this.typeCount],
+    		0,
+    		this.typeCount);
+    }
 	RecoveredType element = new RecoveredType(typeDeclaration, this, bracketBalanceValue);
 	this.types[this.typeCount++] = element;
 

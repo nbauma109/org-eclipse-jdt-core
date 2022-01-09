@@ -96,7 +96,7 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	private static boolean isFactoryLoaded(IAdapterFactory adapterFactory) {
-		return (!(adapterFactory instanceof IAdapterFactoryExt)) || ((IAdapterFactoryExt) adapterFactory).loadFactory(false) != null;
+		return !(adapterFactory instanceof IAdapterFactoryExt) || ((IAdapterFactoryExt) adapterFactory).loadFactory(false) != null;
 	}
 
 	/**
@@ -132,23 +132,21 @@ public final class AdapterManager implements IAdapterManager {
 	 * 
 	 */
 	private Class<?> classForName(IAdapterFactory adapterFactory, String typeName) {
-		return classLookup.computeIfAbsent(adapterFactory, factory -> new ConcurrentHashMap<>()).computeIfAbsent(typeName, type -> {
-			return loadFactory(adapterFactory, false).map(factory -> {
-				try {
-					return factory.getClass().getClassLoader().loadClass(typeName);
-				} catch (ClassNotFoundException e) {
-					// it is possible that the default bundle classloader is unaware of this class
-					// but the adaptor factory can load it in some other way. See bug 200068.
-					Class<?>[] adapterList = factory.getAdapterList();
-					for (Class<?> adapter : adapterList) {
-						if (typeName.equals(adapter.getName())) {
-							return adapter;
-						}
-					}
-				}
-				return null; // class not yet loaded
-			}).orElse(null); // factory not loaded yet
-		});
+		return classLookup.computeIfAbsent(adapterFactory, factory -> new ConcurrentHashMap<>()).computeIfAbsent(typeName, type -> loadFactory(adapterFactory, false).map(factory -> {
+        	try {
+        		return factory.getClass().getClassLoader().loadClass(typeName);
+        	} catch (ClassNotFoundException e) {
+        		// it is possible that the default bundle classloader is unaware of this class
+        		// but the adaptor factory can load it in some other way. See bug 200068.
+        		Class<?>[] adapterList = factory.getAdapterList();
+        		for (Class<?> adapter : adapterList) {
+        			if (typeName.equals(adapter.getName())) {
+        				return adapter;
+        			}
+        		}
+        	}
+        	return null; // class not yet loaded
+        }).orElse(null));
 	}
 
 	@Override

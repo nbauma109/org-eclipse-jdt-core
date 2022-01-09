@@ -47,7 +47,6 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * @param initialCapacity The initial capacity of this Headers object.
 	 */
 	public Headers(int initialCapacity) {
-		super();
 		@SuppressWarnings("unchecked")
 		K[] k = (K[]) new Object[initialCapacity];
 		headers = k;
@@ -92,13 +91,11 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	private int getIndex(Object key) {
 		boolean stringKey = key instanceof String;
 		for (int i = 0; i < size; i++) {
-			if (stringKey && (headers[i] instanceof String)) {
+			if (stringKey && headers[i] instanceof String) {
 				if (((String) headers[i]).equalsIgnoreCase((String) key))
 					return i;
-			} else {
-				if (headers[i].equals(key))
-					return i;
-			}
+			} else if (headers[i].equals(key))
+            	return i;
 		}
 		return -1;
 	}

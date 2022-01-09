@@ -49,7 +49,7 @@ public abstract class AbstractDataTree {
 	/**
 	 * Singleton indicating no children
 	 */
-	protected static final IPath[] NO_CHILDREN = new IPath[0];
+	protected static final IPath[] NO_CHILDREN = {};
 
 	/**
 	 * Creates a new empty tree

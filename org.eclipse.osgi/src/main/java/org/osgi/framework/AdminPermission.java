@@ -220,7 +220,7 @@ public final class AdminPermission extends BasicPermission {
 	 * ThreadLocal used to determine if we have recursively called
 	 * getProperties.
 	 */
-	private static final ThreadLocal<Bundle>		recurse						= new ThreadLocal<Bundle>();
+	private static final ThreadLocal<Bundle>		recurse						= new ThreadLocal<>();
 
 	/**
 	 * Creates a new {@code AdminPermission} object that matches all bundles and
@@ -311,7 +311,7 @@ public final class AdminPermission extends BasicPermission {
 	 * @param mask action mask
 	 */
 	AdminPermission(Filter filter, int mask) {
-		super((filter == null) ? "*" : filter.toString());
+		super(filter == null ? "*" : filter.toString());
 		setTransients(filter, mask);
 		this.bundle = null;
 	}
@@ -324,7 +324,7 @@ public final class AdminPermission extends BasicPermission {
 	 */
 	private void setTransients(Filter filter, int mask) {
 		this.filter = filter;
-		if ((mask == ACTION_NONE) || ((mask & ACTION_ALL) != mask)) {
+		if (mask == ACTION_NONE || (mask & ACTION_ALL) != mask) {
 			throw new IllegalArgumentException("invalid action string");
 		}
 		this.action_mask = mask;
@@ -337,7 +337,7 @@ public final class AdminPermission extends BasicPermission {
 	 * @return action mask.
 	 */
 	private static int parseActions(String actions) {
-		if ((actions == null) || actions.equals("*")) {
+		if (actions == null || actions.equals("*")) {
 			return ACTION_ALL;
 		}
 
@@ -355,7 +355,7 @@ public final class AdminPermission extends BasicPermission {
 			char c;
 
 			// skip whitespace
-			while ((i != -1) && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
+			while (i != -1 && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
 				i--;
 
 			// check for the known strings
@@ -504,7 +504,7 @@ public final class AdminPermission extends BasicPermission {
 														mask |= ACTION_WEAVE;
 
 													} else
-														if (i >= 0 && (a[i] == '*')) {
+														if (i >= 0 && a[i] == '*') {
 															matchlen = 1;
 															mask |= ACTION_ALL;
 
@@ -601,11 +601,8 @@ public final class AdminPermission extends BasicPermission {
 			return false;
 		}
 		AdminPermission requested = (AdminPermission) p;
-		if (bundle != null) {
-			return false;
-		}
 		// if requested permission has a filter, then it is an invalid argument
-		if (requested.filter != null) {
+		if (bundle != null || requested.filter != null) {
 			return false;
 		}
 		return implies0(requested, ACTION_NONE);
@@ -768,7 +765,7 @@ public final class AdminPermission extends BasicPermission {
 
 		AdminPermission ap = (AdminPermission) obj;
 
-		return (action_mask == ap.action_mask) && ((bundle == ap.bundle) || ((bundle != null) && bundle.equals(ap.bundle))) && (filter == null ? ap.filter == null : filter.equals(ap.filter));
+		return action_mask == ap.action_mask && (bundle == ap.bundle || bundle != null && bundle.equals(ap.bundle)) && (filter == null ? ap.filter == null : filter.equals(ap.filter));
 	}
 
 	/**
@@ -839,23 +836,20 @@ public final class AdminPermission extends BasicPermission {
 		}
 		recurse.set(bundle);
 		try {
-			final Map<String, Object> map = new HashMap<String, Object>(4);
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					map.put("id", Long.valueOf(bundle.getBundleId()));
-					map.put("location", bundle.getLocation());
-					String name = bundle.getSymbolicName();
-					if (name != null) {
-						map.put("name", name);
-					}
-					SignerProperty signer = new SignerProperty(bundle);
-					if (signer.isBundleSigned()) {
-						map.put("signer", signer);
-					}
-					return null;
-				}
-			});
+			final Map<String, Object> map = new HashMap<>(4);
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            	map.put("id", Long.valueOf(bundle.getBundleId()));
+            	map.put("location", bundle.getLocation());
+            	String name = bundle.getSymbolicName();
+            	if (name != null) {
+            		map.put("name", name);
+            	}
+            	SignerProperty signer = new SignerProperty(bundle);
+            	if (signer.isBundleSigned()) {
+            		map.put("signer", signer);
+            	}
+            	return null;
+            });
 			return properties = map;
 		} finally {
 			recurse.set(null);
@@ -888,7 +882,7 @@ final class AdminPermissionCollection extends PermissionCollection {
 	 * 
 	 */
 	public AdminPermissionCollection() {
-		permissions = new HashMap<String, AdminPermission>();
+		permissions = new HashMap<>();
 	}
 
 	/**
@@ -927,11 +921,9 @@ final class AdminPermissionCollection extends PermissionCollection {
 			} else {
 				pc.put(name, ap);
 			}
-			if (!all_allowed) {
-				if (name.equals("*")) {
-					all_allowed = true;
-				}
-			}
+			if (!all_allowed && name.equals("*")) {
+            	all_allowed = true;
+            }
 		}
 	}
 
@@ -991,7 +983,7 @@ final class AdminPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		return Collections.enumeration(all);
 	}
 
@@ -999,7 +991,7 @@ final class AdminPermissionCollection extends PermissionCollection {
 	private static final ObjectStreamField[]	serialPersistentFields	= {new ObjectStreamField("permissions", Hashtable.class), new ObjectStreamField("all_allowed", Boolean.TYPE)};
 
 	private synchronized void writeObject(ObjectOutputStream out) throws IOException {
-		Hashtable<String, AdminPermission> hashtable = new Hashtable<String, AdminPermission>(permissions);
+		Hashtable<String, AdminPermission> hashtable = new Hashtable<>(permissions);
 		ObjectOutputStream.PutField pfields = out.putFields();
 		pfields.put("permissions", hashtable);
 		pfields.put("all_allowed", all_allowed);
@@ -1010,7 +1002,7 @@ final class AdminPermissionCollection extends PermissionCollection {
 		ObjectInputStream.GetField gfields = in.readFields();
 		@SuppressWarnings("unchecked")
 		Hashtable<String, AdminPermission> hashtable = (Hashtable<String, AdminPermission>) gfields.get("permissions", null);
-		permissions = new HashMap<String, AdminPermission>(hashtable);
+		permissions = new HashMap<>(hashtable);
 		all_allowed = gfields.get("all_allowed", false);
 	}
 }

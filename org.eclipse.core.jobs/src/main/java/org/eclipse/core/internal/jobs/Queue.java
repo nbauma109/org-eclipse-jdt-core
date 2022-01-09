@@ -60,7 +60,7 @@ public class Queue {
 	 * helper to decrement an index in the queue.
 	 */
 	public int decrement(int index) {
-		return (index == 0) ? (elements.length - 1) : index - 1;
+		return index == 0 ? elements.length - 1 : index - 1;
 	}
 
 	public Iterator elements() {
@@ -74,7 +74,7 @@ public class Queue {
 
 		/* otherwise we need to create a new array */
 		Object[] newElements = new Object[size()];
-		int end = (elements.length - head);
+		int end = elements.length - head;
 		System.arraycopy(elements, head, newElements, 0, end);
 		System.arraycopy(elements, 0, newElements, end, tail);
 		return Arrays.asList(newElements).iterator();
@@ -131,7 +131,7 @@ public class Queue {
 		else {
 			int newHead = newSize - (elements.length - head);
 			System.arraycopy(elements, 0, newElements, 0, tail + 1);
-			System.arraycopy(elements, head, newElements, newHead, (newSize - newHead));
+			System.arraycopy(elements, head, newElements, newHead, newSize - newHead);
 			head = newHead;
 		}
 		elements = newElements;
@@ -142,7 +142,7 @@ public class Queue {
 	 * helper to increment an index in the queue.
 	 */
 	public int increment(int index) {
-		return (index == (elements.length - 1)) ? 0 : index + 1;
+		return index == elements.length - 1 ? 0 : index + 1;
 	}
 
 	public boolean isEmpty() {
@@ -167,7 +167,7 @@ public class Queue {
 	}
 
 	public int size() {
-		return tail > head ? (tail - head) : ((elements.length - head) + tail);
+		return tail > head ? tail - head : elements.length - head + tail;
 	}
 
 	@Override
@@ -178,10 +178,9 @@ public class Queue {
 			Iterator it = elements();
 			while (true) {
 				sb.append(it.next());
-				if (it.hasNext())
-					sb.append(", "); //$NON-NLS-1$
-				else
-					break;
+				if (!it.hasNext())
+                    break;
+                sb.append(", ");
 			}
 		}
 		sb.append("]"); //$NON-NLS-1$

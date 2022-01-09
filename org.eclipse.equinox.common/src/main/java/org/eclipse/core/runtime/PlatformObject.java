@@ -47,7 +47,6 @@ public abstract class PlatformObject implements IAdaptable {
 	 * Constructs a new platform object.
 	 */
 	public PlatformObject() {
-		super();
 	}
 
 	/**

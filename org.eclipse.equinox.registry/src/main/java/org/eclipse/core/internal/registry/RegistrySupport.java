@@ -38,9 +38,7 @@ public class RegistrySupport {
 		if (resources == null)
 			return key;
 		String trimmedKey = key.trim();
-		if (trimmedKey.length() == 0)
-			return key;
-		if (trimmedKey.charAt(0) != '%')
+		if (trimmedKey.length() == 0 || trimmedKey.charAt(0) != '%')
 			return key;
 		return resources.getString(trimmedKey.substring(1));
 	}
@@ -49,18 +47,11 @@ public class RegistrySupport {
 		String message = status.getMessage();
 		int severity = status.getSeverity();
 
-		String statusMsg;
-		switch (severity) {
-			case IStatus.ERROR :
-				statusMsg = RegistryMessages.log_error;
-				break;
-			case IStatus.WARNING :
-				statusMsg = RegistryMessages.log_warning;
-				break;
-			default :
-				statusMsg = RegistryMessages.log_log;
-				break;
-		}
+		String statusMsg = switch (severity) {
+            case IStatus.ERROR -> RegistryMessages.log_error;
+            case IStatus.WARNING -> RegistryMessages.log_warning;
+            default -> RegistryMessages.log_log;
+        };
 		statusMsg += message;
 
 		if (prefix != null)

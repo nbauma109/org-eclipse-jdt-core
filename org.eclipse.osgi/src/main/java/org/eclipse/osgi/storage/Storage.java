@@ -122,7 +122,6 @@ public class Storage {
 		private static final long serialVersionUID = 1L;
 
 		public StorageException() {
-			super();
 		}
 
 		public StorageException(String message, Throwable cause) {
@@ -237,7 +236,7 @@ public class Storage {
 		this.osgiLocation = configLocation.createLocation(osgiParentLocation, configLocation.getDataArea(EquinoxContainer.NAME), configLocation.isReadOnly());
 		this.childRoot = new File(osgiLocation.getURL().getPath());
 
-		if (Boolean.valueOf(container.getConfiguration().getConfiguration(EquinoxConfiguration.PROP_CLEAN)).booleanValue()) {
+		if (Boolean.parseBoolean(container.getConfiguration().getConfiguration(EquinoxConfiguration.PROP_CLEAN))) {
 			cleanOSGiStorage(osgiLocation, childRoot);
 		}
 		if (!this.osgiLocation.isReadOnly()) {
@@ -428,12 +427,10 @@ public class Storage {
 						ModuleRevisionBuilder newBuilder = getBuilder(newGeneration, extraCapabilities, extraExports);
 						moduleContainer.update(systemModule, newBuilder, newGeneration);
 						moduleContainer.refresh(Collections.singleton(systemModule));
-					} else {
-						if (currentRevision.getWiring() == null) {
-							// must resolve before continuing to ensure extensions get attached
-							moduleContainer.resolve(Collections.singleton(systemModule), true);
-						}
-					}
+					} else if (currentRevision.getWiring() == null) {
+                    	// must resolve before continuing to ensure extensions get attached
+                    	moduleContainer.resolve(Collections.singleton(systemModule), true);
+                    }
 				} catch (BundleException e) {
 					throw new IllegalStateException("Could not create a builder for the system bundle.", e); //$NON-NLS-1$
 				}
@@ -521,10 +518,7 @@ public class Storage {
 	}
 
 	private boolean systemNeedsUpdate(File systemContent, ModuleRevision currentRevision, Generation existing, String extraCapabilities, String extraExports, String[] cachedInfo) throws BundleException {
-		if (!extraCapabilities.equals(cachedInfo[1])) {
-			return true;
-		}
-		if (!extraExports.equals(cachedInfo[2])) {
+		if (!extraCapabilities.equals(cachedInfo[1]) || !extraExports.equals(cachedInfo[2])) {
 			return true;
 		}
 		if (systemContent == null) {
@@ -604,7 +598,7 @@ public class Storage {
 					 */
 					@Override
 					public InputStream getInputStream() throws IOException {
-						return (in);
+						return in;
 					}
 				};
 			}
@@ -813,8 +807,8 @@ public class Storage {
 		}
 		if (generation.getBundleInfo().getBundleId() != 0) {
 			ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(mapHeaders, null, //
-					(generation.getContentType() == Type.CONNECT ? "" : null), //$NON-NLS-1$
-					(allowRestrictedProvides ? "" : null)); //$NON-NLS-1$
+					generation.getContentType() == Type.CONNECT ? "" : null, //$NON-NLS-1$
+					allowRestrictedProvides ? "" : null); //$NON-NLS-1$
 			if ((builder.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 				for (ModuleRevisionBuilder.GenericInfo reqInfo : builder.getRequirements(HostNamespace.HOST_NAMESPACE)) {
 					if (HostNamespace.EXTENSION_BOOTCLASSPATH.equals(reqInfo.getDirectives().get(HostNamespace.REQUIREMENT_EXTENSION_DIRECTIVE))) {
@@ -1317,11 +1311,9 @@ public class Storage {
 				success = true;
 			}
 		} finally {
-			if (!success) {
-				if (mos != null) {
-					mos.abort();
-				}
-			}
+			if (!success && mos != null) {
+            	mos.abort();
+            }
 			if (out != null) {
 				try {
 					out.close();
@@ -1381,15 +1373,13 @@ public class Storage {
 			if (bundleInfo.getBundleId() == 0 || contentType == Type.CONNECT) {
 				// just write empty string for system bundle content and connect content in this case
 				out.writeUTF(""); //$NON-NLS-1$
-			} else {
-				if (contentType == Type.REFERENCE) {
-					// make reference installs relative to the install path
-					out.writeUTF(new FilePath(installPath).makeRelative(new FilePath(generation.getContent().getAbsolutePath())));
-				} else {
-					// make normal installs relative to the storage area
-					out.writeUTF(Storage.getBundleFilePath(bundleInfo.getBundleId(), generation.getGenerationId()));
-				}
-			}
+			} else if (contentType == Type.REFERENCE) {
+            	// make reference installs relative to the install path
+            	out.writeUTF(new FilePath(installPath).makeRelative(new FilePath(generation.getContent().getAbsolutePath())));
+            } else {
+            	// make normal installs relative to the storage area
+            	out.writeUTF(Storage.getBundleFilePath(bundleInfo.getBundleId(), generation.getGenerationId()));
+            }
 			out.writeLong(generation.getLastModified());
 
 			Dictionary<String, String> headers = generation.getHeaders();
@@ -1461,14 +1451,14 @@ public class Storage {
 		if (version > VERSION || version < LOWEST_VERSION_SUPPORTED) {
 			throw new IllegalArgumentException("Found persistent version \"" + version + "\" expecting \"" + VERSION + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
-		Version savedRuntimeVersion = (version >= MR_JAR_VERSION) ? Version.parseVersion(in.readUTF()) : null;
+		Version savedRuntimeVersion = version >= MR_JAR_VERSION ? Version.parseVersion(in.readUTF()) : null;
 		if (savedRuntimeVersion == null || !savedRuntimeVersion.equals(runtimeVersion)) {
 			refreshMRBundles.set(true);
 		}
 
-		cachedInfo[0] = (version >= CACHED_SYSTEM_CAPS_VERION) ? in.readUTF() : null;
-		cachedInfo[1] = (version >= CACHED_SYSTEM_CAPS_VERION) ? readLongString(in) : null;
-		cachedInfo[2] = (version >= CACHED_SYSTEM_CAPS_VERION) ? readLongString(in) : null;
+		cachedInfo[0] = version >= CACHED_SYSTEM_CAPS_VERION ? in.readUTF() : null;
+		cachedInfo[1] = version >= CACHED_SYSTEM_CAPS_VERION ? readLongString(in) : null;
+		cachedInfo[2] = version >= CACHED_SYSTEM_CAPS_VERION ? readLongString(in) : null;
 
 		int numCachedHeaders = in.readInt();
 		List<String> storedCachedHeaderKeys = new ArrayList<>(numCachedHeaders);
@@ -1490,11 +1480,9 @@ public class Storage {
 			Type contentType = Type.DEFAULT;
 			if (version >= CONTENT_TYPE_VERSION) {
 				contentType = contentTypes[in.readInt()];
-			} else {
-				if (in.readBoolean()) {
-					contentType = Type.REFERENCE;
-				}
-			}
+			} else if (in.readBoolean()) {
+            	contentType = Type.REFERENCE;
+            }
 
 			boolean hasPackageInfo = in.readBoolean();
 			String contentPath = in.readUTF();
@@ -1524,18 +1512,11 @@ public class Storage {
 					content = new File(contentPath);
 					if (!content.isAbsolute()) {
 						// make sure it has the absolute location instead
-						switch (contentType) {
-						case REFERENCE:
-							// reference installs are relative to the installPath
-							content = new File(installPath, contentPath);
-							break;
-						case DEFAULT:
-							// normal installs are relative to the storage area
-							content = getFile(contentPath, true);
-							break;
-						default:
-							throw new IllegalArgumentException("Unknown type: " + contentType); //$NON-NLS-1$
-						}
+                        content = switch (contentType) {
+                            case REFERENCE -> new File(installPath, contentPath);
+                            case DEFAULT -> getFile(contentPath, true);
+                            default -> throw new IllegalArgumentException("Unknown type: " + contentType); //$NON-NLS-1$
+                        };
 					}
 				}
 			}
@@ -1947,7 +1928,7 @@ public class Storage {
 		int minor = javaVersion.getMinor();
 		do {
 			// If minor is zero then it is not included in the name
-			String profileResourceName = javaEdition + embeddedProfileName + major + ((minor > 0) ? "." + minor : "") + PROFILE_EXT; //$NON-NLS-1$ //$NON-NLS-2$
+			String profileResourceName = javaEdition + embeddedProfileName + major + (minor > 0 ? "." + minor : "") + PROFILE_EXT; //$NON-NLS-1$ //$NON-NLS-2$
 			result = findInSystemBundle(systemGeneration, profileResourceName);
 			if (minor > 0) {
 				minor -= 1;
@@ -2144,15 +2125,12 @@ public class Storage {
 		//
 		// This bit of code attempts to do that by using the bundle ID as an ID for the temp dir along with an incrementing ID
 		// in cases where the temp dir may already exist.
-		Long bundleID = Long.valueOf(generation.getBundleInfo().getBundleId());
+		long bundleID = generation.getBundleInfo().getBundleId();
 		for (int i = 0; i < Integer.MAX_VALUE; i++) {
-			bundleTempDir = new File(libTempDir, bundleID + "_" + Integer.valueOf(i).toString()); //$NON-NLS-1$
+			bundleTempDir = new File(libTempDir, bundleID + "_" + Integer.toString(i)); //$NON-NLS-1$
 			libTempFile = new File(bundleTempDir, libName);
-			if (bundleTempDir.exists()) {
-				if (libTempFile.exists())
-					continue; // to to next temp file
-				break;
-			}
+			if (bundleTempDir.exists() && libTempFile.exists())
+            	continue; // to to next temp file
 			break;
 		}
 		if (!bundleTempDir.isDirectory()) {

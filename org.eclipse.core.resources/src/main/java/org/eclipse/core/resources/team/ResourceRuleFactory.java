@@ -37,7 +37,6 @@ public class ResourceRuleFactory implements IResourceRuleFactory {
 	 * be called by subclasses.
 	 */
 	protected ResourceRuleFactory() {
-		super();
 	}
 
 	/**

@@ -276,7 +276,7 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 		private int getType(Object[] event) {
 			try {
 				Integer type = (Integer) getEventType.invoke(event[0]);
-				return type == null ? 0 : type.intValue();
+				return type == null ? 0 : type;
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				throw new RuntimeException(e);
 			}

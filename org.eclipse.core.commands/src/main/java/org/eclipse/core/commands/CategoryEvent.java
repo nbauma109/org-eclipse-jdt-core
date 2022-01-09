@@ -60,7 +60,7 @@ public final class CategoryEvent extends AbstractNamedHandleEvent {
 	 * @return the instance of the interface that changed. Guaranteed not to be
 	 *         <code>null</code>.
 	 */
-	public final Category getCategory() {
+	public Category getCategory() {
 		return category;
 	}
 }

@@ -188,16 +188,10 @@ public class Version implements Comparable<Version> {
 			throw new IllegalArgumentException("invalid version \"" + toString0() + "\": negative number \"" + micro + "\"");
 		}
 		for (char ch : qualifier.toCharArray()) {
-			if (('A' <= ch) && (ch <= 'Z')) {
+			if ('A' <= ch && ch <= 'Z' || 'a' <= ch && ch <= 'z') {
 				continue;
 			}
-			if (('a' <= ch) && (ch <= 'z')) {
-				continue;
-			}
-			if (('0' <= ch) && (ch <= '9')) {
-				continue;
-			}
-			if ((ch == '_') || (ch == '-')) {
+			if ('0' <= ch && ch <= '9' || ch == '_' || ch == '-') {
 				continue;
 			}
 			throw new IllegalArgumentException("invalid version \"" + toString0() + "\": invalid qualifier \"" + qualifier + "\"");
@@ -372,7 +366,7 @@ public class Version implements Comparable<Version> {
 		}
 
 		Version other = (Version) object;
-		return (major == other.major) && (minor == other.minor) && (micro == other.micro) && qualifier.equals(other.qualifier);
+		return major == other.major && minor == other.minor && micro == other.micro && qualifier.equals(other.qualifier);
 	}
 
 	/**

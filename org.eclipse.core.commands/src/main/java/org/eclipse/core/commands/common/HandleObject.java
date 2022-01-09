@@ -125,7 +125,7 @@ public abstract class HandleObject extends EventManager implements
 		// Check each property in turn.
 		final HandleObject handle= (HandleObject) object;
 		return Objects.equals(id, handle.id)
-				&& (this.getClass() == handle.getClass());
+				&& this.getClass() == handle.getClass();
 	}
 
 	@Override

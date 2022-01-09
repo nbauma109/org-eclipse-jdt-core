@@ -60,12 +60,11 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 	@Override
 	public synchronized void connect() throws IOException {
 		if (!connected) {
-			if (bundleEntry != null) {
-				in = bundleEntry.getInputStream();
-				connected = true;
-			} else {
+			if (bundleEntry == null) {
 				throw new IOException(NLS.bind(Msg.RESOURCE_NOT_FOUND_EXCEPTION, url));
 			}
+            in = bundleEntry.getInputStream();
+            connected = true;
 		}
 	}
 
@@ -121,7 +120,7 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 		long lastModified = bundleEntry.getTime();
 
 		if (lastModified == -1) {
-			return (0);
+			return 0;
 		}
 		return lastModified;
 	}

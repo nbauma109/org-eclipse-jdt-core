@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.IJavaElement;
  * org.eclipse.jdt.core.dom package.
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@Deprecated
 @SuppressWarnings("rawtypes")
 public interface IDOMNode extends Cloneable  {
 

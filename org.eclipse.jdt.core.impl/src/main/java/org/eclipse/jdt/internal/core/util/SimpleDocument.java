@@ -275,7 +275,8 @@ public class SimpleDocument implements IDocument {
 	 * @see org.eclipse.jface.text.IDocument#search(int, java.lang.String, boolean, boolean, boolean)
 	 * @deprecated
 	 */
-	@Override
+	@Deprecated
+    @Override
 	public int search(
 		int startOffset,
 		String findString,

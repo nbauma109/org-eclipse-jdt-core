@@ -117,14 +117,12 @@ public class ObjectMap implements Map {
 			return false;
 		Map other = (Map) o;
 		//must be same size
-		if (count != other.size())
-			return false;
 		//keysets must be equal
-		if (!keySet().equals(other.keySet()))
+		if (count != other.size() || !keySet().equals(other.keySet()))
 			return false;
 		//values for each key must be equal
 		for (int i = 0; i < elements.length; i = i + 2) {
-			if (elements[i] != null && (!elements[i + 1].equals(other.get(elements[i]))))
+			if (elements[i] != null && !elements[i + 1].equals(other.get(elements[i])))
 				return false;
 		}
 		return true;
@@ -234,7 +232,7 @@ public class ObjectMap implements Map {
 
 		// otherwise add it to the list of elements.
 		// grow if necessary
-		if (elements.length <= (count * 2))
+		if (elements.length <= count * 2)
 			grow();
 		elements[emptyIndex] = key;
 		elements[emptyIndex + 1] = value;
@@ -247,8 +245,7 @@ public class ObjectMap implements Map {
 	 */
 	@Override
 	public void putAll(Map map) {
-		for (Iterator i = map.keySet().iterator(); i.hasNext();) {
-			Object key = i.next();
+		for (Object key : map.keySet()) {
 			Object value = map.get(key);
 			put(key, value);
 		}

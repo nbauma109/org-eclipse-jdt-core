@@ -76,7 +76,6 @@ public abstract class FunctionalExpression extends Expression {
 	}
 
 	public FunctionalExpression() {
-		super();
 	}
 
 	@Override
@@ -126,13 +125,12 @@ public abstract class FunctionalExpression extends Expression {
 	public boolean isPertinentToApplicability(TypeBinding targetType, MethodBinding method) {
 		if (targetType instanceof TypeVariableBinding) {
 			TypeVariableBinding typeVariable = (TypeVariableBinding) targetType;
-			if (method != null) { // when called from type inference
-				if (typeVariable.declaringElement == method)
-					return false;
-                return !method.isConstructor() || typeVariable.declaringElement != method.declaringClass;
-			} else { // for internal calls
+			if (method == null) { // for internal calls
                 return !(typeVariable.declaringElement instanceof MethodBinding);
 			}
+            if (typeVariable.declaringElement == method)
+            	return false;
+            return !method.isConstructor() || typeVariable.declaringElement != method.declaringClass;
 		}
 		return true;
 	}
@@ -147,8 +145,7 @@ public abstract class FunctionalExpression extends Expression {
 		if (sam != null && sam.problemId() != ProblemReasons.NoSuchSingleAbstractMethod) {
 			if (sam.isConstructor())
 				return sam.declaringClass;
-			else
-				return sam.returnType;
+            return sam.returnType;
 		}
 		return null;
 	}
@@ -202,8 +199,8 @@ public abstract class FunctionalExpression extends Expression {
 		if (skipKosherCheck || kosherDescriptor(blockScope, sam, true)) {
 			if (this.expectedType instanceof IntersectionTypeBinding18) {
 				ReferenceBinding[] intersectingTypes =  ((IntersectionTypeBinding18)this.expectedType).intersectingTypes;
-				for (int t = 0, max = intersectingTypes.length; t < max; t++) {
-					if (intersectingTypes[t].findSuperTypeOriginatingFrom(TypeIds.T_JavaIoSerializable, false /*Serializable is not a class*/) != null) {
+				for (ReferenceBinding intersectingType : intersectingTypes) {
+					if (intersectingType.findSuperTypeOriginatingFrom(TypeIds.T_JavaIoSerializable, false /*Serializable is not a class*/) != null) {
 						this.isSerializable = true;
 						break;
 					}
@@ -339,9 +336,7 @@ public abstract class FunctionalExpression extends Expression {
 					MethodBinding [] methods = superInterface.getMethods(this.selector);
 					for (int j = 0, count = methods == null ? 0 : methods.length; j < count; j++) {
 						MethodBinding inheritedMethod = methods[j];
-						if (inheritedMethod == null || this.method == inheritedMethod)  // descriptor declaring class may not be same functional interface target type.
-							continue;
-						if (inheritedMethod.isStatic() || inheritedMethod.redeclaresPublicObjectMethod(this.scope))
+						if (inheritedMethod == null || this.method == inheritedMethod || inheritedMethod.isStatic() || inheritedMethod.redeclaresPublicObjectMethod(this.scope))
 							continue;
 						inheritedMethod = MethodVerifier.computeSubstituteMethod(inheritedMethod, this.method, this.environment);
 						if (inheritedMethod == null || !MethodVerifier.isSubstituteParameterSubsignature(this.method, inheritedMethod, this.environment) ||

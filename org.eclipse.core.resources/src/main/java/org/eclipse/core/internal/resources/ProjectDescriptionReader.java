@@ -484,7 +484,7 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 				parseProblem(NLS.bind(Messages.projRead_badLinkLocation, path, Integer.toString(type)));
 				return;
 			}
-			if ((path == null) || path.segmentCount() == 0) {
+			if (path == null || path.segmentCount() == 0) {
 				parseProblem(NLS.bind(Messages.projRead_emptyLinkName, Integer.toString(type), location));
 				return;
 			}
@@ -513,13 +513,13 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 			if (objectStack.peek() instanceof ArrayList) {
 				state = S_MATCHER_ARGUMENTS;
 				// The ArrayList of matchers is the next thing on the stack
-				ArrayList<FileInfoMatcherDescription> list = ((ArrayList<FileInfoMatcherDescription>) objectStack.peek());
+				ArrayList<FileInfoMatcherDescription> list = (ArrayList<FileInfoMatcherDescription>) objectStack.peek();
 				list.add(new FileInfoMatcherDescription((String) matcher[0], matcher[1]));
 			}
 
 			if (objectStack.peek() instanceof FilterDescription) {
 				state = S_FILTER;
-				FilterDescription d = ((FilterDescription) objectStack.peek());
+				FilterDescription d = (FilterDescription) objectStack.peek();
 				d.setFileInfoMatcherDescription(new FileInfoMatcherDescription((String) matcher[0], matcher[1]));
 			}
 		}
@@ -547,7 +547,7 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 				}
 
 				// The HashMap of filtered resources is the next thing on the stack
-				HashMap<IPath, LinkedList<FilterDescription>> map = ((HashMap<IPath, LinkedList<FilterDescription>>) objectStack.peek());
+				HashMap<IPath, LinkedList<FilterDescription>> map = (HashMap<IPath, LinkedList<FilterDescription>>) objectStack.peek();
 				LinkedList<FilterDescription> list = map.get(filter.getResource().getProjectRelativePath());
 				if (list == null) {
 					list = new LinkedList<>();
@@ -558,7 +558,7 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 				// if the project is null, that means that we're loading a project description to retrieve
 				// some meta data only.
 				String key = ""; // an empty key; //$NON-NLS-1$
-				HashMap<String, LinkedList<FilterDescription>> map = ((HashMap<String, LinkedList<FilterDescription>>) objectStack.peek());
+				HashMap<String, LinkedList<FilterDescription>> map = (HashMap<String, LinkedList<FilterDescription>>) objectStack.peek();
 				LinkedList<FilterDescription> list = map.get(key);
 				if (list == null) {
 					list = new LinkedList<>();
@@ -691,7 +691,7 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 			if (oldId != 0) {
 				parseProblem(NLS.bind(Messages.projRead_badFilterName, oldId, newId));
 			} else {
-				((FilterDescription) objectStack.peek()).setId(newId.longValue());
+				((FilterDescription) objectStack.peek()).setId(newId);
 			}
 			state = S_FILTER;
 		}
@@ -705,15 +705,13 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 			IResource oldResource = ((FilterDescription) objectStack.peek()).getResource();
 			if (oldResource != null) {
 				parseProblem(NLS.bind(Messages.projRead_badFilterName, oldResource.getProjectRelativePath(), newPath));
-			} else {
-				if (project != null) {
-					((FilterDescription) objectStack.peek()).setResource(newPath.isEmpty() ? project : project.getFolder(newPath));
-				} else {
-					// if the project is null, that means that we're loading a project description to retrieve
-					// some meta data only.
-					((FilterDescription) objectStack.peek()).setResource(null);
-				}
-			}
+			} else if (project != null) {
+            	((FilterDescription) objectStack.peek()).setResource(newPath.isEmpty() ? project : project.getFolder(newPath));
+            } else {
+            	// if the project is null, that means that we're loading a project description to retrieve
+            	// some meta data only.
+            	((FilterDescription) objectStack.peek()).setResource(null);
+            }
 			state = S_FILTER;
 		}
 	}
@@ -918,7 +916,6 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 		}
 		if (elementName.equals(SNAPSHOT_LOCATION)) {
 			state = S_SNAPSHOT_LOCATION;
-			return;
 		}
 	}
 
@@ -980,12 +977,11 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 		charBuffer.setLength(0);
 		switch (state) {
 			case S_INITIAL :
-				if (elementName.equals(PROJECT_DESCRIPTION)) {
-					state = S_PROJECT_DESC;
-					projectDescription = new ProjectDescription();
-				} else {
-					throw (new SAXException(NLS.bind(Messages.projRead_notProjectDescription, elementName)));
+				if (!elementName.equals(PROJECT_DESCRIPTION)) {
+					throw new SAXException(NLS.bind(Messages.projRead_notProjectDescription, elementName));
 				}
+                state = S_PROJECT_DESC;
+                projectDescription = new ProjectDescription();
 				break;
 			case S_PROJECT_DESC :
 				parseProjectDescription(elementName);

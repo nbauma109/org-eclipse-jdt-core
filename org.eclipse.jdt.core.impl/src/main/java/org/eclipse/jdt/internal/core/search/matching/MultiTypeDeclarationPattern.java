@@ -80,11 +80,9 @@ public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 	QualifiedTypeDeclarationPattern pattern = (QualifiedTypeDeclarationPattern) decodedPattern;
 
 	// check type suffix
-	if (this.typeSuffix != pattern.typeSuffix && this.typeSuffix != TYPE_SUFFIX) {
-		if (!matchDifferentTypeSuffixes(this.typeSuffix, pattern.typeSuffix)) {
-			return false;
-		}
-	}
+	if (this.typeSuffix != pattern.typeSuffix && this.typeSuffix != TYPE_SUFFIX && !matchDifferentTypeSuffixes(this.typeSuffix, pattern.typeSuffix)) {
+    	return false;
+    }
 
 	// check qualified name
 	if (this.qualifications != null) {

@@ -109,7 +109,7 @@ public class CommentsPreparator extends ASTVisitor {
 	private int noFormatTagOpenStart = -1;
 	private int formatCodeTagOpenEnd = -1;
 	private int lastFormatCodeClosingTagIndex = -1;
-	private ArrayList<Integer> commonAttributeAnnotations = new ArrayList<Integer>();
+	private ArrayList<Integer> commonAttributeAnnotations = new ArrayList<>();
 	private DefaultCodeFormatter commentCodeFormatter;
 
 	public CommentsPreparator(TokenManager tm, DefaultCodeFormatterOptions options, String sourceLevel) {
@@ -159,11 +159,11 @@ public class CommentsPreparator extends ASTVisitor {
 
 		int positionInLine = this.tm.findSourcePositionInLine(commentToken.originalStart);
 		boolean isContinuation = commentIndex > 0 && this.tm.get(commentIndex - 1) == this.lastLineComment
-				&& (positionInLine >= this.lastLineCommentPosition - this.options.indentation_size + 1)
+				&& positionInLine >= this.lastLineCommentPosition - this.options.indentation_size + 1
 				&& this.tm.countLineBreaksBetween(this.lastLineComment, commentToken) == 1;
 
 		boolean isHeader = this.tm.isInHeader(commentIndex);
-		boolean formattingEnabled = (isHeader ? this.options.comment_format_header : this.options.comment_format_line_comment);
+		boolean formattingEnabled = isHeader ? this.options.comment_format_header : this.options.comment_format_line_comment;
 		if (!formattingEnabled) {
 			preserveWhitespace(commentToken, commentIndex);
 			if (isContinuation) {
@@ -245,12 +245,10 @@ public class CommentsPreparator extends ASTVisitor {
 		if (this.lastFormatOffComment == null) {
 			if (offIndex > onIndex)
 				this.lastFormatOffComment = commentToken;
-		} else {
-			if (onIndex > offIndex) {
-				this.tm.addDisableFormatTokenPair(this.lastFormatOffComment, commentToken);
-				this.lastFormatOffComment = null;
-			}
-		}
+		} else if (onIndex > offIndex) {
+        	this.tm.addDisableFormatTokenPair(this.lastFormatOffComment, commentToken);
+        	this.lastFormatOffComment = null;
+        }
 		return offIndex >= 0 || onIndex >= 0;
 	}
 
@@ -333,8 +331,7 @@ public class CommentsPreparator extends ASTVisitor {
 			fragments = Arrays.asList(commentToken);
 		}
 		ArrayList<Token> result = new ArrayList<>();
-		for (int i = 0; i < fragments.size(); i++) {
-			Token token = fragments.get(i);
+		for (Token token : fragments) {
 			if (token.hasNLSTag()) {
 				if (ScannerHelper.isWhitespace(this.tm.charAt(token.originalStart - 1)))
 					token.spaceBefore();
@@ -381,14 +378,12 @@ public class CommentsPreparator extends ASTVisitor {
 			return;
 
 		boolean isHeader = this.tm.isInHeader(commentIndex);
-		boolean formattingEnabled = (isHeader ? this.options.comment_format_header : this.options.comment_format_block_comment);
+		boolean formattingEnabled = isHeader ? this.options.comment_format_header : this.options.comment_format_block_comment;
 		if (this.tm.charAt(commentToken.originalStart + 2) == '-') {
-			if (commentToken.getLineBreaksBefore() > 0 || commentIndex == 0
-					|| this.tm.get(commentIndex - 1).getLineBreaksAfter() > 0) {
-				formattingEnabled = false;
-			} else {
+			if (commentToken.getLineBreaksBefore() <= 0 && commentIndex != 0 && this.tm.get(commentIndex - 1).getLineBreaksAfter() <= 0) {
 				return;
 			}
+            formattingEnabled = false;
 		}
 		if (formattingEnabled && tokenizeMultilineComment(commentToken)) {
 			this.commentStructure = commentToken.getInternalStructure();
@@ -465,8 +460,7 @@ public class CommentsPreparator extends ASTVisitor {
 			}
 		}
 
-		boolean isFirstColumn = (charBefore == '\r' || charBefore == '\n' || commentToken.originalStart == 0);
-		return isFirstColumn;
+		return charBefore == '\r' || charBefore == '\n' || commentToken.originalStart == 0;
 	}
 
 	private List<Token> commentToLines(Token commentToken, int commentStartPositionInLine) {
@@ -487,14 +481,14 @@ public class CommentsPreparator extends ASTVisitor {
 			char c = commentText.charAt(i);
 			switch (c) {
 				case ' ':
-					if ((lineStart == i && positionInLine < commentStartPosition)
-							|| (emptyLine && positionInLine == commentToken.getIndent() - 1))
+					if (lineStart == i && positionInLine < commentStartPosition
+							|| emptyLine && positionInLine == commentToken.getIndent() - 1)
 						lineStart = i + 1;
 					positionInLine++;
 					break;
 				case '\t':
-					if ((lineStart == i && positionInLine < commentStartPosition)
-							|| (emptyLine && positionInLine == commentToken.getIndent() - 1))
+					if (lineStart == i && positionInLine < commentStartPosition
+							|| emptyLine && positionInLine == commentToken.getIndent() - 1)
 						lineStart = i + 1;
 					if (tab > 0)
 						positionInLine += tab - positionInLine % tab;
@@ -558,7 +552,7 @@ public class CommentsPreparator extends ASTVisitor {
 			return false;
 
 		boolean isHeader = this.tm.isInHeader(commentIndex);
-		boolean formattingEnabled = (isHeader ? this.options.comment_format_header : this.options.comment_format_javadoc_comment);
+		boolean formattingEnabled = isHeader ? this.options.comment_format_header : this.options.comment_format_javadoc_comment;
 		if (!formattingEnabled || !tokenizeMultilineComment(commentToken)) {
 			commentToken.setInternalStructure(commentToLines(commentToken, -1));
 			return false;
@@ -716,7 +710,7 @@ public class CommentsPreparator extends ASTVisitor {
 				Token tagToken = this.ctm.get(tagIndexes.get(i));
 				String thisName = this.tm.toString(tagToken);
 				boolean sameType = previousName.equals(thisName)
-						|| (isCommonsAttributeAnnotation(previousName) && isCommonsAttributeAnnotation(thisName));
+						|| isCommonsAttributeAnnotation(previousName) && isCommonsAttributeAnnotation(thisName);
 				if (!sameType)
 					tagToken.putLineBreaksBefore(2);
 				previousName = thisName;
@@ -733,7 +727,7 @@ public class CommentsPreparator extends ASTVisitor {
 			}
 		}
 
-		boolean extraIndent = (paramName != null ? this.options.comment_indent_parameter_description : this.options.comment_indent_tag_description);
+		boolean extraIndent = paramName != null ? this.options.comment_indent_parameter_description : this.options.comment_indent_tag_description;
 		for (int i = 2; i < tagTokens.size(); i++) {
 			Token token = tagTokens.get(i);
 			token.setAlign(descriptionAlign);
@@ -749,7 +743,7 @@ public class CommentsPreparator extends ASTVisitor {
 		while (matcher.find()) {
 			int startPos = matcher.start() + node.getStartPosition();
 			int endPos = matcher.end() - 1 + node.getStartPosition();
-			boolean isOpeningTag = (matcher.start(1) == matcher.end(1));
+			boolean isOpeningTag = matcher.start(1) == matcher.end(1);
 
 			if (this.options.comment_format_html) {
 				// make sure tokens inside the tag are wrapped only as a substitute
@@ -820,7 +814,7 @@ public class CommentsPreparator extends ASTVisitor {
 
 	private void handleReference(ASTNode node) {
 		ASTNode parent = node.getParent();
-		if ((parent instanceof TagElement) && ((TagElement) parent).isNested()) {
+		if (parent instanceof TagElement && ((TagElement) parent).isNested()) {
 			int firstIndex = tokenStartingAt(node.getStartPosition());
 			int lastIndex = tokenEndingAt(node.getStartPosition() + node.getLength() - 1);
 			if (this.ctm.charAt(this.ctm.get(lastIndex + 1).originalStart) == '}')
@@ -1235,7 +1229,7 @@ public class CommentsPreparator extends ASTVisitor {
 					lineStart = i + 1;
 				} else if (!ScannerHelper.isWhitespace(c)) {
 					if (c == '*')
-						lineStart = (this.ctm.charAt(i + 1) == ' ') ? i + 2 : i + 1;
+						lineStart = this.ctm.charAt(i + 1) == ' ' ? i + 2 : i + 1;
 					break;
 				}
 			}
@@ -1294,16 +1288,11 @@ public class CommentsPreparator extends ASTVisitor {
 					continue; // group not matched
 				if (replaceChar != 0)
 					return 0; // more than one group matched
-				switch (i) {
-					case 1:
-						replaceChar = (char) Integer.parseInt(entity.substring(start + 2, end), 16);
-						break;
-					case 2:
-						replaceChar = (char) Integer.parseInt(entity.substring(start + 1, end), 10);
-						break;
-					default:
-						replaceChar = HTML_ENTITY_REPLACE.charAt(i);
-				}
+				replaceChar = switch (i) {
+                    case 1 -> (char) Integer.parseInt(entity.substring(start + 2, end), 16);
+                    case 2 -> (char) Integer.parseInt(entity.substring(start + 1, end), 10);
+                    default -> HTML_ENTITY_REPLACE.charAt(i);
+                };
 			}
 			return replaceChar;
 		}

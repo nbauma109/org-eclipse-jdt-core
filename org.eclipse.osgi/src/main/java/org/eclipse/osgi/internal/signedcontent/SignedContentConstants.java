@@ -31,7 +31,7 @@ public interface SignedContentConstants {
 	String SIG_DASH = "SIG-"; //$NON-NLS-1$
 	String META_INF = "META-INF/"; //$NON-NLS-1$
 	String META_INF_MANIFEST_MF = "META-INF/MANIFEST.MF"; //$NON-NLS-1$
-	String[] EMPTY_STRING = new String[0];
+	String[] EMPTY_STRING = {};
 
 	//
 	// following are variables and methods to cache the entries related data

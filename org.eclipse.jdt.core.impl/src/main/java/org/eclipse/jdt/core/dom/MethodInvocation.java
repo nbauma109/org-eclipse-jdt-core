@@ -106,9 +106,8 @@ public class MethodInvocation extends Expression {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_3_0;
 		}
+        return PROPERTY_DESCRIPTORS_3_0;
 	}
 
 	/**
@@ -161,18 +160,16 @@ public class MethodInvocation extends Expression {
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((SimpleName) child);
-				return null;
 			}
+            setName((SimpleName) child);
+            return null;
 		}
 		if (property == EXPRESSION_PROPERTY) {
 			if (get) {
 				return getExpression();
-			} else {
-				setExpression((Expression) child);
-				return null;
 			}
+            setExpression((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

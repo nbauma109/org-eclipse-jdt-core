@@ -59,7 +59,8 @@ public abstract class Statement extends ASTNode {
 	 *
 	 * @deprecated The leading comment feature was removed in 2.1.
 	 */
-	private String optionalLeadingComment = null;
+	@Deprecated
+    private String optionalLeadingComment = null;
 
 	/**
 	 * Creates a new AST node for a statement owned by the given AST.
@@ -95,7 +96,8 @@ public abstract class Statement extends ASTNode {
 	 * or use a scanner to reanalyze the source text immediately preceding
 	 * the statement's source range.
 	 */
-	public String getLeadingComment() {
+	@Deprecated
+    public String getLeadingComment() {
 		return this.optionalLeadingComment;
 	}
 
@@ -130,7 +132,8 @@ public abstract class Statement extends ASTNode {
 	 * only a partial, and inadequate, solution to the issue of associating
 	 * comments with statements.
 	 */
-	public void setLeadingComment(String comment) {
+	@Deprecated
+    public void setLeadingComment(String comment) {
 		if (comment != null) {
 			char[] source = comment.toCharArray();
 			Scanner scanner = this.ast.scanner;
@@ -178,8 +181,7 @@ public abstract class Statement extends ASTNode {
 
 	@Override
 	int memSize() {
-		int size = BASE_NODE_SIZE + 1 * 4 + stringSize(getLeadingComment());
-		return size;
+		return BASE_NODE_SIZE + 1 * 4 + stringSize(getLeadingComment());
 	}
 }
 

@@ -43,16 +43,14 @@ public boolean isStatic() {
 public char[] getSimpleName() {
 	if (this.reference != null) {
 		return this.reference.getSimpleName();
-	} else {
-		return this.compoundName[this.compoundName.length - 1];
 	}
+    return this.compoundName[this.compoundName.length - 1];
 }
 @Override
 public char[] readableName() {
 	if (this.onDemand)
 		return CharOperation.concat(CharOperation.concatWith(this.compoundName, '.'), ".*".toCharArray()); //$NON-NLS-1$
-	else
-		return CharOperation.concatWith(this.compoundName, '.');
+    return CharOperation.concatWith(this.compoundName, '.');
 }
 @Override
 public String toString() {

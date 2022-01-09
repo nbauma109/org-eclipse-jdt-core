@@ -52,7 +52,7 @@ public class EquinoxClassLoader extends ModuleClassLoader {
 		this.delegate = delegate;
 		this.generation = generation;
 		this.manager = new ClasspathManager(generation, this);
-		this.isRegisteredAsParallel = (ModuleClassLoader.REGISTERED_AS_PARALLEL && EQUINOX_REGISTERED_AS_PARALLEL) || this.configuration.PARALLEL_CAPABLE;
+		this.isRegisteredAsParallel = ModuleClassLoader.REGISTERED_AS_PARALLEL && EQUINOX_REGISTERED_AS_PARALLEL || this.configuration.PARALLEL_CAPABLE;
 	}
 
 	@Override

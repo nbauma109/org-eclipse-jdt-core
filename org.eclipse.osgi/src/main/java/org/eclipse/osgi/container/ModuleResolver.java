@@ -352,7 +352,7 @@ final class ModuleResolver {
 
 					fr -> { // don't include, not effective
 						Object effective = fr.getDirectives().get(Namespace.REQUIREMENT_EFFECTIVE_DIRECTIVE);
-						return !(effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective));
+						return effective == null || Namespace.EFFECTIVE_RESOLVE.equals(effective);
 					},
 
 					(fr, r) -> !PackageNamespace.PACKAGE_NAMESPACE.equals(fr.getNamespace()) || isDynamic(fr)
@@ -473,7 +473,7 @@ final class ModuleResolver {
 
 			@Override
 			protected void doLog(int level, String msg, Throwable throwable) {
-				Debug.println("RESOLVER: " + msg + SEPARATOR + (throwable != null ? (TAB + TAB + throwable.getMessage()) : "")); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.println("RESOLVER: " + msg + SEPARATOR + (throwable != null ? TAB + TAB + throwable.getMessage() : "")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 
 		}
@@ -630,7 +630,7 @@ final class ModuleResolver {
 				if (!wirings.containsKey(requirement.getResource()) || isDynamic(requirement)) {
 					reportBuilder.addEntry(requirement.getResource(), Entry.Type.MISSING_CAPABILITY, requirement);
 					String resolution = requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
-					if ((resolution == null || Namespace.RESOLUTION_MANDATORY.equals(resolution))) {
+					if (resolution == null || Namespace.RESOLUTION_MANDATORY.equals(resolution)) {
 						transitivelyResolveFailures.add(requirement.getResource());
 					}
 				}
@@ -674,22 +674,16 @@ final class ModuleResolver {
 		}
 
 		private void filterPermissions(BundleRequirement requirement, List<ModuleCapability> candidates) {
-			if (System.getSecurityManager() == null) {
-				return;
-			}
-
-			if (requirement.getRevision().getBundle() == null) {
+			if (System.getSecurityManager() == null || requirement.getRevision().getBundle() == null) {
 				// this container is not modeling a real framework, no permission check is done
 				return;
 			}
 
 			candidates.removeIf(candidate -> {
 				// TODO this is a hack for when a bundle imports and exports the same package
-				if (PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace())) {
-					if (requirement.getRevision().equals(candidate.getRevision())) {
-						return false;
-					}
-				}
+				if (PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace()) && requirement.getRevision().equals(candidate.getRevision())) {
+                	return false;
+                }
 				Permission requirePermission = InternalUtils.getRequirePermission(candidate);
 				Permission providePermission = InternalUtils.getProvidePermission(candidate);
 				if (!requirement.getRevision().getBundle().hasPermission(requirePermission)) {
@@ -704,7 +698,8 @@ final class ModuleResolver {
 								.toString());
 					}
 					return true;
-				} else if (!candidate.getRevision().getBundle().hasPermission(providePermission)) {
+				}
+                if (!candidate.getRevision().getBundle().hasPermission(providePermission)) {
 					if (DEBUG_PROVIDERS) {
 						Debug.println(new StringBuilder("RESOLVER: Capability filtered because provider did not have permission") //$NON-NLS-1$
 								.append(SEPARATOR).append(TAB) //
@@ -993,12 +988,11 @@ final class ModuleResolver {
 					maxUsedMemory = Math.max(maxUsedMemory, Runtime.getRuntime().freeMemory() - initialFreeMemory);
 				}
 			} catch (ResolutionException resolutionException) {
-				if (resolutionException.getCause() instanceof CancellationException) {
-					// revert back to single bundle resolves
-					resolveRevisionsIndividually(isMandatory, logger, result, toResolve, revisions);
-				} else {
+				if (!(resolutionException.getCause() instanceof CancellationException)) {
 					throw resolutionException;
 				}
+                // revert back to single bundle resolves
+                resolveRevisionsIndividually(isMandatory, logger, result, toResolve, revisions);
 			} catch (OutOfMemoryError memoryError) {
 				// revert back to single bundle resolves
 				resolveRevisionsIndividually(isMandatory, logger, result, toResolve, revisions);
@@ -1205,14 +1199,12 @@ final class ModuleResolver {
 								}
 								if (HostNamespace.HOST_NAMESPACE.equals(req.getNamespace())) {
 									newWires.add(new ModuleWire(hostCapability, hostCapability.getRevision(), req, requirer));
-								} else {
-									if (failToWire(req, requirer, newWires)) {
-										iFragments.remove();
-										validProviders.remove(req.getRevision());
-										retry = true;
-										break fragmentsLoop;
-									}
-								}
+								} else if (failToWire(req, requirer, newWires)) {
+                                	iFragments.remove();
+                                	validProviders.remove(req.getRevision());
+                                	retry = true;
+                                	break fragmentsLoop;
+                                }
 							}
 						}
 					}
@@ -1239,12 +1231,10 @@ final class ModuleResolver {
 						}
 					}
 				}
-				if (newWires.isEmpty()) {
-					if (!Namespace.RESOLUTION_OPTIONAL.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
-						// could not resolve mandatory requirement;
-						return true;
-					}
-				}
+				if (newWires.isEmpty() && !Namespace.RESOLUTION_OPTIONAL.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+                	// could not resolve mandatory requirement;
+                	return true;
+                }
 				// only create the wire if the namespace is a non-substituted namespace (e.g. NOT package)
 				if (!NON_SUBSTITUTED_REQUIREMENTS.contains(requirement.getNamespace())) {
 					wires.addAll(newWires);
@@ -1404,8 +1394,7 @@ final class ModuleResolver {
 			if (current == null) {
 				// generate the map using unresolved collection and wiring snap shot
 				// this is to avoid interacting with the module database
-				Set<ModuleRevision> revisions = new HashSet<>();
-				revisions.addAll(unresolved);
+				Set<ModuleRevision> revisions = new HashSet<>(unresolved);
 				revisions.addAll(previouslyResolved);
 				current = new HashMap<>();
 				for (ModuleRevision revision : revisions) {
@@ -1513,7 +1502,7 @@ final class ModuleResolver {
 
 			Version v1 = getVersion(c1);
 			Version v2 = getVersion(c2);
-			int versionCompare = -(v1.compareTo(v2));
+			int versionCompare = -v1.compareTo(v2);
 			if (versionCompare != 0)
 				return versionCompare;
 
@@ -1577,6 +1566,6 @@ final class ModuleResolver {
 		if (resolvingValue == null) {
 			return false;
 		}
-		return resolvingValue.booleanValue();
+		return resolvingValue;
 	}
 }

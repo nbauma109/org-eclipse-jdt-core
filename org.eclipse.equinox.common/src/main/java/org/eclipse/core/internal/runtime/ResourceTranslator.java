@@ -67,7 +67,7 @@ public class ResourceTranslator {
 
 	private static ResourceBundle getResourceBundle(Bundle bundle, String language) throws MissingResourceException {
 		if (hasRuntime21(bundle)) {
-			Locale locale = (language == null) ? Locale.getDefault() : new Locale(language);
+			Locale locale = language == null ? Locale.getDefault() : new Locale(language);
 			return ResourceBundle.getBundle("plugin", locale, createTempClassloader(bundle)); //$NON-NLS-1$
 		}
 		return Activator.getDefault().getLocalization(bundle, language);
@@ -101,7 +101,6 @@ public class ResourceTranslator {
 				}
 			}
 		} catch (BundleException e) {
-			return false;
 		}
 		return false;
 	}

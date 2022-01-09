@@ -62,7 +62,8 @@ public class ClassInstanceCreation extends Expression {
 	 * @since 3.0
 	 * @deprecated In the JLS3 API, this property is replaced by {@link #TYPE_PROPERTY}.
 	 */
-	public static final ChildPropertyDescriptor NAME_PROPERTY =
+	@Deprecated
+    public static final ChildPropertyDescriptor NAME_PROPERTY =
 		new ChildPropertyDescriptor(ClassInstanceCreation.class, "name", Name.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -135,9 +136,8 @@ public class ClassInstanceCreation extends Expression {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_3_0;
 		}
+        return PROPERTY_DESCRIPTORS_3_0;
 	}
 
 	/**
@@ -212,34 +212,30 @@ public class ClassInstanceCreation extends Expression {
 		if (property == EXPRESSION_PROPERTY) {
 			if (get) {
 				return getExpression();
-			} else {
-				setExpression((Expression) child);
-				return null;
 			}
+            setExpression((Expression) child);
+            return null;
 		}
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((Name) child);
-				return null;
 			}
+            setName((Name) child);
+            return null;
 		}
 		if (property == TYPE_PROPERTY) {
 			if (get) {
 				return getType();
-			} else {
-				setType((Type) child);
-				return null;
 			}
+            setType((Type) child);
+            return null;
 		}
 		if (property == ANONYMOUS_CLASS_DECLARATION_PROPERTY) {
 			if (get) {
 				return getAnonymousClassDeclaration();
-			} else {
-				setAnonymousClassDeclaration((AnonymousClassDeclaration) child);
-				return null;
 			}
+            setAnonymousClassDeclaration((AnonymousClassDeclaration) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -367,7 +363,8 @@ public class ClassInstanceCreation extends Expression {
 	 * {@link #getType()}, which returns a <code>Type</code> instead of a
 	 * <code>Name</code>.
 	 */
-	public Name getName() {
+	@Deprecated
+    public Name getName() {
 		return internalGetName();
 	}
 
@@ -407,7 +404,8 @@ public class ClassInstanceCreation extends Expression {
 	 * {@link #setType(Type)}, which expects a <code>Type</code> instead of
 	 * a <code>Name</code>.
 	 */
-	public void setName(Name name) {
+	@Deprecated
+    public void setName(Name name) {
 		internalSetName(name);
 	}
 

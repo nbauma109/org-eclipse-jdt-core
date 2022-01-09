@@ -24,7 +24,6 @@ public class InstallException extends Exception {
  * Constructs a <code>InstallException</code> with no detail  message.
  */
 public InstallException() {
-	super();
 }
 /**
  * Constructs a <code>InstallException</code> with the specified

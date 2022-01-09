@@ -151,11 +151,11 @@ public final class HashtableOfIntValues implements Cloneable {
 
 	@Override
 	public String toString() {
-		String s = ""; //$NON-NLS-1$
+		StringBuilder s = new StringBuilder();
 		char[] key;
 		for (int i = 0, length = this.valueTable.length; i < length; i++)
 			if ((key = this.keyTable[i]) != null)
-				s += new String(key) + " -> " + this.valueTable[i] + "\n"; 	//$NON-NLS-2$ //$NON-NLS-1$
-		return s;
+				s.append(key).append(" -> ").append(this.valueTable[i]).append("\n"); 	//$NON-NLS-2$ //$NON-NLS-1$
+		return s.toString();
 	}
 }

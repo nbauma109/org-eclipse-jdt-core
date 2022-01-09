@@ -26,7 +26,7 @@ public QualifiedTypeDeclarationPattern(char[] moduleNames, char[] qualification,
 	this(matchRule);
 	addModuleNames(moduleNames);
 	this.qualification = this.isCaseSensitive ? qualification : CharOperation.toLowerCase(qualification);
-	this.simpleName = (this.isCaseSensitive || this.isCamelCase) ? simpleName : CharOperation.toLowerCase(simpleName);
+	this.simpleName = this.isCaseSensitive || this.isCamelCase ? simpleName : CharOperation.toLowerCase(simpleName);
 	this.typeSuffix = typeSuffix;
 
 	this.mustResolve = this.qualification != null || typeSuffix != TYPE_SUFFIX || moduleNames != null;
@@ -74,7 +74,7 @@ public void decodeIndexKey(char[] key) {
 		int size = last - start;
 		System.arraycopy(this.qualification, 0, this.qualification = new char[length+1+size], 0, length);
 		this.qualification[length] = '.';
-		if (last == (start+1) && key[start] == ZERO_CHAR) {
+		if (last == start+1 && key[start] == ZERO_CHAR) {
 			this.enclosingTypeNames = ONE_ZERO_CHAR;
 			this.qualification[length+1] = ZERO_CHAR;
 		} else {
@@ -92,11 +92,9 @@ public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 	QualifiedTypeDeclarationPattern pattern = (QualifiedTypeDeclarationPattern) decodedPattern;
 
 	// check type suffix
-	if (this.typeSuffix != pattern.typeSuffix && this.typeSuffix != TYPE_SUFFIX) {
-		if (!matchDifferentTypeSuffixes(this.typeSuffix, pattern.typeSuffix)) {
-			return false;
-		}
-	}
+	if (this.typeSuffix != pattern.typeSuffix && this.typeSuffix != TYPE_SUFFIX && !matchDifferentTypeSuffixes(this.typeSuffix, pattern.typeSuffix)) {
+    	return false;
+    }
 
 	// check name
 	return matchesName(this.simpleName, pattern.simpleName) &&

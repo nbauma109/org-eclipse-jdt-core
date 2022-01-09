@@ -200,7 +200,7 @@ public class ExternalAnnotationDecorator implements IBinaryType {
 		if (!annotationBase.isFile()) {
 			return null;
 		}
-		return (producer != null ? producer.produce() : new ZipFile(annotationBase));
+		return producer != null ? producer.produce() : new ZipFile(annotationBase);
 	}
 
 	/**
@@ -229,8 +229,6 @@ public class ExternalAnnotationDecorator implements IBinaryType {
 				try {
 					return new ExternalAnnotationProvider(new FileInputStream(filePath), qualifiedBinaryTypeName);
 				} catch (FileNotFoundException e) {
-					// Expected, no need to report an error here
-					return null;
 				}
 			}
 		} else {
@@ -279,13 +277,15 @@ public class ExternalAnnotationDecorator implements IBinaryType {
 		if (walker == ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER && this.annotationProvider != null) {
 			if (member == null) {
 				return this.annotationProvider.forTypeHeader(environment);
-			} else if (member instanceof IBinaryField) {
+			}
+            if (member instanceof IBinaryField) {
 				IBinaryField field = (IBinaryField) member;
 				char[] fieldSignature = field.getGenericSignature();
 				if (fieldSignature == null)
 					fieldSignature = field.getTypeName();
 				return this.annotationProvider.forField(field.getName(), fieldSignature, environment);
-			} else if (member instanceof IBinaryMethod) {
+			}
+            if (member instanceof IBinaryMethod) {
 				IBinaryMethod method = (IBinaryMethod) member;
 				char[] methodSignature = method.getGenericSignature();
 				if (methodSignature == null)

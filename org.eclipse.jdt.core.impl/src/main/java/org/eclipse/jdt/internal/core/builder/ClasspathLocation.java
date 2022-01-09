@@ -77,55 +77,35 @@ public abstract class ClasspathLocation {
 	}
 	protected boolean areAllModuleOptionsEqual(ClasspathLocation other) {
 		if (this.patchModuleName != null) {
-			if (other.patchModuleName == null)
+			if (other.patchModuleName == null || !this.patchModuleName.equals(other.patchModuleName))
 				return false;
-			if (!this.patchModuleName.equals(other.patchModuleName))
-				return false;
-		} else {
-			if (other.patchModuleName != null)
-				return false;
-		}
+		} else if (other.patchModuleName != null)
+        	return false;
 		if (this.limitModuleNames != null) {
-			if (other.limitModuleNames == null)
+			if (other.limitModuleNames == null || other.limitModuleNames.size() != this.limitModuleNames.size() || !this.limitModuleNames.containsAll(other.limitModuleNames))
 				return false;
-			if (other.limitModuleNames.size() != this.limitModuleNames.size())
-				return false;
-			if (!this.limitModuleNames.containsAll(other.limitModuleNames))
-				return false;
-		} else {
-			if (other.limitModuleNames != null)
-				return false;
-		}
-		if (this.updates != null) {
-			if (other.updates == null)
-				return false;
-			List<Consumer<IUpdatableModule>> packageUpdates = this.updates.getList(UpdateKind.PACKAGE, false);
-			List<Consumer<IUpdatableModule>> otherPackageUpdates = other.updates.getList(UpdateKind.PACKAGE, false);
-			if (packageUpdates != null) {
-				if (otherPackageUpdates == null)
-					return false;
-				if (packageUpdates.size() != otherPackageUpdates.size())
-					return false;
-				if (!packageUpdates.containsAll(otherPackageUpdates))
-					return false;
-			} else {
-				if (otherPackageUpdates != null)
-					return false;
-			}
-			List<Consumer<IUpdatableModule>> moduleUpdates = this.updates.getList(UpdateKind.MODULE, false);
-			List<Consumer<IUpdatableModule>> otherModuleUpdates = other.updates.getList(UpdateKind.MODULE, false);
-			if (moduleUpdates != null) {
-				if (otherModuleUpdates == null)
-					return false;
-				if (moduleUpdates.size() != otherModuleUpdates.size())
-					return false;
-                return moduleUpdates.containsAll(otherModuleUpdates);
-			} else {
-                return otherModuleUpdates == null;
-			}
-		} else {
+		} else if (other.limitModuleNames != null)
+        	return false;
+		if (this.updates == null) {
             return other.updates == null;
 		}
+        if (other.updates == null)
+        	return false;
+        List<Consumer<IUpdatableModule>> packageUpdates = this.updates.getList(UpdateKind.PACKAGE, false);
+        List<Consumer<IUpdatableModule>> otherPackageUpdates = other.updates.getList(UpdateKind.PACKAGE, false);
+        if (packageUpdates != null) {
+        	if (otherPackageUpdates == null || packageUpdates.size() != otherPackageUpdates.size() || !packageUpdates.containsAll(otherPackageUpdates))
+        		return false;
+        } else if (otherPackageUpdates != null)
+        	return false;
+        List<Consumer<IUpdatableModule>> moduleUpdates = this.updates.getList(UpdateKind.MODULE, false);
+        List<Consumer<IUpdatableModule>> otherModuleUpdates = other.updates.getList(UpdateKind.MODULE, false);
+        if (moduleUpdates == null) {
+            return otherModuleUpdates == null;
+        }
+        if (otherModuleUpdates == null || moduleUpdates.size() != otherModuleUpdates.size())
+        	return false;
+        return moduleUpdates.containsAll(otherModuleUpdates);
     }
 	static ClasspathLocation forSourceFolder(IContainer sourceFolder, IContainer outputFolder,
 			char[][] inclusionPatterns, char[][] exclusionPatterns, boolean ignoreOptionalProblems, IPath externalAnnotationPath, List<ClasspathLocation> allExternalAnnotationPaths) {
@@ -145,9 +125,9 @@ static ClasspathLocation forLibrary(String libraryPathname,
 										String compliance) {
 	return Util.archiveFormat(libraryPathname) == Util.JMOD_FILE ?
 					new ClasspathJMod(libraryPathname, lastModified, accessRuleSet, annotationsPath) :
-						(compliance == null || (CompilerOptions.versionToJdkLevel(compliance) < ClassFileConstants.JDK9) ?
+						compliance == null || CompilerOptions.versionToJdkLevel(compliance) < ClassFileConstants.JDK9 ?
 			new ClasspathJar(libraryPathname, lastModified, accessRuleSet, annotationsPath, isOnModulePath) :
-				new ClasspathMultiReleaseJar(libraryPathname, lastModified, accessRuleSet, annotationsPath, isOnModulePath, compliance));
+				new ClasspathMultiReleaseJar(libraryPathname, lastModified, accessRuleSet, annotationsPath, isOnModulePath, compliance);
 
 }
 public static ClasspathJrt forJrtSystem(String jrtPath, AccessRuleSet accessRuleSet, IPath annotationsPath, String release) throws CoreException {
@@ -155,7 +135,7 @@ public static ClasspathJrt forJrtSystem(String jrtPath, AccessRuleSet accessRule
 }
 public static ClasspathJrt forJrtSystem(String jrtPath, AccessRuleSet accessRuleSet,
 		IPath annotationsPath, Collection<ClasspathLocation> allLocationsForEEA, String release) throws CoreException {
-	return (release == null || release.equals("")) ? new ClasspathJrt(jrtPath, accessRuleSet, annotationsPath, allLocationsForEEA) : //$NON-NLS-1$
+	return release == null || release.equals("") ? new ClasspathJrt(jrtPath, accessRuleSet, annotationsPath, allLocationsForEEA) : //$NON-NLS-1$
 						new ClasspathJrtWithReleaseOption(jrtPath, accessRuleSet, annotationsPath, allLocationsForEEA, release);
 }
 
@@ -166,13 +146,13 @@ public static ClasspathLocation forLibrary(String libraryPathname, AccessRuleSet
 
 public static ClasspathLocation forLibrary(IFile library, AccessRuleSet accessRuleSet, IPath annotationsPath, Collection<ClasspathLocation> allLocationsForEEA,
 										boolean isOnModulePath, String compliance) {
-	return (CompilerOptions.versionToJdkLevel(compliance) < ClassFileConstants.JDK9) ?
+	return CompilerOptions.versionToJdkLevel(compliance) < ClassFileConstants.JDK9 ?
 			new ClasspathJar(library, accessRuleSet, annotationsPath, allLocationsForEEA, isOnModulePath) :
 				new ClasspathMultiReleaseJar(library, accessRuleSet, annotationsPath, allLocationsForEEA, isOnModulePath, compliance);
 }
 public static ClasspathLocation forLibrary(ZipFile zipFile, AccessRuleSet accessRuleSet, IPath externalAnnotationPath, Collection<ClasspathLocation> allLocationsForEEA,
 										boolean isOnModulePath, String compliance) {
-	return (CompilerOptions.versionToJdkLevel(compliance) < ClassFileConstants.JDK9) ?
+	return CompilerOptions.versionToJdkLevel(compliance) < ClassFileConstants.JDK9 ?
 			new ClasspathJar(zipFile, accessRuleSet, externalAnnotationPath, isOnModulePath) :
 				new ClasspathMultiReleaseJar(zipFile, accessRuleSet, externalAnnotationPath, isOnModulePath, compliance);
 }

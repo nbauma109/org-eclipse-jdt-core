@@ -79,7 +79,7 @@ public class ManifestLocalization {
 		CaseInsensitiveDictionaryMap<String, String> localeHeaders = new CaseInsensitiveDictionaryMap<>(this.rawHeaders);
 		for (Entry<String, String> entry : localeHeaders.entrySet()) {
 			String value = entry.getValue();
-			if (value.startsWith("%") && (value.length() > 1)) { //$NON-NLS-1$
+			if (value.startsWith("%") && value.length() > 1) { //$NON-NLS-1$
 				String propertiesKey = value.substring(1);
 				try {
 					value = localeProperties == null ? propertiesKey : (String) localeProperties.getObject(propertiesKey);
@@ -101,7 +101,7 @@ public class ManifestLocalization {
 		while (nl.length() > 0) {
 			result.add(nl);
 			int i = nl.lastIndexOf('_');
-			nl = (i < 0) ? "" : nl.substring(0, i); //$NON-NLS-1$
+			nl = i < 0 ? "" : nl.substring(0, i); //$NON-NLS-1$
 		}
 		result.add(""); //$NON-NLS-1$
 		return result.toArray(new String[result.size()]);
@@ -189,29 +189,27 @@ public class ManifestLocalization {
 
 	private URL findResource(String resource) {
 		ModuleWiring searchWiring = generation.getRevision().getWiring();
-		if (searchWiring != null) {
-			if ((generation.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
-				List<ModuleWire> hostWires = searchWiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
-				searchWiring = null;
-				Long lowestHost = Long.MAX_VALUE;
-				if (hostWires != null) {
-					// search for the host with the highest ID
-					for (ModuleWire hostWire : hostWires) {
-						Long hostID = hostWire.getProvider().getRevisions().getModule().getId();
-						if (hostID.compareTo(lowestHost) <= 0) {
-							lowestHost = hostID;
-							searchWiring = hostWire.getProviderWiring();
-						}
-					}
-				}
-			}
-		}
+		if (searchWiring != null && (generation.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+        	List<ModuleWire> hostWires = searchWiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+        	searchWiring = null;
+        	Long lowestHost = Long.MAX_VALUE;
+        	if (hostWires != null) {
+        		// search for the host with the highest ID
+        		for (ModuleWire hostWire : hostWires) {
+        			Long hostID = hostWire.getProvider().getRevisions().getModule().getId();
+        			if (hostID.compareTo(lowestHost) <= 0) {
+        				lowestHost = hostID;
+        				searchWiring = hostWire.getProviderWiring();
+        			}
+        		}
+        	}
+        }
 		if (searchWiring != null) {
 			int lastSlash = resource.lastIndexOf('/');
 			String path = lastSlash > 0 ? resource.substring(0, lastSlash) : "/"; //$NON-NLS-1$
 			String fileName = lastSlash != -1 ? resource.substring(lastSlash + 1) : resource;
 			List<URL> result = searchWiring.findEntries(path, fileName, 0);
-			return (result == null || result.isEmpty()) ? null : result.get(0);
+			return result == null || result.isEmpty() ? null : result.get(0);
 		}
 		// search the raw bundle file for the generation
 		return generation.getEntry(resource);
@@ -250,7 +248,6 @@ public class ManifestLocalization {
 		private final String localeString;
 
 		public EmptyResouceBundle(String locale) {
-			super();
 			this.localeString = locale;
 		}
 

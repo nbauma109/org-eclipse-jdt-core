@@ -92,9 +92,8 @@ public JavaModelException(IStatus status) {
 public Throwable getException() {
 	if (this.nestedCoreException == null) {
 		return getStatus().getException();
-	} else {
-		return this.nestedCoreException;
 	}
+    return this.nestedCoreException;
 }
 /**
  * Returns the Java model status object for this exception.
@@ -106,11 +105,10 @@ public IJavaModelStatus getJavaModelStatus() {
 	IStatus status = getStatus();
 	if (status instanceof IJavaModelStatus) {
 		return (IJavaModelStatus)status;
-	} else {
-		// A regular IStatus is created only in the case of a CoreException.
-		// See bug 13492 Should handle JavaModelExceptions that contains CoreException more gracefully
-		return new JavaModelStatus(this.nestedCoreException);
 	}
+    // A regular IStatus is created only in the case of a CoreException.
+    // See bug 13492 Should handle JavaModelExceptions that contains CoreException more gracefully
+    return new JavaModelStatus(this.nestedCoreException);
 }
 /**
  * Returns whether this exception indicates that a Java model element does not

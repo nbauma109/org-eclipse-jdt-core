@@ -33,7 +33,6 @@ public final class OperationCanceledException extends RuntimeException {
 	 * Creates a new exception.
 	 */
 	public OperationCanceledException() {
-		super();
 	}
 
 	/**

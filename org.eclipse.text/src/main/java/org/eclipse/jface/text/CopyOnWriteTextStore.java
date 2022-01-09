@@ -61,7 +61,6 @@ public class CopyOnWriteTextStore implements ITextStore {
 		 * @param text the initial content
 		 */
 		private StringTextStore(String text) {
-			super();
 			fText= text != null ? text : ""; //$NON-NLS-1$
 			fCopyLimit= fText.length() > SMALL_TEXT_LIMIT ? fText.length() / 2 : 0;
 		}

@@ -105,9 +105,8 @@ public class AdaptExpression extends CompositeExpression {
 					if (adapted == null) {
 						if (manager.queryAdapter(var, fTypeName) == IAdapterManager.NOT_LOADED) {
 							return EvaluationResult.NOT_LOADED;
-						} else {
-							return EvaluationResult.FALSE;
 						}
+                        return EvaluationResult.FALSE;
 					}
 				}
 				if (adapted == null) {

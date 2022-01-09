@@ -58,7 +58,7 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, Bin
 		QualifiedNameReference qNameRef = (QualifiedNameReference) reference;
 		long sourcePosition = qNameRef.sourcePositions[0];
 		offset = (int) (sourcePosition >>> 32);
-		length = ((int) sourcePosition) - offset +1;
+		length = (int) sourcePosition - offset +1;
 	} else if (reference instanceof LocalDeclaration) {
 		LocalVariable localVariable = getLocalVariable();
 		offset = localVariable.nameStart;
@@ -120,24 +120,18 @@ public int resolveLevel(Binding binding) {
 	if(binding instanceof FieldBinding && ((FieldBinding) binding).isRecordComponent()) {
 		return matchField(binding, true);
 	}
-	if(binding instanceof LocalVariableBinding) {
-		if ( ((LocalVariableBinding)binding).declaringScope.referenceContext() instanceof CompactConstructorDeclaration) {
-			//update with binding
-			if( this.pattern instanceof FieldPattern) {
-				return matchField(binding, true);
-			}
-		}
-	}
+	//update with binding
+    if( binding instanceof LocalVariableBinding && ((LocalVariableBinding)binding).declaringScope.referenceContext() instanceof CompactConstructorDeclaration && this.pattern instanceof FieldPattern) {
+    	return matchField(binding, true);
+    }
 	if (!(binding instanceof LocalVariableBinding)) return IMPOSSIBLE_MATCH;
 
 	return matchLocalVariable((LocalVariableBinding) binding, true);
 }
 private int matchField(Binding binding, boolean matchName) {
 	if (binding == null) return INACCURATE_MATCH;
-	if(binding instanceof FieldBinding) {
-		if (! ((FieldBinding)binding).declaringClass.isRecord())
-			return IMPOSSIBLE_MATCH;
-	}
+	if (binding instanceof FieldBinding && ! ((FieldBinding)binding).declaringClass.isRecord())
+    	return IMPOSSIBLE_MATCH;
 	if(this.pattern instanceof LocalVariablePattern) {
 		LocalVariablePattern lvp = (LocalVariablePattern)this.pattern;
 		LocalVariable localVariable = lvp.localVariable;

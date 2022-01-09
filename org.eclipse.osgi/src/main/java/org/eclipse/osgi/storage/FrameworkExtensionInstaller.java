@@ -80,8 +80,6 @@ public class FrameworkExtensionInstaller {
 				result.setAccessible(true);
 			}
 			return result;
-		} catch (SecurityException e) {
-			// if we do not have the permissions then we will not find the method
 		} catch (NoSuchMethodException | RuntimeException e) {
 			// do nothing look in super class below
 			// have to avoid blowing up <clinit>
@@ -134,7 +132,7 @@ public class FrameworkExtensionInstaller {
 		}
 
 		for (ModuleRevision revision : revisions) {
-			if (CL == null || (ADD_FWK_URL_METHOD == null && ADD_FWK_FILE_PATH_METHOD == null)) {
+			if (CL == null || ADD_FWK_URL_METHOD == null && ADD_FWK_FILE_PATH_METHOD == null) {
 				// use the first revision as the blame
 				throw new BundleException("Cannot support framework extension bundles without a public addURL(URL) or appendToClassPathForInstrumentation(String) method on the framework class loader: " + revision.getBundle()); //$NON-NLS-1$
 			}

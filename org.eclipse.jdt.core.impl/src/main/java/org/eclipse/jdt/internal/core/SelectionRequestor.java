@@ -85,7 +85,6 @@ public class SelectionRequestor implements ISelectionRequestor {
  * Fix for 1FVXGDK
  */
 public SelectionRequestor(NameLookup nameLookup, Openable openable) {
-	super();
 	this.nameLookup = nameLookup;
 	this.openable = openable;
 }
@@ -165,8 +164,8 @@ protected void acceptBinaryMethod(
 		if (typeParameterNames != null && typeParameterNames.length != 0) {
 			IMethod[] methods = type.findMethods(method);
 			if (methods != null && methods.length > 1) {
-				for (int i = 0; i < methods.length; i++) {
-					if (areTypeParametersCompatible(methods[i], typeParameterNames, typeParameterBoundNames)) {
+				for (IMethod method2 : methods) {
+					if (areTypeParametersCompatible(method2, typeParameterNames, typeParameterBoundNames)) {
 						acceptBinaryMethod(type, method, uniqueKey, isConstructor);
 					}
 				}
@@ -186,23 +185,14 @@ public void acceptModule(char[] moduleName, char[] uniqueKey, int start, int end
  */
 @Override
 public void acceptType(char[] packageName, char[] typeName, int modifiers, boolean isDeclaration, char[] uniqueKey, int start, int end) {
-	int acceptFlags = 0;
+	int acceptFlags;
 	int kind = modifiers & (ClassFileConstants.AccInterface|ClassFileConstants.AccEnum|ClassFileConstants.AccAnnotation);
-	switch (kind) {
-		case ClassFileConstants.AccAnnotation:
-		case ClassFileConstants.AccAnnotation|ClassFileConstants.AccInterface:
-			acceptFlags = NameLookup.ACCEPT_ANNOTATIONS;
-			break;
-		case ClassFileConstants.AccEnum:
-			acceptFlags = NameLookup.ACCEPT_ENUMS;
-			break;
-		case ClassFileConstants.AccInterface:
-			acceptFlags = NameLookup.ACCEPT_INTERFACES;
-			break;
-		default:
-			acceptFlags = NameLookup.ACCEPT_CLASSES | NameLookup.ACCEPT_RECORDS ;
-			break;
-	}
+	acceptFlags = switch (kind) {
+        case ClassFileConstants.AccAnnotation, ClassFileConstants.AccAnnotation|ClassFileConstants.AccInterface -> NameLookup.ACCEPT_ANNOTATIONS;
+        case ClassFileConstants.AccEnum -> NameLookup.ACCEPT_ENUMS;
+        case ClassFileConstants.AccInterface -> NameLookup.ACCEPT_INTERFACES;
+        default -> NameLookup.ACCEPT_CLASSES | NameLookup.ACCEPT_RECORDS;
+    };
 	IType type = null;
 	if(isDeclaration) {
 		type = resolveTypeByLocation(packageName, typeName, acceptFlags, start, end);
@@ -280,13 +270,12 @@ public void acceptField(char[] declaringTypePackageName, char[] declaringTypeNam
 						System.arraycopy(comps, 0, fields, f.length, comps.length);
 					}
 				}
-				for (int i = 0; i < fields.length; i++) {
-					IField field = fields[i];
+				for (IField field : fields) {
 					ISourceRange range = field.getNameRange();
 					if(range.getOffset() <= start
 							&& range.getOffset() + range.getLength() >= end
 							&& field.getElementName().equals(new String(name))) {
-						addElement(fields[i]);
+						addElement(field);
 						if(SelectionEngine.DEBUG){
 							System.out.print("SELECTION - accept field("); //$NON-NLS-1$
 							System.out.print(field);
@@ -481,7 +470,7 @@ public void acceptLocalVariable(LocalVariableBinding binding, org.eclipse.jdt.in
 	LocalVariable localVar = null;
 	if(parent != null) {
 		String typeSig = null;
-		if (local.type == null || (local.type.isTypeNameVar(binding.declaringScope) && !binding.type.isAnonymousType())) {
+		if (local.type == null || local.type.isTypeNameVar(binding.declaringScope) && !binding.type.isAnonymousType()) {
 			if (local.initialization instanceof CastExpression) {
 				typeSig = Util.typeSignature(((CastExpression) local.initialization).type);
 			} else {
@@ -594,11 +583,11 @@ public void acceptMethod(
 public void acceptPackage(char[] packageName) {
 	IPackageFragment[] pkgs = this.nameLookup.findPackageFragments(new String(packageName), false);
 	if (pkgs != null) {
-		for (int i = 0, length = pkgs.length; i < length; i++) {
-			addElement(pkgs[i]);
+		for (IPackageFragment pkg : pkgs) {
+			addElement(pkg);
 			if(SelectionEngine.DEBUG){
 				System.out.print("SELECTION - accept package("); //$NON-NLS-1$
-				System.out.print(pkgs[i].toString());
+				System.out.print(pkg.toString());
 				System.out.println(")"); //$NON-NLS-1$
 			}
 		}
@@ -623,10 +612,10 @@ protected void acceptSourceMethod(
 	IMethod[] methods = null;
 	try {
 		methods = type.getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			if (methods[i].getElementName().equals(name)
-					&& methods[i].getParameterTypes().length == parameterTypeNames.length) {
-				IMethod method = methods[i];
+		for (IMethod method2 : methods) {
+			if (method2.getElementName().equals(name)
+					&& method2.getParameterTypes().length == parameterTypeNames.length) {
+				IMethod method = method2;
 				if (uniqueKey != null) {
 					ResolvedSourceMethod resolvedMethod = new ResolvedSourceMethod(
 						(JavaElement)method.getParent(),
@@ -648,17 +637,15 @@ protected void acceptSourceMethod(
 		try {
 			if (type.isRecord()) {
 				IField comp = type.getRecordComponent(name);
-				if (comp != null) {
-					 if (!Flags.isStatic(comp.getFlags())) {
-						// no match was actually found, but a method was originally given -> default accessor
-						 addElement(comp);
-						 if(SelectionEngine.DEBUG){
-								System.out.print("SELECTION - accept field("); //$NON-NLS-1$
-								System.out.print(comp);
-								System.out.println(")"); //$NON-NLS-1$
-						 }
-					 }
-				}
+				if (comp != null && !Flags.isStatic(comp.getFlags())) {
+                	// no match was actually found, but a method was originally given -> default accessor
+                	 addElement(comp);
+                	 if(SelectionEngine.DEBUG){
+                			System.out.print("SELECTION - accept field("); //$NON-NLS-1$
+                			System.out.print(comp);
+                			System.out.println(")"); //$NON-NLS-1$
+                	 }
+                 }
 			}
 		} catch (JavaModelException e) {
 			// Do Nothing
@@ -723,12 +710,12 @@ protected void acceptMethodDeclaration(IType type, char[] selector, int start, i
 	IMethod[] methods = null;
 	try {
 		methods = type.getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			ISourceRange range = methods[i].getNameRange();
+		for (IMethod method : methods) {
+			ISourceRange range = method.getNameRange();
 			if(range.getOffset() <= start
 					&& range.getOffset() + range.getLength() >= end
-					&& methods[i].getElementName().equals(name)) {
-				addElement(methods[i]);
+					&& method.getElementName().equals(name)) {
+				addElement(method);
 				if(SelectionEngine.DEBUG){
 					System.out.print("SELECTION - accept method("); //$NON-NLS-1$
 					System.out.print(this.elements[0].toString());
@@ -748,7 +735,6 @@ protected void acceptMethodDeclaration(IType type, char[] selector, int start, i
 		System.out.print(type);
 		System.out.println(")"); //$NON-NLS-1$
 	}
-	return;
 }
 @Override
 public void acceptTypeParameter(char[] declaringTypePackageName, char[] declaringTypeName, char[] typeParameterName, boolean isDeclaration, int start, int end) {
@@ -848,7 +834,7 @@ protected void addElement(IJavaElement element) {
 	}
 
 	if (elementLength == this.elements.length) {
-		System.arraycopy(this.elements, 0, this.elements = new IJavaElement[(elementLength*2) + 1], 0, elementLength);
+		System.arraycopy(this.elements, 0, this.elements = new IJavaElement[elementLength*2 + 1], 0, elementLength);
 	}
 	this.elements[++this.elementIndex] = element;
 }
@@ -859,33 +845,31 @@ private boolean areTypeParametersCompatible(IMethod method, char[][] typeParamet
 		int length2 = typeParameterNames == null ? 0 : typeParameterNames.length;
 		if (length1 != length2) {
 			return false;
-		} else {
-			for (int j = 0; j < length1; j++) {
-				ITypeParameter typeParameter = typeParameters[j];
-				String typeParameterName = typeParameter.getElementName();
-				if (!typeParameterName.equals(new String(typeParameterNames[j]))) {
-					return false;
-				}
-
-				String[] bounds = typeParameter.getBounds();
-				int boundCount = typeParameterBoundNames[j] == null ? 0 : typeParameterBoundNames[j].length;
-
-				if (bounds.length != boundCount) {
-					return false;
-				} else {
-					for (int k = 0; k < boundCount; k++) {
-						String simpleName = Signature.getSimpleName(bounds[k]);
-						int index = simpleName.indexOf('<');
-						if (index != -1) {
-							simpleName = simpleName.substring(0, index);
-						}
-						if (!simpleName.equals(new String(typeParameterBoundNames[j][k]))) {
-							return false;
-						}
-					}
-				}
-			}
 		}
+        for (int j = 0; j < length1; j++) {
+        	ITypeParameter typeParameter = typeParameters[j];
+        	String typeParameterName = typeParameter.getElementName();
+        	if (!typeParameterName.equals(new String(typeParameterNames[j]))) {
+        		return false;
+        	}
+
+        	String[] bounds = typeParameter.getBounds();
+        	int boundCount = typeParameterBoundNames[j] == null ? 0 : typeParameterBoundNames[j].length;
+
+        	if (bounds.length != boundCount) {
+        		return false;
+        	}
+            for (int k = 0; k < boundCount; k++) {
+            	String simpleName = Signature.getSimpleName(bounds[k]);
+            	int index = simpleName.indexOf('<');
+            	if (index != -1) {
+            		simpleName = simpleName.substring(0, index);
+            	}
+            	if (!simpleName.equals(new String(typeParameterBoundNames[j][k]))) {
+            		return false;
+            	}
+            }
+        }
 	} catch (JavaModelException e) {
 		return false;
 	}
@@ -941,15 +925,13 @@ protected IJavaElement findLocalElement(int pos, MethodScope scope) {
 public IJavaElement findMethodFromBinding(MethodBinding method, String[] signatures, ReferenceBinding declaringClass) {
 	IType foundType = this.resolveType(declaringClass.qualifiedPackageName(), declaringClass.qualifiedSourceName(), NameLookup.ACCEPT_CLASSES & NameLookup.ACCEPT_INTERFACES);
 	if (foundType != null) {
-		if (foundType instanceof BinaryType) {
-			try {
-				return Util.findMethod(foundType, method.selector, signatures, method.isConstructor());
-			} catch (JavaModelException e) {
-				return null;
-			}
-		} else {
+		if (!(foundType instanceof BinaryType)) {
 			return foundType.getMethod(new String(method.selector), signatures);
 		}
+        try {
+        	return Util.findMethod(foundType, method.selector, signatures, method.isConstructor());
+        } catch (JavaModelException e) {
+        }
 	}
 	return null;
 }
@@ -980,8 +962,8 @@ protected IType resolveType(char[] packageName, char[] typeName, int acceptFlags
 	if (this.openable instanceof CompilationUnit && ((CompilationUnit)this.openable).isWorkingCopy()) {
 		CompilationUnit wc = (CompilationUnit) this.openable;
 		try {
-			if(((packageName == null || packageName.length == 0) && wc.getPackageDeclarations().length == 0) ||
-				(!(packageName == null || packageName.length == 0) && wc.getPackageDeclaration(new String(packageName)).exists())) {
+			if((packageName == null || packageName.length == 0) && wc.getPackageDeclarations().length == 0 ||
+				packageName != null && packageName.length != 0 && wc.getPackageDeclaration(new String(packageName)).exists()) {
 
 				char[][] compoundName = CharOperation.splitOn('.', typeName);
 				if(compoundName.length > 0) {
@@ -1002,7 +984,7 @@ protected IType resolveType(char[] packageName, char[] typeName, int acceptFlags
 
 	if(type == null) {
 		IPackageFragment[] pkgs = this.nameLookup.findPackageFragments(
-			(packageName == null || packageName.length == 0) ? IPackageFragment.DEFAULT_PACKAGE_NAME : new String(packageName),
+			packageName == null || packageName.length == 0 ? IPackageFragment.DEFAULT_PACKAGE_NAME : new String(packageName),
 			false);
 		// iterate type lookup in each package fragment
 		for (int i = 0, length = pkgs == null ? 0 : pkgs.length; i < length; i++) {
@@ -1026,9 +1008,9 @@ protected IType resolveType(char[] packageName, char[] typeName, int acceptFlags
 				} catch (JavaModelException e) {
 					return null;
 				}
-				for (int i= 0; i < allTypes.length; i++) {
-					if (allTypes[i].getTypeQualifiedName().equals(tName)) {
-						return allTypes[i];
+				for (IType type2 : allTypes) {
+					if (type2.getTypeQualifiedName().equals(tName)) {
+						return type2;
 					}
 				}
 			}
@@ -1044,8 +1026,8 @@ protected IType resolveTypeByLocation(char[] packageName, char[] typeName, int a
 	if (this.openable instanceof CompilationUnit && this.openable.isOpen()) {
 		CompilationUnit wc = (CompilationUnit) this.openable;
 		try {
-			if(((packageName == null || packageName.length == 0) && wc.getPackageDeclarations().length == 0) ||
-				(!(packageName == null || packageName.length == 0) && wc.getPackageDeclaration(new String(packageName)).exists())) {
+			if((packageName == null || packageName.length == 0) && wc.getPackageDeclarations().length == 0 ||
+				packageName != null && packageName.length != 0 && wc.getPackageDeclaration(new String(packageName)).exists()) {
 
 				char[][] compoundName = CharOperation.splitOn('.', typeName);
 				if(compoundName.length > 0) {
@@ -1082,7 +1064,7 @@ protected IType resolveTypeByLocation(char[] packageName, char[] typeName, int a
 
 	if(type == null) {
 		IPackageFragment[] pkgs = this.nameLookup.findPackageFragments(
-			(packageName == null || packageName.length == 0) ? IPackageFragment.DEFAULT_PACKAGE_NAME : new String(packageName),
+			packageName == null || packageName.length == 0 ? IPackageFragment.DEFAULT_PACKAGE_NAME : new String(packageName),
 			false);
 		// iterate type lookup in each package fragment
 		for (int i = 0, length = pkgs == null ? 0 : pkgs.length; i < length; i++) {
@@ -1106,9 +1088,9 @@ protected IType resolveTypeByLocation(char[] packageName, char[] typeName, int a
 				} catch (JavaModelException e) {
 					return null;
 				}
-				for (int i= 0; i < allTypes.length; i++) {
-					if (allTypes[i].getTypeQualifiedName().equals(tName)) {
-						return allTypes[i];
+				for (IType type2 : allTypes) {
+					if (type2.getTypeQualifiedName().equals(tName)) {
+						return type2;
 					}
 				}
 			}

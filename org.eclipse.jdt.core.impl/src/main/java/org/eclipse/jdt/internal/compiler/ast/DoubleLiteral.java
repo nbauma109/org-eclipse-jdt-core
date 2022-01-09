@@ -43,11 +43,7 @@ public void computeConstant() {
 		// being rejected by 1.4 libraries where Double.valueOf(...) doesn't handle hex decimal floats
 		try {
 			double v = FloatUtil.valueOfHexDoubleLiteral(this.source);
-			if (v == Double.POSITIVE_INFINITY) {
-				// error: the number is too large to represent
-				return;
-			}
-			if (Double.isNaN(v)) {
+			if (v == Double.POSITIVE_INFINITY || Double.isNaN(v)) {
 				// error: the number is too small to represent
 				return;
 			}
@@ -58,7 +54,7 @@ public void computeConstant() {
 		}
 		return;
 	}
-	final double doubleValue = computedValue.doubleValue();
+	final double doubleValue = computedValue;
 	if (doubleValue > Double.MAX_VALUE) {
 		// error: the number is too large to represent
 		return;

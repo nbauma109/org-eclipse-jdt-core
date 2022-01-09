@@ -51,7 +51,7 @@ public class ResourceCompilationUnit implements ICompilationUnit {
 
 		// otherwise retrieve it
 		try {
-			return (this.contents = Util.getResourceContentsAsCharArray(this.file));
+			return this.contents = Util.getResourceContentsAsCharArray(this.file);
 		} catch (CoreException e) {
 			return CharOperation.NO_CHAR;
 		}

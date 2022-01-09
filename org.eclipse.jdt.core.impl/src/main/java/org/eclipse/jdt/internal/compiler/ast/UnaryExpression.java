@@ -38,7 +38,7 @@ public class UnaryExpression extends OperatorExpression {
 			BlockScope currentScope,
 			FlowContext flowContext,
 			FlowInfo flowInfo) {
-		if (((this.bits & OperatorMASK) >> OperatorSHIFT) == NOT) {
+		if ((this.bits & OperatorMASK) >> OperatorSHIFT == NOT) {
 			flowContext.tagBits ^= FlowContext.INSIDE_NEGATION;
 			flowInfo = this.expression.
 				analyseCode(currentScope, flowContext, flowInfo).
@@ -54,7 +54,7 @@ public class UnaryExpression extends OperatorExpression {
 
 	@Override
 	protected void updateFlowOnBooleanResult(FlowInfo flowInfo, boolean result) {
-		if (((this.bits & OperatorMASK) >> OperatorSHIFT) == NOT)
+		if ((this.bits & OperatorMASK) >> OperatorSHIFT == NOT)
 			this.expression.updateFlowOnBooleanResult(flowInfo, !result);
 	}
 
@@ -99,7 +99,7 @@ public class UnaryExpression extends OperatorExpression {
 							currentScope,
 							codeStream,
 							null,
-							(falseLabel = new BranchLabel(codeStream)),
+							falseLabel = new BranchLabel(codeStream),
 							valueRequired);
 						if (valueRequired) {
 							codeStream.iconst_0();
@@ -192,7 +192,7 @@ public class UnaryExpression extends OperatorExpression {
 		BranchLabel falseLabel,
 		boolean valueRequired) {
 
-		if ((this.constant != Constant.NotAConstant) && (this.constant.typeID() == T_boolean)) {
+		if (this.constant != Constant.NotAConstant && this.constant.typeID() == T_boolean) {
 			super.generateOptimizedBoolean(
 				currentScope,
 				codeStream,
@@ -201,7 +201,7 @@ public class UnaryExpression extends OperatorExpression {
 				valueRequired);
 			return;
 		}
-		if (((this.bits & OperatorMASK) >> OperatorSHIFT) == NOT) {
+		if ((this.bits & OperatorMASK) >> OperatorSHIFT == NOT) {
 			this.expression.generateOptimizedBoolean(
 				currentScope,
 				codeStream,
@@ -227,7 +227,7 @@ public class UnaryExpression extends OperatorExpression {
 	@Override
 	public void collectPatternVariablesToScope(LocalVariableBinding[] variables, BlockScope scope) {
 		this.expression.collectPatternVariablesToScope(variables, scope);
-		if (((this.bits & OperatorMASK) >> OperatorSHIFT) == NOT) {
+		if ((this.bits & OperatorMASK) >> OperatorSHIFT == NOT) {
 			variables = this.expression.getPatternVariablesWhenTrue();
 			if (variables != null)
 				this.addPatternVariablesWhenFalse(variables);
@@ -245,7 +245,7 @@ public class UnaryExpression extends OperatorExpression {
 	@Override
 	public TypeBinding resolveType(BlockScope scope) {
 		boolean expressionIsCast;
-		if ((expressionIsCast = this.expression instanceof CastExpression) == true) this.expression.bits |= DisableUnnecessaryCastCheck; // will check later on
+		if (expressionIsCast = this.expression instanceof CastExpression) this.expression.bits |= DisableUnnecessaryCastCheck; // will check later on
 		TypeBinding expressionType = this.expression.resolveType(scope);
 		if (expressionType == null) {
 			this.constant = Constant.NotAConstant;
@@ -254,35 +254,26 @@ public class UnaryExpression extends OperatorExpression {
 		int expressionTypeID = expressionType.id;
 		// autoboxing support
 		boolean use15specifics = scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5;
-		if (use15specifics) {
-			if (!expressionType.isBaseType()) {
-				expressionTypeID = scope.environment().computeBoxingType(expressionType).id;
-			}
-		}
+		if (use15specifics && !expressionType.isBaseType()) {
+        	expressionTypeID = scope.environment().computeBoxingType(expressionType).id;
+        }
 		if (expressionTypeID > 15) {
 			this.constant = Constant.NotAConstant;
 			scope.problemReporter().invalidOperator(this, expressionType);
 			return null;
 		}
 
-		int tableId;
-		switch ((this.bits & OperatorMASK) >> OperatorSHIFT) {
-			case NOT :
-				tableId = AND_AND;
-				break;
-			case TWIDDLE :
-				tableId = LEFT_SHIFT;
-				break;
-			default :
-				tableId = MINUS;
-		} //+ and - cases
-
+		int tableId = switch ((this.bits & OperatorMASK) >> OperatorSHIFT) {
+            case NOT -> AND_AND;
+            case TWIDDLE -> LEFT_SHIFT;
+            default -> MINUS;
+        };
 		// the code is an int
 		// (cast)  left   Op (cast)  rigth --> result
 		//  0000   0000       0000   0000      0000
 		//  <<16   <<12       <<8    <<4       <<0
 		int operatorSignature = OperatorSignatures[tableId][(expressionTypeID << 4) + expressionTypeID];
-		this.expression.computeConversion(scope, TypeBinding.wellKnownType(scope, (operatorSignature >>> 16) & 0x0000F), expressionType);
+		this.expression.computeConversion(scope, TypeBinding.wellKnownType(scope, operatorSignature >>> 16 & 0x0000F), expressionType);
 		this.bits |= operatorSignature & 0xF;
 		switch (operatorSignature & 0xF) { // only switch on possible result type.....
 			case T_boolean :
@@ -321,7 +312,7 @@ public class UnaryExpression extends OperatorExpression {
 					(this.bits & OperatorMASK) >> OperatorSHIFT);
 		} else {
 			this.constant = Constant.NotAConstant;
-			if (((this.bits & OperatorMASK) >> OperatorSHIFT) == NOT) {
+			if ((this.bits & OperatorMASK) >> OperatorSHIFT == NOT) {
 				Constant cst = this.expression.optimizedBooleanConstant();
 				if (cst != Constant.NotAConstant)
 					this.optimizedBooleanConstant = BooleanConstant.fromValue(!cst.booleanValue());

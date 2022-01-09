@@ -38,7 +38,7 @@ public class QualifiedTypeReference extends TypeReference {
 		Annotation [][] allAnnotations = getMergedAnnotationsOnDimensions(additionalDimensions, additionalAnnotations);
 		ArrayQualifiedTypeReference arrayQualifiedTypeReference = new ArrayQualifiedTypeReference(this.tokens, totalDimensions, allAnnotations, this.sourcePositions);
 		arrayQualifiedTypeReference.annotations = this.annotations;
-		arrayQualifiedTypeReference.bits |= (this.bits & ASTNode.HasTypeAnnotations);
+		arrayQualifiedTypeReference.bits |= this.bits & ASTNode.HasTypeAnnotations;
 		if (!isVarargs)
 			arrayQualifiedTypeReference.extendedDimensions = additionalDimensions;
 		return arrayQualifiedTypeReference;
@@ -82,8 +82,8 @@ public class QualifiedTypeReference extends TypeReference {
 			Annotation[] qualifierAnnot = this.annotations[j];
 			if (qualifierAnnot != null && qualifierAnnot.length > 0) {
 				if (j == 0) {
-					for (int k = 0; k < qualifierAnnot.length; k++) {
-						scope.problemReporter().typeAnnotationAtQualifiedName(qualifierAnnot[k]);
+					for (Annotation element : qualifierAnnot) {
+						scope.problemReporter().typeAnnotationAtQualifiedName(element);
 					}
 				} else {
 					scope.problemReporter().misplacedTypeAnnotations(qualifierAnnot[0],
@@ -189,8 +189,8 @@ public class QualifiedTypeReference extends TypeReference {
 	void recordResolution(LookupEnvironment env, TypeBinding typeFound) {
 		if (typeFound != null && typeFound.isValidBinding()) {
 			synchronized (env.root) {
-				for (int i = 0; i < env.root.resolutionListeners.length; i++) {
-					env.root.resolutionListeners[i].recordResolution(this, typeFound);
+				for (IQualifiedTypeResolutionListener resolutionListener : env.root.resolutionListeners) {
+					resolutionListener.recordResolution(this, typeFound);
 				}
 			}
 		}
@@ -217,31 +217,27 @@ public class QualifiedTypeReference extends TypeReference {
 
 	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
-		if (visitor.visit(this, scope)) {
-			if (this.annotations != null) {
-				int annotationsLevels = this.annotations.length;
-				for (int i = 0; i < annotationsLevels; i++) {
-					int annotationsLength = this.annotations[i] == null ? 0 : this.annotations[i].length;
-					for (int j = 0; j < annotationsLength; j++)
-						this.annotations[i][j].traverse(visitor, scope);
-				}
-			}
-		}
+		if (visitor.visit(this, scope) && this.annotations != null) {
+        	int annotationsLevels = this.annotations.length;
+        	for (int i = 0; i < annotationsLevels; i++) {
+        		int annotationsLength = this.annotations[i] == null ? 0 : this.annotations[i].length;
+        		for (int j = 0; j < annotationsLength; j++)
+        			this.annotations[i][j].traverse(visitor, scope);
+        	}
+        }
 		visitor.endVisit(this, scope);
 	}
 
 	@Override
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
-		if (visitor.visit(this, scope)) {
-			if (this.annotations != null) {
-				int annotationsLevels = this.annotations.length;
-				for (int i = 0; i < annotationsLevels; i++) {
-					int annotationsLength = this.annotations[i] == null ? 0 : this.annotations[i].length;
-					for (int j = 0; j < annotationsLength; j++)
-						this.annotations[i][j].traverse(visitor, scope);
-				}
-			}
-		}
+		if (visitor.visit(this, scope) && this.annotations != null) {
+        	int annotationsLevels = this.annotations.length;
+        	for (int i = 0; i < annotationsLevels; i++) {
+        		int annotationsLength = this.annotations[i] == null ? 0 : this.annotations[i].length;
+        		for (int j = 0; j < annotationsLength; j++)
+        			this.annotations[i][j].traverse(visitor, scope);
+        	}
+        }
 		visitor.endVisit(this, scope);
 	}
 	@Override

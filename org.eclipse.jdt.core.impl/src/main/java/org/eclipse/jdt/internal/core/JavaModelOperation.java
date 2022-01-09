@@ -89,7 +89,7 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 	 * empty result if no elements are created, or if this
 	 * operation is not actually executed.
 	 */
-	protected static final IJavaElement[] NO_ELEMENTS= new IJavaElement[] {};
+	protected static final IJavaElement[] NO_ELEMENTS= {};
 
 
 	/**
@@ -181,8 +181,8 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 		JavaElementDelta previousDelta = (JavaElementDelta)reconcileDeltas.get(workingCopy);
 		if (previousDelta != null) {
 			IJavaElementDelta[] children = delta.getAffectedChildren();
-			for (int i = 0, length = children.length; i < length; i++) {
-				JavaElementDelta child = (JavaElementDelta)children[i];
+			for (IJavaElementDelta child2 : children) {
+				JavaElementDelta child = (JavaElementDelta)child2;
 				previousDelta.insertDeltaTree(child.getElement(), child);
 			}
 			// note that the last delta's AST always takes precedence over the existing delta's AST
@@ -245,8 +245,8 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 		if (this.elementsToProcess == null || this.elementsToProcess.length == 0) {
 			return new JavaModelStatus(IJavaModelStatusConstants.NO_ELEMENTS_TO_PROCESS);
 		}
-		for (int i = 0; i < this.elementsToProcess.length; i++) {
-			if (this.elementsToProcess[i] == null) {
+		for (IJavaElement element : this.elementsToProcess) {
+			if (element == null) {
 				return new JavaModelStatus(IJavaModelStatusConstants.NO_ELEMENTS_TO_PROCESS);
 			}
 		}
@@ -259,8 +259,7 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 		IProgressMonitor subProgressMonitor = getSubProgressMonitor(resources.length);
 		IWorkspaceRoot root =  ResourcesPlugin.getWorkspace().getRoot();
 		try {
-			for (int i = 0, length = resources.length; i < length; i++) {
-				IResource resource = resources[i];
+			for (IResource resource : resources) {
 				IPath destination = container.append(resource.getName());
 				if (root.findMember(destination) == null) {
 					resource.copy(destination, false, subProgressMonitor);
@@ -322,15 +321,14 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 				// deleting a package: delete the parent if it is empty (e.g. deleting x.y where folder x doesn't have resources but y)
 				// without deleting the package fragment root
 				resource = resource.getParent();
-				if (!resource.equals(rootResource) && resource.members().length == 0) {
-					resource.delete(
-						forceFlag ? IResource.FORCE | IResource.KEEP_HISTORY : IResource.KEEP_HISTORY,
-						getSubProgressMonitor(1));
-					setAttribute(HAS_MODIFIED_RESOURCE_ATTR, TRUE);
-				} else {
+				if (resource.equals(rootResource) || resource.members().length != 0) {
 					// we didn't delete the package, so its parent packages cannot be empty
 					break;
 				}
+                resource.delete(
+                	forceFlag ? IResource.FORCE | IResource.KEEP_HISTORY : IResource.KEEP_HISTORY,
+                	getSubProgressMonitor(1));
+                setAttribute(HAS_MODIFIED_RESOURCE_ATTR, TRUE);
 			}
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
@@ -377,8 +375,8 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 	 * Returns whether the given path is equals to one of the given other paths.
 	 */
 	protected boolean equalsOneOf(IPath path, IPath[] otherPaths) {
-		for (int i = 0, length = otherPaths.length; i < length; i++) {
-			if (path.equals(otherPaths[i])) {
+		for (IPath otherPath : otherPaths) {
+			if (path.equals(otherPath)) {
 				return true;
 			}
 		}
@@ -400,16 +398,15 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 		} catch (CoreException ce) {
 			if (ce instanceof JavaModelException) {
 				throw (JavaModelException)ce;
-			} else {
-				// translate the core exception to a java model exception
-				if (ce.getStatus().getCode() == IResourceStatus.OPERATION_FAILED) {
-					Throwable e = ce.getStatus().getException();
-					if (e instanceof JavaModelException) {
-						throw (JavaModelException) e;
-					}
-				}
-				throw new JavaModelException(ce);
 			}
+            // translate the core exception to a java model exception
+            if (ce.getStatus().getCode() == IResourceStatus.OPERATION_FAILED) {
+            	Throwable e = ce.getStatus().getException();
+            	if (e instanceof JavaModelException) {
+            		throw (JavaModelException) e;
+            	}
+            }
+            throw new JavaModelException(ce);
 		}
 	}
 	/**
@@ -426,9 +423,8 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 		JavaModelOperation topLevelOp = (JavaModelOperation)stack.get(0);
 		if (topLevelOp.attributes == null) {
 			return null;
-		} else {
-			return topLevelOp.attributes.get(key);
 		}
+        return topLevelOp.attributes.get(key);
 	}
 	/**
 	 * Returns the compilation unit the given element is contained in,
@@ -590,8 +586,7 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 		SubMonitor subProgressMonitor = this.progressMonitor.newChild(resources.length);
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		try {
-			for (int i = 0, length = resources.length; i < length; i++) {
-				IResource resource = resources[i];
+			for (IResource resource : resources) {
 				IPath destination = container.append(resource.getName());
 				if (root.findMember(destination) == null) {
 					resource.move(destination, false, subProgressMonitor.split(1));
@@ -616,14 +611,13 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 	protected JavaModelOperation popOperation() {
 		ArrayList stack = getCurrentOperationStack();
 		int size = stack.size();
-		if (size > 0) {
-			if (size == 1) { // top level operation
-				OPERATION_STACKS.remove(); // release reference (see http://bugs.eclipse.org/bugs/show_bug.cgi?id=33927)
-			}
-			return (JavaModelOperation)stack.remove(size-1);
-		} else {
+		if (size <= 0) {
 			return null;
 		}
+        if (size == 1) { // top level operation
+        	OPERATION_STACKS.remove(); // release reference (see http://bugs.eclipse.org/bugs/show_bug.cgi?id=33927)
+        }
+        return (JavaModelOperation)stack.remove(size-1);
 	}
 	/*
 	 * Registers the given action to be run when the outer most java model operation has finished.
@@ -681,8 +675,8 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 	 * Returns whether the given path is the prefix of one of the given other paths.
 	 */
 	protected boolean prefixesOneOf(IPath path, IPath[] otherPaths) {
-		for (int i = 0, length = otherPaths.length; i < length; i++) {
-			if (path.isPrefixOf(otherPaths[i])) {
+		for (IPath otherPath : otherPaths) {
+			if (path.isPrefixOf(otherPath)) {
 				return true;
 			}
 		}
@@ -756,8 +750,7 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 					// close the parents of the created elements and reset their project's cache (in case we are in an
 					// IWorkspaceRunnable and the clients wants to use the created element's parent)
 					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=83646
-					for (int i = 0, length = this.resultElements.length; i < length; i++) {
-						IJavaElement element = this.resultElements[i];
+					for (IJavaElement element : this.resultElements) {
 						Openable openable = (Openable) element.getOpenable();
 						if (!(openable instanceof CompilationUnit) || !((CompilationUnit) openable).isWorkingCopy()) { // a working copy must remain a child of its parent even after a move
 							openable.getParent().close();
@@ -775,12 +768,10 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 					// - the operation is a top level operation
 					// - the operation did produce some delta(s)
 					// - but the operation has not modified any resource
-					if (isTopLevelOperation()) {
-						if ((deltaProcessor.javaModelDeltas.size() > previousDeltaCount || !deltaProcessor.reconcileDeltas.isEmpty())
-								&& !hasModifiedResource()) {
-							deltaProcessor.fire(null, DeltaProcessor.DEFAULT_CHANGE_EVENT);
-						} // else deltas are fired while processing the resource delta
-					}
+					if (isTopLevelOperation() && (deltaProcessor.javaModelDeltas.size() > previousDeltaCount || !deltaProcessor.reconcileDeltas.isEmpty())
+                    		&& !hasModifiedResource()) {
+                    	deltaProcessor.fire(null, DeltaProcessor.DEFAULT_CHANGE_EVENT);
+                    } // else deltas are fired while processing the resource delta
 				} finally {
 					popOperation();
 				}
@@ -813,15 +804,14 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
 		} catch (CoreException ce) {
 			if (ce instanceof JavaModelException) {
 				throw (JavaModelException)ce;
-			} else {
-				if (ce.getStatus().getCode() == IResourceStatus.OPERATION_FAILED) {
-					Throwable e= ce.getStatus().getException();
-					if (e instanceof JavaModelException) {
-						throw (JavaModelException) e;
-					}
-				}
-				throw new JavaModelException(ce);
 			}
+            if (ce.getStatus().getCode() == IResourceStatus.OPERATION_FAILED) {
+            	Throwable e= ce.getStatus().getException();
+            	if (e instanceof JavaModelException) {
+            		throw (JavaModelException) e;
+            	}
+            }
+            throw new JavaModelException(ce);
 		}
 	}
 	protected void runPostActions() throws JavaModelException {

@@ -38,7 +38,6 @@ import org.eclipse.jdt.internal.codeassist.ISearchRequestor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ExternalAnnotationDecorator;
 import org.eclipse.jdt.internal.compiler.classfmt.ExternalAnnotationProvider;
-import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.IModule;
@@ -109,7 +108,7 @@ public class SearchableEnvironment
 			this.moduleUpdater = new ModuleUpdater(project);
 			if (!excludeTestCode) {
 				IClasspathEntry[] expandedClasspath = project.getExpandedClasspath();
-				if(Arrays.stream(expandedClasspath).anyMatch(e -> e.isTest())) {
+				if(Arrays.stream(expandedClasspath).anyMatch(IClasspathEntry::isTest)) {
 					this.moduleUpdater.addReadUnnamedForNonEmptyClasspath(project, expandedClasspath);
 				}
 			}
@@ -163,7 +162,7 @@ public class SearchableEnvironment
 		if (this.owner != null) {
 			String source = this.owner.findSource(typeName, packageName);
 			if (source != null) {
-				IJavaElement moduleElement = (moduleContext != null && moduleContext.length > 0) ? moduleContext[0] : null;
+				IJavaElement moduleElement = moduleContext != null && moduleContext.length > 0 ? moduleContext[0] : null;
 				ICompilationUnit cu = new BasicCompilationUnit(
 						source.toCharArray(),
 						CharOperation.splitOn('.', packageName.toCharArray()),
@@ -184,38 +183,37 @@ public class SearchableEnvironment
 			// construct name env answer
 			if (answer.type instanceof BinaryType) { // BinaryType
 				return createAnswer(answer, packageName, typeName, (BinaryType) answer.type);
-			} else { //SourceType
-				try {
-					// retrieve the requested type
-					SourceTypeElementInfo sourceType = (SourceTypeElementInfo)((SourceType) answer.type).getElementInfo();
-					ISourceType topLevelType = sourceType;
-					while (topLevelType.getEnclosingType() != null) {
-						topLevelType = topLevelType.getEnclosingType();
-					}
-					// find all siblings (other types declared in same unit, since may be used for name resolution)
-					IType[] types = sourceType.getHandle().getCompilationUnit().getTypes();
-					ISourceType[] sourceTypes = new ISourceType[types.length];
-
-					// in the resulting collection, ensure the requested type is the first one
-					sourceTypes[0] = sourceType;
-					int length = types.length;
-					for (int i = 0, index = 1; i < length; i++) {
-						ISourceType otherType =
-							(ISourceType) ((JavaElement) types[i]).getElementInfo();
-						if (!otherType.equals(topLevelType) && index < length) // check that the index is in bounds (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=62861)
-							sourceTypes[index++] = otherType;
-					}
-					char[] moduleName = answer.module != null ? answer.module.getElementName().toCharArray() : null;
-					return new NameEnvironmentAnswer(sourceTypes, answer.restriction, getExternalAnnotationPath(answer.entry), moduleName);
-				} catch (JavaModelException jme) {
-					if (jme.isDoesNotExist() && String.valueOf(TypeConstants.PACKAGE_INFO_NAME).equals(typeName)) {
-						// in case of package-info.java the type doesn't exist in the model,
-						// but the CU may still help in order to fetch package level annotations.
-						return new NameEnvironmentAnswer((ICompilationUnit)answer.type.getParent(), answer.restriction);
-					}
-					// no usable answer
-				}
 			}
+            try {
+            	// retrieve the requested type
+            	SourceTypeElementInfo sourceType = (SourceTypeElementInfo)((SourceType) answer.type).getElementInfo();
+            	ISourceType topLevelType = sourceType;
+            	while (topLevelType.getEnclosingType() != null) {
+            		topLevelType = topLevelType.getEnclosingType();
+            	}
+            	// find all siblings (other types declared in same unit, since may be used for name resolution)
+            	IType[] types = sourceType.getHandle().getCompilationUnit().getTypes();
+            	ISourceType[] sourceTypes = new ISourceType[types.length];
+
+            	// in the resulting collection, ensure the requested type is the first one
+            	sourceTypes[0] = sourceType;
+            	int length = types.length;
+            	for (int i = 0, index = 1; i < length; i++) {
+            		ISourceType otherType =
+            			(ISourceType) ((JavaElement) types[i]).getElementInfo();
+            		if (!otherType.equals(topLevelType) && index < length) // check that the index is in bounds (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=62861)
+            			sourceTypes[index++] = otherType;
+            	}
+            	char[] moduleName = answer.module != null ? answer.module.getElementName().toCharArray() : null;
+            	return new NameEnvironmentAnswer(sourceTypes, answer.restriction, getExternalAnnotationPath(answer.entry), moduleName);
+            } catch (JavaModelException jme) {
+            	if (jme.isDoesNotExist() && String.valueOf(TypeConstants.PACKAGE_INFO_NAME).equals(typeName)) {
+            		// in case of package-info.java the type doesn't exist in the model,
+            		// but the CU may still help in order to fetch package level annotations.
+            		return new NameEnvironmentAnswer((ICompilationUnit)answer.type.getParent(), answer.restriction);
+            	}
+            	// no usable answer
+            }
 		}
 		return null;
 	}
@@ -425,16 +423,13 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 					// implements interface method
 				}
 			};
-			IRestrictedAccessTypeRequestor typeRequestor = new IRestrictedAccessTypeRequestor() {
-				@Override
-				public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path, AccessRestriction access) {
-					if (excludePath != null && excludePath.equals(path))
-						return;
-					if (!findMembers && enclosingTypeNames != null && enclosingTypeNames.length > 0)
-						return; // accept only top level types
-					storage.acceptType(packageName, simpleTypeName, enclosingTypeNames, modifiers, access);
-				}
-			};
+			IRestrictedAccessTypeRequestor typeRequestor = (modifiers, packageName, simpleTypeName, enclosingTypeNames, path, access) -> {
+            	if (excludePath != null && excludePath.equals(path))
+            		return;
+            	if (!findMembers && enclosingTypeNames != null && enclosingTypeNames.length > 0)
+            		return; // accept only top level types
+            	storage.acceptType(packageName, simpleTypeName, enclosingTypeNames, modifiers, access);
+            };
 			try {
 				new BasicSearchEngine(this.workingCopies).searchAllTypeNames(
 					null,
@@ -672,16 +667,13 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 					// implements interface method
 				}
 			};
-			IRestrictedAccessTypeRequestor typeRequestor = new IRestrictedAccessTypeRequestor() {
-				@Override
-				public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path, AccessRestriction access) {
-					if (excludePath != null && excludePath.equals(path))
-						return;
-					if (!findMembers && enclosingTypeNames != null && enclosingTypeNames.length > 0)
-						return; // accept only top level types
-					storage.acceptType(packageName, simpleTypeName, enclosingTypeNames, modifiers, access);
-				}
-			};
+			IRestrictedAccessTypeRequestor typeRequestor = (modifiers, packageName, simpleTypeName, enclosingTypeNames, path, access) -> {
+            	if (excludePath != null && excludePath.equals(path))
+            		return;
+            	if (!findMembers && enclosingTypeNames != null && enclosingTypeNames.length > 0)
+            		return; // accept only top level types
+            	storage.acceptType(packageName, simpleTypeName, enclosingTypeNames, modifiers, access);
+            };
 
 			if (monitor != null) {
 				IndexManager indexManager = JavaModelManager.getIndexManager();
@@ -775,7 +767,7 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 	public void findConstructorDeclarations(char[] prefix, int matchRule, final boolean resolveDocumentName, final ISearchRequestor storage, IProgressMonitor monitor) {
 		try {
 			final String excludePath;
-			if (this.unitToSkip != null && this.unitToSkip instanceof IJavaElement) {
+			if (this.unitToSkip instanceof IJavaElement) {
 				excludePath = ((IJavaElement) this.unitToSkip).getPath().toString();
 			} else {
 				excludePath = null;
@@ -838,37 +830,23 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 				}
 			};
 
-			IRestrictedAccessConstructorRequestor constructorRequestor = new IRestrictedAccessConstructorRequestor() {
-				@Override
-				public void acceptConstructor(
-						int modifiers,
-						char[] simpleTypeName,
-						int parameterCount,
-						char[] signature,
-						char[][] parameterTypes,
-						char[][] parameterNames,
-						int typeModifiers,
-						char[] packageName,
-						int extraFlags,
-						String path,
-						AccessRestriction access) {
-					if (excludePath != null && excludePath.equals(path))
-						return;
+			IRestrictedAccessConstructorRequestor constructorRequestor = (modifiers, simpleTypeName, parameterCount, signature, parameterTypes, parameterNames, typeModifiers, packageName, extraFlags, path, access) -> {
+if (excludePath != null && excludePath.equals(path))
+            return;
 
-					storage.acceptConstructor(
-							modifiers,
-							simpleTypeName,
-							parameterCount,
-							signature,
-							parameterTypes,
-							parameterNames,
-							typeModifiers,
-							packageName,
-							extraFlags,
-							path,
-							access);
-				}
-			};
+storage.acceptConstructor(
+            	modifiers,
+            	simpleTypeName,
+            	parameterCount,
+            	signature,
+            	parameterTypes,
+            	parameterNames,
+            	typeModifiers,
+            	packageName,
+            	extraFlags,
+            	path,
+            	access);
+};
 
 			if (monitor != null) {
 				IndexManager indexManager = JavaModelManager.getIndexManager();
@@ -949,9 +927,9 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 			IPackageFragment[] fragments = elementRequestor.getPackageFragments();
 			if (fragments != null) {
 				String className = prefix.substring(index + 1);
-				for (int i = 0, length = fragments.length; i < length; i++)
-					if (fragments[i] != null)
-						this.nameLookup.seekTypes(className, fragments[i], true, type, requestor);
+				for (IPackageFragment fragment : fragments)
+                    if (fragment != null)
+						this.nameLookup.seekTypes(className, fragment, true, type, requestor);
 			}
 		}
 	}
@@ -983,19 +961,17 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 				case Named:
 					if (this.knownModuleLocations != null) {
 						IPackageFragmentRoot[] moduleContext = findModuleContext(moduleName);
-						if (moduleContext != null) {
-							// (this.owner != null && this.owner.isPackage(pkgName)) // TODO(SHMOD) see old isPackage
-							if (this.nameLookup.isPackage(pkgName, moduleContext)) {
-								return new char[][] { moduleName };
-							}
-						}
+						// (this.owner != null && this.owner.isPackage(pkgName)) // TODO(SHMOD) see old isPackage
+                        if (moduleContext != null && this.nameLookup.isPackage(pkgName, moduleContext)) {
+                        	return new char[][] { moduleName };
+                        }
 					}
 					return null;
 				case Unnamed:
 				case Any:
 					// if in pre-9 mode we may still search the unnamed module
 					if (this.knownModuleLocations == null) {
-						if ((this.owner != null && this.owner.isPackage(pkgName))
+						if (this.owner != null && this.owner.isPackage(pkgName)
 								|| this.nameLookup.isPackage(pkgName))
 							return new char[][] { ModuleBinding.UNNAMED };
 						return null;
@@ -1009,21 +985,19 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 						boolean containsUnnamed = false;
 						for (IPackageFragmentRoot packageRoot : matchingRoots) {
 							IPackageFragmentRoot[] singleton = { packageRoot };
-							if (strategy.matches(singleton, locs -> locs[0] instanceof JrtPackageFragmentRoot || getModuleDescription(locs) != null)) {
-								if (this.nameLookup.isPackage(pkgName, singleton)) {
-									IModuleDescription moduleDescription = getModuleDescription(singleton);
-									char[] aName;
-									if (moduleDescription != null) {
-										aName = moduleDescription.getElementName().toCharArray();
-									} else {
-										if (containsUnnamed)
-											continue;
-										containsUnnamed = true;
-										aName = ModuleBinding.UNNAMED;
-									}
-									names = CharOperation.arrayConcat(names, aName);
-								}
-							}
+							if (strategy.matches(singleton, locs -> locs[0] instanceof JrtPackageFragmentRoot || getModuleDescription(locs) != null) && this.nameLookup.isPackage(pkgName, singleton)) {
+                            	IModuleDescription moduleDescription = getModuleDescription(singleton);
+                            	char[] aName;
+                            	if (moduleDescription != null) {
+                            		aName = moduleDescription.getElementName().toCharArray();
+                            	} else {
+                            		if (containsUnnamed)
+                            			continue;
+                            		containsUnnamed = true;
+                            		aName = ModuleBinding.UNNAMED;
+                            	}
+                            	names = CharOperation.arrayConcat(names, aName);
+                            }
 						}
 					}
 					return names == CharOperation.NO_CHAR_CHAR ? null : names;
@@ -1051,10 +1025,8 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 			case Unnamed:
 			case Any:
 				// if in pre-9 mode we may still search the unnamed module
-				if (this.knownModuleLocations == null) {
-					if (this.nameLookup.hasCompilationUnit(pkgName, null))
-						return true;
-				}
+				if (this.knownModuleLocations == null && this.nameLookup.hasCompilationUnit(pkgName, null))
+                	return true;
 				//$FALL-THROUGH$
 			case AnyNamed:
 				// narrow down candidates of roots (https://bugs.eclipse.org/566498)
@@ -1063,10 +1035,8 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 				if(packageRoots != null) {
 					for (IPackageFragmentRoot packageRoot : packageRoots) {
 						IPackageFragmentRoot[] singleton = { packageRoot };
-						if (strategy.matches(singleton, locs -> locs[0] instanceof JrtPackageFragmentRoot || getModuleDescription(locs) != null)) {
-							if (this.nameLookup.hasCompilationUnit(pkgName, singleton))
-								return true;
-						}
+						if (strategy.matches(singleton, locs -> locs[0] instanceof JrtPackageFragmentRoot || getModuleDescription(locs) != null) && this.nameLookup.hasCompilationUnit(pkgName, singleton))
+                        	return true;
 					}
 				}
 				return false;
@@ -1099,12 +1069,11 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 					while (moduleContext == null && current != null) {
 						switch (current.getElementType()) {
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-								if (!((IPackageFragmentRoot) current).isExternal() && !(current instanceof JarPackageFragmentRoot)) {
-									current = current.getJavaProject();
-								} else {
+								if (((IPackageFragmentRoot) current).isExternal() || current instanceof JarPackageFragmentRoot) {
 									moduleContext = new IPackageFragmentRoot[] { (IPackageFragmentRoot) current }; // TODO: validate
 									break;
 								}
+                                current = current.getJavaProject();
 								//$FALL-THROUGH$
 							case IJavaElement.JAVA_PROJECT:
 								try {
@@ -1153,8 +1122,8 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 	 */
 	protected String toStringCharChar(char[][] names) {
 		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < names.length; i++) {
-			result.append(toStringChar(names[i]));
+		for (char[] name : names) {
+			result.append(toStringChar(name));
 		}
 		return result.toString();
 	}
@@ -1215,8 +1184,7 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 		IPackageFragmentRoot[] allRoots = javaProject.getPackageFragmentRoots();
 		IPackageFragmentRoot[] sourceRoots = Arrays.copyOf(allRoots, allRoots.length);
 		int count = 0;
-		for (int i = 0; i < allRoots.length; i++) {
-			IPackageFragmentRoot root = allRoots[i];
+		for (IPackageFragmentRoot root : allRoots) {
 			if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
 				if(root instanceof JarPackageFragmentRoot) {
 					// don't treat jars in a project as part of the project's module

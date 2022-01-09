@@ -96,9 +96,8 @@ public class ImportDeclaration extends ASTNode {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_3_0;
 		}
+        return PROPERTY_DESCRIPTORS_3_0;
 	}
 
 	/**
@@ -145,18 +144,16 @@ public class ImportDeclaration extends ASTNode {
 		if (property == ON_DEMAND_PROPERTY) {
 			if (get) {
 				return isOnDemand();
-			} else {
-				setOnDemand(value);
-				return false;
 			}
+            setOnDemand(value);
+            return false;
 		}
 		if (property == STATIC_PROPERTY) {
 			if (get) {
 				return isStatic();
-			} else {
-				setStatic(value);
-				return false;
 			}
+            setStatic(value);
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
@@ -167,10 +164,9 @@ public class ImportDeclaration extends ASTNode {
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((Name) child);
-				return null;
 			}
+            setName((Name) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

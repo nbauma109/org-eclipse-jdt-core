@@ -242,9 +242,7 @@ public class PathVariableManager implements IPathVariableManager, IManager {
 		synchronized (this) {
 			IPath currentValue = getValue(varName);
 			boolean variableExists = currentValue != null;
-			if (!variableExists && newValue == null)
-				return;
-			if (variableExists && currentValue.equals(newValue))
+			if (!variableExists && newValue == null || variableExists && currentValue.equals(newValue))
 				return;
 			if (newValue == null) {
 				preferences.setToDefault(getKeyForName(varName));
@@ -341,7 +339,7 @@ public class PathVariableManager implements IPathVariableManager, IManager {
 	 */
 	@Override
 	public void setURIValue(String name, URI value) throws CoreException {
-		setValue(name, (value != null ? URIUtil.toPath(value) : null));
+		setValue(name, value != null ? URIUtil.toPath(value) : null);
 	}
 
 	/**

@@ -133,7 +133,7 @@ class MonitorManager implements ILifecycleListener, IPathVariableChangeListener,
 	private boolean isMonitoring(IResource resource) {
 		synchronized (registeredMonitors) {
 			for (List<IResource> resources : registeredMonitors.values()) {
-				if ((resources != null) && (resources.contains(resource)))
+				if (resources != null && resources.contains(resource))
 					return true;
 			}
 		}
@@ -205,11 +205,9 @@ class MonitorManager implements ILifecycleListener, IPathVariableChangeListener,
 		for (List<IResource> resources : registeredMonitors.values()) {
 			for (IResource resource : resources) {
 				IPath rawLocation = resource.getRawLocation();
-				if (rawLocation != null) {
-					if (rawLocation.segmentCount() > 0 && variableName.equals(rawLocation.segment(0))) {
-						invalidResources.add(resource);
-					}
-				}
+				if (rawLocation != null && rawLocation.segmentCount() > 0 && variableName.equals(rawLocation.segment(0))) {
+                	invalidResources.add(resource);
+                }
 			}
 		}
 		if (!invalidResources.isEmpty()) {

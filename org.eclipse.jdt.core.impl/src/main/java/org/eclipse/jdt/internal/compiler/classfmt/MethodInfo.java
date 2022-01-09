@@ -124,7 +124,7 @@ public static MethodInfo createMethod(byte[] classFileBytes, int[] offsets, int 
 					break;
 			}
 		}
-		readOffset += (6 + methodInfo.u4At(readOffset + 2));
+		readOffset += 6 + methodInfo.u4At(readOffset + 2);
 	}
 	methodInfo.attributeBytes = readOffset;
 
@@ -155,12 +155,10 @@ static AnnotationInfo[] decodeMethodAnnotations(int offset, boolean runtimeVisib
 			for( int i=0; i<numberOfAnnotations; i++ ){
 				long standardAnnoTagBits = annos[i].standardAnnotationTagBits;
 				methodInfo.tagBits |= standardAnnoTagBits;
-				if(standardAnnoTagBits != 0){
-					if (methodInfo.version < ClassFileConstants.JDK9 || (standardAnnoTagBits & TagBits.AnnotationDeprecated) == 0) { // must retain enhanced deprecation
-						annos[i] = null;
-						continue;
-					}
-				}
+				if (standardAnnoTagBits != 0 && (methodInfo.version < ClassFileConstants.JDK9 || (standardAnnoTagBits & TagBits.AnnotationDeprecated) == 0)) { // must retain enhanced deprecation
+                	annos[i] = null;
+                	continue;
+                }
 				numRetainedAnnotations++;
 			}
 
@@ -209,8 +207,8 @@ static AnnotationInfo[][] decodeParamAnnotations(int offset, boolean runtimeVisi
 					allParamAnnotations = new AnnotationInfo[numberOfParameters][];
 				AnnotationInfo[] annos = decodeAnnotations(readOffset, runtimeVisible, numberOfAnnotations, methodInfo);
 				allParamAnnotations[i] = annos;
-				for (int aIndex = 0; aIndex < annos.length; aIndex++)
-					readOffset += annos[aIndex].readOffset;
+				for (AnnotationInfo element : annos)
+                    readOffset += element.readOffset;
 			}
 		}
 	}
@@ -399,7 +397,7 @@ private synchronized void readExceptionAttributes() {
 				}
 			}
 		} else {
-			readOffset += (6 + u4At(readOffset + 2));
+			readOffset += 6 + u4At(readOffset + 2);
 		}
 	}
 	if (names == null) {
@@ -435,7 +433,7 @@ private synchronized void readModifierRelatedAttributes() {
 						flags |= ClassFileConstants.AccVarargs;
 			}
 		}
-		readOffset += (6 + u4At(readOffset + 2));
+		readOffset += 6 + u4At(readOffset + 2);
 	}
 	this.accessFlags = flags;
 }
@@ -474,9 +472,8 @@ private synchronized void readCodeAttribute() {
 					this.argumentNames = noArgumentNames;
 				}
 				return;
-			} else {
-				readOffset += (6 + u4At(readOffset + 2));
 			}
+            readOffset += 6 + u4At(readOffset + 2);
 		}
 	}
 	this.argumentNames = noArgumentNames;
@@ -484,7 +481,7 @@ private synchronized void readCodeAttribute() {
 private void decodeCodeAttribute(int offset) {
 	int readOffset = offset + 10;
 	int codeLength = (int) u4At(readOffset);
-	readOffset += (4 + codeLength);
+	readOffset += 4 + codeLength;
 	int exceptionTableLength = u2At(readOffset);
 	readOffset += 2;
 	if (exceptionTableLength != 0) {
@@ -500,7 +497,7 @@ private void decodeCodeAttribute(int offset) {
 		if (CharOperation.equals(attributeName, AttributeNamesConstants.LocalVariableTableName)) {
 			decodeLocalVariableAttribute(readOffset, codeLength);
 		}
-		readOffset += (6 + u4At(readOffset + 2));
+		readOffset += 6 + u4At(readOffset + 2);
 	}
 }
 private void decodeLocalVariableAttribute(int offset, int codeLength) {
@@ -512,21 +509,20 @@ private void decodeLocalVariableAttribute(int offset, int codeLength) {
 		int argumentNamesIndex = 0;
 		for (int i = 0; i < length; i++) {
 			int startPC = u2At(readOffset);
-			if (startPC == 0) {
-				int nameIndex = u2At(4 + readOffset);
-				int utf8Offset = this.constantPoolOffsets[nameIndex] - this.structOffset;
-				char[] localVariableName = utf8At(utf8Offset + 3, u2At(utf8Offset + 1));
-				if (!CharOperation.equals(localVariableName, ConstantPool.This)) {
-					names[argumentNamesIndex++] = localVariableName;
-				}
-			} else {
+			if (startPC != 0) {
 				break;
 			}
+            int nameIndex = u2At(4 + readOffset);
+            int utf8Offset = this.constantPoolOffsets[nameIndex] - this.structOffset;
+            char[] localVariableName = utf8At(utf8Offset + 3, u2At(utf8Offset + 1));
+            if (!CharOperation.equals(localVariableName, ConstantPool.This)) {
+            	names[argumentNamesIndex++] = localVariableName;
+            }
 			readOffset += 10;
 		}
 		if (argumentNamesIndex != names.length) {
 			// resize
-			System.arraycopy(names, 0, (names = new char[argumentNamesIndex][]), 0, argumentNamesIndex);
+			System.arraycopy(names, 0, names = new char[argumentNamesIndex][], 0, argumentNamesIndex);
 		}
 		this.argumentNames = names;
 	}

@@ -128,8 +128,7 @@ public class LinkedPositionGroup {
 			checkContent(position);
 			fPositions.add(position);
 			fHasCustomIteration |= position.getSequenceNumber() != LinkedPositionGroup.NO_STOP;
-		} else
-			return; // nothing happens
+		}
 	}
 
 	/**
@@ -283,12 +282,6 @@ public class LinkedPositionGroup {
 
 				return result;
 			} catch (MalformedTreeException x) {
-				// may happen during undo, as LinkedModeModel does not know
-				// that the changes technically originate from a parent environment
-				// if this happens, post notification changes are not accepted anyway and
-				// we can simply return null - any changes will be undone by the undo
-				// manager
-				return null;
 			}
 
 		}
@@ -304,7 +297,7 @@ public class LinkedPositionGroup {
 		Assert.isTrue(!fIsSealed);
 		fIsSealed= true;
 
-		if (fHasCustomIteration == false && !fPositions.isEmpty()) {
+		if (!fHasCustomIteration && !fPositions.isEmpty()) {
 			fPositions.get(0).setSequenceNumber(0);
 		}
 	}

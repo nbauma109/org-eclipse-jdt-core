@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.compiler.parser.ScannerHelper;
  */
 public final class StringOperation {
 
-	private final static int[] EMPTY_REGIONS = new int[0];
+	private final static int[] EMPTY_REGIONS = {};
 
 /**
  * Answers all the regions in a given name matching a given camel case pattern.
@@ -78,7 +78,7 @@ public final class StringOperation {
  * 	the pattern
  * @since 3.5
  */
-public static final int[] getCamelCaseMatchingRegions(String pattern, int patternStart, int patternEnd, String name, int nameStart, int nameEnd, boolean samePartCount) {
+public static int[] getCamelCaseMatchingRegions(String pattern, int patternStart, int patternEnd, String name, int nameStart, int nameEnd, boolean samePartCount) {
 
 	/* !!!!!!!!!! WARNING !!!!!!!!!!
 	 * The algorithm used in this method has been fully inspired from
@@ -103,9 +103,8 @@ public static final int[] getCamelCaseMatchingRegions(String pattern, int patter
 			? new int[] { patternStart, patternEnd-patternStart }
 			: null;
 	}
-	if (nameEnd <= nameStart) return null;
 	// check first pattern char
-	if (name.charAt(nameStart) != pattern.charAt(patternStart)) {
+	if (nameEnd <= nameStart || name.charAt(nameStart) != pattern.charAt(patternStart)) {
 		// first char must strictly match (upper/lower)
 		return null;
 	}
@@ -209,13 +208,9 @@ public static final int[] getCamelCaseMatchingRegions(String pattern, int patter
 			if (nameChar < ScannerHelper.MAX_OBVIOUS) {
 				int charNature = ScannerHelper.OBVIOUS_IDENT_CHAR_NATURES[nameChar];
 				if ((charNature & (ScannerHelper.C_LOWER_LETTER | ScannerHelper.C_SPECIAL)) != 0) {
-					// nameChar is lowercase
-					iName++;
-				} else if ((charNature & ScannerHelper.C_DIGIT) != 0) {
+                } else if ((charNature & ScannerHelper.C_DIGIT) != 0) {
 					// nameChar is digit => break if the digit is current pattern character otherwise consume it
 					if (patternChar == nameChar) break;
-					iName++;
-				// nameChar is uppercase...
 				} else  if (patternChar != nameChar) {
 					//.. and it does not match patternChar, so it's not a match
 					return null;
@@ -223,18 +218,16 @@ public static final int[] getCamelCaseMatchingRegions(String pattern, int patter
 					//.. and it matched patternChar. Back to the big loop
 					break;
 				}
-			}
-			// Same tests for non-obvious characters
-			else if (Character.isJavaIdentifierPart(nameChar) && !Character.isUpperCase(nameChar)) {
-				iName++;
-			} else if (Character.isDigit(nameChar)) {
-				if (patternChar == nameChar) break;
-				iName++;
-			} else  if (patternChar != nameChar) {
-				return null;
-			} else {
-				break;
-			}
+			} else if (Character.isJavaIdentifierPart(nameChar) && !Character.isUpperCase(nameChar)) {
+            } else if (Character.isDigit(nameChar)) {
+            	if (patternChar == nameChar) break;
+            } else  if (patternChar != nameChar) {
+            	return null;
+            } else {
+            	break;
+            }
+            // nameChar is lowercase
+            iName++;
 		}
 		// At this point, either name has been exhausted, or it is at an uppercase letter.
 		// Since pattern is also at an uppercase letter
@@ -288,7 +281,7 @@ public static final int[] getCamelCaseMatchingRegions(String pattern, int patter
  * 	the pattern
  * @since 3.5
  */
-public static final int[] getPatternMatchingRegions(
+public static int[] getPatternMatchingRegions(
 	String pattern,
 	int patternStart,
 	int patternEnd,
@@ -342,7 +335,7 @@ public static final int[] getPatternMatchingRegions(
 		previous = ch;
 	}
 	if (parts == 0) {
-		if (questions <= (nameEnd - nameStart)) return EMPTY_REGIONS;
+		if (questions <= nameEnd - nameStart) return EMPTY_REGIONS;
 		return null;
 	}
 	int[] segments = new int[parts*2];
@@ -352,7 +345,7 @@ public static final int[] getPatternMatchingRegions(
 	int start = iName;
 	char patternChar = 0;
 	previous = 0;
-	while ((iPattern < patternEnd)
+	while (iPattern < patternEnd
 		&& (patternChar = pattern.charAt(iPattern)) != '*') {
 		if (iName == nameEnd)
 			return null;
@@ -387,16 +380,9 @@ public static final int[] getPatternMatchingRegions(
 	}
 	/* check sequence of star+segment */
 	int segmentStart;
-	if (patternChar == '*') {
-		if (iPattern > 0 && previous != '?') {
-			segments[count++] = start;
-			segments[count++] = iName-start;
-			start = iName;
-		}
-		segmentStart = ++iPattern; // skip star
-	} else {
+	if (patternChar != '*') {
 		if (iName == nameEnd) {
-			if (count == (parts*2)) return segments;
+			if (count == parts*2) return segments;
 			int end = patternEnd;
 			if (previous == '?') { // last char was a '?' => purge all trailing '?'
 				while (pattern.charAt(--end-1) == '?') {
@@ -409,6 +395,12 @@ public static final int[] getPatternMatchingRegions(
 		}
 		return null;
 	}
+    if (iPattern > 0 && previous != '?') {
+    	segments[count++] = start;
+    	segments[count++] = iName-start;
+    	start = iName;
+    }
+    segmentStart = ++iPattern; // skip star
 	int prefixStart = iName;
 	int previousCount = count;
 	previous = patternChar;
@@ -424,7 +416,7 @@ public static final int[] getPatternMatchingRegions(
 		if ((patternChar = pattern.charAt(iPattern)) == '*') {
 			segmentStart = ++iPattern; // skip star
 			if (segmentStart == patternEnd) {
-				if (count < (parts*2)) {
+				if (count < parts*2) {
 					segments[count++] = start;
 					segments[count++] = iName-start;
 				}
@@ -483,10 +475,10 @@ public static final int[] getPatternMatchingRegions(
 		previous = patternChar;
 	}
 
-	if ((segmentStart == patternEnd)
-		|| (iName == nameEnd && iPattern == patternEnd)
-		|| (iPattern == patternEnd - 1 && pattern.charAt(iPattern) == '*')) {
-		if (count < (parts*2)) {
+	if (segmentStart == patternEnd
+		|| iName == nameEnd && iPattern == patternEnd
+		|| iPattern == patternEnd - 1 && pattern.charAt(iPattern) == '*') {
+		if (count < parts*2) {
 			segments[count++] = start;
 			segments[count++] = iName-start;
 		}

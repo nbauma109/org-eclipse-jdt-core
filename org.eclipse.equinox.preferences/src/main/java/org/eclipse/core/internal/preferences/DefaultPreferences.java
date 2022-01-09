@@ -140,7 +140,7 @@ public class DefaultPreferences extends EclipsePreferences {
 			if (name().equals(localQualifier)) {
 				value = translatePreference(value, translations);
 				if (EclipsePreferences.DEBUG_PREFERENCE_SET)
-					PrefsMessages.message("Setting default preference: " + (new Path(absolutePath()).append(childPath).append(key)) + '=' + value); //$NON-NLS-1$
+					PrefsMessages.message("Setting default preference: " + new Path(absolutePath()).append(childPath).append(key) + '=' + value); //$NON-NLS-1$
 				((EclipsePreferences) internalNode(childPath, false, null)).internalPut(key, value);
 			}
 		}
@@ -392,11 +392,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		} catch (FileNotFoundException e) {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 				PrefsMessages.message("Preference customization file not found: " + filename); //$NON-NLS-1$
-		} catch (IOException e) {
-			String message = NLS.bind(PrefsMessages.preferences_loadException, filename);
-			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e);
-			RuntimeLog.log(status);
-		} catch (IllegalArgumentException e) {
+		} catch (IOException | IllegalArgumentException e) {
 			String message = NLS.bind(PrefsMessages.preferences_loadException, filename);
 			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e);
 			RuntimeLog.log(status);

@@ -41,7 +41,6 @@ public final class BinaryTypeDescriptor {
 	 *            path within the .jar)
 	 */
 	public BinaryTypeDescriptor(char[] location, char[] fieldDescriptor, char[] workspacePath, char[] indexPath) {
-		super();
 		this.location = location;
 		this.fieldDescriptor = fieldDescriptor;
 		this.indexPath = indexPath;

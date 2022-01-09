@@ -96,10 +96,9 @@ public class ThisExpression extends Expression {
 		if (property == QUALIFIER_PROPERTY) {
 			if (get) {
 				return getQualifier();
-			} else {
-				setQualifier((Name) child);
-				return null;
 			}
+            setQualifier((Name) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

@@ -20,8 +20,6 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceProxy;
-import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
@@ -50,8 +48,7 @@ public class IndexBinaryFolder extends IndexRequest {
 	@Override
 	public boolean execute(IProgressMonitor progressMonitor) {
 
-		if (this.isCancelled || progressMonitor != null && progressMonitor.isCanceled()) return true;
-		if (!this.folder.isAccessible()) return true; // nothing to do
+		if (this.isCancelled || progressMonitor != null && progressMonitor.isCanceled() || !this.folder.isAccessible()) return true; // nothing to do
 
 		Index index = this.manager.getIndexForUpdate(this.containerPath, true, /*reuse index file*/ true /*create if none*/);
 		if (index == null) return true;
@@ -67,50 +64,44 @@ public class IndexBinaryFolder extends IndexRequest {
 			final String OK = "OK"; //$NON-NLS-1$
 			final String DELETED = "DELETED"; //$NON-NLS-1$
 			if (paths == null) {
-				this.folder.accept(new IResourceProxyVisitor() {
-					@Override
-					public boolean visit(IResourceProxy proxy) {
-						if (IndexBinaryFolder.this.isCancelled) return false;
-						if (proxy.getType() == IResource.FILE) {
-							if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(proxy.getName())) {
-								IFile file = (IFile) proxy.requestResource();
-								String containerRelativePath = Util.relativePath(file.getFullPath(), IndexBinaryFolder.this.containerPath.segmentCount());
-								indexedFileNames.put(containerRelativePath, file);
-							}
-							return false;
-						}
-						return true;
-					}
-				}, IResource.NONE);
+				this.folder.accept(proxy -> {
+                	if (IndexBinaryFolder.this.isCancelled) return false;
+                	if (proxy.getType() == IResource.FILE) {
+                		if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(proxy.getName())) {
+                			IFile file = (IFile) proxy.requestResource();
+                			String containerRelativePath = Util.relativePath(file.getFullPath(), IndexBinaryFolder.this.containerPath.segmentCount());
+                			indexedFileNames.put(containerRelativePath, file);
+                		}
+                		return false;
+                	}
+                	return true;
+                }, IResource.NONE);
 			} else {
 				for (int i = 0; i < max; i++) {
 					indexedFileNames.put(paths[i], DELETED);
 				}
 				final long indexLastModified = index.getIndexLastModified();
 				this.folder.accept(
-					new IResourceProxyVisitor() {
-						@Override
-						public boolean visit(IResourceProxy proxy) throws CoreException {
-							if (IndexBinaryFolder.this.isCancelled) return false;
-							if (proxy.getType() == IResource.FILE) {
-								if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(proxy.getName())) {
-									IFile file = (IFile) proxy.requestResource();
-									URI location = file.getLocationURI();
-									if (location != null) {
-										String containerRelativePath = Util.relativePath(file.getFullPath(), IndexBinaryFolder.this.containerPath.segmentCount());
-										indexedFileNames.put(containerRelativePath,
-											indexedFileNames.get(containerRelativePath) == null
-													|| indexLastModified <
-													EFS.getStore(location).fetchInfo().getLastModified()
-												? file
-												: OK);
-									}
-								}
-								return false;
-							}
-							return true;
-						}
-					},
+					proxy -> {
+                    	if (IndexBinaryFolder.this.isCancelled) return false;
+                    	if (proxy.getType() == IResource.FILE) {
+                    		if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(proxy.getName())) {
+                    			IFile file = (IFile) proxy.requestResource();
+                    			URI location = file.getLocationURI();
+                    			if (location != null) {
+                    				String containerRelativePath = Util.relativePath(file.getFullPath(), IndexBinaryFolder.this.containerPath.segmentCount());
+                    				indexedFileNames.put(containerRelativePath,
+                    					indexedFileNames.get(containerRelativePath) == null
+                    							|| indexLastModified <
+                    							EFS.getStore(location).fetchInfo().getLastModified()
+                    						? file
+                    						: OK);
+                    			}
+                    		}
+                    		return false;
+                    	}
+                    	return true;
+                    },
 					IResource.NONE
 				);
 			}

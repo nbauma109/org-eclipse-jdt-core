@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.util.IParameterAnnotation;
  */
 public class ParameterAnnotation extends ClassFileStruct implements IParameterAnnotation {
 
-	private static final IAnnotation[] NO_ENTRIES = new IAnnotation[0];
+	private static final IAnnotation[] NO_ENTRIES = {};
 
 	private int annotationsNumber;
 	private IAnnotation[] annotations;

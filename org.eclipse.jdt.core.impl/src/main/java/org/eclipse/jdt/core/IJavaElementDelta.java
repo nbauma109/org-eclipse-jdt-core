@@ -175,6 +175,7 @@ public interface IJavaElementDelta {
 	 * classpath. This flag is only valid if the element is an {@link IPackageFragmentRoot}.
 	 * @deprecated Use {@link #F_REORDER} instead.
 	 */
+    @Deprecated
     int F_CLASSPATH_REORDER = 0x000100;
 	/**
 	 * Change flag indicating that the element has changed position relatively to its siblings.

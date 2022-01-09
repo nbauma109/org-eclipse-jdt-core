@@ -83,7 +83,7 @@ public class SafeFileOutputStream extends OutputStream {
 		if (!sourceFile.exists())
 			return;
 		try {
-			Files.move(sourceFile.toPath(), destinationFile.toPath(), new StandardCopyOption[] {StandardCopyOption.REPLACE_EXISTING});
+			Files.move(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=468787
 			if (!sourceFile.exists() && destinationFile.exists()) {

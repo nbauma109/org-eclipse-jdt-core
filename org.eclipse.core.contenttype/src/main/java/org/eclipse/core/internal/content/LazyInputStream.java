@@ -48,7 +48,7 @@ public class LazyInputStream extends InputStream implements ILazySource {
 	private int copyFromBuffer(byte[] userBuffer, int userOffset, int needed) {
 		int copied = 0;
 		int current = offset / blockCapacity;
-		while ((needed - copied) > 0 && current < blocks.length) {
+		while (needed - copied > 0 && current < blocks.length) {
 			int blockSize = computeBlockSize(current);
 			int offsetInBlock = offset % blockCapacity;
 			int availableInBlock = blockSize - offsetInBlock;

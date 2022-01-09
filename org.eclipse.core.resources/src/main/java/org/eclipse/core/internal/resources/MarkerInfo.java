@@ -66,11 +66,11 @@ public class MarkerInfo implements IMarkerSetElement, Cloneable, IStringPoolPart
 		}
 		if (value instanceof Boolean) {
 			//return canonical boolean
-			return ((Boolean) value).booleanValue() ? Boolean.TRUE : Boolean.FALSE;
+			return (Boolean) value ? Boolean.TRUE : Boolean.FALSE;
 		}
 		if (value instanceof Integer) {
 			//replace common integers with canonical values
-			switch (((Integer) value).intValue()) {
+			switch ((Integer) value) {
 				case 0 :
 					return INTEGER_ZERO;
 				case 1 :
@@ -85,7 +85,6 @@ public class MarkerInfo implements IMarkerSetElement, Cloneable, IStringPoolPart
 	}
 
 	public MarkerInfo() {
-		super();
 	}
 
 	/**
@@ -152,15 +151,13 @@ public class MarkerInfo implements IMarkerSetElement, Cloneable, IStringPoolPart
 				return;
 			attributes = new MarkerAttributeMap<>();
 			attributes.put(attributeName, value);
-		} else {
-			if (value == null) {
-				attributes.remove(attributeName);
-				if (attributes.isEmpty())
-					attributes = null;
-			} else {
-				attributes.put(attributeName, value);
-			}
-		}
+		} else if (value == null) {
+        	attributes.remove(attributeName);
+        	if (attributes.isEmpty())
+        		attributes = null;
+        } else {
+        	attributes.put(attributeName, value);
+        }
 	}
 
 	public void setAttributes(Map<String, ? extends Object> map, boolean validate) {

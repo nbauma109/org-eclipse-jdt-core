@@ -528,7 +528,7 @@ public class WrapPreparator extends ASTVisitor {
 				}
 			}
 			Collections.reverse(this.wrapIndexes);
-			this.wrapParentIndex = (expression != null) ? this.tm.lastIndexIn(expression, -1)
+			this.wrapParentIndex = expression != null ? this.tm.lastIndexIn(expression, -1)
 					: this.tm.lastIndexIn(invocation, -1);
 			this.wrapGroupEnd = this.tm.lastIndexIn(node, -1);
 			handleWrap(this.options.alignment_for_selector_in_method_invocation);
@@ -654,7 +654,7 @@ public class WrapPreparator extends ASTVisitor {
 		if (operatorPrecedence == null)
 			return true;
 		ASTNode parent = node.getParent();
-		if ((parent instanceof InfixExpression) && samePrecedence(node, (InfixExpression) parent))
+		if (parent instanceof InfixExpression && samePrecedence(node, (InfixExpression) parent))
 			return true; // this node has been handled higher in the AST
 
 		int wrappingOption = OPERATOR_WRAPPING_OPTION.get(node.getOperator()).applyAsInt(this.options);
@@ -691,7 +691,7 @@ public class WrapPreparator extends ASTVisitor {
 		Expression right = node.getRightOperand();
 		List<Expression> extended = node.extendedOperands();
 		for (int i = -1; i < extended.size(); i++) {
-			Expression operand = (i == -1) ? right : extended.get(i);
+			Expression operand = i == -1 ? right : extended.get(i);
 			if (operand instanceof InfixExpression && samePrecedence(node, (InfixExpression) operand)) {
 				findTokensToWrap((InfixExpression) operand, wrapBeforeOperator, depth + 1);
 			}
@@ -708,10 +708,8 @@ public class WrapPreparator extends ASTVisitor {
 				if (wrapBeforeOperator) {
 					if (this.tm.countLineBreaksBetween(this.tm.get(indexAfter - 1), this.tm.get(indexAfter)) > 0)
 						this.wrapIndexes.add(indexAfter);
-				} else {
-					if (this.tm.countLineBreaksBetween(this.tm.get(indexBefore), this.tm.get(indexBefore - 1)) > 0)
-						this.wrapIndexes.add(indexBefore);
-				}
+				} else if (this.tm.countLineBreaksBetween(this.tm.get(indexBefore), this.tm.get(indexBefore - 1)) > 0)
+                	this.wrapIndexes.add(indexBefore);
 			}
 		}
 	}
@@ -734,7 +732,7 @@ public class WrapPreparator extends ASTVisitor {
 		boolean wrapBefore = this.options.wrap_before_conditional_operator;
 		List<Integer> before = wrapBefore ? this.wrapIndexes : this.secondaryWrapIndexes;
 		List<Integer> after = wrapBefore ? this.secondaryWrapIndexes : this.wrapIndexes;
-		if (!chainsMatter || (!isFirstInChain && !isNextInChain)) {
+		if (!chainsMatter || !isFirstInChain && !isNextInChain) {
 			before.add(this.tm.firstIndexAfter(node.getExpression(), TokenNameQUESTION));
 			before.add(this.tm.firstIndexAfter(node.getThenExpression(), TokenNameCOLON));
 			after.add(this.tm.firstIndexIn(node.getThenExpression(), -1));
@@ -850,7 +848,7 @@ public class WrapPreparator extends ASTVisitor {
 
 		Statement elseStatement = node.getElseStatement();
 		boolean keepThenOnSameLine = this.options.keep_then_statement_on_same_line
-				|| (this.options.keep_simple_if_on_one_line && elseStatement == null);
+				|| this.options.keep_simple_if_on_one_line && elseStatement == null;
 		if (keepThenOnSameLine)
 			handleSimpleLoop(node.getThenStatement(), this.options.alignment_for_compact_if);
 
@@ -970,11 +968,10 @@ public class WrapPreparator extends ASTVisitor {
 			while (this.tm.get(this.wrapParentIndex).isComment())
 				this.wrapParentIndex--;
 			this.wrapGroupEnd = this.tm.lastIndexIn(types.get(types.size() - 1), -1);
-			handleWrap(this.options.alignment_for_union_type_in_multicatch);
 		} else {
 			prepareElementsList(types, TokenNameOR, TokenNameLPAREN);
-			handleWrap(this.options.alignment_for_union_type_in_multicatch);
 		}
+        handleWrap(this.options.alignment_for_union_type_in_multicatch);
 		return true;
 	}
 
@@ -1185,7 +1182,7 @@ public class WrapPreparator extends ASTVisitor {
 		int to = this.tm.lastIndexIn(node, -1);
 		for (int i = from; i <= to; i++) {
 			Token token = this.tm.get(i);
-			if ((token.getLineBreaksBefore() > 0 || (previous != null && previous.getLineBreaksAfter() > 0))
+			if ((token.getLineBreaksBefore() > 0 || previous != null && previous.getLineBreaksAfter() > 0)
 					&& (token.getWrapPolicy() == null || token.getWrapPolicy().wrapMode == WrapMode.BLOCK_INDENT)) {
 				int extraIndent = token.getIndent() + indentChange;
 				token.setWrapPolicy(new WrapPolicy(WrapMode.BLOCK_INDENT, parentIndex, extraIndent));
@@ -1302,7 +1299,7 @@ public class WrapPreparator extends ASTVisitor {
 		}
 
 		if (!this.secondaryWrapIndexes.isEmpty()) {
-			int optionNoAlignment = (wrappingOption & ~Alignment.SPLIT_MASK) | Alignment.M_NO_ALIGNMENT;
+			int optionNoAlignment = wrappingOption & ~Alignment.SPLIT_MASK | Alignment.M_NO_ALIGNMENT;
 			policy = getWrapPolicy(optionNoAlignment, 1, false, parentNode);
 			for (int index : this.secondaryWrapIndexes) {
 				Token token = this.tm.get(index);
@@ -1317,9 +1314,7 @@ public class WrapPreparator extends ASTVisitor {
 		if (wrapPreceedingComments) {
 			for (int i = index - 1; i >= 0; i--) {
 				Token previous = this.tm.get(i);
-				if (!previous.isComment())
-					break;
-				if (previous.getWrapPolicy() == WrapPolicy.FORCE_FIRST_COLUMN)
+				if (!previous.isComment() || previous.getWrapPolicy() == WrapPolicy.FORCE_FIRST_COLUMN)
 					break;
 				if (previous.getLineBreaksAfter() == 0 && i == index - 1)
 					index = i;
@@ -1348,13 +1343,11 @@ public class WrapPreparator extends ASTVisitor {
 		boolean indentOnColumn = (wrappingOption & Alignment.M_INDENT_ON_COLUMN) != 0;
 		boolean isForceWrap = (wrappingOption & Alignment.M_FORCE) != 0;
 		boolean isAlreadyWrapped = false;
-		if (indentOnColumn) {
-			extraIndent = 0;
-		} else if (parentNode instanceof Annotation) {
+		if (indentOnColumn || parentNode instanceof Annotation) {
 			extraIndent = 0;
 		} else if (parentNode instanceof EnumDeclaration) {
 			// special behavior for compatibility with legacy formatter
-			extraIndent = ((wrappingOption & Alignment.M_INDENT_BY_ONE) != 0) ? 2 : 1;
+			extraIndent = (wrappingOption & Alignment.M_INDENT_BY_ONE) != 0 ? 2 : 1;
 			if (!this.options.indent_body_declarations_compare_to_enum_declaration_header)
 				extraIndent--;
 			isAlreadyWrapped = isFirst;
@@ -1365,9 +1358,7 @@ public class WrapPreparator extends ASTVisitor {
 		} else if (parentNode instanceof DoStatement) {
 			extraIndent = 0;
 			this.wrapParentIndex = this.tm.firstIndexIn(parentNode, -1); // only if !indoentOnColumn
-		} else if (parentNode instanceof LambdaExpression) {
-			extraIndent = 1;
-		} else if ((wrappingOption & Alignment.M_INDENT_BY_ONE) != 0) {
+		} else if (parentNode instanceof LambdaExpression || (wrappingOption & Alignment.M_INDENT_BY_ONE) != 0) {
 			extraIndent = 1;
 		} else if (parentNode instanceof ArrayInitializer) {
 			extraIndent = this.options.continuation_indentation_for_array_initializer;
@@ -1433,7 +1424,7 @@ public class WrapPreparator extends ASTVisitor {
 			@Override
 			protected boolean token(Token token, int index) {
 				int lineBreaks = getLineBreaksToPreserve(getPrevious(), token);
-				if (lineBreaks > 1 || (!this.join_wrapped_lines && token.isWrappable()) || index == 0)
+				if (lineBreaks > 1 || !this.join_wrapped_lines && token.isWrappable() || index == 0)
 					token.putLineBreaksBefore(lineBreaks);
 				return true;
 			}
@@ -1452,8 +1443,8 @@ public class WrapPreparator extends ASTVisitor {
 	}
 
 	int getLineBreaksToPreserve(Token token1, Token token2) {
-		if ((token1 != null && !token1.isPreserveLineBreaksAfter())
-				|| (token2 != null && !token2.isPreserveLineBreaksBefore())) {
+		if (token1 != null && !token1.isPreserveLineBreaksAfter()
+				|| token2 != null && !token2.isPreserveLineBreaksBefore()) {
 			return 0;
 		}
 		if (token1 != null) {

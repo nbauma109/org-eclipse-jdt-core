@@ -73,7 +73,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	public FrameworkDebugOptions(EquinoxConfiguration environmentInfo) {
 		this.environmentInfo = environmentInfo;
 		// check if verbose debugging was set during initialization.  This needs to be set even if debugging is disabled
-		this.verboseDebug = Boolean.valueOf(environmentInfo.getConfiguration(OSGI_DEBUG_VERBOSE, Boolean.TRUE.toString())).booleanValue();
+		this.verboseDebug = Boolean.parseBoolean(environmentInfo.getConfiguration(OSGI_DEBUG_VERBOSE, Boolean.TRUE.toString()));
 		// if no debug option was specified, don't even bother to try.
 		// Must ensure that the options slot is null as this is the signal to the
 		// platform that debugging is not enabled.
@@ -248,11 +248,9 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 					if (!currentValue.equals(value)) {
 						fireChangedEvent = getSymbolicName(option);
 					}
-				} else {
-					if (value != null) {
-						fireChangedEvent = getSymbolicName(option);
-					}
-				}
+				} else if (value != null) {
+                	fireChangedEvent = getSymbolicName(option);
+                }
 				if (fireChangedEvent != null) {
 					options.put(option, value);
 				}

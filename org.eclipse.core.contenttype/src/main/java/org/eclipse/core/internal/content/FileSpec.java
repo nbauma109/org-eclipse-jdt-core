@@ -50,7 +50,7 @@ class FileSpec {
 	}
 
 	public boolean equals(final String text, final int otherType, final boolean strict) {
-		return ((!strict && getBasicType(type) == getBasicType(otherType)) || type == otherType) && this.text.equalsIgnoreCase(text);
+		return (!strict && getBasicType(type) == getBasicType(otherType) || type == otherType) && this.text.equalsIgnoreCase(text);
 	}
 
 	@Override

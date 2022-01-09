@@ -38,7 +38,6 @@ public abstract class FileSystem extends PlatformObject implements IFileSystem {
 	 * Creates a new file system instance.
 	 */
 	public FileSystem() {
-		super();
 	}
 
 	/**

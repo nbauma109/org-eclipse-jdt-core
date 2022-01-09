@@ -89,7 +89,7 @@ public class CommitWorkingCopyOperation extends JavaModelOperation {
 			boolean isIncluded = !Util.isExcluded(workingCopy);
 			IFile resource = (IFile)workingCopy.getResource();
 			IJavaProject project = root.getJavaProject();
-			if (isPrimary || (root.validateOnClasspath().isOK() && isIncluded && resource.isAccessible() && Util.isValidCompilationUnitName(workingCopy.getElementName(), project.getOption(JavaCore.COMPILER_SOURCE, true), project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))) {
+			if (isPrimary || root.validateOnClasspath().isOK() && isIncluded && resource.isAccessible() && Util.isValidCompilationUnitName(workingCopy.getElementName(), project.getOption(JavaCore.COMPILER_SOURCE, true), project.getOption(JavaCore.COMPILER_COMPLIANCE, true))) {
 
 				// force opening so that the delta builder can get the old info
 				if (!isPrimary && !primary.isOpen()) {
@@ -196,9 +196,8 @@ public class CommitWorkingCopyOperation extends JavaModelOperation {
 		IWorkspace workspace = resource.getWorkspace();
 		if (resource.exists()) {
 			return workspace.getRuleFactory().modifyRule(resource);
-		} else {
-			return workspace.getRuleFactory().createRule(resource);
 		}
+        return workspace.getRuleFactory().createRule(resource);
 	}
 	/**
 	 * Possible failures: <ul>

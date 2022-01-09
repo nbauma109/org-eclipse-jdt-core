@@ -316,7 +316,8 @@ public final class ImportRewrite {
 	private static final char NORMAL_PREFIX= 'n';
 
 	/** @deprecated using deprecated code */
-	private static final int JLS8_INTERNAL = AST.JLS8;
+	@Deprecated
+    private static final int JLS8_INTERNAL = AST.JLS8;
 
 	private final ImportRewriteContext defaultContext;
 
@@ -374,8 +375,7 @@ public final class ImportRewrite {
 		if (restoreExistingImports) {
 			existingImport= new ArrayList();
 			IImportDeclaration[] imports= cu.getImports();
-			for (int i= 0; i < imports.length; i++) {
-				IImportDeclaration curr= imports[i];
+			for (IImportDeclaration curr : imports) {
 				char prefix= Flags.isStatic(curr.getFlags()) ? STATIC_PREFIX : NORMAL_PREFIX;
 				existingImport.add(prefix + curr.getElementName());
 			}
@@ -590,68 +590,64 @@ public final class ImportRewrite {
 	/**
 	 * Not API, package visibility as accessed from an anonymous type
 	 */
-	/* package */ final int findInImports(String qualifier, String name, int kind) {
-		boolean allowAmbiguity=  (kind == ImportRewriteContext.KIND_STATIC_METHOD) || (name.length() == 1 && name.charAt(0) == '*');
+	/* package */ int findInImports(String qualifier, String name, int kind) {
+		boolean allowAmbiguity=  kind == ImportRewriteContext.KIND_STATIC_METHOD || name.length() == 1 && name.charAt(0) == '*';
 		List imports= this.existingImports;
-		char prefix= (kind == ImportRewriteContext.KIND_TYPE) ? NORMAL_PREFIX : STATIC_PREFIX;
+		char prefix= kind == ImportRewriteContext.KIND_TYPE ? NORMAL_PREFIX : STATIC_PREFIX;
 
 		for (int i= imports.size() - 1; i >= 0 ; i--) {
 			String curr= (String) imports.get(i);
 			int res= compareImport(prefix, qualifier, name, curr);
-			if (res != ImportRewriteContext.RES_NAME_UNKNOWN) {
-				if (!allowAmbiguity || res == ImportRewriteContext.RES_NAME_FOUND) {
-					if (prefix != STATIC_PREFIX) {
-						return res;
-					}
-					Object currKind = this.importsKindMap.get(curr.substring(1));
-					if (currKind != null && currKind.equals(this.importsKindMap.get(qualifier + '.' + name))) {
-						return res;
-					}
-				}
-			}
+			if (res != ImportRewriteContext.RES_NAME_UNKNOWN && (!allowAmbiguity || res == ImportRewriteContext.RES_NAME_FOUND)) {
+            	if (prefix != STATIC_PREFIX) {
+            		return res;
+            	}
+            	Object currKind = this.importsKindMap.get(curr.substring(1));
+            	if (currKind != null && currKind.equals(this.importsKindMap.get(qualifier + '.' + name))) {
+            		return res;
+            	}
+            }
 		}
 
 		String packageName= this.compilationUnit.getParent().getElementName();
-		if (kind == ImportRewriteContext.KIND_TYPE) {
-			if (this.filterImplicitImports && this.useContextToFilterImplicitImports) {
-				String mainTypeSimpleName= JavaCore.removeJavaLikeExtension(this.compilationUnit.getElementName());
-				String mainTypeName= Util.concatenateName(packageName, mainTypeSimpleName, '.');
-				if (qualifier.equals(packageName)
-						|| mainTypeName.equals(Util.concatenateName(qualifier, name, '.'))) {
-					return ImportRewriteContext.RES_NAME_FOUND;
-				}
+		if (kind == ImportRewriteContext.KIND_TYPE && this.filterImplicitImports && this.useContextToFilterImplicitImports) {
+        	String mainTypeSimpleName= JavaCore.removeJavaLikeExtension(this.compilationUnit.getElementName());
+        	String mainTypeName= Util.concatenateName(packageName, mainTypeSimpleName, '.');
+        	if (qualifier.equals(packageName)
+        			|| mainTypeName.equals(Util.concatenateName(qualifier, name, '.'))) {
+        		return ImportRewriteContext.RES_NAME_FOUND;
+        	}
 
-				if (this.astRoot != null) {
-					List<AbstractTypeDeclaration> types = this.astRoot.types();
-					int nTypes = types.size();
-					for (int i = 0; i < nTypes; i++) {
-						AbstractTypeDeclaration type = types.get(i);
-						SimpleName simpleName = type.getName();
-						if (simpleName.getIdentifier().equals(name)) {
-							return qualifier.equals(packageName)
-									? ImportRewriteContext.RES_NAME_FOUND
-									: ImportRewriteContext.RES_NAME_CONFLICT;
-						}
-					}
-				} else {
-					try {
-						IType[] types = this.compilationUnit.getTypes();
-						int nTypes = types.length;
-						for (int i = 0; i < nTypes; i++) {
-							IType type = types[i];
-							String typeName = type.getElementName();
-							if (typeName.equals(name)) {
-								return qualifier.equals(packageName)
-										? ImportRewriteContext.RES_NAME_FOUND
-										: ImportRewriteContext.RES_NAME_CONFLICT;
-							}
-						}
-					} catch (JavaModelException e) {
-						// don't want to throw an exception here
-					}
-				}
-			}
-		}
+        	if (this.astRoot != null) {
+        		List<AbstractTypeDeclaration> types = this.astRoot.types();
+        		int nTypes = types.size();
+        		for (int i = 0; i < nTypes; i++) {
+        			AbstractTypeDeclaration type = types.get(i);
+        			SimpleName simpleName = type.getName();
+        			if (simpleName.getIdentifier().equals(name)) {
+        				return qualifier.equals(packageName)
+        						? ImportRewriteContext.RES_NAME_FOUND
+        						: ImportRewriteContext.RES_NAME_CONFLICT;
+        			}
+        		}
+        	} else {
+        		try {
+        			IType[] types = this.compilationUnit.getTypes();
+        			int nTypes = types.length;
+        			for (int i = 0; i < nTypes; i++) {
+        				IType type = types[i];
+        				String typeName = type.getElementName();
+        				if (typeName.equals(name)) {
+        					return qualifier.equals(packageName)
+        							? ImportRewriteContext.RES_NAME_FOUND
+        							: ImportRewriteContext.RES_NAME_CONFLICT;
+        				}
+        			}
+        		} catch (JavaModelException e) {
+        			// don't want to throw an exception here
+        		}
+        	}
+        }
 
 		return ImportRewriteContext.RES_NAME_UNKNOWN;
 	}
@@ -692,27 +688,26 @@ public final class ImportRewrite {
 			MarkerAnnotation result = ast.newMarkerAnnotation();
 			result.setTypeName(name);
 			return result;
-		} else if (mvps.length == 1 && "value".equals(mvps[0].getName())) { //$NON-NLS-1$
+		}
+        if (mvps.length == 1 && "value".equals(mvps[0].getName())) { //$NON-NLS-1$
 			SingleMemberAnnotation result= ast.newSingleMemberAnnotation();
 			result.setTypeName(name);
 			Object value = mvps[0].getValue();
 			if (value != null)
 				result.setValue(addAnnotation(ast, value, context));
 			return result;
-		} else {
-			NormalAnnotation result = ast.newNormalAnnotation();
-			result.setTypeName(name);
-			for (int i= 0; i < mvps.length; i++) {
-				IMemberValuePairBinding mvp = mvps[i];
-				MemberValuePair mvpNode = ast.newMemberValuePair();
-				mvpNode.setName(ast.newSimpleName(mvp.getName()));
-				Object value = mvp.getValue();
-				if (value != null)
-					mvpNode.setValue(addAnnotation(ast, value, context));
-				result.values().add(mvpNode);
-			}
-			return result;
 		}
+        NormalAnnotation result = ast.newNormalAnnotation();
+        result.setTypeName(name);
+        for (IMemberValuePairBinding mvp : mvps) {
+        	MemberValuePair mvpNode = ast.newMemberValuePair();
+        	mvpNode.setName(ast.newSimpleName(mvp.getName()));
+        	Object value = mvp.getValue();
+        	if (value != null)
+        		mvpNode.setValue(addAnnotation(ast, value, context));
+        	result.values().add(mvpNode);
+        }
+        return result;
 	}
 
 	/**
@@ -780,8 +775,7 @@ public final class ImportRewrite {
 				if (typeArguments.length > 0) {
 					ParameterizedType type= ast.newParameterizedType(baseType);
 					List argNodes= type.typeArguments();
-					for (int i= 0; i < typeArguments.length; i++) {
-						String curr= typeArguments[i];
+					for (String curr : typeArguments) {
 						if (containsNestedCapture(curr)) { // see bug 103044
 							argNodes.add(ast.newWildcardType());
 						} else {
@@ -925,8 +919,8 @@ public final class ImportRewrite {
 			return containsNestedCapture(binding.getElementType(), true);
 		}
 		ITypeBinding[] typeArguments= binding.getTypeArguments();
-		for (int i= 0; i < typeArguments.length; i++) {
-			if (containsNestedCapture(typeArguments[i], true)) {
+		for (ITypeBinding typeArgument : typeArguments) {
+			if (containsNestedCapture(typeArgument, true)) {
 				return true;
 			}
 		}
@@ -1304,7 +1298,7 @@ public final class ImportRewrite {
 	 * recorded by this rewriter
 	 * @throws CoreException the exception is thrown if the rewrite fails.
 	 */
-	public final TextEdit rewriteImports(IProgressMonitor monitor) throws CoreException {
+	public TextEdit rewriteImports(IProgressMonitor monitor) throws CoreException {
 
 		SubMonitor subMonitor = SubMonitor.convert(monitor,
 				Messages.bind(Messages.importRewrite_processDescription), 2);
@@ -1471,8 +1465,8 @@ public final class ImportRewrite {
 		if (context == null)
 			context= this.defaultContext;
 		annotationBindings = context.removeRedundantTypeAnnotations(annotationBindings, location, type);
-		for (int i = 0; i< annotationBindings.length; i++) {
-			Annotation annotation = addAnnotation(annotationBindings[i], ast, context);
+		for (IAnnotationBinding annotationBinding : annotationBindings) {
+			Annotation annotation = addAnnotation(annotationBinding, ast, context);
 			if (annotation != null) annotations.add(annotation);
 		}
 	}
@@ -1491,8 +1485,7 @@ public final class ImportRewrite {
 		}
 		// build the type recursively from left to right
 		Type type = binding.isMember() ? buildType(binding.getDeclaringClass(), bindingPoint, ast, context, qualifier, TypeLocation.OTHER) : null;
-		type = internalAddImport(binding, ast, context, type, false, location);
-		return type;
+		return internalAddImport(binding, ast, context, type, false, location);
 	}
 
 	private ITypeBinding checkAnnotationAndGenerics(ITypeBinding binding) {
@@ -1500,15 +1493,14 @@ public final class ImportRewrite {
 		while (binding != null) {
 			IAnnotationBinding[] annotationBinding = binding.getTypeAnnotations();
 			ITypeBinding []  typeArguments = binding.getTypeArguments();
-			if ((annotationBinding != null && annotationBinding.length > 0) ||
-					(typeArguments != null && typeArguments.length > 0)) {
+			if (annotationBinding != null && annotationBinding.length > 0 ||
+					typeArguments != null && typeArguments.length > 0) {
 				bindingPoint = binding;
 			}
-			if (binding.isMember()) {
-				binding = binding.getDeclaringClass();
-			} else {
+			if (!binding.isMember()) {
 				break;
 			}
+            binding = binding.getDeclaringClass();
 		}
 		return bindingPoint;
 	}
@@ -1565,7 +1557,8 @@ public final class ImportRewrite {
 			normalizedBinding= normalizeTypeBinding(binding);
 			if (normalizedBinding == null) {
 				 return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
-			} else if (normalizedBinding.isTypeVariable()) {
+			}
+            if (normalizedBinding.isTypeVariable()) {
 					// no import
 				type = ast.newSimpleType(ast.newSimpleName(binding.getName()));
 			} else if (normalizedBinding.isWildcardType()) {
@@ -1598,8 +1591,7 @@ public final class ImportRewrite {
 		if (typeArguments.length > 0) {
 			ParameterizedType paramType = ast.newParameterizedType(type);
 			List arguments = paramType.typeArguments();
-			for (int i = 0; i < typeArguments.length; i++) {
-				ITypeBinding curr = typeArguments[i];
+			for (ITypeBinding curr : typeArguments) {
 				if (containsNestedCapture(curr, false)) { // see bug 103044
 					arguments.add(ast.newWildcardType());
 				} else {
@@ -1613,23 +1605,28 @@ public final class ImportRewrite {
 
 	private Expression addAnnotation(AST ast, Object value, ImportRewriteContext context) {
 		if (value instanceof Boolean) {
-			return ast.newBooleanLiteral(((Boolean) value).booleanValue());
-		} else if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long
+			return ast.newBooleanLiteral((Boolean) value);
+		}
+        if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long
 				|| value instanceof Float || value instanceof Double) {
 			return ast.newNumberLiteral(value.toString());
-		} else if (value instanceof Character) {
+		}
+        if (value instanceof Character) {
 			CharacterLiteral result = ast.newCharacterLiteral();
-			result.setCharValue(((Character) value).charValue());
+			result.setCharValue((Character) value);
 			return result;
-		} else if (value instanceof ITypeBinding) {
+		}
+        if (value instanceof ITypeBinding) {
 			TypeLiteral result = ast.newTypeLiteral();
 			result.setType(addImport((ITypeBinding) value, ast, context, TypeLocation.OTHER));
 			return result;
-		} else if (value instanceof String) {
+		}
+        if (value instanceof String) {
 			StringLiteral result = ast.newStringLiteral();
 			result.setLiteralValue((String) value);
 			return result;
-		} else if (value instanceof IVariableBinding) {
+		}
+        if (value instanceof IVariableBinding) {
 			IVariableBinding variable = (IVariableBinding) value;
 
 			FieldAccess result = ast.newFieldAccess();
@@ -1646,22 +1643,23 @@ public final class ImportRewrite {
 			}
 			result.setExpression(name);
 			return result;
-		} else if (value instanceof IAnnotationBinding) {
+		}
+        if (value instanceof IAnnotationBinding) {
 			return addAnnotation((IAnnotationBinding) value, ast, context);
-		} else if (value instanceof Object[]) {
-			Object[] values = (Object[]) value;
-			if (values.length == 1)
-				return addAnnotation(ast, values[0], context);
-
-			ArrayInitializer initializer = ast.newArrayInitializer();
-			List expressions = initializer.expressions();
-			int size = values.length;
-			for (int i = 0; i < size; i++)
-				expressions.add(addAnnotation(ast, values[i], context));
-			return initializer;
-		} else {
+		}
+        if (!(value instanceof Object[])) {
 			return null;
 		}
+        Object[] values = (Object[]) value;
+        if (values.length == 1)
+        	return addAnnotation(ast, values[0], context);
+
+        ArrayInitializer initializer = ast.newArrayInitializer();
+        List expressions = initializer.expressions();
+        int size = values.length;
+        for (int i = 0; i < size; i++)
+        	expressions.add(addAnnotation(ast, values[i], context));
+        return initializer;
 	}
 
 	private static boolean isTypeInUnnamedPackage(ITypeBinding binding) {

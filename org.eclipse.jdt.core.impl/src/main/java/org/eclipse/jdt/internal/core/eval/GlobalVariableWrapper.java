@@ -35,9 +35,8 @@ public String getInitializer() {
 	char[] initializer = this.variable.getInitializer();
 	if (initializer != null) {
 		return new String(initializer);
-	} else {
-		return null;
 	}
+    return null;
 }
 /**
  * @see org.eclipse.jdt.core.eval.IGlobalVariable#getName

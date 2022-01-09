@@ -75,11 +75,9 @@ public class ZipBundleFile extends CloseableBundleFile<ZipEntry> {
 	protected BundleEntry findEntry(String path) {
 		ZipEntry zipEntry = getZipEntry(path);
 		if (zipEntry == null) {
-			if (path.length() == 0 || path.charAt(path.length() - 1) == '/') {
-				// this is a directory request lets see if any entries exist in this directory
-				if (containsDir(path))
-					return new DirZipBundleEntry(this, path);
-			}
+			// this is a directory request lets see if any entries exist in this directory
+            if ((path.length() == 0 || path.charAt(path.length() - 1) == '/') && containsDir(path))
+            	return new DirZipBundleEntry(this, path);
 			return null;
 		}
 		return new ZipBundleEntry(zipEntry, this);
@@ -104,7 +102,7 @@ public class ZipBundleFile extends CloseableBundleFile<ZipEntry> {
 	protected Iterable<String> getPaths() {
 		return () -> {
 			final Enumeration<? extends ZipEntry> entries = zipFile.entries();
-			return new Iterator<String>() {
+			return new Iterator<>() {
 				@Override
 				public boolean hasNext() {
 					return entries.hasMoreElements();

@@ -111,45 +111,39 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			if (this.right.kind() != Binding.WILDCARD_TYPE) { // "If T is a type" ... all alternatives require "wildcard"
 				if (this.left.kind() != Binding.WILDCARD_TYPE) {
 					return ConstraintTypeFormula.create(this.left, this.right, SAME, this.isSoft);
-				} else {
-					// TODO: speculative addition:
-					if (this.right instanceof InferenceVariable)
-						return new TypeBound((InferenceVariable) this.right, this.left, SAME, this.isSoft);
-					return FALSE;
 				}
-			} else {
-				WildcardBinding t = (WildcardBinding) this.right;
+                // TODO: speculative addition:
+                if (this.right instanceof InferenceVariable)
+                	return new TypeBound((InferenceVariable) this.right, this.left, SAME, this.isSoft);
+                return FALSE;
+			}
+                WildcardBinding t = (WildcardBinding) this.right;
 				if (t.boundKind == Wildcard.UNBOUND)
 					return TRUE;
 				if (t.boundKind == Wildcard.EXTENDS) {
 					if (this.left.kind() != Binding.WILDCARD_TYPE) {
 						return ConstraintTypeFormula.create(this.left, t.bound, SUBTYPE, this.isSoft);
-					} else {
-						WildcardBinding s = (WildcardBinding) this.left;
-						switch (s.boundKind) {
-							case Wildcard.UNBOUND:
-								return ConstraintTypeFormula.create(inferenceContext.object, t.bound, SUBTYPE, this.isSoft);
-							case Wildcard.EXTENDS:
-								return ConstraintTypeFormula.create(s.bound, t.bound, SUBTYPE, this.isSoft);
-							case Wildcard.SUPER:
-								return ConstraintTypeFormula.create(inferenceContext.object, t.bound, SAME, this.isSoft);
-							default:
-								throw new IllegalArgumentException("Unexpected boundKind "+s.boundKind);  //$NON-NLS-1$
-						}
 					}
-				} else { // SUPER
-					if (this.left.kind() != Binding.WILDCARD_TYPE) {
-						return ConstraintTypeFormula.create(t.bound, this.left, SUBTYPE, this.isSoft);
-					} else {
-						WildcardBinding s = (WildcardBinding) this.left;
-						if (s.boundKind == Wildcard.SUPER) {
-							return ConstraintTypeFormula.create(t.bound, s.bound, SUBTYPE, this.isSoft);
-						} else {
-							return FALSE;
-						}
-					}
-				}
-			}
+                    WildcardBinding s = (WildcardBinding) this.left;
+                    switch (s.boundKind) {
+                    	case Wildcard.UNBOUND:
+                    		return ConstraintTypeFormula.create(inferenceContext.object, t.bound, SUBTYPE, this.isSoft);
+                    	case Wildcard.EXTENDS:
+                    		return ConstraintTypeFormula.create(s.bound, t.bound, SUBTYPE, this.isSoft);
+                    	case Wildcard.SUPER:
+                    		return ConstraintTypeFormula.create(inferenceContext.object, t.bound, SAME, this.isSoft);
+                    	default:
+                    		throw new IllegalArgumentException("Unexpected boundKind "+s.boundKind);  //$NON-NLS-1$
+                    }
+				} else if (this.left.kind() != Binding.WILDCARD_TYPE) {
+                	return ConstraintTypeFormula.create(t.bound, this.left, SUBTYPE, this.isSoft);
+                } else {
+                	WildcardBinding s = (WildcardBinding) this.left;
+                	if (s.boundKind == Wildcard.SUPER) {
+                		return ConstraintTypeFormula.create(t.bound, s.bound, SUBTYPE, this.isSoft);
+                	}
+                    return FALSE;
+                }
 		default: throw new IllegalStateException("Unexpected relation kind "+this.relation); //$NON-NLS-1$
 		}
 	}
@@ -177,58 +171,57 @@ class ConstraintTypeFormula extends ConstraintFormula {
 					return ConstraintTypeFormula.create(object, rightWC.bound, SAME, this.isSoft);
 				if (leftWC.boundKind == Wildcard.EXTENDS && rightWC.boundKind == Wildcard.UNBOUND)
 					return ConstraintTypeFormula.create(leftWC.bound, object, SAME, this.isSoft);
-				if ((leftWC.boundKind == Wildcard.EXTENDS && rightWC.boundKind == Wildcard.EXTENDS)
-					||(leftWC.boundKind == Wildcard.SUPER && rightWC.boundKind == Wildcard.SUPER))
+				if (leftWC.boundKind == Wildcard.EXTENDS && rightWC.boundKind == Wildcard.EXTENDS
+					||leftWC.boundKind == Wildcard.SUPER && rightWC.boundKind == Wildcard.SUPER)
 				{
 					return ConstraintTypeFormula.create(leftWC.bound, rightWC.bound, SAME, this.isSoft);
 				}
 			}
-		} else {
-			if (this.right.kind() != Binding.WILDCARD_TYPE) {
-				// left and right are types (vs. wildcards)
-				if (this.left.isProperType(true) && this.right.isProperType(true)) {
-					if (TypeBinding.equalsEquals(this.left, this.right))
-						return TRUE;
-					return FALSE;
-				}
-				if (this.left.id == TypeIds.T_null || this.right.id== TypeIds.T_null) {
-					return FALSE;
-				}
-				if (this.left instanceof InferenceVariable && !this.right.isPrimitiveType()) {
-					return new TypeBound((InferenceVariable) this.left, this.right, SAME, this.isSoft);
-				}
-				if (this.right instanceof InferenceVariable && !this.left.isPrimitiveType()) {
-					return new TypeBound((InferenceVariable) this.right, this.left, SAME, this.isSoft);
-				}
-				if ((this.left.isClass() || this.left.isInterface())
-						&& (this.right.isClass() || this.right.isInterface())
-						&& TypeBinding.equalsEquals(this.left.erasure(), this.right.erasure()))
-				{
-					TypeBinding[] leftParams = this.left.typeArguments();
-					TypeBinding[] rightParams = this.right.typeArguments();
-					if (leftParams == null || rightParams == null)
-						return leftParams == rightParams ? TRUE : FALSE;
-					if (leftParams.length != rightParams.length)
-						return FALSE;
-					int len = leftParams.length;
-					ConstraintFormula[] constraints = new ConstraintFormula[len];
-					for (int i = 0; i < len; i++) {
-						constraints[i] = ConstraintTypeFormula.create(leftParams[i], rightParams[i], SAME, this.isSoft);
-					}
-					return constraints;
-				}
-				if (this.left.isArrayType() && this.right.isArrayType()) {
-					if (this.left.dimensions() == this.right.dimensions()) {
-						// checking dimensions in one step is an optimization over reducing one dim at a time
-						return ConstraintTypeFormula.create(this.left.leafComponentType(), this.right.leafComponentType(), SAME, this.isSoft);
-					} else if (this.left.dimensions() > 0 && this.right.dimensions() > 0) {
-						TypeBinding leftPrime = peelOneDimension(this.left, inferenceContext.environment);
-						TypeBinding rightPrime = peelOneDimension(this.right, inferenceContext.environment);
-						return ConstraintTypeFormula.create(leftPrime, rightPrime, SAME, this.isSoft);
-					}
-				}
-			}
-		}
+		} else if (this.right.kind() != Binding.WILDCARD_TYPE) {
+        	// left and right are types (vs. wildcards)
+        	if (this.left.isProperType(true) && this.right.isProperType(true)) {
+        		if (TypeBinding.equalsEquals(this.left, this.right))
+        			return TRUE;
+        		return FALSE;
+        	}
+        	if (this.left.id == TypeIds.T_null || this.right.id== TypeIds.T_null) {
+        		return FALSE;
+        	}
+        	if (this.left instanceof InferenceVariable && !this.right.isPrimitiveType()) {
+        		return new TypeBound((InferenceVariable) this.left, this.right, SAME, this.isSoft);
+        	}
+        	if (this.right instanceof InferenceVariable && !this.left.isPrimitiveType()) {
+        		return new TypeBound((InferenceVariable) this.right, this.left, SAME, this.isSoft);
+        	}
+        	if ((this.left.isClass() || this.left.isInterface())
+        			&& (this.right.isClass() || this.right.isInterface())
+        			&& TypeBinding.equalsEquals(this.left.erasure(), this.right.erasure()))
+        	{
+        		TypeBinding[] leftParams = this.left.typeArguments();
+        		TypeBinding[] rightParams = this.right.typeArguments();
+        		if (leftParams == null || rightParams == null)
+        			return leftParams == rightParams ? TRUE : FALSE;
+        		if (leftParams.length != rightParams.length)
+        			return FALSE;
+        		int len = leftParams.length;
+        		ConstraintFormula[] constraints = new ConstraintFormula[len];
+        		for (int i = 0; i < len; i++) {
+        			constraints[i] = ConstraintTypeFormula.create(leftParams[i], rightParams[i], SAME, this.isSoft);
+        		}
+        		return constraints;
+        	}
+        	if (this.left.isArrayType() && this.right.isArrayType()) {
+        		if (this.left.dimensions() == this.right.dimensions()) {
+        			// checking dimensions in one step is an optimization over reducing one dim at a time
+        			return ConstraintTypeFormula.create(this.left.leafComponentType(), this.right.leafComponentType(), SAME, this.isSoft);
+        		}
+                if (this.left.dimensions() > 0 && this.right.dimensions() > 0) {
+        			TypeBinding leftPrime = peelOneDimension(this.left, inferenceContext.environment);
+        			TypeBinding rightPrime = peelOneDimension(this.right, inferenceContext.environment);
+        			return ConstraintTypeFormula.create(leftPrime, rightPrime, SAME, this.isSoft);
+        		}
+        	}
+        }
 		return FALSE;
 	}
 
@@ -316,8 +309,8 @@ class ConstraintTypeFormula extends ConstraintFormula {
 				if (subCandidate.kind() == Binding.INTERSECTION_TYPE) {
 					ReferenceBinding[] intersectingTypes = subCandidate.getIntersectingTypes();
 					if (intersectingTypes != null)
-						for (int i = 0; i < intersectingTypes.length; i++)
-							if (TypeBinding.equalsEquals(intersectingTypes[i], superCandidate))
+                        for (ReferenceBinding intersectingType : intersectingTypes)
+                            if (TypeBinding.equalsEquals(intersectingType, superCandidate))
 								return true;
 				}
 				WildcardBinding variable = (WildcardBinding) superCandidate;
@@ -329,8 +322,8 @@ class ConstraintTypeFormula extends ConstraintFormula {
 				if (subCandidate.kind() == Binding.INTERSECTION_TYPE) {
 					ReferenceBinding[] intersectingTypes = subCandidate.getIntersectingTypes();
 					if (intersectingTypes != null)
-						for (int i = 0; i < intersectingTypes.length; i++)
-							if (TypeBinding.equalsEquals(intersectingTypes[i], superCandidate))
+                        for (ReferenceBinding intersectingType : intersectingTypes)
+                            if (TypeBinding.equalsEquals(intersectingType, superCandidate))
 								return true;
 				}
 				if (superCandidate instanceof CaptureBinding) {
@@ -368,9 +361,9 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			result = (ArrayBinding) firstBound;
 			numArrayBounds++;
 		}
-		for (int i = 0; i < otherUpperBounds.length; i++) {
-			if (otherUpperBounds[i].isArrayType()) {
-				result = (ArrayBinding) otherUpperBounds[i];
+		for (TypeBinding otherUpperBound : otherUpperBounds) {
+			if (otherUpperBound.isArrayType()) {
+				result = (ArrayBinding) otherUpperBound;
 				numArrayBounds++;
 			}
 		}
@@ -404,16 +397,15 @@ class ConstraintTypeFormula extends ConstraintFormula {
 	}
 
 	public boolean equalsEquals (ConstraintTypeFormula that) {
-		return (that != null && this.relation == that.relation && this.isSoft == that.isSoft &&
-					TypeBinding.equalsEquals(this.left, that.left) && TypeBinding.equalsEquals(this.right, that.right));
+		return that != null && this.relation == that.relation && this.isSoft == that.isSoft &&
+					TypeBinding.equalsEquals(this.left, that.left) && TypeBinding.equalsEquals(this.right, that.right);
 	}
 
 	@Override
 	public boolean applySubstitution(BoundSet solutionSet, InferenceVariable[] variables) {
 		super.applySubstitution(solutionSet, variables);
-		for (int i=0; i<variables.length; i++) {
-			InferenceVariable variable = variables[i];
-			TypeBinding instantiation = solutionSet.getInstantiation(variables[i], null);
+		for (InferenceVariable variable : variables) {
+			TypeBinding instantiation = solutionSet.getInstantiation(variable, null);
 			if (instantiation == null)
 				return false;
 			this.left = this.left.substituteInferenceVariable(variable, instantiation);

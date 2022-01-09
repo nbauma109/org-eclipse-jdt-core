@@ -148,34 +148,30 @@ public class AnnotationTypeMemberDeclaration extends BodyDeclaration {
 		if (property == JAVADOC_PROPERTY) {
 			if (get) {
 				return getJavadoc();
-			} else {
-				setJavadoc((Javadoc) child);
-				return null;
 			}
+            setJavadoc((Javadoc) child);
+            return null;
 		}
 		if (property == TYPE_PROPERTY) {
 			if (get) {
 				return getType();
-			} else {
-				setType((Type) child);
-				return null;
 			}
+            setType((Type) child);
+            return null;
 		}
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((SimpleName) child);
-				return null;
 			}
+            setName((SimpleName) child);
+            return null;
 		}
 		if (property == DEFAULT_PROPERTY) {
 			if (get) {
 				return getDefault();
-			} else {
-				setDefault((Expression) child);
-				return null;
 			}
+            setDefault((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

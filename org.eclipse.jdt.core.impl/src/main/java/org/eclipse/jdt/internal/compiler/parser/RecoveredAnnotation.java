@@ -57,9 +57,7 @@ public class RecoveredAnnotation extends RecoveredElement {
 	@Override
 	public RecoveredElement addAnnotationName(int identPtr, int identLengthPtr, int annotationStart, int bracketBalanceValue) {
 
-		RecoveredAnnotation element = new RecoveredAnnotation(identPtr, identLengthPtr, annotationStart, this, bracketBalanceValue);
-
-		return element;
+		return new RecoveredAnnotation(identPtr, identLengthPtr, annotationStart, this, bracketBalanceValue);
 	}
 
 	public RecoveredElement addAnnotation(Annotation annot, int index) {
@@ -87,7 +85,7 @@ public class RecoveredAnnotation extends RecoveredElement {
 				int end = (int)pos;
 				int valueEnd = this.memberValuPairEqualEnd > -1 ? this.memberValuPairEqualEnd : end;
 
-				SingleNameReference fakeExpression = new SingleNameReference(RecoveryScanner.FAKE_IDENTIFIER, (((long) valueEnd + 1) << 32) + (valueEnd));
+				SingleNameReference fakeExpression = new SingleNameReference(RecoveryScanner.FAKE_IDENTIFIER, ((long) valueEnd + 1 << 32) + valueEnd);
 				pendingMemberValueName = new MemberValuePair(memberValueName, start, end, fakeExpression);
 			}
 			parser.identifierPtr = this.identifierPtr;
@@ -206,9 +204,8 @@ public class RecoveredAnnotation extends RecoveredElement {
 			Parser parser = parser();
 			if (this.identifierPtr < parser.identifierPositionStack.length) {
 				return (int) parser.identifierPositionStack[this.identifierPtr];
-			} else {
-				return this.sourceStart;
 			}
+            return this.sourceStart;
 		}
 		return this.annotation.declarationSourceEnd;
 	}
@@ -217,9 +214,8 @@ public class RecoveredAnnotation extends RecoveredElement {
 	public String toString(int tab) {
 		if (this.annotation != null) {
 			return tabString(tab) + "Recovered annotation:\n" + this.annotation.print(tab + 1, new StringBuffer(10)); //$NON-NLS-1$
-		} else {
-			return tabString(tab) + "Recovered annotation: identiferPtr=" + this.identifierPtr + " identiferlengthPtr=" + this.identifierLengthPtr + "\n"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
+        return tabString(tab) + "Recovered annotation: identiferPtr=" + this.identifierPtr + " identiferlengthPtr=" + this.identifierLengthPtr + "\n"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public Annotation updatedAnnotationReference() {

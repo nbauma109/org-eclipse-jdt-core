@@ -193,7 +193,7 @@ private LinkedHashSet<ClasspathLocation> computeClasspathLocations(JavaProject j
 		// e.printStackTrace(); // ignore
 	}
 
-	LinkedHashSet<ClasspathLocation> locations = new LinkedHashSet<ClasspathLocation>();
+	LinkedHashSet<ClasspathLocation> locations = new LinkedHashSet<>();
 	int length = roots.length;
 	JavaModelManager manager = JavaModelManager.getJavaModelManager();
 	for (int i = 0; i < length; i++) {
@@ -263,7 +263,7 @@ private ClasspathLocation mapToClassPathLocation(JavaModelManager manager, Packa
 			ClasspathEntry rawClasspathEntry = (ClasspathEntry) root.getRawClasspathEntry();
 			IJavaProject project = (IJavaProject) root.getParent();
 			String compliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-			cp = (root instanceof JrtPackageFragmentRoot) ?
+			cp = root instanceof JrtPackageFragmentRoot ?
 					ClasspathLocation.forJrtSystem(path.toOSString(), rawClasspathEntry.getAccessRuleSet(),
 							ClasspathEntry.getExternalAnnotationPath(rawClasspathEntry, project.getProject(), true),
 							allLocations, compliance) :
@@ -485,13 +485,11 @@ public char[][] getModulesDeclaringPackage(char[][] packageName, char[] moduleNa
 	}
 	char[][] moduleNames = CharOperation.NO_CHAR_CHAR;
 	for (ClasspathLocation location : getLocationsFor(null /* ignore module */, qualifiedPackageName)) {
-		if (strategy.matches(location, ClasspathLocation::hasModule) ) {
-			if (location.isPackage(qualifiedPackageName, null)) {
-				char[][] mNames = location.getModulesDeclaringPackage(qualifiedPackageName, null);
-				if (mNames == null || mNames.length == 0) continue;
-				moduleNames = CharOperation.arrayConcat(moduleNames, mNames);
-			}
-		}
+		if (strategy.matches(location, ClasspathLocation::hasModule) && location.isPackage(qualifiedPackageName, null)) {
+        	char[][] mNames = location.getModulesDeclaringPackage(qualifiedPackageName, null);
+        	if (mNames == null || mNames.length == 0) continue;
+        	moduleNames = CharOperation.arrayConcat(moduleNames, mNames);
+        }
 	}
 	if(NameLookup.VERBOSE) {
 		Util.verbose(" Result for JavaSearchNameEnvironment#getModulesDeclaringPackage( " + qualifiedPackageName + ", " + CharOperation.charToString(moduleName) + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -529,14 +527,13 @@ public boolean hasCompilationUnit(char[][] qualifiedPackageName, char[] moduleNa
 		}
 	} else {
 		for (ClasspathLocation location : getLocationsFor(null /* ignore module */, qualifiedPackageNameString)) {
-			if (strategy.matches(location, ClasspathLocation::hasModule) )
-				if (location.hasCompilationUnit(qualifiedPackageNameString, moduleNameString)) {
-					if(NameLookup.VERBOSE) {
-						Util.verbose(" Result for JavaSearchNameEnvironment#hasCompilationUnit( " + qualifiedPackageNameString + ", " + moduleNameString + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						Util.verbose(" -> " + location); //$NON-NLS-1$
-					}
-					return true;
-				}
+			if (strategy.matches(location, ClasspathLocation::hasModule) && location.hasCompilationUnit(qualifiedPackageNameString, moduleNameString)) {
+            	if(NameLookup.VERBOSE) {
+            		Util.verbose(" Result for JavaSearchNameEnvironment#hasCompilationUnit( " + qualifiedPackageNameString + ", " + moduleNameString + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            		Util.verbose(" -> " + location); //$NON-NLS-1$
+            	}
+            	return true;
+            }
 		}
 	}
 	return false;
@@ -560,8 +557,8 @@ public IModule getModule(char[] moduleName) {
 public char[][] getAllAutomaticModules() {
 	if (this.moduleLocations == null || this.moduleLocations.size() == 0)
 		return CharOperation.NO_CHAR_CHAR;
-	Set<char[]> set = this.moduleLocations.values().stream().map(e -> e.getModule()).filter(m -> m != null && m.isAutomatic())
-			.map(m -> m.name()).collect(Collectors.toSet());
+	Set<char[]> set = this.moduleLocations.values().stream().map(ClasspathLocation::getModule).filter(m -> m != null && m.isAutomatic())
+			.map(IModule::name).collect(Collectors.toSet());
 	return set.toArray(new char[set.size()][]);
 }
 

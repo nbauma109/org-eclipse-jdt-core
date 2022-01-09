@@ -61,16 +61,14 @@ public TypeBinding resolveType(BlockScope scope) {
 	final boolean isDiamond = this.type != null && (this.type.bits & ASTNode.IsDiamond) != 0;
 	if (this.enclosingInstance != null) {
 		TypeBinding enclosingType = this.enclosingInstance.resolveType(scope);
-		if (enclosingType == null) {
-			// try to propose something even if enclosing type cannot be resolved.
-			// Eg.: new Test<>().new Test<>(#cursor#
-			if (this.enclosingInstance instanceof AllocationExpression) {
-				TypeReference enclosingInstanceType = ((AllocationExpression) this.enclosingInstance).type;
-				if (enclosingInstanceType != null) {
-					enclosingType = enclosingInstanceType.resolvedType;
-				}
-			}
-		}
+		// try to propose something even if enclosing type cannot be resolved.
+        // Eg.: new Test<>().new Test<>(#cursor#
+        if (enclosingType == null && this.enclosingInstance instanceof AllocationExpression) {
+        	TypeReference enclosingInstanceType = ((AllocationExpression) this.enclosingInstance).type;
+        	if (enclosingInstanceType != null) {
+        		enclosingType = enclosingInstanceType.resolvedType;
+        	}
+        }
 		if (enclosingType == null || !(enclosingType instanceof ReferenceBinding)) {
 			throw new CompletionNodeFound();
 		}
@@ -79,7 +77,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	 	this.resolvedType = this.type.resolveType(scope, true /* check bounds*/);
 	}
 
-	if (isDiamond && (this.resolvedType instanceof ParameterizedTypeBinding) && !hasMissingType) {
+	if (isDiamond && this.resolvedType instanceof ParameterizedTypeBinding && !hasMissingType) {
 		TypeBinding [] inferredTypes = inferElidedTypes(scope);
 		if (inferredTypes != null) {
 			this.resolvedType = this.type.resolvedType = scope.environment().createParameterizedType(((ParameterizedTypeBinding) this.resolvedType).genericType(), inferredTypes, this.resolvedType.enclosingType());

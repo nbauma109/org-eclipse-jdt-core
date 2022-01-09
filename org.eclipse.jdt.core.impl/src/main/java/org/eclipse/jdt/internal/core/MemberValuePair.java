@@ -16,6 +16,8 @@ package org.eclipse.jdt.internal.core;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.internal.core.util.Util;
 
+import java.util.Objects;
+
 public class MemberValuePair implements IMemberValuePair {
 
 	String memberName;
@@ -42,8 +44,8 @@ public class MemberValuePair implements IMemberValuePair {
 			this.valueKind == other.valueKind
 			&& this.memberName.equals(other.memberName)
 			&& (this.value == other.value
-				|| (this.value != null && this.value.equals(other.value))
-				|| (this.value instanceof Object[] && other.value instanceof Object[] && Util.equalArraysOrNull((Object[])this.value, (Object[]) other.value)));
+				|| this.value != null && this.value.equals(other.value)
+				|| this.value instanceof Object[] && other.value instanceof Object[] && Util.equalArraysOrNull((Object[])this.value, (Object[]) other.value));
 	}
 
 	@Override
@@ -63,11 +65,6 @@ public class MemberValuePair implements IMemberValuePair {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((this.memberName == null) ? 0 : this.memberName.hashCode());
-		result = prime * result + ((this.value == null) ? 0 : this.value.hashCode());
-		result = prime * result + this.valueKind;
-		return result;
+		return Objects.hash(memberName, value, valueKind);
 	}
 }

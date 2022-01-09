@@ -149,15 +149,13 @@ public class EquinoxLocations {
 	private void mungeConfigurationLocation() {
 		// if the config property was set, munge it for backwards compatibility.
 		String location = equinoxConfig.getConfiguration(PROP_CONFIG_AREA);
-		if (location != null) {
-			if (location.endsWith(".cfg")) { //$NON-NLS-1$
-				int index = location.lastIndexOf('/');
-				if (index < 0)
-					index = location.lastIndexOf('\\');
-				location = location.substring(0, index + 1);
-				equinoxConfig.setConfiguration(PROP_CONFIG_AREA, location);
-			}
-		}
+		if (location != null && location.endsWith(".cfg")) { //$NON-NLS-1$
+        	int index = location.lastIndexOf('/');
+        	if (index < 0)
+        		index = location.lastIndexOf('\\');
+        	location = location.substring(0, index + 1);
+        	equinoxConfig.setConfiguration(PROP_CONFIG_AREA, location);
+        }
 	}
 
 	private static String getEclipseHomeLocation(String launcher, ConfigValues configValues) {
@@ -171,7 +169,7 @@ public class EquinoxLocations {
 		String macosx = org.eclipse.osgi.service.environment.Constants.OS_MACOSX;
 		if (macosx.equals(configValues.getConfiguration(EquinoxConfiguration.PROP_OSGI_OS)))
 			launcherDir = getMacOSEclipseHomeLocation(launcherDir);
-		return (launcherDir.exists() && launcherDir.isDirectory()) ? launcherDir.getAbsolutePath() : null;
+		return launcherDir.exists() && launcherDir.isDirectory() ? launcherDir.getAbsolutePath() : null;
 	}
 
 	private static File getMacOSEclipseHomeLocation(File launcherDir) {
@@ -185,7 +183,7 @@ public class EquinoxLocations {
 		String location = equinoxConfig.clearConfiguration(property);
 		// the user/product may specify a non-default readOnly setting
 		String userReadOnlySetting = equinoxConfig.getConfiguration(property + READ_ONLY_AREA_SUFFIX);
-		boolean readOnly = (userReadOnlySetting == null ? readOnlyDefault : Boolean.valueOf(userReadOnlySetting).booleanValue());
+		boolean readOnly = userReadOnlySetting == null ? readOnlyDefault : Boolean.parseBoolean(userReadOnlySetting);
 		// if the instance location is not set, predict where the workspace will be and
 		// put the instance area inside the workspace meta area.
 		if (location == null)
@@ -205,7 +203,8 @@ public class EquinoxLocations {
 		int idx = location.indexOf(INSTALL_HASH_PLACEHOLDER);
 		if (idx == 0) {
 			throw new RuntimeException("The location cannot start with '" + INSTALL_HASH_PLACEHOLDER + "': " + location); //$NON-NLS-1$ //$NON-NLS-2$
-		} else if (idx > 0) {
+		}
+        if (idx > 0) {
 			location = location.substring(0, idx) + getInstallDirHash() + location.substring(idx + INSTALL_HASH_PLACEHOLDER.length());
 		}
 		URL url = buildURL(location, true);
@@ -295,7 +294,7 @@ public class EquinoxLocations {
 		File installDir = new File(installURL.getPath());
 		String installDirHash = getInstallDirHash();
 
-		String appName = "." + ECLIPSE; //$NON-NLS-1$
+		StringBuilder appName = new StringBuilder(".").append(ECLIPSE); //$NON-NLS-1$
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
 		if (eclipseProduct.exists()) {
 			Properties props = new Properties();
@@ -307,19 +306,19 @@ public class EquinoxLocations {
 				String appVersion = props.getProperty(PRODUCT_SITE_VERSION);
 				if (appVersion == null || appVersion.trim().length() == 0)
 					appVersion = ""; //$NON-NLS-1$
-				appName += File.separator + appId + "_" + appVersion + "_" + installDirHash; //$NON-NLS-1$ //$NON-NLS-2$
+				appName.append(File.separator).append(appId).append("_").append(appVersion).append("_").append(installDirHash); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (IOException e) {
 				// Do nothing if we get an exception.  We will default to a standard location
 				// in the user's home dir.
 				// add the hash to help prevent collisions
-				appName += File.separator + installDirHash;
+				appName.append(File.separator).append(installDirHash);
 			}
 		} else {
 			// add the hash to help prevent collisions
-			appName += File.separator + installDirHash;
+			appName.append(File.separator).append(installDirHash);
 		}
 		String userHome = System.getProperty(PROP_USER_HOME);
-		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
+		return new File(userHome, appName.append("/").append(pathAppendage).toString()).getAbsolutePath(); //$NON-NLS-1$
 	}
 
 	/**
@@ -341,9 +340,8 @@ public class EquinoxLocations {
 			hashCode = installDir.getAbsolutePath().hashCode();
 		}
 		if (hashCode < 0)
-			hashCode = -(hashCode);
-		String installDirHash = String.valueOf(hashCode);
-		return installDirHash;
+			hashCode = -hashCode;
+		return String.valueOf(hashCode);
 	}
 
 	/**

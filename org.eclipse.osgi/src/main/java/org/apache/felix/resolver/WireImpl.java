@@ -40,21 +40,25 @@ class WireImpl implements Wire
         m_cap = cap;
     }
 
+    @Override
     public Resource getRequirer()
     {
         return m_requirer;
     }
 
+    @Override
     public Requirement getRequirement()
     {
         return m_req;
     }
 
+    @Override
     public Resource getProvider()
     {
         return m_provider;
     }
 
+    @Override
     public Capability getCapability()
     {
         return m_cap;
@@ -71,11 +75,7 @@ class WireImpl implements Wire
     @Override
     public boolean equals(Object obj)
     {
-        if (obj == null)
-        {
-            return false;
-        }
-        if (!(obj instanceof Wire))
+        if (obj == null || !(obj instanceof Wire))
         {
             return false;
         }
@@ -96,7 +96,7 @@ class WireImpl implements Wire
             return false;
         }
         return this.m_cap == other.getCapability()
-                || (this.m_cap != null && this.m_cap.equals(other.getCapability()));
+                || this.m_cap != null && this.m_cap.equals(other.getCapability());
     }
 
     @Override
@@ -106,7 +106,6 @@ class WireImpl implements Wire
         hash = 29 * hash + (this.m_requirer != null ? this.m_requirer.hashCode() : 0);
         hash = 29 * hash + (this.m_req != null ? this.m_req.hashCode() : 0);
         hash = 29 * hash + (this.m_provider != null ? this.m_provider.hashCode() : 0);
-        hash = 29 * hash + (this.m_cap != null ? this.m_cap.hashCode() : 0);
-        return hash;
+        return 29 * hash + (this.m_cap != null ? this.m_cap.hashCode() : 0);
     }
 }

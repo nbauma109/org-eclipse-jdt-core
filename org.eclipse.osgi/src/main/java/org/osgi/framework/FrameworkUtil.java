@@ -208,7 +208,7 @@ public class FrameworkUtil {
 	public static Optional<Bundle> getBundle(ClassLoader bundleClassLoader) {
 		requireNonNull(bundleClassLoader);
 		return Optional
-				.ofNullable((bundleClassLoader instanceof BundleReference)
+				.ofNullable(bundleClassLoader instanceof BundleReference
 						? ((BundleReference) bundleClassLoader).getBundle()
 						: null);
 	}
@@ -336,18 +336,17 @@ public class FrameworkUtil {
 			}
 			if (dn.size() < patLen) {
 				return false;
-			} else {
-				if (dn.size() > patLen) {
-					if (!dnPattern.get(0).equals(STAR_WILDCARD)) {
-						// If the number of rdns do not match we must have a
-						// prefix map
-						return false;
-					}
-					// The rdnPattern and rdn must have the same number of
-					// elements
-					dnStart = dn.size() - patLen;
-				}
 			}
+            if (dn.size() > patLen) {
+            	if (!dnPattern.get(0).equals(STAR_WILDCARD)) {
+            		// If the number of rdns do not match we must have a
+            		// prefix map
+            		return false;
+            	}
+            	// The rdnPattern and rdn must have the same number of
+            	// elements
+            	dnStart = dn.size() - patLen;
+            }
 			for (int i = 0; i < patLen; i++) {
 				if (!rdnmatch((List<?>) dn.get(i + dnStart), (List<?>) dnPattern.get(i + patStart))) {
 					return false;
@@ -373,7 +372,7 @@ public class FrameworkUtil {
 			if (pattern == null) {
 				throw new IllegalArgumentException("The pattern must not be null.");
 			}
-			List<Object> parsed = new ArrayList<Object>();
+			List<Object> parsed = new ArrayList<>();
 			final int length = pattern.length();
 			char c = ';'; // start with semi-colon to detect empty pattern
 			for (int startIndex = skipSpaces(pattern, 0); startIndex < length;) {
@@ -415,7 +414,7 @@ public class FrameworkUtil {
 				if (dn.equals(STAR_WILDCARD) || dn.equals(MINUS_WILDCARD)) {
 					continue;
 				}
-				List<Object> rdns = new ArrayList<Object>();
+				List<Object> rdns = new ArrayList<>();
 				if (dn.charAt(0) == '*') {
 					int index = skipSpaces(dn, 1);
 					if (dn.charAt(index) != ',') {
@@ -437,13 +436,13 @@ public class FrameworkUtil {
 			if (chain == null) {
 				throw new IllegalArgumentException("DN chain must not be null.");
 			}
-			List<Object> result = new ArrayList<Object>(chain.size());
+			List<Object> result = new ArrayList<>(chain.size());
 			// Now we parse is a list of strings, lets make List of rdn out
 			// of them
 			for (String dn : chain) {
 				dn = new X500Principal(dn).getName(X500Principal.CANONICAL);
 				// Now dn is a nice CANONICAL DN
-				List<Object> rdns = new ArrayList<Object>();
+				List<Object> rdns = new ArrayList<>();
 				parseDN(dn, rdns);
 				result.add(rdns);
 			}
@@ -475,7 +474,7 @@ public class FrameworkUtil {
 		private static void parseDN(String dn, List<Object> rdn) {
 			int startIndex = 0;
 			char c = '\0';
-			List<String> nameValues = new ArrayList<String>();
+			List<String> nameValues = new ArrayList<>();
 			while (startIndex < dn.length()) {
 				int endIndex;
 				for (endIndex = startIndex; endIndex < dn.length(); endIndex++) {
@@ -494,7 +493,7 @@ public class FrameworkUtil {
 				if (c != '+') {
 					rdn.add(nameValues);
 					if (endIndex != dn.length()) {
-						nameValues = new ArrayList<String>();
+						nameValues = new ArrayList<>();
 					} else {
 						nameValues = null;
 					}
@@ -519,15 +518,13 @@ public class FrameworkUtil {
 						throw new IllegalArgumentException("expected wildcard in DN pattern");
 					}
 					// otherwise continue skipping over wild cards
-				} else {
-					if (dnPattern instanceof List<?>) {
-						// if its a list then we have our 'non-wildcard' DN
-						break;
-					} else {
-						// unknown member of the DNChainPattern
-						throw new IllegalArgumentException("expected String or List in DN Pattern");
-					}
-				}
+				} else if (dnPattern instanceof List<?>) {
+                	// if its a list then we have our 'non-wildcard' DN
+                	break;
+                } else {
+                	// unknown member of the DNChainPattern
+                	throw new IllegalArgumentException("expected String or List in DN Pattern");
+                }
 			}
 			// i either points to end-of-list, or to the first
 			// non-wildcard pattern after dnChainPatternIndex
@@ -540,10 +537,7 @@ public class FrameworkUtil {
 		 * the format: "DNPattern;*;DNPattern" (or combinations of this)
 		 */
 		private static boolean dnChainMatch(List<Object> dnChain, int dnChainIndex, List<Object> dnChainPattern, int dnChainPatternIndex) throws IllegalArgumentException {
-			if (dnChainIndex >= dnChain.size()) {
-				return false;
-			}
-			if (dnChainPatternIndex >= dnChainPattern.size()) {
+			if (dnChainIndex >= dnChain.size() || dnChainPatternIndex >= dnChainPattern.size()) {
 				return false;
 			}
 			// check to see what the pattern starts with
@@ -581,59 +575,53 @@ public class FrameworkUtil {
 				}
 				// if we are here, then we didn't find a match.. fall through to
 				// failure
-			} else {
-				if (dnPattern instanceof List<?>) {
-					// here we have to do a deeper check for each DN in the
-					// pattern until we hit a wild card
-					do {
-						if (!dnmatch((List<?>) dnChain.get(dnChainIndex), (List<?>) dnPattern)) {
-							return false;
-						}
-						// go to the next set of DN's in both chains
-						dnChainIndex++;
-						dnChainPatternIndex++;
-						// if we finished the pattern then it all matched
-						if ((dnChainIndex >= dnChain.size()) && (dnChainPatternIndex >= dnChainPattern.size())) {
-							return true;
-						}
-						// if the DN Chain is finished, but the pattern isn't
-						// finished then if the rest of the pattern is not
-						// wildcard then we are done
-						if (dnChainIndex >= dnChain.size()) {
-							dnChainPatternIndex = skipWildCards(dnChainPattern, dnChainPatternIndex);
-							// return TRUE iff the pattern index moved past the
-							// list-size (implying that the rest of the pattern
-							// is all wildcards)
-							return dnChainPatternIndex >= dnChainPattern.size();
-						}
-						// if the pattern finished, but the chain continues then
-						// we have a mis-match
-						if (dnChainPatternIndex >= dnChainPattern.size()) {
-							return false;
-						}
-						// get the next DN Pattern
-						dnPattern = dnChainPattern.get(dnChainPatternIndex);
-						if (dnPattern instanceof String) {
-							if (!dnPattern.equals(STAR_WILDCARD) && !dnPattern.equals(MINUS_WILDCARD)) {
-								throw new IllegalArgumentException("expected wildcard in DN pattern");
-							}
-							// if the next DN is a 'wildcard', then we will
-							// recurse
-							return dnChainMatch(dnChain, dnChainIndex, dnChainPattern, dnChainPatternIndex);
-						} else {
-							if (!(dnPattern instanceof List<?>)) {
-								throw new IllegalArgumentException("expected String or List in DN Pattern");
-							}
-						}
-						// if we are here, then we will just continue to the
-						// match the next set of DN's from the DNChain, and the
-						// DNChainPattern since both are lists
-					} while (true);
-					// should never reach here?
-				} else {
-					throw new IllegalArgumentException("expected String or List in DN Pattern");
-				}
-			}
+			} else if (dnPattern instanceof List<?>) {
+            	// here we have to do a deeper check for each DN in the
+            	// pattern until we hit a wild card
+            	do {
+            		if (!dnmatch((List<?>) dnChain.get(dnChainIndex), (List<?>) dnPattern)) {
+            			return false;
+            		}
+            		// go to the next set of DN's in both chains
+            		dnChainIndex++;
+            		dnChainPatternIndex++;
+            		// if we finished the pattern then it all matched
+            		if (dnChainIndex >= dnChain.size() && dnChainPatternIndex >= dnChainPattern.size()) {
+            			return true;
+            		}
+            		// if the DN Chain is finished, but the pattern isn't
+            		// finished then if the rest of the pattern is not
+            		// wildcard then we are done
+            		if (dnChainIndex >= dnChain.size()) {
+            			dnChainPatternIndex = skipWildCards(dnChainPattern, dnChainPatternIndex);
+            			// return TRUE iff the pattern index moved past the
+            			// list-size (implying that the rest of the pattern
+            			// is all wildcards)
+            			return dnChainPatternIndex >= dnChainPattern.size();
+            		}
+            		// if the pattern finished, but the chain continues then
+            		// we have a mis-match
+            		if (dnChainPatternIndex >= dnChainPattern.size()) {
+            			return false;
+            		}
+            		// get the next DN Pattern
+            		dnPattern = dnChainPattern.get(dnChainPatternIndex);
+            		if (dnPattern instanceof String) {
+            			if (!dnPattern.equals(STAR_WILDCARD) && !dnPattern.equals(MINUS_WILDCARD)) {
+            				throw new IllegalArgumentException("expected wildcard in DN pattern");
+            			}
+            			// if the next DN is a 'wildcard', then we will
+            			// recurse
+            			return dnChainMatch(dnChain, dnChainIndex, dnChainPattern, dnChainPatternIndex);
+            		}
+                    if (!(dnPattern instanceof List<?>)) {
+                    	throw new IllegalArgumentException("expected String or List in DN Pattern");
+                    }
+            	} while (true);
+            	// should never reach here?
+            } else {
+            	throw new IllegalArgumentException("expected String or List in DN Pattern");
+            }
 			// if we get here, the the default return is 'mis-match'
 			return false;
 		}
@@ -718,9 +706,7 @@ public class FrameworkUtil {
 	public static <K, V> Map<K,V> asMap(
 			Dictionary< ? extends K, ? extends V> dictionary) {
 		if (dictionary instanceof Map) {
-			@SuppressWarnings("unchecked")
-			Map<K,V> coerced = (Map<K,V>) dictionary;
-			return coerced;
+			return (Map<K,V>) dictionary;
 		}
 		return new DictionaryAsMap<>(dictionary);
 	}
@@ -970,9 +956,7 @@ public class FrameworkUtil {
 	public static <K, V> Dictionary<K,V> asDictionary(
 			Map< ? extends K, ? extends V> map) {
 		if (map instanceof Dictionary) {
-			@SuppressWarnings("unchecked")
-			Dictionary<K,V> coerced = (Dictionary<K,V>) map;
-			return coerced;
+			return (Dictionary<K,V>) map;
 		}
 		return new MapAsDictionary<>(map);
 	}

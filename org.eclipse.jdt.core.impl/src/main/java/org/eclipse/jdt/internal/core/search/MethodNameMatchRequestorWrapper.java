@@ -69,15 +69,14 @@ public class MethodNameMatchRequestorWrapper extends NameMatchRequestorWrapper i
 		// Get the type
 		char[][] enclosingTypeNames = declaringQualifier != null && declaringQualifier.length > 0 ? CharOperation.splitOn('.', declaringQualifier) : CharOperation.NO_CHAR_CHAR;
 		IType type = getType(typeModifiers, packageName, simpleTypeName, enclosingTypeNames, path, access);
-		if (type == null) return;
-		if (!(!(this.scope instanceof HierarchyScope) || ((HierarchyScope) this.scope).enclosesFineGrained(type))) return;
+		if (type == null || this.scope instanceof HierarchyScope && !((HierarchyScope) this.scope).enclosesFineGrained(type)) return;
 		parameterTypes = parameterTypes == null ? CharOperation.NO_CHAR_CHAR : parameterTypes;
 		String[] paramTypeSigs = CharOperation.NO_STRINGS;
 		if (signature != null) {
 			char[][] parTypes = Signature.getParameterTypes(signature);
 			if (parTypes.length > 0) {
-				for (int i = 0, l = parTypes.length; i < l; ++i) {
-					CharOperation.replace(parTypes[i], '/', '.');
+				for (char[] parType : parTypes) {
+					CharOperation.replace(parType, '/', '.');
 				}
 			}
 			paramTypeSigs = CharOperation.toStrings(parTypes);

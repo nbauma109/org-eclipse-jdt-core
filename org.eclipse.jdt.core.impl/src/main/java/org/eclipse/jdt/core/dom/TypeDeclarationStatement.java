@@ -43,7 +43,8 @@ public class TypeDeclarationStatement extends Statement {
 	 * @since 3.0
 	 * @deprecated In the JLS3 API, this property is replaced by {@link #DECLARATION_PROPERTY}.
 	 */
-	public static final ChildPropertyDescriptor TYPE_DECLARATION_PROPERTY =
+	@Deprecated
+    public static final ChildPropertyDescriptor TYPE_DECLARATION_PROPERTY =
 		new ChildPropertyDescriptor(TypeDeclarationStatement.class, "typeDeclaration", TypeDeclaration.class, MANDATORY, CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -95,9 +96,8 @@ public class TypeDeclarationStatement extends Statement {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_3_0;
 		}
+        return PROPERTY_DESCRIPTORS_3_0;
 	}
 
 	/**
@@ -119,9 +119,8 @@ public class TypeDeclarationStatement extends Statement {
     private ChildPropertyDescriptor typeDeclProperty () {
         if (getAST().apiLevel() == AST.JLS2_INTERNAL) {
             return TYPE_DECLARATION_PROPERTY;
-        } else {
-            return DECLARATION_PROPERTY;
         }
+        return DECLARATION_PROPERTY;
     }
 
 
@@ -153,18 +152,16 @@ public class TypeDeclarationStatement extends Statement {
 		if (property == TYPE_DECLARATION_PROPERTY) {
 			if (get) {
 				return getTypeDeclaration();
-			} else {
-				setTypeDeclaration((TypeDeclaration) child);
-				return null;
 			}
+            setTypeDeclaration((TypeDeclaration) child);
+            return null;
 		}
 		if (property == DECLARATION_PROPERTY) {
 			if (get) {
 				return getDeclaration();
-			} else {
-				setDeclaration((AbstractTypeDeclaration) child);
-				return null;
 			}
+            setDeclaration((AbstractTypeDeclaration) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -259,7 +256,8 @@ public class TypeDeclarationStatement extends Statement {
 	 * {@link #getDeclaration()}, which returns <code>AbstractTypeDeclaration</code>
 	 * instead of <code>TypeDeclaration</code>.
 	 */
-	public TypeDeclaration getTypeDeclaration() {
+	@Deprecated
+    public TypeDeclaration getTypeDeclaration() {
 		return internalGetTypeDeclaration();
 	}
 
@@ -291,7 +289,8 @@ public class TypeDeclarationStatement extends Statement {
      * <code>AbstractTypeDeclaration</code> instead of
      * <code>TypeDeclaration</code>.
 	 */
-	public void setTypeDeclaration(TypeDeclaration decl) {
+	@Deprecated
+    public void setTypeDeclaration(TypeDeclaration decl) {
 		internalSetTypeDeclaration(decl);
 	}
 
@@ -320,14 +319,11 @@ public class TypeDeclarationStatement extends Statement {
 	public ITypeBinding resolveBinding() {
 		// forward request to the wrapped type declaration
 		AbstractTypeDeclaration d = getDeclaration();
-		if (d instanceof TypeDeclaration) {
+		if (d instanceof TypeDeclaration || d instanceof AnnotationTypeDeclaration) {
 			return d.resolveBinding();
-		} else if (d instanceof AnnotationTypeDeclaration) {
-			return d.resolveBinding();
-		} else {
-			// shouldn't happen
-			return null;
 		}
+        // shouldn't happen
+        return null;
 	}
 
 	@Override

@@ -24,7 +24,7 @@ public class JavaElementInfo implements Cloneable {
 	/**
 	 * Shared empty collection used for efficiency.
 	 */
-	static Object[] NO_NON_JAVA_RESOURCES = new Object[] {};
+	static Object[] NO_NON_JAVA_RESOURCES = {};
 
 	@Override
 	public Object clone() {

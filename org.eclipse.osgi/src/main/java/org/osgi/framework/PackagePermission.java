@@ -66,7 +66,8 @@ public final class PackagePermission extends BasicPermission {
 	 * 
 	 * @deprecated As of 1.5. Use {@code exportonly} instead.
 	 */
-	public final static String						EXPORT				= "export";
+	@Deprecated
+    public final static String						EXPORT				= "export";
 
 	/**
 	 * The action string {@code exportonly}. The {@code exportonly} action does
@@ -167,7 +168,7 @@ public final class PackagePermission extends BasicPermission {
 	 */
 	public PackagePermission(String name, String actions) {
 		this(name, parseActions(actions));
-		if ((filter != null) && ((action_mask & ACTION_ALL) != ACTION_IMPORT)) {
+		if (filter != null && (action_mask & ACTION_ALL) != ACTION_IMPORT) {
 			throw new IllegalArgumentException("invalid action string for filter expression");
 		}
 	}
@@ -218,7 +219,7 @@ public final class PackagePermission extends BasicPermission {
 	 * @param mask action mask
 	 */
 	private void setTransients(String name, int mask) {
-		if ((mask == ACTION_NONE) || ((mask & ACTION_ALL) != mask)) {
+		if (mask == ACTION_NONE || (mask & ACTION_ALL) != mask) {
 			throw new IllegalArgumentException("invalid action string");
 		}
 		action_mask = mask;
@@ -250,7 +251,7 @@ public final class PackagePermission extends BasicPermission {
 			char c;
 
 			// skip whitespace
-			while ((i != -1) && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
+			while (i != -1 && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
 				i--;
 
 			// check for the known strings
@@ -275,25 +276,23 @@ public final class PackagePermission extends BasicPermission {
 					matchlen = 6;
 					mask |= ACTION_EXPORT | ACTION_IMPORT;
 
-				} else {
-					if (i >= 9 && (a[i - 9] == 'e' || a[i - 9] == 'E')
-							&& (a[i - 8] == 'x' || a[i - 8] == 'X')
-							&& (a[i - 7] == 'p' || a[i - 7] == 'P')
-							&& (a[i - 6] == 'o' || a[i - 6] == 'O')
-							&& (a[i - 5] == 'r' || a[i - 5] == 'R')
-							&& (a[i - 4] == 't' || a[i - 4] == 'T')
-							&& (a[i - 3] == 'o' || a[i - 3] == 'O')
-							&& (a[i - 2] == 'n' || a[i - 2] == 'N')
-							&& (a[i - 1] == 'l' || a[i - 1] == 'L')
-							&& (a[i] == 'y' || a[i] == 'Y')) {
-						matchlen = 10;
-						mask |= ACTION_EXPORT;
+				} else if (i >= 9 && (a[i - 9] == 'e' || a[i - 9] == 'E')
+                		&& (a[i - 8] == 'x' || a[i - 8] == 'X')
+                		&& (a[i - 7] == 'p' || a[i - 7] == 'P')
+                		&& (a[i - 6] == 'o' || a[i - 6] == 'O')
+                		&& (a[i - 5] == 'r' || a[i - 5] == 'R')
+                		&& (a[i - 4] == 't' || a[i - 4] == 'T')
+                		&& (a[i - 3] == 'o' || a[i - 3] == 'O')
+                		&& (a[i - 2] == 'n' || a[i - 2] == 'N')
+                		&& (a[i - 1] == 'l' || a[i - 1] == 'L')
+                		&& (a[i] == 'y' || a[i] == 'Y')) {
+                	matchlen = 10;
+                	mask |= ACTION_EXPORT;
 
-					} else {
-						// parse error
-						throw new IllegalArgumentException("invalid permission: " + actions);
-					}
-				}
+                } else {
+                	// parse error
+                	throw new IllegalArgumentException("invalid permission: " + actions);
+                }
 
 			// make sure we didn't just match the tail of a word
 			// like "ackbarfimport". Also, skip to the comma.
@@ -376,11 +375,8 @@ public final class PackagePermission extends BasicPermission {
 			return false;
 		}
 		PackagePermission requested = (PackagePermission) p;
-		if (bundle != null) {
-			return false;
-		}
 		// if requested permission has a filter, then it is an invalid argument
-		if (requested.filter != null) {
+		if (bundle != null || requested.filter != null) {
 			return false;
 		}
 		return implies0(requested, ACTION_NONE);
@@ -483,7 +479,7 @@ public final class PackagePermission extends BasicPermission {
 
 		PackagePermission pp = (PackagePermission) obj;
 
-		return (action_mask == pp.action_mask) && getName().equals(pp.getName()) && ((bundle == pp.bundle) || ((bundle != null) && bundle.equals(pp.bundle)));
+		return action_mask == pp.action_mask && getName().equals(pp.getName()) && (bundle == pp.bundle || bundle != null && bundle.equals(pp.bundle));
 	}
 
 	/**
@@ -538,25 +534,22 @@ public final class PackagePermission extends BasicPermission {
 		if (result != null) {
 			return result;
 		}
-		final Map<String, Object> map = new HashMap<String, Object>(5);
+		final Map<String, Object> map = new HashMap<>(5);
 		map.put("package.name", getName());
 		if (bundle != null) {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					map.put("id", Long.valueOf(bundle.getBundleId()));
-					map.put("location", bundle.getLocation());
-					String name = bundle.getSymbolicName();
-					if (name != null) {
-						map.put("name", name);
-					}
-					SignerProperty signer = new SignerProperty(bundle);
-					if (signer.isBundleSigned()) {
-						map.put("signer", signer);
-					}
-					return null;
-				}
-			});
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            	map.put("id", Long.valueOf(bundle.getBundleId()));
+            	map.put("location", bundle.getLocation());
+            	String name = bundle.getSymbolicName();
+            	if (name != null) {
+            		map.put("name", name);
+            	}
+            	SignerProperty signer = new SignerProperty(bundle);
+            	if (signer.isBundleSigned()) {
+            		map.put("signer", signer);
+            	}
+            	return null;
+            });
 		}
 		return properties = map;
 	}
@@ -599,7 +592,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 	 * Create an empty PackagePermissions object.
 	 */
 	public PackagePermissionCollection() {
-		permissions = new HashMap<String, PackagePermission>();
+		permissions = new HashMap<>();
 		all_allowed = false;
 	}
 
@@ -635,7 +628,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 			if (f != null) {
 				pc = filterPermissions;
 				if (pc == null) {
-					filterPermissions = pc = new HashMap<String, PackagePermission>();
+					filterPermissions = pc = new HashMap<>();
 				}
 			} else {
 				pc = permissions;
@@ -653,11 +646,9 @@ final class PackagePermissionCollection extends PermissionCollection {
 				pc.put(name, pp);
 			}
 
-			if (!all_allowed) {
-				if (name.equals("*")) {
-					all_allowed = true;
-				}
-			}
+			if (!all_allowed && name.equals("*")) {
+            	all_allowed = true;
+            }
 		}
 	}
 
@@ -751,7 +742,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		Map<String, PackagePermission> pc = filterPermissions;
 		if (pc != null) {
 			all.addAll(pc.values());
@@ -764,7 +755,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 			new ObjectStreamField("filterPermissions", HashMap.class)	};
 
 	private synchronized void writeObject(ObjectOutputStream out) throws IOException {
-		Hashtable<String, PackagePermission> hashtable = new Hashtable<String, PackagePermission>(permissions);
+		Hashtable<String, PackagePermission> hashtable = new Hashtable<>(permissions);
 		ObjectOutputStream.PutField pfields = out.putFields();
 		pfields.put("permissions", hashtable);
 		pfields.put("all_allowed", all_allowed);
@@ -776,7 +767,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 		ObjectInputStream.GetField gfields = in.readFields();
 		@SuppressWarnings("unchecked")
 		Hashtable<String, PackagePermission> hashtable = (Hashtable<String, PackagePermission>) gfields.get("permissions", null);
-		permissions = new HashMap<String, PackagePermission>(hashtable);
+		permissions = new HashMap<>(hashtable);
 		all_allowed = gfields.get("all_allowed", false);
 		@SuppressWarnings("unchecked")
 		HashMap<String, PackagePermission> fp = (HashMap<String, PackagePermission>) gfields.get("filterPermissions", null);

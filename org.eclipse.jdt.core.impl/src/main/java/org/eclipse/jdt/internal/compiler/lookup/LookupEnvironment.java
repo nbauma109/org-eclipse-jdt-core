@@ -41,7 +41,6 @@ package org.eclipse.jdt.internal.compiler.lookup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +49,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.ClassFilePool;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
@@ -211,14 +211,13 @@ public ModuleBinding getModule(char[] name) {
 		return this.UnNamedModule;
 	ModuleBinding moduleBinding = this.knownModules.get(name);
 	if (moduleBinding == null) {
-		if (this.useModuleSystem) {
-			IModule mod = ((IModuleAwareNameEnvironment) this.nameEnvironment).getModule(name);
-			if (mod != null) {
-				this.typeRequestor.accept(mod, this);
-				moduleBinding = this.root.knownModules.get(name);
-			}
-		} else
-			return this.UnNamedModule;
+		if (!this.useModuleSystem)
+            return this.UnNamedModule;
+        IModule mod = ((IModuleAwareNameEnvironment) this.nameEnvironment).getModule(name);
+        if (mod != null) {
+        	this.typeRequestor.accept(mod, this);
+        	moduleBinding = this.root.knownModules.get(name);
+        }
 	}
 	return moduleBinding;
 }
@@ -321,7 +320,8 @@ ReferenceBinding askForType(PackageBinding packageBinding, char[] name, ModuleBi
 		if (answer.isResolvedBinding()) {
 			candidate = combine(candidate, answer.getResolvedBinding(), clientModule);
 			continue;
-		} else if (answer.isBinaryType()) {
+		}
+        if (answer.isBinaryType()) {
 			// the type was found as a .class file
 			this.typeRequestor.accept(answer.getBinaryType(), answerPackage, answer.getAccessRestriction());
 			ReferenceBinding binding = answerPackage.getType0(name);
@@ -360,8 +360,7 @@ private ReferenceBinding combine(ReferenceBinding one, ReferenceBinding two, Mod
 	if (one == null) return two;
 	if (two == null) return one;
 	if (one.fPackage == null || !clientModule.canAccess(one.fPackage)) return two;
-	if (two.fPackage == null || !clientModule.canAccess(two.fPackage)) return one;
-	if (one == two) return one; //$IDENTITY-COMPARISON$
+	if (two.fPackage == null || !clientModule.canAccess(two.fPackage) || one == two) return one; //$IDENTITY-COMPARISON$
 	return new ProblemReferenceBinding(one.compoundName, one, ProblemReasons.Ambiguous); // TODO(SHMOD): use a new problem ID
 }
 /** Collect answers from the oracle concerning the given clientModule (if present) and each of a set of other modules. */
@@ -373,37 +372,36 @@ private NameEnvironmentAnswer[] askForTypeFromModules(ModuleBinding clientModule
 		if (answer != null)
 			answer.moduleBinding = this.root.getModuleFromAnswer(answer);
 		return new NameEnvironmentAnswer[] { answer };
-	} else {
-		boolean found = false;
-		NameEnvironmentAnswer[] answers = null;
-		if (clientModule != null) {
-			answers = new NameEnvironmentAnswer[otherModules.length+1];
-			NameEnvironmentAnswer answer = oracle.apply(clientModule);
-			if (answer != null) {
-				answer.moduleBinding = clientModule;
-				answers[answers.length-1] = answer;
-				found = true;
-			}
-		} else {
-			answers = new NameEnvironmentAnswer[otherModules.length];
-		}
-		for (int i = 0; i < otherModules.length; i++) {
-			NameEnvironmentAnswer answer = oracle.apply(otherModules[i]);
-			if (answer != null) {
-				if (answer.moduleBinding == null) {
-					char[] nameFromAnswer = answer.moduleName();
-					if (CharOperation.equals(nameFromAnswer, otherModules[i].moduleName)) {
-						answer.moduleBinding = otherModules[i];
-					} else {
-						answer.moduleBinding = getModule(nameFromAnswer);
-					}
-				}
-				answers[i] = answer;
-				found = true;
-			}
-		}
-		return found ? answers : null;
 	}
+    boolean found = false;
+    NameEnvironmentAnswer[] answers = null;
+    if (clientModule != null) {
+    	answers = new NameEnvironmentAnswer[otherModules.length+1];
+    	NameEnvironmentAnswer answer = oracle.apply(clientModule);
+    	if (answer != null) {
+    		answer.moduleBinding = clientModule;
+    		answers[answers.length-1] = answer;
+    		found = true;
+    	}
+    } else {
+    	answers = new NameEnvironmentAnswer[otherModules.length];
+    }
+    for (int i = 0; i < otherModules.length; i++) {
+    	NameEnvironmentAnswer answer = oracle.apply(otherModules[i]);
+    	if (answer != null) {
+    		if (answer.moduleBinding == null) {
+    			char[] nameFromAnswer = answer.moduleName();
+    			if (CharOperation.equals(nameFromAnswer, otherModules[i].moduleName)) {
+    				answer.moduleBinding = otherModules[i];
+    			} else {
+    				answer.moduleBinding = getModule(nameFromAnswer);
+    			}
+    		}
+    		answers[i] = answer;
+    		found = true;
+    	}
+    }
+    return found ? answers : null;
 }
 /** First check for a known type in a split package and otherwise ask the oracle. */
 private static NameEnvironmentAnswer fromSplitPackageOrOracle(IModuleAwareNameEnvironment moduleEnv, ModuleBinding module,
@@ -731,7 +729,7 @@ public ModuleBinding javaBaseModule() {
 	ModuleBinding resolvedModel = null;
 	if (this.useModuleSystem)
 		resolvedModel = getModule(TypeConstants.JAVA_BASE);
-	return this.JavaBaseModule = (resolvedModel != null ? resolvedModel : this.UnNamedModule); // fall back to pre-Jigsaw view
+	return this.JavaBaseModule = resolvedModel != null ? resolvedModel : this.UnNamedModule; // fall back to pre-Jigsaw view
 }
 
 private PackageBinding computePackageFrom(char[][] constantPoolName, boolean isMissing) {
@@ -879,19 +877,17 @@ public TypeBinding convertToRawType(TypeBinding type, boolean forceRawEnclosingT
 		ReferenceBinding convertedEnclosing;
 		if (!((ReferenceBinding)originalType).hasEnclosingInstanceContext()) {
 			convertedEnclosing = (ReferenceBinding) originalEnclosing.original();
-		} else {
-			if (originalEnclosing.kind() == Binding.RAW_TYPE) {
-				convertedEnclosing = originalEnclosing;
-				needToConvert = true;
-			} else if (forceRawEnclosingType && !needToConvert/*stop recursion when conversion occurs*/) {
-				convertedEnclosing = (ReferenceBinding) convertToRawType(originalEnclosing, forceRawEnclosingType);
-				needToConvert = TypeBinding.notEquals(originalEnclosing, convertedEnclosing); // only convert generic or parameterized types
-			} else if (needToConvert) {
-				convertedEnclosing = (ReferenceBinding) convertToRawType(originalEnclosing, false);
-			} else {
-				convertedEnclosing = convertToParameterizedType(originalEnclosing);
-			}
-		}
+		} else if (originalEnclosing.kind() == Binding.RAW_TYPE) {
+        	convertedEnclosing = originalEnclosing;
+        	needToConvert = true;
+        } else if (forceRawEnclosingType && !needToConvert/*stop recursion when conversion occurs*/) {
+        	convertedEnclosing = (ReferenceBinding) convertToRawType(originalEnclosing, forceRawEnclosingType);
+        	needToConvert = TypeBinding.notEquals(originalEnclosing, convertedEnclosing); // only convert generic or parameterized types
+        } else if (needToConvert) {
+        	convertedEnclosing = (ReferenceBinding) convertToRawType(originalEnclosing, false);
+        } else {
+        	convertedEnclosing = convertToParameterizedType(originalEnclosing);
+        }
 		if (needToConvert) {
 			convertedType = createRawType((ReferenceBinding) originalType.erasure(), convertedEnclosing);
 		} else if (TypeBinding.notEquals(originalEnclosing, convertedEnclosing)) {
@@ -1021,13 +1017,7 @@ public ArrayBinding createArrayType(TypeBinding leafComponentType, int dimension
 
 public TypeBinding createIntersectionType18(ReferenceBinding[] intersectingTypes) {
 	if (!intersectingTypes[0].isClass()) {
-		Arrays.sort(intersectingTypes, new Comparator<TypeBinding>() {
-			@Override
-			public int compare(TypeBinding o1, TypeBinding o2) {
-				//
-				return o1.isClass() ? -1 : (o2.isClass() ? 1 : CharOperation.compareTo(o1.readableName(), o2.readableName()));
-			}
-		});
+		Arrays.sort(intersectingTypes, (o1, o2) -> o1.isClass() ? -1 : o2.isClass() ? 1 : CharOperation.compareTo(o1.readableName(), o2.readableName()));
 	}
 	return this.typeSystem.getIntersectionType18(intersectingTypes);
 }
@@ -1135,11 +1125,9 @@ public PlainPackageBinding createPlainPackage(char[][] compoundName) {
 				if (((INameEnvironmentExtension)this.nameEnvironment).findType(compoundName[i], parent.compoundName, false, this.module.nameForLookup()) != null) {
 					return null;
 				}
-			} else {
-				if (this.nameEnvironment.findType(compoundName[i], parent.compoundName) != null) {
-					return null;
-				}
-			}
+			} else if (this.nameEnvironment.findType(compoundName[i], parent.compoundName) != null) {
+            	return null;
+            }
 			PackageBinding singleParent = parent.getIncarnation(this.module);
 			if (singleParent != parent && singleParent != null) {
 				// parent.getPackage0() may have been too shy, so drill into the split:
@@ -1165,8 +1153,7 @@ public ParameterizedGenericMethodBinding createParameterizedGenericMethod(Method
 			for (int max = cachedInfo.length; index < max; index++){
 				ParameterizedGenericMethodBinding cachedMethod = cachedInfo[index];
 				if (cachedMethod == null) break nextCachedMethod;
-				if (!cachedMethod.isRaw) continue nextCachedMethod;
-				if (cachedMethod.declaringClass != (rawType == null ? genericMethod.declaringClass : rawType)) continue nextCachedMethod; //$IDENTITY-COMPARISON$
+				if (!cachedMethod.isRaw || cachedMethod.declaringClass != (rawType == null ? genericMethod.declaringClass : rawType)) continue nextCachedMethod; //$IDENTITY-COMPARISON$
 				return cachedMethod;
 		}
 		needToGrow = true;
@@ -1206,9 +1193,8 @@ public ParameterizedGenericMethodBinding createParameterizedGenericMethod(Method
 			for (int max = cachedInfo.length; index < max; index++){
 				ParameterizedGenericMethodBinding cachedMethod = cachedInfo[index];
 				if (cachedMethod == null) break nextCachedMethod;
-				if (cachedMethod.isRaw) continue nextCachedMethod;
-				if (cachedMethod.targetType != targetType) continue nextCachedMethod; //$IDENTITY-COMPARISON$
-				if (cachedMethod.inferredWithUncheckedConversion != inferredWithUncheckedConversion) continue nextCachedMethod;
+				 //$IDENTITY-COMPARISON$
+				if (cachedMethod.isRaw || cachedMethod.targetType != targetType || cachedMethod.inferredWithUncheckedConversion != inferredWithUncheckedConversion) continue nextCachedMethod;
 				TypeBinding[] cachedArguments = cachedMethod.typeArguments;
 				int cachedArgLength = cachedArguments == null ? 0 : cachedArguments.length;
 				if (argLength != cachedArgLength) continue nextCachedMethod;
@@ -1251,19 +1237,17 @@ public PolymorphicMethodBinding createPolymorphicMethod(MethodBinding originalPo
 		TypeBinding parameterTypeBinding = parameters[i];
 		if (parameterTypeBinding.id == TypeIds.T_null) {
 			parametersTypeBinding[i] = getType(JAVA_LANG_VOID, javaBaseModule());
-		} else {
-			if (parameterTypeBinding.isPolyType()) {
-				PolyTypeBinding ptb = (PolyTypeBinding) parameterTypeBinding;
-				if (scope instanceof BlockScope && ptb.expression.resolvedType == null) {
-					ptb.expression.setExpectedType(scope.getJavaLangObject());
-					parametersTypeBinding[i] = ptb.expression.resolveType((BlockScope) scope);
-				} else {
-					parametersTypeBinding[i] = ptb.expression.resolvedType;
-				}
-			} else {
-				parametersTypeBinding[i] = parameterTypeBinding.erasure();
-			}
-		}
+		} else if (parameterTypeBinding.isPolyType()) {
+        	PolyTypeBinding ptb = (PolyTypeBinding) parameterTypeBinding;
+        	if (scope instanceof BlockScope && ptb.expression.resolvedType == null) {
+        		ptb.expression.setExpectedType(scope.getJavaLangObject());
+        		parametersTypeBinding[i] = ptb.expression.resolveType((BlockScope) scope);
+        	} else {
+        		parametersTypeBinding[i] = ptb.expression.resolvedType;
+        	}
+        } else {
+        	parametersTypeBinding[i] = parameterTypeBinding.erasure();
+        }
 	}
 	boolean needToGrow = false;
 	int index = 0;
@@ -1369,7 +1353,7 @@ public ParameterizedTypeBinding createParameterizedType(ReferenceBinding generic
 }
 public ReferenceBinding maybeCreateParameterizedType(ReferenceBinding nonGenericType, ReferenceBinding enclosingType) {
 	boolean canSeeEnclosingTypeParameters = enclosingType != null
-			&& (enclosingType.isParameterizedType() | enclosingType.isRawType())
+			&& enclosingType.isParameterizedType() | enclosingType.isRawType()
 			&& !nonGenericType.isStatic();
 	if (canSeeEnclosingTypeParameters)
 		return createParameterizedType(nonGenericType, null, enclosingType);
@@ -1397,22 +1381,22 @@ public TypeBinding createAnnotatedType(TypeBinding type, AnnotationBinding[] new
 		long tagBitsSeen = 0;
 		AnnotationBinding[] filtered = new AnnotationBinding[newbies.length];
 		int count = 0;
-		for (int i = 0; i < newbies.length; i++) {
-			if (newbies[i] == null) {
+		for (AnnotationBinding element : newbies) {
+			if (element == null) {
 				filtered[count++] = null;
 				// reset tagBitsSeen for next array dimension
 				tagBitsSeen = 0;
 				continue;
 			}
 			long tagBits = 0;
-			if (newbies[i].type.hasNullBit(TypeIds.BitNonNullAnnotation)) {
+			if (element.type.hasNullBit(TypeIds.BitNonNullAnnotation)) {
 				tagBits = TagBits.AnnotationNonNull;
-			} else if (newbies[i].type.hasNullBit(TypeIds.BitNullableAnnotation)) {
+			} else if (element.type.hasNullBit(TypeIds.BitNullableAnnotation)) {
 				tagBits = TagBits.AnnotationNullable;
 			}
 			if ((tagBitsSeen & tagBits) == 0) {
 				tagBitsSeen |= tagBits;
-				filtered[count++] = newbies[i];
+				filtered[count++] = element;
 			}
 		}
 		if (count < newbies.length)
@@ -1486,23 +1470,19 @@ private boolean flaggedJavaBaseTypeErrors(ReferenceBinding result, char[][] comp
 		if (type != null && type.isValidBinding()) {
 			PackageBinding pack = type.getPackage();
 			char[] readableName = pack != null ? pack.readableName() : null;
-			if (readableName != null) {
-				// 7.4.3 : The packages java, java.lang, and java.io are always observable.
-				if (CharOperation.equals(readableName, TypeConstants.JAVA)
-						|| CharOperation.equals(readableName, CharOperation.concatWith(TypeConstants.JAVA_LANG, '.'))
-						|| CharOperation.equals(readableName, CharOperation.concatWith(TypeConstants.JAVA_IO, '.'))) {
-					PackageBinding currentPack = getTopLevelPackage(readableName);
-					ModuleBinding visibleModule = currentPack != null ? currentPack.enclosingModule : null;
-					if (visibleModule != null && visibleModule != javaBaseModule()) {
-						// A type from java.base is not visible
-						if (!this.globalOptions.enableJdtDebugCompileMode) {
-							this.problemReporter.conflictingPackageInModules(compoundName, this.root.unitBeingCompleted, this.missingClassFileLocation,
-									readableName, TypeConstants.JAVA_BASE, visibleModule.readableName());
-							return true;
-						}
-					}
-				}
-			}
+			// 7.4.3 : The packages java, java.lang, and java.io are always observable.
+            if (readableName != null && (CharOperation.equals(readableName, TypeConstants.JAVA)
+            		|| CharOperation.equals(readableName, CharOperation.concatWith(TypeConstants.JAVA_LANG, '.'))
+            		|| CharOperation.equals(readableName, CharOperation.concatWith(TypeConstants.JAVA_IO, '.')))) {
+            	PackageBinding currentPack = getTopLevelPackage(readableName);
+            	ModuleBinding visibleModule = currentPack != null ? currentPack.enclosingModule : null;
+            	// A type from java.base is not visible
+                if (visibleModule != null && visibleModule != javaBaseModule() && !this.globalOptions.enableJdtDebugCompileMode) {
+                	this.problemReporter.conflictingPackageInModules(compoundName, this.root.unitBeingCompleted, this.missingClassFileLocation,
+                			readableName, TypeConstants.JAVA_BASE, visibleModule.readableName());
+                	return true;
+                }
+            }
 		}
 	}
 	return false;
@@ -1553,7 +1533,7 @@ public AnnotationBinding getNonNullAnnotation() {
 public AnnotationBinding[] nullAnnotationsFromTagBits(long nullTagBits) {
 	if (nullTagBits == TagBits.AnnotationNonNull)
 		return new AnnotationBinding[] { getNonNullAnnotation() };
-	else if (nullTagBits == TagBits.AnnotationNullable)
+    if (nullTagBits == TagBits.AnnotationNullable)
 		return new AnnotationBinding[] { getNullableAnnotation() };
 	return null;
 }
@@ -1625,15 +1605,12 @@ private void initializeUsesNullTypeAnnotation() {
 	} finally {
 		this.mayTolerateMissingType = origMayTolerateMissingType;
 	}
-	if (nullable == null && nonNull == null)
-		return;
-	if (nullable == null || nonNull == null)
+	if (nullable == null && nonNull == null || nullable == null || nonNull == null)
 		return; // TODO should report an error about inconsistent setup
 	long nullableMetaBits = nullable.getAnnotationTagBits() & TagBits.AnnotationForTypeUse;
 	long nonNullMetaBits = nonNull.getAnnotationTagBits() & TagBits.AnnotationForTypeUse;
-	if (nullableMetaBits != nonNullMetaBits)
-		return; // TODO should report an error about inconsistent setup
-	if (nullableMetaBits == 0)
+	 // TODO should report an error about inconsistent setup
+	if (nullableMetaBits != nonNullMetaBits || nullableMetaBits == 0)
 		return;
 	this.globalOptions.useNullTypeAnnotations = Boolean.TRUE;
 }
@@ -1736,12 +1713,12 @@ public ReferenceBinding getType(char[][] compoundName, ModuleBinding mod) {
 
 	if (referenceBinding == null || referenceBinding == TheNotFoundType)
 		return null;
-	referenceBinding = (ReferenceBinding) BinaryTypeBinding.resolveType(referenceBinding, this, false /* no raw conversion for now */);
+	
 
 	// compoundName refers to a nested type incorrectly (for example, package1.A$B)
 //	if (referenceBinding.isNestedType())
 //		return new ProblemReferenceBinding(compoundName, referenceBinding, InternalNameProvided);
-	return referenceBinding;
+	return (ReferenceBinding) BinaryTypeBinding.resolveType(referenceBinding, this, false /* no raw conversion for now */);
 }
 
 private TypeBinding[] getTypeArgumentsFromSignature(SignatureWrapper wrapper, TypeVariableBinding[] staticVariables, ReferenceBinding enclosingType, ReferenceBinding genericType,
@@ -1811,8 +1788,8 @@ ReferenceBinding getTypeFromConstantPoolName(char[] signature, int start, int en
 	char[][] compoundName = CharOperation.splitOn('/', signature, start, end);
 	boolean wasMissingType = false;
 	if (missingTypeNames != null) {
-		for (int i = 0, max = missingTypeNames.length; i < max; i++) {
-			if (CharOperation.equals(compoundName, missingTypeNames[i])) {
+		for (char[][] missingTypeName : missingTypeNames) {
+			if (CharOperation.equals(compoundName, missingTypeName)) {
 				wasMissingType = true;
 				break;
 			}
@@ -1961,8 +1938,8 @@ boolean qualifiedNameMatchesSignature(char[][] name, char[] signature) {
 	int s = 1; // skip 'L'
 	for (int i = 0; i < name.length; i++) {
 		char[] n = name[i];
-		for (int j = 0; j < n.length; j++)
-			if (n[j] != signature[s++])
+		for (char element : n)
+            if (element != signature[s++])
 				return false;
 		if (signature[s] == ';' && i == name.length-1)
 			return true;
@@ -2020,7 +1997,7 @@ public TypeBinding getTypeFromTypeSignature(SignatureWrapper wrapper, TypeVariab
 		return null; // cannot reach this, since previous problem will abort compilation
 	}
 	boolean isParameterized;
-	TypeBinding type = getTypeFromSignature(wrapper.signature, wrapper.start, wrapper.computeEnd(), isParameterized = (wrapper.end == wrapper.bracket), enclosingType, missingTypeNames, walker);
+	TypeBinding type = getTypeFromSignature(wrapper.signature, wrapper.start, wrapper.computeEnd(), isParameterized = wrapper.end == wrapper.bracket, enclosingType, missingTypeNames, walker);
 
 	if (!isParameterized)
 		return dimension == 0 ? type : createArrayType(type, dimension, AnnotatableTypeSystem.flattenedAnnotations(annotationsOnDimensions));
@@ -2066,7 +2043,7 @@ public TypeBinding getTypeFromTypeSignature(SignatureWrapper wrapper, TypeVariab
 			typeArguments = null;
 		}
 		if (typeArguments != null || 											// has type arguments, or ...
-				(!memberType.isStatic() && currentType.isParameterizedType())) 	// ... can see type arguments of enclosing
+				!memberType.isStatic() && currentType.isParameterizedType()) 	// ... can see type arguments of enclosing
 		{
 			if (memberType.isStatic())
 				currentType = plainCurrent; // ignore bogus parameterization of enclosing
@@ -2154,8 +2131,8 @@ public MethodVerifier newMethodVerifier() {
 }
 
 public void releaseClassFiles(org.eclipse.jdt.internal.compiler.ClassFile[] classFiles) {
-	for (int i = 0, fileCount = classFiles.length; i < fileCount; i++)
-		this.classFilePool.release(classFiles[i]);
+	for (ClassFile classFile : classFiles)
+        this.classFilePool.release(classFile);
 }
 
 public void reset() {
@@ -2239,14 +2216,11 @@ public AnnotationBinding[] filterNullTypeAnnotations(AnnotationBinding[] typeAnn
 		return typeAnnotations;
 	AnnotationBinding[] filtered = new AnnotationBinding[typeAnnotations.length];
 	int count = 0;
-	for (int i = 0; i < typeAnnotations.length; i++) {
-		AnnotationBinding typeAnnotation = typeAnnotations[i];
+	for (AnnotationBinding typeAnnotation : typeAnnotations) {
 		if (typeAnnotation == null) {
 			count++; // sentinel in annotation sequence for array dimensions
-		} else {
-			if (!typeAnnotation.type.hasNullBit(TypeIds.BitNonNullAnnotation|TypeIds.BitNullableAnnotation))
-				filtered[count++] = typeAnnotation;
-		}
+		} else if (!typeAnnotation.type.hasNullBit(TypeIds.BitNonNullAnnotation|TypeIds.BitNullableAnnotation))
+        	filtered[count++] = typeAnnotation;
 	}
 	if (count == 0)
 		return Binding.NO_ANNOTATIONS;
@@ -2259,8 +2233,7 @@ public AnnotationBinding[] filterNullTypeAnnotations(AnnotationBinding[] typeAnn
 public boolean containsNullTypeAnnotation(IBinaryAnnotation[] typeAnnotations) {
 	if (typeAnnotations.length == 0)
 		return false;
-	for (int i = 0; i < typeAnnotations.length; i++) {
-		IBinaryAnnotation typeAnnotation = typeAnnotations[i];
+	for (IBinaryAnnotation typeAnnotation : typeAnnotations) {
 		char[] typeName = typeAnnotation.getTypeName();
 		// typeName must be "Lfoo/X;"
 		if (typeName == null || typeName.length < 3 || typeName[0] != 'L') continue;
@@ -2273,8 +2246,7 @@ public boolean containsNullTypeAnnotation(IBinaryAnnotation[] typeAnnotations) {
 public boolean containsNullTypeAnnotation(AnnotationBinding[] typeAnnotations) {
 	if (typeAnnotations.length == 0)
 		return false;
-	for (int i = 0; i < typeAnnotations.length; i++) {
-		AnnotationBinding typeAnnotation = typeAnnotations[i];
+	for (AnnotationBinding typeAnnotation : typeAnnotations) {
 		if (typeAnnotation.type.hasNullBit(TypeIds.BitNonNullAnnotation|TypeIds.BitNullableAnnotation))
 			return true;
 	}

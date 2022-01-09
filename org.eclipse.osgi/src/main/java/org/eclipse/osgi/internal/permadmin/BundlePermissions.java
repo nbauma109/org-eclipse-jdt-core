@@ -70,15 +70,12 @@ public final class BundlePermissions extends PermissionCollection {
 	@Override
 	public boolean implies(Permission permission) {
 		// first check implied permissions
-		if ((impliedPermissions != null) && impliedPermissions.implies(permission))
-			return true;
-
 		// Now check implied permissions added by weaving hooks.
-		if (wovenPermissions.implies(permission))
+		if (impliedPermissions != null && impliedPermissions.implies(permission) || wovenPermissions.implies(permission))
 			return true;
 
 		// We must be allowed by the restricted permissions to have any hope of passing the check
-		if ((restrictedPermissions != null) && !restrictedPermissions.implies(permission))
+		if (restrictedPermissions != null && !restrictedPermissions.implies(permission))
 			return false;
 
 		return securityAdmin.checkPermission(permission, this);

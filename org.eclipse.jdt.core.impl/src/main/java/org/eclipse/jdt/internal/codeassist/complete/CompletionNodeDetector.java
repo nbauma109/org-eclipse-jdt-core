@@ -87,7 +87,7 @@ public class CompletionNodeDetector extends ASTVisitor {
 	public Expression getCompletionNodeOuterExpression() {
 		if (this.outerExpression != null)
 			return this.outerExpression;
-		else if (this.parent instanceof Expression)
+        if (this.parent instanceof Expression)
 			return (Expression) this.parent;
 		return null;
 	}
@@ -481,11 +481,11 @@ public class CompletionNodeDetector extends ASTVisitor {
 		}
 		if(this.result) {
 			if ((this.parent == null
-					|| (this.parent instanceof ArrayInitializer && astNode instanceof Statement)) // heuristically get more context
+					|| this.parent instanceof ArrayInitializer && astNode instanceof Statement) // heuristically get more context
 					&& astNode != this.searchedNode) {
-				if(!(astNode instanceof AllocationExpression && ((AllocationExpression) astNode).type == this.searchedNode)
-					&& !(astNode instanceof ConditionalExpression && ((ConditionalExpression) astNode).valueIfTrue == this.searchedNode)
-					&& !(astNode instanceof ConditionalExpression && ((ConditionalExpression) astNode).valueIfFalse == this.searchedNode)) {
+				if((!(astNode instanceof AllocationExpression) || ((AllocationExpression) astNode).type != this.searchedNode)
+					&& (!(astNode instanceof ConditionalExpression) || ((ConditionalExpression) astNode).valueIfTrue != this.searchedNode)
+					&& (!(astNode instanceof ConditionalExpression) || ((ConditionalExpression) astNode).valueIfFalse != this.searchedNode)) {
 					this.parent = astNode;
 				}
 			}

@@ -71,7 +71,7 @@ public class MonitorJob extends Job {
 	 * rule which have been created with conflicting and containing {@link IResource}s.
 	 */
 	private static class MonitorRule implements ISchedulingRule {
-		private static final ISchedulingRule[] SCHEDULING_RULE__EMPTY_ARR = new ISchedulingRule[0];
+		private static final ISchedulingRule[] SCHEDULING_RULE__EMPTY_ARR = {};
 
 		private final ISchedulingRule resourceRule;
 

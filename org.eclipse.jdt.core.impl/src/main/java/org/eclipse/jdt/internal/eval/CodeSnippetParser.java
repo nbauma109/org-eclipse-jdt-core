@@ -52,8 +52,8 @@ protected void classInstanceCreation(boolean alwaysQualified) {
 
 	AllocationExpression alloc;
 	int length;
-	if (((length = this.astLengthStack[this.astLengthPtr--]) == 1)
-		&& (this.astStack[this.astPtr] == null)) {
+	if ((length = this.astLengthStack[this.astLengthPtr--]) == 1
+		&& this.astStack[this.astPtr] == null) {
 		//NO ClassBody
 		this.astPtr--;
 		if (alwaysQualified) {
@@ -95,8 +95,8 @@ protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 	// ClassInstanceCreationExpression ::= 'new' TypeArguments ClassType '(' ArgumentListopt ')' ClassBodyopt
 	AllocationExpression alloc;
 	int length;
-	if (((length = this.astLengthStack[this.astLengthPtr--]) == 1)
-		&& (this.astStack[this.astPtr] == null)) {
+	if ((length = this.astLengthStack[this.astLengthPtr--]) == 1
+		&& this.astStack[this.astPtr] == null) {
 		//NO ClassBody
 		this.astPtr--;
 		alloc = new CodeSnippetAllocationExpression(this.evaluationContext);
@@ -302,7 +302,7 @@ protected void consumeMethodDeclaration(boolean isNotAbstract, boolean isDefault
 
 	int start = methodDecl.bodyStart-1, end = start;
 	long position = ((long)start << 32) + end;
-	long[] positions = new long[]{position};
+	long[] positions = {position};
 	if (this.evaluationContext.localVariableNames != null) {
 
 		int varCount = this.evaluationContext.localVariableNames.length; // n local decls+ try statement
@@ -548,7 +548,7 @@ protected void consumeStatementReturn() {
 	// returned value intercepted by code snippet
 	// support have to be defined at toplevel only
 	if ((this.hasRecoveredOnExpression
-			|| (this.scanner.startPosition >= this.codeSnippetStart && this.scanner.startPosition <= this.codeSnippetEnd+1+this.lineSeparatorLength /* 14838*/))
+			|| this.scanner.startPosition >= this.codeSnippetStart && this.scanner.startPosition <= this.codeSnippetEnd+1+this.lineSeparatorLength)
 		&& this.expressionLengthStack[this.expressionLengthPtr] != 0
 		&& isTopLevelType()) {
 		this.expressionLengthPtr--;
@@ -663,7 +663,7 @@ protected CompilationUnitDeclaration endParse(int act) {
 				System.arraycopy(unitResult.problems, this.problemCountBeforeRecovery, unitResult.problems, 0, problemCount - this.problemCountBeforeRecovery);
 				unitResult.problemCount -= this.problemCountBeforeRecovery;
 			} else {
-				unitResult.problemCount -= (problemCount - this.problemCountBeforeRecovery);
+				unitResult.problemCount -= problemCount - this.problemCountBeforeRecovery;
 			}
 			for (int i = unitResult.problemCount; i < problemCount; i++) {
 				unitResult.problems[i] = null; // discard problem
@@ -680,35 +680,33 @@ protected NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 		consumeNonTypeUseName();
 	}
 
-	if (this.scanner.startPosition >= this.codeSnippetStart
-		&& this.scanner.startPosition <= this.codeSnippetEnd+1+this.lineSeparatorLength /*14838*/){
-		int length;
-		NameReference ref;
-		if ((length = this.identifierLengthStack[this.identifierLengthPtr--]) == 1) {
-			// single variable reference
-			ref =
-				new CodeSnippetSingleNameReference(
-					this.identifierStack[this.identifierPtr],
-					this.identifierPositionStack[this.identifierPtr--],
-					this.evaluationContext);
-		} else {
-			//Qualified variable reference
-			char[][] tokens = new char[length][];
-			this.identifierPtr -= length;
-			System.arraycopy(this.identifierStack, this.identifierPtr + 1, tokens, 0, length);
-			long[] positions = new long[length];
-			System.arraycopy(this.identifierPositionStack, this.identifierPtr + 1, positions, 0, length);
-			ref =
-				new CodeSnippetQualifiedNameReference(tokens,
-					positions,
-					(int) (this.identifierPositionStack[this.identifierPtr + 1] >> 32), // sourceStart
-					(int) this.identifierPositionStack[this.identifierPtr + length],
-					this.evaluationContext); // sourceEnd
-		}
-		return ref;
-	} else {
+	if (this.scanner.startPosition < this.codeSnippetStart || this.scanner.startPosition > this.codeSnippetEnd+1+this.lineSeparatorLength) {
 		return super.getUnspecifiedReference(rejectTypeAnnotations);
 	}
+    int length;
+    NameReference ref;
+    if ((length = this.identifierLengthStack[this.identifierLengthPtr--]) == 1) {
+    	// single variable reference
+    	ref =
+    		new CodeSnippetSingleNameReference(
+    			this.identifierStack[this.identifierPtr],
+    			this.identifierPositionStack[this.identifierPtr--],
+    			this.evaluationContext);
+    } else {
+    	//Qualified variable reference
+    	char[][] tokens = new char[length][];
+    	this.identifierPtr -= length;
+    	System.arraycopy(this.identifierStack, this.identifierPtr + 1, tokens, 0, length);
+    	long[] positions = new long[length];
+    	System.arraycopy(this.identifierPositionStack, this.identifierPtr + 1, positions, 0, length);
+    	ref =
+    		new CodeSnippetQualifiedNameReference(tokens,
+    			positions,
+    			(int) (this.identifierPositionStack[this.identifierPtr + 1] >> 32), // sourceStart
+    			(int) this.identifierPositionStack[this.identifierPtr + length],
+    			this.evaluationContext); // sourceEnd
+    }
+    return ref;
 }
 @Override
 protected NameReference getUnspecifiedReferenceOptimized() {
@@ -720,45 +718,43 @@ protected NameReference getUnspecifiedReferenceOptimized() {
 	look for that it is not a type reference */
 	consumeNonTypeUseName();
 
-	if (this.scanner.startPosition >= this.codeSnippetStart
-		&& this.scanner.startPosition <= this.codeSnippetEnd+1+this.lineSeparatorLength /*14838*/){
-		int length;
-		NameReference ref;
-		if ((length = this.identifierLengthStack[this.identifierLengthPtr--]) == 1) {
-			// single variable reference
-			ref =
-				new CodeSnippetSingleNameReference(
-					this.identifierStack[this.identifierPtr],
-					this.identifierPositionStack[this.identifierPtr--],
-					this.evaluationContext);
-			ref.bits &= ~ASTNode.RestrictiveFlagMASK;
-			ref.bits |= Binding.LOCAL | Binding.FIELD;
-			return ref;
-		}
-
-		//Qualified-variable-reference
-		//In fact it is variable-reference DOT field-ref , but it would result in a type
-		//conflict tha can be only reduce by making a superclass (or inetrface ) between
-		//nameReference and FiledReference or putting FieldReference under NameReference
-		//or else..........This optimisation is not really relevant so just leave as it is
-
-		char[][] tokens = new char[length][];
-		this.identifierPtr -= length;
-		System.arraycopy(this.identifierStack, this.identifierPtr + 1, tokens, 0, length);
-		long[] positions = new long[length];
-		System.arraycopy(this.identifierPositionStack, this.identifierPtr + 1, positions, 0, length);
-		ref = new CodeSnippetQualifiedNameReference(
-				tokens,
-				positions,
-				(int) (this.identifierPositionStack[this.identifierPtr + 1] >> 32), // sourceStart
-				(int) this.identifierPositionStack[this.identifierPtr + length],
-				this.evaluationContext); // sourceEnd
-		ref.bits &= ~ASTNode.RestrictiveFlagMASK;
-		ref.bits |= Binding.LOCAL | Binding.FIELD;
-		return ref;
-	} else {
+	if (this.scanner.startPosition < this.codeSnippetStart || this.scanner.startPosition > this.codeSnippetEnd+1+this.lineSeparatorLength) {
 		return super.getUnspecifiedReferenceOptimized();
 	}
+    int length;
+    NameReference ref;
+    if ((length = this.identifierLengthStack[this.identifierLengthPtr--]) == 1) {
+    	// single variable reference
+    	ref =
+    		new CodeSnippetSingleNameReference(
+    			this.identifierStack[this.identifierPtr],
+    			this.identifierPositionStack[this.identifierPtr--],
+    			this.evaluationContext);
+    	ref.bits &= ~ASTNode.RestrictiveFlagMASK;
+    	ref.bits |= Binding.LOCAL | Binding.FIELD;
+    	return ref;
+    }
+
+    //Qualified-variable-reference
+    //In fact it is variable-reference DOT field-ref , but it would result in a type
+    //conflict tha can be only reduce by making a superclass (or inetrface ) between
+    //nameReference and FiledReference or putting FieldReference under NameReference
+    //or else..........This optimisation is not really relevant so just leave as it is
+
+    char[][] tokens = new char[length][];
+    this.identifierPtr -= length;
+    System.arraycopy(this.identifierStack, this.identifierPtr + 1, tokens, 0, length);
+    long[] positions = new long[length];
+    System.arraycopy(this.identifierPositionStack, this.identifierPtr + 1, positions, 0, length);
+    ref = new CodeSnippetQualifiedNameReference(
+    		tokens,
+    		positions,
+    		(int) (this.identifierPositionStack[this.identifierPtr + 1] >> 32), // sourceStart
+    		(int) this.identifierPositionStack[this.identifierPtr + length],
+    		this.evaluationContext); // sourceEnd
+    ref.bits &= ~ASTNode.RestrictiveFlagMASK;
+    ref.bits |= Binding.LOCAL | Binding.FIELD;
+    return ref;
 }
 @Override
 protected void ignoreExpressionAssignment() {
@@ -770,7 +766,7 @@ protected void ignoreExpressionAssignment() {
  * Returns whether we are parsing a top level type or not.
  */
 private boolean isTopLevelType() {
-	return (this.nestedType - this.switchNestingLevel) == (this.diet ? 0 : 1);
+	return this.nestedType - this.switchNestingLevel == (this.diet ? 0 : 1);
 }
 @Override
 protected MessageSend newMessageSend() {
@@ -811,7 +807,7 @@ protected MessageSend newMessageSendWithTypeArguments() {
  * Records the scanner position if we're parsing a top level type.
  */
 private void recordLastStatementIfNeeded() {
-	if ((isTopLevelType()) && (this.scanner.startPosition <= this.codeSnippetEnd+this.lineSeparatorLength /*14838*/)) {
+	if (isTopLevelType() && this.scanner.startPosition <= this.codeSnippetEnd+this.lineSeparatorLength) {
 		this.lastStatement = this.scanner.startPosition;
 	}
 }

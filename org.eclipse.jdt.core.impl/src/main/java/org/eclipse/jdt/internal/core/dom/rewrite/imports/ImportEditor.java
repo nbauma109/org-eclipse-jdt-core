@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -199,34 +198,31 @@ final class ImportEditor {
 				edit.addChild(new ReplaceEdit(
 						surroundingRegion.getOffset(), surroundingRegion.getLength(), newWhitespace));
 			}
-		}
-		else {
-			if (this.originalImportEntries.isEmpty()) {
-				// Replace existing whitespace with preceding line delimiters, import declarations,
-				// and succeeding line delimiters.
+		} else if (this.originalImportEntries.isEmpty()) {
+        	// Replace existing whitespace with preceding line delimiters, import declarations,
+        	// and succeeding line delimiters.
 
-				Collection<TextEdit> importEdits = determineEditsForImports(
-						surroundingRegion, resultantImports);
+        	Collection<TextEdit> importEdits = determineEditsForImports(
+        			surroundingRegion, resultantImports);
 
-				if (this.rewriteSite.hasPrecedingElements) {
-					edit.addChild(new InsertEdit(surroundingRegion.getOffset(), createDelimiter(2)));
-				}
+        	if (this.rewriteSite.hasPrecedingElements) {
+        		edit.addChild(new InsertEdit(surroundingRegion.getOffset(), createDelimiter(2)));
+        	}
 
-				edit.addChildren(importEdits.toArray(new TextEdit[importEdits.size()]));
+        	edit.addChildren(importEdits.toArray(new TextEdit[importEdits.size()]));
 
-				int newSucceedingDelims = this.rewriteSite.hasSucceedingElements ? 2 : 1;
-				String newSucceeding = createDelimiter(newSucceedingDelims);
-				edit.addChild(new InsertEdit(surroundingRegion.getOffset(), newSucceeding));
-			}
-			else {
-				// Replace original imports with new ones, leaving surrounding whitespace in place.
+        	int newSucceedingDelims = this.rewriteSite.hasSucceedingElements ? 2 : 1;
+        	String newSucceeding = createDelimiter(newSucceedingDelims);
+        	edit.addChild(new InsertEdit(surroundingRegion.getOffset(), newSucceeding));
+        }
+        else {
+        	// Replace original imports with new ones, leaving surrounding whitespace in place.
 
-				Collection<TextEdit> importEdits = determineEditsForImports(
-						this.rewriteSite.importsRegion, resultantImports);
+        	Collection<TextEdit> importEdits = determineEditsForImports(
+        			this.rewriteSite.importsRegion, resultantImports);
 
-				edit.addChildren(importEdits.toArray(new TextEdit[importEdits.size()]));
-			}
-		}
+        	edit.addChildren(importEdits.toArray(new TextEdit[importEdits.size()]));
+        }
 		return edit;
 	}
 
@@ -458,14 +454,8 @@ final class ImportEditor {
 			boolean hasReassignedComments) {
 		boolean needsStandardDelimiter = false;
 
-		if (this.fixAllLineDelimiters) {
+		if (this.fixAllLineDelimiters || !currentImport.isOriginal() || hasReassignedComments) {
 			// In "Organize Imports" mode, all delimiters between imports are standardized.
-			needsStandardDelimiter = true;
-		} else if (!currentImport.isOriginal()) {
-			// This (new) import does not have an original leading delimiter.
-			needsStandardDelimiter = true;
-		} else if (hasReassignedComments) {
-			// Comments reassigned from removed imports are being prepended to this import.
 			needsStandardDelimiter = true;
 		} else {
 			ImportEntry originalPrecedingImport = this.originalPrecedingImports.get(currentImport.importName);
@@ -511,12 +501,7 @@ final class ImportEditor {
 	 */
 	private static Collection<TextEdit> deleteRemainingText(IRegion importRegion, Collection<TextEdit> edits) {
 		List<TextEdit> sortedEdits = new ArrayList<>(edits);
-		Collections.sort(sortedEdits, new Comparator<TextEdit>() {
-			@Override
-			public int compare(TextEdit o1, TextEdit o2) {
-				return o1.getOffset() - o2.getOffset();
-			}
-		});
+		Collections.sort(sortedEdits, (o1, o2) -> o1.getOffset() - o2.getOffset());
 
 		int deletePosition = importRegion.getOffset();
 

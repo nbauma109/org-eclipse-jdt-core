@@ -90,7 +90,7 @@ public class OpenableElementInfo extends JavaElementInfo {
 	}
 
 	public void setChildren(IJavaElement[] children) {
-		this.children= (children.length > 0) ? children : JavaElement.NO_ELEMENTS;
+		this.children= children.length > 0 ? children : JavaElement.NO_ELEMENTS;
 	}
 
 	public void setModule(IModuleDescription module) {

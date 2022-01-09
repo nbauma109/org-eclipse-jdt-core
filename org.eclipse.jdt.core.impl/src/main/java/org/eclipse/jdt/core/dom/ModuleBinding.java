@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.core.SearchableEnvironment;
  */
 class ModuleBinding implements IModuleBinding {
 
-	protected static final ITypeBinding[] NO_TYPE_BINDINGS = new ITypeBinding[0];
+	protected static final ITypeBinding[] NO_TYPE_BINDINGS = {};
 	private String name = null;
 	private volatile String key;
 	private boolean isOpen = false;
@@ -76,7 +76,7 @@ class ModuleBinding implements IModuleBinding {
 				if (convertedAnnotationCount == 0) {
 					return this.annotations = AnnotationBinding.NoAnnotations;
 				}
-				System.arraycopy(tempAnnotations, 0, (tempAnnotations = new IAnnotationBinding[convertedAnnotationCount]), 0, convertedAnnotationCount);
+				System.arraycopy(tempAnnotations, 0, tempAnnotations = new IAnnotationBinding[convertedAnnotationCount], 0, convertedAnnotationCount);
 			}
 			return tempAnnotations;
 		}
@@ -141,10 +141,7 @@ class ModuleBinding implements IModuleBinding {
 	public boolean isEqualTo(IBinding other) {
 		if (other == this) // identical binding - equal (key or no key)
 			return true;
-		if (other == null) // other binding missing
-			return false;
-
-		if (!(other instanceof ModuleBinding))
+		if (other == null || !(other instanceof ModuleBinding))
 			return false;
 
 		org.eclipse.jdt.internal.compiler.lookup.ModuleBinding otherBinding = ((ModuleBinding) other).binding;

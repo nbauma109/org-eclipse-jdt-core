@@ -68,9 +68,11 @@ public class PolymorphicMethodBinding extends MethodBinding {
 		TypeBinding cachedReturnType = this.returnType;
 		if (matchingReturnType == null) {
             return cachedReturnType == null;
-		} else if (cachedReturnType == null) {
+		}
+        if (cachedReturnType == null) {
 			return false;
-		} else return !TypeBinding.notEquals(matchingReturnType, cachedReturnType);
+		}
+        return !TypeBinding.notEquals(matchingReturnType, cachedReturnType);
 		// all arguments match
     }
 

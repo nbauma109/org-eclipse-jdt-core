@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.IContributor;
  * plug-in manifest.
  */
 public class ExtensionPoint extends RegistryObject {
-	public static final ExtensionPoint[] EMPTY_ARRAY = new ExtensionPoint[0];
+	public static final ExtensionPoint[] EMPTY_ARRAY = {};
 
 	//Place holder for the label and the schema. It contains either a String[] or a SoftReference to a String[].
 	//The array layout is [label, schemaReference, fullyQualifiedName, namespace, contributorId]
@@ -61,7 +61,7 @@ public class ExtensionPoint extends RegistryObject {
 
 		//The extension point has been loaded from the cache.
 		String[] result = null;
-		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference<?>) extraInformation).get() : (String[]) extraInformation)) == null) {
+		if (extraInformation == null || (result = extraInformation instanceof SoftReference ? (String[]) ((SoftReference<?>) extraInformation).get() : (String[]) extraInformation) == null) {
 			result = registry.getTableReader().loadExtensionPointExtraData(getExtraDataOffset());
 			extraInformation = new SoftReference<>(result);
 		}

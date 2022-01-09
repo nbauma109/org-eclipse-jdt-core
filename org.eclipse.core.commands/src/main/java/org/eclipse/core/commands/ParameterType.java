@@ -61,7 +61,7 @@ public final class ParameterType extends HandleObject implements Comparable {
 	 * @return <code>true</code> if the <code>element</code> is an instance
 	 *         of <code>type</code>; <code>false</code> otherwise.
 	 */
-	private static final boolean isInstanceOf(final Object element,
+	private static boolean isInstanceOf(final Object element,
 			final String type) {
 		// null isn't an instanceof of anything.
 		if (element == null) {
@@ -82,7 +82,7 @@ public final class ParameterType extends HandleObject implements Comparable {
 	 * @return <code>true</code> if the <code>element</code> is an instance
 	 *         of <code>type</code>; <code>false</code> otherwise.
 	 */
-	private static final boolean isSubtype(final Class<?> clazz, final String type) {
+	private static boolean isSubtype(final Class<?> clazz, final String type) {
 		if (clazz.getName().equals(type)) {
 			return true;
 		}
@@ -133,7 +133,7 @@ public final class ParameterType extends HandleObject implements Comparable {
 	 * @param listener
 	 *            The listener to be added; must not be <code>null</code>.
 	 */
-	public final void addListener(final IParameterTypeListener listener) {
+	public void addListener(final IParameterTypeListener listener) {
 		addListenerObject(listener);
 	}
 
@@ -148,7 +148,7 @@ public final class ParameterType extends HandleObject implements Comparable {
 	 *         greater than, equal to or less than this parameter type.
 	 */
 	@Override
-	public final int compareTo(final Object object) {
+	public int compareTo(final Object object) {
 		final ParameterType castedObject = (ParameterType) object;
 		int compareTo = Util.compare(defined, castedObject.defined);
 		if (compareTo == 0) {
@@ -175,13 +175,13 @@ public final class ParameterType extends HandleObject implements Comparable {
 	 *            string/object conversions for parameter values; may be
 	 *            <code>null</code>
 	 */
-	public final void define(final String type,
+	public void define(final String type,
 			final AbstractParameterValueConverter parameterTypeConverter) {
 
 		final boolean definedChanged = !this.defined;
 		this.defined = true;
 
-		this.type = (type == null) ? Object.class.getName() : type;
+		this.type = type == null ? Object.class.getName() : type;
 		this.parameterTypeConverter = parameterTypeConverter;
 
 		fireParameterTypeChanged(new ParameterTypeEvent(this, definedChanged));
@@ -195,7 +195,7 @@ public final class ParameterType extends HandleObject implements Comparable {
 	 *            The event to send to the listeners; must not be
 	 *            <code>null</code>.
 	 */
-	private final void fireParameterTypeChanged(final ParameterTypeEvent event) {
+	private void fireParameterTypeChanged(final ParameterTypeEvent event) {
 		if (event == null) {
 			throw new NullPointerException(
 					"Cannot send a null event to listeners."); //$NON-NLS-1$
@@ -219,7 +219,7 @@ public final class ParameterType extends HandleObject implements Comparable {
 	 * @throws NotDefinedException
 	 *             if the parameter type is not currently defined
 	 */
-	public final AbstractParameterValueConverter getValueConverter()
+	public AbstractParameterValueConverter getValueConverter()
 			throws NotDefinedException {
 		if (!isDefined()) {
 			throw new NotDefinedException(
@@ -259,7 +259,7 @@ public final class ParameterType extends HandleObject implements Comparable {
 	 *            already registered with this instance, no operation is
 	 *            performed.
 	 */
-	public final void removeListener(final IParameterTypeListener listener) {
+	public void removeListener(final IParameterTypeListener listener) {
 		removeListenerObject(listener);
 	}
 
@@ -270,7 +270,7 @@ public final class ParameterType extends HandleObject implements Comparable {
 	 * @return The string representation; never <code>null</code>.
 	 */
 	@Override
-	public final String toString() {
+	public String toString() {
 		if (string == null) {
 			final StringBuilder stringBuffer = new StringBuilder("ParameterType("); //$NON-NLS-1$
 			stringBuffer.append(id);
@@ -287,7 +287,7 @@ public final class ParameterType extends HandleObject implements Comparable {
 	 * listeners.
 	 */
 	@Override
-	public final void undefine() {
+	public void undefine() {
 		string = null;
 
 		final boolean definedChanged = defined;

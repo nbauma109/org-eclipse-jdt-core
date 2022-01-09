@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.core.jdom.*;
  * org.eclipse.jdt.core.dom package.
  * @noextend This class is not intended to be subclassed by clients.
  */
+@Deprecated
 public class DOMFactory implements IDOMFactory {
 	String lineSeparator;
 /**
@@ -38,7 +39,7 @@ public DOMFactory() {
 
 @Override
 public IDOMCompilationUnit createCompilationUnit() {
-	return (new DOMBuilder()).createCompilationUnit();
+	return new DOMBuilder().createCompilationUnit();
 }
 
 @Override
@@ -46,7 +47,7 @@ public IDOMCompilationUnit createCompilationUnit(char[] sourceCode, String name)
 	if(sourceCode == null) {
 		return null;
 	}
-	return (new SimpleDOMBuilder()).createCompilationUnit(sourceCode, name.toCharArray());
+	return new SimpleDOMBuilder().createCompilationUnit(sourceCode, name.toCharArray());
 }
 
 @Override
@@ -54,7 +55,7 @@ public IDOMCompilationUnit createCompilationUnit(String sourceCode, String name)
 	if(sourceCode == null) {
 		return null;
 	}
-	return (new SimpleDOMBuilder()).createCompilationUnit(sourceCode.toCharArray(), name.toCharArray());
+	return new SimpleDOMBuilder().createCompilationUnit(sourceCode.toCharArray(), name.toCharArray());
 }
 
 @Override
@@ -67,12 +68,12 @@ public IDOMField createField(String sourceCode) {
 	if(sourceCode == null) {
 		return null;
 	}
-	return (new DOMBuilder()).createField(sourceCode.toCharArray());
+	return new DOMBuilder().createField(sourceCode.toCharArray());
 }
 
 @Override
 public IDOMImport createImport() {
-	return (new DOMBuilder()).createImport();
+	return new DOMBuilder().createImport();
 }
 
 @Override
@@ -80,7 +81,7 @@ public IDOMImport createImport(String sourceCode) {
 	if(sourceCode == null) {
 		return null;
 	}
-	return (new DOMBuilder()).createImport(sourceCode.toCharArray());
+	return new DOMBuilder().createImport(sourceCode.toCharArray());
 }
 
 @Override
@@ -93,7 +94,7 @@ public IDOMInitializer createInitializer(String sourceCode) {
 	if(sourceCode == null) {
 		return null;
 	}
-	return (new DOMBuilder()).createInitializer(sourceCode.toCharArray());
+	return new DOMBuilder().createInitializer(sourceCode.toCharArray());
 }
 
 @Override
@@ -106,12 +107,12 @@ public IDOMMethod createMethod(String sourceCode) {
 	if(sourceCode == null) {
 		return null;
 	}
-	return (new DOMBuilder()).createMethod(sourceCode.toCharArray());
+	return new DOMBuilder().createMethod(sourceCode.toCharArray());
 }
 
 @Override
 public IDOMPackage createPackage() {
-	return (new DOMBuilder()).createPackage();
+	return new DOMBuilder().createPackage();
 }
 
 @Override
@@ -119,7 +120,7 @@ public IDOMPackage createPackage(String sourceCode) {
 	if(sourceCode == null) {
 		return null;
 	}
-	return (new DOMBuilder()).createPackage(sourceCode.toCharArray());
+	return new DOMBuilder().createPackage(sourceCode.toCharArray());
 }
 
 @Override
@@ -142,6 +143,6 @@ public IDOMType createType(String sourceCode) {
 	if(sourceCode == null) {
 		return null;
 	}
-	return (new DOMBuilder()).createType(sourceCode.toCharArray());
+	return new DOMBuilder().createType(sourceCode.toCharArray());
 }
 }

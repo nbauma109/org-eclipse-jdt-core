@@ -68,7 +68,7 @@ public class RootPreferences extends EclipsePreferences {
 
 	protected synchronized IEclipsePreferences[] getChildren() {
 		//must perform lazy initialization of child nodes
-		String[] childNames = new String[0];
+		String[] childNames = {};
 		try {
 			childNames = childrenNames();
 		} catch (BackingStoreException e) {
@@ -88,7 +88,7 @@ public class RootPreferences extends EclipsePreferences {
 	}
 
 	public Preferences getNode(String path, boolean create) {
-		if (path.length() == 0 || (path.length() == 1 && path.charAt(0) == IPath.SEPARATOR))
+		if (path.length() == 0 || path.length() == 1 && path.charAt(0) == IPath.SEPARATOR)
 			return this;
 		int startIndex = path.charAt(0) == IPath.SEPARATOR ? 1 : 0;
 		int endIndex = path.indexOf(IPath.SEPARATOR, startIndex + 1);

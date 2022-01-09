@@ -48,7 +48,7 @@ public class PlatformURLResourceConnection extends PlatformURLConnection {
 	@Override
 	protected URL resolve() throws IOException {
 		String filePath = url.getFile().trim();
-		filePath = URLDecoder.decode(filePath, StandardCharsets.UTF_8); //$NON-NLS-1$
+		filePath = URLDecoder.decode(filePath, StandardCharsets.UTF_8);
 		IPath spec = new Path(filePath).makeRelative();
 		if (!spec.segment(0).equals(RESOURCE))
 			throw new IOException(NLS.bind(Messages.url_badVariant, url));
@@ -64,7 +64,7 @@ public class PlatformURLResourceConnection extends PlatformURLConnection {
 		}
 
 		IResource resource = null;
-		IPath result = null;
+		IPath result;
 
 		if (count == 2) {
 			resource = project;

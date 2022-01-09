@@ -103,10 +103,10 @@ abstract class AbstractTracked<S, T, R> {
 	 * AbstractTracked constructor.
 	 */
 	AbstractTracked() {
-		tracked = new HashMap<S, T>();
+		tracked = new HashMap<>();
 		trackingCount = 0;
-		adding = new ArrayList<S>(6);
-		initial = new LinkedList<S>();
+		adding = new ArrayList<>(6);
+		initial = new LinkedList<>();
 		closed = false;
 	}
 
@@ -148,7 +148,7 @@ abstract class AbstractTracked<S, T, R> {
 		while (true) {
 			S item;
 			synchronized (this) {
-				if (closed || (initial.size() == 0)) {
+				if (closed || initial.size() == 0) {
 					/*
 					 * if there are no more initial items
 					 */
@@ -278,7 +278,7 @@ abstract class AbstractTracked<S, T, R> {
 		/*
 		 * The item became untracked during the customizer callback.
 		 */
-		if (becameUntracked && (object != null)) {
+		if (becameUntracked && object != null) {
 			if (DEBUG) {
 				System.out.println("AbstractTracked.trackAdding[removed]: " + item); //$NON-NLS-1$
 			}

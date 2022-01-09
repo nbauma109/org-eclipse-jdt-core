@@ -68,7 +68,7 @@ public class CodeStream {
 	// It will be responsible for the following items.
 	// -> Tracking Max Stack.
 
-	public static FieldBinding[] ImplicitThis = new FieldBinding[] {};
+	public static FieldBinding[] ImplicitThis = {};
 	public static final int LABELS_INCREMENT = 5;
 	// local variable attributes output
 	public static final int LOCALS_INCREMENT = 10;
@@ -178,12 +178,12 @@ public static final void sort(int[] tab, int lo0, int hi0, int[] result) {
 			/* find the first element that is greater than or equal to
 			 * the partition element starting from the left Index.
 			 */
-			while ((lo < hi0) && (tab[lo] < mid))
+			while (lo < hi0 && tab[lo] < mid)
 				++lo;
 			/* find an element that is smaller than or equal to
 			 * the partition element starting from the right Index.
 			 */
-			while ((hi > lo0) && (tab[hi] > mid))
+			while (hi > lo0 && tab[hi] > mid)
 				--hi;
 			// if the indexes have not crossed, swap
 			if (lo <= hi) {
@@ -260,23 +260,19 @@ public void addDefinitelyAssignedVariables(Scope scope, int initStateIndex) {
 		return;
 	for (int i = 0; i < this.visibleLocalsCount; i++) {
 		LocalVariableBinding localBinding = this.visibleLocals[i];
-		if (localBinding != null) {
-			// Check if the local is definitely assigned
-			if (isDefinitelyAssigned(scope, initStateIndex, localBinding)) {
-				if ((localBinding.initializationCount == 0) || (localBinding.initializationPCs[((localBinding.initializationCount - 1) << 1) + 1] != -1)) {
-					/* There are two cases:
-					 * 1) there is no initialization interval opened ==> add an opened interval
-					 * 2) there is already some initialization intervals but the last one is closed ==> add an opened interval
-					 * An opened interval means that the value at localBinding.initializationPCs[localBinding.initializationCount - 1][1]
-					 * is equals to -1.
-					 * initializationPCs is a collection of pairs of int:
-					 * 	first value is the startPC and second value is the endPC. -1 one for the last value means that the interval
-					 * 	is not closed yet.
-					 */
-					localBinding.recordInitializationStartPC(this.position);
-				}
-			}
-		}
+		// Check if the local is definitely assigned
+        if (localBinding != null && isDefinitelyAssigned(scope, initStateIndex, localBinding) && (localBinding.initializationCount == 0 || localBinding.initializationPCs[(localBinding.initializationCount - 1 << 1) + 1] != -1)) {
+        	/* There are two cases:
+        	 * 1) there is no initialization interval opened ==> add an opened interval
+        	 * 2) there is already some initialization intervals but the last one is closed ==> add an opened interval
+        	 * An opened interval means that the value at localBinding.initializationPCs[localBinding.initializationCount - 1][1]
+        	 * is equals to -1.
+        	 * initializationPCs is a collection of pairs of int:
+        	 * 	first value is the startPC and second value is the endPC. -1 one for the last value means that the interval
+        	 * 	is not closed yet.
+        	 */
+        	localBinding.recordInitializationStartPC(this.position);
+        }
 	}
 }
 
@@ -1173,18 +1169,16 @@ private void adjustTypeBindingStackForDup2X1() {
 			pushTypeBinding(val2);
 			pushTypeBinding(val1);
 		}
-	} else { // val1 cat 1
-		if (TypeIds.getCategory(val2.id) == 1) {
-			TypeBinding val3 = popTypeBinding();
-			if (TypeIds.getCategory(val3.id) == 1) {
-				pushTypeBinding(val2);
-				pushTypeBinding(val1);
-				pushTypeBinding(val3);
-				pushTypeBinding(val2);
-				pushTypeBinding(val1);
-			}
-		}
-	}
+	} else if (TypeIds.getCategory(val2.id) == 1) {
+    	TypeBinding val3 = popTypeBinding();
+    	if (TypeIds.getCategory(val3.id) == 1) {
+    		pushTypeBinding(val2);
+    		pushTypeBinding(val1);
+    		pushTypeBinding(val3);
+    		pushTypeBinding(val2);
+    		pushTypeBinding(val1);
+    	}
+    }
 }
 public void dup2_x1() {
 	this.countLabels = 0;
@@ -1449,16 +1443,10 @@ public void fieldAccess(byte opcode, FieldBinding fieldBinding, TypeBinding decl
 		Util.recordNestedType(this.classFile, declaringClass);
 	}
 	TypeBinding returnType = fieldBinding.type;
-	int returnTypeSize;
-	switch (returnType.id) {
-		case TypeIds.T_long :
-		case TypeIds.T_double :
-			returnTypeSize = 2;
-			break;
-		default :
-			returnTypeSize = 1;
-			break;
-	}
+	int returnTypeSize = switch (returnType.id) {
+        case TypeIds.T_long, TypeIds.T_double -> 2;
+        default -> 1;
+    };
 	this.fieldAccess(opcode, returnTypeSize, declaringClass.constantPoolName(), fieldBinding.name, returnType.signature(), returnType.id, returnType);
 }
 
@@ -1477,29 +1465,26 @@ private void fieldAccess(byte opcode, int returnTypeSize, char[] declaringClass,
 		case Opcodes.OPC_getstatic :
 			if (returnTypeSize == 2) {
 				this.stackDepth += 2;
-				pushTypeBinding(typeBinding);
 			} else {
 				this.stackDepth++;
-				pushTypeBinding(typeBinding);
 			}
+            pushTypeBinding(typeBinding);
 			break;
 		case Opcodes.OPC_putfield :
 			if (returnTypeSize == 2) {
 				this.stackDepth -= 3;
-				popTypeBinding(2);
 			} else {
 				this.stackDepth -= 2;
-				popTypeBinding(2);
 			}
+            popTypeBinding(2);
 			break;
 		case Opcodes.OPC_putstatic :
 			if (returnTypeSize == 2) {
 				this.stackDepth -= 2;
-				popTypeBinding();
 		} else {
 				this.stackDepth--;
-				popTypeBinding();
 			}
+            popTypeBinding();
 	}
 	if (this.stackDepth > this.stackMax) {
 		this.stackMax = this.stackDepth;
@@ -2386,9 +2371,8 @@ public void generateInlinedValue(byte inlinedValue) {
 			iconst_5();
 			break;
 		default :
-			if ((-128 <= inlinedValue) && (inlinedValue <= 127)) {
+			if (-128 <= inlinedValue && inlinedValue <= 127) {
 				bipush(inlinedValue);
-				return;
 			}
 	}
 }
@@ -2414,11 +2398,11 @@ public void generateInlinedValue(char inlinedValue) {
 			iconst_5();
 			break;
 		default :
-			if ((6 <= inlinedValue) && (inlinedValue <= 127)) {
+			if (6 <= inlinedValue && inlinedValue <= 127) {
 				bipush((byte) inlinedValue);
 				return;
 			}
-			if ((128 <= inlinedValue) && (inlinedValue <= 32767)) {
+			if (128 <= inlinedValue && inlinedValue <= 32767) {
 				sipush(inlinedValue);
 				return;
 			}
@@ -2484,11 +2468,11 @@ public void generateInlinedValue(int inlinedValue) {
 			iconst_5();
 			break;
 		default :
-			if ((-128 <= inlinedValue) && (inlinedValue <= 127)) {
+			if (-128 <= inlinedValue && inlinedValue <= 127) {
 				bipush((byte) inlinedValue);
 				return;
 			}
-			if ((-32768 <= inlinedValue) && (inlinedValue <= 32767)) {
+			if (-32768 <= inlinedValue && inlinedValue <= 32767) {
 				sipush(inlinedValue);
 				return;
 			}
@@ -2532,7 +2516,7 @@ public void generateInlinedValue(short inlinedValue) {
 			iconst_5();
 			break;
 		default :
-			if ((-128 <= inlinedValue) && (inlinedValue <= 127)) {
+			if (-128 <= inlinedValue && inlinedValue <= 127) {
 				bipush((byte) inlinedValue);
 				return;
 			}
@@ -2552,7 +2536,8 @@ public void generateOuterAccess(Object[] mappingSequence, ASTNode invocationSite
 	if (mappingSequence == BlockScope.NoEnclosingInstanceInConstructorCall) {
 		scope.problemReporter().noSuchEnclosingInstance((ReferenceBinding)target, invocationSite, true);
 		return;
-	} else if (mappingSequence == BlockScope.NoEnclosingInstanceInStaticContext) {
+	}
+    if (mappingSequence == BlockScope.NoEnclosingInstanceInStaticContext) {
 		scope.problemReporter().noSuchEnclosingInstance((ReferenceBinding)target, invocationSite, false);
 		return;
 	}
@@ -2560,7 +2545,8 @@ public void generateOuterAccess(Object[] mappingSequence, ASTNode invocationSite
 	if (mappingSequence == BlockScope.EmulationPathToImplicitThis) {
 		aload_0();
 		return;
-	} else if (mappingSequence[0] instanceof FieldBinding) {
+	}
+    if (mappingSequence[0] instanceof FieldBinding) {
 		FieldBinding fieldBinding = (FieldBinding) mappingSequence[0];
 		aload_0();
 		fieldAccess(Opcodes.OPC_getfield, fieldBinding, null /* default declaringClass */);
@@ -2659,7 +2645,7 @@ public void generateSyntheticBodyForConstructorAccess(SyntheticMethodBinding acc
 		SyntheticArgumentBinding[] syntheticArguments = nestedType.syntheticEnclosingInstances();
 		for (int i = 0; i < (syntheticArguments == null ? 0 : syntheticArguments.length); i++) {
 			TypeBinding type;
-			load((type = syntheticArguments[i].type), resolvedPosition);
+			load(type = syntheticArguments[i].type, resolvedPosition);
 			switch(type.id) {
 				case TypeIds.T_long :
 				case TypeIds.T_double :
@@ -2781,12 +2767,11 @@ public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding met
 
 	// Compute a map of hashcodes to a list of synthetic methods whose names share a hashcode
 	Map hashcodesTosynthetics = new LinkedHashMap();
-	for (int i=0,max=syntheticMethodBindings.length;i<max;i++) {
-		SyntheticMethodBinding syntheticMethodBinding = syntheticMethodBindings[i];
+	for (SyntheticMethodBinding syntheticMethodBinding : syntheticMethodBindings) {
 		if (syntheticMethodBinding.lambda!=null && syntheticMethodBinding.lambda.isSerializable ||
 				syntheticMethodBinding.serializableMethodRef != null) {
 			// TODO can I use > Java 1.4 features here?
-			Integer hashcode = Integer.valueOf(new String(syntheticMethodBinding.selector).hashCode());
+			Integer hashcode = new String(syntheticMethodBinding.selector).hashCode();
 			List syntheticssForThisHashcode = (List)hashcodesTosynthetics.get(hashcode);
 			if (syntheticssForThisHashcode==null) {
 				syntheticssForThisHashcode = new ArrayList();
@@ -2825,12 +2810,12 @@ public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding met
 	while (hashcodeIterator.hasNext()) {
 		Integer hashcode = (Integer)hashcodeIterator.next();
 		switchLabels[index] = new CaseLabel(this);
-		keys[index] = hashcode.intValue();
+		keys[index] = hashcode;
 		sortedIndexes[index] = index;
 		index++;
 	}
 	int[] localKeysCopy;
-	System.arraycopy(keys,0,(localKeysCopy = new int[numberOfHashcodes]),0,numberOfHashcodes);
+	System.arraycopy(keys,0,localKeysCopy = new int[numberOfHashcodes],0,numberOfHashcodes);
 	sort(localKeysCopy, 0, numberOfHashcodes-1, sortedIndexes);
 	// TODO need to use a tableswitch at some size threshold?
 	lookupswitch(defaultLabel, keys, sortedIndexes, switchLabels);
@@ -2845,8 +2830,8 @@ public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding met
 		// Loop through all lambdas that share the same hashcode
 		// TODO: isn't doing this for just one of these enough because they all share
 		// the same name?
-		for (int j=0,max=synthetics.size();j<max;j++) {
-			SyntheticMethodBinding syntheticMethodBinding = (SyntheticMethodBinding)synthetics.get(j);
+		for (Object synthetic : synthetics) {
+			SyntheticMethodBinding syntheticMethodBinding = (SyntheticMethodBinding)synthetic;
 			aload_1();
 			ldc(new String(syntheticMethodBinding.selector));
 			invokeStringEquals();
@@ -2875,7 +2860,7 @@ public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding met
 		keys[j] = j;
 		sortedIndexes[j] = j;
 	}
-	System.arraycopy(keys,0,(localKeysCopy = new int[syntheticsCount]),0,syntheticsCount);
+	System.arraycopy(keys,0,localKeysCopy = new int[syntheticsCount],0,syntheticsCount);
 	// TODO no need to sort here? They should all be in order
 	sort(localKeysCopy, 0, syntheticsCount-1, sortedIndexes);
 	// TODO need to use a tableswitch at some size threshold?
@@ -3058,19 +3043,28 @@ public void generateSyntheticBodyForDeserializeLambda(SyntheticMethodBinding met
  */
 public void loadInt(int value) {
 	if (value<6) {
-		if (value==0) {
-			iconst_0();
-		} else if (value==1) {
-			iconst_1();
-		} else if (value==2) {
-			iconst_2();
-		} else if (value==3) {
-			iconst_3();
-		} else if (value==4) {
-			iconst_4();
-		} else if (value==5) {
-			iconst_5();
-		}
+		switch (value) {
+            case 0:
+                iconst_0();
+                break;
+            case 1:
+                iconst_1();
+                break;
+            case 2:
+                iconst_2();
+                break;
+            case 3:
+                iconst_3();
+                break;
+            case 4:
+                iconst_4();
+                break;
+            case 5:
+                iconst_5();
+                break;
+            default:
+                break;
+        }
 	} else if (value < 128) {
 		// TODO [andy] testcases that hit this
 		bipush((byte)value);
@@ -3118,11 +3112,9 @@ public void generateSyntheticBodyForEnumInitializationMethod(SyntheticMethodBind
 	FieldDeclaration[] fieldDeclarations = typeDeclaration.fields;
 	for (int i = methodBinding.startIndex, max = methodBinding.endIndex; i < max; i++) {
 		FieldDeclaration fieldDecl = fieldDeclarations[i];
-		if (fieldDecl.isStatic()) {
-			if (fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
-				fieldDecl.generateCode(staticInitializerScope, this);
-			}
-		}
+		if (fieldDecl.isStatic() && fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
+        	fieldDecl.generateCode(staticInitializerScope, this);
+        }
 	}
 	return_();
 }
@@ -3219,24 +3211,20 @@ public void generateSyntheticBodyForMethodAccess(SyntheticMethodBinding accessMe
 	}
 	if (targetMethod.isStatic())
 		invoke(Opcodes.OPC_invokestatic, targetMethod, accessMethod.declaringClass); // target method declaring class may not be accessible (128563)
-	else {
-		if (targetMethod.isConstructor()
-				|| targetMethod.isPrivate()
-				// qualified super "X.super.foo()" targets methods from superclass
-				|| accessMethod.purpose == SyntheticMethodBinding.SuperMethodAccess){
-			// target method declaring class may not be accessible (247953);
-			TypeBinding declaringClass = accessMethod.purpose == SyntheticMethodBinding.SuperMethodAccess
-					? findDirectSuperTypeTowards(accessMethod, targetMethod)
-					: accessMethod.declaringClass;
-			invoke(Opcodes.OPC_invokespecial, targetMethod, declaringClass);
-		} else {
-			if (targetMethod.declaringClass.isInterface()) { // interface or annotation type
-				invoke(Opcodes.OPC_invokeinterface, targetMethod, null /* default declaringClass */);
-			} else {
-				invoke(Opcodes.OPC_invokevirtual, targetMethod, accessMethod.declaringClass); // target method declaring class may not be accessible (128563)
-			}
-		}
-	}
+    else if (targetMethod.isConstructor()
+    		|| targetMethod.isPrivate()
+    		// qualified super "X.super.foo()" targets methods from superclass
+    		|| accessMethod.purpose == SyntheticMethodBinding.SuperMethodAccess){
+    	// target method declaring class may not be accessible (247953);
+    	TypeBinding declaringClass = accessMethod.purpose == SyntheticMethodBinding.SuperMethodAccess
+    			? findDirectSuperTypeTowards(accessMethod, targetMethod)
+    			: accessMethod.declaringClass;
+    	invoke(Opcodes.OPC_invokespecial, targetMethod, declaringClass);
+    } else if (targetMethod.declaringClass.isInterface()) { // interface or annotation type
+    	invoke(Opcodes.OPC_invokeinterface, targetMethod, null /* default declaringClass */);
+    } else {
+    	invoke(Opcodes.OPC_invokevirtual, targetMethod, accessMethod.declaringClass); // target method declaring class may not be accessible (128563)
+    }
 	switch (targetMethod.returnType.id) {
 		case TypeIds.T_void :
 			return_();
@@ -3271,24 +3259,22 @@ public void generateSyntheticBodyForMethodAccess(SyntheticMethodBinding accessMe
 ReferenceBinding findDirectSuperTypeTowards(SyntheticMethodBinding accessMethod, MethodBinding targetMethod) {
 	ReferenceBinding currentType = accessMethod.declaringClass;
 	ReferenceBinding superclass = currentType.superclass();
-	if (targetMethod.isDefaultMethod()) {
-		// could be inherited via superclass *or* a super interface
-		ReferenceBinding targetType = targetMethod.declaringClass;
-		if (superclass.isCompatibleWith(targetType))
-			return superclass;
-		ReferenceBinding[] superInterfaces = currentType.superInterfaces();
-		if (superInterfaces != null) {
-			for (int i = 0; i < superInterfaces.length; i++) {
-				ReferenceBinding superIfc = superInterfaces[i];
-				if (superIfc.isCompatibleWith(targetType))
-					return superIfc;
-			}
-		}
-		throw new RuntimeException("Assumption violated: some super type must be conform to the declaring class of a super method"); //$NON-NLS-1$
-	} else {
+	if (!targetMethod.isDefaultMethod()) {
 		// only one path possible:
 		return superclass;
 	}
+    // could be inherited via superclass *or* a super interface
+    ReferenceBinding targetType = targetMethod.declaringClass;
+    if (superclass.isCompatibleWith(targetType))
+    	return superclass;
+    ReferenceBinding[] superInterfaces = currentType.superInterfaces();
+    if (superInterfaces != null) {
+    	for (ReferenceBinding superIfc : superInterfaces) {
+    		if (superIfc.isCompatibleWith(targetType))
+    			return superIfc;
+    	}
+    }
+    throw new RuntimeException("Assumption violated: some super type must be conform to the declaring class of a super method"); //$NON-NLS-1$
 }
 
 public void generateSyntheticBodyForSwitchTable(SyntheticMethodBinding methodBinding) {
@@ -3313,8 +3299,7 @@ public void generateSyntheticBodyForSwitchTable(SyntheticMethodBinding methodBin
 	addVariable(localVariableBinding);
 	final FieldBinding[] fields = enumBinding.fields();
 	if (fields != null) {
-		for (int i = 0, max = fields.length; i < max; i++) {
-			FieldBinding fieldBinding = fields[i];
+		for (FieldBinding fieldBinding : fields) {
 			if ((fieldBinding.getAccessFlags() & ClassFileConstants.AccEnum) != 0) {
 				final BranchLabel endLabel = new BranchLabel(this);
 				final ExceptionLabel anyExceptionHandler = new ExceptionLabel(this, TypeBinding.LONG /* represents NoSuchFieldError*/);
@@ -3378,23 +3363,20 @@ public void generateSyntheticEnclosingInstanceValues(BlockScope currentScope, Re
 			denyEnclosingArgInConstructorCall = (invocationSite instanceof AllocationExpression
 					|| invocationSite instanceof ExplicitConstructorCall && ((ExplicitConstructorCall)invocationSite).isSuperAccess())
 				&& !targetType.isLocalType();
-		} else {
-			//compliance >= JDK1_7
-			if (invocationSite instanceof AllocationExpression) {
-				denyEnclosingArgInConstructorCall = !targetType.isLocalType();
-			} else if (invocationSite instanceof ExplicitConstructorCall &&
-					((ExplicitConstructorCall)invocationSite).isSuperAccess()) {
-				MethodScope enclosingMethodScope = currentScope.enclosingMethodScope();
-				denyEnclosingArgInConstructorCall = !targetType.isLocalType() && enclosingMethodScope != null
-						&& enclosingMethodScope.isConstructorCall;
-			} else {
-				denyEnclosingArgInConstructorCall = false;
-			}
-		}
+		} else //compliance >= JDK1_7
+        if (invocationSite instanceof AllocationExpression) {
+        	denyEnclosingArgInConstructorCall = !targetType.isLocalType();
+        } else if (invocationSite instanceof ExplicitConstructorCall &&
+        		((ExplicitConstructorCall)invocationSite).isSuperAccess()) {
+        	MethodScope enclosingMethodScope = currentScope.enclosingMethodScope();
+        	denyEnclosingArgInConstructorCall = !targetType.isLocalType() && enclosingMethodScope != null
+        			&& enclosingMethodScope.isConstructorCall;
+        } else {
+        	denyEnclosingArgInConstructorCall = false;
+        }
 
 		boolean complyTo14 = compliance >= ClassFileConstants.JDK1_4;
-		for (int i = 0, max = syntheticArgumentTypes.length; i < max; i++) {
-			ReferenceBinding syntheticArgType = syntheticArgumentTypes[i];
+		for (ReferenceBinding syntheticArgType : syntheticArgumentTypes) {
 			if (hasExtraEnclosingInstance && TypeBinding.equalsEquals(syntheticArgType, targetEnclosingType)) {
 				hasExtraEnclosingInstance = false;
 				enclosingInstance.generateCode(currentScope, this, true);
@@ -3426,8 +3408,8 @@ public void generateSyntheticOuterArgumentValues(BlockScope currentScope, Refere
 	// generate the synthetic outer arguments then
 	SyntheticArgumentBinding[] syntheticArguments;
 	if ((syntheticArguments = targetType.syntheticOuterLocalVariables()) != null) {
-		for (int i = 0, max = syntheticArguments.length; i < max; i++) {
-			LocalVariableBinding targetVariable = syntheticArguments[i].actualOuterLocalVariable;
+		for (SyntheticArgumentBinding syntheticArgument : syntheticArguments) {
+			LocalVariableBinding targetVariable = syntheticArgument.actualOuterLocalVariable;
 			VariableBinding[] emulationPath = currentScope.getEmulationPath(targetVariable);
 			generateOuterAccess(emulationPath, invocationSite, targetVariable, currentScope);
 		}
@@ -3737,9 +3719,9 @@ public static TypeBinding getConstantPoolDeclaringClass(Scope currentScope, Fiel
 			&& constantPoolDeclaringClass != null // array.length
 			&& codegenBinding.constant() == Constant.NotAConstant) {
 		CompilerOptions options = currentScope.compilerOptions();
-		if ((options.targetJDK >= ClassFileConstants.JDK1_2
-					&& (options.complianceLevel >= ClassFileConstants.JDK1_4 || !(isImplicitThisReceiver && codegenBinding.isStatic()))
-					&& constantPoolDeclaringClass.id != TypeIds.T_JavaLangObject) // no change for Object fields
+		if (options.targetJDK >= ClassFileConstants.JDK1_2
+					&& (options.complianceLevel >= ClassFileConstants.JDK1_4 || !isImplicitThisReceiver || !codegenBinding.isStatic())
+					&& constantPoolDeclaringClass.id != TypeIds.T_JavaLangObject // no change for Object fields
 				|| !constantPoolDeclaringClass.canBeSeenBy(currentScope)) {
 
 			return actualReceiverType.erasure();
@@ -3765,36 +3747,34 @@ public static TypeBinding getConstantPoolDeclaringClass(Scope currentScope, Meth
 		if (options.sourceLevel > ClassFileConstants.JDK1_4 ) {
 			constantPoolDeclaringClass = actualReceiverType.erasure();
 		}
-	} else {
-		// if the binding declaring class is not visible, need special action
-		// for runtime compatibility on 1.2 VMs : change the declaring class of the binding
-		// NOTE: from target 1.2 on, method's declaring class is touched if any different from receiver type
-		// and not from Object or implicit static method call.
-		if (TypeBinding.notEquals(constantPoolDeclaringClass, actualReceiverType.erasure()) && !actualReceiverType.isArrayType()) {
-			CompilerOptions options = currentScope.compilerOptions();
+	} else // if the binding declaring class is not visible, need special action
+    // for runtime compatibility on 1.2 VMs : change the declaring class of the binding
+    // NOTE: from target 1.2 on, method's declaring class is touched if any different from receiver type
+    // and not from Object or implicit static method call.
+    if (TypeBinding.notEquals(constantPoolDeclaringClass, actualReceiverType.erasure()) && !actualReceiverType.isArrayType()) {
+    	CompilerOptions options = currentScope.compilerOptions();
 
-			if ((options.targetJDK >= ClassFileConstants.JDK1_2
-						&& (options.complianceLevel >= ClassFileConstants.JDK1_4 || !(isImplicitThisReceiver && codegenBinding.isStatic()))
-						&& codegenBinding.declaringClass.id != TypeIds.T_JavaLangObject) // no change for Object methods
-					|| !codegenBinding.declaringClass.canBeSeenBy(currentScope)) {
-				TypeBinding erasedReceiverType = actualReceiverType.erasure();
-				if (erasedReceiverType.isIntersectionType18()) {
-					actualReceiverType = erasedReceiverType; // need to peel the intersecting types below
-				}
-				if (actualReceiverType.isIntersectionType18()) {
-					TypeBinding[] intersectingTypes = actualReceiverType.getIntersectingTypes();
-					for(int i = 0; i < intersectingTypes.length; i++) {
-						if (intersectingTypes[i].findSuperTypeOriginatingFrom(constantPoolDeclaringClass) != null) {
-							constantPoolDeclaringClass = intersectingTypes[i].erasure();
-							break;
-						}
-					}
-				} else {
-					constantPoolDeclaringClass = erasedReceiverType;
-				}
-			}
-		}
-	}
+    	if (options.targetJDK >= ClassFileConstants.JDK1_2
+    				&& (options.complianceLevel >= ClassFileConstants.JDK1_4 || !isImplicitThisReceiver || !codegenBinding.isStatic())
+    				&& codegenBinding.declaringClass.id != TypeIds.T_JavaLangObject // no change for Object methods
+    			|| !codegenBinding.declaringClass.canBeSeenBy(currentScope)) {
+    		TypeBinding erasedReceiverType = actualReceiverType.erasure();
+    		if (erasedReceiverType.isIntersectionType18()) {
+    			actualReceiverType = erasedReceiverType; // need to peel the intersecting types below
+    		}
+    		if (actualReceiverType.isIntersectionType18()) {
+    			TypeBinding[] intersectingTypes = actualReceiverType.getIntersectingTypes();
+    			for (TypeBinding intersectingType : intersectingTypes) {
+    				if (intersectingType.findSuperTypeOriginatingFrom(constantPoolDeclaringClass) != null) {
+    					constantPoolDeclaringClass = intersectingType.erasure();
+    					break;
+    				}
+    			}
+    		} else {
+    			constantPoolDeclaringClass = erasedReceiverType;
+    		}
+    	}
+    }
 	return constantPoolDeclaringClass;
 }
 protected int getPosition() {
@@ -4422,7 +4402,7 @@ public void ifnull(BranchLabel lbl) {
 
 final public void iinc(int index, int value) {
 	this.countLabels = 0;
-	if ((index > 255) || (value < -128 || value > 127)) { // have to widen
+	if (index > 255 || value < -128 || value > 127) { // have to widen
 		if (this.classFileOffset + 3 >= this.bCodeStream.length) {
 			resizeByteArray();
 		}
@@ -4602,8 +4582,8 @@ public void initializeMaxLocals(MethodBinding methodBinding) {
 	}
 	TypeBinding[] parameterTypes;
 	if ((parameterTypes = methodBinding.parameters) != null) {
-		for (int i = 0, max = parameterTypes.length; i < max; i++) {
-			switch (parameterTypes[i].id) {
+		for (TypeBinding parameterType : parameterTypes) {
+			switch (parameterType.id) {
 				case TypeIds.T_long :
 				case TypeIds.T_double :
 					this.maxLocals += 2;
@@ -4779,8 +4759,8 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 					// outer local variables
 					SyntheticArgumentBinding[] syntheticArguments = nestedType.syntheticOuterLocalVariables();
 					if (syntheticArguments != null) {
-						for (int i = 0, max = syntheticArguments.length; i < max; i++) {
-							switch (syntheticArguments[i].id)  {
+						for (SyntheticArgumentBinding syntheticArgument : syntheticArguments) {
+							switch (syntheticArgument.id)  {
 								case TypeIds.T_double :
 								case TypeIds.T_long :
 									receiverAndArgsSize += 2;
@@ -4814,19 +4794,11 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 		}
 	}
 	// compute return type size
-	int returnTypeSize;
-	switch (methodBinding.returnType.id) {
-		case TypeIds.T_double :
-		case TypeIds.T_long :
-			returnTypeSize = 2;
-			break;
-		case TypeIds.T_void :
-			returnTypeSize = 0;
-			break;
-		default :
-			returnTypeSize = 1;
-			break;
-	}
+    int returnTypeSize = switch (methodBinding.returnType.id) {
+        case TypeIds.T_double, TypeIds.T_long -> 2;
+        case TypeIds.T_void -> 0;
+        default -> 1;
+    };
 	invoke18(
 			opcode,
 			receiverAndArgsSize,
@@ -5099,53 +5071,53 @@ protected void invokeJavaLangReflectFieldGetter(TypeBinding type) {
 	char[] signature;
 	int returnTypeSize;
 	int typeID = type.id;
-	switch (typeID) {
-		case TypeIds.T_int :
-			selector = ConstantPool.GET_INT_METHOD_NAME;
-			signature = ConstantPool.GET_INT_METHOD_SIGNATURE;
-			returnTypeSize = 1;
-			break;
-		case TypeIds.T_byte :
-			selector = ConstantPool.GET_BYTE_METHOD_NAME;
-			signature = ConstantPool.GET_BYTE_METHOD_SIGNATURE;
-			returnTypeSize = 1;
-			break;
-		case TypeIds.T_short :
-			selector = ConstantPool.GET_SHORT_METHOD_NAME;
-			signature = ConstantPool.GET_SHORT_METHOD_SIGNATURE;
-			returnTypeSize = 1;
-			break;
-		case TypeIds.T_long :
-			selector = ConstantPool.GET_LONG_METHOD_NAME;
-			signature = ConstantPool.GET_LONG_METHOD_SIGNATURE;
-			returnTypeSize = 2;
-			break;
-		case TypeIds.T_float :
-			selector = ConstantPool.GET_FLOAT_METHOD_NAME;
-			signature = ConstantPool.GET_FLOAT_METHOD_SIGNATURE;
-			returnTypeSize = 1;
-			break;
-		case TypeIds.T_double :
-			selector = ConstantPool.GET_DOUBLE_METHOD_NAME;
-			signature = ConstantPool.GET_DOUBLE_METHOD_SIGNATURE;
-			returnTypeSize = 2;
-			break;
-		case TypeIds.T_char :
-			selector = ConstantPool.GET_CHAR_METHOD_NAME;
-			signature = ConstantPool.GET_CHAR_METHOD_SIGNATURE;
-			returnTypeSize = 1;
-			break;
-		case TypeIds.T_boolean :
-			selector = ConstantPool.GET_BOOLEAN_METHOD_NAME;
-			signature = ConstantPool.GET_BOOLEAN_METHOD_SIGNATURE;
-			returnTypeSize = 1;
-			break;
-		default :
-			selector = ConstantPool.GET_OBJECT_METHOD_NAME;
-			signature = ConstantPool.GET_OBJECT_METHOD_SIGNATURE;
-			returnTypeSize = 1;
-			break;
-	}
+	returnTypeSize = switch (typeID) {
+        case TypeIds.T_int -> {
+            selector = ConstantPool.GET_INT_METHOD_NAME;
+            signature = ConstantPool.GET_INT_METHOD_SIGNATURE;
+            yield 1;
+        }
+        case TypeIds.T_byte -> {
+            selector = ConstantPool.GET_BYTE_METHOD_NAME;
+            signature = ConstantPool.GET_BYTE_METHOD_SIGNATURE;
+            yield 1;
+        }
+        case TypeIds.T_short -> {
+            selector = ConstantPool.GET_SHORT_METHOD_NAME;
+            signature = ConstantPool.GET_SHORT_METHOD_SIGNATURE;
+            yield 1;
+        }
+        case TypeIds.T_long -> {
+            selector = ConstantPool.GET_LONG_METHOD_NAME;
+            signature = ConstantPool.GET_LONG_METHOD_SIGNATURE;
+            yield 2;
+        }
+        case TypeIds.T_float -> {
+            selector = ConstantPool.GET_FLOAT_METHOD_NAME;
+            signature = ConstantPool.GET_FLOAT_METHOD_SIGNATURE;
+            yield 1;
+        }
+        case TypeIds.T_double -> {
+            selector = ConstantPool.GET_DOUBLE_METHOD_NAME;
+            signature = ConstantPool.GET_DOUBLE_METHOD_SIGNATURE;
+            yield 2;
+        }
+        case TypeIds.T_char -> {
+            selector = ConstantPool.GET_CHAR_METHOD_NAME;
+            signature = ConstantPool.GET_CHAR_METHOD_SIGNATURE;
+            yield 1;
+        }
+        case TypeIds.T_boolean -> {
+            selector = ConstantPool.GET_BOOLEAN_METHOD_NAME;
+            signature = ConstantPool.GET_BOOLEAN_METHOD_SIGNATURE;
+            yield 1;
+        }
+        default -> {
+            selector = ConstantPool.GET_OBJECT_METHOD_NAME;
+            signature = ConstantPool.GET_OBJECT_METHOD_SIGNATURE;
+            yield 1;
+        }
+    };
 	invoke(
 			Opcodes.OPC_invokevirtual,
 			2, // receiverAndArgsSize
@@ -5162,53 +5134,53 @@ protected void invokeJavaLangReflectFieldSetter(TypeBinding type) {
 	char[] signature;
 	int receiverAndArgsSize;
 	int typeID = type.id;
-	switch (typeID) {
-		case TypeIds.T_int :
-			selector = ConstantPool.SET_INT_METHOD_NAME;
-			signature = ConstantPool.SET_INT_METHOD_SIGNATURE;
-			receiverAndArgsSize = 3;
-			break;
-		case TypeIds.T_byte :
-			selector = ConstantPool.SET_BYTE_METHOD_NAME;
-			signature = ConstantPool.SET_BYTE_METHOD_SIGNATURE;
-			receiverAndArgsSize = 3;
-			break;
-		case TypeIds.T_short :
-			selector = ConstantPool.SET_SHORT_METHOD_NAME;
-			signature = ConstantPool.SET_SHORT_METHOD_SIGNATURE;
-			receiverAndArgsSize = 3;
-			break;
-		case TypeIds.T_long :
-			selector = ConstantPool.SET_LONG_METHOD_NAME;
-			signature = ConstantPool.SET_LONG_METHOD_SIGNATURE;
-			receiverAndArgsSize = 4;
-			break;
-		case TypeIds.T_float :
-			selector = ConstantPool.SET_FLOAT_METHOD_NAME;
-			signature = ConstantPool.SET_FLOAT_METHOD_SIGNATURE;
-			receiverAndArgsSize = 3;
-			break;
-		case TypeIds.T_double :
-			selector = ConstantPool.SET_DOUBLE_METHOD_NAME;
-			signature = ConstantPool.SET_DOUBLE_METHOD_SIGNATURE;
-			receiverAndArgsSize = 4;
-			break;
-		case TypeIds.T_char :
-			selector = ConstantPool.SET_CHAR_METHOD_NAME;
-			signature = ConstantPool.SET_CHAR_METHOD_SIGNATURE;
-			receiverAndArgsSize = 3;
-			break;
-		case TypeIds.T_boolean :
-			selector = ConstantPool.SET_BOOLEAN_METHOD_NAME;
-			signature = ConstantPool.SET_BOOLEAN_METHOD_SIGNATURE;
-			receiverAndArgsSize = 3;
-			break;
-		default :
-			selector = ConstantPool.SET_OBJECT_METHOD_NAME;
-			signature = ConstantPool.SET_OBJECT_METHOD_SIGNATURE;
-			receiverAndArgsSize = 3;
-			break;
-	}
+	receiverAndArgsSize = switch (typeID) {
+        case TypeIds.T_int -> {
+            selector = ConstantPool.SET_INT_METHOD_NAME;
+            signature = ConstantPool.SET_INT_METHOD_SIGNATURE;
+            yield 3;
+        }
+        case TypeIds.T_byte -> {
+            selector = ConstantPool.SET_BYTE_METHOD_NAME;
+            signature = ConstantPool.SET_BYTE_METHOD_SIGNATURE;
+            yield 3;
+        }
+        case TypeIds.T_short -> {
+            selector = ConstantPool.SET_SHORT_METHOD_NAME;
+            signature = ConstantPool.SET_SHORT_METHOD_SIGNATURE;
+            yield 3;
+        }
+        case TypeIds.T_long -> {
+            selector = ConstantPool.SET_LONG_METHOD_NAME;
+            signature = ConstantPool.SET_LONG_METHOD_SIGNATURE;
+            yield 4;
+        }
+        case TypeIds.T_float -> {
+            selector = ConstantPool.SET_FLOAT_METHOD_NAME;
+            signature = ConstantPool.SET_FLOAT_METHOD_SIGNATURE;
+            yield 3;
+        }
+        case TypeIds.T_double -> {
+            selector = ConstantPool.SET_DOUBLE_METHOD_NAME;
+            signature = ConstantPool.SET_DOUBLE_METHOD_SIGNATURE;
+            yield 4;
+        }
+        case TypeIds.T_char -> {
+            selector = ConstantPool.SET_CHAR_METHOD_NAME;
+            signature = ConstantPool.SET_CHAR_METHOD_SIGNATURE;
+            yield 3;
+        }
+        case TypeIds.T_boolean -> {
+            selector = ConstantPool.SET_BOOLEAN_METHOD_NAME;
+            signature = ConstantPool.SET_BOOLEAN_METHOD_SIGNATURE;
+            yield 3;
+        }
+        default -> {
+            selector = ConstantPool.SET_OBJECT_METHOD_NAME;
+            signature = ConstantPool.SET_OBJECT_METHOD_SIGNATURE;
+            yield 3;
+        }
+    };
 	invoke(
 			Opcodes.OPC_invokevirtual,
 			receiverAndArgsSize,
@@ -5629,16 +5601,16 @@ public boolean isDefinitelyAssigned(Scope scope, int initStateIndex, LocalVariab
 	MethodScope methodScope = scope.methodScope();
 	// id is zero-based
 	if (localPosition < UnconditionalFlowInfo.BitCacheSize) {
-		return (methodScope.definiteInits[initStateIndex] & (1L << localPosition)) != 0; // use bits
+		return (methodScope.definiteInits[initStateIndex] & 1L << localPosition) != 0; // use bits
 	}
 	// use extra vector
 	long[] extraInits = methodScope.extraDefiniteInits[initStateIndex];
 	if (extraInits == null)
 		return false; // if vector not yet allocated, then not initialized
 	int vectorIndex;
-	if ((vectorIndex = (localPosition / UnconditionalFlowInfo.BitCacheSize) - 1) >= extraInits.length)
+	if ((vectorIndex = localPosition / UnconditionalFlowInfo.BitCacheSize - 1) >= extraInits.length)
 		return false; // if not enough room in vector, then not initialized
-	return ((extraInits[vectorIndex]) & (1L << (localPosition % UnconditionalFlowInfo.BitCacheSize))) != 0;
+	return (extraInits[vectorIndex] & 1L << localPosition % UnconditionalFlowInfo.BitCacheSize) != 0;
 }
 
 public void ishl() {
@@ -5985,28 +5957,27 @@ public void ldc(String constant) {
 		int constantLength = constant.length();
 		byte[] utf8encoding = new byte[Math.min(constantLength + 100, 65535)];
 		int utf8encodingLength = 0;
-		while ((length < 65532) && (i < constantLength)) {
+		while (length < 65532 && i < constantLength) {
 			char current = constantChars[i];
 			// we resize the byte array immediately if necessary
 			if (length + 3 > (utf8encodingLength = utf8encoding.length)) {
 				System.arraycopy(utf8encoding, 0, utf8encoding = new byte[Math.min(utf8encodingLength + 100, 65535)], 0, length);
 			}
-			if ((current >= 0x0001) && (current <= 0x007F)) {
+			if (current >= 0x0001 && current <= 0x007F) {
 				// we only need one byte: ASCII table
 				utf8encoding[length++] = (byte) current;
 			} else {
-				if (current > 0x07FF) {
-					// we need 3 bytes
-					utf8encoding[length++] = (byte) (0xE0 | ((current >> 12) & 0x0F)); // 0xE0 = 1110 0000
-					utf8encoding[length++] = (byte) (0x80 | ((current >> 6) & 0x3F)); // 0x80 = 1000 0000
-					utf8encoding[length++] = (byte) (0x80 | (current & 0x3F)); // 0x80 = 1000 0000
-				} else {
-					// we can be 0 or between 0x0080 and 0x07FF
-					// In that case we only need 2 bytes
-					utf8encoding[length++] = (byte) (0xC0 | ((current >> 6) & 0x1F)); // 0xC0 = 1100 0000
-					utf8encoding[length++] = (byte) (0x80 | (current & 0x3F)); // 0x80 = 1000 0000
-				}
-			}
+                if (current > 0x07FF) {
+                	// we need 3 bytes
+                	utf8encoding[length++] = (byte) (0xE0 | current >> 12 & 0x0F); // 0xE0 = 1110 0000
+                	utf8encoding[length++] = (byte) (0x80 | current >> 6 & 0x3F); // 0x80 = 1000 0000
+                } else {
+                	// we can be 0 or between 0x0080 and 0x07FF
+                	// In that case we only need 2 bytes
+                	utf8encoding[length++] = (byte) (0xC0 | current >> 6 & 0x1F); // 0xC0 = 1100 0000
+                }
+                utf8encoding[length++] = (byte) (0x80 | current & 0x3F); // 0x80 = 1000 0000
+            }
 			i++;
 		}
 		// check if all the string is encoded (PR 1PR2DWJ)
@@ -6025,28 +5996,27 @@ public void ldc(String constant) {
 			length = 0;
 			utf8encoding = new byte[Math.min(constantLength - i + 100, 65535)];
 			int startIndex = i;
-			while ((length < 65532) && (i < constantLength)) {
+			while (length < 65532 && i < constantLength) {
 				char current = constantChars[i];
 				// we resize the byte array immediately if necessary
 				if (length + 3 > (utf8encodingLength = utf8encoding.length)) {
 					System.arraycopy(utf8encoding, 0, utf8encoding = new byte[Math.min(utf8encodingLength + 100, 65535)], 0, length);
 				}
-				if ((current >= 0x0001) && (current <= 0x007F)) {
+				if (current >= 0x0001 && current <= 0x007F) {
 					// we only need one byte: ASCII table
 					utf8encoding[length++] = (byte) current;
 				} else {
-					if (current > 0x07FF) {
-						// we need 3 bytes
-						utf8encoding[length++] = (byte) (0xE0 | ((current >> 12) & 0x0F)); // 0xE0 = 1110 0000
-						utf8encoding[length++] = (byte) (0x80 | ((current >> 6) & 0x3F)); // 0x80 = 1000 0000
-						utf8encoding[length++] = (byte) (0x80 | (current & 0x3F)); // 0x80 = 1000 0000
-					} else {
-						// we can be 0 or between 0x0080 and 0x07FF
-						// In that case we only need 2 bytes
-						utf8encoding[length++] = (byte) (0xC0 | ((current >> 6) & 0x1F)); // 0xC0 = 1100 0000
-						utf8encoding[length++] = (byte) (0x80 | (current & 0x3F)); // 0x80 = 1000 0000
-					}
-				}
+                    if (current > 0x07FF) {
+                    	// we need 3 bytes
+                    	utf8encoding[length++] = (byte) (0xE0 | current >> 12 & 0x0F); // 0xE0 = 1110 0000
+                    	utf8encoding[length++] = (byte) (0x80 | current >> 6 & 0x3F); // 0x80 = 1000 0000
+                    } else {
+                    	// we can be 0 or between 0x0080 and 0x07FF
+                    	// In that case we only need 2 bytes
+                    	utf8encoding[length++] = (byte) (0xC0 | current >> 6 & 0x1F); // 0xC0 = 1100 0000
+                    }
+                    utf8encoding[length++] = (byte) (0x80 | current & 0x3F); // 0x80 = 1000 0000
+                }
 				i++;
 			}
 			// the next part is done
@@ -6392,7 +6362,7 @@ public void lookupswitch(CaseLabel defaultLabel, int[] keys, int[] sortedIndexes
 	}
 	this.position++;
 	this.bCodeStream[this.classFileOffset++] = Opcodes.OPC_lookupswitch;
-	for (int i = (3 - (pos & 3)); i > 0; i--) { // faster than % 4
+	for (int i = 3 - (pos & 3); i > 0; i--) { // faster than % 4
 		if (this.classFileOffset >= this.bCodeStream.length) {
 			resizeByteArray();
 		}
@@ -6606,7 +6576,7 @@ public void multianewarray(
 		int dimensions,
 		ArrayAllocationExpression allocationExpression) {
 	this.countLabels = 0;
-	this.stackDepth += (1 - dimensions);
+	this.stackDepth += 1 - dimensions;
 	pushTypeBinding(dimensions, typeBinding);
 	if (this.classFileOffset + 3 >= this.bCodeStream.length) {
 		resizeByteArray();
@@ -6925,7 +6895,7 @@ public void recordPositionsFrom(int startPC, int sourcePos, boolean widen) {
 	 */
 	if ((this.generateAttributes & ClassFileConstants.ATTR_LINES) == 0
 			|| sourcePos == 0
-			|| (startPC == this.position && !widen)
+			|| startPC == this.position && !widen
 			|| startPC > this.position)
 		return;
 
@@ -6975,7 +6945,7 @@ public void recordPositionsFrom(int startPC, int sourcePos, boolean widen) {
 				int insertionIndex = insertionIndex(this.pcToSourceMap, this.pcToSourceMapSize, startPC);
 				if (insertionIndex != -1) {
 					// there is no existing entry starting with startPC.
-					if (!((insertionIndex > 1) && (this.pcToSourceMap[insertionIndex - 1] == lineNumber))) {
+					if (insertionIndex <= 1 || this.pcToSourceMap[insertionIndex - 1] != lineNumber) {
 						if(insertionIndex< this.pcToSourceMapSize && this.pcToSourceMap[insertionIndex + 1] == lineNumber) {
 							/* the entry at insertionIndex corresponds to an entry with the same line and a PC >= startPC.
 							in this case it is relevant to widen this entry instead of creating a new one.
@@ -7012,34 +6982,29 @@ public void recordPositionsFrom(int startPC, int sourcePos, boolean widen) {
 				this.pcToSourceMap[this.pcToSourceMapSize++] = startPC;
 				this.pcToSourceMap[this.pcToSourceMapSize++] = lineNumber;
 			}
-		} else {
-			/* the last recorded entry is on the same line. But it could be relevant to widen this entry.
-			   we want to extend this entry forward in case we generated some bytecode before the last entry that are not related to any statement
-			*/
-			if (startPC < this.pcToSourceMap[this.pcToSourceMapSize - 2]) {
-				int insertionIndex = insertionIndex(this.pcToSourceMap, this.pcToSourceMapSize, startPC);
-				if (insertionIndex != -1) {
-					// widen the existing entry
-					// we have to figure out if we need to move the last entry at another location to keep a sorted table
-					/* First we need to check if at the insertion position there is not an existing entry
-					 * that includes the one we want to insert. This is the case if pcToSourceMap[insertionIndex - 1] == newLine.
-					 * In this case we don't want to change the table. If not, we want to insert a new entry. Prior to insertion
-					 * we want to check if it is worth doing an arraycopy. If not we simply update the recorded pc.
-					 */
-					if (!((insertionIndex > 1) && (this.pcToSourceMap[insertionIndex - 1] == lineNumber))) {
-						if (this.pcToSourceMap[insertionIndex + 1] != lineNumber) {
-							System.arraycopy(this.pcToSourceMap, insertionIndex, this.pcToSourceMap, insertionIndex + 2, this.pcToSourceMapSize - insertionIndex);
-							this.pcToSourceMap[insertionIndex++] = startPC;
-							this.pcToSourceMap[insertionIndex] = lineNumber;
-							this.pcToSourceMapSize += 2;
-						} else {
-							this.pcToSourceMap[insertionIndex] = startPC;
-						}
-					}
-				}
-			}
-		}
-		this.lastEntryPC = this.position;
+		} else /* the last recorded entry is on the same line. But it could be relevant to widen this entry.
+           we want to extend this entry forward in case we generated some bytecode before the last entry that are not related to any statement
+        */
+        if (startPC < this.pcToSourceMap[this.pcToSourceMapSize - 2]) {
+        	int insertionIndex = insertionIndex(this.pcToSourceMap, this.pcToSourceMapSize, startPC);
+        	// widen the existing entry
+            // we have to figure out if we need to move the last entry at another location to keep a sorted table
+            /* First we need to check if at the insertion position there is not an existing entry
+             * that includes the one we want to insert. This is the case if pcToSourceMap[insertionIndex - 1] == newLine.
+             * In this case we don't want to change the table. If not, we want to insert a new entry. Prior to insertion
+             * we want to check if it is worth doing an arraycopy. If not we simply update the recorded pc.
+             */
+            if (insertionIndex != -1 && (insertionIndex <= 1 || this.pcToSourceMap[insertionIndex - 1] != lineNumber)) {
+            	if (this.pcToSourceMap[insertionIndex + 1] != lineNumber) {
+            		System.arraycopy(this.pcToSourceMap, insertionIndex, this.pcToSourceMap, insertionIndex + 2, this.pcToSourceMapSize - insertionIndex);
+            		this.pcToSourceMap[insertionIndex++] = startPC;
+            		this.pcToSourceMap[insertionIndex] = lineNumber;
+            		this.pcToSourceMapSize += 2;
+            	} else {
+            		this.pcToSourceMap[insertionIndex] = startPC;
+            	}
+            }
+        }
 	} else {
 		int lineNumber = 0;
 		if (this.lineNumberStart == this.lineNumberEnd) {
@@ -7052,8 +7017,8 @@ public void recordPositionsFrom(int startPC, int sourcePos, boolean widen) {
 		// record the first entry
 		this.pcToSourceMap[this.pcToSourceMapSize++] = startPC;
 		this.pcToSourceMap[this.pcToSourceMapSize++] = lineNumber;
-		this.lastEntryPC = this.position;
 	}
+    this.lastEntryPC = this.position;
 }
 /**
  * @param anExceptionLabel org.eclipse.jdt.internal.compiler.codegen.ExceptionLabel
@@ -7528,7 +7493,7 @@ public void tableswitch(CaseLabel defaultLabel, int low, int high, int[] keys, i
 	this.position++;
 	this.bCodeStream[this.classFileOffset++] = Opcodes.OPC_tableswitch;
 	// padding
-	for (int i = (3 - (pos & 3)); i > 0; i--) {
+	for (int i = 3 - (pos & 3); i > 0; i--) {
 		if (this.classFileOffset >= this.bCodeStream.length) {
 			resizeByteArray();
 		}
@@ -7590,15 +7555,11 @@ protected void writePosition(BranchLabel label, int forwardReference) {
 	if (Math.abs(offset) > 0x7FFF && !this.wideMode) {
 		throw new AbortMethod(CodeStream.RESTART_IN_WIDE_MODE, null);
 	}
-	if (this.wideMode) {
-		if ((label.tagBits & BranchLabel.WIDE) != 0) {
-			this.writeSignedWord(forwardReference, offset);
-		} else {
-			this.writeSignedShort(forwardReference, offset);
-		}
-	} else {
-		this.writeSignedShort(forwardReference, offset);
-	}
+	if (this.wideMode && (label.tagBits & BranchLabel.WIDE) != 0) {
+    	this.writeSignedWord(forwardReference, offset);
+    } else {
+    	this.writeSignedShort(forwardReference, offset);
+    }
 }
 
 /**
@@ -7682,10 +7643,8 @@ private TypeBinding retrieveLocalType(int currentPC, int resolvedPosition) {
 				int endPC = localVariable.initializationPCs[(j << 1) + 1];
 				if (currentPC < startPC) {
 					continue inits;
-				} else if (endPC == -1) { // still live
-					// the current local is an active local
-					return localVariable.type;
-				} else if (currentPC < endPC) {
+				}
+                if (endPC == -1 || currentPC < endPC) { // still live
 					// the current local is an active local
 					return localVariable.type;
 				}

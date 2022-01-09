@@ -46,7 +46,8 @@ public class TryStatement extends Statement {
 	 * @deprecated In the JLS9 API, this property is replaced by {@link #RESOURCES2_PROPERTY}.
 	 * @since 3.7.1
 	 */
-	public static final ChildListPropertyDescriptor RESOURCES_PROPERTY =
+	@Deprecated
+    public static final ChildListPropertyDescriptor RESOURCES_PROPERTY =
 		new ChildListPropertyDescriptor(TryStatement.class, "resources", VariableDeclarationExpression.class, CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -206,18 +207,16 @@ public class TryStatement extends Statement {
 		if (property == BODY_PROPERTY) {
 			if (get) {
 				return getBody();
-			} else {
-				setBody((Block) child);
-				return null;
 			}
+            setBody((Block) child);
+            return null;
 		}
 		if (property == FINALLY_PROPERTY) {
 			if (get) {
 				return getFinally();
-			} else {
-				setFinally((Block) child);
-				return null;
 			}
+            setFinally((Block) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

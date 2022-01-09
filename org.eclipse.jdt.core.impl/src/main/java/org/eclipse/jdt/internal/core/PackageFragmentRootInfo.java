@@ -78,13 +78,10 @@ static Object[] computeFolderNonJavaResources(IPackageFragmentRoot root, IContai
 						String fileName = member.getName();
 
 						// ignore .java files that are not excluded
-						if (Util.isValidCompilationUnitName(fileName, sourceLevel, complianceLevel) && !Util.isExcluded(member, inclusionPatterns, exclusionPatterns))
-							continue nextResource;
+						
 						// ignore .class files
-						if (Util.isValidClassFileName(fileName, sourceLevel, complianceLevel))
-							continue nextResource;
 						// ignore .zip or .jar file on classpath
-						if (isClasspathEntry(member.getFullPath(), classpath))
+						if (Util.isValidCompilationUnitName(fileName, sourceLevel, complianceLevel) && !Util.isExcluded(member, inclusionPatterns, exclusionPatterns) || Util.isValidClassFileName(fileName, sourceLevel, complianceLevel) || isClasspathEntry(member.getFullPath(), classpath))
 							continue nextResource;
 						break;
 
@@ -98,7 +95,7 @@ static Object[] computeFolderNonJavaResources(IPackageFragmentRoot root, IContai
 				}
 				if (nonJavaResources.length == nonJavaResourcesCounter) {
 					// resize
-					System.arraycopy(nonJavaResources, 0, (nonJavaResources = new IResource[nonJavaResourcesCounter * 2]), 0, nonJavaResourcesCounter);
+					System.arraycopy(nonJavaResources, 0, nonJavaResources = new IResource[nonJavaResourcesCounter * 2], 0, nonJavaResourcesCounter);
 				}
 				nonJavaResources[nonJavaResourcesCounter++] = member;
 			}
@@ -109,8 +106,9 @@ static Object[] computeFolderNonJavaResources(IPackageFragmentRoot root, IContai
 				jarEntryResources[i] = new NonJavaResource(root, nonJavaResources[i]);
 			}
 			return jarEntryResources;
-		} else if (nonJavaResources.length != nonJavaResourcesCounter) {
-			System.arraycopy(nonJavaResources, 0, (nonJavaResources = new IResource[nonJavaResourcesCounter]), 0, nonJavaResourcesCounter);
+		}
+        if (nonJavaResources.length != nonJavaResourcesCounter) {
+			System.arraycopy(nonJavaResources, 0, nonJavaResources = new IResource[nonJavaResourcesCounter], 0, nonJavaResourcesCounter);
 		}
 		return nonJavaResources;
 	} catch (CoreException e) {
@@ -164,15 +162,14 @@ protected SourceMapper getSourceMapper() {
 	return this.sourceMapper;
 }
 boolean ignoreOptionalProblems(PackageFragmentRoot packageFragmentRoot) throws JavaModelException {
-	if (this.initialized == false) {
+	if (!this.initialized) {
 		this.ignoreOptionalProblems = ((ClasspathEntry) packageFragmentRoot.getRawClasspathEntry()).ignoreOptionalProblems();
 		this.initialized = true;
 	}
 	return this.ignoreOptionalProblems;
 }
 private static boolean isClasspathEntry(IPath path, IClasspathEntry[] resolvedClasspath) {
-	for (int i = 0, length = resolvedClasspath.length; i < length; i++) {
-		IClasspathEntry entry = resolvedClasspath[i];
+	for (IClasspathEntry entry : resolvedClasspath) {
 		if (entry.getPath().equals(path)) {
 			return true;
 		}

@@ -52,11 +52,9 @@ public final class PermissionInfoCollection extends PermissionCollection {
 		for (PermissionInfo info : permInfos) {
 			if (ALL_PERMISSION_NAME.equals(info.getType())) {
 				tempAllPermissions = true;
-			} else if (FILE_PERMISSION_NAME.equals(info.getType())) {
-				if (!(new File(info.getActions()).isAbsolute())) {
-					allAbsolutePaths = false;
-				}
-			}
+			} else if (FILE_PERMISSION_NAME.equals(info.getType()) && !new File(info.getActions()).isAbsolute()) {
+            	allAbsolutePaths = false;
+            }
 		}
 		this.hasAllPermission = tempAllPermissions;
 		this.cachedRelativeFilePermissionCollections = allAbsolutePaths ? null : new HashMap<>();
@@ -124,13 +122,11 @@ public final class PermissionInfoCollection extends PermissionCollection {
 			PermissionCollection exists = relativeFiles ? cachedRelativeFilePermissionCollections.get(bundlePermissions) : cachedPermissionCollections.get(permClass);
 			if (exists != null) {
 				collection = exists;
-			} else {
-				if (relativeFiles) {
-					cachedRelativeFilePermissionCollections.put(bundlePermissions, collection);
-				} else {
-					cachedPermissionCollections.put(permClass, collection);
-				}
-			}
+			} else if (relativeFiles) {
+            	cachedRelativeFilePermissionCollections.put(bundlePermissions, collection);
+            } else {
+            	cachedPermissionCollections.put(permClass, collection);
+            }
 			return collection;
 		}
 	}
@@ -167,20 +163,18 @@ public final class PermissionInfoCollection extends PermissionCollection {
 				if (numArgs > 1) {
 					args[1] = permInfo.getActions();
 				}
-				if (permInfo.getType().equals(FILE_PERMISSION_NAME)) {
-					// map FilePermissions for relative names to the bundle's data area
-					if (!args[0].equals(ALL_FILES)) {
-						File file = new File(args[0]);
-						if (!file.isAbsolute()) { // relative name
-							File target = bundlePermissions == null ? null : bundlePermissions.getBundle().getDataFile(permInfo.getName());
-							if (target == null) {
-								// ignore if we cannot find the data area
-								continue;
-							}
-							args[0] = target.getPath();
-						}
-					}
-				}
+				// map FilePermissions for relative names to the bundle's data area
+                if (permInfo.getType().equals(FILE_PERMISSION_NAME) && !args[0].equals(ALL_FILES)) {
+                	File file = new File(args[0]);
+                	if (!file.isAbsolute()) { // relative name
+                		File target = bundlePermissions == null ? null : bundlePermissions.getBundle().getDataFile(permInfo.getName());
+                		if (target == null) {
+                			// ignore if we cannot find the data area
+                			continue;
+                		}
+                		args[0] = target.getPath();
+                	}
+                }
 				collection.add(constructor.newInstance((Object[]) args));
 			}
 		}

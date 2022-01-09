@@ -154,26 +154,23 @@ public class EnumConstantDeclaration extends BodyDeclaration {
 		if (property == JAVADOC_PROPERTY) {
 			if (get) {
 				return getJavadoc();
-			} else {
-				setJavadoc((Javadoc) child);
-				return null;
 			}
+            setJavadoc((Javadoc) child);
+            return null;
 		}
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((SimpleName) child);
-				return null;
 			}
+            setName((SimpleName) child);
+            return null;
 		}
 		if (property == ANONYMOUS_CLASS_DECLARATION_PROPERTY) {
 			if (get) {
 				return getAnonymousClassDeclaration();
-			} else {
-				setAnonymousClassDeclaration((AnonymousClassDeclaration) child);
-				return null;
 			}
+            setAnonymousClassDeclaration((AnonymousClassDeclaration) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

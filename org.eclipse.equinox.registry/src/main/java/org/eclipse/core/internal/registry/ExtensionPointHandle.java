@@ -24,7 +24,7 @@ package org.eclipse.core.internal.registry;
  */
 public class ExtensionPointHandle extends BaseExtensionPointHandle {
 
-	static final ExtensionPointHandle[] EMPTY_ARRAY = new ExtensionPointHandle[0];
+	static final ExtensionPointHandle[] EMPTY_ARRAY = {};
 
 	public ExtensionPointHandle(IObjectManager objectManager, int id) {
 		super(objectManager, id);

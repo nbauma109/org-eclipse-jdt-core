@@ -51,7 +51,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	private Object result;
 	private boolean setResult = false;
 	private boolean setAsyncResult = false;
-	private final boolean[] registrationLock = new boolean[] {true};
+	private final boolean[] registrationLock = {true};
 
 	/*
 	 * Constructs a handle for a single running instance of a eclipse application.
@@ -138,7 +138,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		props.put(ApplicationHandle.APPLICATION_DESCRIPTOR, getApplicationDescriptor().getApplicationId());
 		props.put(EclipseAppDescriptor.APP_TYPE, ((EclipseAppDescriptor) getApplicationDescriptor()).getThreadTypeString());
 		props.put(ApplicationHandle.APPLICATION_SUPPORTS_EXITVALUE, Boolean.TRUE);
-		if (defaultAppInstance.booleanValue())
+		if (defaultAppInstance)
 			props.put(EclipseAppDescriptor.APP_DEFAULT, defaultAppInstance);
 		return props;
 	}
@@ -210,7 +210,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		}
 
 		if (Activator.DEBUG)
-			System.out.println(NLS.bind(Messages.application_returned, (new String[] {getApplicationDescriptor().getApplicationId(), tempResult == null ? "null" : tempResult.toString()}))); //$NON-NLS-1$
+			System.out.println(NLS.bind(Messages.application_returned, new String[] {getApplicationDescriptor().getApplicationId(), tempResult == null ? "null" : tempResult.toString()})); //$NON-NLS-1$
 		return tempResult;
 	}
 
@@ -222,12 +222,10 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				throw new IllegalStateException("The application must return IApplicationContext.EXIT_ASYNC_RESULT to set asynchronous results."); //$NON-NLS-1$
 			if (application != tokenApp)
 				throw new IllegalArgumentException("The application is not the correct instance for this application context."); //$NON-NLS-1$
-		} else {
-			if (result == IApplicationContext.EXIT_ASYNC_RESULT) {
-				setAsyncResult = true;
-				return NULL_RESULT; // the result well be set with setResult
-			}
-		}
+		} else if (result == IApplicationContext.EXIT_ASYNC_RESULT) {
+        	setAsyncResult = true;
+        	return NULL_RESULT; // the result well be set with setResult
+        }
 		this.result = result;
 		setResult = true;
 		application = null;
@@ -238,7 +236,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		// only set the exit code property if this is the default application
 		// (bug 321386) only set the exit code if the result != null; when result == null we assume an exception was thrown
 		if (isDefault() && result != null) {
-			int exitCode = result instanceof Integer ? ((Integer) result).intValue() : 0;
+			int exitCode = result instanceof Integer ? (Integer) result : 0;
 			// Use the EnvironmentInfo Service to set properties
 			Activator.setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
 		}
@@ -296,23 +294,20 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		if (refs == null || refs.length == 0)
 			return null;
 		// Implement our own Comparator to sort services
-		Arrays.sort(refs, new Comparator<ServiceReference>() {
-			@Override
-			public int compare(ServiceReference ref1, ServiceReference ref2) {
-				// sort in descending order
-				// sort based on service ranking first; highest rank wins
-				Object property = ref1.getProperty(Constants.SERVICE_RANKING);
-				int rank1 = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
-				property = ref2.getProperty(Constants.SERVICE_RANKING);
-				int rank2 = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
-				if (rank1 != rank2)
-					return rank1 > rank2 ? -1 : 1;
-				// rankings are equal; sort by id, lowest id wins
-				long id1 = ((Long) (ref1.getProperty(Constants.SERVICE_ID))).longValue();
-				long id2 = ((Long) (ref2.getProperty(Constants.SERVICE_ID))).longValue();
-				return id2 > id1 ? -1 : 1;
-			}
-		});
+		Arrays.sort(refs, (ref1, ref2) -> {
+        	// sort in descending order
+        	// sort based on service ranking first; highest rank wins
+        	Object property = ref1.getProperty(Constants.SERVICE_RANKING);
+        	int rank1 = property instanceof Integer ? (Integer) property : 0;
+        	property = ref2.getProperty(Constants.SERVICE_RANKING);
+        	int rank2 = property instanceof Integer ? (Integer) property : 0;
+        	if (rank1 != rank2)
+        		return rank1 > rank2 ? -1 : 1;
+        	// rankings are equal; sort by id, lowest id wins
+        	long id1 = (Long) ref1.getProperty(Constants.SERVICE_ID);
+        	long id2 = (Long) ref2.getProperty(Constants.SERVICE_ID);
+        	return id2 > id1 ? -1 : 1;
+        });
 		return refs;
 	}
 
@@ -325,7 +320,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			} catch (InterruptedException e) {
 				// do nothing
 			}
-		return (IApplication) ((application instanceof IApplication) ? application : null);
+		return (IApplication) (application instanceof IApplication ? application : null);
 	}
 
 	private IConfigurationElement getConfiguration() {
@@ -378,7 +373,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	}
 
 	boolean isDefault() {
-		return defaultAppInstance.booleanValue();
+		return defaultAppInstance;
 	}
 
 	public synchronized Object waitForResult(int timeout) {
@@ -399,7 +394,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		while (!setResult && (delay > 0 || timeout == 0)) {
 			wait(delay); // only wait for the specified amount of time
 			if (timeout > 0)
-				delay -= (System.currentTimeMillis() - startTime);
+				delay -= System.currentTimeMillis() - startTime;
 		}
 		if (result == null)
 			throw new ApplicationException(ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE);

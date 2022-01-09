@@ -187,7 +187,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 	 */
 	public boolean isPackageMemberTypeDeclaration() {
 		ASTNode parent = getParent();
-		return (parent instanceof CompilationUnit);
+		return parent instanceof CompilationUnit;
 	}
 
 	/**
@@ -205,8 +205,8 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 	 */
 	public boolean isMemberTypeDeclaration() {
 		ASTNode parent = getParent();
-		return (parent instanceof AbstractTypeDeclaration)
-			|| (parent instanceof AnonymousClassDeclaration);
+		return parent instanceof AbstractTypeDeclaration
+			|| parent instanceof AnonymousClassDeclaration;
 	}
 
 	/**
@@ -222,7 +222,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 	 */
 	public boolean isLocalTypeDeclaration() {
 		ASTNode parent = getParent();
-		return (parent instanceof TypeDeclarationStatement);
+		return parent instanceof TypeDeclarationStatement;
 	}
 
 	/**

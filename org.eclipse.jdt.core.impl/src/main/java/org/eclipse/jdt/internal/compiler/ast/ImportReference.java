@@ -93,7 +93,7 @@ public class ImportReference extends ASTNode {
 			if (i > 0) output.append('.');
 			output.append(this.tokens[i]);
 		}
-		if (withOnDemand && ((this.bits & ASTNode.OnDemand) != 0)) {
+		if (withOnDemand && (this.bits & ASTNode.OnDemand) != 0) {
 			output.append(".*"); //$NON-NLS-1$
 		}
 		return output;

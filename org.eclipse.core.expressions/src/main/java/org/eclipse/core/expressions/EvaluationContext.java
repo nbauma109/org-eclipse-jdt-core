@@ -99,7 +99,7 @@ public class EvaluationContext implements IEvaluationContext {
 				return fParent.getAllowPluginActivation();
 			return false;
 		}
-		return fAllowPluginActivation.booleanValue();
+		return fAllowPluginActivation;
 	}
 
 	@Override

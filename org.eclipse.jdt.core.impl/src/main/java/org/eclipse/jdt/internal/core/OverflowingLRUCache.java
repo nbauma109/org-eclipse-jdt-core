@@ -178,7 +178,7 @@ public double getLoadFactor() {
 
 		/* Free up space by removing oldest entries */
 		int spaceNeeded = (int)((1 - this.loadFactor) * limit);
-		spaceNeeded = (spaceNeeded > space) ? spaceNeeded : space;
+		spaceNeeded = spaceNeeded > space ? spaceNeeded : space;
 		LRUCacheEntry<K, V> entry = this.entryQueueTail;
 
 		try {
@@ -283,21 +283,13 @@ public void printStats() {
 protected void privateRemoveEntry(LRUCacheEntry<K, V> entry, boolean shuffle, boolean external) {
 
 	if (!shuffle) {
-		if (external) {
-			this.entryTable.remove(entry.key);
-			this.currentSpace -= entry.space;
-		} else {
-			if (!close(entry)) return;
-			// buffer close will recursively call #privateRemoveEntry with external==true
-			// thus entry will already be removed if reaching this point.
-			if (this.entryTable.get(entry.key) == null){
-				return;
-			} else {
-				// basic removal
-				this.entryTable.remove(entry.key);
-				this.currentSpace -= entry.space;
-			}
-		}
+		// buffer close will recursively call #privateRemoveEntry with external==true
+        // thus entry will already be removed if reaching this point.
+        if (!external && (!close(entry) || this.entryTable.get(entry.key) == null)){
+        	return;
+        }
+        this.entryTable.remove(entry.key);
+        this.currentSpace -= entry.space;
 	}
 	LRUCacheEntry<K, V> previous = entry.previous;
 	LRUCacheEntry<K, V> next = entry.next;
@@ -342,9 +334,8 @@ protected void privateRemoveEntry(LRUCacheEntry<K, V> entry, boolean shuffle, bo
 				this.currentSpace = newTotal;
 				this.overflow = 0;
 				return value;
-			} else {
-				privateRemoveEntry (entry, false, false);
 			}
+            privateRemoveEntry (entry, false, false);
 		}
 
 		// attempt to make new space
@@ -373,10 +364,9 @@ protected void privateRemoveEntry(LRUCacheEntry<K, V> entry, boolean shuffle, bo
  * @throws IllegalArgumentException when the new load factor is not in (0.0, 1.0]
  */
 public void setLoadFactor(double newLoadFactor) throws IllegalArgumentException {
-	if(newLoadFactor <= 1.0 && newLoadFactor > 0.0)
-		this.loadFactor = newLoadFactor;
-	else
-		throw new IllegalArgumentException(Messages.cache_invalidLoadFactor);
+	if(newLoadFactor > 1.0 || newLoadFactor <= 0.0)
+        throw new IllegalArgumentException(Messages.cache_invalidLoadFactor);
+    this.loadFactor = newLoadFactor;
 }
 
 	@Override

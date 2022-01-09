@@ -221,11 +221,9 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 			if (key != null) {
 				V value = dictionary.get(key);
 				// ignore null values
-				if (value != null) {
-					if (put(key, value) != null) {
-						throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
-					}
-				}
+				if (value != null && put(key, value) != null) {
+                	throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
+                }
 			}
 		}
 	}
@@ -246,11 +244,9 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 			if (key != null) {
 				V value = e.getValue();
 				// ignore null values
-				if (value != null) {
-					if (put(key, value) != null) {
-						throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
-					}
-				}
+				if (value != null && put(key, value) != null) {
+                	throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
+                }
 			}
 		}
 	}
@@ -746,7 +742,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 				Entry<?, ?> other = (Entry<?, ?>) obj;
 				Object k1 = entry.getKey();
 				@SuppressWarnings("unchecked")
-				Object k2 = (other instanceof CaseInsentiveEntry) ? ((CaseInsentiveEntry<K, V>) other).entry.getKey() : other.getKey();
+				Object k2 = other instanceof CaseInsentiveEntry ? ((CaseInsentiveEntry<K, V>) other).entry.getKey() : other.getKey();
 				return Objects.equals(k1, k2) && Objects.equals(entry.getValue(), other.getValue());
 			}
 			return false;

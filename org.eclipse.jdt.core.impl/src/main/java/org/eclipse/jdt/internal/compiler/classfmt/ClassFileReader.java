@@ -355,7 +355,7 @@ public ClassFileReader(byte[] classFileBytes, char[] fileName, boolean fullyInit
 			int utf8Offset = this.constantPoolOffsets[u2At(readOffset)];
 			char[] attributeName = utf8At(utf8Offset + 3, u2At(utf8Offset + 1));
 			if (attributeName.length == 0) {
-				readOffset += (6 + u4At(readOffset + 2));
+				readOffset += 6 + u4At(readOffset + 2);
 				continue;
 			}
 			switch(attributeName[0] ) {
@@ -492,7 +492,7 @@ public ClassFileReader(byte[] classFileBytes, char[] fileName, boolean fullyInit
 					}
 					break;
 			}
-			readOffset += (6 + u4At(readOffset + 2));
+			readOffset += 6 + u4At(readOffset + 2);
 		}
 		if (this.moduleDeclaration != null && this.annotations != null) {
 			this.moduleDeclaration.setAnnotations(this.annotations, this.tagBits, fullyInitialize);
@@ -597,7 +597,7 @@ private void decodeTypeAnnotations(int offset, boolean runtimeVisible) {
 	int numberOfAnnotations = u2At(offset + 6);
 	if (numberOfAnnotations > 0) {
 		int readOffset = offset + 8;
-		TypeAnnotationInfo[] newInfos = null;
+		TypeAnnotationInfo[] newInfos;
 		newInfos = new TypeAnnotationInfo[numberOfAnnotations];
 		for (int i = 0; i < numberOfAnnotations; i++) {
 			// With the last parameter being 'false', the data structure will not be flushed out
@@ -799,7 +799,7 @@ public IBinaryNestedType[] getMemberTypes() {
 			System.arraycopy(
 				memberTypes,
 				0,
-				(memberTypes = new IBinaryNestedType[memberTypeIndex]),
+				memberTypes = new IBinaryNestedType[memberTypeIndex],
 				0,
 				memberTypeIndex);
 		}
@@ -880,8 +880,8 @@ public int getModifiers() {
 	int modifiers;
 	if (this.innerInfo != null) {
 		modifiers = this.innerInfo.getModifiers()
-			| (this.accessFlags & ClassFileConstants.AccDeprecated)
-			| (this.accessFlags & ClassFileConstants.AccSynthetic);
+			| this.accessFlags & ClassFileConstants.AccDeprecated
+			| this.accessFlags & ClassFileConstants.AccSynthetic;
 	} else {
 		modifiers = this.accessFlags;
 	}
@@ -982,10 +982,10 @@ private boolean hasNonSyntheticMethodChanges(MethodInfo[] currentMethodInfos, Me
 	}
 
 	while (index1 < length1) {
-		if (!((m = currentMethodInfos[index1++]).isSynthetic() || m.isClinit())) return true;
+		if (!(m = currentMethodInfos[index1++]).isSynthetic() && !m.isClinit()) return true;
 	}
 	while (index2 < length2) {
-		if (!((m = otherMethodInfos[index2++]).isSynthetic() || m.isClinit())) return true;
+		if (!(m = otherMethodInfos[index2++]).isSynthetic() && !m.isClinit()) return true;
 	}
 	return false;
 }
@@ -1042,20 +1042,15 @@ public boolean hasStructuralChanges(byte[] newBytes, boolean orderRequired, bool
 			| TagBits.HierarchyHasProblems; // different hierarchy status ?
 
 		// meta-annotations
-		if ((getTagBits() & OnlyStructuralTagBits) != (newClassFile.getTagBits() & OnlyStructuralTagBits))
-			return true;
+		
 		// annotations
-		if (hasStructuralAnnotationChanges(getAnnotations(), newClassFile.getAnnotations()))
-			return true;
-		if (this.version >= ClassFileConstants.JDK1_8
+		if ((getTagBits() & OnlyStructuralTagBits) != (newClassFile.getTagBits() & OnlyStructuralTagBits) || hasStructuralAnnotationChanges(getAnnotations(), newClassFile.getAnnotations()) || this.version >= ClassFileConstants.JDK1_8
 				&& hasStructuralTypeAnnotationChanges(getTypeAnnotations(), newClassFile.getTypeAnnotations()))
 			return true;
 
 		// generic signature
-		if (!CharOperation.equals(getGenericSignature(), newClassFile.getGenericSignature()))
-			return true;
 		// superclass
-		if (!CharOperation.equals(getSuperclassName(), newClassFile.getSuperclassName()))
+		if (!CharOperation.equals(getGenericSignature(), newClassFile.getGenericSignature()) || !CharOperation.equals(getSuperclassName(), newClassFile.getSuperclassName()))
 			return true;
 		// interfaces
 		char[][] newInterfacesNames = newClassFile.getInterfaceNames();
@@ -1156,20 +1151,20 @@ public boolean hasStructuralChanges(byte[] newBytes, boolean orderRequired, bool
 		// missing types
 		char[][][] missingTypes = getMissingTypeNames();
 		char[][][] newMissingTypes = newClassFile.getMissingTypeNames();
-		if (missingTypes != null) {
-			if (newMissingTypes == null) {
-				return true;
-			}
-			int length = missingTypes.length;
-			if (length != newMissingTypes.length) {
-				return true;
-			}
-			for (int i = 0; i < length; i++) {
-				if (!CharOperation.equals(missingTypes[i], newMissingTypes[i])) {
-					return true;
-				}
-			}
-		} else return newMissingTypes != null;
+		if (missingTypes == null)
+            return newMissingTypes != null;
+        if (newMissingTypes == null) {
+        	return true;
+        }
+        int length = missingTypes.length;
+        if (length != newMissingTypes.length) {
+        	return true;
+        }
+        for (int i = 0; i < length; i++) {
+        	if (!CharOperation.equals(missingTypes[i], newMissingTypes[i])) {
+        		return true;
+        	}
+        }
 		return false;
 	} catch (ClassFormatException e) {
 		return true;
@@ -1187,7 +1182,7 @@ private boolean hasStructuralAnnotationChanges(IBinaryAnnotation[] currentAnnota
 	for (int i = 0; i < currentAnnotationsLength; i++) {
 		Boolean match = matchAnnotations(currentAnnotations[i], otherAnnotations[i]);
 		if (match != null)
-			return match.booleanValue();
+			return match;
 	}
 	return false;
 }
@@ -1221,7 +1216,8 @@ private Boolean matchAnnotations(IBinaryAnnotation currentAnnotation, IBinaryAnn
 				return Boolean.FALSE;
 			}
 			return Boolean.TRUE;
-		} else if (!value.equals(value2)) {
+		}
+        if (!value.equals(value2)) {
 			return Boolean.TRUE;
 		}
 	}
@@ -1229,29 +1225,17 @@ private Boolean matchAnnotations(IBinaryAnnotation currentAnnotation, IBinaryAnn
 }
 private boolean hasStructuralFieldChanges(FieldInfo currentFieldInfo, FieldInfo otherFieldInfo) {
 	// generic signature
-	if (!CharOperation.equals(currentFieldInfo.getGenericSignature(), otherFieldInfo.getGenericSignature()))
-		return true;
-	if (currentFieldInfo.getModifiers() != otherFieldInfo.getModifiers())
-		return true;
-	if ((currentFieldInfo.getTagBits() & TagBits.AnnotationDeprecated) != (otherFieldInfo.getTagBits() & TagBits.AnnotationDeprecated))
-		return true;
-	if (hasStructuralAnnotationChanges(currentFieldInfo.getAnnotations(), otherFieldInfo.getAnnotations()))
+	if (!CharOperation.equals(currentFieldInfo.getGenericSignature(), otherFieldInfo.getGenericSignature()) || currentFieldInfo.getModifiers() != otherFieldInfo.getModifiers() || (currentFieldInfo.getTagBits() & TagBits.AnnotationDeprecated) != (otherFieldInfo.getTagBits() & TagBits.AnnotationDeprecated) || hasStructuralAnnotationChanges(currentFieldInfo.getAnnotations(), otherFieldInfo.getAnnotations()))
 		return true;
 	if (this.version >= ClassFileConstants.JDK1_8
-			&& hasStructuralTypeAnnotationChanges(currentFieldInfo.getTypeAnnotations(), otherFieldInfo.getTypeAnnotations()))
-		return true;
-	if (!CharOperation.equals(currentFieldInfo.getName(), otherFieldInfo.getName()))
-		return true;
-	if (!CharOperation.equals(currentFieldInfo.getTypeName(), otherFieldInfo.getTypeName()))
+			&& hasStructuralTypeAnnotationChanges(currentFieldInfo.getTypeAnnotations(), otherFieldInfo.getTypeAnnotations()) || !CharOperation.equals(currentFieldInfo.getName(), otherFieldInfo.getName()) || !CharOperation.equals(currentFieldInfo.getTypeName(), otherFieldInfo.getTypeName()))
 		return true;
 	if (currentFieldInfo.hasConstant() != otherFieldInfo.hasConstant())
 		return true;
 	if (currentFieldInfo.hasConstant()) {
 		Constant currentConstant = currentFieldInfo.getConstant();
 		Constant otherConstant = otherFieldInfo.getConstant();
-		if (currentConstant.typeID() != otherConstant.typeID())
-			return true;
-		if (!currentConstant.getClass().equals(otherConstant.getClass()))
+		if (currentConstant.typeID() != otherConstant.typeID() || !currentConstant.getClass().equals(otherConstant.getClass()))
 			return true;
 		switch (currentConstant.typeID()) {
 			case TypeIds.T_int :
@@ -1279,13 +1263,7 @@ private boolean hasStructuralFieldChanges(FieldInfo currentFieldInfo, FieldInfo 
 
 private boolean hasStructuralMethodChanges(MethodInfo currentMethodInfo, MethodInfo otherMethodInfo) {
 	// generic signature
-	if (!CharOperation.equals(currentMethodInfo.getGenericSignature(), otherMethodInfo.getGenericSignature()))
-		return true;
-	if (currentMethodInfo.getModifiers() != otherMethodInfo.getModifiers())
-		return true;
-	if ((currentMethodInfo.getTagBits() & TagBits.AnnotationDeprecated) != (otherMethodInfo.getTagBits() & TagBits.AnnotationDeprecated))
-		return true;
-	if (hasStructuralAnnotationChanges(currentMethodInfo.getAnnotations(), otherMethodInfo.getAnnotations()))
+	if (!CharOperation.equals(currentMethodInfo.getGenericSignature(), otherMethodInfo.getGenericSignature()) || currentMethodInfo.getModifiers() != otherMethodInfo.getModifiers() || (currentMethodInfo.getTagBits() & TagBits.AnnotationDeprecated) != (otherMethodInfo.getTagBits() & TagBits.AnnotationDeprecated) || hasStructuralAnnotationChanges(currentMethodInfo.getAnnotations(), otherMethodInfo.getAnnotations()))
 		return true;
 	// parameter annotations:
 	int currentAnnotatedParamsCount = currentMethodInfo.getAnnotatedParametersCount();
@@ -1297,12 +1275,7 @@ private boolean hasStructuralMethodChanges(MethodInfo currentMethodInfo, MethodI
 			return true;
 	}
 	if (this.version >= ClassFileConstants.JDK1_8
-			&& hasStructuralTypeAnnotationChanges(currentMethodInfo.getTypeAnnotations(), otherMethodInfo.getTypeAnnotations()))
-		return true;
-
-	if (!CharOperation.equals(currentMethodInfo.getSelector(), otherMethodInfo.getSelector()))
-		return true;
-	if (!CharOperation.equals(currentMethodInfo.getMethodDescriptor(), otherMethodInfo.getMethodDescriptor()))
+			&& hasStructuralTypeAnnotationChanges(currentMethodInfo.getTypeAnnotations(), otherMethodInfo.getTypeAnnotations()) || !CharOperation.equals(currentMethodInfo.getSelector(), otherMethodInfo.getSelector()) || !CharOperation.equals(currentMethodInfo.getMethodDescriptor(), otherMethodInfo.getMethodDescriptor()))
 		return true;
 	if (!CharOperation.equals(currentMethodInfo.getGenericSignature(), otherMethodInfo.getGenericSignature()))
 		return true;
@@ -1371,13 +1344,13 @@ private void initialize() throws ClassFormatException {
 			this.methods[i].initialize();
 		}
 		if (this.innerInfos != null) {
-			for (int i = 0, max = this.innerInfos.length; i < max; i++) {
-				this.innerInfos[i].initialize();
+			for (InnerClassInfo element : this.innerInfos) {
+				element.initialize();
 			}
 		}
 		if (this.annotations != null) {
-			for (int i = 0, max = this.annotations.length; i < max; i++) {
-				this.annotations[i].initialize();
+			for (AnnotationInfo annotation : this.annotations) {
+				annotation.initialize();
 			}
 		}
 		this.getEnclosingMethod();
@@ -1391,7 +1364,7 @@ private void initialize() throws ClassFormatException {
 public boolean isAnonymous() {
 	if (this.innerInfo == null) return false;
 	char[] innerSourceName = this.innerInfo.getSourceName();
-	return (innerSourceName == null || innerSourceName.length == 0);
+	return innerSourceName == null || innerSourceName.length == 0;
 }
 
 @Override
@@ -1401,18 +1374,16 @@ public boolean isBinaryType() {
 
 @Override
 public boolean isLocal() {
-	if (this.innerInfo == null) return false;
-	if (this.innerInfo.getEnclosingTypeName() != null) return false;
+	if (this.innerInfo == null || this.innerInfo.getEnclosingTypeName() != null) return false;
 	char[] innerSourceName = this.innerInfo.getSourceName();
-	return (innerSourceName != null && innerSourceName.length > 0);
+	return innerSourceName != null && innerSourceName.length > 0;
 }
 
 @Override
 public boolean isMember() {
-	if (this.innerInfo == null) return false;
-	if (this.innerInfo.getEnclosingTypeName() == null) return false;
+	if (this.innerInfo == null || this.innerInfo.getEnclosingTypeName() == null) return false;
 	char[] innerSourceName = this.innerInfo.getSourceName();
-	return (innerSourceName != null && innerSourceName.length > 0);	 // protection against ill-formed attributes (67600)
+	return innerSourceName != null && innerSourceName.length > 0;	 // protection against ill-formed attributes (67600)
 }
 
 /**
@@ -1442,7 +1413,7 @@ public String toString() {
 	print.println(" this.className: " + new String(getName())); //$NON-NLS-1$
 	print.println(" this.superclassName: " + (getSuperclassName() == null ? "null" : new String(getSuperclassName()))); //$NON-NLS-2$ //$NON-NLS-1$
 	if (this.moduleName != null)
-		print.println(" this.moduleName: " + (new String(this.moduleName))); //$NON-NLS-1$
+		print.println(" this.moduleName: " + new String(this.moduleName)); //$NON-NLS-1$
 	print.println(" access_flags: " + printTypeModifiers(accessFlags()) + "(" + accessFlags() + ")"); //$NON-NLS-1$ //$NON-NLS-3$ //$NON-NLS-2$
 	print.flush();
 	return out.toString();

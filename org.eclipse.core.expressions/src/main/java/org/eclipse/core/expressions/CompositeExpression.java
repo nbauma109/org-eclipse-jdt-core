@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 
 public abstract class CompositeExpression extends Expression {
 
-	private static final Expression[] EMPTY_ARRAY = new Expression[0];
+	private static final Expression[] EMPTY_ARRAY = {};
 
 	/**
 	 * The seed for the hash code for all composite expressions.

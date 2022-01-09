@@ -117,10 +117,9 @@ public class ParameterizedType extends Type {
 		if (property == TYPE_PROPERTY) {
 			if (get) {
 				return getType();
-			} else {
-				setType((Type) child);
-				return null;
 			}
+            setType((Type) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

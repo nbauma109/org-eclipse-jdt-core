@@ -139,7 +139,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			return false; // MRU is disabled
 		synchronized (this) {
 			int index = bundleFile.getMruIndex();
-			if ((index >= 0 && index < fileLimit) && bundleFileList[index] == bundleFile) {
+			if (index >= 0 && index < fileLimit && bundleFileList[index] == bundleFile) {
 				removeInternal(bundleFile);
 				return true;
 			}
@@ -165,7 +165,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			return; // MRU is disabled
 		synchronized (this) {
 			int index = bundleFile.getMruIndex();
-			if ((index >= 0 && index < fileLimit) && bundleFileList[index] == bundleFile)
+			if (index >= 0 && index < fileLimit && bundleFileList[index] == bundleFile)
 				incUseStamp(index);
 		}
 	}

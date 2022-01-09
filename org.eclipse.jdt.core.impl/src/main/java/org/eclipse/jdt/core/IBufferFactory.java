@@ -21,6 +21,7 @@ package org.eclipse.jdt.core;
  * @since 2.0
  * @deprecated Use {@link WorkingCopyOwner} instead
  */
+@Deprecated
 public interface IBufferFactory {
 
 	/**

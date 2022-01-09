@@ -90,17 +90,14 @@ public class BuildContext implements IBuildContext {
 		int result = 1;
 		result = prime * result + buildConfiguration.hashCode();
 		result = prime * result + Arrays.hashCode(requestedBuilt);
-		result = prime * result + Arrays.hashCode(buildOrder);
-		return result;
+		return prime * result + Arrays.hashCode(buildOrder);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (obj == null || getClass() != obj.getClass())
 			return false;
 		BuildContext other = (BuildContext) obj;
 		return buildConfiguration.equals(other.buildConfiguration) && Arrays.equals(requestedBuilt, other.requestedBuilt) && Arrays.equals(buildOrder, other.buildOrder);

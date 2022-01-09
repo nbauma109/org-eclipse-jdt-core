@@ -140,7 +140,7 @@ public class Preferences {
 	/**
 	 * Singleton empty string array (optimization)
 	 */
-	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+	private static final String[] EMPTY_STRING_ARRAY = {};
 
 	/**
 	 * The simple identifier constant (value "<code>preferences</code>") of
@@ -481,7 +481,7 @@ public class Preferences {
 	 *  value is known for the named property, and <code>false</code>otherwise
 	 */
 	public boolean contains(String name) {
-		return (properties.containsKey(name) || defaultProperties.containsKey(name));
+		return properties.containsKey(name) || defaultProperties.containsKey(name);
 	}
 
 	/**
@@ -1082,7 +1082,7 @@ public class Preferences {
 	 */
 	public String getString(String name) {
 		String value = properties.getProperty(name);
-		return (value != null ? value : STRING_DEFAULT_DEFAULT);
+		return value != null ? value : STRING_DEFAULT_DEFAULT;
 	}
 
 	/**
@@ -1140,7 +1140,7 @@ public class Preferences {
 	 */
 	public String getDefaultString(String name) {
 		String value = defaultProperties.getProperty(name);
-		return (value != null ? value : STRING_DEFAULT_DEFAULT);
+		return value != null ? value : STRING_DEFAULT_DEFAULT;
 	}
 
 	/**

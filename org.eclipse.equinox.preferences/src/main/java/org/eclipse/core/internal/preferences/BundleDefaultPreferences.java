@@ -56,8 +56,8 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 			qualifier = path.segment(1);
 
 		// cache the location
-		if (qualifier == null)
-			return;
+		if (qualifier == null) {
+        }
 	}
 
 

@@ -85,6 +85,7 @@ String[] getExceptionTypes() throws JavaModelException;
  * @since 3.0
  * @deprecated Use {@link #getTypeParameters()} instead
  */
+@Deprecated
 String[] getTypeParameterSignatures() throws JavaModelException;
 /**
  * Returns the formal type parameters for this method.

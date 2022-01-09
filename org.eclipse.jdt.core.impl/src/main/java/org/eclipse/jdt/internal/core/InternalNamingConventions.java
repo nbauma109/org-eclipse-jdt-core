@@ -64,18 +64,16 @@ public class InternalNamingConventions {
 	private static char[][] computeBaseTypeNames(char[] typeName, boolean isConstantField, char[][] excludedNames){
 		if (isConstantField) {
 			return computeNonBaseTypeNames(typeName, isConstantField, false);
-		} else {
-			char[] name = computeBaseTypeNames(typeName[0], excludedNames);
-			if(name != null) {
-				return new char[][]{name};
-			} else {
-				// compute variable name like from non base type
-				return computeNonBaseTypeNames(typeName, isConstantField, false);
-			}
 		}
+        char[] name = computeBaseTypeNames(typeName[0], excludedNames);
+        if(name != null) {
+        	return new char[][]{name};
+        }
+        // compute variable name like from non base type
+        return computeNonBaseTypeNames(typeName, isConstantField, false);
 	}
 	private static char[] computeBaseTypeNames(char firstName, char[][] excludedNames){
-		char[] name = new char[]{firstName};
+		char[] name = {firstName};
 
 		for(int i = 0 ; i < excludedNames.length ; i++){
 			if(CharOperation.equals(name, excludedNames[i], false)) {
@@ -101,9 +99,8 @@ public class InternalNamingConventions {
 		if (length == 1) {
 			if (isConstantField) {
 				return generateConstantName(new char[][]{CharOperation.toLowerCase(sourceName)}, 0, onlyLongest);
-			} else {
-				return generateNonConstantName(new char[][]{CharOperation.toLowerCase(sourceName)}, 0, onlyLongest);
 			}
+            return generateNonConstantName(new char[][]{CharOperation.toLowerCase(sourceName)}, 0, onlyLongest);
 		}
 
 		char[][] nameParts = new char[length][];
@@ -201,9 +198,8 @@ public class InternalNamingConventions {
 
 		if (isConstantField) {
 			return generateConstantName(nameParts, namePartsPtr, onlyLongest);
-		} else {
-			return generateNonConstantName(nameParts, namePartsPtr, onlyLongest);
 		}
+        return generateNonConstantName(nameParts, namePartsPtr, onlyLongest);
 	}
 
 
@@ -421,12 +417,11 @@ public class InternalNamingConventions {
 		char[] withoutPrefixName = name;
 		if (prefixes != null) {
 			int bestLength = 0;
-			for (int i= 0; i < prefixes.length; i++) {
-				char[] prefix = prefixes[i];
+			for (char[] prefix : prefixes) {
 				if (CharOperation.prefixEquals(prefix, name)) {
 					int currLen = prefix.length;
 					boolean lastCharIsLetter = ScannerHelper.isLetter(prefix[currLen - 1]);
-					if(!lastCharIsLetter || (lastCharIsLetter && name.length > currLen && ScannerHelper.isUpperCase(name[currLen]))) {
+					if(!lastCharIsLetter || lastCharIsLetter && name.length > currLen && ScannerHelper.isUpperCase(name[currLen])) {
 						if (bestLength < currLen && name.length != currLen) {
 							withoutPrefixName = CharOperation.subarray(name, currLen, name.length);
 							bestLength = currLen;
@@ -440,8 +435,7 @@ public class InternalNamingConventions {
 		char[] withoutSuffixName = withoutPrefixName;
 		if(suffixes != null) {
 			int bestLength = 0;
-			for (int i = 0; i < suffixes.length; i++) {
-				char[] suffix = suffixes[i];
+			for (char[] suffix : suffixes) {
 				if(CharOperation.endsWith(withoutPrefixName, suffix)) {
 					int currLen = suffix.length;
 					if(bestLength < currLen && withoutPrefixName.length != currLen) {
@@ -462,16 +456,12 @@ public class InternalNamingConventions {
 		if (prefixes != null) {
 			int bestLength = 0;
 			int nameLength = name.length;
-			for (int i= 0; i < prefixes.length; i++) {
-				char[] prefix = prefixes[i];
-
+			for (char[] prefix : prefixes) {
 				int prefixLength = prefix.length;
 				if(prefixLength <= nameLength) {
-					if(CharOperation.prefixEquals(prefix, name, false)) {
-						if (prefixLength > bestLength) {
-							bestLength = prefixLength;
-						}
-					}
+					if (CharOperation.prefixEquals(prefix, name, false) && prefixLength > bestLength) {
+                    	bestLength = prefixLength;
+                    }
 				} else {
 					int currLen = 0;
 					for (; currLen < nameLength; currLen++) {
@@ -690,40 +680,38 @@ public class InternalNamingConventions {
 						System.arraycopy(tempName, 0, tempName = new char[length + 1], 0, length);
 						tempName[length] = 'S';
 					}
-				} else {
-					if (tempName[length-1] == 's'){
-						if(tempName.length > 1 && tempName[length-2] == 's') {
-							System.arraycopy(tempName, 0, tempName = new char[length + 2], 0, length);
-							tempName[length] = 'e';
-							tempName[length+1] = 's';
-						}
-					} else if(tempName[length-1] == 'y') {
-						boolean precededByAVowel = false;
-						if(tempName.length > 1) {
-							switch (tempName[length-2]) {
-								case 'a':
-								case 'e':
-								case 'i':
-								case 'o':
-								case 'u':
-									precededByAVowel = true;
-									break;
-							}
-						}
-						if (precededByAVowel) {
-							System.arraycopy(tempName, 0, tempName = new char[length + 1], 0, length);
-							tempName[length] = 's';
-						} else {
-							System.arraycopy(tempName, 0, tempName = new char[length + 2], 0, length);
-							tempName[length-1] = 'i';
-							tempName[length] = 'e';
-							tempName[length+1] = 's';
-						}
-					} else {
-						System.arraycopy(tempName, 0, tempName = new char[length + 1], 0, length);
-						tempName[length] = 's';
-					}
-				}
+				} else if (tempName[length-1] == 's'){
+                	if(tempName.length > 1 && tempName[length-2] == 's') {
+                		System.arraycopy(tempName, 0, tempName = new char[length + 2], 0, length);
+                		tempName[length] = 'e';
+                		tempName[length+1] = 's';
+                	}
+                } else if(tempName[length-1] == 'y') {
+                	boolean precededByAVowel = false;
+                	if(tempName.length > 1) {
+                		switch (tempName[length-2]) {
+                			case 'a':
+                			case 'e':
+                			case 'i':
+                			case 'o':
+                			case 'u':
+                				precededByAVowel = true;
+                				break;
+                		}
+                	}
+                	if (precededByAVowel) {
+                		System.arraycopy(tempName, 0, tempName = new char[length + 1], 0, length);
+                		tempName[length] = 's';
+                	} else {
+                		System.arraycopy(tempName, 0, tempName = new char[length + 2], 0, length);
+                		tempName[length-1] = 'i';
+                		tempName[length] = 'e';
+                		tempName[length+1] = 's';
+                	}
+                } else {
+                	System.arraycopy(tempName, 0, tempName = new char[length + 1], 0, length);
+                	tempName[length] = 's';
+                }
 			}
 
 			char[] unprefixedName = tempName;
@@ -741,15 +729,9 @@ public class InternalNamingConventions {
 				}
 			} else {
 				done : for (int j = 0; j <= internalPrefix.length; j++) {
-					if(j == internalPrefix.length) {
+					if(j == internalPrefix.length || CharOperation.prefixEquals(CharOperation.subarray(internalPrefix, j, -1), unprefixedName, j != 0 /*do not check case when there is no prefix*/) && (j == 0 || internalPrefix[j - 1] == '_')) {
 						matchingIndex = j;
 						break done;
-					} else if(CharOperation.prefixEquals(CharOperation.subarray(internalPrefix, j, -1), unprefixedName, j != 0 /*do not check case when there is no prefix*/)) {
-						if (j == 0 || internalPrefix[j - 1] == '_') {
-							matchingIndex = j;
-							break done;
-						}
-
 					}
 				}
 			}
@@ -758,13 +740,11 @@ public class InternalNamingConventions {
 				if (!isConstantField) {
 					tempName = CharOperation.concat(CharOperation.subarray(internalPrefix, 0, matchingIndex), unprefixedName);
 					if(matchingIndex == 0) tempName[0] = ScannerHelper.toLowerCase(tempName[0]);
-				} else {
-					if(matchingIndex != 0 && tempName[0] != '_' && internalPrefix[matchingIndex - 1] != '_') {
-						tempName = CharOperation.concat(CharOperation.subarray(CharOperation.toUpperCase(internalPrefix), 0, matchingIndex), unprefixedName, '_');
-					} else {
-						tempName = CharOperation.concat(CharOperation.subarray(CharOperation.toUpperCase(internalPrefix), 0, matchingIndex), unprefixedName);
-					}
-				}
+				} else if(matchingIndex != 0 && tempName[0] != '_' && internalPrefix[matchingIndex - 1] != '_') {
+                	tempName = CharOperation.concat(CharOperation.subarray(CharOperation.toUpperCase(internalPrefix), 0, matchingIndex), unprefixedName, '_');
+                } else {
+                	tempName = CharOperation.concat(CharOperation.subarray(CharOperation.toUpperCase(internalPrefix), 0, matchingIndex), unprefixedName);
+                }
 
 				for (int k = 0; k < prefixes.length; k++) {
 					if (!isConstantField) {
@@ -789,13 +769,11 @@ public class InternalNamingConventions {
 							switch (nameScanner.getNextToken()) {
 								case TerminalTokens.TokenNameIdentifier :
 									int token = nameScanner.getNextToken();
-									if (token == TerminalTokens.TokenNameEOF && nameScanner.startPosition == suffixName.length) {
-										if (!foundNames.includes(suffixName)) {
-											acceptName(suffixName, prefixes[k], suffixes[l],  k == 0, l == 0, internalPrefix.length - matchingIndex, requestor);
-											foundNames.add(suffixName);
-											acceptDefaultName = false;
-										}
-									}
+									if (token == TerminalTokens.TokenNameEOF && nameScanner.startPosition == suffixName.length && !foundNames.includes(suffixName)) {
+                                    	acceptName(suffixName, prefixes[k], suffixes[l],  k == 0, l == 0, internalPrefix.length - matchingIndex, requestor);
+                                    	foundNames.add(suffixName);
+                                    	acceptDefaultName = false;
+                                    }
 									break;
 								default:
 									suffixName = CharOperation.concat(
@@ -813,13 +791,11 @@ public class InternalNamingConventions {
 									switch (nameScanner.getNextToken()) {
 										case TerminalTokens.TokenNameIdentifier :
 											token = nameScanner.getNextToken();
-											if (token == TerminalTokens.TokenNameEOF && nameScanner.startPosition == suffixName.length) {
-												if (!foundNames.includes(suffixName)) {
-													acceptName(suffixName, prefixes[k], suffixes[l], k == 0, l == 0, internalPrefix.length - matchingIndex, requestor);
-													foundNames.add(suffixName);
-													acceptDefaultName = false;
-												}
-											}
+											if (token == TerminalTokens.TokenNameEOF && nameScanner.startPosition == suffixName.length && !foundNames.includes(suffixName)) {
+                                            	acceptName(suffixName, prefixes[k], suffixes[l], k == 0, l == 0, internalPrefix.length - matchingIndex, requestor);
+                                            	foundNames.add(suffixName);
+                                            	acceptDefaultName = false;
+                                            }
 									}
 							}
 						} catch(InvalidInputException e){

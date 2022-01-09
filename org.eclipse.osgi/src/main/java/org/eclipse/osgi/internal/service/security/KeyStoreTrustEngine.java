@@ -124,13 +124,12 @@ public class KeyStoreTrustEngine extends TrustEngine {
 						// this is the last certificate in the chain
 						// determine if we have a valid root
 						X509Certificate cert = (X509Certificate) certChain[i];
-						if (cert.getSubjectDN().equals(cert.getIssuerDN())) {
-							cert.verify(cert.getPublicKey());
-							rootCert = cert; // this is a self-signed certificate
-						} else {
+						if (!cert.getSubjectDN().equals(cert.getIssuerDN())) {
 							// try to find a parent, we have an incomplete chain
 							return findAlternativeRoot(cert, store);
 						}
+                        cert.verify(cert.getPublicKey());
+                        rootCert = cert; // this is a self-signed certificate
 					} else {
 						X509Certificate nextX509Cert = (X509Certificate) certChain[i + 1];
 						certChain[i].verify(nextX509Cert.getPublicKey());
@@ -141,7 +140,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 					String alias = rootCert == null ? null : store.getCertificateAlias(rootCert);
 					if (alias != null)
 						return store.getCertificate(alias);
-					else if (rootCert != certChain[i]) {
+                    if (rootCert != certChain[i]) {
 						alias = store.getCertificateAlias(certChain[i]);
 						if (alias != null)
 							return store.getCertificate(alias);
@@ -158,7 +157,6 @@ public class KeyStoreTrustEngine extends TrustEngine {
 			if (signedBundleHook != null) {
 				signedBundleHook.log(e.getMessage(), FrameworkLogEntry.WARNING, e);
 			}
-			return null;
 		}
 		return null;
 	}
@@ -201,7 +199,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException ke) {
-			throw (CertificateException) new CertificateException(ke.getMessage(), ke);
+			throw new CertificateException(ke.getMessage(), ke);
 		}
 		return alias;
 	}
@@ -223,7 +221,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				removeTrustAnchor(alias);
 			}
 		} catch (KeyStoreException ke) {
-			throw (CertificateException) new CertificateException(ke.getMessage(), ke);
+			throw new CertificateException(ke.getMessage(), ke);
 		}
 	}
 
@@ -248,7 +246,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException ke) {
-			throw (CertificateException) new CertificateException(ke.getMessage(), ke);
+			throw new CertificateException(ke.getMessage(), ke);
 		}
 	}
 
@@ -265,7 +263,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				return store.getCertificate(alias);
 			}
 		} catch (KeyStoreException ke) {
-			throw (CertificateException) new CertificateException(ke.getMessage(), ke);
+			throw new CertificateException(ke.getMessage(), ke);
 		}
 	}
 
@@ -284,7 +282,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException ke) {
-			throw (CertificateException) new CertificateException(ke.getMessage(), ke);
+			throw new CertificateException(ke.getMessage(), ke);
 		}
 		return returnList.toArray(new String[] {});
 	}
@@ -342,7 +340,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	@Override
 	public boolean isReadOnly() {
-		return getPassword() == null || !(new File(path).canWrite());
+		return getPassword() == null || !new File(path).canWrite();
 	}
 
 	@Override

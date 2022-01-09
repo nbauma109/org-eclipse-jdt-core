@@ -74,22 +74,19 @@ public class Clinit extends AbstractMethodDeclaration {
 			// check missing blank final field initializations
 			flowInfo = flowInfo.mergedWith(staticInitializerFlowContext.initsOnReturn);
 			FieldBinding[] fields = this.scope.enclosingSourceType().fields();
-			for (int i = 0, count = fields.length; i < count; i++) {
-				FieldBinding field = fields[i];
-				if (field.isStatic()) {
-					if (!flowInfo.isDefinitelyAssigned(field)) {
-						if (field.isFinal()) {
-							this.scope.problemReporter().uninitializedBlankFinalField(
-									field,
-									this.scope.referenceType().declarationOf(field.original()));
-							// can complain against the field decl, since only one <clinit>
-						} else if (field.isNonNull()) {
-							this.scope.problemReporter().uninitializedNonNullField(
-									field,
-									this.scope.referenceType().declarationOf(field.original()));
-						}
-					}
-				}
+			for (FieldBinding field : fields) {
+				if (field.isStatic() && !flowInfo.isDefinitelyAssigned(field)) {
+                	if (field.isFinal()) {
+                		this.scope.problemReporter().uninitializedBlankFinalField(
+                				field,
+                				this.scope.referenceType().declarationOf(field.original()));
+                		// can complain against the field decl, since only one <clinit>
+                	} else if (field.isNonNull()) {
+                		this.scope.problemReporter().uninitializedNonNullField(
+                				field,
+                				this.scope.referenceType().declarationOf(field.original()));
+                	}
+                }
 			}
 			// check static initializers thrown exceptions
 			staticInitializerFlowContext.checkInitializerExceptions(
@@ -255,8 +252,7 @@ public class Clinit extends AbstractMethodDeclaration {
 					}
 				}
 			} else if (fieldDeclarations != null) {
-				for (int i = 0, max = fieldDeclarations.length; i < max; i++) {
-					FieldDeclaration fieldDecl = fieldDeclarations[i];
+				for (FieldDeclaration fieldDecl : fieldDeclarations) {
 					if (fieldDecl.isStatic()) {
 						if (fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
 							fieldDecl.generateCode(staticInitializerScope, codeStream);
@@ -270,20 +266,17 @@ public class Clinit extends AbstractMethodDeclaration {
 			// $VALUES := new <EnumType>[<enumCount>]
 			codeStream.generateInlinedValue(enumCount);
 			codeStream.anewarray(declaringType.binding);
-			if (enumCount > 0) {
-				if (fieldDeclarations != null) {
-					for (int i = 0, max = fieldDeclarations.length; i < max; i++) {
-						FieldDeclaration fieldDecl = fieldDeclarations[i];
-						// $VALUES[i] = <enum-constant-i>
-						if (fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
-							codeStream.dup();
-							codeStream.generateInlinedValue(fieldDecl.binding.id);
-							codeStream.fieldAccess(Opcodes.OPC_getstatic, fieldDecl.binding, null /* default declaringClass */);
-							codeStream.aastore();
-						}
-					}
-				}
-			}
+			if (enumCount > 0 && fieldDeclarations != null) {
+            	for (FieldDeclaration fieldDecl : fieldDeclarations) {
+            		// $VALUES[i] = <enum-constant-i>
+            		if (fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
+            			codeStream.dup();
+            			codeStream.generateInlinedValue(fieldDecl.binding.id);
+            			codeStream.fieldAccess(Opcodes.OPC_getstatic, fieldDecl.binding, null /* default declaringClass */);
+            			codeStream.aastore();
+            		}
+            	}
+            }
 			codeStream.fieldAccess(Opcodes.OPC_putstatic, declaringType.enumValuesSyntheticfield, null /* default declaringClass */);
 			if (remainingFieldCount != 0) {
 				// if fields that are not enum constants need to be generated (static initializer/static field)
@@ -313,8 +306,7 @@ public class Clinit extends AbstractMethodDeclaration {
 			}
 		} else {
 			if (fieldDeclarations != null) {
-				for (int i = 0, max = fieldDeclarations.length; i < max; i++) {
-					FieldDeclaration fieldDecl = fieldDeclarations[i];
+				for (FieldDeclaration fieldDecl : fieldDeclarations) {
 					switch (fieldDecl.getKind()) {
 						case AbstractVariableDeclaration.INITIALIZER :
 							if (!fieldDecl.isStatic())

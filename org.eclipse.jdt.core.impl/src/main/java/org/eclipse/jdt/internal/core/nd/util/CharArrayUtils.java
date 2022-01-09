@@ -53,10 +53,7 @@ public class CharArrayUtils {
 		if (strarr1 == strarr2) {
 			return true;
 		}
-		if (strarr1 == null || strarr2 == null) {
-			return false;
-		}
-		if (strarr1.length != strarr2.length) {
+		if (strarr1 == null || strarr2 == null || strarr1.length != strarr2.length) {
 			return false;
 		}
 		for (int i = 0; i < strarr2.length; i++) {
@@ -283,9 +280,7 @@ public class CharArrayUtils {
 			next: for (int i = 0; i < max; i++) {
 				int j = 0;
 				while (j < replacedLength) {
-					if (i + j == max)
-						continue next;
-					if (array[i + j] != toBeReplaced[j++])
+					if (i + j == max || array[i + j] != toBeReplaced[j++])
 						continue next;
 				}
 				if (occurrenceCount == starts.length) {
@@ -320,11 +315,7 @@ public class CharArrayUtils {
 	public static final char[][] subarray(char[][] array, int start, int end) {
 		if (end == -1)
 			end = array.length;
-		if (start > end)
-			return null;
-		if (start < 0)
-			return null;
-		if (end > array.length)
+		if (start > end || start < 0 || end > array.length)
 			return null;
 
 		char[][] result = new char[end - start][];
@@ -335,11 +326,7 @@ public class CharArrayUtils {
 	public static final char[] subarray(char[] array, int start, int end) {
 		if (end == -1)
 			end = array.length;
-		if (start > end)
-			return null;
-		if (start < 0)
-			return null;
-		if (end > array.length)
+		if (start > end || start < 0 || end > array.length)
 			return null;
 
 		char[] result = new char[end - start];

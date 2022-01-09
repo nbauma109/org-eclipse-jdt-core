@@ -396,7 +396,7 @@ public void acceptMatch(String relativePath, String containerPath, char separato
 		buffer.append(separator);
 		buffer.append(relativePath);
 		String documentPath = buffer.toString();
-		boolean encloses = (scope instanceof HierarchyScope) ? ((HierarchyScope)scope).encloses(documentPath, monitor)
+		boolean encloses = scope instanceof HierarchyScope ? ((HierarchyScope)scope).encloses(documentPath, monitor)
 							: scope.encloses(documentPath);
 		if (encloses)
 			if (!requestor.acceptIndexMatch(documentPath, pattern, participant, null))
@@ -956,6 +956,7 @@ public static final int[] getMatchingRegions(String pattern, String name, int ma
  * 	(see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=142044" for more details).
  * 	This might be done in a further version...
  */
+@Deprecated
 public static SearchPattern createAndPattern(SearchPattern leftPattern, SearchPattern rightPattern) {
 	return new AndPattern(leftPattern, rightPattern);
 }
@@ -994,7 +995,7 @@ private static SearchPattern createFieldPattern(String patternString, int limitT
 						fieldName = null;
 						break;
 					case TerminalTokens.TokenNameWHITESPACE:
-						if (!(TerminalTokens.TokenNameWHITESPACE == lastToken || TerminalTokens.TokenNameDOT == lastToken))
+						if (TerminalTokens.TokenNameWHITESPACE != lastToken && TerminalTokens.TokenNameDOT != lastToken)
 							mode = InsideType;
 						break;
 					default: // all other tokens are considered identifiers (see bug 21763 Problem in Java search [search])
@@ -1287,9 +1288,8 @@ private static SearchPattern createMethodOrConstructorPattern(String patternStri
 		}
 	}
 	// parenthesis mismatch
-	if (parameterCount>0 && !foundClosingParenthesis) return null;
 	// type arguments mismatch
-	if (argCount > 0) return null;
+	if (parameterCount>0 && !foundClosingParenthesis || argCount > 0) return null;
 
 	char[] selectorChars = null;
 	if (isConstructor) {
@@ -1426,22 +1426,21 @@ private static SearchPattern createMethodOrConstructorPattern(String patternStri
 				typeArguments,
 				limitTo,
 				matchRule);
-	} else {
-		return new MethodPattern(
-				selectorChars,
-				declaringTypeQualification,
-				declaringTypeSimpleName,
-				declaringTypeSignature,
-				returnTypeQualification,
-				returnTypeSimpleName,
-				returnTypeSignature,
-				parameterTypeQualifications,
-				parameterTypeSimpleNames,
-				parameterTypeSignatures,
-				typeArguments,
-				limitTo,
-				matchRule);
 	}
+    return new MethodPattern(
+    		selectorChars,
+    		declaringTypeQualification,
+    		declaringTypeSimpleName,
+    		declaringTypeSignature,
+    		returnTypeQualification,
+    		returnTypeSimpleName,
+    		returnTypeSignature,
+    		parameterTypeQualifications,
+    		parameterTypeSimpleNames,
+    		parameterTypeSignatures,
+    		typeArguments,
+    		limitTo,
+    		matchRule);
 }
 
 private static SearchPattern createModulePattern(String patternString, int limitTo, int matchRule) {
@@ -1712,9 +1711,7 @@ private static SearchPattern createPackagePattern(String patternString, int limi
  * @return a search pattern on the given string pattern, or <code>null</code> if the string pattern is ill-formed
  */
 public static SearchPattern createPattern(String stringPattern, int searchFor, int limitTo, int matchRule) {
-	if (stringPattern == null || stringPattern.length() == 0) return null;
-
-	if ((matchRule = validateMatchRule(stringPattern, searchFor, limitTo, matchRule)) == -1) {
+	if (stringPattern == null || stringPattern.length() == 0 || (matchRule = validateMatchRule(stringPattern, searchFor, limitTo, matchRule)) == -1) {
 		return null;
 	}
 
@@ -2291,7 +2288,7 @@ private static SearchPattern createTypePattern(char[] simpleName, char[] package
 					simpleName,
 					IIndexConstants.TYPE_SUFFIX,
 					matchRule),
-				(type != null)
+				type != null
 					? new TypeReferencePattern(
 						CharOperation.concatWith(packageName, enclosingTypeNames, '.'),
 						simpleName,
@@ -2509,10 +2506,9 @@ public void findIndexMatches(Index index, IndexQueryRequestor requestor, SearchP
 
 		String containerPath = index.containerPath;
 		char separator = index.separator;
-		for (int i = 0, l = entries.length; i < l; i++) {
+		for (EntryResult entry : entries) {
 			if (monitor != null && monitor.isCanceled()) throw new OperationCanceledException();
 
-			EntryResult entry = entries[i];
 			SearchPattern decodedResult = pattern.getBlankPattern();
 			decodedResult.decodeIndexKey(entry.getWord());
 			if (pattern.matchesDecodedKey(decodedResult)) {
@@ -2520,8 +2516,8 @@ public void findIndexMatches(Index index, IndexQueryRequestor requestor, SearchP
 				// to decide whether to do so.
 				if (resolveDocumentName) {
 					String[] names = entry.getDocumentNames(index);
-					for (int j = 0, n = names.length; j < n; j++)
-						acceptMatch(names[j], containerPath, separator, decodedResult, requestor, participant, scope, monitor);
+					for (String name : names)
+                        acceptMatch(name, containerPath, separator, decodedResult, requestor, participant, scope, monitor);
 				} else {
 					acceptMatch("", containerPath, separator, decodedResult, requestor, participant, scope, monitor); //$NON-NLS-1$
 				}
@@ -2624,7 +2620,7 @@ public boolean matchesName(char[] pattern, char[] name) {
 		if (emptyPattern && (this.matchRule & R_PREFIX_MATCH) != 0) return true;
 		boolean sameLength = pattern.length == name.length;
 		boolean canBePrefix = name.length >= pattern.length;
-		boolean matchFirstChar = !isCaseSensitive || emptyPattern || (name.length > 0 &&  pattern[0] == name[0]);
+		boolean matchFirstChar = !isCaseSensitive || emptyPattern || name.length > 0 &&  pattern[0] == name[0];
 
 		if ((matchMode & R_SUBSTRING_MATCH) != 0) {
 			if (CharOperation.substringMatch(pattern, name))
@@ -2775,7 +2771,6 @@ public static int validateMatchRule(String stringPattern, int matchRule) {
 		if (!validCamelCase) {
 			matchRule &= ~R_CAMELCASE_SAME_PART_COUNT_MATCH;
 		}
-		return matchRule;
 	}
 
 	// Return the validated match rule (modified if necessary)

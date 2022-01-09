@@ -76,7 +76,6 @@ public class ProjectEntry implements IModulePathEntry {
 			if (element instanceof IPackageFragment)
 				return mod != null ? new char[][] { mod.name() } : CharOperation.NO_CHAR_CHAR;
 		} catch (JavaModelException e) {
-			return null;
 		}
 		return null;
 	}

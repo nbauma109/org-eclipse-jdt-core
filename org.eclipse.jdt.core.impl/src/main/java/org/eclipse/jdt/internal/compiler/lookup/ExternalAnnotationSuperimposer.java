@@ -114,10 +114,8 @@ class ExternalAnnotationSuperimposer extends TypeBindingVisitor {
 				if (visitor.go(walker.toTypeParameter(false, i)))
 					typeParams[i] = visitor.superimpose(typeParams[i], TypeVariableBinding.class);
 			}
-			if (!method.isConstructor()) {
-				if (visitor.go(walker.toMethodReturn()))
-					method.returnType = visitor.superimpose(method.returnType, TypeBinding.class);
-			}
+			if (!method.isConstructor() && visitor.go(walker.toMethodReturn()))
+            	method.returnType = visitor.superimpose(method.returnType, TypeBinding.class);
 			TypeBinding[] parameters = method.parameters;
 			for (short i = 0; i < parameters.length; i++) {
 				if (visitor.go(walker.toMethodParameter(i))) {

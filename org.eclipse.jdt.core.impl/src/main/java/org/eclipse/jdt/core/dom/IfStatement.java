@@ -124,26 +124,23 @@ public class IfStatement extends Statement {
 		if (property == EXPRESSION_PROPERTY) {
 			if (get) {
 				return getExpression();
-			} else {
-				setExpression((Expression) child);
-				return null;
 			}
+            setExpression((Expression) child);
+            return null;
 		}
 		if (property == THEN_STATEMENT_PROPERTY) {
 			if (get) {
 				return getThenStatement();
-			} else {
-				setThenStatement((Statement) child);
-				return null;
 			}
+            setThenStatement((Statement) child);
+            return null;
 		}
 		if (property == ELSE_STATEMENT_PROPERTY) {
 			if (get) {
 				return getElseStatement();
-			} else {
-				setElseStatement((Statement) child);
-				return null;
 			}
+            setElseStatement((Statement) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

@@ -33,7 +33,6 @@ public final class PreferenceFilterEntry {
 	 * @param key the name of the preference key
 	 */
 	public PreferenceFilterEntry(String key) {
-		super();
 		if (key == null || key.length() == 0)
 			throw new IllegalArgumentException();
 		this.key = key;

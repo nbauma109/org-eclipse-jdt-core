@@ -24,7 +24,6 @@ public class CancelableProblemFactory extends DefaultProblemFactory {
 	public IProgressMonitor monitor;
 
 	public CancelableProblemFactory(IProgressMonitor monitor) {
-		super();
 		this.monitor = monitor;
 	}
 

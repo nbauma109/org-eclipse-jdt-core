@@ -103,14 +103,14 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 				}
 				result = runApplication(defaultContext);
 				// refresh the allowAppRelaunch setting in case the application changed it
-				relaunch = Boolean.valueOf(equinoxConfig.getConfiguration(EclipseStarter.PROP_ALLOW_APPRELAUNCH));
+				relaunch = Boolean.parseBoolean(equinoxConfig.getConfiguration(EclipseStarter.PROP_ALLOW_APPRELAUNCH));
 			} catch (Exception e) {
 				if (!relaunch || (b.getState() & Bundle.ACTIVE) == 0)
 					throw e;
 				if (log != null)
 					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, Msg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
 			}
-			doRelaunch = (relaunch && (b.getState() & Bundle.ACTIVE) != 0);
+			doRelaunch = relaunch && (b.getState() & Bundle.ACTIVE) != 0;
 		} while (doRelaunch);
 		return result;
 	}
@@ -182,7 +182,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	 * exists that can be used to relaunch the default application.
 	 */
 	public Object reStart(Object argument) throws Exception {
-		ServiceReference<?>[] ref = null;
+		ServiceReference<?>[] ref;
 		ref = context.getServiceReferences("org.osgi.service.application.ApplicationDescriptor", "(eclipse.application.default=true)"); //$NON-NLS-1$//$NON-NLS-2$
 		if (ref != null && ref.length > 0) {
 			Object defaultApp = context.getService(ref[0]);

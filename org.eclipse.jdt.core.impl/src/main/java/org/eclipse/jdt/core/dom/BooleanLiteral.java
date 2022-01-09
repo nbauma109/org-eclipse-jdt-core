@@ -95,10 +95,9 @@ public class BooleanLiteral extends Expression {
 		if (property == BOOLEAN_VALUE_PROPERTY) {
 			if (get) {
 				return booleanValue();
-			} else {
-				setBooleanValue(newValue);
-				return false;
 			}
+            setBooleanValue(newValue);
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, newValue);

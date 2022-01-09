@@ -50,7 +50,7 @@ public RecoveredBlock(Block block, RecoveredElement parent, int bracketBalance){
 }
 @Override
 public RecoveredElement add(AbstractMethodDeclaration methodDeclaration, int bracketBalanceValue) {
-	if (this.parent != null && this.parent instanceof RecoveredMethod) {
+	if (this.parent instanceof RecoveredMethod) {
 		RecoveredMethod enclosingRecoveredMethod = (RecoveredMethod) this.parent;
 		if (enclosingRecoveredMethod.methodBody == this && enclosingRecoveredMethod.parent == null) {
 			resetPendingModifiers();
@@ -177,10 +177,8 @@ public RecoveredElement add(Statement stmt, int bracketBalanceValue, boolean del
 	return this;
 }
 boolean isEndKnown(Statement stmt) {
-	if (stmt instanceof ForeachStatement) {
-		if (((ForeachStatement) stmt).action == null)
-			return false;
-	}
+	if (stmt instanceof ForeachStatement && ((ForeachStatement) stmt).action == null)
+    	return false;
 	return stmt.sourceEnd != 0;
 }
 /*
@@ -222,16 +220,14 @@ public RecoveredElement addAnnotationName(int identifierPtr, int identifierLengt
 	if (this.pendingAnnotations == null) {
 		this.pendingAnnotations = new RecoveredAnnotation[5];
 		this.pendingAnnotationCount = 0;
-	} else {
-		if (this.pendingAnnotationCount == this.pendingAnnotations.length) {
-			System.arraycopy(
-				this.pendingAnnotations,
-				0,
-				(this.pendingAnnotations = new RecoveredAnnotation[2 * this.pendingAnnotationCount]),
-				0,
-				this.pendingAnnotationCount);
-		}
-	}
+	} else if (this.pendingAnnotationCount == this.pendingAnnotations.length) {
+    	System.arraycopy(
+    		this.pendingAnnotations,
+    		0,
+    		this.pendingAnnotations = new RecoveredAnnotation[2 * this.pendingAnnotationCount],
+    		0,
+    		this.pendingAnnotationCount);
+    }
 
 	RecoveredAnnotation element = new RecoveredAnnotation(identifierPtr, identifierLengthPtr, annotationStart, this, bracketBalanceValue);
 
@@ -255,16 +251,14 @@ void attach(RecoveredStatement recoveredStatement) {
 	if (this.statements == null) {
 		this.statements = new RecoveredStatement[5];
 		this.statementCount = 0;
-	} else {
-		if (this.statementCount == this.statements.length) {
-			System.arraycopy(
-				this.statements,
-				0,
-				(this.statements = new RecoveredStatement[2 * this.statementCount]),
-				0,
-				this.statementCount);
-		}
-	}
+	} else if (this.statementCount == this.statements.length) {
+    	System.arraycopy(
+    		this.statements,
+    		0,
+    		this.statements = new RecoveredStatement[2 * this.statementCount],
+    		0,
+    		this.statementCount);
+    }
 	this.statements[this.statementCount++] = recoveredStatement;
 }
 void attachPendingModifiers(RecoveredAnnotation[] pendingAnnots, int pendingAnnotCount, int pendingMods, int pendingModsSourceStart) {
@@ -339,11 +333,9 @@ public Block updatedBlock(int depth, Set<TypeDeclaration> knownTypes){
 		if(lastBlock.blockDeclaration.sourceEnd == 0) {
 			lastBlock.blockDeclaration.sourceEnd = bodyEndValue;
 		}
-	} else if(!(lastStatement instanceof RecoveredType)){
-		if(lastStatement.statement.sourceEnd == 0) {
-			lastStatement.statement.sourceEnd = bodyEndValue;
-		}
-	}
+	} else if(!(lastStatement instanceof RecoveredType) && lastStatement.statement.sourceEnd == 0) {
+    	lastStatement.statement.sourceEnd = bodyEndValue;
+    }
 
 	int lastEnd = this.blockDeclaration.sourceStart;
 
@@ -355,10 +347,8 @@ public Block updatedBlock(int depth, Set<TypeDeclaration> knownTypes){
 			for (int j = 0; j < i; j++) {
 				if (updatedStatements[j] instanceof LocalDeclaration) {
 					LocalDeclaration local = (LocalDeclaration) updatedStatements[j];
-					if (local.initialization != null) {
-						if (updatedStatement.sourceStart >= local.initialization.sourceStart && updatedStatement.sourceEnd <= local.initialization.sourceEnd)
-							continue next;
-					}
+					if (local.initialization != null && updatedStatement.sourceStart >= local.initialization.sourceStart && updatedStatement.sourceEnd <= local.initialization.sourceEnd)
+                    	continue next;
 				}
 			}
 			updatedStatements[updatedCount++] = updatedStatement;
@@ -373,11 +363,9 @@ public Block updatedBlock(int depth, Set<TypeDeclaration> knownTypes){
 				if(typeDeclaration.declarationSourceEnd > lastEnd) {
 					lastEnd = typeDeclaration.declarationSourceEnd;
 				}
-			} else {
-				if (updatedStatement.sourceEnd > lastEnd) {
-					lastEnd = updatedStatement.sourceEnd;
-				}
-			}
+			} else if (updatedStatement.sourceEnd > lastEnd) {
+            	lastEnd = updatedStatement.sourceEnd;
+            }
 		}
 	}
 	if (updatedCount == 0) return null; // not interesting block
@@ -414,7 +402,7 @@ public Statement updatedStatement(int depth, Set<TypeDeclaration> knownTypes){
  */
 @Override
 public RecoveredElement updateOnClosingBrace(int braceStart, int braceEnd){
-	if ((--this.bracketBalance <= 0) && (this.parent != null)){
+	if (--this.bracketBalance <= 0 && this.parent != null){
 		this.updateSourceEndIfNecessary(braceStart, braceEnd);
 
 		/* if the block is the method body, then it closes the method too */
@@ -460,9 +448,9 @@ public RecoveredElement add(FieldDeclaration fieldDeclaration, int bracketBalanc
 	/* local variables inside method can only be final and non void */
 	char[][] fieldTypeName;
 	if ((fieldDeclaration.modifiers & ~ClassFileConstants.AccFinal) != 0 // local var can only be final
-		|| (fieldDeclaration.type == null) // initializer
-		|| ((fieldTypeName = fieldDeclaration.type.getTypeName()).length == 1 // non void
-			&& CharOperation.equals(fieldTypeName[0], TypeBinding.VOID.sourceName()))){
+		|| fieldDeclaration.type == null // initializer
+		|| (fieldTypeName = fieldDeclaration.type.getTypeName()).length == 1 // non void
+			&& CharOperation.equals(fieldTypeName[0], TypeBinding.VOID.sourceName())){
 		this.updateSourceEndIfNecessary(previousAvailableLineEnd(fieldDeclaration.declarationSourceStart - 1));
 		return this.parent.add(fieldDeclaration, bracketBalanceValue);
 	}

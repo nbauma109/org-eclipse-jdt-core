@@ -49,7 +49,7 @@ public class Convert {
 		// the highest indexed array bucket.
 
 		for (int i = 0; i < bytes.length; i++) {
-			bytes[(bytes.length - 1) - i] = (byte) value;
+			bytes[bytes.length - 1 - i] = (byte) value;
 			value >>>= 8;
 		}
 

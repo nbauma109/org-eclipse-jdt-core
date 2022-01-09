@@ -92,7 +92,7 @@ public class ResourceComparator implements IElementComparator, ICoreConstants {
 			return ((ResourceInfo) o2).isSet(M_PHANTOM) ? IResourceDelta.ADDED_PHANTOM : IResourceDelta.ADDED;
 		if (o2 == null)
 			return ((ResourceInfo) o1).isSet(M_PHANTOM) ? IResourceDelta.REMOVED_PHANTOM : IResourceDelta.REMOVED;
-		if (!(o1 instanceof ResourceInfo && o2 instanceof ResourceInfo))
+		if (!(o1 instanceof ResourceInfo) || !(o2 instanceof ResourceInfo))
 			return IResourceDelta.NO_CHANGE;
 		ResourceInfo oldElement = (ResourceInfo) o1;
 		ResourceInfo newElement = (ResourceInfo) o2;
@@ -155,7 +155,7 @@ public class ResourceComparator implements IElementComparator, ICoreConstants {
 			return false;
 		long oldStamp = oldElement.getModificationStamp();
 		long newStamp = newElement.getModificationStamp();
-		return (oldStamp == -1 || newStamp == -1) && (oldStamp != newStamp);
+		return (oldStamp == -1 || newStamp == -1) && oldStamp != newStamp;
 	}
 
 	private boolean compareMarkers(ResourceInfo oldElement, ResourceInfo newElement) {

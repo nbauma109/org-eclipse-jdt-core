@@ -89,14 +89,10 @@ static char[] getSearchFullQualifiedSearchName(IBinaryType type) {
 		return null;
 	}
 	char[] binaryName = convertClassFileFormat(type.getName());
-	// XXX textual replacement of "$" is not sufficient for classes/packages which contain "$" in their simple name:
-	// nevertheless this at least solves finding normal named inner Types in .class files
-	// "$" is rarely used since jls-3.8 states:
-	// "the $ sign should be used only in mechanically generated source code or, rarely, to access pre-existing names on legacy systems"
-	char[] qualifiedName = CharOperation.replaceOnCopy(binaryName, '$', '.');
+	
 	// Note on how a type name is calculated for the UI:
 	// @see org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore#getTypeLabel(ITypeBinding, long, StringBuffer)
-	return qualifiedName;
+	return CharOperation.replaceOnCopy(binaryName, '$', '.');
 }
 
 private  boolean checkAnnotation(IBinaryAnnotation annotation, TypeReferencePattern pattern) {
@@ -105,22 +101,18 @@ private  boolean checkAnnotation(IBinaryAnnotation annotation, TypeReferencePatt
 	}
 	IBinaryElementValuePair[] valuePairs = annotation.getElementValuePairs();
 	if (valuePairs != null) {
-		for (int j=0, vpLength=valuePairs.length; j<vpLength; j++) {
-			IBinaryElementValuePair valuePair = valuePairs[j];
+		for (IBinaryElementValuePair valuePair : valuePairs) {
 			Object pairValue = valuePair.getValue();
-			if (pairValue instanceof IBinaryAnnotation) {
-				if (checkAnnotation((IBinaryAnnotation) pairValue, pattern)) {
-					return true;
-				}
-			}
+			if (pairValue instanceof IBinaryAnnotation && checkAnnotation((IBinaryAnnotation) pairValue, pattern)) {
+            	return true;
+            }
 		}
 	}
 	return false;
 }
 private boolean checkAnnotations(TypeReferencePattern pattern, IBinaryAnnotation[] annotations, long tagBits) {
 	if (annotations != null) {
-		for (int a=0, length=annotations.length; a<length; a++) {
-			IBinaryAnnotation annotation = annotations[a];
+		for (IBinaryAnnotation annotation : annotations) {
 			if (checkAnnotation(annotation, pattern)) {
 				return true;
 			}
@@ -132,8 +124,7 @@ private boolean checkAnnotationTypeReference(char[] fullyQualifiedName, TypeRefe
 	return checkTypeName(pattern.simpleName, pattern.qualification, fullyQualifiedName, pattern.isCaseSensitive, pattern.isCamelCase);
 }
 private boolean checkDeclaringType(IBinaryType enclosingBinaryType, char[] simpleName, char[] qualification, boolean isCaseSensitive, boolean isCamelCase) {
-	if (simpleName == null && qualification == null) return true;
-	if (enclosingBinaryType == null) return true;
+	if (simpleName == null && qualification == null || enclosingBinaryType == null) return true;
 
 	char[] declaringTypeName = convertClassFileFormat(enclosingBinaryType.getName());
 	return checkTypeName(simpleName, qualification, declaringTypeName, isCaseSensitive, isCamelCase);
@@ -154,7 +145,7 @@ private boolean checkStandardAnnotations(long annotationTagBits, TypeReferencePa
 	if ((annotationTagBits & TagBits.AnnotationTargetMASK) != 0) {
 		char[][] compoundName = TypeConstants.JAVA_LANG_ANNOTATION_TARGET;
 		if (checkAnnotationTypeReference(CharOperation.concatWith(compoundName, '.'), pattern) ||
-			((annotationTagBits & TARGET_ANNOTATION_BITS) != 0 && checkAnnotationTypeReference(JAVA_LANG_ANNOTATION_ELEMENTTYPE, pattern))) {
+			(annotationTagBits & TARGET_ANNOTATION_BITS) != 0 && checkAnnotationTypeReference(JAVA_LANG_ANNOTATION_ELEMENTTYPE, pattern)) {
 			return true;
 		}
 	}
@@ -383,8 +374,8 @@ private void matchAnnotations(SearchPattern pattern, MatchLocator locator, Class
 			break;
 		case OR_PATTERN:
 			SearchPattern[] patterns = ((OrPattern) pattern).patterns;
-			for (int i = 0, length = patterns.length; i < length; i++) {
-				matchAnnotations(patterns[i], locator, classFile, binaryType);
+			for (SearchPattern pattern2 : patterns) {
+				matchAnnotations(pattern2, locator, classFile, binaryType);
 			}
 			// $FALL-THROUGH$ - fall through default to return
 		default:
@@ -407,8 +398,7 @@ private void matchAnnotations(SearchPattern pattern, MatchLocator locator, Class
 	// Look for references in methods annotations
 	IBinaryMethod[] methods = binaryType.getMethods();
 	if (methods != null) {
-		for (int i = 0, max = methods.length; i < max; i++) {
-			IBinaryMethod method = methods[i];
+		for (IBinaryMethod method : methods) {
 			if (checkAnnotations(typeReferencePattern, method.getAnnotations(), method.getTagBits())) {
 					binaryTypeBinding = locator.cacheBinaryType(classFileBinaryType, binaryType);
 					IMethod methodHandle = classFileBinaryType.getMethod(
@@ -425,8 +415,7 @@ private void matchAnnotations(SearchPattern pattern, MatchLocator locator, Class
 	// Look for references in fields annotations
 	IBinaryField[] fields = binaryType.getFields();
 	if (fields != null) {
-		for (int i = 0, max = fields.length; i < max; i++) {
-			IBinaryField field = fields[i];
+		for (IBinaryField field : fields) {
 			if (checkAnnotations(typeReferencePattern, field.getAnnotations(), field.getTagBits())) {
 					IField fieldHandle = classFileBinaryType.getField(new String(field.getName()));
 					TypeReferenceMatch match = new TypeReferenceMatch(fieldHandle, SearchMatch.A_ACCURATE, -1, 0, false, locator.getParticipant(), locator.currentPossibleMatch.resource);
@@ -455,18 +444,17 @@ boolean matchBinary(SearchPattern pattern, Object binaryInfo, IBinaryType enclos
 			return matchTypeDeclaration((TypeDeclarationPattern) pattern, binaryInfo, enclosingBinaryType);
 		case OR_PATTERN :
 			SearchPattern[] patterns = ((OrPattern) pattern).patterns;
-			for (int i = 0, length = patterns.length; i < length; i++)
-				if (matchBinary(patterns[i], binaryInfo, enclosingBinaryType)) return true;
+			for (SearchPattern pattern2 : patterns)
+                if (matchBinary(pattern2, binaryInfo, enclosingBinaryType)) return true;
 	}
 	return false;
 }
 boolean matchConstructor(ConstructorPattern pattern, Object binaryInfo, IBinaryType enclosingBinaryType) {
-	if (!pattern.findDeclarations) return false; // only relevant when finding declarations
-	if (!(binaryInfo instanceof IBinaryMethod)) return false;
+	 // only relevant when finding declarations
+	if (!pattern.findDeclarations || !(binaryInfo instanceof IBinaryMethod)) return false;
 
 	IBinaryMethod method = (IBinaryMethod) binaryInfo;
-	if (!method.isConstructor()) return false;
-	if (!checkDeclaringType(enclosingBinaryType, pattern.declaringSimpleName, pattern.declaringQualification, pattern.isCaseSensitive(), pattern.isCamelCase()))
+	if (!method.isConstructor() || !checkDeclaringType(enclosingBinaryType, pattern.declaringSimpleName, pattern.declaringQualification, pattern.isCaseSensitive(), pattern.isCamelCase()))
 		return false;
 	if (pattern.parameterSimpleNames != null) {
 		char[] methodDescriptor = convertClassFileFormat(method.getMethodDescriptor());
@@ -475,24 +463,22 @@ boolean matchConstructor(ConstructorPattern pattern, Object binaryInfo, IBinaryT
 	return true;
 }
 boolean matchField(FieldPattern pattern, Object binaryInfo, IBinaryType enclosingBinaryType) {
-	if (!pattern.findDeclarations) return false; // only relevant when finding declarations
-	if (!(binaryInfo instanceof IBinaryField)) return false;
+	 // only relevant when finding declarations
+	if (!pattern.findDeclarations || !(binaryInfo instanceof IBinaryField)) return false;
 
 	IBinaryField field = (IBinaryField) binaryInfo;
-	if (!pattern.matchesName(pattern.name, field.getName())) return false;
-	if (!checkDeclaringType(enclosingBinaryType, pattern.declaringSimpleName, pattern.declaringQualification, pattern.isCaseSensitive(), pattern.isCamelCase()))
+	if (!pattern.matchesName(pattern.name, field.getName()) || !checkDeclaringType(enclosingBinaryType, pattern.declaringSimpleName, pattern.declaringQualification, pattern.isCaseSensitive(), pattern.isCamelCase()))
 		return false;
 
 	char[] fieldTypeSignature = Signature.toCharArray(convertClassFileFormat(field.getTypeName()));
 	return checkTypeName(pattern.typeSimpleName, pattern.typeQualification, fieldTypeSignature, pattern.isCaseSensitive(), pattern.isCamelCase());
 }
 boolean matchMethod(MethodPattern pattern, Object binaryInfo, IBinaryType enclosingBinaryType) {
-	if (!pattern.findDeclarations) return false; // only relevant when finding declarations
-	if (!(binaryInfo instanceof IBinaryMethod)) return false;
+	 // only relevant when finding declarations
+	if (!pattern.findDeclarations || !(binaryInfo instanceof IBinaryMethod)) return false;
 
 	IBinaryMethod method = (IBinaryMethod) binaryInfo;
-	if (!pattern.matchesName(pattern.selector, method.getSelector())) return false;
-	if (!checkDeclaringType(enclosingBinaryType, pattern.declaringSimpleName, pattern.declaringQualification, pattern.isCaseSensitive(), pattern.isCamelCase()))
+	if (!pattern.matchesName(pattern.selector, method.getSelector()) || !checkDeclaringType(enclosingBinaryType, pattern.declaringSimpleName, pattern.declaringQualification, pattern.isCaseSensitive(), pattern.isCamelCase()))
 		return false;
 
 	// look at return type only if declaring type is not specified
@@ -525,8 +511,8 @@ boolean matchSuperTypeReference(SuperTypeReferencePattern pattern, Object binary
 	if (pattern.superRefKind != SuperTypeReferencePattern.ONLY_SUPER_CLASSES) {
 		char[][] superInterfaces = type.getInterfaceNames();
 		if (superInterfaces != null) {
-			for (int i = 0, max = superInterfaces.length; i < max; i++) {
-				char[] superInterfaceName = convertClassFileFormat(superInterfaces[i]);
+			for (char[] element : superInterfaces) {
+				char[] superInterfaceName = convertClassFileFormat(element);
 				if (checkTypeName(pattern.superSimpleName, pattern.superQualification, superInterfaceName, pattern.isCaseSensitive(), pattern.isCamelCase()))
 					return true;
 			}
@@ -541,7 +527,7 @@ boolean matchTypeDeclaration(TypeDeclarationPattern pattern, Object binaryInfo, 
 	char[] fullyQualifiedTypeName = getSearchFullQualifiedSearchName(type);
 	boolean qualifiedPattern = pattern instanceof QualifiedTypeDeclarationPattern;
 	if (pattern.enclosingTypeNames == null || qualifiedPattern) {
-		char[] simpleName = (pattern.getMatchMode() == SearchPattern.R_PREFIX_MATCH)
+		char[] simpleName = pattern.getMatchMode() == SearchPattern.R_PREFIX_MATCH
 			? CharOperation.concat(pattern.simpleName, IIndexConstants.ONE_STAR)
 			: pattern.simpleName;
 		char[] pkg = qualifiedPattern ? ((QualifiedTypeDeclarationPattern)pattern).qualification : pattern.pkg;

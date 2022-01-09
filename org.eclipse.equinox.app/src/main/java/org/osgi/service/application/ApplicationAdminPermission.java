@@ -106,7 +106,7 @@ public class ApplicationAdminPermission extends Permission {
 			throw new NullPointerException( "Action string cannot be null!" );
 		
 		this.applicationDescriptor = null;
-		this.filter = (filter == null ? "*" : filter);
+		this.filter = filter == null ? "*" : filter;
 		this.actions = actions;
 
 		if( !filter.equals( "*" ) && !filter.equals( "<<SELF>>" ) )
@@ -182,10 +182,7 @@ public class ApplicationAdminPermission extends Permission {
 	 */
 	@Override
 	public boolean implies(Permission otherPermission) {
-		if( otherPermission == null )
-			return false;
-				
-		if(!(otherPermission instanceof ApplicationAdminPermission))
+		if(otherPermission == null || !(otherPermission instanceof ApplicationAdminPermission))
 			return false;
 
 		ApplicationAdminPermission other = (ApplicationAdminPermission) otherPermission;
@@ -195,10 +192,9 @@ public class ApplicationAdminPermission extends Permission {
 				return false;
 			
 			if( filter.equals( "<<SELF>>") ) {
-				if( other.applicationID == null )
-					return false; /* it cannot be, this might be a bug */
+				 /* it cannot be, this might be a bug */
 			
-				if( !other.applicationID.equals( other.applicationDescriptor.getApplicationId() ) )
+				if( other.applicationID == null || !other.applicationID.equals( other.applicationDescriptor.getApplicationId() ) )
 					return false;
 			}
 			else {
@@ -207,10 +203,7 @@ public class ApplicationAdminPermission extends Permission {
 				props.put( "signer", new SignerWrapper( other.applicationDescriptor ) );
 								
 				Filter flt = getFilter();
-				if( flt == null )
-					return false;
-			
-				if( !flt.match( props ) )
+				if( flt == null || !flt.match( props ) )
 					return false;
 			}
 		}
@@ -258,11 +251,11 @@ public class ApplicationAdminPermission extends Permission {
 	@Override
 	public int hashCode() {
 		int hc = 0;
-		for( int i=0; i != actionsVector.size(); i++ )
-			hc ^= actionsVector.get( i ).hashCode();
-		hc ^= (null == this.filter )? 0 : this.filter.hashCode();
-		hc ^= (null == this.applicationDescriptor) ? 0 : this.applicationDescriptor.hashCode();
-		hc ^= (null == this.applicationID) ? 0 : this.applicationID.hashCode();
+		for (Object element : actionsVector)
+            hc ^= element.hashCode();
+		hc ^= null == this.filter? 0 : this.filter.hashCode();
+		hc ^= null == this.applicationDescriptor ? 0 : this.applicationDescriptor.hashCode();
+		hc ^= null == this.applicationID ? 0 : this.applicationID.hashCode();
 		return hc;
 	}
 
@@ -307,13 +300,6 @@ public class ApplicationAdminPermission extends Permission {
 	private static class SignerWrapper extends Object {
 		private String pattern;
 		private ApplicationDescriptor appDesc;
-		
-		/**
-		 * @param pattern
-		 */
-		public SignerWrapper(String pattern) {
-			this.pattern = pattern;    			
-		}
 		
 		SignerWrapper(ApplicationDescriptor appDesc) {
 			this.appDesc = appDesc;

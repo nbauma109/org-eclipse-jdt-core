@@ -32,6 +32,7 @@ import org.osgi.framework.ServiceEvent;
  * @deprecated As of 1.1. Replaced by {@link EventListenerHook}.
  * @author $Id: b8c500c6f09cc25e3a6294489b7e6a1d458d5e6f $
  */
+@Deprecated
 @ConsumerType
 public interface EventHook {
 	/**

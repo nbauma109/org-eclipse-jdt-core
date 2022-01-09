@@ -61,12 +61,12 @@ public class CompilationUnit extends ASTNode {
 	/**
 	 * Canonical empty list of messages.
 	 */
-	private static final Message[] EMPTY_MESSAGES = new Message[0];
+	private static final Message[] EMPTY_MESSAGES = {};
 
 	/**
 	 * Canonical empty list of problems.
 	 */
-	private static final IProblem[] EMPTY_PROBLEMS = new IProblem[0];
+	private static final IProblem[] EMPTY_PROBLEMS = {};
 
 	/**
 	 * The "imports" structural property of this node type (element type: {@link ImportDeclaration}).
@@ -147,8 +147,7 @@ public class CompilationUnit extends ASTNode {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel < AST.JLS9_INTERNAL)
 			return PROPERTY_DESCRIPTORS;
-		else
-			return PROPERTY_DESCRIPTORS_9_0;
+        return PROPERTY_DESCRIPTORS_9_0;
 	}
 
 	/**
@@ -311,9 +310,8 @@ public class CompilationUnit extends ASTNode {
 		final int currentLineEnd = line == length + 1 ? getStartPosition() + getLength() - 1 :	this.lineEndTable[line - 1];
 		if (offsetForLine > currentLineEnd) {
 			return -1;
-		} else {
-			return position - offsetForLine;
 		}
+        return position - offsetForLine;
 	}
 
 	/**
@@ -502,9 +500,8 @@ public class CompilationUnit extends ASTNode {
 		if (this.commentMapper == null || node.getAST() != getAST()) {
 			// fall back: use best info available
 			return node.getLength();
-		} else {
-			return this.commentMapper.getExtendedLength(node);
 		}
+        return this.commentMapper.getExtendedLength(node);
 	}
 
 	/**
@@ -526,9 +523,8 @@ public class CompilationUnit extends ASTNode {
 		if (this.commentMapper == null || node.getAST() != getAST()) {
 			// fall back: use best info available
 			return node.getStartPosition();
-		} else {
-			return this.commentMapper.getExtendedStartPosition(node);
 		}
+        return this.commentMapper.getExtendedStartPosition(node);
 	}
 
 	/**
@@ -634,7 +630,8 @@ public class CompilationUnit extends ASTNode {
 		if (line == 1) {
 			final int endOfLine = this.lineEndTable[0];
 			return column > endOfLine ? -1 : column;
-		} else if( line > length + 1 ) {
+		}
+        if( line > length + 1 ) {
 			// greater than the number of lines in the source string.
 			return -1;
 		}
@@ -644,11 +641,10 @@ public class CompilationUnit extends ASTNode {
 		 // previousLineOffset + 1 is the first character of the current line
 		final int offsetForLine = previousLineOffset + 1;
 		final int currentLineEnd = line == length + 1 ? getStartPosition() + getLength() - 1 : this.lineEndTable[line-1];
-		if ((offsetForLine + column) > currentLineEnd) {
+		if (offsetForLine + column > currentLineEnd) {
 			return -1;
-		} else {
-			return offsetForLine + column;
 		}
+        return offsetForLine + column;
 	}
 
 	/**
@@ -773,18 +769,16 @@ public class CompilationUnit extends ASTNode {
 		if (property == MODULE_PROPERTY) {
 			if (get) {
 				return getModule();
-			} else {
-				setModule((ModuleDeclaration) child);
-				return null;
 			}
+            setModule((ModuleDeclaration) child);
+            return null;
 		}
 		if (property == PACKAGE_PROPERTY) {
 			if (get) {
 				return getPackage();
-			} else {
-				setPackage((PackageDeclaration) child);
-				return null;
 			}
+            setPackage((PackageDeclaration) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -817,7 +811,8 @@ public class CompilationUnit extends ASTNode {
 	 * @see ASTParser
 	 * @see #getLineNumber(int)
 	 */
-	public int lineNumber(int position) {
+	@Deprecated
+    public int lineNumber(int position) {
 		int lineNumber = getLineNumber(position);
 		return lineNumber < 1 ? 1 : lineNumber;
 	}
@@ -868,9 +863,8 @@ public class CompilationUnit extends ASTNode {
 			if (position >= getStartPosition() + getLength()) {
 				// this is beyond the end of the source length
 				return -1;
-			} else {
-				return length + 1;
 			}
+            return length + 1;
 		}
 		// assert lineEndTable[low]  < position <= lineEndTable[hi]
 		// && low == 0 && hi == length - 1 && low < hi
@@ -1007,8 +1001,7 @@ public class CompilationUnit extends ASTNode {
 			this.optionalCommentTable = null;
 		} else {
 			int nextAvailablePosition = 0;
-			for (int i = 0; i < commentTable.length; i++) {
-				Comment comment = commentTable[i];
+			for (Comment comment : commentTable) {
 				if (comment == null) {
 					throw new IllegalArgumentException();
 				}
@@ -1143,8 +1136,8 @@ public class CompilationUnit extends ASTNode {
 		size += this.types.listSize();
 		// include disconnected comments
 		if (this.optionalCommentList != null) {
-			for (int i = 0; i < this.optionalCommentList.size(); i++) {
-				Comment comment = (Comment) this.optionalCommentList.get(i);
+			for (Object element : this.optionalCommentList) {
+				Comment comment = (Comment) element;
 				if (comment != null && comment.getParent() == null) {
 					size += comment.treeSize();
 				}

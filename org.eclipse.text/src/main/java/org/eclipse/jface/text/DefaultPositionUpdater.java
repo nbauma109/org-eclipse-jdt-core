@@ -132,18 +132,14 @@ public class DefaultPositionUpdater implements IPositionUpdater {
 			if (yoursEnd <= myEnd)
 				fPosition.length -= fLength;
 			else
-				fPosition.length -= (myEnd - yoursStart +1);
+				fPosition.length -= myEnd - yoursStart +1;
 
-		} else if (yoursStart < myStart) {
-
-			if (yoursEnd < myStart)
-				fPosition.offset -= fLength;
-			else {
-				fPosition.offset -= (myStart - yoursStart);
-				fPosition.length -= (yoursEnd - myStart +1);
-			}
-
-		}
+		} else if (yoursEnd < myStart)
+        	fPosition.offset -= fLength;
+        else {
+        	fPosition.offset -= myStart - yoursStart;
+        	fPosition.length -= yoursEnd - myStart +1;
+        }
 
 		// validate position to allowed values
 		if (fPosition.offset < 0)
@@ -186,7 +182,7 @@ public class DefaultPositionUpdater implements IPositionUpdater {
 	 */
 	protected boolean notDeleted() {
 
-		if (fOffset < fPosition.offset && (fPosition.offset + fPosition.length < fOffset + fLength)) {
+		if (fOffset < fPosition.offset && fPosition.offset + fPosition.length < fOffset + fLength) {
 
 			fPosition.delete();
 
@@ -209,7 +205,7 @@ public class DefaultPositionUpdater implements IPositionUpdater {
 
 			fOffset= event.getOffset();
 			fLength= event.getLength();
-			fReplaceLength= (event.getText() == null ? 0 : event.getText().length());
+			fReplaceLength= event.getText() == null ? 0 : event.getText().length();
 			fDocument= event.getDocument();
 
 			Position[] category= fDocument.getPositions(fCategory);

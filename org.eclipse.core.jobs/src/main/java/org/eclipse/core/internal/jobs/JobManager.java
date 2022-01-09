@@ -695,10 +695,8 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 		long rescheduleDelay = InternalJob.T_NONE;
 		synchronized (lock) {
 			//if the job is finishing asynchronously, there is nothing more to do for now
-			if (result == Job.ASYNC_FINISH)
-				return;
 			//if job is not known then it cannot be done
-			if (job.getState() == Job.NONE)
+			if (result == Job.ASYNC_FINISH || job.getState() == Job.NONE)
 				return;
 			if (JobManager.DEBUG && notify)
 				JobManager.debug("Ending job: " + job); //$NON-NLS-1$
@@ -837,13 +835,9 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 			InternalJob previous = runningJob.previous();
 			while (previous != null) {
 				// ignore jobs of lower priority (higher priority value means lower priority)
-				if (previous.getPriority() < runningJob.getPriority()) {
-					if (!previous.isSystem())
-						return true;
-					// implicit jobs should interrupt unless they act on behalf of system jobs
-					if (previous instanceof ThreadJob && ((ThreadJob) previous).shouldInterrupt())
-						return true;
-				}
+				// implicit jobs should interrupt unless they act on behalf of system jobs
+                if (previous.getPriority() < runningJob.getPriority() && (!previous.isSystem() || previous instanceof ThreadJob && ((ThreadJob) previous).shouldInterrupt()))
+                	return true;
 				previous = previous.previous();
 			}
 			// consider threads waiting on IJobManager#beginRule
@@ -886,10 +880,8 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 		final Semaphore barrier;
 		synchronized (lock) {
 			int state = job.getState();
-			if (state == Job.NONE)
-				return true;
 			//don't join a waiting or sleeping job when suspended (deadlock risk)
-			if (suspended && state != Job.RUNNING)
+			if (state == Job.NONE || suspended && state != Job.RUNNING)
 				return true;
 			//it's an error for a job to join itself
 			if (state == Job.RUNNING && job.getThread() == Thread.currentThread())
@@ -984,10 +976,8 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 					@Override
 					public void scheduled(IJobChangeEvent event) {
 						//don't add to list if job is being rescheduled
-						if (((JobChangeEvent) event).reschedule)
-							return;
 						//if job manager is suspended we only wait for running jobs
-						if (isSuspended())
+						if (((JobChangeEvent) event).reschedule || isSuspended())
 							return;
 						Job job = event.getJob();
 						if (family == null || job.belongsTo(family)) {
@@ -1063,7 +1053,7 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 					}
 				}
 				synchronized (lock) {
-					if ((suspended && jobGroup.getRunningJobsCount() == 0))
+					if (suspended && jobGroup.getRunningJobsCount() == 0)
 						break;
 				}
 				if (jobGroup.doJoin(remainingTime))
@@ -1093,16 +1083,14 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 	 * NullProgressMonitor if no default monitor is available.
 	 */
 	private IProgressMonitor monitorFor(IProgressMonitor monitor) {
-		if (monitor == null || (monitor instanceof NullProgressMonitor)) {
-			if (progressProvider != null) {
-				try {
-					monitor = progressProvider.getDefaultMonitor();
-				} catch (Exception e) {
-					String msg = NLS.bind(JobMessages.meta_pluginProblems, JobManager.PI_JOBS);
-					RuntimeLog.log(new Status(IStatus.ERROR, JobManager.PI_JOBS, JobManager.PLUGIN_ERROR, msg, e));
-				}
-			}
-		}
+		if ((monitor == null || monitor instanceof NullProgressMonitor) && progressProvider != null) {
+        	try {
+        		monitor = progressProvider.getDefaultMonitor();
+        	} catch (Exception e) {
+        		String msg = NLS.bind(JobMessages.meta_pluginProblems, JobManager.PI_JOBS);
+        		RuntimeLog.log(new Status(IStatus.ERROR, JobManager.PI_JOBS, JobManager.PLUGIN_ERROR, msg, e));
+        	}
+        }
 
 		if (monitor == null)
 			return new NullProgressMonitor();
@@ -1149,7 +1137,7 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 					Assert.isTrue(job.previous() == null);
 					blocker.addLast(job);
 
-				} else if (jobGroup == null || jobGroup.getMaxThreads() == 0 || (jobGroup.getState() != JobGroup.CANCELING && jobGroup.getRunningJobsCount() < jobGroup.getMaxThreads())) {
+				} else if (jobGroup == null || jobGroup.getMaxThreads() == 0 || jobGroup.getState() != JobGroup.CANCELING && jobGroup.getRunningJobsCount() < jobGroup.getMaxThreads()) {
 					break;
 				}
 				// skip this job as either this job is blocked on another job or
@@ -1181,8 +1169,7 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 	 * @see System#nanoTime()
 	 */
 	public long now() {
-		long now = currentTimeInMs.updateAndGet(lastValue -> Math.max(lastValue, lifeTimeInMs()));
-		return now;
+		return currentTimeInMs.updateAndGet(lastValue -> Math.max(lastValue, lifeTimeInMs()));
 	}
 
 	/**
@@ -1329,7 +1316,7 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 		InternalJob job = firstJob;
 		do {
 			//note that job state cannot be NONE at this point
-			if ((family == null || job.belongsTo(family)) && ((job.getState() & stateMask) != 0))
+			if ((family == null || job.belongsTo(family)) && (job.getState() & stateMask) != 0)
 				members.add(job);
 			job = job.previous();
 		} while (job != null && job != firstJob);
@@ -1383,7 +1370,7 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 			//if the job is waiting to run, re-shuffle the queue
 			if (job.getState() == Job.WAITING) {
 				long oldStart = job.getStartTime();
-				job.setStartTime(oldStart + (delayFor(newPriority) - delayFor(oldPriority)));
+				job.setStartTime(oldStart + delayFor(newPriority) - delayFor(oldPriority));
 				waiting.resort(job);
 			}
 		}
@@ -1529,7 +1516,7 @@ public class JobManager implements IJobManager, DebugOptionsListener {
 					}
 				}
 
-				if ((job.getRule() != null) && !(job instanceof ThreadJob))
+				if (job.getRule() != null && !(job instanceof ThreadJob))
 					getLockManager().removeLockThread(currentThread, job.getRule());
 			}
 		}

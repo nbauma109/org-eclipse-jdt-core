@@ -59,7 +59,7 @@ public class GapTextStore implements ITextStore {
 	private final float fSizeMultiplier;
 
 	/** The store's content */
-	private char[] fContent= new char[0];
+	private char[] fContent= {};
 	/** Starting index of the gap */
 	private int fGapStart= 0;
 	/** End index of the gap */

@@ -41,7 +41,6 @@ public final class NodeInfoStore {
 	private Set collapsedNodes;
 
 	public NodeInfoStore(AST ast) {
-		super();
 		this.ast= ast;
 		this.placeholderNodes= null;
 		this.collapsedNodes= null;
@@ -53,7 +52,7 @@ public final class NodeInfoStore {
 	 * @param placeholder The placeholder node that acts for the string content.
 	 * @param code The string content.
 	 */
-	public final void markAsStringPlaceholder(ASTNode placeholder, String code) {
+	public void markAsStringPlaceholder(ASTNode placeholder, String code) {
 		StringPlaceholderData data= new StringPlaceholderData();
 		data.code= code;
 		setPlaceholderData(placeholder, data);
@@ -64,7 +63,7 @@ public final class NodeInfoStore {
 	 * @param target The node at the target site. Can be a placeholder node but also the source node itself.
 	 * @param copySource The info at the source site.
 	 */
-	public final void markAsCopyTarget(ASTNode target, CopySourceInfo copySource) {
+	public void markAsCopyTarget(ASTNode target, CopySourceInfo copySource) {
 		CopyPlaceholderData data= new CopyPlaceholderData();
 		data.copySource= copySource;
 		setPlaceholderData(target, data);
@@ -75,7 +74,7 @@ public final class NodeInfoStore {
 	 * @param nodeType Type of the node to create. Use the type constants in {@link NodeInfoStore}.
 	 * @return Returns a place holder node.
 	 */
-	public final ASTNode newPlaceholderNode(int nodeType) {
+	public ASTNode newPlaceholderNode(int nodeType) {
 		try {
 			ASTNode node= this.ast.createInstance(nodeType);
 			switch (node.getNodeType()) {

@@ -129,8 +129,7 @@ public class ForeachStatement extends Statement {
 			}
 		}
 		FlowInfo exitBranch;
-		if (!(this.action == null || (this.action.isEmptyBlock()
-				&& currentScope.compilerOptions().complianceLevel <= ClassFileConstants.JDK1_3))) {
+		if (this.action != null && (!this.action.isEmptyBlock() || currentScope.compilerOptions().complianceLevel > ClassFileConstants.JDK1_3)) {
 
 			if (this.action.complainIfUnreachable(actionInfo, this.scope, initialComplaintLevel, true) < Statement.COMPLAINED_UNREACHABLE) {
 				actionInfo = this.action.analyseCode(this.scope, loopingContext, actionInfo).unconditionalCopy();
@@ -163,7 +162,7 @@ public class ForeachStatement extends Statement {
 		// element variable is not used
 		final boolean hasEmptyAction = this.action == null
 		|| this.action.isEmptyBlock()
-		|| ((this.action.bits & IsUsefulEmptyStatement) != 0);
+		|| (this.action.bits & IsUsefulEmptyStatement) != 0;
 
 		switch(this.kind) {
 			case ARRAY :
@@ -221,7 +220,7 @@ public class ForeachStatement extends Statement {
 		int pc = codeStream.position;
 		final boolean hasEmptyAction = this.action == null
 			|| this.action.isEmptyBlock()
-			|| ((this.action.bits & IsUsefulEmptyStatement) != 0);
+			|| (this.action.bits & IsUsefulEmptyStatement) != 0;
 
 		if (hasEmptyAction
 				&& this.elementVariable.binding.resolvedPosition == -1
@@ -442,7 +441,8 @@ public class ForeachStatement extends Statement {
 		}
 		if (collectionType.isArrayType()) { // for(E e : E[])
 			return ((ArrayBinding) collectionType).elementsType();
-		} else if (collectionType instanceof ReferenceBinding) {
+		}
+        if (collectionType instanceof ReferenceBinding) {
 			ReferenceBinding iterableType = collectionType.findSuperTypeOriginatingFrom(T_JavaLangIterable, false /*Iterable is not a class*/);
 			if (iterableType == null && isTargetJsr14) {
 				iterableType = collectionType.findSuperTypeOriginatingFrom(T_JavaUtilCollection, false /*Iterable is not a class*/);
@@ -547,7 +547,7 @@ public class ForeachStatement extends Statement {
 				} else if (this.collectionElementType.isBaseType()) {
 					this.collection.computeConversion(this.scope, collectionType, collectionType);
 					int boxedID = this.scope.environment().computeBoxingType(this.collectionElementType).id;
-					this.elementVariableImplicitWidening = BOXING | (compileTimeTypeID << 4) | compileTimeTypeID; // use primitive type in implicit conversion
+					this.elementVariableImplicitWidening = BOXING | compileTimeTypeID << 4 | compileTimeTypeID; // use primitive type in implicit conversion
 					compileTimeTypeID = boxedID;
 					this.scope.problemReporter().autoboxing(this.collection, this.collectionElementType, elementType);
 				} else {
@@ -623,11 +623,9 @@ public class ForeachStatement extends Statement {
 						} else {
 							this.elementVariableImplicitWidening = (elementType.id << 4) + compileTimeTypeID;
 						}
-					} else {
-						if (this.collectionElementType.isBaseType()) {
-							this.elementVariableImplicitWidening = BOXING | (compileTimeTypeID << 4) | compileTimeTypeID; // use primitive type in implicit conversion
-						}
-					}
+					} else if (this.collectionElementType.isBaseType()) {
+                    	this.elementVariableImplicitWidening = BOXING | compileTimeTypeID << 4 | compileTimeTypeID; // use primitive type in implicit conversion
+                    }
 				}
 			}
 			switch(this.kind) {

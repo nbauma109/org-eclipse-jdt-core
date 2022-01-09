@@ -85,10 +85,7 @@ public class FloatConstant extends Constant {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
 		}
 		FloatConstant other = (FloatConstant) obj;

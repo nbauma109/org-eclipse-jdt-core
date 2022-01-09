@@ -58,7 +58,7 @@ public final class JavaConventions {
 	private static String RECORD_ID = "record"; //$NON-NLS-1$
 
 	static {
-		javaVersions= new ArrayList<String>();
+		javaVersions= new ArrayList<>();
 		javaVersions.add(0, CompilerOptions.VERSION_10);
 		javaVersions.add(1, CompilerOptions.VERSION_11);
 		javaVersions.add(2, CompilerOptions.VERSION_12);
@@ -67,17 +67,17 @@ public final class JavaConventions {
 
 		restrictedIdentifiersMap= new HashMap<>();
 		//restricted identifier for Java10 and above
-		Set<String> set= new HashSet<String>();
+		Set<String> set= new HashSet<>();
 		set.add(VAR_ID);
 		restrictedIdentifiersMap.put(CompilerOptions.VERSION_10, set);
 		//restricted identifier for Java14 and above
-		set= new HashSet<String>();
+		set= new HashSet<>();
 		set.add(YIELD_ID);
 		restrictedIdentifiersMap.put(CompilerOptions.VERSION_14, set);
 
 		restrictedIdentifierPreviewMap= new HashMap<>();
 		//restricted identifier for Java10 and above
-		set= new HashSet<String>();
+		set= new HashSet<>();
 		set.add(RECORD_ID);
 		restrictedIdentifierPreviewMap.put(CompilerOptions.VERSION_14, set);
 
@@ -99,7 +99,8 @@ public final class JavaConventions {
 	 * @return true if the given package fragment root paths are considered to overlap, false otherwise
 	 * @deprecated Overlapping roots are allowed in 2.1
 	 */
-	public static boolean isOverlappingRoots(IPath rootPath1, IPath rootPath2) {
+	@Deprecated
+    public static boolean isOverlappingRoots(IPath rootPath1, IPath rootPath2) {
 		if (rootPath1 == null || rootPath2 == null) {
 			return false;
 		}
@@ -126,23 +127,20 @@ public final class JavaConventions {
 		// Set scanner for given source and compliance levels
 		SCANNER.sourceLevel = sourceLevel == null ? ClassFileConstants.JDK1_3 : CompilerOptions.versionToJdkLevel(sourceLevel);
 		SCANNER.complianceLevel = complianceLevel == null ? ClassFileConstants.JDK1_3 : CompilerOptions.versionToJdkLevel(complianceLevel);
-		SCANNER.previewEnabled = previewEnabled != null && JavaCore.ENABLED.equals(previewEnabled);
+		SCANNER.previewEnabled = JavaCore.ENABLED.equals(previewEnabled);
 
 		try {
 			SCANNER.setSource(id.toCharArray());
 			int token = SCANNER.scanIdentifier();
-			if (token != TerminalTokens.TokenNameIdentifier) return null;
-			if (SCANNER.currentPosition == SCANNER.eofPosition) { // to handle case where we had an ArrayIndexOutOfBoundsException
-				try {
-					char[] src= SCANNER.getCurrentIdentifierSource();
-					src= scanForRestrictedKeyWords(src, sourceLevel, complianceLevel, SCANNER.previewEnabled, allowRestrictedKeyWords);
-					return src;
-				} catch (ArrayIndexOutOfBoundsException e) {
-					return null;
-				}
-			} else {
+			if (token != TerminalTokens.TokenNameIdentifier || SCANNER.currentPosition != SCANNER.eofPosition) {
 				return null;
 			}
+            try {
+            	char[] src= SCANNER.getCurrentIdentifierSource();
+            	return scanForRestrictedKeyWords(src, sourceLevel, complianceLevel, SCANNER.previewEnabled, allowRestrictedKeyWords);
+            } catch (ArrayIndexOutOfBoundsException e) {
+            	return null;
+            }
 		}
 		catch (InvalidInputException e) {
 			return null;
@@ -191,7 +189,8 @@ public final class JavaConventions {
 	 *		object indicating what is wrong with the name
 	 * @deprecated Use {@link #validateCompilationUnitName(String id, String sourceLevel, String complianceLevel)} instead
 	 */
-	public static IStatus validateCompilationUnitName(String name) {
+	@Deprecated
+    public static IStatus validateCompilationUnitName(String name) {
 		return validateCompilationUnitName(name,CompilerOptions.VERSION_1_3,CompilerOptions.VERSION_1_3);
 	}
 
@@ -264,7 +263,8 @@ public final class JavaConventions {
 	 * @since 2.0
 	 * @deprecated Use {@link #validateClassFileName(String id, String sourceLevel, String complianceLevel)} instead
 	 */
-	public static IStatus validateClassFileName(String name) {
+	@Deprecated
+    public static IStatus validateClassFileName(String name) {
 		return validateClassFileName(name, CompilerOptions.VERSION_1_3, CompilerOptions.VERSION_1_3);
 	}
 
@@ -329,7 +329,8 @@ public final class JavaConventions {
 	 *		object indicating what is wrong with the name
 	 * @deprecated Use {@link #validateFieldName(String id, String sourceLevel, String complianceLevel)} instead
 	 */
-	public static IStatus validateFieldName(String name) {
+	@Deprecated
+    public static IStatus validateFieldName(String name) {
 		return validateIdentifier(name, CompilerOptions.VERSION_1_3,CompilerOptions.VERSION_1_3);
 	}
 
@@ -364,7 +365,8 @@ public final class JavaConventions {
 	 *		object indicating what is wrong with the identifier
 	 * @deprecated Use {@link #validateIdentifier(String id, String sourceLevel, String complianceLevel)} instead
 	 */
-	public static IStatus validateIdentifier(String id) {
+	@Deprecated
+    public static IStatus validateIdentifier(String id) {
 		return validateIdentifier(id,CompilerOptions.VERSION_1_3,CompilerOptions.VERSION_1_3);
 	}
 
@@ -386,9 +388,8 @@ public final class JavaConventions {
 	public static IStatus validateIdentifier(String id, String sourceLevel, String complianceLevel) {
 		if (scannedIdentifier(id, sourceLevel, complianceLevel) != null) {
 			return JavaModelStatus.VERIFIED_OK;
-		} else {
-			return new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, -1, Messages.bind(Messages.convention_illegalIdentifier, id), null);
 		}
+        return new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, -1, Messages.bind(Messages.convention_illegalIdentifier, id), null);
 	}
 
 	/**
@@ -404,7 +405,8 @@ public final class JavaConventions {
 	 *		object indicating what is wrong with the name
 	 * @deprecated Use {@link #validateImportDeclaration(String id, String sourceLevel, String complianceLevel)} instead
 	 */
-	public static IStatus validateImportDeclaration(String name) {
+	@Deprecated
+    public static IStatus validateImportDeclaration(String name) {
 		return validateImportDeclaration(name,CompilerOptions.VERSION_1_3,CompilerOptions.VERSION_1_3);
 	}
 
@@ -430,9 +432,8 @@ public final class JavaConventions {
 		if (name.charAt(name.length() - 1) == '*') {
 			if (name.charAt(name.length() - 2) == '.') {
 				return validatePackageName(name.substring(0, name.length() - 2), sourceLevel, complianceLevel);
-			} else {
-				return new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, -1, Messages.convention_import_unqualifiedImport, null);
 			}
+            return new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, -1, Messages.convention_import_unqualifiedImport, null);
 		}
 		return validatePackageName(name, sourceLevel, complianceLevel);
 	}
@@ -451,7 +452,8 @@ public final class JavaConventions {
 	 *      the name
 	 * @deprecated Use {@link #validateJavaTypeName(String id, String sourceLevel, String complianceLevel)} instead
 	 */
-	public static IStatus validateJavaTypeName(String name) {
+	@Deprecated
+    public static IStatus validateJavaTypeName(String name) {
 		return validateJavaTypeName(name, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
 	}
 
@@ -486,7 +488,8 @@ public final class JavaConventions {
 	 * @see JavaCore#VERSION_9
 	 * @deprecated Use {@link #validateJavaTypeName(String id, String sourceLevel, String complianceLevel, String previewEnabled)} instead
 	 */
-	public static IStatus validateJavaTypeName(String name, String sourceLevel, String complianceLevel) {
+	@Deprecated
+    public static IStatus validateJavaTypeName(String name, String sourceLevel, String complianceLevel) {
 		return internalValidateJavaTypeName(name, sourceLevel, complianceLevel, null);
 	}
 
@@ -558,21 +561,20 @@ public final class JavaConventions {
 			scannedID = scannedIdentifier(type, sourceLevel, complianceLevel, previewEnabled, false);
 		}
 
-		if (scannedID != null) {
-			IStatus status = ResourcesPlugin.getWorkspace().validateName(new String(scannedID), IResource.FILE);
-			if (!status.isOK()) {
-				return status;
-			}
-			if (CharOperation.contains('$', scannedID)) {
-				return new Status(IStatus.WARNING, JavaCore.PLUGIN_ID, -1, Messages.convention_type_dollarName, null);
-			}
-			if ((scannedID.length > 0 && ScannerHelper.isLowerCase(scannedID[0]))) {
-				return new Status(IStatus.WARNING, JavaCore.PLUGIN_ID, -1, Messages.convention_type_lowercaseName, null);
-			}
-			return JavaModelStatus.VERIFIED_OK;
-		} else {
+		if (scannedID == null) {
 			return new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, -1, Messages.bind(Messages.convention_type_invalidName, name), null);
 		}
+        IStatus status = ResourcesPlugin.getWorkspace().validateName(new String(scannedID), IResource.FILE);
+        if (!status.isOK()) {
+        	return status;
+        }
+        if (CharOperation.contains('$', scannedID)) {
+        	return new Status(IStatus.WARNING, JavaCore.PLUGIN_ID, -1, Messages.convention_type_dollarName, null);
+        }
+        if (scannedID.length > 0 && ScannerHelper.isLowerCase(scannedID[0])) {
+        	return new Status(IStatus.WARNING, JavaCore.PLUGIN_ID, -1, Messages.convention_type_lowercaseName, null);
+        }
+        return JavaModelStatus.VERIFIED_OK;
 	}
 
 	/**
@@ -588,7 +590,8 @@ public final class JavaConventions {
 	 *		object indicating what is wrong with the name
 	 * @deprecated Use {@link #validateMethodName(String id, String sourceLevel, String complianceLevel)} instead
 	 */
-	public static IStatus validateMethodName(String name) {
+	@Deprecated
+    public static IStatus validateMethodName(String name) {
 		return validateMethodName(name, CompilerOptions.VERSION_1_3,CompilerOptions.VERSION_1_3);
 	}
 
@@ -628,7 +631,8 @@ public final class JavaConventions {
 	 *		object indicating what is wrong with the name
 	 * @deprecated Use {@link #validatePackageName(String id, String sourceLevel, String complianceLevel)} instead
 	 */
-	public static IStatus validatePackageName(String name) {
+	@Deprecated
+    public static IStatus validatePackageName(String name) {
 		return validatePackageName(name, CompilerOptions.VERSION_1_3,CompilerOptions.VERSION_1_3);
 	}
 
@@ -684,11 +688,9 @@ public final class JavaConventions {
 			if (!status.isOK()) {
 				return status;
 			}
-			if (firstToken && scannedID.length > 0 && ScannerHelper.isUpperCase(scannedID[0])) {
-				if (warningStatus == null) {
-					warningStatus = new Status(IStatus.WARNING, JavaCore.PLUGIN_ID, -1, Messages.convention_package_uppercaseName, null);
-				}
-			}
+			if (firstToken && scannedID.length > 0 && ScannerHelper.isUpperCase(scannedID[0]) && warningStatus == null) {
+            	warningStatus = new Status(IStatus.WARNING, JavaCore.PLUGIN_ID, -1, Messages.convention_package_uppercaseName, null);
+            }
 			firstToken = false;
 		}
 		if (warningStatus != null) {
@@ -751,11 +753,9 @@ public final class JavaConventions {
 			if (!status.isOK()) {
 				return status;
 			}
-			if (firstToken && scannedID.length > 0 && ScannerHelper.isUpperCase(scannedID[0])) {
-				if (warningStatus == null) {
-					warningStatus = new Status(IStatus.WARNING, JavaCore.PLUGIN_ID, -1, Messages.convention_module_uppercaseName, null);
-				}
-			}
+			if (firstToken && scannedID.length > 0 && ScannerHelper.isUpperCase(scannedID[0]) && warningStatus == null) {
+            	warningStatus = new Status(IStatus.WARNING, JavaCore.PLUGIN_ID, -1, Messages.convention_module_uppercaseName, null);
+            }
 			firstToken = false;
 		}
 		if (warningStatus != null) {
@@ -830,7 +830,8 @@ public final class JavaConventions {
 	 * @since 3.1
 	 * @deprecated Use {@link #validateTypeVariableName(String id, String sourceLevel, String complianceLevel)} instead
 	 */
-	public static IStatus validateTypeVariableName(String name) {
+	@Deprecated
+    public static IStatus validateTypeVariableName(String name) {
 		return validateIdentifier(name, CompilerOptions.VERSION_1_3,CompilerOptions.VERSION_1_3);
 	}
 

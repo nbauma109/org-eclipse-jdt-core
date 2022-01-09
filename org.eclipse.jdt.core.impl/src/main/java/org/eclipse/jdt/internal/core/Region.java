@@ -187,11 +187,10 @@ public class Region implements IRegion {
 			Node current = ancestors.get(idx);
 			Node parent = ancestors.get(idx - 1);
 
-			if (current.isEmpty()) {
-				parent.removeChild(currentElement);
-			} else {
+			if (!current.isEmpty()) {
 				break;
 			}
+            parent.removeChild(currentElement);
 			currentElement = getParent(currentElement);
 		}
 

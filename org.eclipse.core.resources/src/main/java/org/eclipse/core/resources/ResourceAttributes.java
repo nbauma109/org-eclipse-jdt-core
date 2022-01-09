@@ -56,7 +56,6 @@ public class ResourceAttributes {
 	 * Creates a new instance of <code>ResourceAttributes</code>.
 	 */
 	public ResourceAttributes() {
-		super();
 	}
 
 	/**

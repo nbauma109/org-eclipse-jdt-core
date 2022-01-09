@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 
 public class TypeParameter extends SourceRefElement implements ITypeParameter {
 
-	static final ITypeParameter[] NO_TYPE_PARAMETERS = new ITypeParameter[0];
+	static final ITypeParameter[] NO_TYPE_PARAMETERS = {};
 
 	protected String name;
 
@@ -44,7 +44,7 @@ public class TypeParameter extends SourceRefElement implements ITypeParameter {
 	@Override
 	public String[] getBoundsSignatures() throws JavaModelException {
 
-		String[] boundSignatures = null;
+		String[] boundSignatures;
 		TypeParameterElementInfo info = (TypeParameterElementInfo) this.getElementInfo();
 
 		// For a binary type or method, the signature is already available from the .class file.
@@ -143,7 +143,7 @@ public class TypeParameter extends SourceRefElement implements ITypeParameter {
 
 	@Override
 	public IClassFile getClassFile() {
-		return (getParent()).getClassFile();
+		return getParent().getClassFile();
 	}
 
 	/**

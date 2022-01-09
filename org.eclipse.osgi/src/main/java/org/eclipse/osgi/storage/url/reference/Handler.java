@@ -34,7 +34,6 @@ public class Handler extends URLStreamHandler {
 	private final String installPath;
 
 	public Handler(String installURL) {
-		super();
 		if (installURL != null && installURL.startsWith("file:")) { //$NON-NLS-1$
 			// this is the safest way to create a File object off a file: URL
 			this.installPath = installURL.substring(5);
@@ -56,7 +55,7 @@ public class Handler extends URLStreamHandler {
 		if (end < start) {
 			return;
 		}
-		String reference = (start < end) ? str.substring(start, end) : url.getPath();
+		String reference = start < end ? str.substring(start, end) : url.getPath();
 
 		setURL(url, url.getProtocol(), null, -1, null, null, reference, null, null);
 	}

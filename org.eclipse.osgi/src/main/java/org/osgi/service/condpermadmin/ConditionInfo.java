@@ -63,7 +63,7 @@ public class ConditionInfo {
 	 */
 	public ConditionInfo(String type, String[] args) {
 		this.type = type;
-		this.args = (args != null) ? args.clone() : new String[0];
+		this.args = args != null ? args.clone() : new String[0];
 		if (type == null) {
 			throw new NullPointerException("type is null");
 		}
@@ -109,7 +109,7 @@ public class ConditionInfo {
 
 			/* type is not quoted or encoded */
 			int begin = pos;
-			while (!Character.isWhitespace(encoded[pos]) && (encoded[pos] != ']')) {
+			while (!Character.isWhitespace(encoded[pos]) && encoded[pos] != ']') {
 				pos++;
 			}
 			if (pos == begin || encoded[begin] == '"') {
@@ -123,7 +123,7 @@ public class ConditionInfo {
 			}
 
 			/* type may be followed by args which are quoted and encoded */
-			List<String> argsList = new ArrayList<String>();
+			List<String> argsList = new ArrayList<>();
 			while (encoded[pos] == '"') {
 				pos++;
 				begin = pos;
@@ -148,10 +148,10 @@ public class ConditionInfo {
 			/* the final character must be ']' */
 			char c = encoded[pos];
 			pos++;
-			while ((pos < length) && Character.isWhitespace(encoded[pos])) {
+			while (pos < length && Character.isWhitespace(encoded[pos])) {
 				pos++;
 			}
-			if ((c != ']') || (pos != length)) {
+			if (c != ']' || pos != length) {
 				throw new IllegalArgumentException("expecting close bracket");
 			}
 		} catch (ArrayIndexOutOfBoundsException e) {
@@ -187,9 +187,9 @@ public class ConditionInfo {
 		output.append('[');
 		output.append(type);
 
-		for (int i = 0; i < args.length; i++) {
+		for (String arg : args) {
 			output.append(" \"");
-			escapeString(args[i], output);
+			escapeString(arg, output);
 			output.append('\"');
 		}
 
@@ -273,8 +273,8 @@ public class ConditionInfo {
 	@Override
 	public int hashCode() {
 		int h = 31 * 17 + type.hashCode();
-		for (int i = 0; i < args.length; i++) {
-			h = 31 * h + args[i].hashCode();
+		for (String arg : args) {
+			h = 31 * h + arg.hashCode();
 		}
 		return h;
 	}

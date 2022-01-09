@@ -35,7 +35,6 @@ public class Synchronizer implements ISynchronizer {
 	protected Set<QualifiedName> registry = new HashSet<>(5);
 
 	public Synchronizer(Workspace workspace) {
-		super();
 		this.workspace = workspace;
 		this.writer = new SyncInfoWriter(workspace, this);
 	}
@@ -51,14 +50,9 @@ public class Synchronizer implements ISynchronizer {
 		Assert.isLegal(visitor != null);
 
 		// if we don't have sync info for the given identifier, then skip it
-		if (getSyncInfo(partner, resource) != null) {
-			// visit the resource and if the visitor says to stop the recursion then return
-			if (!visitor.visit(resource))
-				return;
-		}
-
-		// adjust depth if necessary
-		if (depth == IResource.DEPTH_ZERO || resource.getType() == IResource.FILE)
+		// visit the resource and if the visitor says to stop the recursion then return
+        // adjust depth if necessary
+		if (getSyncInfo(partner, resource) != null && !visitor.visit(resource) || depth == IResource.DEPTH_ZERO || resource.getType() == IResource.FILE)
 			return;
 		if (depth == IResource.DEPTH_ONE)
 			depth = IResource.DEPTH_ZERO;
@@ -128,7 +122,7 @@ public class Synchronizer implements ISynchronizer {
 
 		// namespace check, if the resource doesn't exist then return null
 		ResourceInfo info = workspace.getResourceInfo(resource.getFullPath(), true, false);
-		return (info == null) ? null : info.getSyncInfo(partner, true);
+		return info == null ? null : info.getSyncInfo(partner, true);
 	}
 
 	protected boolean isRegistered(QualifiedName partner) {

@@ -220,9 +220,9 @@ protected void getHandleMemento(StringBuffer buff) {
 	char delimiter = getHandleMementoDelimiter();
 	buff.append(delimiter);
 	escapeMementoName(buff, getElementName());
-	for (int i = 0; i < this.parameterTypes.length; i++) {
+	for (String parameterType : this.parameterTypes) {
 		buff.append(delimiter);
-		escapeMementoName(buff, this.parameterTypes[i]);
+		escapeMementoName(buff, parameterType);
 	}
 	if (this.occurrenceCount > 1) {
 		buff.append(JEM_COUNT);
@@ -292,10 +292,8 @@ public String[] getParameterNames() throws JavaModelException {
 		if (declaringType.isMember()
 				&& !Flags.isStatic(declaringType.getFlags())) {
 			paramCount--; // remove synthetic argument from constructor param count
-		} else if (declaringType.isEnum()) {
-			if (paramCount >= 2) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=436347
-				paramCount -= 2;
-		}
+		} else if (declaringType.isEnum() && paramCount >= 2) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=436347
+        	paramCount -= 2;
 	}
 
 	if (paramCount != 0) {
@@ -474,7 +472,7 @@ private char[][] splitParameters(char[] parametersSource, int paramCount) {
 				index++;
 				break;
 			case '&' :
-				if ((index + 4) < length) {
+				if (index + 4 < length) {
 					if (parametersSource[index + 1] == 'l'
 							&& parametersSource[index + 2] == 't'
 							&& parametersSource[index + 3] == ';') {
@@ -501,7 +499,7 @@ private char[][] splitParameters(char[] parametersSource, int paramCount) {
 	}
 	if (paramIndex != paramCount) {
 		// happens only for constructors with synthetic enclosing type in the signature
-		System.arraycopy(params, 0, (params = new char[paramIndex][]), 0, paramIndex);
+		System.arraycopy(params, 0, params = new char[paramIndex][], 0, paramIndex);
 	}
 	return params;
 }
@@ -555,6 +553,7 @@ public ITypeParameter[] getTypeParameters() throws JavaModelException {
  * @since 3.0
  * @deprecated
  */
+@Deprecated
 @Override
 public String[] getTypeParameterSignatures() throws JavaModelException {
 	IBinaryMethod info = (IBinaryMethod) getElementInfo();

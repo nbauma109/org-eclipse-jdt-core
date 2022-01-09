@@ -73,16 +73,14 @@ public class BundleLoaderSources {
 					pkgSource = existingSource;
 				}
 			}
-		} else {
-			// we are not storing the special case sources, but pkgSource == null this means this
-			// is a normal package source; get it and return it.
-			if (pkgSource == null) {
-				pkgSource = getPackageSource(name);
-				// the first export cached may not be a simple single source like we need.
-				if (pkgSource.getClass() != SingleSourcePackage.class)
-					return new SingleSourcePackage(name, loader);
-			}
-		}
+		} else // we are not storing the special case sources, but pkgSource == null this means this
+        // is a normal package source; get it and return it.
+        if (pkgSource == null) {
+        	pkgSource = getPackageSource(name);
+        	// the first export cached may not be a simple single source like we need.
+        	if (pkgSource.getClass() != SingleSourcePackage.class)
+        		return new SingleSourcePackage(name, loader);
+        }
 
 		return pkgSource;
 	}

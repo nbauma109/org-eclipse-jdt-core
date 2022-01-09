@@ -57,24 +57,22 @@ public CreateMethodOperation(IType parentElement, String source, boolean force) 
  * current <code>MethodDeclaration</code>
  */
 protected String[] convertASTMethodTypesToSignatures() {
-	if (this.parameterTypes == null) {
-		if (this.createdNode != null) {
-			MethodDeclaration methodDeclaration = (MethodDeclaration) this.createdNode;
-			List parameters = methodDeclaration.parameters();
-			int size = parameters.size();
-			this.parameterTypes = new String[size];
-			Iterator iterator = parameters.iterator();
-			// convert the AST types to signatures
-			for (int i = 0; i < size; i++) {
-				SingleVariableDeclaration parameter = (SingleVariableDeclaration) iterator.next();
-				String typeSig = Util.getSignature(parameter.getType());
-				int extraDimensions = parameter.getExtraDimensions();
-				if (methodDeclaration.isVarargs() && i == size-1)
-					extraDimensions++;
-				this.parameterTypes[i] = Signature.createArraySignature(typeSig, extraDimensions);
-			}
-		}
-	}
+	if (this.parameterTypes == null && this.createdNode != null) {
+    	MethodDeclaration methodDeclaration = (MethodDeclaration) this.createdNode;
+    	List parameters = methodDeclaration.parameters();
+    	int size = parameters.size();
+    	this.parameterTypes = new String[size];
+    	Iterator iterator = parameters.iterator();
+    	// convert the AST types to signatures
+    	for (int i = 0; i < size; i++) {
+    		SingleVariableDeclaration parameter = (SingleVariableDeclaration) iterator.next();
+    		String typeSig = Util.getSignature(parameter.getType());
+    		int extraDimensions = parameter.getExtraDimensions();
+    		if (methodDeclaration.isVarargs() && i == size-1)
+    			extraDimensions++;
+    		this.parameterTypes[i] = Signature.createArraySignature(typeSig, extraDimensions);
+    	}
+    }
 	return this.parameterTypes;
 }
 @Override

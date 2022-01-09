@@ -47,10 +47,10 @@ import org.eclipse.jdt.internal.core.util.Util;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class BinaryType extends BinaryMember implements IType, SuffixConstants {
 
-	private static final IField[] NO_FIELDS = new IField[0];
-	private static final IMethod[] NO_METHODS = new IMethod[0];
-	private static final IType[] NO_TYPES = new IType[0];
-	private static final IInitializer[] NO_INITIALIZERS = new IInitializer[0];
+	private static final IField[] NO_FIELDS = {};
+	private static final IMethod[] NO_METHODS = {};
+	private static final IType[] NO_TYPES = {};
+	private static final IInitializer[] NO_INITIALIZERS = {};
 	public static final JavadocContents EMPTY_JAVADOC = new JavadocContents(null, org.eclipse.jdt.internal.compiler.util.Util.EMPTY_STRING);
 
 protected BinaryType(JavaElement parent, String name) {
@@ -69,6 +69,7 @@ protected void closing(Object info) throws JavaModelException {
  * @see IType#codeComplete(char[], int, int, char[][], char[][], int[], boolean, ICompletionRequestor)
  * @deprecated
  */
+@Deprecated
 @Override
 public void codeComplete(char[] snippet,int insertion,int position,char[][] localVariableTypeNames,char[][] localVariableNames,int[] localVariableModifiers,boolean isStatic,ICompletionRequestor requestor) throws JavaModelException {
 	codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor, DefaultWorkingCopyOwner.PRIMARY);
@@ -78,6 +79,7 @@ public void codeComplete(char[] snippet,int insertion,int position,char[][] loca
  * @see IType#codeComplete(char[], int, int, char[][], char[][], int[], boolean, ICompletionRequestor, WorkingCopyOwner)
  * @deprecated
  */
+@Deprecated
 @Override
 public void codeComplete(char[] snippet,int insertion,int position,char[][] localVariableTypeNames,char[][] localVariableNames,int[] localVariableModifiers,boolean isStatic,ICompletionRequestor requestor, WorkingCopyOwner owner) throws JavaModelException {
 	if (requestor == null) {
@@ -209,8 +211,8 @@ public IJavaElement[] getChildrenForCategory(String category) throws JavaModelEx
 				IJavaElement child = children[i];
 				String[] cats = (String[]) categories.get(child);
 				if (cats != null) {
-					for (int j = 0, length2 = cats.length; j < length2; j++) {
-						if (cats[j].equals(category)) {
+					for (String cat : cats) {
+						if (cat.equals(category)) {
 							result[index++] = child;
 							break;
 						}
@@ -253,32 +255,31 @@ public IType getDeclaringType() {
 		} catch (JavaModelException npe) {
 			return null;
 		}
-	} else {
-		// cannot access .class file without opening it
-		// and getDeclaringType() is supposed to be a handle-only method,
-		// so default to assuming $ is an enclosing type separator
-		String classFileName = classFile.getElementName();
-		int lastDollar = -1;
-		for (int i = 0, length = classFileName.length(); i < length; i++) {
-			char c = classFileName.charAt(i);
-			if (Character.isDigit(c) && lastDollar == i-1) {
-				// anonymous or local type
-				return null;
-			} else if (c == '$') {
-				lastDollar = i;
-			}
-		}
-		if (lastDollar == -1) {
-			return null;
-		} else {
-			String enclosingName = classFileName.substring(0, lastDollar);
-			String enclosingClassFileName = enclosingName + SUFFIX_STRING_class;
-			return
-				new BinaryType(
-					(JavaElement)getPackageFragment().getClassFile(enclosingClassFileName),
-					Util.localTypeName(enclosingName, enclosingName.lastIndexOf('$'), enclosingName.length()));
-		}
 	}
+    // cannot access .class file without opening it
+    // and getDeclaringType() is supposed to be a handle-only method,
+    // so default to assuming $ is an enclosing type separator
+    String classFileName = classFile.getElementName();
+    int lastDollar = -1;
+    for (int i = 0, length = classFileName.length(); i < length; i++) {
+    	char c = classFileName.charAt(i);
+    	if (Character.isDigit(c) && lastDollar == i-1) {
+    		// anonymous or local type
+    		return null;
+    	}
+        if (c == '$') {
+    		lastDollar = i;
+    	}
+    }
+    if (lastDollar == -1) {
+    	return null;
+    }
+    String enclosingName = classFileName.substring(0, lastDollar);
+    String enclosingClassFileName = enclosingName + SUFFIX_STRING_class;
+    return
+    	new BinaryType(
+    		(JavaElement)getPackageFragment().getClassFile(enclosingClassFileName),
+    		Util.localTypeName(enclosingName, enclosingName.lastIndexOf('$'), enclosingName.length()));
 }
 @Override
 public Object getElementInfo(IProgressMonitor monitor) throws JavaModelException {
@@ -486,11 +487,10 @@ public IMethod[] getMethods() throws JavaModelException {
 	int size;
 	if ((size = list.size()) == 0) {
 		return NO_METHODS;
-	} else {
-		IMethod[] array= new IMethod[size];
-		list.toArray(array);
-		return array;
 	}
+    IMethod[] array= new IMethod[size];
+    list.toArray(array);
+    return array;
 }
 
 @Override
@@ -500,9 +500,7 @@ public IPackageFragment getPackageFragment() {
 		if (parentElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			return (IPackageFragment)parentElement;
 		}
-		else {
-			parentElement = parentElement.getParent();
-		}
+        parentElement = parentElement.getParent();
 	}
 	Assert.isTrue(false);  // should not happen
 	return null;
@@ -516,35 +514,34 @@ public IPackageFragment getPackageFragment() {
 public String getSuperclassTypeSignature() throws JavaModelException {
 	IBinaryType info = (IBinaryType) getElementInfo();
 	char[] genericSignature = info.getGenericSignature();
-	if (genericSignature != null) {
-		int signatureLength = genericSignature.length;
-		// skip type parameters
-		int index = 0;
-		if (genericSignature[0] == '<') {
-			int count = 1;
-			while (count > 0 && ++index < signatureLength) {
-				switch (genericSignature[index]) {
-					case '<':
-						count++;
-						break;
-					case '>':
-						count--;
-						break;
-				}
-			}
-			index++;
-		}
-		int start = index;
-		index = org.eclipse.jdt.internal.compiler.util.Util.scanClassTypeSignature(genericSignature, start) + 1;
-		char[] superclassSig = CharOperation.subarray(genericSignature, start, index);
-		return new String(ClassFile.translatedName(superclassSig));
-	} else {
+	if (genericSignature == null) {
 		char[] superclassName = info.getSuperclassName();
 		if (superclassName == null) {
 			return null;
 		}
 		return Signature.createTypeSignature(ClassFile.translatedName(superclassName), true);
 	}
+    int signatureLength = genericSignature.length;
+    // skip type parameters
+    int index = 0;
+    if (genericSignature[0] == '<') {
+    	int count = 1;
+    	while (count > 0 && ++index < signatureLength) {
+    		switch (genericSignature[index]) {
+    			case '<':
+    				count++;
+    				break;
+    			case '>':
+    				count--;
+    				break;
+    		}
+    	}
+    	index++;
+    }
+    int start = index;
+    index = org.eclipse.jdt.internal.compiler.util.Util.scanClassTypeSignature(genericSignature, start) + 1;
+    char[] superclassSig = CharOperation.subarray(genericSignature, start, index);
+    return new String(ClassFile.translatedName(superclassSig));
 }
 
 public String getSourceFileName(IBinaryType info) {
@@ -614,38 +611,7 @@ public String[] getPermittedSubtypeNames() throws JavaModelException {
 public String[] getSuperInterfaceTypeSignatures() throws JavaModelException {
 	IBinaryType info = (IBinaryType) getElementInfo();
 	char[] genericSignature = info.getGenericSignature();
-	if (genericSignature != null) {
-		ArrayList interfaces = new ArrayList();
-		int signatureLength = genericSignature.length;
-		// skip type parameters
-		int index = 0;
-		if (genericSignature[0] == '<') {
-			int count = 1;
-			while (count > 0 && ++index < signatureLength) {
-				switch (genericSignature[index]) {
-					case '<':
-						count++;
-						break;
-					case '>':
-						count--;
-						break;
-				}
-			}
-			index++;
-		}
-		// skip superclass
-		index = org.eclipse.jdt.internal.compiler.util.Util.scanClassTypeSignature(genericSignature, index) + 1;
-		while (index  < signatureLength) {
-			int start = index;
-			index = org.eclipse.jdt.internal.compiler.util.Util.scanClassTypeSignature(genericSignature, start) + 1;
-			char[] interfaceSig = CharOperation.subarray(genericSignature, start, index);
-			interfaces.add(new String(ClassFile.translatedName(interfaceSig)));
-		}
-		int size = interfaces.size();
-		String[] result = new String[size];
-		interfaces.toArray(result);
-		return result;
-	} else {
+	if (genericSignature == null) {
 		char[][] names= info.getInterfaceNames();
 		int length;
 		if (names == null || (length = names.length) == 0) {
@@ -658,6 +624,36 @@ public String[] getSuperInterfaceTypeSignatures() throws JavaModelException {
 		}
 		return strings;
 	}
+    ArrayList interfaces = new ArrayList();
+    int signatureLength = genericSignature.length;
+    // skip type parameters
+    int index = 0;
+    if (genericSignature[0] == '<') {
+    	int count = 1;
+    	while (count > 0 && ++index < signatureLength) {
+    		switch (genericSignature[index]) {
+    			case '<':
+    				count++;
+    				break;
+    			case '>':
+    				count--;
+    				break;
+    		}
+    	}
+    	index++;
+    }
+    // skip superclass
+    index = org.eclipse.jdt.internal.compiler.util.Util.scanClassTypeSignature(genericSignature, index) + 1;
+    while (index  < signatureLength) {
+    	int start = index;
+    	index = org.eclipse.jdt.internal.compiler.util.Util.scanClassTypeSignature(genericSignature, start) + 1;
+    	char[] interfaceSig = CharOperation.subarray(genericSignature, start, index);
+    	interfaces.add(new String(ClassFile.translatedName(interfaceSig)));
+    }
+    int size = interfaces.size();
+    String[] result = new String[size];
+    interfaces.toArray(result);
+    return result;
 }
 
 @Override
@@ -720,11 +716,10 @@ public IType[] getTypes() throws JavaModelException {
 	int size;
 	if ((size = list.size()) == 0) {
 		return NO_TYPES;
-	} else {
-		IType[] array= new IType[size];
-		list.toArray(array);
-		return array;
 	}
+    IType[] array= new IType[size];
+    list.toArray(array);
+    return array;
 }
 
 @Override
@@ -767,7 +762,7 @@ public boolean isRecord() throws JavaModelException {
 public boolean isSealed() throws JavaModelException {
 	IBinaryType info = (IBinaryType) getElementInfo();
 	char[][] names = info.getPermittedSubtypeNames();
-	return (names != null && names.length > 0);
+	return names != null && names.length > 0;
 }
 
 @Override
@@ -845,6 +840,7 @@ public ITypeHierarchy newSupertypeHierarchy(
  * @see IType#newSupertypeHierarchy(IWorkingCopy[], IProgressMonitor)
  * @deprecated
  */
+@Deprecated
 @Override
 public ITypeHierarchy newSupertypeHierarchy(
 	IWorkingCopy[] workingCopies,
@@ -916,6 +912,7 @@ public ITypeHierarchy newTypeHierarchy(IJavaProject project, WorkingCopyOwner ow
  * @see IType#newTypeHierarchy(IProgressMonitor monitor)
  * @deprecated
  */
+@Deprecated
 @Override
 public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor) throws JavaModelException {
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=228845, consider any
@@ -937,6 +934,7 @@ public ITypeHierarchy newTypeHierarchy(
  * @see IType#newTypeHierarchy(IWorkingCopy[], IProgressMonitor)
  * @deprecated
  */
+@Deprecated
 @Override
 public ITypeHierarchy newTypeHierarchy(
 	IWorkingCopy[] workingCopies,
@@ -976,34 +974,33 @@ public JavaElement resolved(Binding binding) {
  */
 public String sourceFileName(IBinaryType info) {
 	char[] sourceFileName = info.sourceFileName();
-	if (sourceFileName == null) {
-		/*
-		 * We assume that this type has been compiled from a file with its name
-		 * For example, A.class comes from A.java and p.A.class comes from a file A.java
-		 * in the folder p.
-		 */
-		if (info.isMember()) {
-			IType enclosingType = getDeclaringType();
-			if (enclosingType == null) return null; // play it safe
-			while (enclosingType.getDeclaringType() != null) {
-				enclosingType = enclosingType.getDeclaringType();
-			}
-			return enclosingType.getElementName() + Util.defaultJavaExtension();
-		} else if (info.isLocal() || info.isAnonymous()){
-			String typeQualifiedName = getTypeQualifiedName();
-			int dollar = typeQualifiedName.indexOf('$');
-			if (dollar == -1) {
-				// malformed inner type: name doesn't contain a dollar
-				return getElementName() + Util.defaultJavaExtension();
-			}
-			return typeQualifiedName.substring(0, dollar) + Util.defaultJavaExtension();
-		} else {
-			return getElementName() + Util.defaultJavaExtension();
-		}
-	} else {
+	if (sourceFileName != null) {
 		int index = CharOperation.lastIndexOf('/', sourceFileName);
 		return new String(sourceFileName, index + 1, sourceFileName.length - index - 1);
 	}
+    /*
+     * We assume that this type has been compiled from a file with its name
+     * For example, A.class comes from A.java and p.A.class comes from a file A.java
+     * in the folder p.
+     */
+    if (info.isMember()) {
+    	IType enclosingType = getDeclaringType();
+    	if (enclosingType == null) return null; // play it safe
+    	while (enclosingType.getDeclaringType() != null) {
+    		enclosingType = enclosingType.getDeclaringType();
+    	}
+    	return enclosingType.getElementName() + Util.defaultJavaExtension();
+    }
+    if (!info.isLocal() && !info.isAnonymous()) {
+    	return getElementName() + Util.defaultJavaExtension();
+    }
+    String typeQualifiedName = getTypeQualifiedName();
+    int dollar = typeQualifiedName.indexOf('$');
+    if (dollar == -1) {
+    	// malformed inner type: name doesn't contain a dollar
+    	return getElementName() + Util.defaultJavaExtension();
+    }
+    return typeQualifiedName.substring(0, dollar) + Util.defaultJavaExtension();
 }
 /*
  * @private Debugging purposes
@@ -1064,7 +1061,7 @@ public JavadocContents getJavadocContents(IProgressMonitor monitor) throws JavaM
 	}
 	StringBuffer pathBuffer = new StringBuffer(baseLocation.toExternalForm());
 
-	if (!(pathBuffer.charAt(pathBuffer.length() - 1) == '/')) {
+	if (pathBuffer.charAt(pathBuffer.length() - 1) != '/') {
 		pathBuffer.append('/');
 	}
 	IPackageFragment pack= getPackageFragment();

@@ -78,7 +78,8 @@ public class MethodDeclaration extends BodyDeclaration {
 	 * @since 3.0
 	 * @deprecated In the JLS3 API, this property is replaced by {@link #MODIFIERS2_PROPERTY}.
 	 */
-	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
+	@Deprecated
+    public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
 		internalModifiersPropertyFactory(MethodDeclaration.class);
 
 	/**
@@ -114,7 +115,8 @@ public class MethodDeclaration extends BodyDeclaration {
 	 * @since 3.0
 	 * @deprecated In the JLS3 API, this property is replaced by {@link #RETURN_TYPE2_PROPERTY}.
 	 */
-	public static final ChildPropertyDescriptor RETURN_TYPE_PROPERTY =
+	@Deprecated
+    public static final ChildPropertyDescriptor RETURN_TYPE_PROPERTY =
 		new ChildPropertyDescriptor(MethodDeclaration.class, "returnType", Type.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -130,7 +132,8 @@ public class MethodDeclaration extends BodyDeclaration {
 	 * @since 3.0
 	 * @deprecated In JLS8 and later, use {@link MethodDeclaration#EXTRA_DIMENSIONS2_PROPERTY} instead.
 	 */
-	public static final SimplePropertyDescriptor EXTRA_DIMENSIONS_PROPERTY =
+	@Deprecated
+    public static final SimplePropertyDescriptor EXTRA_DIMENSIONS_PROPERTY =
 		new SimplePropertyDescriptor(MethodDeclaration.class, "extraDimensions", int.class, MANDATORY); //$NON-NLS-1$
 
 	/**
@@ -173,7 +176,8 @@ public class MethodDeclaration extends BodyDeclaration {
 	 * @deprecated In JLS8 and later, use {@link MethodDeclaration#THROWN_EXCEPTION_TYPES_PROPERTY} instead.
 	 * @since 3.0
 	 */
-	public static final ChildListPropertyDescriptor THROWN_EXCEPTIONS_PROPERTY =
+	@Deprecated
+    public static final ChildListPropertyDescriptor THROWN_EXCEPTIONS_PROPERTY =
 		new ChildListPropertyDescriptor(MethodDeclaration.class, "thrownExceptions", Name.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -296,13 +300,14 @@ public class MethodDeclaration extends BodyDeclaration {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else if (apiLevel < AST.JLS8_INTERNAL) {
-			return PROPERTY_DESCRIPTORS_3_0;
-		} else if (DOMASTUtil.isRecordDeclarationSupported(apiLevel)) { // >= JLS 16
-			return PROPERTY_DESCRIPTORS_9_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_8_0;
 		}
+        if (apiLevel < AST.JLS8_INTERNAL) {
+			return PROPERTY_DESCRIPTORS_3_0;
+		}
+        if (DOMASTUtil.isRecordDeclarationSupported(apiLevel)) { // >= JLS 16
+			return PROPERTY_DESCRIPTORS_9_0;
+		}
+        return PROPERTY_DESCRIPTORS_8_0;
 	}
 
 	/**
@@ -375,7 +380,8 @@ public class MethodDeclaration extends BodyDeclaration {
 	 * @since 2.1
 	 * @deprecated In JLS8 and later, use {@link #extraDimensions} instead.
 	 */
-	private int extraArrayDimensions = 0;
+	@Deprecated
+    private int extraArrayDimensions = 0;
 
 	/**
 	 * List of extra dimensions this node has with optional annotations
@@ -393,7 +399,8 @@ public class MethodDeclaration extends BodyDeclaration {
 	 * JLS8 and later: null.
 	 * @deprecated In JLS8 and later, use {@link #thrownExceptionTypes} instead.
 	 */
-	private ASTNode.NodeList thrownExceptions = null;
+	@Deprecated
+    private ASTNode.NodeList thrownExceptions = null;
 
 	/**
 	 * The list of thrown exception Types (element type: {@link Type}).
@@ -452,18 +459,16 @@ public class MethodDeclaration extends BodyDeclaration {
 		if (property == MODIFIERS_PROPERTY) {
 			if (get) {
 				return getModifiers();
-			} else {
-				internalSetModifiers(value);
-				return 0;
 			}
+            internalSetModifiers(value);
+            return 0;
 		}
 		if (property == EXTRA_DIMENSIONS_PROPERTY) {
 			if (get) {
 				return getExtraDimensions();
-			} else {
-				setExtraDimensions(value);
-				return 0;
 			}
+            setExtraDimensions(value);
+            return 0;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetIntProperty(property, get, value);
@@ -474,17 +479,16 @@ public class MethodDeclaration extends BodyDeclaration {
 		if (property == CONSTRUCTOR_PROPERTY) {
 			if (get) {
 				return isConstructor();
-			} else {
-				setConstructor(value);
-				return false;
 			}
-		} else if (property == COMPACT_CONSTRUCTOR_PROPERTY) {
+            setConstructor(value);
+            return false;
+		}
+        if (property == COMPACT_CONSTRUCTOR_PROPERTY) {
 			if (get) {
 				return isCompactConstructor();
-			} else {
-				setCompactConstructor(value);
-				return false;
 			}
+            setCompactConstructor(value);
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
@@ -497,58 +501,51 @@ public class MethodDeclaration extends BodyDeclaration {
 		if (property == JAVADOC_PROPERTY) {
 			if (get) {
 				return getJavadoc();
-			} else {
-				setJavadoc((Javadoc) child);
-				return null;
 			}
+            setJavadoc((Javadoc) child);
+            return null;
 		}
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((SimpleName) child);
-				return null;
 			}
+            setName((SimpleName) child);
+            return null;
 		}
 		if (property == RETURN_TYPE_PROPERTY) {
 			if (get) {
 				return getReturnType();
-			} else {
-				setReturnType((Type) child);
-				return null;
 			}
+            setReturnType((Type) child);
+            return null;
 		}
 		if (property == RETURN_TYPE2_PROPERTY) {
 			if (get) {
 				return getReturnType2();
-			} else {
-				setReturnType2((Type) child);
-				return null;
 			}
+            setReturnType2((Type) child);
+            return null;
 		}
 		if (property == RECEIVER_TYPE_PROPERTY) {
 			if (get) {
 				return getReceiverType();
-			} else {
-				setReceiverType((Type) child);
-				return null;
 			}
+            setReceiverType((Type) child);
+            return null;
 		}
 		if (property == RECEIVER_QUALIFIER_PROPERTY) {
 			if (get) {
 				return getReceiverQualifier();
-			} else {
-				setReceiverQualifier((SimpleName) child);
-				return null;
 			}
+            setReceiverQualifier((SimpleName) child);
+            return null;
 		}
 		if (property == BODY_PROPERTY) {
 			if (get) {
 				return getBody();
-			} else {
-				setBody((Block) child);
-				return null;
 			}
+            setBody((Block) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -886,10 +883,9 @@ public class MethodDeclaration extends BodyDeclaration {
 		}
 		if (parameters().isEmpty()) {
 			return false;
-		} else {
-			SingleVariableDeclaration v = (SingleVariableDeclaration) parameters().get(parameters().size() - 1);
-			return v.isVarargs();
 		}
+        SingleVariableDeclaration v = (SingleVariableDeclaration) parameters().get(parameters().size() - 1);
+        return v.isVarargs();
 	}
 
 	/**
@@ -902,7 +898,8 @@ public class MethodDeclaration extends BodyDeclaration {
 	 *    a JLS8 or later AST
 	 * @deprecated In the JLS8 API, this method is replaced by {@link #thrownExceptionTypes()}.
 	 */
-	public List thrownExceptions() {
+	@Deprecated
+    public List thrownExceptions() {
 		return internalThrownExceptions();
 	}
 
@@ -955,7 +952,8 @@ public class MethodDeclaration extends BodyDeclaration {
 	 * @deprecated In the JLS3 API, this method is replaced by {@link #getReturnType2()},
 	 * which may return <code>null</code>.
 	 */
-	public Type getReturnType() {
+	@Deprecated
+    public Type getReturnType() {
 		return internalGetReturnType();
 	}
 
@@ -1001,7 +999,8 @@ public class MethodDeclaration extends BodyDeclaration {
 	 * @deprecated In the JLS3 API, this method is replaced by
 	 * {@link #setReturnType2(Type)}, which accepts <code>null</code>.
 	 */
-	public void setReturnType(Type type) {
+	@Deprecated
+    public void setReturnType(Type type) {
 		internalSetReturnType(type);
 	}
 
@@ -1110,9 +1109,8 @@ public class MethodDeclaration extends BodyDeclaration {
 		if (this.extraDimensions == null) {
 			// JLS2,3,4 behavior - bona fide property
 			return this.extraArrayDimensions;
-		} else {
-			return this.extraDimensions.size();
 		}
+        return this.extraDimensions.size();
 	}
 
 	/**
@@ -1136,7 +1134,8 @@ public class MethodDeclaration extends BodyDeclaration {
 	 * @deprecated In the JLS8 API, this method is replaced by
 	 * {@link #extraDimensions()} which contains a list of {@link Dimension} nodes.
 	 */
-	public void setExtraDimensions(int dimensions) {
+	@Deprecated
+    public void setExtraDimensions(int dimensions) {
 		// more efficient than just calling supportedOnlyIn2_3_4() to check
 		if (this.extraDimensions != null) {
 			supportedOnlyIn2_3_4();

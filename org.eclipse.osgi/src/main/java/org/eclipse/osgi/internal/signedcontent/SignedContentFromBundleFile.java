@@ -159,7 +159,6 @@ public class SignedContentFromBundleFile implements SignedContent {
 		}
 
 		public CorruptEntry(InvalidContentException verifyError, String name) {
-			super();
 			this.verifyError = verifyError;
 			this.name = name;
 		}

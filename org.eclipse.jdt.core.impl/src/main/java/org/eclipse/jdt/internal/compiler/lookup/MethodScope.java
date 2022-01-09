@@ -94,17 +94,17 @@ String basicToString(int tab) {
 	for (int i = tab; --i >= 0;)
 		newLine += "\t"; //$NON-NLS-1$
 
-	String s = newLine + "--- Method Scope ---"; //$NON-NLS-1$
+	StringBuilder s = new StringBuilder().append(newLine).append("--- Method Scope ---"); //$NON-NLS-1$
 	newLine += "\t"; //$NON-NLS-1$
-	s += newLine + "locals:"; //$NON-NLS-1$
+	s.append(newLine).append("locals:"); //$NON-NLS-1$
 	for (int i = 0; i < this.localIndex; i++)
-		s += newLine + "\t" + this.locals[i].toString(); //$NON-NLS-1$
-	s += newLine + "startIndex = " + this.startIndex; //$NON-NLS-1$
-	s += newLine + "isConstructorCall = " + this.isConstructorCall; //$NON-NLS-1$
-	s += newLine + "initializedField = " + this.initializedField; //$NON-NLS-1$
-	s += newLine + "lastVisibleFieldID = " + this.lastVisibleFieldID; //$NON-NLS-1$
-	s += newLine + "referenceContext = " + this.referenceContext; //$NON-NLS-1$
-	return s;
+		s.append(newLine).append("\t").append(this.locals[i].toString()); //$NON-NLS-1$
+	s.append(newLine).append("startIndex = ").append(this.startIndex); //$NON-NLS-1$
+	s.append(newLine).append("isConstructorCall = ").append(this.isConstructorCall); //$NON-NLS-1$
+	s.append(newLine).append("initializedField = ").append(this.initializedField); //$NON-NLS-1$
+	s.append(newLine).append("lastVisibleFieldID = ").append(this.lastVisibleFieldID); //$NON-NLS-1$
+	s.append(newLine).append("referenceContext = ").append(this.referenceContext); //$NON-NLS-1$
+	return s.toString();
 }
 
 /**
@@ -118,7 +118,7 @@ private void checkAndSetModifiersForConstructor(MethodBinding methodBinding) {
 
 	int astNodeBits = ((ConstructorDeclaration) this.referenceContext).bits;
 	if ((astNodeBits & ASTNode.IsDefaultConstructor) != 0
-			||((astNodeBits & ASTNode.IsImplicit) != 0 && (astNodeBits & ASTNode.IsCanonicalConstructor) != 0))  {
+			||(astNodeBits & ASTNode.IsImplicit) != 0 && (astNodeBits & ASTNode.IsCanonicalConstructor) != 0)  {
 		// certain flags are propagated from declaring class onto constructor
 		final int DECLARING_FLAGS = ClassFileConstants.AccEnum|ClassFileConstants.AccPublic|ClassFileConstants.AccProtected;
 		final int VISIBILITY_FLAGS = ClassFileConstants.AccPrivate|ClassFileConstants.AccPublic|ClassFileConstants.AccProtected;
@@ -159,7 +159,7 @@ private void checkAndSetModifiersForConstructor(MethodBinding methodBinding) {
 
 	// check for incompatible modifiers in the visibility bits, isolate the visibility bits
 	int accessorBits = realModifiers & (ClassFileConstants.AccPublic | ClassFileConstants.AccProtected | ClassFileConstants.AccPrivate);
-	if ((accessorBits & (accessorBits - 1)) != 0) {
+	if ((accessorBits & accessorBits - 1) != 0) {
 		problemReporter().illegalVisibilityModifierCombinationForMethod(declaringClass, (AbstractMethodDeclaration) this.referenceContext);
 
 		// need to keep the less restrictive so disable Protected/Private as necessary
@@ -231,21 +231,20 @@ private void checkAndSetModifiersForMethod(MethodBinding methodBinding) {
 				problemReporter().illegalModifierForAnnotationMember((AbstractMethodDeclaration) this.referenceContext);
 			else
 				problemReporter().illegalModifierForInterfaceMethod((AbstractMethodDeclaration) this.referenceContext, sourceLevel);
-			methodBinding.modifiers &= (expectedModifiers | ~ExtraCompilerModifiers.AccJustFlag);
+			methodBinding.modifiers &= expectedModifiers | ~ExtraCompilerModifiers.AccJustFlag;
 		}
 		return;
-	} else if (declaringClass.isAnonymousType() && sourceLevel >= ClassFileConstants.JDK9) {
+	}
+    if (declaringClass.isAnonymousType() && sourceLevel >= ClassFileConstants.JDK9) {
 		// If the class instance creation expression elides the supertype's type arguments using '<>',
 		// then for all non-private methods declared in the class body, it is as if the method declaration
 		// is annotated with @Override - https://bugs.openjdk.java.net/browse/JDK-8073593
 		LocalTypeBinding local = (LocalTypeBinding) declaringClass;
 		TypeReference ref = local.scope.referenceContext.allocation.type;
-		if (ref != null && (ref.bits & ASTNode.IsDiamond) != 0) {
-			//
-			if ((realModifiers & (ClassFileConstants.AccPrivate | ClassFileConstants.AccStatic )) == 0) {
-				methodBinding.tagBits |= TagBits.AnnotationOverride;
-			}
-		}
+		//
+        if (ref != null && (ref.bits & ASTNode.IsDiamond) != 0 && (realModifiers & (ClassFileConstants.AccPrivate | ClassFileConstants.AccStatic )) == 0) {
+        	methodBinding.tagBits |= TagBits.AnnotationOverride;
+        }
 	}
 
 	// check for abnormal modifiers
@@ -258,7 +257,7 @@ private void checkAndSetModifiersForMethod(MethodBinding methodBinding) {
 
 	// check for incompatible modifiers in the visibility bits, isolate the visibility bits
 	int accessorBits = realModifiers & (ClassFileConstants.AccPublic | ClassFileConstants.AccProtected | ClassFileConstants.AccPrivate);
-	if ((accessorBits & (accessorBits - 1)) != 0) {
+	if ((accessorBits & accessorBits - 1) != 0) {
 		problemReporter().illegalVisibilityModifierCombinationForMethod(declaringClass, (AbstractMethodDeclaration) this.referenceContext);
 
 		// need to keep the less restrictive so disable Protected/Private as necessary
@@ -291,30 +290,28 @@ private void checkAndSetModifiersForMethod(MethodBinding methodBinding) {
 		problemReporter().nativeMethodsCannotBeStrictfp(declaringClass, (AbstractMethodDeclaration) this.referenceContext);
 
 	// static members are only authorized in a static member or top level type
-	if (sourceLevel < ClassFileConstants.JDK16) {
-		if (((realModifiers & ClassFileConstants.AccStatic) != 0) && declaringClass.isNestedType() && !declaringClass.isStatic())
-			problemReporter().unexpectedStaticModifierForMethod(declaringClass, (AbstractMethodDeclaration) this.referenceContext);
-	}
+	if (sourceLevel < ClassFileConstants.JDK16 && (realModifiers & ClassFileConstants.AccStatic) != 0 && declaringClass.isNestedType() && !declaringClass.isStatic())
+    	problemReporter().unexpectedStaticModifierForMethod(declaringClass, (AbstractMethodDeclaration) this.referenceContext);
 
 	methodBinding.modifiers = modifiers;
 }
 
 public void checkUnusedParameters(MethodBinding method) {
 	if (method.isAbstract()
-			|| (method.isImplementing() && !compilerOptions().reportUnusedParameterWhenImplementingAbstract)
-			|| (method.isOverriding() && !method.isImplementing() && !compilerOptions().reportUnusedParameterWhenOverridingConcrete)
+			|| method.isImplementing() && !compilerOptions().reportUnusedParameterWhenImplementingAbstract
+			|| method.isOverriding() && !method.isImplementing() && !compilerOptions().reportUnusedParameterWhenOverridingConcrete
 			|| method.isMain()) {
 		// do not want to check
 		return;
 	}
 	for (int i = 0, maxLocals = this.localIndex; i < maxLocals; i++) {
 		LocalVariableBinding local = this.locals[i];
-		if (local == null || ((local.tagBits & TagBits.IsArgument) == 0)) {
+		if (local == null || (local.tagBits & TagBits.IsArgument) == 0) {
 			break; // done with arguments
 		}
 		if (local.useFlag == LocalVariableBinding.UNUSED &&
 				// do not report fake used variable
-				((local.declaration.bits & ASTNode.IsLocalDeclarationReachable) != 0)) { // declaration is reachable
+				(local.declaration.bits & ASTNode.IsLocalDeclarationReachable) != 0) { // declaration is reachable
 			problemReporter().unusedArgument(local.declaration);
 		}
 	}
@@ -334,7 +331,7 @@ public void computeLocalVariablePositions(int initOffset, CodeStream codeStream)
 	int ilocal = 0, maxLocals = this.localIndex;
 	while (ilocal < maxLocals) {
 		LocalVariableBinding local = this.locals[ilocal];
-		if (local == null || ((local.tagBits & TagBits.IsArgument) == 0)) break; // done with arguments
+		if (local == null || (local.tagBits & TagBits.IsArgument) == 0) break; // done with arguments
 
 		// record user-defined argument for attribute generation
 		codeStream.record(local);
@@ -342,7 +339,7 @@ public void computeLocalVariablePositions(int initOffset, CodeStream codeStream)
 		// assign variable position
 		local.resolvedPosition = this.offset;
 
-		if ((TypeBinding.equalsEquals(local.type, TypeBinding.LONG)) || (TypeBinding.equalsEquals(local.type, TypeBinding.DOUBLE))) {
+		if (TypeBinding.equalsEquals(local.type, TypeBinding.LONG) || TypeBinding.equalsEquals(local.type, TypeBinding.DOUBLE)) {
 			this.offset += 2;
 		} else {
 			this.offset++;
@@ -356,10 +353,10 @@ public void computeLocalVariablePositions(int initOffset, CodeStream codeStream)
 
 	// sneak in extra argument before other local variables
 	if (this.extraSyntheticArguments != null) {
-		for (int iarg = 0, maxArguments = this.extraSyntheticArguments.length; iarg < maxArguments; iarg++){
-			SyntheticArgumentBinding argument = this.extraSyntheticArguments[iarg];
+		for (SyntheticArgumentBinding extraSyntheticArgument : this.extraSyntheticArguments) {
+			SyntheticArgumentBinding argument = extraSyntheticArgument;
 			argument.resolvedPosition = this.offset;
-			if ((TypeBinding.equalsEquals(argument.type, TypeBinding.LONG)) || (TypeBinding.equalsEquals(argument.type, TypeBinding.DOUBLE))){
+			if (TypeBinding.equalsEquals(argument.type, TypeBinding.LONG) || TypeBinding.equalsEquals(argument.type, TypeBinding.DOUBLE)){
 				this.offset += 2;
 			} else {
 				this.offset++;
@@ -392,7 +389,7 @@ MethodBinding createMethod(AbstractMethodDeclaration method) {
 		checkAndSetModifiersForConstructor(method.binding);
 	} else {
 		if (declaringClass.isInterface()) {// interface or annotation type
-			if (sourceLevel >= ClassFileConstants.JDK9 && ((method.modifiers & ClassFileConstants.AccPrivate) != 0)) { // private method
+			if (sourceLevel >= ClassFileConstants.JDK9 && (method.modifiers & ClassFileConstants.AccPrivate) != 0) { // private method
 				// do nothing
 			} else if (method.isDefaultMethod() || method.isStatic()) {
 				modifiers |= ClassFileConstants.AccPublic; // default method is not abstract
@@ -481,10 +478,9 @@ public FieldBinding findField(TypeBinding receiverType, char[] fieldName, Invoca
 				fieldName,
 				ProblemReasons.NoProperEnclosingInstance);
 
-	if (field.isStatic())
-		return field; // static fields are always accessible
+	 // static fields are always accessible
 
-	if (!this.isConstructorCall || TypeBinding.notEquals(receiverType, enclosingSourceType()))
+	if (field.isStatic() || !this.isConstructorCall || TypeBinding.notEquals(receiverType, enclosingSourceType()))
 		return field;
 
 	if (invocationSite instanceof SingleNameReference)
@@ -508,11 +504,11 @@ public FieldBinding findField(TypeBinding receiverType, char[] fieldName, Invoca
 }
 
 public boolean isInsideConstructor() {
-	return (this.referenceContext instanceof ConstructorDeclaration);
+	return this.referenceContext instanceof ConstructorDeclaration;
 }
 
 public boolean isInsideInitializer() {
-	return (this.referenceContext instanceof TypeDeclaration);
+	return this.referenceContext instanceof TypeDeclaration;
 }
 
 @Override
@@ -521,8 +517,8 @@ public boolean isLambdaScope() {
 }
 
 public boolean isInsideInitializerOrConstructor() {
-	return (this.referenceContext instanceof TypeDeclaration)
-		|| (this.referenceContext instanceof ConstructorDeclaration);
+	return this.referenceContext instanceof TypeDeclaration
+		|| this.referenceContext instanceof ConstructorDeclaration;
 }
 
 /**
@@ -548,7 +544,7 @@ public final int recordInitializationStates(FlowInfo flowInfo) {
 	checkNextEntry : for (int i = this.lastIndex; --i >= 0;) {
 		if (this.definiteInits[i] == inits) {
 			long[] otherInits = this.extraDefiniteInits[i];
-			if ((extraInits != null) && (otherInits != null)) {
+			if (extraInits != null && otherInits != null) {
 				if (extraInits.length == otherInits.length) {
 					int j, max;
 					for (j = 0, max = extraInits.length; j < max; j++) {
@@ -558,11 +554,9 @@ public final int recordInitializationStates(FlowInfo flowInfo) {
 					}
 					return i;
 				}
-			} else {
-				if ((extraInits == null) && (otherInits == null)) {
-					return i;
-				}
-			}
+			} else if (extraInits == null && otherInits == null) {
+            	return i;
+            }
 		}
 	}
 
@@ -572,13 +566,13 @@ public final int recordInitializationStates(FlowInfo flowInfo) {
 		System.arraycopy(
 			this.definiteInits,
 			0,
-			(this.definiteInits = new long[this.lastIndex + 20]),
+			this.definiteInits = new long[this.lastIndex + 20],
 			0,
 			this.lastIndex);
 		System.arraycopy(
 			this.extraDefiniteInits,
 			0,
-			(this.extraDefiniteInits = new long[this.lastIndex + 20][]),
+			this.extraDefiniteInits = new long[this.lastIndex + 20][],
 			0,
 			this.lastIndex);
 	}
@@ -653,7 +647,7 @@ public Binding checkRedundantDefaultNullness(int nullBits, int sourceStart) {
 	if (referenceMethod != null) {
 		MethodBinding binding = referenceMethod.binding;
 		if (binding != null && binding.defaultNullness != 0) {
-			return (binding.defaultNullness == nullBits) ? binding : null;
+			return binding.defaultNullness == nullBits ? binding : null;
 		}
 	}
 	return this.parent.checkRedundantDefaultNullness(nullBits, sourceStart);

@@ -38,7 +38,7 @@ public HashtableOfLong(int size) {
 }
 public boolean containsKey(long key) {
 	int length = this.keyTable.length,
-		index = ((int)(key >>> 32)) % length;
+		index = (int)(key >>> 32) % length;
 	long currentKey;
 	while ((currentKey = this.keyTable[index]) != 0) {
 		if (currentKey == key)
@@ -51,7 +51,7 @@ public boolean containsKey(long key) {
 }
 public Object get(long key) {
 	int length = this.keyTable.length,
-		index = ((int)(key >>> 32)) % length;
+		index = (int)(key >>> 32) % length;
 	long currentKey;
 	while ((currentKey = this.keyTable[index]) != 0) {
 		if (currentKey == key)  return this.valueTable[index];
@@ -63,7 +63,7 @@ public Object get(long key) {
 }
 public Object put(long key, Object value) {
 	int length = this.keyTable.length,
-		index = ((int)(key >>> 32)) % length;
+		index = (int)(key >>> 32) % length;
 	long currentKey;
 	while ((currentKey = this.keyTable[index]) != 0) {
 		if (currentKey == key)  return this.valueTable[index] = value;
@@ -95,11 +95,11 @@ public int size() {
 }
 @Override
 public String toString() {
-	String s = ""; //$NON-NLS-1$
+	StringBuilder s = new StringBuilder();
 	Object object;
 	for (int i = 0, length = this.valueTable.length; i < length; i++)
 		if ((object = this.valueTable[i]) != null)
-			s += this.keyTable[i] + " -> " + object + "\n"; //$NON-NLS-2$ //$NON-NLS-1$
-	return s;
+			s.append(this.keyTable[i]).append(" -> ").append(object).append("\n"); //$NON-NLS-2$ //$NON-NLS-1$
+	return s.toString();
 }
 }

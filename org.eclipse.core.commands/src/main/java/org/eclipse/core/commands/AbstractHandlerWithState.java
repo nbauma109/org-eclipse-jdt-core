@@ -40,7 +40,7 @@ public abstract class AbstractHandlerWithState extends AbstractHandler implement
 	 */
 	private Map<String, State> states;
 
-	private static final String[] EMPTY = new String[0];
+	private static final String[] EMPTY = {};
 
 	/**
 	 * <p>
@@ -75,7 +75,7 @@ public abstract class AbstractHandlerWithState extends AbstractHandler implement
 
 	@Override
 	public final State getState(final String stateId) {
-		if ((states == null) || (states.isEmpty())) {
+		if (states == null || states.isEmpty()) {
 			return null;
 		}
 
@@ -84,7 +84,7 @@ public abstract class AbstractHandlerWithState extends AbstractHandler implement
 
 	@Override
 	public final String[] getStateIds() {
-		if ((states == null) || (states.isEmpty())) {
+		if (states == null || states.isEmpty()) {
 			return EMPTY;
 		}
 

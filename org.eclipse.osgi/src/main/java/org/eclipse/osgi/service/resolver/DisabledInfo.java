@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import java.util.Objects;
+
 /**
  * A disabled info represents a policy decision to disable a bundle which exists in a {@link State}.
  * Bundles may be disabled by adding disabled info with the {@link State#addDisabledInfo(DisabledInfo)}
@@ -85,11 +87,6 @@ public final class DisabledInfo {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (bundle == null ? 0 : bundle.hashCode());
-		result = prime * result + (policyName == null ? 0 : policyName.hashCode());
-		result = prime * result + (message == null ? 0 : message.hashCode());
-		return result;
+		return Objects.hash(bundle, policyName, message);
 	}
 }

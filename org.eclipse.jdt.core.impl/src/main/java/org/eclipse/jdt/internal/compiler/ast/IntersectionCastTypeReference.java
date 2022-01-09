@@ -38,8 +38,8 @@ public class IntersectionCastTypeReference extends TypeReference {
 		this.sourceStart = typeReferences[0].sourceStart;
 		int length = typeReferences.length;
 		this.sourceEnd = typeReferences[length - 1].sourceEnd;
-		for (int i = 0, max = typeReferences.length; i < max; i++) {
-			if ((typeReferences[i].bits & ASTNode.HasTypeAnnotations) != 0) {
+		for (TypeReference element : typeReferences) {
+			if ((element.bits & ASTNode.HasTypeAnnotations) != 0) {
 				this.bits |= ASTNode.HasTypeAnnotations;
 				break;
 			}
@@ -81,7 +81,7 @@ public class IntersectionCastTypeReference extends TypeReference {
 		for (int i = 0; i < length; i++) {
 			final TypeReference typeReference = this.typeReferences[i];
 			TypeBinding type = typeReference.resolveType(scope, checkBounds, location);
-			if (type == null || ((type.tagBits & TagBits.HasMissingType) != 0)) {
+			if (type == null || (type.tagBits & TagBits.HasMissingType) != 0) {
 				hasError = true;
 				continue;
 			}
@@ -142,8 +142,7 @@ public class IntersectionCastTypeReference extends TypeReference {
 		Map invocations = new HashMap(2);
 		nextInterface: for (int i = 0, interfaceCount = interfaces.length; i < interfaceCount; i++) {
 			ReferenceBinding one = interfaces[i];
-			if (one == null) continue nextInterface;
-			if (itsSuperclass != null && scope.hasErasedCandidatesCollisions(itsSuperclass, one, invocations, intersectionType, this))
+			if (one == null || itsSuperclass != null && scope.hasErasedCandidatesCollisions(itsSuperclass, one, invocations, intersectionType, this))
 				continue nextInterface;
 			nextOtherInterface: for (int j = 0; j < i; j++) {
 				ReferenceBinding two = interfaces[j];
@@ -155,7 +154,7 @@ public class IntersectionCastTypeReference extends TypeReference {
 		if ((intersectionType.tagBits & TagBits.HierarchyHasProblems) != 0)
 			return null;
 
-		return (this.resolvedType = intersectionType);
+		return this.resolvedType = intersectionType;
 	}
 
 	@Override

@@ -16,8 +16,6 @@ package org.eclipse.jdt.internal.core.search.indexing;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceProxy;
-import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,8 +41,7 @@ class AddFolderToIndex extends IndexRequest {
 	@Override
 	public boolean execute(IProgressMonitor progressMonitor) {
 
-		if (this.isCancelled || progressMonitor != null && progressMonitor.isCanceled()) return true;
-		if (!this.project.isAccessible()) return true; // nothing to do
+		if (this.isCancelled || progressMonitor != null && progressMonitor.isCanceled() || !this.project.isAccessible()) return true; // nothing to do
 		IResource folder = this.project.getParent().findMember(this.folderPath);
 		if (folder == null || folder.getType() == IResource.FILE) return true; // nothing to do, source folder was removed
 
@@ -62,42 +59,34 @@ class AddFolderToIndex extends IndexRequest {
 			final SourceElementParser parser = indexManager.getSourceElementParser(JavaCore.create(this.project), null/*requestor will be set by indexer*/);
 			if (this.exclusionPatterns == null && this.inclusionPatterns == null) {
 				folder.accept(
-					new IResourceProxyVisitor() {
-						@Override
-						public boolean visit(IResourceProxy proxy) /* throws CoreException */{
-							if (proxy.getType() == IResource.FILE) {
-								if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName()))
-									indexManager.addSource((IFile) proxy.requestResource(), container, parser);
-								return false;
-							}
-							return true;
-						}
-					},
+					proxy -> /* throws CoreException */{
+                    	if (proxy.getType() == IResource.FILE) {
+                    		if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName()))
+                    			indexManager.addSource((IFile) proxy.requestResource(), container, parser);
+                    		return false;
+                    	}
+                    	return true;
+                    },
 					IResource.NONE
 				);
 			} else {
 				folder.accept(
-					new IResourceProxyVisitor() {
-						@Override
-						public boolean visit(IResourceProxy proxy) /* throws CoreException */{
-							switch(proxy.getType()) {
-								case IResource.FILE :
-									if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
-										IResource resource = proxy.requestResource();
-										if (!Util.isExcluded(resource, AddFolderToIndex.this.inclusionPatterns, AddFolderToIndex.this.exclusionPatterns))
-											indexManager.addSource((IFile)resource, container, parser);
-									}
-									return false;
-								case IResource.FOLDER :
-									if (AddFolderToIndex.this.exclusionPatterns != null && AddFolderToIndex.this.inclusionPatterns == null) {
-										// if there are inclusion patterns then we must walk the children
-										if (Util.isExcluded(proxy.requestFullPath(), AddFolderToIndex.this.inclusionPatterns, AddFolderToIndex.this.exclusionPatterns, true))
-										    return false;
-									}
-							}
-							return true;
-						}
-					},
+					proxy -> /* throws CoreException */{
+                    	switch(proxy.getType()) {
+                    		case IResource.FILE :
+                    			if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
+                    				IResource resource = proxy.requestResource();
+                    				if (!Util.isExcluded(resource, AddFolderToIndex.this.inclusionPatterns, AddFolderToIndex.this.exclusionPatterns))
+                    					indexManager.addSource((IFile)resource, container, parser);
+                    			}
+                    			return false;
+                    		case IResource.FOLDER :
+                    			// if there are inclusion patterns then we must walk the children
+                                if (AddFolderToIndex.this.exclusionPatterns != null && AddFolderToIndex.this.inclusionPatterns == null && Util.isExcluded(proxy.requestFullPath(), AddFolderToIndex.this.inclusionPatterns, AddFolderToIndex.this.exclusionPatterns, true))
+                                    return false;
+                    	}
+                    	return true;
+                    },
 					IResource.NONE
 				);
 			}

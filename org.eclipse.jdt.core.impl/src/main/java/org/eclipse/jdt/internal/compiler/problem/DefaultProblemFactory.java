@@ -171,35 +171,33 @@ public final String getLocalizedMessage(int id, int elaborationId, String[] prob
 		output.append((String) this.messageTemplates.get(keyFromID(IProblem.JavadocMessagePrefix & IProblem.IgnoreCategoriesMask)));
 	}
 	while (true) {
-		if ((end = CharOperation.indexOf('{', message, start)) > -1) {
-			if (output == null) output = new StringBuilder(length+problemArguments.length*20);
-			output.append(message, start, end - start);
-			if ((start = CharOperation.indexOf('}', message, end + 1)) > -1) {
-				try {
-					output.append(problemArguments[CharOperation.parseInt(message, end + 1, start - end - 1)]);
-				} catch (NumberFormatException nfe) {
-					output.append(message, end + 1, start - end);
-				} catch (ArrayIndexOutOfBoundsException e) {
-					return "Cannot bind message for problem (id: " //$NON-NLS-1$
-						+ (id & IProblem.IgnoreCategoriesMask)
-						+ ") \""  //$NON-NLS-1$
-						+ new String(message)
-						+ "\" with arguments: {" //$NON-NLS-1$
-						+ Util.toString(problemArguments)
-						+"}"; //$NON-NLS-1$
-				}
-				start++;
-			} else {
-				output.append(message, end, length);
-				break;
-			}
-		} else {
+		if ((end = CharOperation.indexOf('{', message, start)) <= -1) {
 			if (output == null) {
 				return new String(message);
 			}
 			output.append(message, start, length - start);
 			break;
 		}
+        if (output == null) output = new StringBuilder(length+problemArguments.length*20);
+        output.append(message, start, end - start);
+        if ((start = CharOperation.indexOf('}', message, end + 1)) <= -1) {
+        	output.append(message, end, length);
+        	break;
+        }
+        try {
+        	output.append(problemArguments[CharOperation.parseInt(message, end + 1, start - end - 1)]);
+        } catch (NumberFormatException nfe) {
+        	output.append(message, end + 1, start - end);
+        } catch (ArrayIndexOutOfBoundsException e) {
+        	return "Cannot bind message for problem (id: " //$NON-NLS-1$
+        		+ (id & IProblem.IgnoreCategoriesMask)
+        		+ ") \""  //$NON-NLS-1$
+        		+ new String(message)
+        		+ "\" with arguments: {" //$NON-NLS-1$
+        		+ Util.toString(problemArguments)
+        		+"}"; //$NON-NLS-1$
+        }
+        start++;
 	}
 
 	return output.toString();

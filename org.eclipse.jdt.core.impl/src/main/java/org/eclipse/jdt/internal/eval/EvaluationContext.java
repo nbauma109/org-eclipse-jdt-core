@@ -186,8 +186,7 @@ public void complete(
 		}
 
 		ClassFile[] classFiles = this.installedVars.classFiles;
-		for (int i = 0; i < classFiles.length; i++) {
-			ClassFile classFile = classFiles[i];
+		for (ClassFile classFile : classFiles) {
 			IBinaryType binary = null;
 			try {
 				binary = new ClassFileReader(classFile.getBytes(), null);
@@ -225,24 +224,22 @@ public void deleteVariable(GlobalVariable variable) {
 	this.varsChanged = true;
 }
 private void deployCodeSnippetClassIfNeeded(IRequestor requestor) throws InstallException {
-	if (this.codeSnippetBinary == null) {
-		// Deploy CodeSnippet class (only once)
-		if (!requestor.acceptClassFiles(
-			new ClassFile[] {
-				new ClassFile() {
-					@Override
-					public byte[] getBytes() {
-						return getCodeSnippetBytes();
-					}
-					@Override
-					public char[][] getCompoundName() {
-						return EvaluationConstants.ROOT_COMPOUND_NAME;
-					}
-				}
-			},
-			null))
-				throw new InstallException();
-	}
+	// Deploy CodeSnippet class (only once)
+    if (this.codeSnippetBinary == null && !requestor.acceptClassFiles(
+    	new ClassFile[] {
+    		new ClassFile() {
+    			@Override
+    			public byte[] getBytes() {
+    				return getCodeSnippetBytes();
+    			}
+    			@Override
+    			public char[][] getCompoundName() {
+    				return EvaluationConstants.ROOT_COMPOUND_NAME;
+    			}
+    		}
+    	},
+    	null))
+    		throw new InstallException();
 }
 /**
  * @see org.eclipse.jdt.core.eval.IEvaluationContext
@@ -349,7 +346,7 @@ public void evaluate(char[] codeSnippet, INameEnvironment environment, Map<Strin
  */
 public void evaluateImports(INameEnvironment environment, IRequestor requestor, IProblemFactory problemFactory) {
 	for (int i = 0; i < this.imports.length; i++) {
-		CategorizedProblem[] problems = new CategorizedProblem[] {null};
+		CategorizedProblem[] problems = {null};
 		char[] importDeclaration = this.imports[i];
 		char[][] splitDeclaration = CharOperation.splitOn('.', importDeclaration);
 		int splitLength = splitDeclaration.length;
@@ -370,17 +367,15 @@ public void evaluateImports(INameEnvironment environment, IRequestor requestor, 
 						pkgName = splitDeclaration[splitLength - 2];
 				}
 				if (!environment.isPackage(parentName, pkgName)) {
-					String[] arguments = new String[] {new String(importDeclaration)};
+					String[] arguments = {new String(importDeclaration)};
 					problems[0] = problemFactory.createProblem(importDeclaration, IProblem.ImportNotFound, arguments, arguments, ProblemSeverities.Warning, 0, importDeclaration.length - 1, i, 0);
 				}
-			} else {
-				if (environment.findType(splitDeclaration) == null) {
-					String[] arguments = new String[] {new String(importDeclaration)};
-					problems[0] = problemFactory.createProblem(importDeclaration, IProblem.ImportNotFound, arguments, arguments, ProblemSeverities.Warning, 0, importDeclaration.length - 1, i, 0);
-				}
-			}
+			} else if (environment.findType(splitDeclaration) == null) {
+            	String[] arguments = {new String(importDeclaration)};
+            	problems[0] = problemFactory.createProblem(importDeclaration, IProblem.ImportNotFound, arguments, arguments, ProblemSeverities.Warning, 0, importDeclaration.length - 1, i, 0);
+            }
 		} else {
-			String[] arguments = new String[] {new String(importDeclaration)};
+			String[] arguments = {new String(importDeclaration)};
 			problems[0] = problemFactory.createProblem(importDeclaration, IProblem.ImportNotFound, arguments, arguments, ProblemSeverities.Warning, 0, importDeclaration.length - 1, i, 0);
 		}
 		if (problems[0] != null) {
@@ -409,19 +404,16 @@ public void evaluateVariables(INameEnvironment environment, Map<String, String> 
 			// Sort classes so that enclosing types are cached before nested types
 			// otherwise an AbortCompilation is thrown in 1.5 mode since the enclosing type
 			// is needed to resolve a nested type
-			Util.sort(classes, new Util.Comparer() {
-				@Override
-				public int compare(Object a, Object b) {
-					if (a == b) return 0;
-					ClassFile enclosing = ((ClassFile) a).enclosingClassFile;
-					while (enclosing != null) {
-						if (enclosing == b)
-							return 1;
-						enclosing = enclosing.enclosingClassFile;
-					}
-					return -1;
-				}
-			});
+			Util.sort(classes, (a, b) -> {
+            	if (a == b) return 0;
+            	ClassFile enclosing = ((ClassFile) a).enclosingClassFile;
+            	while (enclosing != null) {
+            		if (enclosing == b)
+            			return 1;
+            		enclosing = enclosing.enclosingClassFile;
+            	}
+            	return -1;
+            });
 
 			// Send classes
 			if (!requestor.acceptClassFiles(classes, null)) {
@@ -477,50 +469,52 @@ byte[] getCodeSnippetBytes() {
  */
 public static String getCodeSnippetSource() {
 	return
-		"package org.eclipse.jdt.internal.eval.target;\n" + //$NON-NLS-1$
-		"\n" + //$NON-NLS-1$
-		"/*\n" + //$NON-NLS-1$
-		" * (c) Copyright IBM Corp. 2000, 2001.\n" + //$NON-NLS-1$
-		" * All Rights Reserved.\n" + //$NON-NLS-1$
-		" */\n" + //$NON-NLS-1$
-		"/**\n" + //$NON-NLS-1$
-		" * The root of all code snippet classes. Code snippet classes\n" + //$NON-NLS-1$
-		" * are supposed to overide the run() method.\n" + //$NON-NLS-1$
-		" * <p>\n" + //$NON-NLS-1$
-		" * IMPORTANT NOTE:\n" + //$NON-NLS-1$
-		" * All methods in this class must be public since this class is going to be loaded by the\n" + //$NON-NLS-1$
-		" * bootstrap class loader, and the other code snippet support classes might be loaded by \n" + //$NON-NLS-1$
-		" * another class loader (so their runtime packages are going to be different).\n" + //$NON-NLS-1$
-		" */\n" + //$NON-NLS-1$
-		"public class CodeSnippet {\n" + //$NON-NLS-1$
-		"	private Class resultType = void.class;\n" + //$NON-NLS-1$
-		"	private Object resultValue = null;\n" + //$NON-NLS-1$
-		"/**\n" + //$NON-NLS-1$
-		" * Returns the result type of the code snippet evaluation.\n" + //$NON-NLS-1$
-		" */\n" + //$NON-NLS-1$
-		"public Class getResultType() {\n" + //$NON-NLS-1$
-		"	return this.resultType;\n" + //$NON-NLS-1$
-		"}\n" + //$NON-NLS-1$
-		"/**\n" + //$NON-NLS-1$
-		" * Returns the result value of the code snippet evaluation.\n" + //$NON-NLS-1$
-		" */\n" + //$NON-NLS-1$
-		"public Object getResultValue() {\n" + //$NON-NLS-1$
-		"	return this.resultValue;\n" + //$NON-NLS-1$
-		"}\n" + //$NON-NLS-1$
-		"/**\n" + //$NON-NLS-1$
-		" * The code snippet. Subclasses must override this method with a transformed code snippet\n" + //$NON-NLS-1$
-		" * that stores the result using setResult(Class, Object).\n" + //$NON-NLS-1$
-		" */\n" + //$NON-NLS-1$
-		"public void run() {\n" + //$NON-NLS-1$
-		"}\n" + //$NON-NLS-1$
-		"/**\n" + //$NON-NLS-1$
-		" * Stores the result type and value of the code snippet evaluation.\n" + //$NON-NLS-1$
-		" */\n" + //$NON-NLS-1$
-		"public void setResult(Object someResultValue, Class someResultType) {\n" + //$NON-NLS-1$
-		"	this.resultValue = someResultValue;\n" + //$NON-NLS-1$
-		"	this.resultType = someResultType;\n" + //$NON-NLS-1$
-		"}\n" + //$NON-NLS-1$
-		"}\n"; //$NON-NLS-1$
+		"""
+    	package org.eclipse.jdt.internal.eval.target;
+    	
+    	/*
+    	 * (c) Copyright IBM Corp. 2000, 2001.
+    	 * All Rights Reserved.
+    	 */
+    	/**
+    	 * The root of all code snippet classes. Code snippet classes
+    	 * are supposed to overide the run() method.
+    	 * <p>
+    	 * IMPORTANT NOTE:
+    	 * All methods in this class must be public since this class is going to be loaded by the
+    	 * bootstrap class loader, and the other code snippet support classes might be loaded by\s
+    	 * another class loader (so their runtime packages are going to be different).
+    	 */
+    	public class CodeSnippet {
+    		private Class resultType = void.class;
+    		private Object resultValue = null;
+    	/**
+    	 * Returns the result type of the code snippet evaluation.
+    	 */
+    	public Class getResultType() {
+    		return this.resultType;
+    	}
+    	/**
+    	 * Returns the result value of the code snippet evaluation.
+    	 */
+    	public Object getResultValue() {
+    		return this.resultValue;
+    	}
+    	/**
+    	 * The code snippet. Subclasses must override this method with a transformed code snippet
+    	 * that stores the result using setResult(Class, Object).
+    	 */
+    	public void run() {
+    	}
+    	/**
+    	 * Stores the result type and value of the code snippet evaluation.
+    	 */
+    	public void setResult(Object someResultValue, Class someResultType) {
+    		this.resultValue = someResultValue;
+    		this.resultType = someResultType;
+    	}
+    	}
+    	""";
 }
 /**
  * Returns the imports of this evaluation context. An import is the name of a package

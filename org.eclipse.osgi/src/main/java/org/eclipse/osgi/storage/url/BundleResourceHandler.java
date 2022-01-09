@@ -296,6 +296,6 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 
 	static long parseBundleIDFromURLHost(String host) {
 		int dotIndex = host.indexOf(BID_FWKID_SEPARATOR);
-		return (dotIndex >= 0 && dotIndex < host.length() - 1) ? Long.parseLong(host.substring(0, dotIndex)) : Long.parseLong(host);
+		return dotIndex >= 0 && dotIndex < host.length() - 1 ? Long.parseLong(host.substring(0, dotIndex)) : Long.parseLong(host);
 	}
 }

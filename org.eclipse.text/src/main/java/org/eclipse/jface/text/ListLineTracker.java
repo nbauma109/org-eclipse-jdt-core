@@ -107,10 +107,7 @@ abstract class ListLineTracker implements ILineTracker {
 
 		Line l= fLines.get(startLine);
 
-		if (l.delimiter == null)
-			return 1;
-
-		if (l.offset + l.length > target)
+		if (l.delimiter == null || l.offset + l.length > target)
 			return 1;
 
 		if (l.offset + l.length == target)
@@ -137,7 +134,8 @@ abstract class ListLineTracker implements ILineTracker {
 	public final int getLineNumberOfOffset(int position) throws BadLocationException {
 		if (position < 0) {
 			throw new BadLocationException("Negative offset : " + position); //$NON-NLS-1$
-		} else if (position > fTextLength) {
+		}
+        if (position > fTextLength) {
 			throw new BadLocationException("Offset > length: " + position + " > " + fTextLength);  //$NON-NLS-1$//$NON-NLS-2$
 		}
 
@@ -148,7 +146,7 @@ abstract class ListLineTracker implements ILineTracker {
 				return 0;
 
 			Line l= fLines.get(lastLine);
-			return (l.delimiter != null ? lastLine + 1 : lastLine);
+			return l.delimiter != null ? lastLine + 1 : lastLine;
 		}
 
 		return findLine(position);
@@ -164,7 +162,7 @@ abstract class ListLineTracker implements ILineTracker {
 			if (size == 0)
 				return new Region(0, 0);
 			Line l= fLines.get(size - 1);
-			return (l.delimiter != null ? new Line(fTextLength, 0) : new Line(fTextLength - l.length, l.length));
+			return l.delimiter != null ? new Line(fTextLength, 0) : new Line(fTextLength - l.length, l.length);
 		}
 
 		return getLineInformation(findLine(position));
@@ -186,7 +184,7 @@ abstract class ListLineTracker implements ILineTracker {
 		}
 
 		Line l= fLines.get(line);
-		return (l.delimiter != null ? new Line(l.offset, l.length - l.delimiter.length()) : l);
+		return l.delimiter != null ? new Line(l.offset, l.length - l.delimiter.length()) : l;
 	}
 
 	@Override
@@ -218,7 +216,7 @@ abstract class ListLineTracker implements ILineTracker {
 			return 1;
 
 		Line l= fLines.get(lines - 1);
-		return (l.delimiter != null ? lines + 1 : lines);
+		return l.delimiter != null ? lines + 1 : lines;
 	}
 
 	@Override
@@ -253,10 +251,7 @@ abstract class ListLineTracker implements ILineTracker {
 		if (line < 0 || line > lines)
 			throw new BadLocationException();
 
-		if (lines == 0)
-			return null;
-
-		if (line == lines)
+		if (lines == 0 || line == lines)
 			return null;
 
 		Line l= fLines.get(line);
@@ -291,7 +286,7 @@ abstract class ListLineTracker implements ILineTracker {
 
 		while (delimiterInfo != null && delimiterInfo.delimiterIndex > -1) {
 
-			int index= delimiterInfo.delimiterIndex + (delimiterInfo.delimiterLength - 1);
+			int index= delimiterInfo.delimiterIndex + delimiterInfo.delimiterLength - 1;
 
 			if (insertPosition + count >= fLines.size())
 				fLines.add(new Line(offset + start, offset + index, delimiterInfo.delimiter));

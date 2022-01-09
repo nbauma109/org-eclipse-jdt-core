@@ -31,7 +31,6 @@ public final class LinearUndoEnforcer extends LinearUndoViolationDetector {
 	 * Create an instance of LinearUndoEnforcer.
 	 */
 	public LinearUndoEnforcer() {
-		super();
 	}
 
 	/*

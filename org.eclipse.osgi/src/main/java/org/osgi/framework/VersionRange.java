@@ -91,10 +91,10 @@ public class VersionRange {
 	 * @throws IllegalArgumentException If the arguments are invalid.
 	 */
 	public VersionRange(char leftType, Version leftEndpoint, Version rightEndpoint, char rightType) {
-		if ((leftType != LEFT_CLOSED) && (leftType != LEFT_OPEN)) {
+		if (leftType != LEFT_CLOSED && leftType != LEFT_OPEN) {
 			throw new IllegalArgumentException("invalid leftType \"" + leftType + "\"");
 		}
-		if ((rightType != RIGHT_OPEN) && (rightType != RIGHT_CLOSED)) {
+		if (rightType != RIGHT_OPEN && rightType != RIGHT_CLOSED) {
 			throw new IllegalArgumentException("invalid rightType \"" + rightType + "\"");
 		}
 		if (leftEndpoint == null) {
@@ -244,10 +244,7 @@ public class VersionRange {
 	 *         range; {@code false} otherwise.
 	 */
 	public boolean includes(Version version) {
-		if (empty) {
-			return false;
-		}
-		if (left.compareTo(version) >= (leftClosed ? 1 : 0)) {
+		if (empty || left.compareTo(version) >= (leftClosed ? 1 : 0)) {
 			return false;
 		}
 		if (right == null) {
@@ -266,7 +263,7 @@ public class VersionRange {
 	 *         specified, then this version range is returned.
 	 */
 	public VersionRange intersection(VersionRange... ranges) {
-		if ((ranges == null) || (ranges.length == 0)) {
+		if (ranges == null || ranges.length == 0) {
 			return this;
 		}
 		// prime with data from this version range
@@ -279,12 +276,10 @@ public class VersionRange {
 			int comparison = endpointLeft.compareTo(range.left);
 			if (comparison == 0) {
 				closedLeft = closedLeft && range.leftClosed;
-			} else {
-				if (comparison < 0) { // move endpointLeft to the right
-					endpointLeft = range.left;
-					closedLeft = range.leftClosed;
-				}
-			}
+			} else if (comparison < 0) { // move endpointLeft to the right
+            	endpointLeft = range.left;
+            	closedLeft = range.leftClosed;
+            }
 			if (range.right != null) {
 				if (endpointRight == null) {
 					endpointRight = range.right;
@@ -293,12 +288,10 @@ public class VersionRange {
 					comparison = endpointRight.compareTo(range.right);
 					if (comparison == 0) {
 						closedRight = closedRight && range.rightClosed;
-					} else {
-						if (comparison > 0) { // move endpointRight to the left
-							endpointRight = range.right;
-							closedRight = range.rightClosed;
-						}
-					}
+					} else if (comparison > 0) { // move endpointRight to the left
+                    	endpointRight = range.right;
+                    	closedRight = range.rightClosed;
+                    }
 				}
 			}
 		}
@@ -341,29 +334,26 @@ public class VersionRange {
 	 *         version; {@code false} otherwise.
 	 */
 	public boolean isExact() {
-		if (empty || (right == null)) {
+		if (empty || right == null) {
 			return false;
 		}
 		if (leftClosed) {
 			if (rightClosed) {
 				// [l,r]: exact if l == r
 				return left.equals(right);
-			} else {
-				// [l,r): exact if l++ >= r
-				Version adjacent1 = new Version(left.getMajor(), left.getMinor(), left.getMicro(), left.getQualifier() + "-");
-				return adjacent1.compareTo(right) >= 0;
 			}
-		} else {
-			if (rightClosed) {
-				// (l,r] is equivalent to [l++,r]: exact if l++ == r
-				Version adjacent1 = new Version(left.getMajor(), left.getMinor(), left.getMicro(), left.getQualifier() + "-");
-				return adjacent1.equals(right);
-			} else {
-				// (l,r) is equivalent to [l++,r): exact if (l++)++ >=r
-				Version adjacent2 = new Version(left.getMajor(), left.getMinor(), left.getMicro(), left.getQualifier() + "--");
-				return adjacent2.compareTo(right) >= 0;
-			}
+            // [l,r): exact if l++ >= r
+            Version adjacent1 = new Version(left.getMajor(), left.getMinor(), left.getMicro(), left.getQualifier() + "-");
+            return adjacent1.compareTo(right) >= 0;
 		}
+        if (rightClosed) {
+        	// (l,r] is equivalent to [l++,r]: exact if l++ == r
+        	Version adjacent1 = new Version(left.getMajor(), left.getMinor(), left.getMicro(), left.getQualifier() + "-");
+        	return adjacent1.equals(right);
+        }
+        // (l,r) is equivalent to [l++,r): exact if (l++)++ >=r
+        Version adjacent2 = new Version(left.getMajor(), left.getMinor(), left.getMicro(), left.getQualifier() + "--");
+        return adjacent2.compareTo(right) >= 0;
 	}
 
 	/**
@@ -446,9 +436,9 @@ public class VersionRange {
 			return true;
 		}
 		if (right == null) {
-			return (leftClosed == other.leftClosed) && (other.right == null) && left.equals(other.left);
+			return leftClosed == other.leftClosed && other.right == null && left.equals(other.left);
 		}
-		return (leftClosed == other.leftClosed) && (rightClosed == other.rightClosed) && left.equals(other.left) && right.equals(other.right);
+		return leftClosed == other.leftClosed && rightClosed == other.rightClosed && left.equals(other.left) && right.equals(other.right);
 	}
 
 	/**
@@ -469,14 +459,14 @@ public class VersionRange {
 			throw new IllegalArgumentException("invalid attributeName \"" + attributeName + "\"");
 		}
 		for (char ch : attributeName.toCharArray()) {
-			if ((ch == '=') || (ch == '>') || (ch == '<') || (ch == '~') || (ch == '(') || (ch == ')')) {
+			if (ch == '=' || ch == '>' || ch == '<' || ch == '~' || ch == '(' || ch == ')') {
 				throw new IllegalArgumentException("invalid attributeName \"" + attributeName + "\"");
 			}
 		}
 
 		StringBuilder result = new StringBuilder(128);
-		final boolean needPresence = !leftClosed && ((right == null) || !rightClosed);
-		final boolean multipleTerms = needPresence || (right != null);
+		final boolean needPresence = !leftClosed && (right == null || !rightClosed);
+		final boolean multipleTerms = needPresence || right != null;
 		if (multipleTerms) {
 			result.append("(&");
 		}

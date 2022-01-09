@@ -26,7 +26,7 @@ public class JavadocArgumentExpression extends Expression {
 		this.token = name;
 		this.sourceStart = startPos;
 		this.sourceEnd = endPos;
-		long pos = (((long) startPos) << 32) + endPos;
+		long pos = ((long) startPos << 32) + endPos;
 		this.argument = new Argument(name, pos, typeRef, ClassFileConstants.AccDefault);
 		this.bits |= InsideJavadoc;
 	}
@@ -63,7 +63,7 @@ public class JavadocArgumentExpression extends Expression {
 						int compoundLength = 2;
 						while ((enclosingType = enclosingType.enclosingType()) != null) compoundLength++;
 						int typeNameLength = typeRef.getTypeName().length;
-						if (typeNameLength != compoundLength && typeNameLength != (compoundLength+this.resolvedType.getPackage().compoundName.length)) {
+						if (typeNameLength != compoundLength && typeNameLength != compoundLength+this.resolvedType.getPackage().compoundName.length) {
 							scope.problemReporter().javadocInvalidMemberTypeQualification(typeRef.sourceStart, typeRef.sourceEnd, scope.getDeclarationModifiers());
 						}
 					}
@@ -117,20 +117,16 @@ public class JavadocArgumentExpression extends Expression {
 	 */
 	@Override
 	public void traverse(ASTVisitor visitor, BlockScope blockScope) {
-		if (visitor.visit(this, blockScope)) {
-			if (this.argument != null) {
-				this.argument.traverse(visitor, blockScope);
-			}
-		}
+		if (visitor.visit(this, blockScope) && this.argument != null) {
+        	this.argument.traverse(visitor, blockScope);
+        }
 		visitor.endVisit(this, blockScope);
 	}
 	@Override
 	public void traverse(ASTVisitor visitor, ClassScope blockScope) {
-		if (visitor.visit(this, blockScope)) {
-			if (this.argument != null) {
-				this.argument.traverse(visitor, blockScope);
-			}
-		}
+		if (visitor.visit(this, blockScope) && this.argument != null) {
+        	this.argument.traverse(visitor, blockScope);
+        }
 		visitor.endVisit(this, blockScope);
 	}
 }

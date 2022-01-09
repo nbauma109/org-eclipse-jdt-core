@@ -197,6 +197,7 @@ public interface State {
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
 	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[], Map)}
 	 */
+    @Deprecated
     void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
 
 	/**
@@ -217,6 +218,7 @@ public interface State {
 	 * @since 3.4
 	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[], Map)}
 	 */
+    @Deprecated
     void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
 
 	/**
@@ -396,6 +398,7 @@ public interface State {
 	 * @deprecated The exact form of this has never been defined.  There is
 	 * no alternative method available.
 	 */
+    @Deprecated
     void setOverrides(Object value);
 
 	/**

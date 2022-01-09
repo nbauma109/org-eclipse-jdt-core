@@ -42,7 +42,7 @@ public class Promises {
 	 * @return A new Promise that has been resolved with the specified value.
 	 */
 	public static <T> Promise<T> resolved(T value) {
-		return new PromiseImpl<T>(value, null);
+		return new PromiseImpl<>(value, null);
 	}
 
 	/**
@@ -54,7 +54,7 @@ public class Promises {
 	 * @return A new Promise that has been resolved with the specified failure.
 	 */
 	public static <T> Promise<T> failed(Throwable failure) {
-		return new PromiseImpl<T>(null, requireNonNull(failure));
+		return new PromiseImpl<>(null, requireNonNull(failure));
 	}
 
 	/**
@@ -85,13 +85,13 @@ public class Promises {
 	 */
 	public static <T, S extends T> Promise<List<T>> all(Collection<Promise<S>> promises) {
 		if (promises.isEmpty()) {
-			List<T> result = new ArrayList<T>();
+			List<T> result = new ArrayList<>();
 			return resolved(result);
 		}
 		/* make a copy and capture the ordering */
-		List<Promise<? extends T>> list = new ArrayList<Promise<? extends T>>(promises);
-		PromiseImpl<List<T>> chained = new PromiseImpl<List<T>>();
-		All<T> all = new All<T>(chained, list);
+		List<Promise<? extends T>> list = new ArrayList<>(promises);
+		PromiseImpl<List<T>> chained = new PromiseImpl<>();
+		All<T> all = new All<>(chained, list);
 		for (Promise<? extends T> promise : list) {
 			promise.onResolve(all);
 		}
@@ -144,19 +144,20 @@ public class Promises {
 			this.promiseCount = new AtomicInteger(promises.size());
 		}
 
-		public void run() {
+		@Override
+        public void run() {
 			if (promiseCount.decrementAndGet() != 0) {
 				return;
 			}
-			List<T> result = new ArrayList<T>(promises.size());
-			List<Promise<?>> failed = new ArrayList<Promise<?>>(promises.size());
+			List<T> result = new ArrayList<>(promises.size());
+			List<Promise<?>> failed = new ArrayList<>(promises.size());
 			Throwable cause = null;
 			for (Promise<? extends T> promise : promises) {
 				Throwable failure;
 				T value;
 				try {
 					failure = promise.getFailure();
-					value = (failure != null) ? null : promise.getValue();
+					value = failure != null ? null : promise.getValue();
 				} catch (Throwable e) {
 					chained.resolve(null, e);
 					return;

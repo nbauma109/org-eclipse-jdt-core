@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.core.util.Util;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 // TODO (jerome) - add implementation support for 1.5 features
 class DOMMethod extends DOMMember implements IDOMMethod {
 
@@ -348,14 +349,12 @@ protected void appendMemberDeclarationContents(CharArrayBuffer buffer) {
 			// add list and space before body
 			buffer.append(this.fDocument, this.fExceptionRange[0], this.fBodyRange[0] - this.fExceptionRange[0]);
 		}
-	} else {
-		// add space before body
-		if (this.fExceptionRange[0] >= 0) {
-			buffer.append(this.fDocument, this.fExceptionRange[1] + 1, this.fBodyRange[0] - this.fExceptionRange[1] - 1);
-		} else {
-			buffer.append(this.fDocument, start, this.fBodyRange[0] - start);
-		}
-	}
+	} else // add space before body
+    if (this.fExceptionRange[0] >= 0) {
+    	buffer.append(this.fDocument, this.fExceptionRange[1] + 1, this.fBodyRange[0] - this.fExceptionRange[1] - 1);
+    } else {
+    	buffer.append(this.fDocument, start, this.fBodyRange[0] - start);
+    }
 
 }
 /**
@@ -380,15 +379,13 @@ protected void appendSimpleContents(CharArrayBuffer buffer) {
 @Override
 public String getBody() {
 	becomeDetailed();
-	if (hasBody()) {
-		if (this.fBody != null) {
-			return this.fBody;
-		} else {
-			return new String(this.fDocument, this.fBodyRange[0], this.fBodyRange[1] + 1 - this.fBodyRange[0]);
-		}
-	} else {
+	if (!hasBody()) {
 		return null;
 	}
+    if (this.fBody != null) {
+    	return this.fBody;
+    }
+    return new String(this.fDocument, this.fBodyRange[0], this.fBodyRange[1] + 1 - this.fBodyRange[0]);
 }
 /**
  * Returns the simple name of the enclsoing type for this constructor.
@@ -397,16 +394,14 @@ public String getBody() {
  */
 protected String getConstructorName() {
 
-	if (isConstructor()) {
-		if (getParent() != null) {
-			return getParent().getName();
-		} else {
-			// If there is no parent use the original name
-			return new String(getNameContents());
-		}
-	} else {
+	if (!isConstructor()) {
 		return null;
 	}
+    if (getParent() != null) {
+    	return getParent().getName();
+    }
+    // If there is no parent use the original name
+    return new String(getNameContents());
 
 }
 /**
@@ -428,34 +423,32 @@ protected char[] generateFlags() {
 	char[] flags= Flags.toString(getFlags() & ~Flags.AccVarargs).toCharArray();
 	if (flags.length == 0) {
 		return flags;
-	} else {
-		return CharOperation.concat(flags, new char[] {' '});
 	}
+    return CharOperation.concat(flags, new char[] {' '});
 }/**
  * @see IDOMNode#getJavaElement
  */
 @Override
 public IJavaElement getJavaElement(IJavaElement parent) throws IllegalArgumentException {
-	if (parent.getElementType() == IJavaElement.TYPE) {
-		// translate parameter types to signatures
-		String[] sigs= null;
-		if (this.fParameterTypes != null) {
-			sigs= new String[this.fParameterTypes.length];
-			int i;
-			for (i= 0; i < this.fParameterTypes.length; i++) {
-				sigs[i]= Signature.createTypeSignature(this.fParameterTypes[i].toCharArray(), false);
-			}
-		}
-		String name= null;
-		if (isConstructor()) {
-			name= getConstructorName();
-		} else {
-			name= getName();
-		}
-		return ((IType)parent).getMethod(name, sigs);
-	} else {
+	if (parent.getElementType() != IJavaElement.TYPE) {
 		throw new IllegalArgumentException(Messages.element_illegalParent);
 	}
+    // translate parameter types to signatures
+    String[] sigs= null;
+    if (this.fParameterTypes != null) {
+    	sigs= new String[this.fParameterTypes.length];
+    	int i;
+    	for (i= 0; i < this.fParameterTypes.length; i++) {
+    		sigs[i]= Signature.createTypeSignature(this.fParameterTypes[i].toCharArray(), false);
+    	}
+    }
+    String name= null;
+    if (isConstructor()) {
+    	name= getConstructorName();
+    } else {
+    	name= getName();
+    }
+    return ((IType)parent).getMethod(name, sigs);
 }
 /**
  * @see DOMMember#getMemberDeclarationStartPosition()
@@ -464,9 +457,8 @@ public IJavaElement getJavaElement(IJavaElement parent) throws IllegalArgumentEx
 protected int getMemberDeclarationStartPosition() {
 	if (this.fReturnTypeRange[0] >= 0) {
 		return this.fReturnTypeRange[0];
-	} else {
-		return this.fNameRange[0];
 	}
+    return this.fNameRange[0];
 }
 /**
  * @see IDOMNode#getName()
@@ -475,9 +467,8 @@ protected int getMemberDeclarationStartPosition() {
 public String getName() {
 	if (isConstructor()) {
 		return null;
-	} else {
-		return super.getName();
 	}
+    return super.getName();
 }
 /**
  * @see IDOMNode#getNodeType()
@@ -507,9 +498,8 @@ public String[] getParameterTypes() {
 public String getReturnType() {
 	if (isConstructor()) {
 		return null;
-	} else {
-		return this.fReturnType;
 	}
+    return this.fReturnType;
 }
 /**
  * Returns the source code to be used for this method's return type
@@ -517,14 +507,11 @@ public String getReturnType() {
 protected char[] getReturnTypeContents() {
 	if (isConstructor()) {
 		return null;
-	} else {
-		if (isReturnTypeAltered()) {
-			return this.fReturnType.toCharArray();
-		} else {
-			return CharOperation.subarray(this.fDocument, this.fReturnTypeRange[0], this.fReturnTypeRange[1] + 1);
-		}
-
 	}
+    if (isReturnTypeAltered()) {
+    	return this.fReturnType.toCharArray();
+    }
+    return CharOperation.subarray(this.fDocument, this.fReturnTypeRange[0], this.fReturnTypeRange[1] + 1);
 }
 /**
  * Returns true if this method's return type has
@@ -558,8 +545,8 @@ public boolean isSignatureEqual(IDOMNode node) {
 	boolean ok= node.getNodeType() == getNodeType();
 	if (ok) {
 		IDOMMethod method= (IDOMMethod)node;
-		ok = (isConstructor() && method.isConstructor()) ||
-			(!isConstructor() && !method.isConstructor());
+		ok = isConstructor() && method.isConstructor() ||
+			!isConstructor() && !method.isConstructor();
 		if (ok && !isConstructor()) {
 			ok= getName().equals(method.getName());
 		}
@@ -572,24 +559,19 @@ public boolean isSignatureEqual(IDOMNode node) {
 			// this method has no parameters
             // the other method has no parameters either
             return types == null || types.length == 0;
-		} else {
-			// this method has parameters
-			if (types == null || types.length == 0) {
-				// the other method has no parameters
-				return false;
-			}
-			if (this.fParameterTypes.length != types.length) {
-				// the methods have a different number of parameters
-				return false;
-			}
-			int i;
-			for (i= 0; i < types.length; i++) {
-				if (!this.fParameterTypes[i].equals(types[i])) {
-					return false;
-				}
-			}
-			return true;
 		}
+        // this method has parameters
+        if (types == null || types.length == 0 || this.fParameterTypes.length != types.length) {
+        	// the methods have a different number of parameters
+        	return false;
+        }
+        int i;
+        for (i= 0; i < types.length; i++) {
+        	if (!this.fParameterTypes[i].equals(types[i])) {
+        		return false;
+        	}
+        }
+        return true;
 	}
 	return false;
 
@@ -651,7 +633,7 @@ public void setExceptions(String[] names) {
 	} else {
 		this.fExceptions= names;
 		CharArrayBuffer buffer = new CharArrayBuffer();
-		char[] comma = new char[] {',', ' '};
+		char[] comma = {',', ' '};
 		for (int i = 0, length = names.length; i < length; i++) {
 			if (i > 0)
 				buffer.append(comma);
@@ -668,9 +650,8 @@ public void setExceptions(String[] names) {
 public void setName(String name) {
 	if (name == null) {
 		throw new IllegalArgumentException(Messages.element_nullName);
-	} else {
-		super.setName(name);
 	}
+    super.setName(name);
 }
 /**
  * @see IDOMMethod#setParameters(String[], String[])
@@ -679,13 +660,12 @@ public void setName(String name) {
 public void setParameters(String[] types, String[] names) throws IllegalArgumentException {
 	becomeDetailed();
 	if (types== null || names == null) {
-		if (types == null && names == null) {
-			this.fParameterTypes= null;
-			this.fParameterNames= null;
-			this.fParameterList= new char[] {'(',')'};
-		} else {
+		if (types != null || names != null) {
 			throw new IllegalArgumentException(Messages.dom_mismatchArgNamesAndTypes);
 		}
+        this.fParameterTypes= null;
+        this.fParameterNames= null;
+        this.fParameterList= new char[] {'(',')'};
 	} else if (names.length != types.length) {
 		throw new IllegalArgumentException(Messages.dom_mismatchArgNamesAndTypes);
 	} else if (names.length == 0) {
@@ -695,7 +675,7 @@ public void setParameters(String[] types, String[] names) throws IllegalArgument
 		this.fParameterTypes= types;
 		CharArrayBuffer parametersBuffer = new CharArrayBuffer();
 		parametersBuffer.append("("); //$NON-NLS-1$
-		char[] comma = new char[] {',', ' '};
+		char[] comma = {',', ' '};
 		for (int i = 0; i < names.length; i++) {
 			if (i > 0) {
 				parametersBuffer.append(comma);
@@ -763,9 +743,8 @@ protected void shareContents(DOMNode node) {
 public String toString() {
 	if (isConstructor()) {
 		return "CONSTRUCTOR"; //$NON-NLS-1$
-	} else {
-		return "METHOD: " + getName(); //$NON-NLS-1$
 	}
+    return "METHOD: " + getName(); //$NON-NLS-1$
 }
 
 /**

@@ -90,6 +90,7 @@ public ReconcileContext(ReconcileWorkingCopyOperation operation, CompilationUnit
  * @deprecated JLS3 has been deprecated. This method has been replaced by {@link #getAST4()} which returns an AST
  * with JLS4 level.
  */
+@Deprecated
 public org.eclipse.jdt.core.dom.CompilationUnit getAST3() throws JavaModelException {
 	return getAST(AST.JLS3);
 }
@@ -119,6 +120,7 @@ public org.eclipse.jdt.core.dom.CompilationUnit getAST3() throws JavaModelExcept
  * with JLS8 level.
  * @since 3.7.1
  */
+@Deprecated
 public org.eclipse.jdt.core.dom.CompilationUnit getAST4() throws JavaModelException {
 	return getAST(AST.JLS4);
 }
@@ -148,6 +150,7 @@ public org.eclipse.jdt.core.dom.CompilationUnit getAST4() throws JavaModelExcept
  * with the given level.
  * @since 3.10
  */
+@Deprecated
 public org.eclipse.jdt.core.dom.CompilationUnit getAST8() throws JavaModelException {
 	return getAST(AST.JLS8);
 }

@@ -581,11 +581,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 				moduleDatabase.readLock();
 				try {
 					ModuleWiring wiring = revision.getWiring();
-					if (wiring == null) {
-						// not resolved!!
-						return null;
-					}
-					if (wiring.isDynamicPackageMiss(dynamicPkgName)) {
+					if (wiring == null || wiring.isDynamicPackageMiss(dynamicPkgName)) {
 						// cached a miss for this package
 						return null;
 					}
@@ -700,7 +696,6 @@ public final class ModuleContainer implements DebugOptionsListener {
 		private static final long serialVersionUID = 1L;
 
 		public ResolutionLockException() {
-			super();
 		}
 
 		public ResolutionLockException(Throwable cause) {
@@ -887,13 +882,11 @@ public final class ModuleContainer implements DebugOptionsListener {
 		try {
 			secureAction.start(module, options);
 		} catch (BundleException e) {
-			if (e.getType() == BundleException.STATECHANGE_ERROR) {
-				if (Module.ACTIVE_SET.contains(module.getState())) {
-					// There is still a timing issue here;
-					// but at least try to detect that another thread is starting the module
-					return;
-				}
-			}
+			if (e.getType() == BundleException.STATECHANGE_ERROR && Module.ACTIVE_SET.contains(module.getState())) {
+            	// There is still a timing issue here;
+            	// but at least try to detect that another thread is starting the module
+            	return;
+            }
 			adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
 		} catch (IllegalStateException e) {
 			// been uninstalled
@@ -1094,7 +1087,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		if (initial == null) {
 			return;
 		}
-		Long zero = Long.valueOf(0);
+		Long zero = (long) 0;
 		for (Iterator<Module> iModules = initial.iterator(); iModules.hasNext();) {
 			Module m = iModules.next();
 			if (m.getId().equals(zero)) {
@@ -1102,25 +1095,23 @@ public final class ModuleContainer implements DebugOptionsListener {
 				if (Module.ACTIVE_SET.contains(m.getState())) {
 					iModules.remove();
 				}
-			} else {
-				if (Module.RESOLVED_SET.contains(m.getState())) {
-					// check if current revision is an extension of the system module
-					ModuleRevision current = m.getCurrentRevision();
-					if ((current.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
-						ModuleWiring wiring = current.getWiring();
-						if (wiring != null) {
-							List<ModuleWire> hostWires = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
-							for (ModuleWire hostWire : hostWires) {
-								if (hostWire.getProvider().getRevisions().getModule().getId().equals(zero)) {
-									// The current revision is the extension to allow it to refresh
-									// this would just shutdown the framework for no reason
-									iModules.remove();
-								}
-							}
-						}
-					}
-				}
-			}
+			} else if (Module.RESOLVED_SET.contains(m.getState())) {
+            	// check if current revision is an extension of the system module
+            	ModuleRevision current = m.getCurrentRevision();
+            	if ((current.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+            		ModuleWiring wiring = current.getWiring();
+            		if (wiring != null) {
+            			List<ModuleWire> hostWires = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+            			for (ModuleWire hostWire : hostWires) {
+            				if (hostWire.getProvider().getRevisions().getModule().getId().equals(zero)) {
+            					// The current revision is the extension to allow it to refresh
+            					// this would just shutdown the framework for no reason
+            					iModules.remove();
+            				}
+            			}
+            		}
+            	}
+            }
 		}
 	}
 
@@ -1786,13 +1777,11 @@ public final class ModuleContainer implements DebugOptionsListener {
 					} else {
 						eagerStartParallel.add(module);
 					}
-				} else {
-					if (module.isLazyActivate()) {
-						lazyStart.add(module);
-					} else {
-						eagerStart.add(module);
-					}
-				}
+				} else if (module.isLazyActivate()) {
+                	lazyStart.add(module);
+                } else {
+                	eagerStart.add(module);
+                }
 			}
 		}
 
@@ -1810,11 +1799,11 @@ public final class ModuleContainer implements DebugOptionsListener {
 					if (moduleStartLevel < toStartLevel) {
 						// skip modules who should have already been started
 						continue;
-					} else if (moduleStartLevel == toStartLevel) {
-						toStart.add(module);
-					} else {
+					}
+                    if (moduleStartLevel != toStartLevel) {
 						break;
 					}
+                    toStart.add(module);
 				} catch (IllegalStateException e) {
 					// been uninstalled
 					continue;
@@ -1858,7 +1847,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 					if (moduleStartLevel > toStartLevel + 1) {
 						// skip modules who should have already been stopped
 						continue;
-					} else if (moduleStartLevel <= toStartLevel) {
+					}
+                    if (moduleStartLevel <= toStartLevel) {
 						// stopped all modules we are going to for this start level
 						break;
 					}

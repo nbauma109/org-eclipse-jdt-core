@@ -46,7 +46,7 @@ public class SyntheticFactoryMethodBinding extends MethodBinding {
 				: this.environment.createParameterizedType(this.declaringClass, typeArguments, this.enclosingType);
 		for (MethodBinding parameterizedMethod : parameterizedType.methods()) {
 			if (parameterizedMethod.original() == this.staticFactoryFor)
-				return (constructorTypeArguments.length > 0 || inferredWithUncheckedConversion)
+				return constructorTypeArguments.length > 0 || inferredWithUncheckedConversion
 						? this.environment.createParameterizedGenericMethod(parameterizedMethod, constructorTypeArguments, inferredWithUncheckedConversion, false, targetType)
 						: (ParameterizedMethodBinding) parameterizedMethod;
 			if (parameterizedMethod instanceof ProblemMethodBinding) {

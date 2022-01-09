@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.core.util.Messages;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 @SuppressWarnings("rawtypes")
 public abstract class DOMNode implements IDOMNode {
 
@@ -246,7 +247,6 @@ DOMNode() {
  *		or -1's if this node does not have a name.
  */
 DOMNode(char[] document, int[] sourceRange, String name, int[] nameRange) {
-	super();
 	this.fDocument= document;
 	this.fSourceRange= sourceRange;
 	this.fName= name;
@@ -311,7 +311,6 @@ protected void appendContentsOfChildren(CharArrayBuffer buffer) {
 		sibling= child.fNextNode;
 		if (sibling != null) {
 			if (sibling.isContentMergableWith(child)) {
-				end= sibling.getEndPosition();
 			} else {
 				if (child.isFragmented()) {
 					child.appendContents(buffer);
@@ -319,15 +318,13 @@ protected void appendContentsOfChildren(CharArrayBuffer buffer) {
 					buffer.append(child.getDocument(), start, end + 1 - start);
 				}
 				start= sibling.getStartPosition();
-				end= sibling.getEndPosition();
 			}
-		} else {
-			if (child.isFragmented()) {
-				child.appendContents(buffer);
-			} else {
-				buffer.append(child.getDocument(), start, end + 1 - start);
-			}
-		}
+            end= sibling.getEndPosition();
+		} else if (child.isFragmented()) {
+        	child.appendContents(buffer);
+        } else {
+        	buffer.append(child.getDocument(), start, end + 1 - start);
+        }
 		child= sibling;
 	}
 }
@@ -516,11 +513,9 @@ public IDOMNode getChild(String name) {
 			if (n == null) {
 				return child;
 			}
-		} else {
-			if (name.equals(n)) {
-				return child;
-			}
-		}
+		} else if (name.equals(n)) {
+        	return child;
+        }
 		child = child.fNextNode;
 	}
 	return null;
@@ -610,16 +605,14 @@ public String getName() {
 protected char[] getNameContents() {
 	if (isNameAltered()) {
 		return this.fName.toCharArray();
-	} else {
-		if (this.fName == null || this.fNameRange[0] < 0) {
-			return null;
-		} else {
-			int length = this.fNameRange[1] + 1 - this.fNameRange[0];
-			char[] result = new char[length];
-			System.arraycopy(this.fDocument, this.fNameRange[0], result, 0, length);
-			return result;
-		}
 	}
+    if (this.fName == null || this.fNameRange[0] < 0) {
+    	return null;
+    }
+    int length = this.fNameRange[1] + 1 - this.fNameRange[0];
+    char[] result = new char[length];
+    System.arraycopy(this.fDocument, this.fNameRange[0], result, 0, length);
+    return result;
 }
 /**
  * @see IDOMNode#getNextNode()
@@ -641,15 +634,10 @@ public IDOMNode getParent() {
  */
 protected int getParentEndDeclaration() {
 	IDOMNode parent = getParent();
-	if (parent == null) {
+	if (parent == null || parent instanceof IDOMCompilationUnit) {
 		return 0;
-	} else {
-		if (parent instanceof IDOMCompilationUnit) {
-			return 0;
-		} else {
-			return ((DOMType)parent).getOpenBodyEnd();
-		}
 	}
+    return ((DOMType)parent).getOpenBodyEnd();
 }
 /**
  * @see IDOMNode#getPreviousNode()
@@ -664,9 +652,8 @@ public IDOMNode getPreviousNode() {
 protected IDOMNode getRoot() {
 	if (this.fParent == null) {
 		return this;
-	} else {
-		return this.fParent.getRoot();
 	}
+    return this.fParent.getRoot();
 }
 /**
  * Returns the original position of the first character of this
@@ -844,7 +831,7 @@ void normalizeEndPosition(ILineStartFinder finder, DOMNode next) {
 void normalizeStartPosition(int previousEnd, ILineStartFinder finder) {
 	int nodeStart = getStartPosition();
 	int lineStart = finder.getLineStart(nodeStart);
-	if (nodeStart > lineStart && (lineStart > previousEnd || (previousEnd == 0 && lineStart == 0)))
+	if (nodeStart > lineStart && (lineStart > previousEnd || previousEnd == 0 && lineStart == 0))
 		setStartPosition(lineStart);
 }
 /**

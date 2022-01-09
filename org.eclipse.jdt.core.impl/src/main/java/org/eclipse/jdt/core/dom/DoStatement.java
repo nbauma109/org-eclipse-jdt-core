@@ -110,18 +110,16 @@ public class DoStatement extends Statement {
 		if (property == BODY_PROPERTY) {
 			if (get) {
 				return getBody();
-			} else {
-				setBody((Statement) child);
-				return null;
 			}
+            setBody((Statement) child);
+            return null;
 		}
 		if (property == EXPRESSION_PROPERTY) {
 			if (get) {
 				return getExpression();
-			} else {
-				setExpression((Expression) child);
-				return null;
 			}
+            setExpression((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

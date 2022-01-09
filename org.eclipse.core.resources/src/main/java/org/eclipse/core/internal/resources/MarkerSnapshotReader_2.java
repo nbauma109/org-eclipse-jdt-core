@@ -95,19 +95,12 @@ public class MarkerSnapshotReader_2 extends MarkerSnapshotReader {
 			switch (type) {
 				case ATTRIBUTE_INTEGER :
 					int intValue = input.readInt();
-					switch (intValue) {
-						case 0 :
-							value = MarkerInfo.INTEGER_ZERO;
-							break;
-						case 1 :
-							value = MarkerInfo.INTEGER_ONE;
-							break;
-						case 2 :
-							value = MarkerInfo.INTEGER_TWO;
-							break;
-						default :
-							value = intValue;
-					}
+					value = switch (intValue) {
+                        case 0 -> MarkerInfo.INTEGER_ZERO;
+                        case 1 -> MarkerInfo.INTEGER_ONE;
+                        case 2 -> MarkerInfo.INTEGER_TWO;
+                        default -> intValue;
+                    };
 					break;
 				case ATTRIBUTE_BOOLEAN :
 					value = input.readBoolean();

@@ -186,10 +186,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	@Override
 	public File getFile(String entry, boolean nativeCode) {
-		if (generation == null) {
-			return null;
-		}
-		if (!lockOpen()) {
+		if (generation == null || !lockOpen()) {
 			return null;
 		}
 		try {
@@ -207,22 +204,20 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 						if (nested.isDirectory())
 							// must ensure the complete directory is extracted (bug 182585)
 							extractDirectory(bEntry.getName());
-					} else {
-						if (bEntry.getName().endsWith("/")) { //$NON-NLS-1$
-							nested.mkdirs();
-							if (!nested.isDirectory()) {
-								if (debug.DEBUG_BUNDLE_FILE)
-									Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
-								throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
-							}
-							extractDirectory(bEntry.getName());
-						} else {
-							InputStream in = bEntry.getInputStream();
-							if (in == null)
-								return null;
-							generation.storeContent(nested, in, nativeCode);
-						}
-					}
+					} else if (bEntry.getName().endsWith("/")) { //$NON-NLS-1$
+                    	nested.mkdirs();
+                    	if (!nested.isDirectory()) {
+                    		if (debug.DEBUG_BUNDLE_FILE)
+                    			Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
+                    		throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
+                    	}
+                    	extractDirectory(bEntry.getName());
+                    } else {
+                    	InputStream in = bEntry.getInputStream();
+                    	if (in == null)
+                    		return null;
+                    	generation.storeContent(nested, in, nativeCode);
+                    }
 
 					return nested;
 				}
@@ -309,14 +304,12 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 			for (String entryPath : getPaths()) {
 				// Is the entry of possible interest? Note that
 				// string.startsWith("") == true.
-				if (entryPath.startsWith(path)) {
-					// If we get here, we know that the entry is either (1) equal to
-					// path, (2) a file under path, or (3) a subdirectory of path.
-					if (path.length() < entryPath.length()) {
-						// If we get here, we know that entry is not equal to path.
-						getEntryPaths(path, entryPath.substring(path.length()), recurse, result);
-					}
-				}
+				// If we get here, we know that the entry is either (1) equal to
+                // path, (2) a file under path, or (3) a subdirectory of path.
+                if (entryPath.startsWith(path) && path.length() < entryPath.length()) {
+                	// If we get here, we know that entry is not equal to path.
+                	getEntryPaths(path, entryPath.substring(path.length()), recurse, result);
+                }
 			}
 			return result.size() == 0 ? null : Collections.enumeration(result);
 		} finally {

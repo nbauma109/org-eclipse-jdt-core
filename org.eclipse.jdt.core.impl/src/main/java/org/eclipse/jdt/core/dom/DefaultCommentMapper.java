@@ -93,7 +93,7 @@ class DefaultCommentMapper {
 			int commentStart = comment.getStartPosition();
 			if (position < commentStart) {
 				top = i-1;
-			} else if (position >=(commentStart+comment.getLength())) {
+			} else if (position >=commentStart+comment.getLength()) {
 				bottom = i+1;
 			} else {
 				index = i;
@@ -104,9 +104,8 @@ class DefaultCommentMapper {
 			comment = this.comments[i];
 			if (position < comment.getStartPosition()) {
 				return exact<0 ? i-1 : i;
-			} else {
-				return exact<0 ? i : i+1;
 			}
+            return exact<0 ? i : i+1;
 		}
 		return index;
 	}
@@ -325,10 +324,11 @@ class DefaultCommentMapper {
 			int commentStart = comment.getStartPosition();
 			int end = commentStart+comment.getLength()-1;
 			int commentLine = getLineNumber(commentStart, parentLineRange);
-			if (end <= previousEnd || (commentLine == previousEndLine && commentLine != nodeStartLine)) {
+			if (end <= previousEnd || commentLine == previousEndLine && commentLine != nodeStartLine) {
 				// stop search on condition 1) and 2)
 				break;
-			} else if ((end+1) < previousStart) { // may be equals => then no scan is necessary
+			}
+            if (end+1 < previousStart) { // may be equals => then no scan is necessary
 				this.scanner.resetTo(end+1, previousStart);
 				try {
 					int token = this.scanner.getNextToken();
@@ -387,12 +387,12 @@ class DefaultCommentMapper {
 					this.leadingNodes = new ASTNode[STORAGE_INCREMENT];
 					this.leadingIndexes = new long[STORAGE_INCREMENT];
 				} else if (this.leadingPtr == this.leadingNodes.length) {
-					int newLength = (this.leadingPtr*3/2)+STORAGE_INCREMENT;
+					int newLength = this.leadingPtr*3/2+STORAGE_INCREMENT;
 					System.arraycopy(this.leadingNodes, 0, this.leadingNodes = new ASTNode[newLength], 0, this.leadingPtr);
 					System.arraycopy(this.leadingIndexes, 0, this.leadingIndexes = new long[newLength], 0, this.leadingPtr);
 				}
 				this.leadingNodes[this.leadingPtr] = node;
-				this.leadingIndexes[this.leadingPtr] = (((long)startIdx)<<32) + endIdx;
+				this.leadingIndexes[this.leadingPtr] = ((long)startIdx<<32) + endIdx;
 				extended = this.comments[endIdx].getStartPosition();
 			}
 		}
@@ -431,7 +431,7 @@ class DefaultCommentMapper {
 				this.trailingIndexes = new long[STORAGE_INCREMENT];
 				this.lastTrailingPtr = -1;
 			} else if (this.trailingPtr == this.trailingNodes.length) {
-				int newLength = (this.trailingPtr*3/2)+STORAGE_INCREMENT;
+				int newLength = this.trailingPtr*3/2+STORAGE_INCREMENT;
 				System.arraycopy(this.trailingNodes, 0, this.trailingNodes = new ASTNode[newLength], 0, this.trailingPtr);
 				System.arraycopy(this.trailingIndexes, 0, this.trailingIndexes = new long[newLength], 0, this.trailingPtr);
 			}
@@ -465,7 +465,8 @@ class DefaultCommentMapper {
 			if (commentStart >= nextStart) {
 				// stop search on condition 1)
 				break;
-			} else if (previousEnd < commentStart) {
+			}
+            if (previousEnd < commentStart) {
 				this.scanner.resetTo(previousEnd, commentStart);
 				try {
 					int token = this.scanner.getNextToken();
@@ -508,7 +509,7 @@ class DefaultCommentMapper {
 			if (!lastChild) {
 				int nextLine = getLineNumber(nextStart, parentLineRange);
 				int previousLine = getLineNumber(previousEnd, parentLineRange);
-				if((nextLine - previousLine) <= 1) {
+				if(nextLine - previousLine <= 1) {
 					if (sameLineIdx == -1) return nodeEnd;
 					endIdx = sameLineIdx;
 				}
@@ -519,12 +520,12 @@ class DefaultCommentMapper {
 				this.trailingIndexes = new long[STORAGE_INCREMENT];
 				this.lastTrailingPtr = -1;
 			} else if (this.trailingPtr == this.trailingNodes.length) {
-				int newLength = (this.trailingPtr*3/2)+STORAGE_INCREMENT;
+				int newLength = this.trailingPtr*3/2+STORAGE_INCREMENT;
 				System.arraycopy(this.trailingNodes, 0, this.trailingNodes = new ASTNode[newLength], 0, this.trailingPtr);
 				System.arraycopy(this.trailingIndexes, 0, this.trailingIndexes = new long[newLength], 0, this.trailingPtr);
 			}
 			this.trailingNodes[this.trailingPtr] = node;
-			long nodeRange = (((long)startIdx)<<32) + endIdx;
+			long nodeRange = ((long)startIdx<<32) + endIdx;
 			this.trailingIndexes[this.trailingPtr] = nodeRange;
 			// Compute new extended end
 			extended = this.comments[endIdx].getStartPosition()+this.comments[endIdx].getLength()-1;

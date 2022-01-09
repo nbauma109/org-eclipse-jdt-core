@@ -26,7 +26,6 @@ public final class FileInfoMatcherDescription {
 	private Object arguments;
 
 	public FileInfoMatcherDescription(String id, Object arguments) {
-		super();
 		this.id = id;
 		this.arguments = arguments;
 	}
@@ -44,17 +43,14 @@ public final class FileInfoMatcherDescription {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Objects.hashCode(arguments);
-		result = prime * result + Objects.hashCode(id);
-		return result;
+		return prime * result + Objects.hashCode(id);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (obj == null || getClass() != obj.getClass())
 			return false;
 		FileInfoMatcherDescription other = (FileInfoMatcherDescription) obj;
 		return Objects.equals(this.arguments, other.arguments) && Objects.equals(this.id, other.id);

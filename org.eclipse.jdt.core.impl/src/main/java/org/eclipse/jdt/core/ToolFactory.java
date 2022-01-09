@@ -76,7 +76,7 @@ public class ToolFactory {
 	 * @since 3.3
 	 */
 	// Supposed to be a non-compile time constant
-	public static final int M_FORMAT_NEW = Integer.valueOf(0).intValue();
+	public static final int M_FORMAT_NEW = 0;
 
 	/**
 	 * This mode is used for formatting existing code when all formatter options should be used.
@@ -90,7 +90,7 @@ public class ToolFactory {
 	 * @since 3.3
 	 */
 	// Supposed to be a non-compile time constant
-	public static final int M_FORMAT_EXISTING = Integer.valueOf(1).intValue();
+	public static final int M_FORMAT_EXISTING = 1;
 
 	/**
 	 * Create an instance of a code formatter. A code formatter implementation can be contributed via the
@@ -102,7 +102,8 @@ public class ToolFactory {
 	 * @see ToolFactory#createDefaultCodeFormatter(Map)
 	 * @deprecated The extension point has been deprecated, use {@link #createCodeFormatter(Map)} instead.
 	 */
-	public static ICodeFormatter createCodeFormatter(){
+	@Deprecated
+    public static ICodeFormatter createCodeFormatter(){
 
 			Plugin jdtCorePlugin = JavaCore.getPlugin();
 			if (jdtCorePlugin == null) return null;
@@ -110,11 +111,11 @@ public class ToolFactory {
 			IExtensionPoint extension = Platform.getExtensionRegistry().getExtensionPoint(JavaCore.PLUGIN_ID, JavaModelManager.FORMATTER_EXTPOINT_ID);
 			if (extension != null) {
 				IExtension[] extensions =  extension.getExtensions();
-				for(int i = 0; i < extensions.length; i++){
-					IConfigurationElement [] configElements = extensions[i].getConfigurationElements();
-					for(int j = 0; j < configElements.length; j++){
+				for (IExtension extension2 : extensions) {
+					IConfigurationElement [] configElements = extension2.getConfigurationElements();
+					for (IConfigurationElement configElement : configElements) {
 						try {
-							Object execExt = configElements[j].createExecutableExtension("class"); //$NON-NLS-1$
+							Object execExt = configElement.createExecutableExtension("class"); //$NON-NLS-1$
 							if (execExt instanceof ICodeFormatter){
 								// use first contribution found
 								return (ICodeFormatter)execExt;
@@ -191,13 +192,13 @@ public class ToolFactory {
 					JavaCore.JAVA_FORMATTER_EXTENSION_POINT_ID);
 			if (extension != null) {
 				IExtension[] extensions = extension.getExtensions();
-				for (int i = 0; i < extensions.length; i++) {
-					IConfigurationElement[] configElements = extensions[i].getConfigurationElements();
-					for (int j = 0; j < configElements.length; j++) {
-						String initializerID = configElements[j].getAttribute("id"); //$NON-NLS-1$
+				for (IExtension extension2 : extensions) {
+					IConfigurationElement[] configElements = extension2.getConfigurationElements();
+					for (IConfigurationElement configElement : configElements) {
+						String initializerID = configElement.getAttribute("id"); //$NON-NLS-1$
 						if (initializerID != null && initializerID.equals(formatterId)) {
 							try {
-								Object execExt = configElements[j].createExecutableExtension("class"); //$NON-NLS-1$
+								Object execExt = configElement.createExecutableExtension("class"); //$NON-NLS-1$
 								if (execExt instanceof CodeFormatter) {
 									CodeFormatter formatter = (CodeFormatter) execExt;
 									formatter.setOptions(currentOptions);
@@ -235,7 +236,8 @@ public class ToolFactory {
 	 * @see org.eclipse.jdt.core.util.IClassFileDisassembler
 	 * @deprecated Use {@link #createDefaultClassFileBytesDisassembler()} instead
 	 */
-	public static org.eclipse.jdt.core.util.IClassFileDisassembler createDefaultClassFileDisassembler(){
+	@Deprecated
+    public static org.eclipse.jdt.core.util.IClassFileDisassembler createDefaultClassFileDisassembler(){
 		class DeprecatedDisassembler extends Disassembler implements org.eclipse.jdt.core.util.IClassFileDisassembler {
 			// for backward compatibility, defines a disassembler which implements IClassFileDisassembler
 		}
@@ -274,20 +276,19 @@ public class ToolFactory {
 					String classFileName = classfile.getElementName();
 					String entryName = org.eclipse.jdt.internal.core.util.Util.concatWith(packageFragment.names, classFileName, '/');
 					return createDefaultClassFileReader(archiveName, entryName, decodingFlag);
-				} else {
-					InputStream in = null;
-					try {
-						in = ((IFile) ((JavaElement) classfile).resource()).getContents();
-						return createDefaultClassFileReader(in, decodingFlag);
-					} finally {
-						if (in != null)
-							try {
-								in.close();
-							} catch (IOException e) {
-								// ignore
-							}
-					}
 				}
+                InputStream in = null;
+                try {
+                	in = ((IFile) ((JavaElement) classfile).resource()).getContents();
+                	return createDefaultClassFileReader(in, decodingFlag);
+                } finally {
+                	if (in != null)
+                		try {
+                			in.close();
+                		} catch (IOException e) {
+                			// ignore
+                		}
+                }
 			} catch(CoreException e){
 				// unable to read
 			}
@@ -362,10 +363,7 @@ public class ToolFactory {
 			}
 			zipFile = new ZipFile(zipFileName);
 			ZipEntry zipEntry = zipFile.getEntry(zipEntryName);
-			if (zipEntry == null) {
-				return null;
-			}
-			if (!zipEntryName.toLowerCase().endsWith(SuffixConstants.SUFFIX_STRING_class)) {
+			if (zipEntry == null || !zipEntryName.toLowerCase().endsWith(SuffixConstants.SUFFIX_STRING_class)) {
 				return null;
 			}
 			byte[] classFileBytes = Util.getZipEntryByteContent(zipEntry, zipFile);
@@ -395,7 +393,8 @@ public class ToolFactory {
 	 * @see JavaCore#getOptions()
 	 * @deprecated Use {@link #createCodeFormatter(Map)} instead but note the different options
 	 */
-	public static ICodeFormatter createDefaultCodeFormatter(Map options){
+	@Deprecated
+    public static ICodeFormatter createDefaultCodeFormatter(Map options){
 		if (options == null) options = JavaCore.getOptions();
 		return new org.eclipse.jdt.internal.formatter.old.CodeFormatter(options);
 	}
@@ -586,7 +585,7 @@ public class ToolFactory {
 	 */
 	@SuppressWarnings("javadoc") // references deprecated TokenNameIdentifier
 	public static IScanner createScanner(boolean tokenizeComments, boolean tokenizeWhiteSpace, boolean recordLineSeparator, String sourceLevel, String complianceLevel, boolean enablePreview) {
-		PublicScanner scanner = null;
+		PublicScanner scanner;
 		long sourceLevelValue = CompilerOptions.versionToJdkLevel(sourceLevel);
 		if (sourceLevelValue == 0) sourceLevelValue = ClassFileConstants.JDK1_3; // fault-tolerance
 		long complianceLevelValue = CompilerOptions.versionToJdkLevel(complianceLevel);

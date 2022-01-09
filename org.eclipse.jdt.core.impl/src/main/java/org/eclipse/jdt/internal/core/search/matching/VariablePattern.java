@@ -59,7 +59,7 @@ public VariablePattern(int patternKind, char[] name, int limitTo, int matchRule)
 		this.findReferences = this.readAccess || this.writeAccess;
     }
 
-	this.name = (this.isCaseSensitive || this.isCamelCase) ? name : CharOperation.toLowerCase(name);
+	this.name = this.isCaseSensitive || this.isCamelCase ? name : CharOperation.toLowerCase(name);
 }
 /*
  * Returns whether a method declaration or message send will need to be resolved to

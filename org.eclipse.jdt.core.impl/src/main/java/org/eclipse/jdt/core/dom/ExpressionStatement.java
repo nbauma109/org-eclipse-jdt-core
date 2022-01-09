@@ -100,10 +100,9 @@ public class ExpressionStatement extends Statement {
 		if (property == EXPRESSION_PROPERTY) {
 			if (get) {
 				return getExpression();
-			} else {
-				setExpression((Expression) child);
-				return null;
 			}
+            setExpression((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

@@ -42,7 +42,8 @@ public interface ICodeAssist {
 	 * @exception IllegalArgumentException if <code>requestor</code> is <code>null</code>
 	 * @deprecated Use {@link #codeComplete(int, ICompletionRequestor)} instead.
 	 */
-	void codeComplete(int offset, ICodeCompletionRequestor requestor)
+	@Deprecated
+    void codeComplete(int offset, ICodeCompletionRequestor requestor)
 		throws JavaModelException;
 	/**
 	 * Performs code completion at the given offset position in this compilation unit,
@@ -63,7 +64,8 @@ public interface ICodeAssist {
 	 * @since 2.0
 	 * @deprecated Use {@link #codeComplete(int, CompletionRequestor)} instead.
  	 */
-	void codeComplete(int offset, ICompletionRequestor requestor)
+	@Deprecated
+    void codeComplete(int offset, ICompletionRequestor requestor)
 		throws JavaModelException;
 
 	/**
@@ -157,7 +159,8 @@ public interface ICodeAssist {
 	 * @since 3.0
 	 * @deprecated Use {@link #codeComplete(int, CompletionRequestor, WorkingCopyOwner)} instead.
 	 */
-	void codeComplete(int offset, ICompletionRequestor requestor, WorkingCopyOwner owner)
+	@Deprecated
+    void codeComplete(int offset, ICompletionRequestor requestor, WorkingCopyOwner owner)
 		throws JavaModelException;
 
 	/**

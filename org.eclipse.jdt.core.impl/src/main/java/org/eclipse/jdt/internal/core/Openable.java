@@ -221,26 +221,14 @@ public String findRecommendedLineSeparator() throws JavaModelException {
 protected void generateInfos(Object info, HashMap newElements, IProgressMonitor monitor) throws JavaModelException {
 
 	if (JavaModelCache.VERBOSE){
-		String element;
-		switch (getElementType()) {
-			case JAVA_PROJECT:
-				element = "project"; //$NON-NLS-1$
-				break;
-			case PACKAGE_FRAGMENT_ROOT:
-				element = "root"; //$NON-NLS-1$
-				break;
-			case PACKAGE_FRAGMENT:
-				element = "package"; //$NON-NLS-1$
-				break;
-			case CLASS_FILE:
-				element = "class file"; //$NON-NLS-1$
-				break;
-			case COMPILATION_UNIT:
-				element = "compilation unit"; //$NON-NLS-1$
-				break;
-			default:
-				element = "element"; //$NON-NLS-1$
-		}
+		String element = switch (getElementType()) {
+            case JAVA_PROJECT -> "project"; //$NON-NLS-1$
+            case PACKAGE_FRAGMENT_ROOT -> "root"; //$NON-NLS-1$
+            case PACKAGE_FRAGMENT -> "package"; //$NON-NLS-1$
+            case CLASS_FILE -> "class file"; //$NON-NLS-1$
+            case COMPILATION_UNIT -> "compilation unit"; //$NON-NLS-1$
+            default -> "element"; //$NON-NLS-1$
+        };
 		System.out.println(Thread.currentThread() +" OPENING " + element + " " + this.toStringWithAncestors()); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
@@ -291,26 +279,26 @@ protected boolean ignoreErrorStatus(IStatus status) {
  */
 @Override
 public IBuffer getBuffer() throws JavaModelException {
-	if (hasBuffer()) {
-		// ensure element is open
-		Object info = getElementInfo();
-		IBuffer buffer = getBufferManager().getBuffer(this);
-		if (buffer == null) {
-			// try to (re)open a buffer
-			buffer = openBuffer(null, info);
-		}
-		if (buffer instanceof NullBuffer) {
-			return null;
-		}
-		return buffer;
-	} else {
+	if (!hasBuffer()) {
 		return null;
 	}
+    // ensure element is open
+    Object info = getElementInfo();
+    IBuffer buffer = getBufferManager().getBuffer(this);
+    if (buffer == null) {
+    	// try to (re)open a buffer
+    	buffer = openBuffer(null, info);
+    }
+    if (buffer instanceof NullBuffer) {
+    	return null;
+    }
+    return buffer;
 }
 /**
  * Answers the buffer factory to use for creating new buffers
  * @deprecated
  */
+@Deprecated
 public IBufferFactory getBufferFactory(){
 	return getBufferManager().getDefaultBufferFactory();
 }
@@ -351,17 +339,15 @@ public IResource getUnderlyingResource() throws JavaModelException {
 		return null;
 	}
 	int type = parentResource.getType();
-	if (type == IResource.FOLDER || type == IResource.PROJECT) {
-		IContainer folder = (IContainer) parentResource;
-		IResource resource = folder.findMember(getElementName());
-		if (resource == null) {
-			throw newNotPresentException();
-		} else {
-			return resource;
-		}
-	} else {
+	if (type != IResource.FOLDER && type != IResource.PROJECT) {
 		return parentResource;
 	}
+    IContainer folder = (IContainer) parentResource;
+    IResource resource = folder.findMember(getElementName());
+    if (resource == null) {
+    	throw newNotPresentException();
+    }
+    return resource;
 }
 
 /**

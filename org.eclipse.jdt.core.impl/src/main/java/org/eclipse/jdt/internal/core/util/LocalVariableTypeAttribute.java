@@ -25,7 +25,7 @@ public class LocalVariableTypeAttribute
 	extends ClassFileAttribute
 	implements ILocalVariableTypeTableAttribute {
 
-	private static final ILocalVariableTypeTableEntry[] NO_ENTRIES = new ILocalVariableTypeTableEntry[0];
+	private static final ILocalVariableTypeTableEntry[] NO_ENTRIES = {};
 	private int localVariableTypeTableLength;
 	private ILocalVariableTypeTableEntry[] localVariableTypeTableEntries;
 

@@ -58,11 +58,9 @@ final class PackageImportComparator implements Comparator<ImportName> {
 
 				// Use the heuristic that a prefix whose last segment starts with a lowercase letter
 				// is a package name, if we don't recognize the prefix as the name of a type.
-				if (this.javaProject.findType(containerNamePrefix) == null) {
-					if (Character.isLowerCase(containerNamePrefix.charAt(lastSegmentStart))) {
-						return containerNamePrefix;
-					}
-				}
+				if (this.javaProject.findType(containerNamePrefix) == null && Character.isLowerCase(containerNamePrefix.charAt(lastSegmentStart))) {
+                	return containerNamePrefix;
+                }
 
 				if (lastSegmentStart == 0) {
 					// No prefix of containerName could be resolved to a package name.

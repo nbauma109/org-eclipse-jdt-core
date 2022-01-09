@@ -342,12 +342,11 @@ public final class ListRewrite {
 	 * is not before the last node. An <code>IllegalArgumentException</code> is
 	 * also thrown if the copied range is overlapping with an other moved or copied range.
 	 */
-	public final ASTNode createCopyTarget(ASTNode first, ASTNode last) {
+	public ASTNode createCopyTarget(ASTNode first, ASTNode last) {
 		if (first == last) {
 			return this.rewriter.createCopyTarget(first);
-		} else {
-			return createTargetNode(first, last, false, null, null);
 		}
+        return createTargetNode(first, last, false, null, null);
 	}
 
 	/**
@@ -368,7 +367,7 @@ public final class ListRewrite {
 	 *
 	 * @since 3.1
 	 */
-	public final ASTNode createMoveTarget(ASTNode first, ASTNode last) {
+	public ASTNode createMoveTarget(ASTNode first, ASTNode last) {
 		return createMoveTarget(first, last, null, null);
 	}
 
@@ -396,20 +395,19 @@ public final class ListRewrite {
 	 *
 	 * @since 3.1
 	 */
-	public final ASTNode createMoveTarget(ASTNode first, ASTNode last, ASTNode replacingNode, TextEditGroup editGroup) {
+	public ASTNode createMoveTarget(ASTNode first, ASTNode last, ASTNode replacingNode, TextEditGroup editGroup) {
 		if (first == last) {
 			replace(first, replacingNode, editGroup);
 			return this.rewriter.createMoveTarget(first);
-		} else {
-			return createTargetNode(first, last, true, replacingNode, editGroup);
 		}
+        return createTargetNode(first, last, true, replacingNode, editGroup);
 	}
 
 	/*
 	 * Heuristic to decide if a inserted node is bound to previous or the next sibling.
 	 */
 	private boolean isInsertBoundToPreviousByDefault(ASTNode node) {
-		return (node instanceof Statement || node instanceof FieldDeclaration);
+		return node instanceof Statement || node instanceof FieldDeclaration;
 	}
 
 	/**

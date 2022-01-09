@@ -60,7 +60,7 @@ public class LocationHelper {
 
 	private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
 		String file = url.getPath();
-		if (trailingSlash == (file.endsWith("/"))) //$NON-NLS-1$
+		if (trailingSlash == file.endsWith("/")) //$NON-NLS-1$
 			return url;
 		file = trailingSlash ? file + "/" : file.substring(0, file.length() - 1); //$NON-NLS-1$
 		return new URL(url.getProtocol(), url.getHost(), file);
@@ -78,7 +78,6 @@ public class LocationHelper {
 			return new Locker_JavaIo(lock);
 		}
 		if (LOCKING_NIO.equals(lockMode)) {
-			return new Locker_JavaNio(lock, debug);
 		}
 
 		//	Backup case if an invalid value has been specified
@@ -146,7 +145,7 @@ public class LocationHelper {
 			urlString = buf.toString();
 		}
 		try {
-			return URLDecoder.decode(urlString, StandardCharsets.UTF_8); //$NON-NLS-1$
+			return URLDecoder.decode(urlString, StandardCharsets.UTF_8);
 		} catch (RuntimeException e) {
 			// Tried but failed
 			// TODO should we throw runtime exception here?

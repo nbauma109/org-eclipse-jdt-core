@@ -23,7 +23,6 @@ import org.eclipse.core.filesystem.provider.FileSystem;
 public class VirtualFileSystem extends FileSystem {
 
 	public VirtualFileSystem() {
-		super();
 	}
 
 	@Override

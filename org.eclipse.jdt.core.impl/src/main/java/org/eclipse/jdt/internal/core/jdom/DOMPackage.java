@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.core.util.Util;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 class DOMPackage extends DOMNode implements IDOMPackage {
 
 /**
@@ -102,9 +103,8 @@ protected void appendFragmentedContents(CharArrayBuffer buffer) {
 public String getContents() {
 	if (this.fName == null) {
 		return null;
-	} else {
-		return super.getContents();
 	}
+    return super.getContents();
 }
 /**
  * @see DOMNode#getDetailedNode()
@@ -120,9 +120,8 @@ protected DOMNode getDetailedNode() {
 public IJavaElement getJavaElement(IJavaElement parent) throws IllegalArgumentException {
 	if (parent.getElementType() == IJavaElement.COMPILATION_UNIT) {
 		return ((ICompilationUnit)parent).getPackageDeclaration(getName());
-	} else {
-		throw new IllegalArgumentException(Messages.element_illegalParent);
 	}
+    throw new IllegalArgumentException(Messages.element_illegalParent);
 }
 /**
  * @see IDOMNode#getNodeType()

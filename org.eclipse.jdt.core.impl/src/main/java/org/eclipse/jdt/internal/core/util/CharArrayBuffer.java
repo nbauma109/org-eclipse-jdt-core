@@ -82,7 +82,7 @@ public CharArrayBuffer(char[] first) {
  * @param size - the buffer size, if less than 1, set to the DEFAULT_BUFFER_SIZE.
  */
 public CharArrayBuffer(char[] first, int size) {
-	this.size = (size > 0) ? size : DEFAULT_BUFFER_SIZE;
+	this.size = size > 0 ? size : DEFAULT_BUFFER_SIZE;
 	this.buffer = new char[this.size][];
 	this.ranges = new int[this.size][];
 	this.end = 0;
@@ -117,18 +117,16 @@ public CharArrayBuffer append(char[] src) {
  * @throws ArrayIndexOutOfBoundsException - if arguments specify an array index out of bounds.
  */
 public CharArrayBuffer append(char[] src, int start, int length) {
-	if (start < 0) throw new ArrayIndexOutOfBoundsException();
-	if (length < 0) throw new ArrayIndexOutOfBoundsException();
+	if (start < 0 || length < 0) throw new ArrayIndexOutOfBoundsException();
 	if (src != null) {
 		int srcLength = src.length;
-		if (start > srcLength) throw new ArrayIndexOutOfBoundsException();
-		if (length + start > srcLength) throw new ArrayIndexOutOfBoundsException();
+		if (start > srcLength || length + start > srcLength) throw new ArrayIndexOutOfBoundsException();
 		/** do length check here to allow exceptions to be thrown */
 		if (length > 0) {
 			if (this.end == this.size) {
 				int size2 = this.size * 2;
-				System.arraycopy(this.buffer, 0, (this.buffer = new char[size2][]), 0, this.size);
-				System.arraycopy(this.ranges, 0, (this.ranges = new int[size2][]), 0, this.size);
+				System.arraycopy(this.buffer, 0, this.buffer = new char[size2][], 0, this.size);
+				System.arraycopy(this.ranges, 0, this.ranges = new int[size2][], 0, this.size);
 				this.size *= 2;
 			}
 			this.buffer[this.end] = src;
@@ -192,6 +190,6 @@ public char[] getContents() {
 @Override
 public String toString() {
 	char[] contents = getContents();
-	return (contents != null) ? new String(contents) : Util.EMPTY_STRING;
+	return contents != null ? new String(contents) : Util.EMPTY_STRING;
 }
 }

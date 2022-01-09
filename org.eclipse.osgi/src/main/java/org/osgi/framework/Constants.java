@@ -130,7 +130,8 @@ public interface Constants {
 	 * 
 	 * @deprecated As of 1.2.
 	 */
-	String	EXPORT_SERVICE							= "Export-Service";
+	@Deprecated
+    String	EXPORT_SERVICE							= "Export-Service";
 
 	/**
 	 * Manifest header identifying the packages on which the bundle depends.
@@ -163,7 +164,8 @@ public interface Constants {
 	 * 
 	 * @deprecated As of 1.2.
 	 */
-	String	IMPORT_SERVICE							= "Import-Service";
+	@Deprecated
+    String	IMPORT_SERVICE							= "Import-Service";
 
 	/**
 	 * Manifest header identifying the bundle's vendor.
@@ -248,7 +250,8 @@ public interface Constants {
 	 * @deprecated As of 1.3. This has been replaced by
 	 *             {@link #VERSION_ATTRIBUTE}.
 	 */
-	String	PACKAGE_SPECIFICATION_VERSION			= "specification-version";
+	@Deprecated
+    String	PACKAGE_SPECIFICATION_VERSION			= "specification-version";
 
 	/**
 	 * Manifest header attribute identifying the processor required to run
@@ -327,7 +330,8 @@ public interface Constants {
 	 * @since 1.2
 	 * @deprecated As of 1.6. Replaced by the {@code osgi.ee} capability.
 	 */
-	String	BUNDLE_REQUIREDEXECUTIONENVIRONMENT		= "Bundle-RequiredExecutionEnvironment";
+	@Deprecated
+    String	BUNDLE_REQUIREDEXECUTIONENVIRONMENT		= "Bundle-RequiredExecutionEnvironment";
 
 	/**
 	 * Manifest header identifying the bundle's symbolic name.
@@ -849,7 +853,8 @@ public interface Constants {
 	 * @since 1.3
 	 * @deprecated As of 1.9.
 	 */
-	String	EXTENSION_BOOTCLASSPATH					= "bootclasspath";
+	@Deprecated
+    String	EXTENSION_BOOTCLASSPATH					= "bootclasspath";
 
 	/**
 	 * Manifest header identifying the bundle's activation policy.
@@ -958,7 +963,8 @@ public interface Constants {
 	 * @since 1.2
 	 * @deprecated As of 1.6. Replaced by the {@code osgi.ee} capability.
 	 */
-	String	FRAMEWORK_EXECUTIONENVIRONMENT			= "org.osgi.framework.executionenvironment";
+	@Deprecated
+    String	FRAMEWORK_EXECUTIONENVIRONMENT			= "org.osgi.framework.executionenvironment";
 
 	/**
 	 * Framework launching property identifying packages for which the Framework
@@ -1036,7 +1042,8 @@ public interface Constants {
 	 * @since 1.3
 	 * @deprecated As of 1.10.
 	 */
-	String	SUPPORTS_BOOTCLASSPATH_EXTENSION		= "org.osgi.supports.bootclasspath.extension";
+	@Deprecated
+    String	SUPPORTS_BOOTCLASSPATH_EXTENSION		= "org.osgi.supports.bootclasspath.extension";
 
 	/**
 	 * Framework environment property identifying whether the Framework supports

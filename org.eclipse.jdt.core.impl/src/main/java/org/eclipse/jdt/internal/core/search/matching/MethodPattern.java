@@ -106,7 +106,7 @@ public MethodPattern(
 		this.findDeclarations = false;
     }
 
-	this.selector = (this.isCaseSensitive || this.isCamelCase) ? selector : CharOperation.toLowerCase(selector);
+	this.selector = this.isCaseSensitive || this.isCamelCase ? selector : CharOperation.toLowerCase(selector);
 	this.declaringQualification = this.isCaseSensitive ? declaringQualification : CharOperation.toLowerCase(declaringQualification);
 	this.declaringSimpleName = this.isCaseSensitive ? declaringSimpleName : CharOperation.toLowerCase(declaringSimpleName);
 	this.returnQualification = this.isCaseSensitive ? returnQualification : CharOperation.toLowerCase(returnQualification);
@@ -315,11 +315,9 @@ public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 protected boolean mustResolve() {
 	// declaring type
 	// If declaring type is specified - even with simple name - always resolves
-	if (this.declaringSimpleName != null || this.declaringQualification != null) return true;
-
 	// return type
 	// If return type is specified - even with simple name - always resolves
-	if (this.returnSimpleName != null || this.returnQualification != null) return true;
+	if (this.declaringSimpleName != null || this.declaringQualification != null || this.returnSimpleName != null || this.returnQualification != null) return true;
 
 	// parameter types
 	if (this.parameterSimpleNames != null)

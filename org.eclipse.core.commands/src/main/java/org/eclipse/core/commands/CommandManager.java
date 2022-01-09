@@ -190,24 +190,23 @@ public final class CommandManager extends HandleObjectManager implements
 					buffer = new StringBuilder(escapedText.substring(0, i));
 				}
 
-				if (++i < escapedText.length()) {
-					c = escapedText.charAt(i);
-					switch (c) {
-					case PARAMETER_START_CHAR:
-					case PARAMETER_END_CHAR:
-					case ID_VALUE_CHAR:
-					case PARAMETER_SEPARATOR_CHAR:
-					case ESCAPE_CHAR:
-						buffer.append(c);
-						break;
-					default:
-						throw new SerializationException(
-								"Invalid character '" + c + "' in escape sequence"); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-				} else {
+				if (++i >= escapedText.length()) {
 					throw new SerializationException(
 							"Unexpected termination of escape sequence"); //$NON-NLS-1$
 				}
+                c = escapedText.charAt(i);
+                switch (c) {
+                case PARAMETER_START_CHAR:
+                case PARAMETER_END_CHAR:
+                case ID_VALUE_CHAR:
+                case PARAMETER_SEPARATOR_CHAR:
+                case ESCAPE_CHAR:
+                	buffer.append(c);
+                	break;
+                default:
+                	throw new SerializationException(
+                			"Invalid character '" + c + "' in escape sequence"); //$NON-NLS-1$ //$NON-NLS-2$
+                }
 			}
 
 		}
@@ -674,11 +673,7 @@ public final class CommandManager extends HandleObjectManager implements
 	private Parameterization[] getParameterizations(String serializedParameters, final IParameter[] parameters)
 			throws SerializationException {
 
-		if (serializedParameters == null || (serializedParameters.isEmpty())) {
-			return null;
-		}
-
-		if ((parameters == null) || (parameters.length == 0)) {
+		if (serializedParameters == null || serializedParameters.isEmpty() || parameters == null || parameters.length == 0) {
 			return null;
 		}
 

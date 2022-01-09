@@ -89,37 +89,37 @@ public class ContentTypeHandler implements IContentType {
 		if (target == null)
 			return null;
 		final ContentType baseType = (ContentType) target.getBaseType();
-		return (baseType != null) ? new ContentTypeHandler(baseType, baseType.getCatalog().getGeneration()) : null;
+		return baseType != null ? new ContentTypeHandler(baseType, baseType.getCatalog().getGeneration()) : null;
 	}
 
 	@Override
 	public String getDefaultCharset() {
 		final IContentType target = getTarget();
-		return (target != null) ? target.getDefaultCharset() : null;
+		return target != null ? target.getDefaultCharset() : null;
 	}
 
 	@Override
 	public IContentDescription getDefaultDescription() {
 		final IContentType target = getTarget();
-		return (target != null) ? target.getDefaultDescription() : new DummyContentDescription();
+		return target != null ? target.getDefaultDescription() : new DummyContentDescription();
 	}
 
 	@Override
 	public IContentDescription getDescriptionFor(InputStream contents, QualifiedName[] options) throws IOException {
 		final IContentType target = getTarget();
-		return (target != null) ? target.getDescriptionFor(contents, options) : null;
+		return target != null ? target.getDescriptionFor(contents, options) : null;
 	}
 
 	@Override
 	public IContentDescription getDescriptionFor(Reader contents, QualifiedName[] options) throws IOException {
 		final IContentType target = getTarget();
-		return (target != null) ? target.getDescriptionFor(contents, options) : null;
+		return target != null ? target.getDescriptionFor(contents, options) : null;
 	}
 
 	@Override
 	public String[] getFileSpecs(int type) {
 		final IContentType target = getTarget();
-		return (target != null) ? target.getFileSpecs(type) : new String[0];
+		return target != null ? target.getFileSpecs(type) : new String[0];
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class ContentTypeHandler implements IContentType {
 	@Override
 	public String getName() {
 		final IContentType target = getTarget();
-		return (target != null) ? target.getName() : id;
+		return target != null ? target.getName() : id;
 	}
 
 	@Override

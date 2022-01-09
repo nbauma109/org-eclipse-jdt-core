@@ -45,7 +45,6 @@ class PermissionsHash extends PermissionCollection {
 	 *
 	 */
 	public PermissionsHash() {
-		super();
 	}
 
 	/**
@@ -92,7 +91,7 @@ class PermissionsHash extends PermissionCollection {
 	public boolean implies(Permission perm) {
 		Permission p = perms.get(perm);
 
-		if ((p != null) && p.implies(perm)) {
+		if (p != null && p.implies(perm)) {
 			return true;
 		}
 

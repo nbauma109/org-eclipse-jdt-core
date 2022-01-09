@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -61,21 +62,19 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
     public OpenHashMap(int expected, float f) {
         this.first = -1;
         this.last = -1;
-        if (f > 0.0F && f <= 1.0F) {
-            if (expected < 0) {
-                throw new IllegalArgumentException("The expected number of elements must be nonnegative");
-            } else {
-                this.f = f;
-                this.n = arraySize(expected, f);
-                this.mask = this.n - 1;
-                this.maxFill = maxFill(this.n, f);
-                this.key = new Object[this.n + 1];
-                this.value = new Object[this.n + 1];
-                this.link = new long[this.n + 1];
-            }
-        } else {
+        if (f <= 0.0F || f > 1.0F) {
             throw new IllegalArgumentException("Load factor must be greater than 0 and smaller than or equal to 1");
         }
+        if (expected < 0) {
+            throw new IllegalArgumentException("The expected number of elements must be nonnegative");
+        }
+        this.f = f;
+        this.n = arraySize(expected, f);
+        this.mask = this.n - 1;
+        this.maxFill = maxFill(this.n, f);
+        this.key = new Object[this.n + 1];
+        this.value = new Object[this.n + 1];
+        this.link = new long[this.n + 1];
     }
 
     public OpenHashMap(int expected) {
@@ -99,11 +98,9 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         this(k.length, f);
         if (k.length != v.length) {
             throw new IllegalArgumentException("The key array and the value array have different lengths (" + k.length + " and " + v.length + ")");
-        } else {
-            for (int i = 0; i < k.length; ++i) {
-                this.put(k[i], v[i]);
-            }
-
+        }
+        for (int i = 0; i < k.length; ++i) {
+            this.put(k[i], v[i]);
         }
     }
 
@@ -119,35 +116,33 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return this.defRetValue;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof Map)) {
+        }
+        if (!(o instanceof Map)) {
             return false;
-        } else {
-            Map<?, ?> m = (Map<?, ?>) o;
-            int n = m.size();
-            if (this.size() != n) {
+        }
+        Map<?, ?> m = (Map<?, ?>) o;
+        int n = m.size();
+        if (this.size() != n) {
+            return false;
+        }
+        Iterator<? extends Entry<?, ?>> i = this.fast().iterator();
+        while (n-- > 0) {
+            Entry<?, ?> e = i.next();
+            Object k = e.getKey();
+            Object v = e.getValue();
+            Object v2 = m.get(k);
+            if (!Objects.equals(v, v2)) {
                 return false;
             }
-            Iterator<? extends Entry<?, ?>> i = this.fast().iterator();
-            while (n-- > 0) {
-                Entry<?, ?> e = i.next();
-                Object k = e.getKey();
-                Object v = e.getValue();
-                Object v2 = m.get(k);
-                if (v == null) {
-                    if (v2 != null) {
-                        return false;
-                    }
-                } else if (!v.equals(v2)) {
-                    return false;
-                }
-            }
-            return true;
         }
+        return true;
     }
 
+    @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
         Iterator<Map.Entry<K, V>> i = this.fast().iterator();
@@ -194,7 +189,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
     }
 
     private void tryCapacity(long capacity) {
-        int needed = (int) Math.min(1073741824L, Math.max(2L, nextPowerOfTwo((long) Math.ceil((float) capacity / this.f))));
+        int needed = (int) Math.min(1073741824L, Math.max(2L, nextPowerOfTwo((long) Math.ceil(capacity / this.f))));
         if (needed > this.n) {
             this.rehash(needed);
         }
@@ -229,8 +224,9 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return (V) oldValue;
     }
 
+    @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        if ((double) this.f <= 0.5D) {
+        if (this.f <= 0.5D) {
             this.ensureCapacity(m.size());
         } else {
             this.tryCapacity(this.size() + m.size());
@@ -284,8 +280,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             this.first = this.last = pos;
             this.link[pos] = -1L;
         } else {
-            this.link[this.last] ^= (this.link[this.last] ^ (long) pos & 0xFFFFFFFFL) & 0xFFFFFFFFL;
-            this.link[pos] = ((long) this.last & 0xFFFFFFFFL) << 32 | 0xFFFFFFFFL;
+            this.link[this.last] ^= (this.link[this.last] ^ pos & 0xFFFFFFFFL) & 0xFFFFFFFFL;
+            this.link[pos] = (this.last & 0xFFFFFFFFL) << 32 | 0xFFFFFFFFL;
             this.last = pos;
         }
 
@@ -296,16 +292,16 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return -1;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public V put(K k, V v) {
         int pos = this.insert(k, v);
         if (pos < 0) {
             return this.defRetValue;
-        } else {
-            Object oldValue = this.value[pos];
-            this.value[pos] = v;
-            return (V) oldValue;
         }
+        Object oldValue = this.value[pos];
+        this.value[pos] = v;
+        return (V) oldValue;
     }
 
     @SuppressWarnings("unchecked")
@@ -337,13 +333,13 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
 
         Object v;
-        this.value[pos] = (v = compute(k));
+        this.value[pos] = v = compute(k);
         if (this.size == 0) {
             this.first = this.last = pos;
             this.link[pos] = -1L;
         } else {
-            this.link[this.last] ^= (this.link[this.last] ^ (long) pos & 0xFFFFFFFFL) & 0xFFFFFFFFL;
-            this.link[pos] = ((long) this.last & 0xFFFFFFFFL) << 32 | 0xFFFFFFFFL;
+            this.link[this.last] ^= (this.link[this.last] ^ pos & 0xFFFFFFFFL) & 0xFFFFFFFFL;
+            this.link[pos] = (this.last & 0xFFFFFFFFL) << 32 | 0xFFFFFFFFL;
             this.last = pos;
         }
 
@@ -388,85 +384,84 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
+    @Override
     public V remove(Object k) {
         if (k == null) {
             return this.containsNullKey ? this.removeNullEntry() : this.defRetValue;
-        } else {
-            Object[] key = this.key;
-            Object curr;
-            int pos;
-            if ((curr = key[pos = mix(k.hashCode()) & this.mask]) == null) {
-                return this.defRetValue;
-            } else if (k.equals(curr)) {
+        }
+        Object[] key = this.key;
+        Object curr;
+        int pos;
+        if ((curr = key[pos = mix(k.hashCode()) & this.mask]) == null) {
+            return this.defRetValue;
+        }
+        if (k.equals(curr)) {
+            return this.removeEntry(pos);
+        }
+        while ((curr = key[pos = pos + 1 & this.mask]) != null) {
+            if (k.equals(curr)) {
                 return this.removeEntry(pos);
-            } else {
-                while ((curr = key[pos = pos + 1 & this.mask]) != null) {
-                    if (k.equals(curr)) {
-                        return this.removeEntry(pos);
-                    }
-                }
-
-                return this.defRetValue;
             }
         }
+
+        return this.defRetValue;
     }
 
     @SuppressWarnings("unchecked")
     public V removeFirst() {
         if (this.size == 0) {
             throw new NoSuchElementException();
-        } else {
-            int pos = this.first;
-            this.first = (int) this.link[pos];
-            if (0 <= this.first) {
-                this.link[this.first] |= 0xFFFFFFFF00000000L;
-            }
-
-            --this.size;
-            Object v = this.value[pos];
-            if (pos == this.n) {
-                this.containsNullKey = false;
-                this.value[this.n] = null;
-            } else {
-                this.shiftKeys(pos);
-            }
-
-            if (this.size < this.maxFill / 4 && this.n > 16) {
-                this.rehash(this.n / 2);
-            }
-
-            return (V) v;
         }
+        int pos = this.first;
+        this.first = (int) this.link[pos];
+        if (0 <= this.first) {
+            this.link[this.first] |= 0xFFFFFFFF00000000L;
+        }
+
+        --this.size;
+        Object v = this.value[pos];
+        if (pos == this.n) {
+            this.containsNullKey = false;
+            this.value[this.n] = null;
+        } else {
+            this.shiftKeys(pos);
+        }
+
+        if (this.size < this.maxFill / 4 && this.n > 16) {
+            this.rehash(this.n / 2);
+        }
+
+        return (V) v;
     }
 
     @SuppressWarnings("unchecked")
     public V removeLast() {
         if (this.size == 0) {
             throw new NoSuchElementException();
-        } else {
-            int pos = this.last;
-            this.last = (int) (this.link[pos] >>> 32);
-            if (0 <= this.last) {
-                this.link[this.last] |= 0xFFFFFFFFL;
-            }
-
-            --this.size;
-            Object v = this.value[pos];
-            if (pos == this.n) {
-                this.containsNullKey = false;
-                this.value[this.n] = null;
-            } else {
-                this.shiftKeys(pos);
-            }
-
-            if (this.size < this.maxFill / 4 && this.n > 16) {
-                this.rehash(this.n / 2);
-            }
-
-            return (V) v;
         }
+        int pos = this.last;
+        this.last = (int) (this.link[pos] >>> 32);
+        if (0 <= this.last) {
+            this.link[this.last] |= 0xFFFFFFFFL;
+        }
+
+        --this.size;
+        Object v = this.value[pos];
+        if (pos == this.n) {
+            this.containsNullKey = false;
+            this.value[this.n] = null;
+        } else {
+            this.shiftKeys(pos);
+        }
+
+        if (this.size < this.maxFill / 4 && this.n > 16) {
+            this.rehash(this.n / 2);
+        }
+
+        return (V) v;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public V get(Object k) {
         if (k == null) {
@@ -487,7 +482,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
 
         // There's always an usused entry
         while (true) {
-            if ((curr = key[pos = (pos + 1) & mask]) == null) {
+            if ((curr = key[pos = pos + 1 & mask]) == null) {
                 return defRetValue;
             }
             if (k.equals(curr)) {
@@ -496,43 +491,45 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
+    @Override
     public boolean containsKey(Object k) {
         if (k == null) {
             return this.containsNullKey;
-        } else {
-            Object[] key = this.key;
-            Object curr;
-            int pos;
-            if ((curr = key[pos = mix(k.hashCode()) & this.mask]) == null) {
-                return false;
-            } else if (k.equals(curr)) {
+        }
+        Object[] key = this.key;
+        Object curr;
+        int pos;
+        if ((curr = key[pos = mix(k.hashCode()) & this.mask]) == null) {
+            return false;
+        }
+        if (k.equals(curr)) {
+            return true;
+        }
+        while ((curr = key[pos = pos + 1 & this.mask]) != null) {
+            if (k.equals(curr)) {
                 return true;
-            } else {
-                while ((curr = key[pos = pos + 1 & this.mask]) != null) {
-                    if (k.equals(curr)) {
-                        return true;
-                    }
-                }
-
-                return false;
             }
         }
+
+        return false;
     }
 
+    @Override
     public boolean containsValue(Object v) {
         Object[] value = this.value;
         Object[] key = this.key;
-        if (containsNullKey && (value[n] == null && v == null) || value[n].equals(v)) {
+        if (containsNullKey && value[n] == null && v == null || value[n].equals(v)) {
             return true;
         }
         for (int i = n; i-- != 0;) {
-            if (!(key[i] == null) && (value[i] == null && v == null) || value[i].equals(v)) {
+            if (key[i] != null && value[i] == null && v == null || value[i].equals(v)) {
                 return true;
             }
         }
         return false;
     }
 
+    @Override
     public void clear() {
         if (size != 0) {
             size = 0;
@@ -543,10 +540,12 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
+    @Override
     public int size() {
         return this.size;
     }
 
+    @Override
     public boolean isEmpty() {
         return this.size == 0;
     }
@@ -579,68 +578,69 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             link[d] = -1L;
         } else if (first == s) {
             first = d;
-            link[(int) link[s]] ^= (link[(int) link[s]] ^ ((long) d & 0xFFFFFFFFL) << 32) & 0xFFFFFFFF00000000L;
+            link[(int) link[s]] ^= (link[(int) link[s]] ^ (d & 0xFFFFFFFFL) << 32) & 0xFFFFFFFF00000000L;
             link[d] = link[s];
         } else if (last == s) {
             last = d;
-            link[(int) (link[s] >>> 32)] ^= (link[(int) (link[s] >>> 32)] ^ (long) d & 0xFFFFFFFFL) & 0xFFFFFFFFL;
+            link[(int) (link[s] >>> 32)] ^= (link[(int) (link[s] >>> 32)] ^ d & 0xFFFFFFFFL) & 0xFFFFFFFFL;
             link[d] = link[s];
         } else {
             long links = link[s];
             int prev = (int) (links >>> 32);
             int next = (int) links;
-            link[prev] ^= (link[prev] ^ (long) d & 0xFFFFFFFFL) & 0xFFFFFFFFL;
-            link[next] ^= (link[next] ^ ((long) d & 0xFFFFFFFFL) << 32) & 0xFFFFFFFF00000000L;
+            link[prev] ^= (link[prev] ^ d & 0xFFFFFFFFL) & 0xFFFFFFFFL;
+            link[next] ^= (link[next] ^ (d & 0xFFFFFFFFL) << 32) & 0xFFFFFFFF00000000L;
             link[d] = links;
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public K firstKey() {
         if (size == 0) {
             throw new NoSuchElementException();
-        } else {
-            return (K) key[first];
         }
+        return (K) key[first];
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public K lastKey() {
         if (size == 0) {
             throw new NoSuchElementException();
-        } else {
-            return (K) key[last];
         }
+        return (K) key[last];
     }
 
+    @Override
     public Comparator<? super K> comparator() {
         return null;
     }
 
+    @Override
     public SortedMap<K, V> tailMap(K from) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public SortedMap<K, V> headMap(K to) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public SortedMap<K, V> subMap(K from, K to) {
         throw new UnsupportedOperationException();
     }
 
     public Iterable<Map.Entry<K, V>> fast() {
         if (fast == null) {
-            fast = new Iterable<Entry<K, V>>() {
-                public Iterator<Entry<K, V>> iterator() {
-                    return new FastEntryIterator();
-                }
-            };
+            fast = FastEntryIterator::new;
         }
 
         return fast;
     }
 
+    @Override
     public SortedSet<Map.Entry<K, V>> entrySet() {
         if (entries == null) {
             entries = new MapEntrySet();
@@ -649,6 +649,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return this.entries;
     }
 
+    @Override
     public SortedSet<K> keySet() {
         if (keys == null) {
             keys = new KeySet();
@@ -657,21 +658,26 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return keys;
     }
 
+    @Override
     public Collection<V> values() {
         if (values == null) {
-            values = new AbstractObjectCollection<V>() {
+            values = new AbstractObjectCollection<>() {
+                @Override
                 public Iterator<V> iterator() {
                     return new ValueIterator();
                 }
 
+                @Override
                 public int size() {
                     return size;
                 }
 
+                @Override
                 public boolean contains(Object v) {
                     return containsValue(v);
                 }
 
+                @Override
                 public void clear() {
                     OpenHashMap.this.clear();
                 }
@@ -697,13 +703,12 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         int l = arraySize(size, f);
         if (l >= n) {
             return true;
-        } else {
-            try {
-                rehash(l);
-                return true;
-            } catch (OutOfMemoryError cantDoIt) {
-                return false;
-            }
+        }
+        try {
+            rehash(l);
+            return true;
+        } catch (OutOfMemoryError cantDoIt) {
+            return false;
         }
     }
 
@@ -726,16 +731,15 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
      * @see #trim()
      */
     public boolean trim(int n) {
-        int l = nextPowerOfTwo((int) Math.ceil((float) n / f));
+        int l = nextPowerOfTwo((int) Math.ceil(n / f));
         if (n <= l) {
             return true;
-        } else {
-            try {
-                rehash(l);
-                return true;
-            } catch (OutOfMemoryError cantDoIt) {
-                return false;
-            }
+        }
+        try {
+            rehash(l);
+            return true;
+        } catch (OutOfMemoryError cantDoIt) {
+            return false;
         }
     }
 
@@ -767,7 +771,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             } else {
                 pos = mix(key[i].hashCode()) & mask;
                 while (newKey[pos] != null) {
-                    pos = ( pos + 1 ) & mask;
+                    pos = pos + 1 & mask;
                 }
                 newKey[pos] = key[i];
             }
@@ -775,8 +779,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             newValue[pos] = value[i];
 
             if (prev != -1) {
-                newLink[newPrev] ^= (newLink[newPrev] ^ (long) pos & 0xFFFFFFFFL) & 0xFFFFFFFFL;
-                newLink[pos] ^= (newLink[pos] ^ ((long) newPrev & 0xFFFFFFFFL) << 32) & 0xFFFFFFFF00000000L;
+                newLink[newPrev] ^= (newLink[newPrev] ^ pos & 0xFFFFFFFFL) & 0xFFFFFFFFL;
+                newLink[pos] ^= (newLink[pos] ^ (newPrev & 0xFFFFFFFFL) << 32) & 0xFFFFFFFF00000000L;
                 newPrev = pos;
             } else {
                 newPrev = first = pos;
@@ -801,6 +805,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         this.value = newValue;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public OpenHashMap<K, V> clone() {
         OpenHashMap<K, V> c;
@@ -821,6 +826,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return c;
     }
 
+    @Override
     public int hashCode() {
         int h = 0;
         for( int j = realSize(), i = 0, t = 0; j-- != 0; ) {
@@ -890,8 +896,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
 
             value[pos] = v;
             if (this.first != -1) {
-                link[prev] ^= (link[prev] ^ (long) pos & 0xFFFFFFFFL) & 0xFFFFFFFFL;
-                link[pos] ^= (link[pos] ^ ((long) prev & 0xFFFFFFFFL) << 32) & 0xFFFFFFFF00000000L;
+                link[prev] ^= (link[prev] ^ pos & 0xFFFFFFFFL) & 0xFFFFFFFFL;
+                link[pos] ^= (link[pos] ^ (prev & 0xFFFFFFFFL) << 32) & 0xFFFFFFFF00000000L;
                 prev = pos;
             } else {
                 prev = this.first = pos;
@@ -908,9 +914,9 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
 
     private final class ValueIterator extends MapIterator implements Iterator<V> {
         public ValueIterator() {
-            super();
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public V next() {
             return (V) value[this.nextEntry()];
@@ -921,68 +927,77 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         private KeySet() {
         }
 
+        @Override
         public Iterator<K> iterator() {
             return new KeyIterator();
         }
 
+        @Override
         public int size() {
             return size;
         }
 
+        @Override
         public boolean contains(Object k) {
             return containsKey(k);
         }
 
+        @Override
         public boolean remove(Object k) {
             int oldSize = size;
             OpenHashMap.this.remove(k);
             return size != oldSize;
         }
 
+        @Override
         public void clear() {
             OpenHashMap.this.clear();
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public K first() {
             if (size == 0) {
                 throw new NoSuchElementException();
-            } else {
-                return (K) key[first];
             }
+            return (K) key[first];
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public K last() {
             if (size == 0) {
                 throw new NoSuchElementException();
-            } else {
-                return (K) key[last];
             }
+            return (K) key[last];
         }
 
+        @Override
         public Comparator<? super K> comparator() {
             return null;
         }
 
-        public final SortedSet<K> tailSet(K from) {
+        @Override
+        public SortedSet<K> tailSet(K from) {
             throw new UnsupportedOperationException();
         }
 
-        public final SortedSet<K> headSet(K to) {
+        @Override
+        public SortedSet<K> headSet(K to) {
             throw new UnsupportedOperationException();
         }
 
-        public final SortedSet<K> subSet(K from, K to) {
+        @Override
+        public SortedSet<K> subSet(K from, K to) {
             throw new UnsupportedOperationException();
         }
     }
 
     private final class KeyIterator extends MapIterator implements Iterator<K> {
         public KeyIterator() {
-            super();
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public K next() {
             return (K) key[this.nextEntry()];
@@ -993,144 +1008,135 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         private MapEntrySet() {
         }
 
+        @Override
         public EntryIterator iterator() {
             return new EntryIterator();
         }
 
+        @Override
         public Comparator<? super Entry<K, V>> comparator() {
             return null;
         }
 
+        @Override
         public SortedSet<Entry<K, V>> subSet(Entry<K, V> fromElement, Entry<K, V> toElement) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public SortedSet<Entry<K, V>> headSet(Entry<K, V> toElement) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public SortedSet<Entry<K, V>> tailSet(Entry<K, V> fromElement) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public Entry<K, V> first() {
             if (size == 0) {
                 throw new NoSuchElementException();
-            } else {
-                return new MapEntry(first);
             }
+            return new MapEntry(first);
         }
 
+        @Override
         public Entry<K, V> last() {
             if (size == 0) {
                 throw new NoSuchElementException();
-            } else {
-                return new MapEntry(last);
             }
+            return new MapEntry(last);
         }
 
+        @Override
         public boolean contains(Object o) {
             if (!(o instanceof java.util.Map.Entry)) {
                 return false;
-            } else {
-                Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
-                Object k = e.getKey();
-                if (k == null) {
-                    if (containsNullKey) {
-                        if (value[n] == null) {
-                            return e.getValue() == null;
-                        } else return value[n].equals(e.getValue());
+            }
+            Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
+            Object k = e.getKey();
+            if (k == null) {
+                if (containsNullKey) {
+                    if (value[n] == null) {
+                        return e.getValue() == null;
                     }
+                    return value[n].equals(e.getValue());
+                }
 
-                    return false;
-                } else {
-                    Object[] key = OpenHashMap.this.key;
-                    Object curr;
-                    int pos;
-                    if ((curr = key[pos = mix(k.hashCode()) & mask]) == null) {
-                        return false;
-                    } else if (k.equals(curr)) {
-                        return value[pos] == null ? e.getValue() == null : value[pos].equals(e.getValue());
-                    } else {
-                        while ((curr = key[pos = pos + 1 & mask]) != null) {
-                            if (k.equals(curr)) {
-                                return value[pos] == null ? e.getValue() == null : value[pos].equals(e.getValue());
-                            }
-                        }
-
-                        return false;
-                    }
+                return false;
+            }
+            Object[] key = OpenHashMap.this.key;
+            Object curr;
+            int pos;
+            if ((curr = key[pos = mix(k.hashCode()) & mask]) == null) {
+                return false;
+            }
+            if (k.equals(curr)) {
+                return value[pos] == null ? e.getValue() == null : value[pos].equals(e.getValue());
+            }
+            while ((curr = key[pos = pos + 1 & mask]) != null) {
+                if (k.equals(curr)) {
+                    return value[pos] == null ? e.getValue() == null : value[pos].equals(e.getValue());
                 }
             }
+
+            return false;
         }
 
+        @Override
         public boolean remove(Object o) {
             if (!(o instanceof java.util.Map.Entry)) {
                 return false;
+            }
+            Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
+            Object k = e.getKey();
+            Object v = e.getValue();
+            if (k == null) {
+                if (!containsNullKey || !Objects.equals(value[n], v)) {
+                    return false;
+                }
+
+                removeNullEntry();
+                return true;
+            }
+            Object[] key = OpenHashMap.this.key;
+            Object curr;
+            int pos;
+            if ((curr = key[pos = mix(k.hashCode()) & mask]) == null) {
+                return false;
+            }
+            if (curr.equals(k)) {
+                if (!Objects.equals(value[pos], v)) {
+                    return false;
+                }
             } else {
-                Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
-                Object k = e.getKey();
-                Object v = e.getValue();
-                if (k == null) {
-                    if (containsNullKey) {
-                        if (value[n] == null) {
-                            if (v != null) {
-                                return false;
-                            }
-                        } else if (!value[n].equals(v)) {
+                while (true) {
+                    do {
+                        if ((curr = key[pos = pos + 1 & mask]) == null) {
                             return false;
                         }
+                    } while (!curr.equals(k));
 
-                        removeNullEntry();
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    Object[] key = OpenHashMap.this.key;
-                    Object curr;
-                    int pos;
-                    if ((curr = key[pos = mix(k.hashCode()) & mask]) == null) {
-                        return false;
-                    } else if (curr.equals(k)) {
-                        if (value[pos] == null) {
-                            if (v != null) {
-                                return false;
-                            }
-                        } else if (!value[pos].equals(v)) {
-                            return false;
+                    if (value[pos] == null) {
+                        if (v == null) {
+                            break;
                         }
-
-                        removeEntry(pos);
-                        return true;
-                    } else {
-                        while (true) {
-                            do {
-                                if ((curr = key[pos = pos + 1 & mask]) == null) {
-                                    return false;
-                                }
-                            } while (!curr.equals(k));
-
-                            if (value[pos] == null) {
-                                if (v == null) {
-                                    break;
-                                }
-                            } else if (value[pos].equals(v)) {
-                                break;
-                            }
-                        }
-
-                        removeEntry(pos);
-                        return true;
+                    } else if (value[pos].equals(v)) {
+                        break;
                     }
                 }
             }
+            removeEntry(pos);
+            return true;
         }
 
+        @Override
         public int size() {
             return size;
         }
 
+        @Override
         public void clear() {
             OpenHashMap.this.clear();
         }
@@ -1140,10 +1146,10 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         final MapEntry entry;
 
         public FastEntryIterator() {
-            super();
             this.entry = new MapEntry();
         }
 
+        @Override
         public MapEntry next() {
             this.entry.index = this.nextEntry();
             return this.entry;
@@ -1154,13 +1160,14 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         private MapEntry entry;
 
         public EntryIterator() {
-            super();
         }
 
+        @Override
         public MapEntry next() {
             return this.entry = new MapEntry(this.nextEntry());
         }
 
+        @Override
         public void remove() {
             super.remove();
             this.entry.index = -1;
@@ -1168,17 +1175,19 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
     }
 
     public static abstract class AbstractObjectSet<K> extends AbstractObjectCollection<K> implements Cloneable {
+        @Override
         public boolean equals(Object o) {
             if (o == this) {
                 return true;
-            } else if (!(o instanceof Set)) {
-                return false;
-            } else {
-                Set<?> s = (Set<?>) o;
-                return s.size() == this.size() && this.containsAll(s);
             }
+            if (!(o instanceof Set)) {
+                return false;
+            }
+            Set<?> s = (Set<?>) o;
+            return s.size() == this.size() && this.containsAll(s);
         }
 
+        @Override
         public int hashCode() {
             int h = 0;
             int n = this.size();
@@ -1237,15 +1246,14 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         public int nextEntry() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
-            } else {
-                curr = next;
-                next = (int) link[curr];
-                prev = curr;
-                if (index >= 0) {
-                    ++index;
-                }
-                return curr;
             }
+            curr = next;
+            next = (int) link[curr];
+            prev = curr;
+            if (index >= 0) {
+                ++index;
+            }
+            return curr;
         }
 
         public void remove() {
@@ -1267,12 +1275,12 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             if (prev == -1) {
                 first = next;
             } else {
-                link[prev] ^= (link[prev] ^ (long) next & 0xFFFFFFFFL) & 0xFFFFFFFFL;
+                link[prev] ^= (link[prev] ^ next & 0xFFFFFFFFL) & 0xFFFFFFFFL;
             }
             if (next == -1) {
                 last = prev;
             } else {
-                link[next] ^= (link[next] ^ ((long) prev & 0xFFFFFFFFL) << 32) & 0xFFFFFFFF00000000L;
+                link[next] ^= (link[next] ^ (prev & 0xFFFFFFFFL) << 32) & 0xFFFFFFFF00000000L;
             }
 
             int last, slot, pos = curr;
@@ -1286,7 +1294,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
                 Object[] key = OpenHashMap.this.key;
                 // We have to horribly duplicate the shiftKeys() code because we need to update next/prev.
                 for (; ; ) {
-                    pos = ((last = pos) + 1) & mask;
+                    pos = (last = pos) + 1 & mask;
                     for (; ; ) {
                         if ((curr = key[pos]) == null) {
                             key[last] = null;
@@ -1295,7 +1303,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
                         }
                         slot = mix(curr.hashCode()) & mask;
                         if (last <= pos ? last >= slot || slot > pos : last >= slot && slot > pos) break;
-                        pos = (pos + 1) & mask;
+                        pos = pos + 1 & mask;
                     }
                     key[last] = curr;
                     value[last] = value[pos];
@@ -1317,16 +1325,19 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         MapEntry() {
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public K getKey() {
             return (K) key[this.index];
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public V getValue() {
             return (V) value[this.index];
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public V setValue(V v) {
             Object oldValue = value[this.index];
@@ -1334,31 +1345,30 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return (V) oldValue;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (!(o instanceof Entry)) {
                 return false;
-            } else {
-                Entry<?, ?> e = (Entry<?, ?>) o;
-                if (key[this.index] == null) {
-                    if (e.getKey() != null) {
-                        return false;
-                    }
-                } else if (!key[this.index].equals(e.getKey())) {
-                    return false;
-                }
-
-                if (value[this.index] == null) {
-                    return e.getValue() == null;
-                } else return value[this.index].equals(e.getValue());
             }
+            Entry<?, ?> e = (Entry<?, ?>) o;
+            if (!Objects.equals(key[this.index], e.getKey())) {
+                return false;
+            }
+
+            if (value[this.index] == null) {
+                return e.getValue() == null;
+            }
+            return value[this.index].equals(e.getValue());
         }
 
+        @Override
         public int hashCode() {
             return (key[this.index] == null ? 0 :
                     key[this.index].hashCode()) ^ (value[this.index] == null ? 0 :
                     value[this.index].hashCode());
         }
 
+        @Override
         public String toString() {
             return key[this.index] + "=>" + value[this.index];
         }
@@ -1369,12 +1379,14 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         protected AbstractObjectCollection() {
         }
 
+        @Override
         public Object[] toArray() {
             Object[] a = new Object[this.size()];
             unwrap(this.iterator(), a);
             return a;
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public <T> T[] toArray(T[] a) {
             if (a.length < this.size()) {
@@ -1384,6 +1396,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return a;
         }
 
+        @Override
         public boolean addAll(Collection<? extends K> c) {
             boolean retVal = false;
             Iterator<? extends K> i = c.iterator();
@@ -1398,10 +1411,12 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return retVal;
         }
 
+        @Override
         public boolean add(K k) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public boolean containsAll(Collection<?> c) {
             int n = c.size();
             Iterator<?> i = c.iterator();
@@ -1415,6 +1430,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return false;
         }
 
+        @Override
         public boolean retainAll(Collection<?> c) {
             boolean retVal = false;
             int n = this.size();
@@ -1430,6 +1446,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return retVal;
         }
 
+        @Override
         public boolean removeAll(Collection<?> c) {
             boolean retVal = false;
             int n = c.size();
@@ -1444,10 +1461,12 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return retVal;
         }
 
+        @Override
         public boolean isEmpty() {
             return this.size() == 0;
         }
 
+        @Override
         public String toString() {
             StringBuilder s = new StringBuilder();
             Iterator<K> i = this.iterator();
@@ -1476,43 +1495,40 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
     }
 
     private static int arraySize(int expected, float f) {
-        long s = Math.max(2L, nextPowerOfTwo((long) Math.ceil((float) expected / f)));
+        long s = Math.max(2L, nextPowerOfTwo((long) Math.ceil(expected / f)));
         if (s > 0x40000000L) {
             throw new IllegalArgumentException("Too large (" + expected + " expected elements with load factor " + f + ")");
-        } else {
-            return (int) s;
         }
+        return (int) s;
     }
 
     private static int maxFill(int n, float f) {
-        return Math.min((int) Math.ceil((float) n * f), n - 1);
+        return Math.min((int) Math.ceil(n * f), n - 1);
     }
 
     private static int nextPowerOfTwo(int x) {
         if (x == 0) {
             return 1;
-        } else {
-            --x;
-            x |= x >> 1;
-            x |= x >> 2;
-            x |= x >> 4;
-            x |= x >> 8;
-            return (x | x >> 16) + 1;
         }
+        --x;
+        x |= x >> 1;
+        x |= x >> 2;
+        x |= x >> 4;
+        x |= x >> 8;
+        return (x | x >> 16) + 1;
     }
 
     private static long nextPowerOfTwo(long x) {
         if (x == 0L) {
             return 1L;
-        } else {
-            --x;
-            x |= x >> 1;
-            x |= x >> 2;
-            x |= x >> 4;
-            x |= x >> 8;
-            x |= x >> 16;
-            return (x | x >> 32) + 1L;
         }
+        --x;
+        x |= x >> 1;
+        x |= x >> 2;
+        x |= x >> 4;
+        x |= x >> 8;
+        x |= x >> 16;
+        return (x | x >> 32) + 1L;
     }
 
     private static int mix(int x) {
@@ -1523,15 +1539,15 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
     private static <K> int unwrap(Iterator<? extends K> i, K[] array, int offset, int max) {
         if (max < 0) {
             throw new IllegalArgumentException("The maximum number of elements (" + max + ") is negative");
-        } else if (offset >= 0 && offset + max <= array.length) {
+        }
+        if (offset >= 0 && offset + max <= array.length) {
             int j;
             for (j = max; j-- != 0 && i.hasNext(); array[offset++] = i.next()) {
             }
 
             return max - j - 1;
-        } else {
-            throw new IllegalArgumentException();
         }
+        throw new IllegalArgumentException();
     }
 
     private static <K> int unwrap(Iterator<? extends K> i, K[] array) {

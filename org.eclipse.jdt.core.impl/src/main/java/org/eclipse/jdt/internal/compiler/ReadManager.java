@@ -24,7 +24,7 @@ public class ReadManager implements Runnable {
 	int readyToReadPosition;
 	int nextAvailablePosition;
 	Thread[] readingThreads;
-	char[] readInProcessMarker = new char[0];
+	char[] readInProcessMarker = {};
 	int sleepingThreadCount;
 	private Throwable caughtException;
 

@@ -42,7 +42,6 @@ public class StateWire {
 	 * @param declaredCapability the declared capability.  The bundle declaring the capability may be different from the capability host.
 	 */
 	public StateWire(BundleDescription requirementHost, VersionConstraint declaredRequirement, BundleDescription capabilityHost, BaseDescription declaredCapability) {
-		super();
 		this.requirementHost = requirementHost;
 		this.declaredRequirement = declaredRequirement;
 		this.capabilityHost = capabilityHost;

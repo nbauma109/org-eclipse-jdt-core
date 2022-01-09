@@ -66,7 +66,7 @@ public class ParameterizedMethodBinding extends MethodBinding {
 			for (int i = 0; i < length; i++) { // copy original type variable to relocate
 				TypeVariableBinding originalVariable = originalVariables[i];
 				substitutedVariables[i] = new TypeVariableBinding(originalVariable.sourceName, this, originalVariable.rank, parameterizedDeclaringClass.environment);
-				substitutedVariables[i].tagBits |= (originalVariable.tagBits & (TagBits.AnnotationNullMASK|TagBits.HasNullTypeAnnotation));
+				substitutedVariables[i].tagBits |= originalVariable.tagBits & (TagBits.AnnotationNullMASK|TagBits.HasNullTypeAnnotation);
 			}
 			this.typeVariables = substitutedVariables;
 
@@ -117,11 +117,10 @@ public class ParameterizedMethodBinding extends MethodBinding {
 							int interfaceCount = substitutedInterfaces.length;
 							System.arraycopy(substitutedInterfaces, 0, substitutedInterfaces = new ReferenceBinding[interfaceCount+1], 1, interfaceCount);
 							substitutedInterfaces[0] = (ReferenceBinding) substitutedSuperclass;
-							substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 						} else {
 							substitutedVariable.setSuperClass((ReferenceBinding) substitutedSuperclass); // typeVar was extending other typeVar which got substituted with interface
-							substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 						}
+                        substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 				}
 			}
 		}
@@ -145,7 +144,7 @@ public class ParameterizedMethodBinding extends MethodBinding {
 					if (paramTagBits != 0) {
 						if (this.parameterNonNullness == null)
 							this.parameterNonNullness = new Boolean[parametersLen];
-						this.parameterNonNullness[i] = Boolean.valueOf(paramTagBits == TagBits.AnnotationNonNull);
+						this.parameterNonNullness[i] = paramTagBits == TagBits.AnnotationNonNull;
 					}
 				}
 			}
@@ -209,7 +208,7 @@ public class ParameterizedMethodBinding extends MethodBinding {
 							this,
 							originalVariable.rank,
 							environment);
-				substitutedVariables[i].tagBits |= (originalVariable.tagBits & (TagBits.AnnotationNullMASK|TagBits.HasNullTypeAnnotation));
+				substitutedVariables[i].tagBits |= originalVariable.tagBits & (TagBits.AnnotationNullMASK|TagBits.HasNullTypeAnnotation);
 			}
 			this.typeVariables = substitutedVariables;
 
@@ -258,11 +257,10 @@ public class ParameterizedMethodBinding extends MethodBinding {
 							int interfaceCount = substitutedInterfaces.length;
 							System.arraycopy(substitutedInterfaces, 0, substitutedInterfaces = new ReferenceBinding[interfaceCount+1], 1, interfaceCount);
 							substitutedInterfaces[0] = (ReferenceBinding) substitutedSuperclass;
-							substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 						} else {
 							substitutedVariable.setSuperClass((ReferenceBinding) substitutedSuperclass); // typeVar was extending other typeVar which got substituted with interface
-							substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 						}
+                        substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 				}
 			}
 		}

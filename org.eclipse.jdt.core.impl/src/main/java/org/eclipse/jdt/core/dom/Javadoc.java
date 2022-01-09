@@ -39,7 +39,8 @@ public class Javadoc extends Comment {
 	 * @since 3.0
 	 * @deprecated Replaced by {@link #TAGS_PROPERTY} in the JLS3 API.
 	 */
-	public static final SimplePropertyDescriptor COMMENT_PROPERTY =
+	@Deprecated
+    public static final SimplePropertyDescriptor COMMENT_PROPERTY =
 		new SimplePropertyDescriptor(Javadoc.class, "comment", String.class, MANDATORY); //$NON-NLS-1$
 
 	/**
@@ -92,9 +93,8 @@ public class Javadoc extends Comment {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_3_0;
 		}
+        return PROPERTY_DESCRIPTORS_3_0;
 	}
 
 	/**
@@ -110,7 +110,8 @@ public class Javadoc extends Comment {
 	 * by a representation of the structure of the doc comment.
 	 * For backwards compatibility, it is still funcational as before.
 	 */
-	private String comment = MINIMAL_DOC_COMMENT;
+	@Deprecated
+    private String comment = MINIMAL_DOC_COMMENT;
 
 	/**
 	 * The list of tag elements (element type: {@link TagElement}).
@@ -146,10 +147,9 @@ public class Javadoc extends Comment {
 		if (property == COMMENT_PROPERTY) {
 			if (get) {
 				return getComment();
-			} else {
-				setComment((String) value);
-				return null;
 			}
+            setComment((String) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
@@ -207,7 +207,8 @@ public class Javadoc extends Comment {
 	 * by a representation of the structure of the doc comment.
 	 * See {@link #tags() tags}.
 	 */
-	public String getComment() {
+	@Deprecated
+    public String getComment() {
 	    supportedOnlyIn2();
 		return this.comment;
 	}
@@ -225,7 +226,8 @@ public class Javadoc extends Comment {
 	 * by a representation of the structure of the doc comment.
 	 * See {@link #tags() tags}.
 	 */
-	public void setComment(String docComment) {
+	@Deprecated
+    public void setComment(String docComment) {
 	    supportedOnlyIn2();
 		if (docComment == null) {
 			throw new IllegalArgumentException();

@@ -29,7 +29,6 @@ public class DynamicImportList extends AbstractList<String> implements RandomAcc
 	private final WovenClassImpl wovenClass;
 
 	public DynamicImportList(WovenClassImpl wovenClass) {
-		super();
 		this.wovenClass = wovenClass;
 	}
 

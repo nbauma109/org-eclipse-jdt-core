@@ -60,7 +60,7 @@ protected void verify(IJavaElement element) throws JavaModelException {
 
 	int elementType = element.getElementType();
 
-	if (!(elementType == IJavaElement.COMPILATION_UNIT || elementType == IJavaElement.PACKAGE_FRAGMENT)) {
+	if (elementType != IJavaElement.COMPILATION_UNIT && elementType != IJavaElement.PACKAGE_FRAGMENT) {
 		error(IJavaModelStatusConstants.INVALID_ELEMENT_TYPES, element);
 	}
 	if (elementType == IJavaElement.COMPILATION_UNIT) {

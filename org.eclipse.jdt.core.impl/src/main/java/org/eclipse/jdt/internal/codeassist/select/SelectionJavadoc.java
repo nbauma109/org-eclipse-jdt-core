@@ -112,7 +112,8 @@ public class SelectionJavadoc extends Javadoc {
 				binding = this.selectedNode.resolvedType;
 			}
 			throw new SelectionNodeFound(binding);
-		} else if (this.inheritDocSelected) {
+		}
+        if (this.inheritDocSelected) {
 			// no selection node when inheritDoc tag is selected
 			// But we need to detect it to enable code select on inheritDoc
 			ReferenceContext referenceContext = scope.referenceContext();

@@ -62,12 +62,10 @@ public class ManifestAnalyzer {
 		this.calledFilesNames = null;
 		for (int i = 0, max = chars.length; i < max;) {
 			currentChar = chars[i++];
-			if (currentChar == '\r') {
-				// skip \r, will consider \n later (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=251079 )
-				if (i < max) {
-					currentChar = chars[i++];
-				}
-			}
+			// skip \r, will consider \n later (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=251079 )
+            if (currentChar == '\r' && i < max) {
+            	currentChar = chars[i++];
+            }
 			switch (state) {
 				case START:
 					if (currentChar == CLASSPATH_HEADER_TOKEN[0]) {
@@ -87,12 +85,11 @@ public class ManifestAnalyzer {
 					}
 					break;
 				case PAST_CLASSPATH_HEADER:
-					if (currentChar == ' ') {
-						state = SKIPPING_WHITESPACE;
-						this.classpathSectionsCount++;
-					} else {
+					if (currentChar != ' ') {
 						return false;
 					}
+                    state = SKIPPING_WHITESPACE;
+                    this.classpathSectionsCount++;
 					break;
 				case SKIPPING_WHITESPACE:
 					if (currentChar == '\n') {
@@ -136,13 +133,13 @@ public class ManifestAnalyzer {
 						state = CONTINUING;
 						// >>>>>>>>>>> Add a break to not add the jar yet as it can continue on the next line
 						break;
-					} else if (currentChar == ' ') {
-						// appends token below
-						state = SKIPPING_WHITESPACE;
-					} else {
+					}
+                    if (currentChar != ' ') {
 						currentJarToken.append((char) currentChar);
 						break;
 					}
+                    // appends token below
+                    state = SKIPPING_WHITESPACE;
 					addCurrentTokenJarWhenNecessary(currentJarToken);
 					break;
 			}

@@ -162,11 +162,11 @@ private void rehash() {
 
 @Override
 public String toString() {
-	String s = ""; //$NON-NLS-1$
+	StringBuilder s = new StringBuilder();
 	Object object;
 	for (int i = 0, l = this.valueTable.length; i < l; i++)
 		if ((object = this.valueTable[i]) != null)
-			s += this.keyTable[i].toString() + " -> " + object + "\n"; 	//$NON-NLS-2$ //$NON-NLS-1$
-	return s;
+			s.append(this.keyTable[i].toString()).append(" -> ").append(object).append("\n"); 	//$NON-NLS-2$ //$NON-NLS-1$
+	return s.toString();
 }
 }

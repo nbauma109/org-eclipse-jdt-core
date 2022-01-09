@@ -298,7 +298,7 @@ public abstract class InternalJob extends PlatformObject implements Comparable {
 	 * Must be called from JobManager#changeState
 	 */
 	final void internalSetState(int i) {
-		flags = (flags & ~M_STATE) | i;
+		flags = flags & ~M_STATE | i;
 	}
 
 	/**

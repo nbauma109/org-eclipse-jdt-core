@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.Util;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -126,8 +125,8 @@ public List fetchLinkedJars(FileSystem.ClasspathSectionProblemReporter problemRe
 private NameEnvironmentAnswer findClassInternal(char[] typeName, String qualifiedPackageName, String qualifiedBinaryFileName, boolean asBinaryOnly) {
 	if (!isPackage(qualifiedPackageName, null)) return null; // most common case TODO(SHMOD): use module name from this.module?
 	String fileName = new String(typeName);
-	boolean binaryExists = ((this.mode & BINARY) != 0) && doesFileExist(fileName + SUFFIX_STRING_class, qualifiedPackageName);
-	boolean sourceExists = ((this.mode & SOURCE) != 0) && doesFileExist(fileName + SUFFIX_STRING_java, qualifiedPackageName);
+	boolean binaryExists = (this.mode & BINARY) != 0 && doesFileExist(fileName + SUFFIX_STRING_class, qualifiedPackageName);
+	boolean sourceExists = (this.mode & SOURCE) != 0 && doesFileExist(fileName + SUFFIX_STRING_java, qualifiedPackageName);
 	if (sourceExists && !asBinaryOnly) {
 		String fullSourcePath = this.path + qualifiedBinaryFileName.substring(0, qualifiedBinaryFileName.length() - 6)  + SUFFIX_STRING_java;
 		CompilationUnit unit = new CompilationUnit(null, fullSourcePath, this.encoding, this.destinationPath);
@@ -173,14 +172,14 @@ public NameEnvironmentAnswer findSecondaryInClass(char[] typeName, String qualif
 
 	String typeNameString = new String(typeName);
 	String moduleName = this.module != null ? String.valueOf(this.module.name()) : null; // TODO(SHMOD): test for ModuleBinding.ANY & UNNAMED
-	boolean prereqs = this.options != null && isPackage(qualifiedPackageName, moduleName) && ((this.mode & SOURCE) != 0) && doesFileExist(typeNameString + SUFFIX_STRING_java, qualifiedPackageName);
+	boolean prereqs = this.options != null && isPackage(qualifiedPackageName, moduleName) && (this.mode & SOURCE) != 0 && doesFileExist(typeNameString + SUFFIX_STRING_java, qualifiedPackageName);
 	return prereqs ? null : findSourceSecondaryType(typeNameString, qualifiedPackageName, qualifiedBinaryFileName); /* only secondary types */
 }
 
 @Override
 public boolean hasAnnotationFileFor(String qualifiedTypeName) {
 	int pos = qualifiedTypeName.lastIndexOf('/');
-	if (pos != -1 && (pos + 1 < qualifiedTypeName.length())) {
+	if (pos != -1 && pos + 1 < qualifiedTypeName.length()) {
 		String fileName = qualifiedTypeName.substring(pos + 1) + ExternalAnnotationProvider.ANNOTATION_FILE_SUFFIX;
 		return doesFileExist(fileName, qualifiedTypeName.substring(0, pos));
 	}
@@ -213,12 +212,10 @@ private Hashtable<String, String> getSecondaryTypes(String qualifiedPackageName)
 	File[] listFiles = dir.isDirectory() ? dir.listFiles() : null;
 	if (listFiles == null) return packageEntry;
 
-	for (int i = 0, l = listFiles.length; i < l; ++i) {
-		File f = listFiles[i];
+	for (File f : listFiles) {
 		if (f.isDirectory()) continue;
 		String s = f.getAbsolutePath();
-		if (s == null) continue;
-		if (!(s.endsWith(SUFFIX_STRING_java) || s.endsWith(SUFFIX_STRING_JAVA))) continue;
+		if (s == null || !s.endsWith(SUFFIX_STRING_java) && !s.endsWith(SUFFIX_STRING_JAVA)) continue;
 		CompilationUnit cu = new CompilationUnit(null, s, this.encoding, this.destinationPath);
 		CompilationResult compilationResult = new CompilationResult(s.toCharArray(), 1, 1, 10);
 		ProblemReporter problemReporter =
@@ -232,8 +229,7 @@ private Hashtable<String, String> getSecondaryTypes(String qualifiedPackageName)
 		CompilationUnitDeclaration unit = parser.parse(cu, compilationResult);
 		org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] types = unit != null ? unit.types : null;
 		if (types == null) continue;
-		for (int j = 0, k = types.length; j < k; j++) {
-			TypeDeclaration type = types[j];
+		for (TypeDeclaration type : types) {
 			char[] name = type.isSecondary() ? type.name : null;  // add only secondary types
 			if (name != null)
 				packageEntry.put(new String(name), s);
@@ -265,13 +261,10 @@ public char[][][] findTypeNames(String qualifiedPackageName, String moduleName) 
 	if (!dir.exists() || !dir.isDirectory()) {
 		return null;
 	}
-	String[] listFiles = dir.list(new FilenameFilter() {
-		@Override
-		public boolean accept(File directory1, String name) {
-			String fileName = name.toLowerCase();
-			return fileName.endsWith(".class") || fileName.endsWith(".java"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	});
+	String[] listFiles = dir.list((directory1, name) -> {
+    	String fileName = name.toLowerCase();
+    	return fileName.endsWith(".class") || fileName.endsWith(".java"); //$NON-NLS-1$ //$NON-NLS-2$
+    });
 	int length;
 	if (listFiles == null || (length = listFiles.length) == 0) {
 		return null;
@@ -328,7 +321,8 @@ public boolean hasCUDeclaringPackage(String qualifiedPackageName, Function<Compi
 		String pkgName = null;
 		if (entryLC.endsWith(SUFFIX_STRING_class)) {
 			return true;
-		} else if (entryLC.endsWith(SUFFIX_STRING_java)) {
+		}
+        if (entryLC.endsWith(SUFFIX_STRING_java)) {
 			CompilationUnit cu = new CompilationUnit(null, fullPath, this.encoding);
 			pkgName = pkgNameExtractor.apply(cu);
 		}

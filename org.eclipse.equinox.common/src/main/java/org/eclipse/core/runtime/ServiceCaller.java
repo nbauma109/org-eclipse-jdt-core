@@ -143,7 +143,7 @@ public class ServiceCaller<Service> {
 	static int getRank(ServiceReference<?> ref) {
 		Object rank = ref.getProperty(Constants.SERVICE_RANKING);
 		if (rank instanceof Integer) {
-			return ((Integer) rank).intValue();
+			return (Integer) rank;
 		}
 		return 0;
 	}
@@ -180,22 +180,16 @@ public class ServiceCaller<Service> {
 		@Override
 		public void serviceChanged(ServiceEvent e) {
 			if (e.getServiceReference().equals(ref)) {
-				if (e.getType() == ServiceEvent.UNREGISTERING) {
+				if (e.getType() == ServiceEvent.UNREGISTERING || filter != null && e.getType() == ServiceEvent.MODIFIED_ENDMATCH) {
 					unget();
-				} else if (filter != null && e.getType() == ServiceEvent.MODIFIED_ENDMATCH) {
-					unget();
-				} else if (e.getType() == ServiceEvent.MODIFIED) {
-					if (getRank(ref) != rank) {
-						// rank changed; untrack to force a new ReferenceAndService with new rank
-						unget();
-					}
-				}
-			} else if (e.getType() == ServiceEvent.MODIFIED) {
-				if (getRank(e.getServiceReference()) > rank) {
-					// Another service with higher rank is available
-					unget();
-				}
-			}
+				} else if (e.getType() == ServiceEvent.MODIFIED && getRank(ref) != rank) {
+                	// rank changed; untrack to force a new ReferenceAndService with new rank
+                	unget();
+                }
+			} else if (e.getType() == ServiceEvent.MODIFIED && getRank(e.getServiceReference()) > rank) {
+            	// Another service with higher rank is available
+            	unget();
+            }
 		}
 
 		// must hold monitor on ServiceCaller.this when calling track
@@ -284,7 +278,7 @@ public class ServiceCaller<Service> {
 	}
 
 	private boolean getCallUnget(Consumer<Service> consumer) {
-		return getCurrent().map((r) -> {
+		return getCurrent().map(r -> {
 			try {
 				consumer.accept(r.instance);
 				return Boolean.TRUE;
@@ -322,7 +316,7 @@ public class ServiceCaller<Service> {
 	 * @return true if the OSGi service was located and called successfully, false otherwise
 	 */
 	public boolean call(Consumer<Service> consumer) {
-		return trackCurrent().map((r) -> {
+		return trackCurrent().map(r -> {
 			consumer.accept(r.instance);
 			return Boolean.TRUE;
 		}).orElse(Boolean.FALSE);
@@ -333,7 +327,7 @@ public class ServiceCaller<Service> {
 	 * @return the currently available service or empty if the service cannot be found.
 	 */
 	public Optional<Service> current() {
-		return trackCurrent().map((r) -> r.instance);
+		return trackCurrent().map(r -> r.instance);
 	}
 
 	private Optional<ReferenceAndService> trackCurrent() {
@@ -341,7 +335,7 @@ public class ServiceCaller<Service> {
 		if (current != null) {
 			return Optional.of(current);
 		}
-		return getCurrent().flatMap((r) -> {
+		return getCurrent().flatMap(r -> {
 			synchronized (ServiceCaller.this) {
 				if (service != null) {
 					// another thread beat us
@@ -357,7 +351,7 @@ public class ServiceCaller<Service> {
 
 	private Optional<ReferenceAndService> getCurrent() {
 		BundleContext context = getContext();
-		return getServiceReference(context).map((r) -> {
+		return getServiceReference(context).map(r -> {
 			Service current = context.getService(r);
 			return current == null ? null : new ReferenceAndService(context, r, current);
 		});

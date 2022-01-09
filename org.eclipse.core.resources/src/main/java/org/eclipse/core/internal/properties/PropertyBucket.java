@@ -30,7 +30,7 @@ public class PropertyBucket extends Bucket {
 			int qualifierComparison = o1[0].compareTo(o2[0]);
 			return qualifierComparison != 0 ? qualifierComparison : o1[1].compareTo(o2[1]);
 		};
-		private static final String[][] EMPTY_DATA = new String[0][];
+		private static final String[][] EMPTY_DATA = {};
 		/**
 		 * value is an array of qualified-key value pairs String[][] of
 		 * {{propertyKey.qualifier, propertyKey.localName, propertyValue}}
@@ -45,7 +45,7 @@ public class PropertyBucket extends Bucket {
 		static String[][] delete(String[][] existing, QualifiedName propertyName) {
 			// a size-1 array is a special case
 			if (existing.length == 1)
-				return (existing[0][0].equals(propertyName.getQualifier()) && existing[0][1].equals(propertyName.getLocalName())) ? null : existing;
+				return existing[0][0].equals(propertyName.getQualifier()) && existing[0][1].equals(propertyName.getLocalName()) ? null : existing;
 			// find the guy to delete
 			int deletePosition = search(existing, propertyName);
 			if (deletePosition < 0)

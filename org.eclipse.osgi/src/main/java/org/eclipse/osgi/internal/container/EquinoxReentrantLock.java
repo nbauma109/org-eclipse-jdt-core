@@ -22,7 +22,7 @@ public final class EquinoxReentrantLock extends ReentrantLock {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	final public Thread getOwner() {
+	public Thread getOwner() {
 		return super.getOwner();
 	}
 }

@@ -36,9 +36,9 @@ import org.eclipse.jdt.core.util.ISourceAttribute;
 import org.eclipse.jdt.internal.compiler.util.Util;
 
 public class ClassFileReader extends ClassFileStruct implements IClassFileReader {
-	private static final IFieldInfo[] NO_FIELD_INFOS = new IFieldInfo[0];
+	private static final IFieldInfo[] NO_FIELD_INFOS = {};
 	private static final char[][] NO_INTERFACES_NAMES = CharOperation.NO_CHAR_CHAR;
-	private static final IMethodInfo[] NO_METHOD_INFOS = new IMethodInfo[0];
+	private static final IMethodInfo[] NO_METHOD_INFOS = {};
 	private int accessFlags;
 	private IClassFileAttribute[] attributes;
 	private int attributesCount;
@@ -214,7 +214,7 @@ public class ClassFileReader extends ClassFileStruct implements IClassFileReader
 						readOffset += 2;
 					}
 				} else {
-					readOffset += (2 * this.interfacesCount);
+					readOffset += 2 * this.interfacesCount;
 				}
 			}
 			// Read the this.fields, use exception handlers to catch bad format
@@ -237,7 +237,7 @@ public class ClassFileReader extends ClassFileStruct implements IClassFileReader
 						if (attributeCountForField != 0) {
 							for (int j = 0; j < attributeCountForField; j++) {
 								int attributeLength = (int) u4At(classFileBytes, 2, readOffset);
-								readOffset += (6 + attributeLength);
+								readOffset += 6 + attributeLength;
 							}
 						}
 					}
@@ -263,7 +263,7 @@ public class ClassFileReader extends ClassFileStruct implements IClassFileReader
 						if (attributeCountForMethod != 0) {
 							for (int j = 0; j < attributeCountForMethod; j++) {
 								int attributeLength = (int) u4At(classFileBytes, 2, readOffset);
-								readOffset += (6 + attributeLength);
+								readOffset += 6 + attributeLength;
 							}
 						}
 					}
@@ -323,11 +323,11 @@ public class ClassFileReader extends ClassFileStruct implements IClassFileReader
 							this.attributes[attributesIndex++] = new ClassFileAttribute(classFileBytes, this.constantPool, readOffset);
 						}
 						long tmp = u4At(classFileBytes, readOffset + 2, 0);
-						readOffset += (6 + tmp);
+						readOffset += 6 + tmp;
 					}
 				} else {
 					for (int i = 0; i < this.attributesCount; i++) {
-						readOffset += (6 + u4At(classFileBytes, readOffset + 2, 0));
+						readOffset += 6 + u4At(classFileBytes, readOffset + 2, 0);
 					}
 				}
 			}
@@ -514,7 +514,7 @@ public class ClassFileReader extends ClassFileStruct implements IClassFileReader
 	 */
 	@Override
 	public boolean isClass() {
-		return !(isInterface() || isModule());
+		return !isInterface() && !isModule();
 	}
 
 	/**

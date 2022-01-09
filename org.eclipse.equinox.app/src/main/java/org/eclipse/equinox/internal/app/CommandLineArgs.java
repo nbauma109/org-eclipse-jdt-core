@@ -36,16 +36,14 @@ public class CommandLineArgs {
 
 	// Command line args as seen by the Eclipse runtime. allArgs does NOT
 	// include args consumed by the underlying framework (e.g., OSGi)
-	private static String[] appArgs = new String[0];
-	private static String[] allArgs = new String[0];
+	private static String[] appArgs = {};
+	private static String[] allArgs = {};
 	private static String product;
 	private static String application;
 
 	static String[] processCommandLine(EnvironmentInfo envInfo) {
 		String[] args = envInfo.getNonFrameworkArgs();
-		if (args == null)
-			return args;
-		if (args.length == 0)
+		if (args == null || args.length == 0)
 			return args;
 		allArgs = args;
 		int[] configArgs = new int[args.length];
@@ -83,7 +81,7 @@ public class CommandLineArgs {
 			if (found) {
 				configArgs[configArgIndex++] = i;
 				// check if the obsolete arg had a second param
-				if (i < (args.length - 1) && !args[i + 1].startsWith("-")) //$NON-NLS-1$
+				if (i < args.length - 1 && !args[i + 1].startsWith("-")) //$NON-NLS-1$
 					configArgs[configArgIndex++] = ++i;
 				continue;
 			}

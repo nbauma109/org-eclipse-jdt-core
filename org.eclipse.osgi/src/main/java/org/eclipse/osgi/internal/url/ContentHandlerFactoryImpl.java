@@ -88,7 +88,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 				try {
 					clazz = URLStreamHandlerFactoryImpl.secureAction.loadSystemClass(name.toString());
 					if (clazz != null) {
-						return (null); //this class exists, it is a built in handler, let the JVM handle it
+						return null; //this class exists, it is a built in handler, let the JVM handle it
 					}
 				} catch (ClassNotFoundException ex) {
 					//keep looking
@@ -106,7 +106,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 		//first check to see if the handler is in the cache
 		ContentHandlerProxy proxy = proxies.get(contentType);
 		if (proxy != null) {
-			return (proxy);
+			return proxy;
 		}
 		ServiceReference<ContentHandler>[] serviceReferences = contentHandlerTracker.getServiceReferences();
 		if (serviceReferences != null) {
@@ -124,7 +124,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 					if (typename.equals(contentType)) {
 						proxy = new ContentHandlerProxy(contentType, serviceReference, context);
 						proxies.put(contentType, proxy);
-						return (proxy);
+						return proxy;
 					}
 				}
 			}
@@ -139,7 +139,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 		//We need to do this because if we return null, we won't get called again for this content type.
 		proxy = new ContentHandlerProxy(contentType, null, context);
 		proxies.put(contentType, proxy);
-		return (proxy);
+		return proxy;
 	}
 
 	public synchronized ContentHandler findAuthorizedContentHandler(String contentType) {
@@ -152,7 +152,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 
 		try {
 			Method createInternalContentHandlerMethod = factory.getClass().getMethod("createInternalContentHandler", String.class); //$NON-NLS-1$
-			return (ContentHandler) createInternalContentHandlerMethod.invoke(factory, new Object[] {contentType});
+			return (ContentHandler) createInternalContentHandlerMethod.invoke(factory, contentType);
 		} catch (Exception e) {
 			container.getLogServices().log(ContentHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, "findAuthorizedContentHandler-loop", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);

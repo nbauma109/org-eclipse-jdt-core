@@ -68,9 +68,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 
 	checkUnused: {
 		MethodBinding constructorBinding;
-		if ((constructorBinding = this.binding) == null) break checkUnused;
-		if ((this.bits & ASTNode.IsDefaultConstructor) != 0) break checkUnused;
-		if (constructorBinding.isUsed()) break checkUnused;
+		if ((constructorBinding = this.binding) == null || (this.bits & ASTNode.IsDefaultConstructor) != 0 || constructorBinding.isUsed()) break checkUnused;
 		if (constructorBinding.isPrivate()) {
 			if ((this.binding.declaringClass.tagBits & TagBits.HasNonPrivateConstructor) == 0)
 				break checkUnused; // tolerate as known pattern to block instantiation
@@ -92,9 +90,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 				break checkUnused;
 			// see if there is a no-arg super constructor
 			MethodBinding methodBinding = superClass.getExactConstructor(Binding.NO_PARAMETERS);
-			if (methodBinding == null)
-				break checkUnused;
-			if (!methodBinding.canBeSeenBy(SuperReference.implicitSuperConstructorCall(), this.scope))
+			if (methodBinding == null || !methodBinding.canBeSeenBy(SuperReference.implicitSuperConstructorCall(), this.scope))
 				break checkUnused;
 			ReferenceBinding declaringClass = constructorBinding.declaringClass;
 			if (constructorBinding.isPublic() && constructorBinding.parameters.length == 0 &&
@@ -115,8 +111,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=385780
 	if (this.typeParameters != null  &&
 			!this.scope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
-		for (int i = 0, length = this.typeParameters.length; i < length; ++i) {
-			TypeParameter typeParameter = this.typeParameters[i];
+		for (TypeParameter typeParameter : this.typeParameters) {
 			if ((typeParameter.binding.modifiers & ExtraCompilerModifiers.AccLocallyUsed) == 0) {
 				this.scope.problemReporter().unusedTypeParameter(typeParameter);
 			}
@@ -158,9 +153,9 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 			// set since they are supposed to be set inside other local constructor
 			if (this.constructorCall.accessMode == ExplicitConstructorCall.This) {
 				FieldBinding[] fields = this.binding.declaringClass.fields();
-				for (int i = 0, count = fields.length; i < count; i++) {
+				for (FieldBinding field2 : fields) {
 					FieldBinding field;
-					if (!(field = fields[i]).isStatic()) {
+					if (!(field = field2).isStatic()) {
 						flowInfo.markAsDefinitelyAssigned(field);
 					}
 				}
@@ -176,8 +171,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 			CompilerOptions compilerOptions = this.scope.compilerOptions();
 			boolean enableSyntacticNullAnalysisForFields = compilerOptions.enableSyntacticNullAnalysisForFields;
 			int complaintLevel = (nonStaticFieldInfoReachMode & FlowInfo.UNREACHABLE) == 0 ? Statement.NOT_COMPLAINED : Statement.COMPLAINED_FAKE_REACHABLE;
-			for (int i = 0, count = this.statements.length; i < count; i++) {
-				Statement stat = this.statements[i];
+			for (Statement stat : this.statements) {
 				if ((complaintLevel = stat.complainIfUnreachable(flowInfo, this.scope, complaintLevel, true)) < Statement.COMPLAINED_UNREACHABLE) {
 					flowInfo = stat.analyseCode(this.scope, constructorContext, flowInfo);
 				}
@@ -200,8 +194,8 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 		// flowInfo.setReachMode(initialReachMode);
 
 		// check missing blank final field initializations (plus @NonNull)
-		if ((this.constructorCall != null)
-			&& (this.constructorCall.accessMode != ExplicitConstructorCall.This)) {
+		if (this.constructorCall != null
+			&& this.constructorCall.accessMode != ExplicitConstructorCall.This) {
 			flowInfo = flowInfo.mergedWith(constructorContext.initsOnReturn);
 			FieldBinding[] fields = this.binding.declaringClass.fields();
 			checkAndGenerateFieldAssignment(initializerFlowContext, flowInfo, fields);
@@ -217,13 +211,12 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 	}
 }
 protected void doFieldReachAnalysis(FlowInfo flowInfo, FieldBinding[] fields) {
-	for (int i = 0, count = fields.length; i < count; i++) {
-		FieldBinding field = fields[i];
+	for (FieldBinding field : fields) {
 		if (!field.isStatic() && !flowInfo.isDefinitelyAssigned(field)) {
 			if (field.isFinal()) {
 				this.scope.problemReporter().uninitializedBlankFinalField(
 						field,
-						((this.bits & ASTNode.IsDefaultConstructor) != 0)
+						(this.bits & ASTNode.IsDefaultConstructor) != 0
 							? this.scope.referenceType().declarationOf(field.original())
 							: this);
 			} else if (field.isNonNull() || field.type.isFreeTypeVariable()) {
@@ -231,7 +224,7 @@ protected void doFieldReachAnalysis(FlowInfo flowInfo, FieldBinding[] fields) {
 				if (!isValueProvidedUsingAnnotation(fieldDecl))
 					this.scope.problemReporter().uninitializedNonNullField(
 						field,
-						((this.bits & ASTNode.IsDefaultConstructor) != 0)
+						(this.bits & ASTNode.IsDefaultConstructor) != 0
 							? fieldDecl
 							: this);
 			}
@@ -240,7 +233,6 @@ protected void doFieldReachAnalysis(FlowInfo flowInfo, FieldBinding[] fields) {
 }
 
 protected void checkAndGenerateFieldAssignment(FlowContext flowContext, FlowInfo flowInfo, FieldBinding[] fields) {
-	return;
 }
 boolean isValueProvidedUsingAnnotation(FieldDeclaration fieldDecl) {
 	// a member field annotated with @Inject is considered to be initialized by the injector
@@ -250,22 +242,23 @@ boolean isValueProvidedUsingAnnotation(FieldDeclaration fieldDecl) {
 			Annotation annotation = fieldDecl.annotations[i];
 			if (annotation.resolvedType.id == TypeIds.T_JavaxInjectInject) {
 				return true; // no concept of "optional"
-			} else if (annotation.resolvedType.id == TypeIds.T_ComGoogleInjectInject) {
+			}
+            if (annotation.resolvedType.id == TypeIds.T_ComGoogleInjectInject) {
 				MemberValuePair[] memberValuePairs = annotation.memberValuePairs();
 				if (memberValuePairs == Annotation.NoValuePairs)
 					return true;
-				for (int j = 0; j < memberValuePairs.length; j++) {
+				for (MemberValuePair memberValuePair : memberValuePairs) {
 					// if "optional=false" is specified, don't rely on initialization by the injector:
-					if (CharOperation.equals(memberValuePairs[j].name, TypeConstants.OPTIONAL))
-						return memberValuePairs[j].value instanceof FalseLiteral;
+					if (CharOperation.equals(memberValuePair.name, TypeConstants.OPTIONAL))
+						return memberValuePair.value instanceof FalseLiteral;
 				}
 			} else if (annotation.resolvedType.id == TypeIds.T_OrgSpringframeworkBeansFactoryAnnotationAutowired) {
 				MemberValuePair[] memberValuePairs = annotation.memberValuePairs();
 				if (memberValuePairs == Annotation.NoValuePairs)
 					return true;
-				for (int j = 0; j < memberValuePairs.length; j++) {
-					if (CharOperation.equals(memberValuePairs[j].name, TypeConstants.REQUIRED))
-						return memberValuePairs[j].value instanceof TrueLiteral;
+				for (MemberValuePair memberValuePair : memberValuePairs) {
+					if (CharOperation.equals(memberValuePair.name, TypeConstants.REQUIRED))
+						return memberValuePair.value instanceof TrueLiteral;
 				}
 			}
 		}
@@ -352,9 +345,9 @@ public void generateSyntheticFieldInitializationsIfNecessary(MethodScope methodS
 
 	SyntheticArgumentBinding[] syntheticArgs = nestedType.syntheticEnclosingInstances();
 	if (syntheticArgs != null) {
-		for (int i = 0, max = syntheticArgs.length; i < max; i++) {
+		for (SyntheticArgumentBinding syntheticArg2 : syntheticArgs) {
 			SyntheticArgumentBinding syntheticArg;
-			if ((syntheticArg = syntheticArgs[i]).matchingField != null) {
+			if ((syntheticArg = syntheticArg2).matchingField != null) {
 				codeStream.aload_0();
 				codeStream.load(syntheticArg);
 				codeStream.fieldAccess(Opcodes.OPC_putfield, syntheticArg.matchingField, null /* default declaringClass */);
@@ -363,9 +356,9 @@ public void generateSyntheticFieldInitializationsIfNecessary(MethodScope methodS
 	}
 	syntheticArgs = nestedType.syntheticOuterLocalVariables();
 	if (syntheticArgs != null) {
-		for (int i = 0, max = syntheticArgs.length; i < max; i++) {
+		for (SyntheticArgumentBinding syntheticArg2 : syntheticArgs) {
 			SyntheticArgumentBinding syntheticArg;
-			if ((syntheticArg = syntheticArgs[i]).matchingField != null) {
+			if ((syntheticArg = syntheticArg2).matchingField != null) {
 				codeStream.aload_0();
 				codeStream.load(syntheticArg);
 				codeStream.fieldAccess(Opcodes.OPC_putfield, syntheticArg.matchingField, null /* default declaringClass */);
@@ -378,7 +371,7 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 	classFile.generateMethodInfoHeader(this.binding);
 	int methodAttributeOffset = classFile.contentsOffset;
 	int attributeNumber = classFile.generateMethodInfoAttributes(this.binding);
-	if ((!this.binding.isNative()) && (!this.binding.isAbstract())) {
+	if (!this.binding.isNative() && !this.binding.isAbstract()) {
 
 		TypeDeclaration declaringType = classScope.referenceContext;
 		int codeAttributeOffset = classFile.contentsOffset;
@@ -404,10 +397,10 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 		}
 
 		if (this.arguments != null) {
-			for (int i = 0, max = this.arguments.length; i < max; i++) {
+			for (Argument argument : this.arguments) {
 				// arguments initialization for local variable debug attributes
 				LocalVariableBinding argBinding;
-				codeStream.addVisibleLocalVariable(argBinding = this.arguments[i].binding);
+				codeStream.addVisibleLocalVariable(argBinding = argument.binding);
 				argBinding.recordInitializationStartPC(0);
 				switch(argBinding.type.id) {
 					case TypeIds.T_long :
@@ -444,9 +437,9 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 			}
 			// generate user field initialization
 			if (declaringType.fields != null) {
-				for (int i = 0, max = declaringType.fields.length; i < max; i++) {
+				for (FieldDeclaration field : declaringType.fields) {
 					FieldDeclaration fieldDecl;
-					if (!(fieldDecl = declaringType.fields[i]).isStatic()) {
+					if (!(fieldDecl = field).isStatic()) {
 						fieldDecl.generateCode(initializerScope, codeStream);
 					}
 				}
@@ -454,8 +447,8 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 		}
 		// generate statements
 		if (this.statements != null) {
-			for (int i = 0, max = this.statements.length; i < max; i++) {
-				this.statements[i].generateCode(this.scope, codeStream);
+			for (Statement statement : this.statements) {
+				statement.generateCode(this.scope, codeStream);
 			}
 		}
 		// if a problem got reported during code gen, then trigger problem method creation
@@ -474,7 +467,7 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 			throw new AbortMethod(this.scope.referenceCompilationUnit().compilationResult, null);
 		}
 		attributeNumber++;
-		if ((codeStream instanceof StackMapFrameCodeStream)
+		if (codeStream instanceof StackMapFrameCodeStream
 				&& needFieldInitializations
 				&& declaringType.fields != null) {
 			((StackMapFrameCodeStream) codeStream).resetSecretLocals();
@@ -486,9 +479,7 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 @Override
 protected AnnotationBinding[][] getPropagatedRecordComponentAnnotations() {
 
-	if ((this.bits & (ASTNode.IsCanonicalConstructor | ASTNode.IsImplicit)) == 0)
-		return null;
-	if (this.binding == null)
+	if ((this.bits & (ASTNode.IsCanonicalConstructor | ASTNode.IsImplicit)) == 0 || this.binding == null)
 		return null;
 	AnnotationBinding[][] paramAnnotations = null;
 	ReferenceBinding declaringClass = this.binding.declaringClass;
@@ -523,8 +514,7 @@ public void getAllAnnotationContexts(int targetType, List allAnnotationContexts)
 	TypeReference fakeReturnType = new SingleTypeReference(this.selector, 0);
 	fakeReturnType.resolvedType = this.binding.declaringClass;
 	AnnotationCollector collector = new AnnotationCollector(fakeReturnType, targetType, allAnnotationContexts);
-	for (int i = 0, max = this.annotations.length; i < max; i++) {
-		Annotation annotation = this.annotations[i];
+	for (Annotation annotation : this.annotations) {
 		annotation.traverse(collector, (BlockScope) null);
 	}
 }
@@ -564,7 +554,7 @@ public boolean isRecursive(ArrayList visited) {
 	}
 
 	ConstructorDeclaration targetConstructor =
-		((ConstructorDeclaration)this.scope.referenceType().declarationOf(this.constructorCall.binding.original()));
+		(ConstructorDeclaration)this.scope.referenceType().declarationOf(this.constructorCall.binding.original());
 	if (targetConstructor == null) return false; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=358762
 	if (this == targetConstructor) return true; // direct case
 
@@ -582,7 +572,7 @@ public boolean isRecursive(ArrayList visited) {
 @Override
 public void parseStatements(Parser parser, CompilationUnitDeclaration unit) {
 	//fill up the constructor body with its statements
-	if (((this.bits & ASTNode.IsDefaultConstructor) != 0) && this.constructorCall == null){
+	if ((this.bits & ASTNode.IsDefaultConstructor) != 0 && this.constructorCall == null){
 		this.constructorCall = SuperReference.implicitSuperConstructorCall();
 		this.constructorCall.sourceStart = this.sourceStart;
 		this.constructorCall.sourceEnd = this.sourceEnd;
@@ -600,9 +590,9 @@ public StringBuffer printBody(int indent, StringBuffer output) {
 		this.constructorCall.printStatement(indent, output);
 	}
 	if (this.statements != null) {
-		for (int i = 0; i < this.statements.length; i++) {
+		for (Statement statement : this.statements) {
 			output.append('\n');
-			this.statements[i].printStatement(indent, output);
+			statement.printStatement(indent, output);
 		}
 	}
 	output.append('\n');
@@ -626,7 +616,7 @@ public void resolveJavadoc() {
 				if (classScope != null) {
 					javadocVisibility = Util.computeOuterMostVisibility(classScope.referenceType(), javadocVisibility);
 				}
-				int javadocModifiers = (this.binding.modifiers & ~ExtraCompilerModifiers.AccVisibilityMASK) | javadocVisibility;
+				int javadocModifiers = this.binding.modifiers & ~ExtraCompilerModifiers.AccVisibilityMASK | javadocVisibility;
 				reporter.javadocMissing(this.sourceStart, this.sourceEnd, severity, javadocModifiers);
 			}
 		}
@@ -658,7 +648,7 @@ public void resolveStatements() {
 			this.constructorCall = null;
 		} else if (sourceType.isRecord() &&
 				!(this instanceof CompactConstructorDeclaration) && // compact constr should be marked as canonical?
-				(this.binding != null && !this.binding.isCanonicalConstructor()) &&
+				this.binding != null && !this.binding.isCanonicalConstructor() &&
 				this.constructorCall.accessMode != ExplicitConstructorCall.This) {
 			this.scope.problemReporter().recordMissingExplicitConstructorCallInNonCanonicalConstructor(this);
 			this.constructorCall = null;

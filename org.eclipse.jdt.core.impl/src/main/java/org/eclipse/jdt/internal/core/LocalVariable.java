@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 
 public class LocalVariable extends SourceRefElement implements ILocalVariable {
 
-	public static final ILocalVariable[] NO_LOCAL_VARIABLES = new ILocalVariable[0];
+	public static final ILocalVariable[] NO_LOCAL_VARIABLES = {};
 
 	String name;
 	public int declarationSourceStart, declarationSourceEnd;
@@ -134,8 +134,7 @@ public class LocalVariable extends SourceRefElement implements ILocalVariable {
 
 	@Override
 	public IAnnotation getAnnotation(String annotationName) {
-		for (int i = 0, length = this.annotations.length; i < length; i++) {
-			IAnnotation annotation = this.annotations[i];
+		for (IAnnotation annotation : this.annotations) {
 			if (annotation.getElementName().equals(annotationName))
 				return annotation;
 		}
@@ -211,22 +210,27 @@ public class LocalVariable extends SourceRefElement implements ILocalVariable {
 	private Object getAnnotationMemberValue(MemberValuePair memberValuePair, Expression expression, JavaElement parentElement) {
 		if (expression instanceof NullLiteral) {
 			return null;
-		} else if (expression instanceof Literal) {
+		}
+        if (expression instanceof Literal) {
 			((Literal) expression).computeConstant();
 			return Util.getAnnotationMemberValue(memberValuePair, expression.constant);
-		} else if (expression instanceof org.eclipse.jdt.internal.compiler.ast.Annotation) {
+		}
+        if (expression instanceof org.eclipse.jdt.internal.compiler.ast.Annotation) {
 			memberValuePair.valueKind = IMemberValuePair.K_ANNOTATION;
 			return getAnnotation((org.eclipse.jdt.internal.compiler.ast.Annotation) expression, parentElement);
-		} else if (expression instanceof ClassLiteralAccess) {
+		}
+        if (expression instanceof ClassLiteralAccess) {
 			ClassLiteralAccess classLiteral = (ClassLiteralAccess) expression;
 			char[] typeName = CharOperation.concatWith(classLiteral.type.getTypeName(), '.');
 			memberValuePair.valueKind = IMemberValuePair.K_CLASS;
 			return new String(typeName);
-		} else if (expression instanceof QualifiedNameReference) {
+		}
+        if (expression instanceof QualifiedNameReference) {
 			char[] qualifiedName = CharOperation.concatWith(((QualifiedNameReference) expression).tokens, '.');
 			memberValuePair.valueKind = IMemberValuePair.K_QUALIFIED_NAME;
 			return new String(qualifiedName);
-		} else if (expression instanceof SingleNameReference) {
+		}
+        if (expression instanceof SingleNameReference) {
 			char[] simpleName = ((SingleNameReference) expression).token;
 			if (simpleName == RecoveryScanner.FAKE_IDENTIFIER) {
 				memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
@@ -234,7 +238,8 @@ public class LocalVariable extends SourceRefElement implements ILocalVariable {
 			}
 			memberValuePair.valueKind = IMemberValuePair.K_SIMPLE_NAME;
 			return new String(simpleName);
-		} else if (expression instanceof ArrayInitializer) {
+		}
+        if (expression instanceof ArrayInitializer) {
 			memberValuePair.valueKind = -1; // modified below by the first call to getMemberValue(...)
 			Expression[] expressions = ((ArrayInitializer) expression).expressions;
 			int length = expressions == null ? 0 : expressions.length;
@@ -251,21 +256,17 @@ public class LocalVariable extends SourceRefElement implements ILocalVariable {
 			if (memberValuePair.valueKind == -1)
 				memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
 			return values;
-		} else if (expression instanceof UnaryExpression) {			//to deal with negative numerals (see bug - 248312)
-			UnaryExpression unaryExpression = (UnaryExpression) expression;
-			if ((unaryExpression.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT == OperatorIds.MINUS) {
-				if (unaryExpression.expression instanceof Literal) {
-					Literal subExpression = (Literal) unaryExpression.expression;
-					subExpression.computeConstant();
-					return Util.getNegativeAnnotationMemberValue(memberValuePair, subExpression.constant);
-				}
-			}
-			memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
-			return null;
-		} else {
-			memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
-			return null;
 		}
+        if (expression instanceof UnaryExpression) {			//to deal with negative numerals (see bug - 248312)
+        	UnaryExpression unaryExpression = (UnaryExpression) expression;
+        	if ((unaryExpression.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT == OperatorIds.MINUS && unaryExpression.expression instanceof Literal) {
+            	Literal subExpression = (Literal) unaryExpression.expression;
+            	subExpression.computeConstant();
+            	return Util.getNegativeAnnotationMemberValue(memberValuePair, subExpression.constant);
+            }
+        }
+        memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
+        return null;
 	}
 
 	@Override

@@ -83,12 +83,7 @@ public class CompilationResult {
 	private boolean hasMandatoryErrors;
 
 	private static final int[] EMPTY_LINE_ENDS = Util.EMPTY_INT_ARRAY;
-	private static final Comparator PROBLEM_COMPARATOR = new Comparator() {
-		@Override
-		public int compare(Object o1, Object o2) {
-			return ((CategorizedProblem) o1).getSourceStart() - ((CategorizedProblem) o2).getSourceStart();
-		}
-	};
+	private static final Comparator PROBLEM_COMPARATOR = (o1, o2) -> ((CategorizedProblem) o1).getSourceStart() - ((CategorizedProblem) o2).getSourceStart();
 
 public CompilationResult(char[] fileName, int unitIndex, int totalUnitsKnown, int maxProblemPerUnit){
 	this.fileName = fileName;
@@ -163,24 +158,17 @@ public CategorizedProblem[] getAllProblems() {
 		// select the next problem
 		CategorizedProblem currentProblem = null;
 		if (nextProblem != null) {
-			if (nextTask != null) {
-				if (nextProblem.getSourceStart() < nextTask.getSourceStart()) {
-					currentProblem = nextProblem;
-					problemIndex++;
-				} else {
-					currentProblem = nextTask;
-					taskIndex++;
-				}
-			} else {
-				currentProblem = nextProblem;
-				problemIndex++;
-			}
-		} else {
-			if (nextTask != null) {
-				currentProblem = nextTask;
-				taskIndex++;
-			}
-		}
+			if (nextTask == null || nextProblem.getSourceStart() < nextTask.getSourceStart()) {
+            	currentProblem = nextProblem;
+            	problemIndex++;
+            } else {
+            	currentProblem = nextTask;
+            	taskIndex++;
+            }
+		} else if (nextTask != null) {
+        	currentProblem = nextTask;
+        	taskIndex++;
+        }
 		allProblems[allProblemIndex++] = currentProblem;
 	}
 	return allProblems;
@@ -241,13 +229,13 @@ public CategorizedProblem[] getProblems() {
 	// Re-adjust the size of the problems if necessary.
 	if (this.problems != null) {
 		if (this.problemCount != this.problems.length) {
-			System.arraycopy(this.problems, 0, (this.problems = new CategorizedProblem[this.problemCount]), 0, this.problemCount);
+			System.arraycopy(this.problems, 0, this.problems = new CategorizedProblem[this.problemCount], 0, this.problemCount);
 		}
 
 		if (this.maxProblemPerUnit > 0 && this.problemCount > this.maxProblemPerUnit){
 			quickPrioritize(this.problems, 0, this.problemCount - 1);
 			this.problemCount = this.maxProblemPerUnit;
-			System.arraycopy(this.problems, 0, (this.problems = new CategorizedProblem[this.problemCount]), 0, this.problemCount);
+			System.arraycopy(this.problems, 0, this.problems = new CategorizedProblem[this.problemCount], 0, this.problemCount);
 		}
 
 		// Stable sort problems per source positions.
@@ -266,12 +254,8 @@ public CategorizedProblem[] getCUProblems() {
 		int keep = 0;
 		for (int i=0; i< this.problemCount; i++) {
 			CategorizedProblem problem = this.problems[i];
-			if (problem.getID() != IProblem.MissingNonNullByDefaultAnnotationOnPackage) {
+			if (problem.getID() != IProblem.MissingNonNullByDefaultAnnotationOnPackage || this.compilationUnit != null && CharOperation.equals(this.compilationUnit.getMainTypeName(), TypeConstants.PACKAGE_INFO_NAME)) {
 				filteredProblems[keep++] = problem;
-			} else if (this.compilationUnit != null) {
-				if (CharOperation.equals(this.compilationUnit.getMainTypeName(), TypeConstants.PACKAGE_INFO_NAME)) {
-					filteredProblems[keep++] = problem;
-				}
 			}
 		}
 		if (keep < this.problemCount) {
@@ -282,7 +266,7 @@ public CategorizedProblem[] getCUProblems() {
 		if (this.maxProblemPerUnit > 0 && this.problemCount > this.maxProblemPerUnit){
 			quickPrioritize(this.problems, 0, this.problemCount - 1);
 			this.problemCount = this.maxProblemPerUnit;
-			System.arraycopy(this.problems, 0, (this.problems = new CategorizedProblem[this.problemCount]), 0, this.problemCount);
+			System.arraycopy(this.problems, 0, this.problems = new CategorizedProblem[this.problemCount], 0, this.problemCount);
 		}
 
 		// Stable sort problems per source positions.
@@ -305,7 +289,7 @@ public CategorizedProblem[] getTasks() {
 	if (this.tasks != null) {
 
 		if (this.taskCount != this.tasks.length) {
-			System.arraycopy(this.tasks, 0, (this.tasks = new CategorizedProblem[this.taskCount]), 0, this.taskCount);
+			System.arraycopy(this.tasks, 0, this.tasks = new CategorizedProblem[this.taskCount], 0, this.taskCount);
 		}
 		// Stable sort problems per source positions.
 		Arrays.sort(this.tasks, 0, this.tasks.length, CompilationResult.PROBLEM_COMPARATOR);
@@ -373,7 +357,6 @@ public void recordPackageName(char[][] packName) {
 
 public void record(CategorizedProblem newProblem, ReferenceContext referenceContext) {
 	record(newProblem, referenceContext, true);
-	return;
 }
 
 public void record(CategorizedProblem newProblem, ReferenceContext referenceContext, boolean mandatoryError) {
@@ -385,7 +368,7 @@ public void record(CategorizedProblem newProblem, ReferenceContext referenceCont
 	if (this.problemCount == 0) {
 		this.problems = new CategorizedProblem[5];
 	} else if (this.problemCount == this.problems.length) {
-		System.arraycopy(this.problems, 0, (this.problems = new CategorizedProblem[this.problemCount * 2]), 0, this.problemCount);
+		System.arraycopy(this.problems, 0, this.problems = new CategorizedProblem[this.problemCount * 2], 0, this.problemCount);
 	}
 	this.problems[this.problemCount++] = newProblem;
 	if (referenceContext != null){
@@ -425,7 +408,7 @@ private void recordTask(CategorizedProblem newProblem) {
 	if (this.taskCount == 0) {
 		this.tasks = new CategorizedProblem[5];
 	} else if (this.taskCount == this.tasks.length) {
-		System.arraycopy(this.tasks, 0, (this.tasks = new CategorizedProblem[this.taskCount * 2]), 0, this.taskCount);
+		System.arraycopy(this.tasks, 0, this.tasks = new CategorizedProblem[this.taskCount * 2], 0, this.taskCount);
 	}
 	this.tasks[this.taskCount++] = newProblem;
 }

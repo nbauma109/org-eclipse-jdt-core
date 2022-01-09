@@ -93,10 +93,7 @@ public class ModuleRequirement implements BundleRequirement {
 	private static final String PACKAGENAME_FILTER_COMPONENT = PackageNamespace.PACKAGE_NAMESPACE + "="; //$NON-NLS-1$
 
 	DynamicModuleRequirement getDynamicPackageRequirement(ModuleRevision host, String dynamicPkgName) {
-		if (!PackageNamespace.PACKAGE_NAMESPACE.equals(namespace)) {
-			return null;
-		}
-		if (!PackageNamespace.RESOLUTION_DYNAMIC.equals(directives.get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+		if (!PackageNamespace.PACKAGE_NAMESPACE.equals(namespace) || !PackageNamespace.RESOLUTION_DYNAMIC.equals(directives.get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
 			// not dynamic
 			return null;
 		}

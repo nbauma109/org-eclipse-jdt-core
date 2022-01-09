@@ -145,21 +145,21 @@ public class EvaluationResult {
 	/** The evaluation result representing the value NOT_LOADED */
 	public static final EvaluationResult NOT_LOADED= new EvaluationResult(NOT_LOADED_VALUE);
 
-	private static final EvaluationResult[][] AND= new EvaluationResult[][] {
+	private static final EvaluationResult[][] AND= {
 						// FALSE	//TRUE		//NOT_LOADED
 		/* FALSE   */ { FALSE,		FALSE,		FALSE		},
 		/* TRUE    */ { FALSE,		TRUE,		NOT_LOADED	},
 		/* PNL     */ { FALSE,		NOT_LOADED, NOT_LOADED	},
 	};
 
-	private static final EvaluationResult[][] OR= new EvaluationResult[][] {
+	private static final EvaluationResult[][] OR= {
 						// FALSE	//TRUE	//NOT_LOADED
 		/* FALSE   */ { FALSE,		TRUE,	NOT_LOADED	},
 		/* TRUE    */ { TRUE,		TRUE,	TRUE		},
 		/* PNL     */ { NOT_LOADED,	TRUE, 	NOT_LOADED	},
 	};
 
-	private static final EvaluationResult[] NOT= new EvaluationResult[] {
+	private static final EvaluationResult[] NOT= {
 		//FALSE		//TRUE	//NOT_LOADED
 		TRUE,		FALSE,	NOT_LOADED
 	};
@@ -231,7 +231,7 @@ public class EvaluationResult {
 	 *  value
 	 */
 	public static EvaluationResult valueOf(Boolean b) {
-		return b.booleanValue() ? TRUE : FALSE;
+		return b ? TRUE : FALSE;
 	}
 
 	/**

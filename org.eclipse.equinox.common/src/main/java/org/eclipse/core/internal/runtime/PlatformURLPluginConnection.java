@@ -63,7 +63,7 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 		if (bundle == null)
 			throw new IOException(NLS.bind(CommonMessages.url_resolvePlugin, id));
 		result[0] = bundle;
-		result[1] = (ix == -1 || (ix + 1) >= spec.length()) ? "/" : spec.substring(ix + 1); //$NON-NLS-1$
+		result[1] = ix == -1 || ix + 1 >= spec.length() ? "/" : spec.substring(ix + 1); //$NON-NLS-1$
 		return result;
 	}
 

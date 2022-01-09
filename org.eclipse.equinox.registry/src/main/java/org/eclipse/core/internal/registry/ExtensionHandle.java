@@ -24,7 +24,7 @@ package org.eclipse.core.internal.registry;
  */
 public class ExtensionHandle extends BaseExtensionHandle {
 
-	static final ExtensionHandle[] EMPTY_ARRAY = new ExtensionHandle[0];
+	static final ExtensionHandle[] EMPTY_ARRAY = {};
 
 	public ExtensionHandle(IObjectManager objectManager, int id) {
 		super(objectManager, id);

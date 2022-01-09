@@ -206,9 +206,8 @@ public class Util {
 			case 'Z':
 				break;
 			case 'V':
-				if (!allowVoid) return -1;
 				// array of void is not allowed
-				if (nestingDepth != 0) return -1;
+				if (!allowVoid || nestingDepth != 0) return -1;
 				break;
 			case 'L':
 				int semicolon = sig.indexOf(';', i);
@@ -389,8 +388,8 @@ public class Util {
 		if (array == null || array.length == 0) return name;
 		if (name == null || name.length() == 0) return concatWith(array, separator);
 		StringBuilder buffer = new StringBuilder();
-		for (int i = 0, length = array.length; i < length; i++) {
-			buffer.append(array[i]);
+		for (String element : array) {
+			buffer.append(element);
 			buffer.append(separator);
 		}
 		buffer.append(name);
@@ -482,10 +481,8 @@ public class Util {
 		if (a == b)	return true;
 		if (a.length < len || b.length < len) return false;
 		for (int i = 0; i < len; ++i) {
-			if (a[i] == null) {
-				if (b[i] != null) return false;
-			} else {
-				if (!a[i].equals(b[i])) return false;
+			if (!Objects.equals(a[i], b[i])) {
+				return false;
 			}
 		}
 		return true;
@@ -531,10 +528,8 @@ public class Util {
 		// walk array from end to beginning as this optimizes package name cases
 		// where the first part is always the same (e.g. org.eclipse.jdt)
 		for (int i = len-1; i >= 0; i--) {
-			if (a[i] == null) {
-				if (b[i] != null) return false;
-			} else {
-				if (!a[i].equals(b[i])) return false;
+			if (!Objects.equals(a[i], b[i])) {
+				return false;
 			}
 		}
 		return true;
@@ -622,11 +617,9 @@ public class Util {
 			}
 		}
 		char[][] javaLikeExtensions = getJavaLikeExtensions();
-		suffixes: for (int i = 0, length = javaLikeExtensions.length; i < length; i++) {
-			char[] suffix = javaLikeExtensions[i];
+		suffixes: for (char[] suffix : javaLikeExtensions) {
 			int extensionStart = stringLength+1;
-			if (extensionStart + suffix.length != fileNameLength) continue;
-			if (fileName.charAt(stringLength) != '.') continue;
+			if (extensionStart + suffix.length != fileNameLength || fileName.charAt(stringLength) != '.') continue;
 			for (int j = extensionStart; j < fileNameLength; j++) {
 				if (fileName.charAt(j) != suffix[j-extensionStart])
 					continue suffixes;
@@ -666,17 +659,16 @@ public class Util {
 				break;
 			if (c == '[') {
 				++i;
-			} else
-				if (c == 'L') {
+			} else {
+                if (c == 'L') {
 					i = CharOperation.indexOf(';', sig, i + 1) + 1;
 					Assert.isTrue(i != 0);
-					result[count++] = convertTypeSignature(sig, start, i - start);
-					start = i;
 				} else {
 					++i;
-					result[count++] = convertTypeSignature(sig, start, i - start);
-					start = i;
 				}
+                result[count++] = convertTypeSignature(sig, start, i - start);
+                start = i;
+            }
 		}
 		return result;
 	}
@@ -692,11 +684,11 @@ public class Util {
 	private static IFile findFirstClassFile(IFolder folder) {
 		try {
 			IResource[] members = folder.members();
-			for (int i = 0, max = members.length; i < max; i++) {
-				IResource member = members[i];
+			for (IResource member : members) {
 				if (member.getType() == IResource.FOLDER) {
 					return findFirstClassFile((IFolder)member);
-				} else if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(member.getName())) {
+				}
+                if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(member.getName())) {
 					return (IFile) member;
 				}
 			}
@@ -732,9 +724,9 @@ public class Util {
 
 	public static IClassFileAttribute getAttribute(IClassFileReader classFileReader, char[] attributeName) {
 		IClassFileAttribute[] attributes = classFileReader.getAttributes();
-		for (int i = 0, max = attributes.length; i < max; i++) {
-			if (CharOperation.equals(attributes[i].getAttributeName(), attributeName)) {
-				return attributes[i];
+		for (IClassFileAttribute attribute : attributes) {
+			if (CharOperation.equals(attribute.getAttributeName(), attributeName)) {
+				return attribute;
 			}
 		}
 		return null;
@@ -742,9 +734,9 @@ public class Util {
 
 	public static IClassFileAttribute getAttribute(ICodeAttribute codeAttribute, char[] attributeName) {
 		IClassFileAttribute[] attributes = codeAttribute.getAttributes();
-		for (int i = 0, max = attributes.length; i < max; i++) {
-			if (CharOperation.equals(attributes[i].getAttributeName(), attributeName)) {
-				return attributes[i];
+		for (IClassFileAttribute attribute : attributes) {
+			if (CharOperation.equals(attribute.getAttributeName(), attributeName)) {
+				return attribute;
 			}
 		}
 		return null;
@@ -752,18 +744,18 @@ public class Util {
 
 	public static IClassFileAttribute getAttribute(IFieldInfo fieldInfo, char[] attributeName) {
 		IClassFileAttribute[] attributes = fieldInfo.getAttributes();
-		for (int i = 0, max = attributes.length; i < max; i++) {
-			if (CharOperation.equals(attributes[i].getAttributeName(), attributeName)) {
-				return attributes[i];
+		for (IClassFileAttribute attribute : attributes) {
+			if (CharOperation.equals(attribute.getAttributeName(), attributeName)) {
+				return attribute;
 			}
 		}
 		return null;
 	}
 	public static IClassFileAttribute getAttribute(IComponentInfo componentInfo, char[] attributeName) {
 		IClassFileAttribute[] attributes = componentInfo.getAttributes();
-		for (int i = 0, max = attributes.length; i < max; i++) {
-			if (CharOperation.equals(attributes[i].getAttributeName(), attributeName)) {
-				return attributes[i];
+		for (IClassFileAttribute attribute : attributes) {
+			if (CharOperation.equals(attribute.getAttributeName(), attributeName)) {
+				return attribute;
 			}
 		}
 		return null;
@@ -771,9 +763,9 @@ public class Util {
 
 	public static IClassFileAttribute getAttribute(IMethodInfo methodInfo, char[] attributeName) {
 		IClassFileAttribute[] attributes = methodInfo.getAttributes();
-		for (int i = 0, max = attributes.length; i < max; i++) {
-			if (CharOperation.equals(attributes[i].getAttributeName(), attributeName)) {
-				return attributes[i];
+		for (IClassFileAttribute attribute : attributes) {
+			if (CharOperation.equals(attribute.getAttributeName(), attributeName)) {
+				return attribute;
 			}
 		}
 		return null;
@@ -828,12 +820,10 @@ public class Util {
 			HashSet fileExtensions = new HashSet();
 			// content types derived from java content type should be included (https://bugs.eclipse.org/bugs/show_bug.cgi?id=121715)
 			IContentType[] contentTypes = Platform.getContentTypeManager().getAllContentTypes();
-			for (int i = 0, length = contentTypes.length; i < length; i++) {
-				if (contentTypes[i].isKindOf(javaContentType)) { // note that javaContentType.isKindOf(javaContentType) == true
-					String[] fileExtension = contentTypes[i].getFileSpecs(IContentType.FILE_EXTENSION_SPEC);
-					for (int j = 0, length2 = fileExtension.length; j < length2; j++) {
-						fileExtensions.add(fileExtension[j]);
-					}
+			for (IContentType contentType : contentTypes) {
+				if (contentType.isKindOf(javaContentType)) { // note that javaContentType.isKindOf(javaContentType) == true
+					String[] fileExtension = contentType.getFileSpecs(IContentType.FILE_EXTENSION_SPEC);
+					fileExtensions.addAll(Arrays.asList(fileExtension));
 				}
 			}
 			int length = fileExtensions.size();
@@ -884,17 +874,16 @@ public class Util {
 					if (path != null) {
 						if (JavaModelManager.isJrt(path)) {
 							return ClassFileConstants.JDK9;
-						} else {
-							jar = JavaModelManager.getJavaModelManager().getZipFile(path);
-							for (Enumeration e= jar.entries(); e.hasMoreElements();) {
-								ZipEntry member= (ZipEntry) e.nextElement();
-								String entryName= member.getName();
-								if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(entryName)) {
-									reader = ClassFileReader.read(jar, entryName);
-									break;
-								}
-							}
 						}
+                        jar = JavaModelManager.getJavaModelManager().getZipFile(path);
+                        for (Enumeration e= jar.entries(); e.hasMoreElements();) {
+                        	ZipEntry member= (ZipEntry) e.nextElement();
+                        	String entryName= member.getName();
+                        	if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(entryName)) {
+                        		reader = ClassFileReader.read(jar, entryName);
+                        		break;
+                        	}
+                        }
 					}
 				} catch (CoreException e) {
 					// ignore
@@ -989,24 +978,23 @@ public class Util {
 			char[] pkgName = CharOperation.subarray(fileName, jarSeparator+1, pkgEnd);
 			char[][] compoundName = CharOperation.splitOn('/', pkgName);
 			return root.getPackageFragment(CharOperation.toStrings(compoundName));
-		} else {
-			Path path = new Path(new String(fileName, 0, pkgEnd));
-			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-			IContainer folder = path.segmentCount() == 1 ? workspaceRoot.getProject(path.lastSegment()) : workspaceRoot.getFolder(path);
-			IJavaElement element = JavaCore.create(folder);
-			if (element == null) return null;
-			switch (element.getElementType()) {
-				case IJavaElement.PACKAGE_FRAGMENT:
-					return (IPackageFragment) element;
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-					return ((PackageFragmentRoot) element).getPackageFragment(CharOperation.NO_STRINGS);
-				case IJavaElement.JAVA_PROJECT:
-					PackageFragmentRoot root = (PackageFragmentRoot) ((IJavaProject) element).getPackageFragmentRoot(folder);
-					if (root == null) return null;
-					return root.getPackageFragment(CharOperation.NO_STRINGS);
-			}
-			return null;
 		}
+        Path path = new Path(new String(fileName, 0, pkgEnd));
+        IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+        IContainer folder = path.segmentCount() == 1 ? workspaceRoot.getProject(path.lastSegment()) : workspaceRoot.getFolder(path);
+        IJavaElement element = JavaCore.create(folder);
+        if (element == null) return null;
+        switch (element.getElementType()) {
+        	case IJavaElement.PACKAGE_FRAGMENT:
+        		return (IPackageFragment) element;
+        	case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+        		return ((PackageFragmentRoot) element).getPackageFragment(CharOperation.NO_STRINGS);
+        	case IJavaElement.JAVA_PROJECT:
+        		PackageFragmentRoot root = (PackageFragmentRoot) ((IJavaProject) element).getPackageFragmentRoot(folder);
+        		if (root == null) return null;
+        		return root.getPackageFragment(CharOperation.NO_STRINGS);
+        }
+        return null;
 	}
 
 	/**
@@ -1124,7 +1112,7 @@ public class Util {
 					/* check the next character. If this is also ARGUMENTS_DELIMITER then only put one into the
 					 * decoded argument and proceed with the next character
 					 */
-					if ((i + 1) == max) {
+					if (i + 1 == max) {
 						return null;
 					}
 					char next = argumentsString.charAt(i + 1);
@@ -1249,10 +1237,11 @@ public class Util {
 			} catch (CoreException e)  {
 				throw new JavaModelException(e);
 			}
-		} else if (property.equals(PackageFragmentRoot.NO_SOURCE_ATTACHMENT)) {
+		}
+        if (property.equals(PackageFragmentRoot.NO_SOURCE_ATTACHMENT)) {
 			return null;
-		} else
-			return property;
+		}
+        return property;
 	}
 
 	private static QualifiedName getSourceAttachmentPropertyName(IPath path) {
@@ -1380,8 +1369,7 @@ public class Util {
 			if (!(type instanceof IType))
 				return null;
 			IInitializer[] initializers = ((IType) type).getInitializers();
-			for (int i = 0; i < initializers.length; i++) {
-				IInitializer initializer = initializers[i];
+			for (IInitializer initializer : initializers) {
 				ISourceRange sourceRange = initializer.getSourceRange();
 				if (sourceRange != null) {
 					int initializerStart = sourceRange.getOffset();
@@ -1408,40 +1396,7 @@ public class Util {
 		IType declaringType = (IType) unresolvedJavaElement;
 
 		org.eclipse.jdt.internal.compiler.ast.ASTNode node = bindingsToNodes == null ? null : bindingsToNodes.get(methodBinding);
-		if (node != null && !declaringType.isBinary()) {
-			if (node instanceof AnnotationMethodDeclaration) {
-				// node is an AnnotationMethodDeclaration
-				AnnotationMethodDeclaration typeMemberDeclaration = (AnnotationMethodDeclaration) node;
-				return (JavaElement) declaringType.getMethod(String.valueOf(typeMemberDeclaration.selector), CharOperation.NO_STRINGS); // annotation type members don't have parameters
-			} else {
-				// node is an MethodDeclaration
-				MethodDeclaration methodDeclaration = (MethodDeclaration) node;
-
-				Argument[] arguments = methodDeclaration.arguments;
-				String[] parameterSignatures;
-				if (arguments != null) {
-					parameterSignatures = new String[arguments.length];
-					for (int i = 0; i < arguments.length; i++) {
-						Argument argument = arguments[i];
-						TypeReference typeReference = argument.type;
-						int arrayDim = typeReference.dimensions();
-
-						String typeSig =
-							Signature.createTypeSignature(
-									CharOperation.concatWith(
-											typeReference.getTypeName(), '.'), false);
-						if (arrayDim > 0) {
-							typeSig = Signature.createArraySignature(typeSig, arrayDim);
-						}
-						parameterSignatures[i] = typeSig;
-
-					}
-				} else {
-					parameterSignatures = CharOperation.NO_STRINGS;
-				}
-				return (JavaElement) declaringType.getMethod(String.valueOf(methodDeclaration.selector), parameterSignatures);
-			}
-		} else {
+		if (node == null || declaringType.isBinary()) {
 			// case of method not in the created AST, or a binary method
 			org.eclipse.jdt.internal.compiler.lookup.MethodBinding original = methodBinding.original();
 			String selector = original.isConstructor() ? declaringType.getElementName() : new String(original.selector);
@@ -1465,9 +1420,7 @@ public class Util {
 				parameterSignatures[declaringIndex + i] = new String(signature);
 			}
 			IMethod result = declaringType.getMethod(selector, parameterSignatures);
-			if (isBinary)
-				return (JavaElement) result;
-			if (result.exists()) // if perfect match (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=249567 )
+			if (isBinary || result.exists()) // if perfect match (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=249567 )
 				return (JavaElement) result;
 			IMethod[] methods = null;
 			try {
@@ -1481,6 +1434,37 @@ public class Util {
 				return null;
 			return (JavaElement) candidates[0];
 		}
+        if (node instanceof AnnotationMethodDeclaration) {
+        	// node is an AnnotationMethodDeclaration
+        	AnnotationMethodDeclaration typeMemberDeclaration = (AnnotationMethodDeclaration) node;
+        	return (JavaElement) declaringType.getMethod(String.valueOf(typeMemberDeclaration.selector), CharOperation.NO_STRINGS); // annotation type members don't have parameters
+        }
+        // node is an MethodDeclaration
+        MethodDeclaration methodDeclaration = (MethodDeclaration) node;
+
+        Argument[] arguments = methodDeclaration.arguments;
+        String[] parameterSignatures;
+        if (arguments != null) {
+        	parameterSignatures = new String[arguments.length];
+        	for (int i = 0; i < arguments.length; i++) {
+        		Argument argument = arguments[i];
+        		TypeReference typeReference = argument.type;
+        		int arrayDim = typeReference.dimensions();
+
+        		String typeSig =
+        			Signature.createTypeSignature(
+        					CharOperation.concatWith(
+        							typeReference.getTypeName(), '.'), false);
+        		if (arrayDim > 0) {
+        			typeSig = Signature.createArraySignature(typeSig, arrayDim);
+        		}
+        		parameterSignatures[i] = typeSig;
+
+        	}
+        } else {
+        	parameterSignatures = CharOperation.NO_STRINGS;
+        }
+        return (JavaElement) declaringType.getMethod(String.valueOf(methodDeclaration.selector), parameterSignatures);
 	}
 
 	/**
@@ -1539,40 +1523,38 @@ public class Util {
 				// does not exist
 				return null;
 			}
-		} else if (referenceBinding.isTypeVariable()) {
+		}
+        if (referenceBinding.isTypeVariable()) {
 			// type parameter
 			final String typeVariableName = new String(referenceBinding.sourceName());
 			org.eclipse.jdt.internal.compiler.lookup.Binding declaringElement = ((org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding) referenceBinding).declaringElement;
 			if (declaringElement instanceof MethodBinding) {
 				IMethod declaringMethod = (IMethod) getUnresolvedJavaElement((MethodBinding) declaringElement, workingCopyOwner, bindingsToNodes);
 				return (JavaElement) declaringMethod.getTypeParameter(typeVariableName);
-			} else {
-				IType declaringType = (IType) getUnresolvedJavaElement((TypeBinding) declaringElement, workingCopyOwner, bindingsToNodes);
-				if (declaringType == null)
-					return null;
-				return (JavaElement) declaringType.getTypeParameter(typeVariableName);
 			}
-		} else {
-			if (fileName == null) return null; // case of a WilCardBinding that doesn't have a corresponding Java element
-			// member or top level type
-			TypeBinding declaringTypeBinding = typeBinding.enclosingType();
-			if (declaringTypeBinding == null) {
-				// top level type
-				if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(fileName)) {
-					ClassFile classFile = (ClassFile) getClassFile(fileName);
-					if (classFile == null) return null;
-					return (JavaElement) classFile.getType();
-				}
-				ICompilationUnit cu = getCompilationUnit(fileName, workingCopyOwner);
-				if (cu == null) return null;
-				return (JavaElement) cu.getType(new String(referenceBinding.sourceName()));
-			} else {
-				// member type
-				IType declaringType = (IType) getUnresolvedJavaElement(declaringTypeBinding, workingCopyOwner, bindingsToNodes);
-				if (declaringType == null) return null;
-				return (JavaElement) declaringType.getType(new String(referenceBinding.sourceName()));
-			}
+            IType declaringType = (IType) getUnresolvedJavaElement((TypeBinding) declaringElement, workingCopyOwner, bindingsToNodes);
+            if (declaringType == null)
+            	return null;
+            return (JavaElement) declaringType.getTypeParameter(typeVariableName);
 		}
+        if (fileName == null) return null; // case of a WilCardBinding that doesn't have a corresponding Java element
+        // member or top level type
+        TypeBinding declaringTypeBinding = typeBinding.enclosingType();
+        if (declaringTypeBinding != null) {
+        	// member type
+        	IType declaringType = (IType) getUnresolvedJavaElement(declaringTypeBinding, workingCopyOwner, bindingsToNodes);
+        	if (declaringType == null) return null;
+        	return (JavaElement) declaringType.getType(new String(referenceBinding.sourceName()));
+        }
+        // top level type
+        if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(fileName)) {
+        	ClassFile classFile = (ClassFile) getClassFile(fileName);
+        	if (classFile == null) return null;
+        	return (JavaElement) classFile.getType();
+        }
+        ICompilationUnit cu = getCompilationUnit(fileName, workingCopyOwner);
+        if (cu == null) return null;
+        return (JavaElement) cu.getType(new String(referenceBinding.sourceName()));
 	}
 
 	/*
@@ -1602,13 +1584,11 @@ public class Util {
 	public static int indexOfJavaLikeExtension(String fileName) {
 		int fileNameLength = fileName.length();
 		char[][] javaLikeExtensions = getJavaLikeExtensions();
-		extensions: for (int i = 0, length = javaLikeExtensions.length; i < length; i++) {
-			char[] extension = javaLikeExtensions[i];
+		extensions: for (char[] extension : javaLikeExtensions) {
 			int extensionLength = extension.length;
 			int extensionStart = fileNameLength - extensionLength;
 			int dotIndex = extensionStart - 1;
-			if (dotIndex < 0) continue;
-			if (fileName.charAt(dotIndex) != '.') continue;
+			if (dotIndex < 0 || fileName.charAt(dotIndex) != '.') continue;
 			for (int j = 0; j < extensionLength; j++) {
 				if (fileName.charAt(extensionStart + j) != extension[j])
 					continue extensions;
@@ -1788,13 +1768,11 @@ public class Util {
 		if (len == 0) return false;
 		int i = 0;
 		char c = sig.charAt(i++);
-		if (c != '(') return false;
-		if (i >= len) return false;
+		if (c != '(' || i >= len) return false;
 		while (sig.charAt(i) != ')') {
 			// Void is not allowed as a parameter type.
 			i = checkTypeSignature(sig, i, len, false);
-			if (i == -1) return false;
-			if (i >= len) return false;
+			if (i == -1 || i >= len) return false;
 		}
 		++i;
 		i = checkTypeSignature(sig, i, len, true);
@@ -2355,12 +2333,7 @@ public class Util {
 		int len = elements.length;
 		IJavaElement[] copy = new IJavaElement[len];
 		System.arraycopy(elements, 0, copy, 0, len);
-		sort(copy, new Comparer() {
-			@Override
-			public int compare(Object a, Object b) {
-				return ((JavaElement) a).toStringWithAncestors().compareTo(((JavaElement) b).toStringWithAncestors());
-			}
-		});
+		sort(copy, (a, b) -> ((JavaElement) a).toStringWithAncestors().compareTo(((JavaElement) b).toStringWithAncestors()));
 		return copy;
 	}
 
@@ -2433,7 +2406,7 @@ public class Util {
 		int start = 0;
 		for (int i = 0; i < segCount; ++i) {
 			int dot = s.indexOf('.', start);
-			int end = (dot == -1 ? s.length() : dot);
+			int end = dot == -1 ? s.length() : dot;
 			segs[i] = new char[end - start];
 			s.getChars(start, end, segs[i], 0);
 			start = end + 1;
@@ -2472,8 +2445,8 @@ public class Util {
 	public static String toString(char[][] c, char[] d) {
 		if (c == null) return new String(d);
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0, max = c.length; i < max; ++i) {
-			sb.append(c[i]);
+		for (char[] element : c) {
+			sb.append(element);
 			sb.append('.');
 		}
 		sb.append(d);
@@ -2791,12 +2764,10 @@ public class Util {
 		if (fileName == null) return false;
 		int fileNameLength = fileName.length;
 		char[][] javaLikeExtensions = getJavaLikeExtensions();
-		extensions: for (int i = 0, length = javaLikeExtensions.length; i < length; i++) {
-			char[] extension = javaLikeExtensions[i];
+		extensions: for (char[] extension : javaLikeExtensions) {
 			int extensionLength = extension.length;
 			int extensionStart = fileNameLength - extensionLength;
-			if (extensionStart-1 < 0) continue;
-			if (fileName[extensionStart-1] != '.') continue;
+			if (extensionStart-1 < 0 || fileName[extensionStart-1] != '.') continue;
 			for (int j = 0; j < extensionLength; j++) {
 				if (fileName[extensionStart + j] != extension[j])
 					continue extensions;
@@ -2849,48 +2820,51 @@ public class Util {
 	public static Object getAnnotationMemberValue(JavaElement parent, MemberValuePair memberValuePair, Object binaryValue) {
 		if (binaryValue instanceof Constant) {
 			return getAnnotationMemberValue(memberValuePair, (Constant) binaryValue);
-		} else if (binaryValue instanceof IBinaryAnnotation) {
+		}
+        if (binaryValue instanceof IBinaryAnnotation) {
 			memberValuePair.valueKind = IMemberValuePair.K_ANNOTATION;
 			return getAnnotation(parent, (IBinaryAnnotation) binaryValue, memberValuePair.getMemberName());
-		} else if (binaryValue instanceof ClassSignature) {
+		}
+        if (binaryValue instanceof ClassSignature) {
 			memberValuePair.valueKind = IMemberValuePair.K_CLASS;
 			char[] className = Signature.toCharArray(CharOperation.replaceOnCopy(((ClassSignature) binaryValue).getTypeName(), '/', '.'));
 			return new String(className);
-		} else if (binaryValue instanceof EnumConstantSignature) {
+		}
+        if (binaryValue instanceof EnumConstantSignature) {
 			memberValuePair.valueKind = IMemberValuePair.K_QUALIFIED_NAME;
 			EnumConstantSignature enumConstant = (EnumConstantSignature) binaryValue;
 			char[] enumName = Signature.toCharArray(CharOperation.replaceOnCopy(enumConstant.getTypeName(), '/', '.'));
 			char[] qualifiedName = CharOperation.concat(enumName, enumConstant.getEnumConstantName(), '.');
 			return new String(qualifiedName);
-		} else if (binaryValue instanceof Object[]) {
-			memberValuePair.valueKind = -1; // modified below by the first call to getMemberValue(...)
-			Object[] binaryValues = (Object[]) binaryValue;
-			int length = binaryValues.length;
-			Object[] values = new Object[length];
-			for (int i = 0; i < length; i++) {
-				int previousValueKind = memberValuePair.valueKind;
-				Object value = getAnnotationMemberValue(parent, memberValuePair, binaryValues[i]);
-				if (previousValueKind != -1 && memberValuePair.valueKind != previousValueKind) {
-					// values are heterogeneous, value kind is thus unknown
-					memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
-				}
-				if (value instanceof Annotation) {
-					Annotation annotation = (Annotation) value;
-					for (int j = 0; j < i; j++) {
-						if (annotation.equals(values[j])) {
-							annotation.occurrenceCount++;
-						}
-					}
-				}
-				values[i] = value;
-			}
-			if (memberValuePair.valueKind == -1)
-				memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
-			return values;
-		} else {
+		}
+        if (!(binaryValue instanceof Object[])) {
 			memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
 			return null;
 		}
+        memberValuePair.valueKind = -1; // modified below by the first call to getMemberValue(...)
+        Object[] binaryValues = (Object[]) binaryValue;
+        int length = binaryValues.length;
+        Object[] values = new Object[length];
+        for (int i = 0; i < length; i++) {
+        	int previousValueKind = memberValuePair.valueKind;
+        	Object value = getAnnotationMemberValue(parent, memberValuePair, binaryValues[i]);
+        	if (previousValueKind != -1 && memberValuePair.valueKind != previousValueKind) {
+        		// values are heterogeneous, value kind is thus unknown
+        		memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
+        	}
+        	if (value instanceof Annotation) {
+        		Annotation annotation = (Annotation) value;
+        		for (int j = 0; j < i; j++) {
+        			if (annotation.equals(values[j])) {
+        				annotation.occurrenceCount++;
+        			}
+        		}
+        	}
+        	values[i] = value;
+        }
+        if (memberValuePair.valueKind == -1)
+        	memberValuePair.valueKind = IMemberValuePair.K_UNKNOWN;
+        return values;
 	}
 
 	/*
@@ -2993,11 +2967,9 @@ public class Util {
 			switch (source[idx]) {
 				case '>':
 					paramOpening--;
-					if (paramOpening == 0)  {
-						if (signaturesCount == signatures.length) {
-							System.arraycopy(signatures, 0, signatures = new char[signaturesCount+10][], 0, signaturesCount);
-						}
-					}
+					if (paramOpening == 0 && signaturesCount == signatures.length) {
+                    	System.arraycopy(signatures, 0, signatures = new char[signaturesCount+10][], 0, signaturesCount);
+                    }
 					break;
 				case '<':
 					paramOpening++;
@@ -3311,7 +3283,8 @@ public class Util {
 				defaultOptionsMap.remove(JavaCore.COMPILER_TASK_TAGS);
 			}
 			return;
-		} else if (taskTags == null) {
+		}
+        if (taskTags == null) {
 			Util.logRepeatedMessage(TASK_PRIORITIES_PROBLEM, IStatus.ERROR, "Inconsistent values for taskTags (null) and task priorities (not null)"); //$NON-NLS-1$
 			defaultOptionsMap.remove(JavaCore.COMPILER_TASK_PRIORITIES);
 			return;
@@ -3321,10 +3294,10 @@ public class Util {
 		if (taskTagsLength != taskPrioritiesLength) {
 			Util.logRepeatedMessage(TASK_PRIORITIES_PROBLEM, IStatus.ERROR, "Inconsistent values for taskTags and task priorities : length is different"); //$NON-NLS-1$
 			if (taskTagsLength > taskPrioritiesLength) {
-				System.arraycopy(taskTags, 0, (taskTags = new char[taskPrioritiesLength][]), 0, taskPrioritiesLength);
+				System.arraycopy(taskTags, 0, taskTags = new char[taskPrioritiesLength][], 0, taskPrioritiesLength);
 				defaultOptionsMap.put(JavaCore.COMPILER_TASK_TAGS, new String(CharOperation.concatWith(taskTags,',')));
 			} else {
-				System.arraycopy(taskPriorities, 0, (taskPriorities = new char[taskTagsLength][]), 0, taskTagsLength);
+				System.arraycopy(taskPriorities, 0, taskPriorities = new char[taskTagsLength][], 0, taskTagsLength);
 				defaultOptionsMap.put(JavaCore.COMPILER_TASK_PRIORITIES, new String(CharOperation.concatWith(taskPriorities,',')));
 			}
 		}
@@ -3340,7 +3313,7 @@ public class Util {
 	 * @throws JavaModelException
 	 */
 	public static IMethod findMethod(IType type, char[] selector, String[] paramTypeSignatures, boolean isConstructor) throws JavaModelException {
-		IMethod method = null;
+		IMethod method;
 		int startingIndex = 0;
 		String[] args;
 		IType enclosingType = type.getDeclaringType();

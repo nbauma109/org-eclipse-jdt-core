@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -90,25 +91,20 @@ public abstract class ClasspathLocation implements FileSystem.Classpath,
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + this.getMode();
-		result = prime * result + ((this.path == null) ? 0 : this.path.hashCode());
-		return result;
+		return prime * result + (this.path == null ? 0 : this.path.hashCode());
 	}
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (obj == null || getClass() != obj.getClass())
 			return false;
 		ClasspathLocation other = (ClasspathLocation) obj;
 		String localPath = this.getPath();
 		String otherPath = other.getPath();
-		if (localPath == null) {
-			if (otherPath != null)
-				return false;
-		} else if (!localPath.equals(otherPath))
+		if (!Objects.equals(localPath, otherPath)) {
 			return false;
+		}
         return this.getMode() == other.getMode();
     }
 	@Override

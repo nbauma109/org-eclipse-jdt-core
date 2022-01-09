@@ -137,6 +137,7 @@ UndoEdit applyTextEdit(TextEdit edit, IProgressMonitor monitor) throws JavaModel
  * 	Note that if this deprecated method is used, problems will be reported to the given problem requestor
  * 	as well as the problem requestor returned by the working copy owner (if not null).
  */
+@Deprecated
 void becomeWorkingCopy(IProblemRequestor problemRequestor, IProgressMonitor monitor) throws JavaModelException;
 /**
  * Changes this compilation unit handle into a working copy. A new {@link IBuffer} is
@@ -542,6 +543,7 @@ ICompilationUnit getWorkingCopy(IProgressMonitor monitor) throws JavaModelExcept
  * 	Note that if this deprecated method is used, problems will be reported on the passed problem requester
  * 	as well as on the problem requestor returned by the working copy owner (if not null).
  */
+@Deprecated
 ICompilationUnit getWorkingCopy(WorkingCopyOwner owner, IProblemRequestor problemRequestor, IProgressMonitor monitor) throws JavaModelException;
 /**
  * Returns whether the resource of this working copy has changed since the

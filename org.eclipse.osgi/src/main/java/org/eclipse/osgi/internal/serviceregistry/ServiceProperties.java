@@ -47,7 +47,7 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 	 * in the props parameter.
 	 */
 	ServiceProperties(Dictionary<String, ?> props, int extra) {
-		super(initialCapacity((props == null) ? extra : props.size() + extra));
+		super(initialCapacity(props == null ? extra : props.size() + extra));
 		if (props == null) {
 			return;
 		}
@@ -74,7 +74,7 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 	 * in the props parameter.
 	 */
 	ServiceProperties(Map<String, ?> props) {
-		super(initialCapacity((props == null) ? 0 : props.size()));
+		super(initialCapacity(props == null ? 0 : props.size()));
 		if (props == null) {
 			return;
 		}
@@ -105,13 +105,7 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 	static Object cloneValue(Object value) {
 		if (value == null)
 			return null;
-		if (value instanceof String) /* shortcut String */
-			return value;
-		if (value instanceof Number) /* shortcut Number */
-			return value;
-		if (value instanceof Character) /* shortcut Character */
-			return value;
-		if (value instanceof Boolean) /* shortcut Boolean */
+		if (value instanceof String || value instanceof Number || value instanceof Character || value instanceof Boolean) /* shortcut Boolean */
 			return value;
 
 		Class<?> clazz = value.getClass();

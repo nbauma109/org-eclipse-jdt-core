@@ -70,20 +70,12 @@ class EquinoxLogFactory implements ServiceFactory<FrameworkLog> {
 				Bundle b = frameworkEvent.getBundle();
 				Throwable t = frameworkEvent.getThrowable();
 				String entry = b.getSymbolicName() == null ? b.getLocation() : b.getSymbolicName();
-				int severity;
-				switch (frameworkEvent.getType()) {
-					case FrameworkEvent.INFO :
-						severity = FrameworkLogEntry.INFO;
-						break;
-					case FrameworkEvent.ERROR :
-						severity = FrameworkLogEntry.ERROR;
-						break;
-					case FrameworkEvent.WARNING :
-						severity = FrameworkLogEntry.WARNING;
-						break;
-					default :
-						severity = FrameworkLogEntry.OK;
-				}
+				int severity = switch (frameworkEvent.getType()) {
+                    case FrameworkEvent.INFO -> FrameworkLogEntry.INFO;
+                    case FrameworkEvent.ERROR -> FrameworkLogEntry.ERROR;
+                    case FrameworkEvent.WARNING -> FrameworkLogEntry.WARNING;
+                    default -> FrameworkLogEntry.OK;
+                };
 				FrameworkLogEntry logEntry = new FrameworkLogEntry(entry, severity, 0, "", 0, t, null); //$NON-NLS-1$
 				log(logEntry);
 			}

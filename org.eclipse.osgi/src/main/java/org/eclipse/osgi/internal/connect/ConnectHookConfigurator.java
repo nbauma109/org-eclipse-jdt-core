@@ -34,7 +34,6 @@ import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory;
-import org.eclipse.osgi.internal.hookregistry.StorageHookFactory.StorageHook;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
@@ -59,12 +58,12 @@ public class ConnectHookConfigurator implements HookConfigurator {
 		final ConnectModules connectModules = hookRegistry.getContainer().getConnectModules();
 		ModuleConnector moduleConnector = connectModules.getModuleConnector();
 
-		hookRegistry.addStorageHookFactory(new StorageHookFactory<Object, Object, StorageHook<Object, Object>>() {
+		hookRegistry.addStorageHookFactory(new StorageHookFactory<>() {
 			@Override
 			protected StorageHook<Object, Object> createStorageHook(Generation generation) {
 				final ConnectModule m = connectModules.getConnectModule(generation.getBundleInfo().getLocation());
 
-				return new StorageHook<Object, Object>(generation, this.getClass()) {
+				return new StorageHook<>(generation, this.getClass()) {
 					boolean hasModule = false;
 
 					@Override

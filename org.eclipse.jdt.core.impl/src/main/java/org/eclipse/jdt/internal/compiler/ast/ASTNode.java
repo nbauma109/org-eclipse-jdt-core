@@ -343,12 +343,10 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	// for all reference context entries.
 	public static final int HasFunctionalInterfaceTypes = ASTNode.Bit22;
 
-	public static final Argument [] NO_ARGUMENTS = new Argument [0];
-	public static final RecordComponent [] NO_RECORD_COMPONENTS = new RecordComponent [0];
+	public static final Argument [] NO_ARGUMENTS = {};
+	public static final RecordComponent [] NO_RECORD_COMPONENTS = {};
 
 	public ASTNode() {
-
-		super();
 	}
 	private static int checkInvocationArgument(BlockScope scope, Expression argument, TypeBinding parameterType, TypeBinding argumentType, TypeBinding originalParameterType) {
 		argument.computeConversion(scope, parameterType, argumentType);
@@ -378,20 +376,18 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 
 		boolean uncheckedBoundCheck = (method.tagBits & TagBits.HasUncheckedTypeArgumentForBoundCheck) != 0;
 		MethodBinding rawOriginalGenericMethod = null;
-		if (!isRawMemberInvocation) {
-			if (method instanceof ParameterizedGenericMethodBinding) {
-				ParameterizedGenericMethodBinding paramMethod = (ParameterizedGenericMethodBinding) method;
-				if (paramMethod.isRaw && method.hasSubstitutedParameters()) {
-					rawOriginalGenericMethod = method.original();
-				}
-			}
-		}
+		if (!isRawMemberInvocation && method instanceof ParameterizedGenericMethodBinding) {
+        	ParameterizedGenericMethodBinding paramMethod = (ParameterizedGenericMethodBinding) method;
+        	if (paramMethod.isRaw && method.hasSubstitutedParameters()) {
+        		rawOriginalGenericMethod = method.original();
+        	}
+        }
 		int invocationStatus = INVOCATION_ARGUMENT_OK;
 		if (arguments == null) {
 			if (method.isVarargs()) {
 				TypeBinding parameterType = ((ArrayBinding) params[paramLength-1]).elementsType(); // no element was supplied for vararg parameter
 				if (!parameterType.isReifiable()
-						&& (!is1_7 || ((method.tagBits & TagBits.AnnotationSafeVarargs) == 0))) {
+						&& (!is1_7 || (method.tagBits & TagBits.AnnotationSafeVarargs) == 0)) {
 					scope.problemReporter().unsafeGenericArrayForVarargs(parameterType, (ASTNode)invocationSite);
 				}
 			}
@@ -411,7 +407,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					if (paramLength != argLength || parameterType.dimensions() != argumentTypes[lastIndex].dimensions()) {
 						parameterType = ((ArrayBinding) parameterType).elementsType(); // single element was provided for vararg parameter
 						if (!parameterType.isReifiable()
-								&& (!is1_7 || ((method.tagBits & TagBits.AnnotationSafeVarargs) == 0))) {
+								&& (!is1_7 || (method.tagBits & TagBits.AnnotationSafeVarargs) == 0)) {
 							scope.problemReporter().unsafeGenericArrayForVarargs(parameterType, (ASTNode)invocationSite);
 						}
 						originalRawParam = rawOriginalGenericMethod == null ? null : ((ArrayBinding)rawOriginalGenericMethod.parameters[lastIndex]).elementsType();
@@ -426,7 +422,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					TypeBinding lastArgType = argumentTypes[varargsIndex];
 					int dimensions;
 					if (lastArgType == TypeBinding.NULL) {
-						if (!(varargsType.leafComponentType().isBaseType() && varargsType.dimensions() == 1))
+						if (!varargsType.leafComponentType().isBaseType() || varargsType.dimensions() != 1)
 							scope.problemReporter().varargsArgumentNeedCast(method, lastArgType, invocationSite);
 					} else if (varargsType.dimensions <= (dimensions = lastArgType.dimensions())) {
 						if (lastArgType.leafComponentType().isBaseType()) {
@@ -461,7 +457,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			}
 		} else if (rawOriginalGenericMethod != null
 				|| uncheckedBoundCheck
-				|| ((invocationStatus & INVOCATION_ARGUMENT_UNCHECKED) != 0)) {
+				|| (invocationStatus & INVOCATION_ARGUMENT_UNCHECKED) != 0) {
 			if (method instanceof ParameterizedGenericMethodBinding) {
 				scope.problemReporter().unsafeRawGenericMethodInvocation((ASTNode)invocationSite, method, argumentTypes);
 				return true;
@@ -487,7 +483,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				&& field.isOrEnclosedByPrivateType()
 				&& !scope.isDefinedInField(field)) 				// ignore cases where field is used from inside itself
 		{
-			if (((filteredBits & IsCompoundAssigned) != 0))
+			if ((filteredBits & IsCompoundAssigned) != 0)
 				// used, but usage may not be relevant
 				field.original().compoundUseFlag++;
 			else
@@ -497,7 +493,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 
 		if ((field.modifiers & ExtraCompilerModifiers.AccRestrictedAccess) != 0) {
 			ModuleBinding module = field.declaringClass.module();
-			LookupEnvironment env = (module == null) ? scope.environment() : module.environment;
+			LookupEnvironment env = module == null ? scope.environment() : module.environment;
 			AccessRestriction restriction =
 				env.getAccessRestriction(field.declaringClass.erasure());
 			if (restriction != null) {
@@ -507,10 +503,8 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			}
 		}
 
-		if (!field.isViewedAsDeprecated()) return false;
-
 		// inside same unit - no report
-		if (scope.isDefinedInSameUnit(field.declaringClass)) return false;
+		if (!field.isViewedAsDeprecated() || scope.isDefinedInSameUnit(field.declaringClass)) return false;
 
 		// if context is deprecated, may avoid reporting
         return scope.compilerOptions().reportDeprecationInsideDeprecatedCode || !scope.isInsideDeprecatedCode();
@@ -546,7 +540,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			// note: explicit constructors calls warnings are kept despite the 'new C1()' case (two
 			//       warnings, one on type, the other on constructor), because of the 'super()' case.
 			ModuleBinding module = method.declaringClass.module();
-			LookupEnvironment env = (module == null) ? scope.environment() : module.environment;
+			LookupEnvironment env = module == null ? scope.environment() : module.environment;
 			AccessRestriction restriction =
 				env.getAccessRestriction(method.declaringClass.erasure());
 			if (restriction != null) {
@@ -556,13 +550,11 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			}
 		}
 
-		if (!method.isViewedAsDeprecated()) return false;
+		
 
 		// inside same unit - no report
-		if (scope.isDefinedInSameUnit(method.declaringClass)) return false;
-
 		// non explicit use and non explicitly deprecated - no report
-		if (!isExplicitUse &&
+		if (!method.isViewedAsDeprecated() || scope.isDefinedInSameUnit(method.declaringClass) || !isExplicitUse &&
 				(method.modifiers & ClassFileConstants.AccDeprecated) == 0) {
 			return false;
 		}
@@ -615,7 +607,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		reportPreviewAPI(scope, type.extendedTagBits);
 		if (refType.hasRestrictedAccess()) {
 			ModuleBinding module = refType.module();
-			LookupEnvironment env = (module == null) ? scope.environment() : module.environment;
+			LookupEnvironment env = module == null ? scope.environment() : module.environment;
 			AccessRestriction restriction = env.getAccessRestriction(type.erasure());
 			if (restriction != null) {
 				scope.problemReporter().forbiddenReference(type, this, restriction.classpathEntryType,
@@ -626,10 +618,8 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		// force annotations resolution before deciding whether the type may be deprecated
 		refType.initializeDeprecatedAnnotationTagBits();
 
-		if (!refType.isViewedAsDeprecated()) return false;
-
 		// inside same unit - no report
-		if (scope.isDefinedInSameUnit(refType)) return false;
+		if (!refType.isViewedAsDeprecated() || scope.isDefinedInSameUnit(refType)) return false;
 
 		// if context is deprecated, may avoid reporting
         return scope.compilerOptions().reportDeprecationInsideDeprecatedCode || !scope.isInsideDeprecatedCode();
@@ -719,11 +709,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		boolean variableArity = candidateMethod.isVarargs();
 		final TypeBinding[] parameters = candidateMethod.parameters;
 		Expression[] arguments = invocation.arguments();
-		if (variableArity && arguments != null && parameters.length == arguments.length) {
-			if (arguments[arguments.length-1].isCompatibleWith(parameters[parameters.length-1], scope)) {
-				variableArity = false;
-			}
-		}
+		if (variableArity && arguments != null && parameters.length == arguments.length && arguments[arguments.length-1].isCompatibleWith(parameters[parameters.length-1], scope)) {
+        	variableArity = false;
+        }
 		for (int i = 0, length = arguments == null ? 0 : arguments.length; i < length; i++) {
 			Expression argument = arguments[i];
 			TypeBinding parameterType = InferenceContext18.getParameter(parameters, i, variableArity);
@@ -797,13 +785,13 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				case Binding.PACKAGE :
 					PackageBinding packageBinding = (PackageBinding) recipient;
 					if ((packageBinding.tagBits & TagBits.AnnotationResolved) != 0) return annotations;
-					packageBinding.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					packageBinding.tagBits |= TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved;
 					break;
 				case Binding.TYPE :
 				case Binding.GENERIC_TYPE :
 					ReferenceBinding type = (ReferenceBinding) recipient;
 					if ((type.tagBits & TagBits.AnnotationResolved) != 0) return annotations;
-					type.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					type.tagBits |= TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved;
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
 						type.setAnnotations(annotations, false);
@@ -812,7 +800,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				case Binding.METHOD :
 					MethodBinding method = (MethodBinding) recipient;
 					if ((method.tagBits & TagBits.AnnotationResolved) != 0) return annotations;
-					method.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					method.tagBits |= TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved;
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
 						method.setAnnotations(annotations, false);
@@ -821,7 +809,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				case Binding.FIELD :
 					FieldBinding field = (FieldBinding) recipient;
 					if ((field.tagBits & TagBits.AnnotationResolved) != 0) return annotations;
-					field.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					field.tagBits |= TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved;
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
 						field.setAnnotations(annotations, false);
@@ -830,7 +818,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				case Binding.RECORD_COMPONENT :
 					RecordComponentBinding rcb = (RecordComponentBinding) recipient;
 					if ((rcb.tagBits & TagBits.AnnotationResolved) != 0) return annotations;
-					rcb.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					rcb.tagBits |= TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved;
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
 						rcb.setAnnotations(annotations, false);
@@ -839,7 +827,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				case Binding.LOCAL :
 					LocalVariableBinding local = (LocalVariableBinding) recipient;
 					if ((local.tagBits & TagBits.AnnotationResolved) != 0) return annotations;
-					local.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					local.tagBits |= TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved;
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
 						local.setAnnotations(annotations, scope, false);
@@ -853,7 +841,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				case Binding.MODULE:
 					ModuleBinding module = (ModuleBinding)recipient;
 					if ((module.tagBits & TagBits.AnnotationResolved) != 0) return annotations;
-					module.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					module.tagBits |= TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved;
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
 						module.setAnnotations(annotations, scope, false);
@@ -906,37 +894,35 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						// Note for JDK>=14, this could be LVB or RCB, hence typecasting to VB
 						long otherLocalTagBits = ((VariableBinding) annotationRecipient).tagBits;
 						// Make sure we retain the TagBits.IsArgument bit
-						local.tagBits = otherLocalTagBits | (local.tagBits & TagBits.IsArgument);
-						if ((otherLocalTagBits & TagBits.AnnotationSuppressWarnings) == 0) {
-							// None of the annotations is a SuppressWarnings annotation
-							// need to fill the instances array
-							if (annotations != null) {
-								for (int j = 0; j < length; j++) {
-									Annotation annot = sourceAnnotations[j];
-									annotations[j] = annot.getCompilerAnnotation();
-								}
-							}
-						} else if (annotations != null) {
-							// One of the annotations at least is a SuppressWarnings annotation
-							LocalDeclaration localDeclaration = local.declaration;
-							int declarationSourceEnd = localDeclaration.declarationSourceEnd;
-							int declarationSourceStart = localDeclaration.declarationSourceStart;
-							for (int j = 0; j < length; j++) {
-								Annotation annot = sourceAnnotations[j];
-								/*
-								 * Annotations are shared between two locals, but we still need to record
-								 * the suppress annotation range for the second local
-								 */
-								AnnotationBinding annotationBinding = annot.getCompilerAnnotation();
-								annotations[j] = annotationBinding;
-								if (annotationBinding != null) {
-									final ReferenceBinding annotationType = annotationBinding.getAnnotationType();
-									if (annotationType != null && annotationType.id == TypeIds.T_JavaLangSuppressWarnings) {
-										annot.recordSuppressWarnings(scope, declarationSourceStart, declarationSourceEnd, scope.compilerOptions().suppressWarnings);
-									}
-								}
-							}
-						}
+						local.tagBits = otherLocalTagBits | local.tagBits & TagBits.IsArgument;
+						if (annotations != null) {
+                            if ((otherLocalTagBits & TagBits.AnnotationSuppressWarnings) == 0) {
+                            	for (int j = 0; j < length; j++) {
+                            		Annotation annot = sourceAnnotations[j];
+                            		annotations[j] = annot.getCompilerAnnotation();
+                            	}
+                            } else {
+                            	// One of the annotations at least is a SuppressWarnings annotation
+                            	LocalDeclaration localDeclaration = local.declaration;
+                            	int declarationSourceEnd = localDeclaration.declarationSourceEnd;
+                            	int declarationSourceStart = localDeclaration.declarationSourceStart;
+                            	for (int j = 0; j < length; j++) {
+                            		Annotation annot = sourceAnnotations[j];
+                            		/*
+                            		 * Annotations are shared between two locals, but we still need to record
+                            		 * the suppress annotation range for the second local
+                            		 */
+                            		AnnotationBinding annotationBinding = annot.getCompilerAnnotation();
+                            		annotations[j] = annotationBinding;
+                            		if (annotationBinding != null) {
+                            			final ReferenceBinding annotationType = annotationBinding.getAnnotationType();
+                            			if (annotationType != null && annotationType.id == TypeIds.T_JavaLangSuppressWarnings) {
+                            				annot.recordSuppressWarnings(scope, declarationSourceStart, declarationSourceEnd, scope.compilerOptions().suppressWarnings);
+                            			}
+                            		}
+                            	}
+                            }
+                        }
 						// Note: This is the argument of an implicit canonical constructor of a record declaration
 						// copy the se8 annotations.
 						if (annotationRecipient instanceof RecordComponentBinding && copySE8AnnotationsToType)
@@ -944,14 +930,13 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						break;
 				}
 				return annotations;
-			} else {
-				annotation.recipient = recipient;
-				annotation.resolveType(scope);
-				// null if receiver is a package binding
-				if (annotations != null) {
-					annotations[i] = annotation.getCompilerAnnotation();
-				}
 			}
+            annotation.recipient = recipient;
+            annotation.resolveType(scope);
+            // null if receiver is a package binding
+            if (annotations != null) {
+            	annotations[i] = annotation.getCompilerAnnotation();
+            }
 		}
 
 		/* See if the recipient is meta-annotated with @Repeatable and if so validate constraints. We can't do this during resolution of @Repeatable itself as @Target and
@@ -1074,12 +1059,10 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			Binding target = scope.checkRedundantDefaultNullness(defaultNullness, localDeclaration.sourceStart);
 			boolean recorded = scope.recordNonNullByDefault(binding, defaultNullness, lastNNBDAnnotation,
 					lastNNBDAnnotation.sourceStart, localDeclaration.declarationSourceEnd);
-			if (recorded) {
-				if (target != null) {
-					scope.problemReporter().nullDefaultAnnotationIsRedundant(localDeclaration,
-							new Annotation[] { lastNNBDAnnotation }, target);
-				}
-			}
+			if (recorded && target != null) {
+            	scope.problemReporter().nullDefaultAnnotationIsRedundant(localDeclaration,
+            			new Annotation[] { lastNNBDAnnotation }, target);
+            }
 		}
 	}
 
@@ -1154,7 +1137,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						typeRef.bits |= HasTypeAnnotations;
 						local.type = mergeAnnotationsIntoType(scope, se8Annotations, se8nullBits, se8NullAnnotation, typeRef, local.type);
 						if(scope.environment().usesNullTypeAnnotations()) {
-							local.tagBits &= ~(se8nullBits);
+							local.tagBits &= ~se8nullBits;
 						}
 					}
 					break;
@@ -1167,7 +1150,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						fieldDeclaration.type.bits |= HasTypeAnnotations;
 						field.type = mergeAnnotationsIntoType(scope, se8Annotations, se8nullBits, se8NullAnnotation, fieldDeclaration.type, field.type);
 						if(scope.environment().usesNullTypeAnnotations()) {
-							field.tagBits &= ~(se8nullBits);
+							field.tagBits &= ~se8nullBits;
 						}
 					}
 					break;
@@ -1179,7 +1162,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						recordComponent.type.bits |= HasTypeAnnotations;
 						recordComponentBinding.type = mergeAnnotationsIntoType(scope, se8Annotations, se8nullBits, se8NullAnnotation, recordComponent.type, recordComponentBinding.type);
 						if(scope.environment().usesNullTypeAnnotations()) { //TODO Bug 562478
-							recordComponentBinding.tagBits &= ~(se8nullBits);
+							recordComponentBinding.tagBits &= ~se8nullBits;
 						}
 					}
 					break;
@@ -1193,7 +1176,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 							methodDecl.returnType.bits |= HasTypeAnnotations;
 							method.returnType = mergeAnnotationsIntoType(scope, se8Annotations, se8nullBits, se8NullAnnotation, methodDecl.returnType, method.returnType);
 							if(scope.environment().usesNullTypeAnnotations()) {
-								method.tagBits &= ~(se8nullBits);
+								method.tagBits &= ~se8nullBits;
 							}
 						}
 					} else {
@@ -1279,15 +1262,13 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		TypeReference unionRef = typeRef.isUnionType() ? ((UnionTypeReference) typeRef).typeReferences[0] : null;
 
 		// for arrays: @T X[] SE7 associates @T to the type, but in SE8 it affects the leaf component type
-		TypeBinding oldLeafType = (unionRef == null) ? existingType.leafComponentType() : unionRef.resolvedType;
-		if (se8nullBits != 0) {
-			if (typeRef instanceof ArrayTypeReference) { // NOTE: no corresponding code for ArrayQualifiedTypeReference is necessary
-				ArrayTypeReference arrayTypeReference = (ArrayTypeReference) typeRef;
-				if(arrayTypeReference.leafComponentTypeWithoutDefaultNullness != null) {
-					oldLeafType=arrayTypeReference.leafComponentTypeWithoutDefaultNullness;
-				}
-			}
-		}
+		TypeBinding oldLeafType = unionRef == null ? existingType.leafComponentType() : unionRef.resolvedType;
+		if (se8nullBits != 0 && typeRef instanceof ArrayTypeReference) { // NOTE: no corresponding code for ArrayQualifiedTypeReference is necessary
+        	ArrayTypeReference arrayTypeReference = (ArrayTypeReference) typeRef;
+        	if(arrayTypeReference.leafComponentTypeWithoutDefaultNullness != null) {
+        		oldLeafType=arrayTypeReference.leafComponentTypeWithoutDefaultNullness;
+        	}
+        }
 		if (se8nullBits != 0 && oldLeafType.isBaseType()) {
 			scope.problemReporter().illegalAnnotationForBaseType(typeRef, new Annotation[] { se8NullAnnotation }, se8nullBits);
 			return existingType;
@@ -1434,7 +1415,6 @@ public static void resolveDeprecatedAnnotations(BlockScope scope, Annotation[] a
 				recordComponentBinding.tagBits |= TagBits.DeprecatedAnnotationResolved;
 				return;
 			default:
-				return;
 		}
 	}
 }

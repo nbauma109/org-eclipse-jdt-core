@@ -354,11 +354,9 @@ class ThreadJob extends Job {
 				updateLockState = true;
 			}
 			waitEnd(threadJob, updateLockState, monitor);
-			if (canStopWaiting) {
-				if (waiting) {
-					manager.implicitJobs.removeWaiting(threadJob);
-				}
-			}
+			if (canStopWaiting && waiting) {
+            	manager.implicitJobs.removeWaiting(threadJob);
+            }
 			if (canBlock) {
 				// must unregister monitoring this job
 				manager.endMonitoring(threadJob);
@@ -397,7 +395,7 @@ class ThreadJob extends Job {
 			lastPush = (RuntimeException) new RuntimeException().fillInStackTrace();
 		}
 		//check for containment last because we don't want to fail again on endRule
-		if (baseRule != null && rule != null && !(baseRule.contains(rule) && baseRule.isConflicting(rule))) {
+		if (baseRule != null && rule != null && (!baseRule.contains(rule) || !baseRule.isConflicting(rule))) {
 			illegalPush(rule, baseRule);
 		}
 	}

@@ -63,7 +63,6 @@ public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 
 	public ClasspathJrtWithReleaseOption(String zipFilename, AccessRuleSet accessRuleSet,
 			IPath externalAnnotationPath, Collection<ClasspathLocation> allLocationsForEEA, String release) throws CoreException {
-		super();
 		if (release == null || release.equals("")) { //$NON-NLS-1$
 			throw new IllegalArgumentException("--release argument can not be null"); //$NON-NLS-1$
 		}
@@ -95,9 +94,8 @@ public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 		int index = comp.indexOf("1."); //$NON-NLS-1$
 		if (index != -1) {
 			return comp.substring(index + 2);
-		} else {
-			return comp;
 		}
+        return comp;
 	}
 
 	/**
@@ -254,14 +252,12 @@ public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 						reader = new ClassFileReader(content, qualifiedBinaryFileName.toCharArray());
 						if (moduleName != null) {
 							((ClassFileReader) reader).moduleName = moduleName.toCharArray();
-						} else {
-							if (this.ctSym.isJRE12Plus()) {
-								moduleName = this.ctSym.getModuleInJre12plus(this.releaseCode, qualifiedBinaryFileName);
-								if (moduleName != null) {
-									((ClassFileReader) reader).moduleName = moduleName.toCharArray();
-								}
-							}
-						}
+						} else if (this.ctSym.isJRE12Plus()) {
+                        	moduleName = this.ctSym.getModuleInJre12plus(this.releaseCode, qualifiedBinaryFileName);
+                        	if (moduleName != null) {
+                        		((ClassFileReader) reader).moduleName = moduleName.toCharArray();
+                        	}
+                        }
 					}
 				}
 			} else {
@@ -327,8 +323,7 @@ public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 
 	@Override
 	public String toString() {
-		String start = "Classpath jrt file " + this.zipFilename + " with --release option " + this.release; //$NON-NLS-1$ //$NON-NLS-2$
-		return start;
+		return "Classpath jrt file " + this.zipFilename + " with --release option " + this.release;
 	}
 
 }

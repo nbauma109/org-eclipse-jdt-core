@@ -210,17 +210,17 @@ public interface TypeConstants {
 	char[][] JAVA_LANG_ANNOTATION_ELEMENTTYPE = {JAVA, LANG, ANNOTATION, "ElementType".toCharArray()}; //$NON-NLS-1$
 	char[][] JDK_INTERNAL_PREVIEW_FEATURE = {JDK, INTERNAL, "PreviewFeature".toCharArray()}; //$NON-NLS-1$
 	char[][] JDK_INTERNAL_JAVAC_PREVIEW_FEATURE = {JDK, INTERNAL, JAVAC, "PreviewFeature".toCharArray()}; //$NON-NLS-1$
-	char[][] JAVA_LANG_REFLECT_FIELD = new char[][] {JAVA, LANG, REFLECT, "Field".toCharArray()}; //$NON-NLS-1$
-	char[][] JAVA_LANG_REFLECT_METHOD = new char[][] {JAVA, LANG, REFLECT, "Method".toCharArray()}; //$NON-NLS-1$
-	char[][] JAVA_IO_CLOSEABLE = new char[][] { JAVA, IO, "Closeable".toCharArray()};//$NON-NLS-1$
-	char[][] JAVA_IO_OBJECTSTREAMEXCEPTION = new char[][] { JAVA, IO, "ObjectStreamException".toCharArray()};//$NON-NLS-1$
+	char[][] JAVA_LANG_REFLECT_FIELD = {JAVA, LANG, REFLECT, "Field".toCharArray()}; //$NON-NLS-1$
+	char[][] JAVA_LANG_REFLECT_METHOD = {JAVA, LANG, REFLECT, "Method".toCharArray()}; //$NON-NLS-1$
+	char[][] JAVA_IO_CLOSEABLE = { JAVA, IO, "Closeable".toCharArray()};//$NON-NLS-1$
+	char[][] JAVA_IO_OBJECTSTREAMEXCEPTION = { JAVA, IO, "ObjectStreamException".toCharArray()};//$NON-NLS-1$
 	char[][] JAVA_IO_EXTERNALIZABLE = {JAVA, IO, "Externalizable".toCharArray()}; //$NON-NLS-1$
-	char[][] JAVA_IO_IOEXCEPTION = new char[][] { JAVA, IO, "IOException".toCharArray()};//$NON-NLS-1$
-	char[][] JAVA_IO_OBJECTOUTPUTSTREAM = new char[][] { JAVA, IO, "ObjectOutputStream".toCharArray()}; //$NON-NLS-1$
-	char[][] JAVA_IO_OBJECTINPUTSTREAM = new char[][] { JAVA, IO, "ObjectInputStream".toCharArray()}; //$NON-NLS-1$
-	char[][] JAVA_NIO_FILE_FILES = new char[][] { JAVA, "nio".toCharArray(), "file".toCharArray(), "Files".toCharArray() };   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+	char[][] JAVA_IO_IOEXCEPTION = { JAVA, IO, "IOException".toCharArray()};//$NON-NLS-1$
+	char[][] JAVA_IO_OBJECTOUTPUTSTREAM = { JAVA, IO, "ObjectOutputStream".toCharArray()}; //$NON-NLS-1$
+	char[][] JAVA_IO_OBJECTINPUTSTREAM = { JAVA, IO, "ObjectInputStream".toCharArray()}; //$NON-NLS-1$
+	char[][] JAVA_NIO_FILE_FILES = { JAVA, "nio".toCharArray(), "file".toCharArray(), "Files".toCharArray() };   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 	// javax.rmi.CORBA.Stub
-	char[][] JAVAX_RMI_CORBA_STUB = new char[][] {
+	char[][] JAVAX_RMI_CORBA_STUB = {
 			JAVAX,
 			"rmi".toCharArray(), //$NON-NLS-1$
 			"CORBA".toCharArray(), //$NON-NLS-1$
@@ -263,7 +263,7 @@ public interface TypeConstants {
 	char[][] APACHE_IOUTILS = { ORG, APACHE, COMMONS, IO, "IOUtils".toCharArray() }; //$NON-NLS-1$
 	char[][] APACHE_DBUTILS = { ORG, APACHE, COMMONS, "dbutils".toCharArray(), "DbUtils".toCharArray() }; //$NON-NLS-1$ //$NON-NLS-2$
 	char[] CLOSE_QUIETLY = "closeQuietly".toCharArray(); //$NON-NLS-1$
-	CloseMethodRecord[] closeMethods = new CloseMethodRecord[] {
+	CloseMethodRecord[] closeMethods = {
 		new CloseMethodRecord(GUAVA_CLOSEABLES, CLOSE_QUIETLY, 1),
 		new CloseMethodRecord(GUAVA_CLOSEABLES, CLOSE, 1),
 		new CloseMethodRecord(APACHE_IOUTILS, CLOSE_QUIETLY, 1),
@@ -275,7 +275,7 @@ public interface TypeConstants {
 		new CloseMethodRecord(APACHE_DBUTILS, "rollbackAndCloseQuietly".toCharArray(), 1), //$NON-NLS-1$
 	};
 	// white lists of closeables:
-	char[][] JAVA_IO_WRAPPER_CLOSEABLES = new char[][] {
+	char[][] JAVA_IO_WRAPPER_CLOSEABLES = {
 		"BufferedInputStream".toCharArray(), //$NON-NLS-1$
 		"BufferedOutputStream".toCharArray(), //$NON-NLS-1$
 		"BufferedReader".toCharArray(), //$NON-NLS-1$
@@ -297,7 +297,7 @@ public interface TypeConstants {
 		"PushbackReader".toCharArray(), //$NON-NLS-1$
 		"OutputStreamWriter".toCharArray(), //$NON-NLS-1$
 	};
-	char[][] JAVA_UTIL_ZIP_WRAPPER_CLOSEABLES = new char[][] {
+	char[][] JAVA_UTIL_ZIP_WRAPPER_CLOSEABLES = {
 		"GZIPInputStream".toCharArray(), //$NON-NLS-1$
 		"InflaterInputStream".toCharArray(), //$NON-NLS-1$
 		"DeflaterInputStream".toCharArray(), //$NON-NLS-1$
@@ -311,14 +311,14 @@ public interface TypeConstants {
 		"ZipOutputStream".toCharArray(), //$NON-NLS-1$
 		"JarOutputStream".toCharArray(), //$NON-NLS-1$
 	};
-	char[][][] OTHER_WRAPPER_CLOSEABLES = new char[][][] {
+	char[][][] OTHER_WRAPPER_CLOSEABLES = {
 		{JAVA, "security".toCharArray(), "DigestInputStream".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$
 		{JAVA, "security".toCharArray(), "DigestOutputStream".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$
 		{JAVA, "beans".toCharArray(), "XMLEncoder".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$
 		{JAVA, "beans".toCharArray(), "XMLDecoder".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$
 		{JAVAX, "sound".toCharArray(), "sampled".toCharArray(), "AudioInputStream".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	};
-	char[][] JAVA_IO_RESOURCE_FREE_CLOSEABLES = new char[][] {
+	char[][] JAVA_IO_RESOURCE_FREE_CLOSEABLES = {
 		"StringReader".toCharArray(), //$NON-NLS-1$
 		"StringWriter".toCharArray(), //$NON-NLS-1$
 		"ByteArrayInputStream".toCharArray(), //$NON-NLS-1$
@@ -367,7 +367,7 @@ public interface TypeConstants {
 	// different assertion utilities:
 	char[] ASSERT_CLASS = "Assert".toCharArray(); //$NON-NLS-1$
 	char[] ASSERTIONS_CLASS = "Assertions".toCharArray(); //$NON-NLS-1$
-	char[][] ORG_ECLIPSE_CORE_RUNTIME_ASSERT = new char[][] { ORG, ECLIPSE, CORE, RUNTIME, ASSERT_CLASS };
+	char[][] ORG_ECLIPSE_CORE_RUNTIME_ASSERT = { ORG, ECLIPSE, CORE, RUNTIME, ASSERT_CLASS };
 	// ... methods:
 	char[] IS_NOTNULL = "isNotNull".toCharArray(); //$NON-NLS-1$
 
@@ -377,9 +377,9 @@ public interface TypeConstants {
 	char[] PARAMS = "params".toCharArray(); //$NON-NLS-1$
 	char[] PROVIDER = "provider".toCharArray(); //$NON-NLS-1$
 	char[] API = "api".toCharArray(); //$NON-NLS-1$
-	char[][] JUNIT_FRAMEWORK_ASSERT = new char[][] { JUNIT, FRAMEWORK, ASSERT_CLASS };
-	char[][] ORG_JUNIT_ASSERT = new char[][] { ORG, JUNIT, ASSERT_CLASS };
-	char[][] ORG_JUNIT_JUPITER_API_ASSERTIONS = new char[][] { ORG, JUNIT, JUPITER, API, ASSERTIONS_CLASS };
+	char[][] JUNIT_FRAMEWORK_ASSERT = { JUNIT, FRAMEWORK, ASSERT_CLASS };
+	char[][] ORG_JUNIT_ASSERT = { ORG, JUNIT, ASSERT_CLASS };
+	char[][] ORG_JUNIT_JUPITER_API_ASSERTIONS = { ORG, JUNIT, JUPITER, API, ASSERTIONS_CLASS };
 	// ... methods:
 	char[] ASSERT_NULL = "assertNull".toCharArray(); //$NON-NLS-1$
 	char[] ASSERT_NOTNULL = "assertNotNull".toCharArray(); //$NON-NLS-1$
@@ -387,19 +387,19 @@ public interface TypeConstants {
 	char[] ASSERT_FALSE = "assertFalse".toCharArray(); //$NON-NLS-1$
 	// ... annotations:
 	char[] METHOD_SOURCE = "MethodSource".toCharArray(); //$NON-NLS-1$
-	char[][] ORG_JUNIT_METHOD_SOURCE = new char[][] { ORG, JUNIT, JUPITER, PARAMS, PROVIDER, METHOD_SOURCE };
+	char[][] ORG_JUNIT_METHOD_SOURCE = { ORG, JUNIT, JUPITER, PARAMS, PROVIDER, METHOD_SOURCE };
 
 	char[] VALIDATE_CLASS = "Validate".toCharArray(); //$NON-NLS-1$
-	char[][] ORG_APACHE_COMMONS_LANG_VALIDATE = new char[][] { ORG, APACHE, COMMONS, LANG, VALIDATE_CLASS };
-	char[][] ORG_APACHE_COMMONS_LANG3_VALIDATE = new char[][] { ORG, APACHE, COMMONS, LANG3, VALIDATE_CLASS };
-	char[][] ORG_ECLIPSE_JDT_INTERNAL_COMPILER_LOOKUP_TYPEBINDING = new char[][] { ORG, ECLIPSE, JDT, INTERNAL, COMPILER, LOOKUP, TYPEBINDING };
-	char[][] ORG_ECLIPSE_JDT_CORE_DOM_ITYPEBINDING = new char[][] { ORG, ECLIPSE, JDT, CORE, DOM, ITYPEBINDING };
+	char[][] ORG_APACHE_COMMONS_LANG_VALIDATE = { ORG, APACHE, COMMONS, LANG, VALIDATE_CLASS };
+	char[][] ORG_APACHE_COMMONS_LANG3_VALIDATE = { ORG, APACHE, COMMONS, LANG3, VALIDATE_CLASS };
+	char[][] ORG_ECLIPSE_JDT_INTERNAL_COMPILER_LOOKUP_TYPEBINDING = { ORG, ECLIPSE, JDT, INTERNAL, COMPILER, LOOKUP, TYPEBINDING };
+	char[][] ORG_ECLIPSE_JDT_CORE_DOM_ITYPEBINDING = { ORG, ECLIPSE, JDT, CORE, DOM, ITYPEBINDING };
 
 	// ... methods:
 	char[] IS_TRUE = "isTrue".toCharArray(); //$NON-NLS-1$
 	char[] NOT_NULL = "notNull".toCharArray(); //$NON-NLS-1$
 
-	char[][] COM_GOOGLE_COMMON_BASE_PRECONDITIONS = new char[][] {
+	char[][] COM_GOOGLE_COMMON_BASE_PRECONDITIONS = {
 			COM, GOOGLE, "common".toCharArray(), "base".toCharArray(), "Preconditions".toCharArray() }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	// ... methods:
 	char[] CHECK_NOT_NULL = "checkNotNull".toCharArray(); //$NON-NLS-1$
@@ -412,8 +412,8 @@ public interface TypeConstants {
 	// different @Inject annotations are relevant for @NonNull fields
 	char[] INJECT_PACKAGE = "inject".toCharArray(); //$NON-NLS-1$
 	char[] INJECT_TYPE = "Inject".toCharArray(); //$NON-NLS-1$
-	char[][] JAVAX_ANNOTATION_INJECT_INJECT = new char[][] { JAVAX, INJECT_PACKAGE, INJECT_TYPE };
-	char[][] COM_GOOGLE_INJECT_INJECT = new char[][] {COM, GOOGLE, INJECT_PACKAGE, INJECT_TYPE };
+	char[][] JAVAX_ANNOTATION_INJECT_INJECT = { JAVAX, INJECT_PACKAGE, INJECT_TYPE };
+	char[][] COM_GOOGLE_INJECT_INJECT = {COM, GOOGLE, INJECT_PACKAGE, INJECT_TYPE };
 	//    detail for the above:
 	char[] OPTIONAL = "optional".toCharArray(); //$NON-NLS-1$
 
@@ -425,7 +425,7 @@ public interface TypeConstants {
 	char[] IS_NULL = "isNull".toCharArray();   //$NON-NLS-1$
 
 	// well-known methods with "dangerous" signatures:
-	char[][] JAVA_UTIL_MAP = new char[][] { JAVA, UTIL, "Map".toCharArray() }; //$NON-NLS-1$
+	char[][] JAVA_UTIL_MAP = { JAVA, UTIL, "Map".toCharArray() }; //$NON-NLS-1$
 	char[] GET = "get".toCharArray(); //$NON-NLS-1$
 	char[] REMOVE = "remove".toCharArray(); //$NON-NLS-1$
 	char[] REMOVE_ALL = "removeAll".toCharArray(); //$NON-NLS-1$
@@ -454,7 +454,7 @@ public interface TypeConstants {
 					if (CharOperation.prefixEquals(TypeConstants.REMOVE, selector)) {
 						if (CharOperation.equals(selector, TypeConstants.REMOVE))
 							return DangerousMethod.Remove;
-						else if (CharOperation.equals(selector, TypeConstants.REMOVE_ALL))
+                        if (CharOperation.equals(selector, TypeConstants.REMOVE_ALL))
 							return DangerousMethod.RemoveAll;
 					} else if (CharOperation.equals(selector, TypeConstants.RETAIN_ALL)) {
 						return DangerousMethod.RetainAll;
@@ -464,11 +464,11 @@ public interface TypeConstants {
 					if (CharOperation.prefixEquals(TypeConstants.CONTAINS, selector)) {
 						if (CharOperation.equals(selector, TypeConstants.CONTAINS))
 							return DangerousMethod.Contains;
-						else if (CharOperation.equals(selector, TypeConstants.CONTAINS_ALL))
+                        if (CharOperation.equals(selector, TypeConstants.CONTAINS_ALL))
 							return DangerousMethod.ContainsAll;
-						else if (CharOperation.equals(selector, TypeConstants.CONTAINS_KEY))
+                        if (CharOperation.equals(selector, TypeConstants.CONTAINS_KEY))
 							return DangerousMethod.ContainsKey;
-						else if (CharOperation.equals(selector, TypeConstants.CONTAINS_VALUE))
+                        if (CharOperation.equals(selector, TypeConstants.CONTAINS_VALUE))
 							return DangerousMethod.ContainsValue;
 					}
 					break;
@@ -497,7 +497,7 @@ public interface TypeConstants {
 	char [] AUTOWIRED = "Autowired".toCharArray();  //$NON-NLS-1$
 	char [] BEANS = "beans".toCharArray();  //$NON-NLS-1$
 	char [] FACTORY = "factory".toCharArray(); //$NON-NLS-1$
-	char[][] ORG_SPRING_AUTOWIRED = new char[][] {ORG, SPRING, BEANS, FACTORY, ANNOTATION, AUTOWIRED};
+	char[][] ORG_SPRING_AUTOWIRED = {ORG, SPRING, BEANS, FACTORY, ANNOTATION, AUTOWIRED};
 	char[] REQUIRED = "required".toCharArray(); //$NON-NLS-1$
 
 	// Constraints for generic type argument inference

@@ -159,7 +159,7 @@ public class LRUCache implements Cloneable {
 		return newCache;
 	}
 	public double fillingRatio() {
-		return (fCurrentSpace) * 100.0 / fSpaceLimit;
+		return fCurrentSpace * 100.0 / fSpaceLimit;
 	}
 	/**
 	 * Flushes all entries from the cache.
@@ -396,9 +396,8 @@ public class LRUCache implements Cloneable {
 				entry._fSpace = newSpace;
 				this.fCurrentSpace = newTotal;
 				return value;
-			} else {
-				privateRemoveEntry (entry, false);
 			}
+            privateRemoveEntry (entry, false);
 		}
 		if (makeSpace(newSpace)) {
 			privateAdd (key, value, newSpace);
@@ -505,6 +504,5 @@ public class LRUCache implements Cloneable {
 			this.privateRemoveEntry (entry, true);
 			this.privateAddEntry (entry, true);
 		}
-		return;
 	}
 }

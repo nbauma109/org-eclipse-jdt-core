@@ -68,8 +68,8 @@ public String errorReportSource(char[] unitSource) {
 	//this code assumes that the font used in the console is fixed size
 
 	//sanity .....
-	if ((this.startPosition > this.endPosition)
-		|| ((this.startPosition < 0) && (this.endPosition < 0))
+	if (this.startPosition > this.endPosition
+		|| this.startPosition < 0 && this.endPosition < 0
 		|| unitSource.length == 0)
 		return Messages.problem_noSourceInformation;
 
@@ -106,7 +106,7 @@ public String errorReportSource(char[] unitSource) {
 
 	// compute underline
 	for (int i = begin; i <this.startPosition; i++) {
-		errorBuffer.append((unitSource[i] == TAB) ? TAB : SPACE);
+		errorBuffer.append(unitSource[i] == TAB ? TAB : SPACE);
 	}
 	for (int i = this.startPosition; i <= (this.endPosition >= length ? length - 1 : this.endPosition); i++) {
 		errorBuffer.append(MARK);
@@ -272,14 +272,12 @@ public void setSourceStart(int sourceStart) {
 
 @Override
 public String toString() {
-	String s = "Pb(" + (this.id & IProblem.IgnoreCategoriesMask) + ") "; //$NON-NLS-1$ //$NON-NLS-2$
+	StringBuilder s = new StringBuilder("Pb(").append(this.id & IProblem.IgnoreCategoriesMask).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
 	if (this.message != null) {
-		s += this.message;
-	} else {
-		if (this.arguments != null)
-			for (int i = 0; i < this.arguments.length; i++)
-				s += " " + this.arguments[i]; //$NON-NLS-1$
-	}
-	return s;
+		s.append(this.message);
+	} else if (this.arguments != null)
+        for (String argument : this.arguments)
+            s.append(" ").append(argument); //$NON-NLS-1$
+	return s.toString();
 }
 }

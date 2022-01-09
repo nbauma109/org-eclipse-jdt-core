@@ -66,7 +66,7 @@ public final class HashtableOfInteger {
 	}
 
 	public boolean containsKey(int key) {
-		Integer intKey = Integer.valueOf(key);
+		Integer intKey = key;
 		int length = this.keyTable.length,
 			index = intKey.hashCode() % length;
 		Integer currentKey;
@@ -81,7 +81,7 @@ public final class HashtableOfInteger {
 	}
 
 	public Object get(int key) {
-		Integer intKey = Integer.valueOf(key);
+		Integer intKey = key;
 		int length = this.keyTable.length,
 			index = intKey.hashCode() % length;
 		Integer currentKey;
@@ -96,7 +96,7 @@ public final class HashtableOfInteger {
 	}
 
 	public Object put(int key, Object value) {
-		Integer intKey = Integer.valueOf(key);
+		Integer intKey = key;
 		int length = this.keyTable.length,
 			index = intKey.hashCode() % length;
 		Integer currentKey;
@@ -126,7 +126,7 @@ public final class HashtableOfInteger {
 	 * @param value The value of the table entry
 	 */
 	public void putUnsafely(int key, Object value) {
-		Integer intKey = Integer.valueOf(key);
+		Integer intKey = key;
 		int length = this.keyTable.length,
 			index = intKey.hashCode() % length;
 		while (this.keyTable[index] != null) {
@@ -144,7 +144,7 @@ public final class HashtableOfInteger {
 	}
 
 	public Object removeKey(int key) {
-		Integer intKey = Integer.valueOf(key);
+		Integer intKey = key;
 		int length = this.keyTable.length,
 			index = intKey.hashCode() % length;
 		Integer currentKey;
@@ -183,11 +183,11 @@ public final class HashtableOfInteger {
 
 	@Override
 	public String toString() {
-		String s = ""; //$NON-NLS-1$
+		StringBuilder s = new StringBuilder();
 		Object object;
 		for (int i = 0, length = this.valueTable.length; i < length; i++)
 			if ((object = this.valueTable[i]) != null)
-				s += this.keyTable[i] + " -> " + object + "\n"; 	//$NON-NLS-2$ //$NON-NLS-1$
-		return s;
+				s.append(this.keyTable[i]).append(" -> ").append(object).append("\n"); 	//$NON-NLS-2$ //$NON-NLS-1$
+		return s.toString();
 	}
 }

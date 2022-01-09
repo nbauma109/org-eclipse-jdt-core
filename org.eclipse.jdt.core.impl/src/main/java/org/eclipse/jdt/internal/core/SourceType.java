@@ -45,7 +45,7 @@ public class SourceType extends NamedMember implements IType {
  * Currently this is computed and used only for anonymous types.
  */
 public int localOccurrenceCount = 1;
-private static final IField[] NO_FIELDS = new IField[0];
+private static final IField[] NO_FIELDS = {};
 
 protected SourceType(JavaElement parent, String name) {
 	super(parent, name);
@@ -55,14 +55,15 @@ protected void closing(Object info) throws JavaModelException {
 	super.closing(info);
 	SourceTypeElementInfo elementInfo = (SourceTypeElementInfo) info;
 	ITypeParameter[] typeParameters = elementInfo.typeParameters;
-	for (int i = 0, length = typeParameters.length; i < length; i++) {
-		((TypeParameter) typeParameters[i]).close();
+	for (ITypeParameter typeParameter : typeParameters) {
+		((TypeParameter) typeParameter).close();
 	}
 }
 /**
  * @see IType
  * @deprecated
  */
+@Deprecated
 @Override
 public void codeComplete(char[] snippet,int insertion,int position,char[][] localVariableTypeNames,char[][] localVariableNames,int[] localVariableModifiers,boolean isStatic,ICompletionRequestor requestor) throws JavaModelException {
 	codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor, DefaultWorkingCopyOwner.PRIMARY);
@@ -71,6 +72,7 @@ public void codeComplete(char[] snippet,int insertion,int position,char[][] loca
  * @see IType
  * @deprecated
  */
+@Deprecated
 @Override
 public void codeComplete(char[] snippet,int insertion,int position,char[][] localVariableTypeNames,char[][] localVariableNames,int[] localVariableModifiers,boolean isStatic,ICompletionRequestor requestor, WorkingCopyOwner owner) throws JavaModelException {
 	if (requestor == null) {
@@ -196,8 +198,7 @@ public IType createType(String contents, IJavaElement sibling, boolean force, IP
 }
 @Override
 public boolean equals(Object o) {
-	if (!(o instanceof SourceType)) return false;
-	if (((SourceType) o).isLambda())
+	if (!(o instanceof SourceType) || ((SourceType) o).isLambda())
 		return false;
 	return super.equals(o);
 }
@@ -232,8 +233,8 @@ public IJavaElement[] getChildrenForCategory(String category) throws JavaModelEx
 		IJavaElement child = children[i];
 		String[] elementCategories = (String[]) categories.get(child);
 		if (elementCategories != null)
-			for (int j = 0, length2 = elementCategories.length; j < length2; j++) {
-				if (elementCategories[j].equals(category))
+            for (String element : elementCategories) {
+				if (element.equals(category))
 					result[index++] = child;
 			}
 	}
@@ -251,12 +252,11 @@ public IType getDeclaringType() {
 	while (parentElement != null) {
 		if (parentElement.getElementType() == IJavaElement.TYPE) {
 			return (IType) parentElement;
-		} else
-			if (parentElement instanceof IMember) {
-				parentElement = parentElement.getParent();
-			} else {
-				return null;
-			}
+		}
+        if (!(parentElement instanceof IMember)) {
+        	return null;
+        }
+        parentElement = parentElement.getParent();
 	}
 	return null;
 }
@@ -508,9 +508,7 @@ public IPackageFragment getPackageFragment() {
 		if (parentElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			return (IPackageFragment)parentElement;
 		}
-		else {
-			parentElement = parentElement.getParent();
-		}
+        parentElement = parentElement.getParent();
 	}
 	Assert.isTrue(false);  // should not happen
 	return null;
@@ -829,6 +827,7 @@ public ITypeHierarchy newSupertypeHierarchy(
  * @see IType#newSupertypeHierarchy(IWorkingCopy[], IProgressMonitor)
  * @deprecated
  */
+@Deprecated
 @Override
 public ITypeHierarchy newSupertypeHierarchy(
 	IWorkingCopy[] workingCopies,
@@ -921,6 +920,7 @@ public ITypeHierarchy newTypeHierarchy(
  * @see IType#newTypeHierarchy(IWorkingCopy[], IProgressMonitor)
  * @deprecated
  */
+@Deprecated
 @Override
 public ITypeHierarchy newTypeHierarchy(
 	IWorkingCopy[] workingCopies,

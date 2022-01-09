@@ -233,7 +233,7 @@ public final class CommandEvent extends AbstractNamedHandleEvent {
 	 * @return the instance of the interface that changed. Guaranteed not to be
 	 *         <code>null</code>.
 	 */
-	public final Command getCommand() {
+	public Command getCommand() {
 		return command;
 	}
 
@@ -242,8 +242,8 @@ public final class CommandEvent extends AbstractNamedHandleEvent {
 	 *
 	 * @return <code>true</code>, iff the category property changed.
 	 */
-	public final boolean isCategoryChanged() {
-		return ((changedValues & CHANGED_CATEGORY) != 0);
+	public boolean isCategoryChanged() {
+		return (changedValues & CHANGED_CATEGORY) != 0;
 	}
 
 	/**
@@ -251,8 +251,8 @@ public final class CommandEvent extends AbstractNamedHandleEvent {
 	 *
 	 * @return <code>true</code>, iff the handled property changed.
 	 */
-	public final boolean isHandledChanged() {
-		return ((changedValues & CHANGED_HANDLED) != 0);
+	public boolean isHandledChanged() {
+		return (changedValues & CHANGED_HANDLED) != 0;
 	}
 
 	/**
@@ -261,8 +261,8 @@ public final class CommandEvent extends AbstractNamedHandleEvent {
 	 * @return <code>true</code>, iff the help context identifier changed.
 	 * @since 3.2
 	 */
-	public final boolean isHelpContextIdChanged() {
-		return ((changedValues & CHANGED_HELP_CONTEXT_ID) != 0);
+	public boolean isHelpContextIdChanged() {
+		return (changedValues & CHANGED_HELP_CONTEXT_ID) != 0;
 	}
 
 	/**
@@ -270,8 +270,8 @@ public final class CommandEvent extends AbstractNamedHandleEvent {
 	 *
 	 * @return <code>true</code>, iff the parameters property changed.
 	 */
-	public final boolean isParametersChanged() {
-		return ((changedValues & CHANGED_PARAMETERS) != 0);
+	public boolean isParametersChanged() {
+		return (changedValues & CHANGED_PARAMETERS) != 0;
 	}
 
 	/**
@@ -280,8 +280,8 @@ public final class CommandEvent extends AbstractNamedHandleEvent {
 	 * @return <code>true</code>, iff the return type property changed.
 	 * @since 3.2
 	 */
-	public final boolean isReturnTypeChanged() {
-		return ((changedValues & CHANGED_RETURN_TYPE) != 0);
+	public boolean isReturnTypeChanged() {
+		return (changedValues & CHANGED_RETURN_TYPE) != 0;
 	}
 
 	/**
@@ -290,7 +290,7 @@ public final class CommandEvent extends AbstractNamedHandleEvent {
 	 * @return <code>true</code> iff the comand enablement changed
 	 * @since 3.3
 	 */
-	public final boolean isEnabledChanged() {
-		return ((changedValues & CHANGED_ENABLED) != 0);
+	public boolean isEnabledChanged() {
+		return (changedValues & CHANGED_ENABLED) != 0;
 	}
 }

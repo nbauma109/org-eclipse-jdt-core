@@ -84,30 +84,28 @@ public class UnlikelyArgumentCheck {
 		if (suspect == null)
 			return null;
 
-		if (actualReceiverType.hasTypeBit(TypeIds.BitMap)) {
-			if (paramTypeId == TypeIds.T_JavaLangObject) {
-				switch (suspect) {
-					case ContainsKey:
-					case Get:
-					case Remove:
-						// map operations taking a key
-						ReferenceBinding mapType = actualReceiverType
-								.findSuperTypeOriginatingFrom(TypeIds.T_JavaUtilMap, false);
-						if (mapType != null && mapType.isParameterizedType())
-							return new UnlikelyArgumentCheck(suspect, argumentType,
-									((ParameterizedTypeBinding) mapType).typeArguments()[0], mapType);
-						break;
-					case ContainsValue:
-						// map operation taking a value
-						mapType = actualReceiverType.findSuperTypeOriginatingFrom(TypeIds.T_JavaUtilMap, false);
-						if (mapType != null && mapType.isParameterizedType())
-							return new UnlikelyArgumentCheck(suspect, argumentType,
-									((ParameterizedTypeBinding) mapType).typeArguments()[1], mapType);
-						break;
-					default: // no other suspects are detected in java.util.Map
-				}
-			}
-		}
+		if (actualReceiverType.hasTypeBit(TypeIds.BitMap) && paramTypeId == TypeIds.T_JavaLangObject) {
+        	switch (suspect) {
+        		case ContainsKey:
+        		case Get:
+        		case Remove:
+        			// map operations taking a key
+        			ReferenceBinding mapType = actualReceiverType
+        					.findSuperTypeOriginatingFrom(TypeIds.T_JavaUtilMap, false);
+        			if (mapType != null && mapType.isParameterizedType())
+        				return new UnlikelyArgumentCheck(suspect, argumentType,
+        						((ParameterizedTypeBinding) mapType).typeArguments()[0], mapType);
+        			break;
+        		case ContainsValue:
+        			// map operation taking a value
+        			mapType = actualReceiverType.findSuperTypeOriginatingFrom(TypeIds.T_JavaUtilMap, false);
+        			if (mapType != null && mapType.isParameterizedType())
+        				return new UnlikelyArgumentCheck(suspect, argumentType,
+        						((ParameterizedTypeBinding) mapType).typeArguments()[1], mapType);
+        			break;
+        		default: // no other suspects are detected in java.util.Map
+        	}
+        }
 		if (actualReceiverType.hasTypeBit(TypeIds.BitCollection)) {
 			if (paramTypeId == TypeIds.T_JavaLangObject) {
 				switch (suspect) {
@@ -143,22 +141,20 @@ public class UnlikelyArgumentCheck {
 					default: // no other suspects with Collection-parameter are detected in java.util.Collection
 				}
 			}
-			if (actualReceiverType.hasTypeBit(TypeIds.BitList)) {
-				if (paramTypeId == TypeIds.T_JavaLangObject) {
-					switch (suspect) {
-						case IndexOf:
-						case LastIndexOf:
-							// list operations taking a single element
-							ReferenceBinding listType = actualReceiverType
-									.findSuperTypeOriginatingFrom(TypeIds.T_JavaUtilList, false);
-							if (listType != null && listType.isParameterizedType())
-								return new UnlikelyArgumentCheck(suspect, argumentType,
-										((ParameterizedTypeBinding) listType).typeArguments()[0], listType);
-							break;
-						default: // no other suspects are detected in java.util.List
-					}
-				}
-			}
+			if (actualReceiverType.hasTypeBit(TypeIds.BitList) && paramTypeId == TypeIds.T_JavaLangObject) {
+            	switch (suspect) {
+            		case IndexOf:
+            		case LastIndexOf:
+            			// list operations taking a single element
+            			ReferenceBinding listType = actualReceiverType
+            					.findSuperTypeOriginatingFrom(TypeIds.T_JavaUtilList, false);
+            			if (listType != null && listType.isParameterizedType())
+            				return new UnlikelyArgumentCheck(suspect, argumentType,
+            						((ParameterizedTypeBinding) listType).typeArguments()[0], listType);
+            			break;
+            		default: // no other suspects are detected in java.util.List
+            	}
+            }
 		}
 		if (paramTypeId == TypeIds.T_JavaLangObject && suspect == DangerousMethod.Equals) {
 			return new UnlikelyArgumentCheck(suspect, argumentType, actualReceiverType, actualReceiverType);

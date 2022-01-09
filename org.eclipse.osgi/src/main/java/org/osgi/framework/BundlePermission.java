@@ -142,7 +142,7 @@ public final class BundlePermission extends BasicPermission {
 	 * @param mask
 	 */
 	private synchronized void setTransients(int mask) {
-		if ((mask == ACTION_NONE) || ((mask & ACTION_ALL) != mask)) {
+		if (mask == ACTION_NONE || (mask & ACTION_ALL) != mask) {
 			throw new IllegalArgumentException("invalid action string");
 		}
 
@@ -185,7 +185,7 @@ public final class BundlePermission extends BasicPermission {
 			char c;
 
 			// skip whitespace
-			while ((i != -1) && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
+			while (i != -1 && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
 				i--;
 
 			// check for the known strings
@@ -296,7 +296,7 @@ public final class BundlePermission extends BasicPermission {
 
 		final int effective = getActionsMask();
 		final int desired = requested.getActionsMask();
-		return ((effective & desired) == desired) && super.implies(requested);
+		return (effective & desired) == desired && super.implies(requested);
 	}
 
 	/**
@@ -383,7 +383,7 @@ public final class BundlePermission extends BasicPermission {
 
 		BundlePermission bp = (BundlePermission) obj;
 
-		return (getActionsMask() == bp.getActionsMask()) && getName().equals(bp.getName());
+		return getActionsMask() == bp.getActionsMask() && getName().equals(bp.getName());
 	}
 
 	/**
@@ -394,8 +394,7 @@ public final class BundlePermission extends BasicPermission {
 	@Override
 	public int hashCode() {
 		int h = 31 * 17 + getName().hashCode();
-		h = 31 * h + getActions().hashCode();
-		return h;
+		return 31 * h + getActions().hashCode();
 	}
 
 	/**
@@ -453,7 +452,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 * 
 	 */
 	public BundlePermissionCollection() {
-		permissions = new HashMap<String, BundlePermission>();
+		permissions = new HashMap<>();
 		all_allowed = false;
 	}
 
@@ -490,10 +489,8 @@ final class BundlePermissionCollection extends PermissionCollection {
 				pc.put(name, bp);
 			}
 
-			if (!all_allowed) {
-				if (name.equals("*"))
-					all_allowed = true;
-			}
+			if (!all_allowed && name.equals("*"))
+            	all_allowed = true;
 		}
 	}
 
@@ -568,7 +565,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		return Collections.enumeration(all);
 	}
 
@@ -576,7 +573,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 	private static final ObjectStreamField[]	serialPersistentFields	= {new ObjectStreamField("permissions", Hashtable.class), new ObjectStreamField("all_allowed", Boolean.TYPE)};
 
 	private synchronized void writeObject(ObjectOutputStream out) throws IOException {
-		Hashtable<String, BundlePermission> hashtable = new Hashtable<String, BundlePermission>(permissions);
+		Hashtable<String, BundlePermission> hashtable = new Hashtable<>(permissions);
 		ObjectOutputStream.PutField pfields = out.putFields();
 		pfields.put("permissions", hashtable);
 		pfields.put("all_allowed", all_allowed);
@@ -587,7 +584,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 		ObjectInputStream.GetField gfields = in.readFields();
 		@SuppressWarnings("unchecked")
 		Hashtable<String, BundlePermission> hashtable = (Hashtable<String, BundlePermission>) gfields.get("permissions", null);
-		permissions = new HashMap<String, BundlePermission>(hashtable);
+		permissions = new HashMap<>(hashtable);
 		all_allowed = gfields.get("all_allowed", false);
 	}
 }

@@ -23,6 +23,7 @@ package org.eclipse.jdt.core.jdom;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 public class DOMException extends RuntimeException {
 
 	private static final long serialVersionUID = 2536853590795032028L; // backward compatible

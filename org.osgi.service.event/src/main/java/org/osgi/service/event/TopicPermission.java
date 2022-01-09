@@ -128,24 +128,22 @@ public final class TopicPermission extends Permission {
 	 */
 	private synchronized void setTransients(final int mask) {
 		final String name = getName();
-		if ((name == null) || name.length() == 0) {
+		if (name == null || name.length() == 0) {
 			throw new IllegalArgumentException("invalid name");
 		}
 
-		if ((mask == ACTION_NONE) || ((mask & ACTION_ALL) != mask)) {
+		if (mask == ACTION_NONE || (mask & ACTION_ALL) != mask) {
 			throw new IllegalArgumentException("invalid action string");
 		}
 		action_mask = mask;
 
 		if (name.equals("*")) {
 			prefix = "";
-		} else {
-			if (name.endsWith("/*")) {
-				prefix = name.substring(0, name.length() - 1);
-			} else {
-				prefix = null;
-			}
-		}
+		} else if (name.endsWith("/*")) {
+        	prefix = name.substring(0, name.length() - 1);
+        } else {
+        	prefix = null;
+        }
 	}
 
 	/**
@@ -178,7 +176,7 @@ public final class TopicPermission extends Permission {
 		while (i != -1) {
 			char c;
 			// skip whitespace
-			while ((i != -1) && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
+			while (i != -1 && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
 				i--;
 			// check for the known strings
 			int matchlen;
@@ -340,7 +338,7 @@ public final class TopicPermission extends Permission {
 			return false;
 		}
 		TopicPermission tp = (TopicPermission) obj;
-		return (getActionsMask() == tp.getActionsMask()) && getName().equals(tp.getName());
+		return getActionsMask() == tp.getActionsMask() && getName().equals(tp.getName());
 	}
 
 	/**
@@ -351,8 +349,7 @@ public final class TopicPermission extends Permission {
 	@Override
 	public int hashCode() {
 		int h = 31 * 17 + getName().hashCode();
-		h = 31 * h + getActions().hashCode();
-		return h;
+		return 31 * h + getActions().hashCode();
 	}
 
 	/**
@@ -407,7 +404,7 @@ final class TopicPermissionCollection extends PermissionCollection {
 	 * 
 	 */
 	public TopicPermissionCollection() {
-		permissions = new HashMap<String, TopicPermission>();
+		permissions = new HashMap<>();
 		all_allowed = false;
 	}
 
@@ -445,10 +442,8 @@ final class TopicPermissionCollection extends PermissionCollection {
 			} else {
 				permissions.put(name, tp);
 			}
-			if (!all_allowed) {
-				if (name.equals("*"))
-					all_allowed = true;
-			}
+			if (!all_allowed && name.equals("*"))
+            	all_allowed = true;
 		}
 	}
 
@@ -525,7 +520,7 @@ final class TopicPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		return Collections.enumeration(all);
 	}
 
@@ -533,7 +528,7 @@ final class TopicPermissionCollection extends PermissionCollection {
 	private static final ObjectStreamField[]	serialPersistentFields	= {new ObjectStreamField("permissions", Hashtable.class), new ObjectStreamField("all_allowed", Boolean.TYPE)};
 
 	private synchronized void writeObject(ObjectOutputStream out) throws IOException {
-		Hashtable<String, TopicPermission> hashtable = new Hashtable<String, TopicPermission>(permissions);
+		Hashtable<String, TopicPermission> hashtable = new Hashtable<>(permissions);
 		ObjectOutputStream.PutField pfields = out.putFields();
 		pfields.put("permissions", hashtable);
 		pfields.put("all_allowed", all_allowed);
@@ -544,7 +539,7 @@ final class TopicPermissionCollection extends PermissionCollection {
 		ObjectInputStream.GetField gfields = in.readFields();
 		@SuppressWarnings("unchecked")
 		Hashtable<String, TopicPermission> hashtable = (Hashtable<String, TopicPermission>) gfields.get("permissions", null);
-		permissions = new HashMap<String, TopicPermission>(hashtable);
+		permissions = new HashMap<>(hashtable);
 		all_allowed = gfields.get("all_allowed", false);
 	}
 }

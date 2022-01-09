@@ -35,6 +35,7 @@ import org.osgi.framework.Bundle;
  * @see org.osgi.service.packageadmin.ExportedPackage
  * @see org.osgi.service.packageadmin.RequiredBundle
  */
+@Deprecated
 public interface PackageAdmin {
 	/**
 	 * Gets the exported packages for the specified bundle.
@@ -55,6 +56,7 @@ public interface PackageAdmin {
 	 *         {@code PackageAdmin} service.
 	 * @deprecated
 	 */
+    @Deprecated
     ExportedPackage[] getExportedPackages(Bundle bundle);
 
 	/**
@@ -67,6 +69,7 @@ public interface PackageAdmin {
 	 * @since 1.2
 	 * @deprecated
 	 */
+    @Deprecated
     ExportedPackage[] getExportedPackages(String name);
 
 	/**
@@ -83,6 +86,7 @@ public interface PackageAdmin {
 	 * @see #getExportedPackages(String)
 	 * @deprecated
 	 */
+    @Deprecated
     ExportedPackage getExportedPackage(String name);
 
 	/**
@@ -191,6 +195,7 @@ public interface PackageAdmin {
 	 * @since 1.2
 	 * @deprecated
 	 */
+    @Deprecated
     RequiredBundle[] getRequiredBundles(String symbolicName);
 
 	/**

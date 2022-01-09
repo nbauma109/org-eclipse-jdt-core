@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.compiler.batch;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,7 @@ public class ModuleFinder {
 	protected static FileSystem.Classpath findModule(final File file, String destinationPath, Parser parser,
 			Map<String, String> options, boolean isModulepath, String release) {
 		FileSystem.Classpath modulePath = FileSystem.getClasspath(file.getAbsolutePath(), null, !isModulepath, null,
-				destinationPath == null ? null : (destinationPath + File.separator + file.getName()), options, release);
+				destinationPath == null ? null : destinationPath + File.separator + file.getName(), options, release);
 		if (modulePath != null) {
 			scanForModule(modulePath, file, parser, isModulepath, release);
 		}
@@ -60,33 +59,26 @@ public class ModuleFinder {
 				null,
 				!isModulepath,
 				null,
-				destinationPath == null ? null : (destinationPath + File.separator + file.getName()),
+				destinationPath == null ? null : destinationPath + File.separator + file.getName(),
 				options,
 				release);
 		if (entry != null) {
 			IModule module = scanForModule(entry, file, parser, thisAnAutomodule, release);
 			if (module != null) {
 				collector.add(entry);
-			} else {
-				if (file.isDirectory()) {
-					File[] files = file.listFiles();
-					for (File f : files) {
-						scanForModules(destinationPath, parser, options, isModulepath, isModulepath, collector, f, release);
-					}
-				}
-			}
+			} else if (file.isDirectory()) {
+            	File[] files = file.listFiles();
+            	for (File f : files) {
+            		scanForModules(destinationPath, parser, options, isModulepath, isModulepath, collector, f, release);
+            	}
+            }
 		}
 	}
 	protected static IModule scanForModule(FileSystem.Classpath modulePath, final File file, Parser parser, boolean considerAutoModules, String release) {
 		IModule module = null;
 		if (file.isDirectory()) {
-			String[] list = file.list(new FilenameFilter() {
-				@Override
-				public boolean accept(File dir, String name) {
-                    return dir == file && (name.equalsIgnoreCase(IModule.MODULE_INFO_CLASS)
-                            || name.equalsIgnoreCase(IModule.MODULE_INFO_JAVA));
-                }
-			});
+			String[] list = file.list((dir, name) -> dir == file && (name.equalsIgnoreCase(IModule.MODULE_INFO_CLASS)
+                    || name.equalsIgnoreCase(IModule.MODULE_INFO_JAVA)));
 			if (list.length > 0) {
 				String fileName = list[0];
 				switch (fileName) {
@@ -110,13 +102,11 @@ public class ModuleFinder {
 				module = extractModuleFromArchive(file, modulePath, moduleDescPath, release);
 			}
 		}
-		if (considerAutoModules && module == null && !(modulePath instanceof ClasspathJrt)) {
-			if (!file.isDirectory()) {
-				String fileName = getFileName(file);
-				if (!fileName.isEmpty())
-					module = IModule.createAutomatic(fileName, file.isFile(), getManifest(file));
-			}
-		}
+		if (considerAutoModules && module == null && !(modulePath instanceof ClasspathJrt) && !file.isDirectory()) {
+        	String fileName = getFileName(file);
+        	if (!fileName.isEmpty())
+        		module = IModule.createAutomatic(fileName, file.isFile(), getManifest(file));
+        }
 		if (module != null)
 			modulePath.acceptModule(module);
 		return module;
@@ -148,20 +138,18 @@ public class ModuleFinder {
 	 */
 	protected static String[] extractAddonRead(String option) {
 		StringTokenizer tokenizer = new StringTokenizer(option, "="); //$NON-NLS-1$
-		String source = null;
-		String target = null;
-		if (tokenizer.hasMoreTokens()) {
-			source = tokenizer.nextToken();
-		} else {
+		String source;
+		String target;
+		if (!tokenizer.hasMoreTokens()) {
 			// Handle error
 			return null;
 		}
-		if (tokenizer.hasMoreTokens()) {
-			target = tokenizer.nextToken();
-		} else {
+        source = tokenizer.nextToken();
+		if (!tokenizer.hasMoreTokens()) {
 			// Handle error
 			return null;
 		}
+        target = tokenizer.nextToken();
  		return new String[]{source, target};
 	}
 	/**
@@ -193,21 +181,19 @@ public class ModuleFinder {
 	 */
 	protected static AddExport extractAddonExport(String option) {
 		StringTokenizer tokenizer = new StringTokenizer(option, "/"); //$NON-NLS-1$
-		String source = null;
-		String pack = null;
+		String source;
+		String pack;
 		List<String> targets = new ArrayList<>();
-		if (tokenizer.hasMoreTokens()) {
-			source = tokenizer.nextToken("/"); //$NON-NLS-1$
-		} else {
+		if (!tokenizer.hasMoreTokens()) {
 			// Handle error
 			return null;
 		}
-		if (tokenizer.hasMoreTokens()) {
-			pack = tokenizer.nextToken("/="); //$NON-NLS-1$
-		} else {
+        source = tokenizer.nextToken("/"); //$NON-NLS-1$
+		if (!tokenizer.hasMoreTokens()) {
 			// Handle error
 			return null;
 		}
+        pack = tokenizer.nextToken("/="); //$NON-NLS-1$
 		while (tokenizer.hasMoreTokens()) {
 			targets.add(tokenizer.nextToken("=,")); //$NON-NLS-1$
 		}
@@ -224,7 +210,8 @@ public class ModuleFinder {
 		int format = Util.archiveFormat(file.getAbsolutePath());
 		if (format == Util.ZIP_FILE) {
 			return IModule.MODULE_INFO_CLASS;
-		} else if(format == Util.JMOD_FILE) {
+		}
+        if(format == Util.JMOD_FILE) {
 			return "classes/" + IModule.MODULE_INFO_CLASS; //$NON-NLS-1$
 		}
 		return null;

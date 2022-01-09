@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class DOMBuilder extends AbstractDOMBuilder implements IDocumentElementRequestor {
 
@@ -178,12 +179,8 @@ public IDOMCompilationUnit createCompilationUnit(ICompilationUnit compilationUni
 public IDOMField createField(char[] sourceCode) {
 	initializeBuild(sourceCode, false, false, true);
 	getParser(this.options).parseField(sourceCode);
-	if (this.fAbort || this.fNode == null) {
-		return null;
-	}
-
 	// we only accept field declarations with one field
-	if (this.fFieldCount > 1) {
+	if (this.fAbort || this.fNode == null || this.fFieldCount > 1) {
 		return null;
 	}
 
@@ -204,7 +201,7 @@ public IDOMField[] createFields(char[] sourceCode) {
 	this.fFields.toArray(fields);
 	for (int i= 0; i < fields.length; i++) {
 		DOMNode node= (DOMNode)fields[i];
-		if (i < (fields.length - 1)) {
+		if (i < fields.length - 1) {
 			DOMNode next= (DOMNode)fields[i + 1];
 			node.fNextNode= next;
 			next.fPreviousNode= node;
@@ -474,7 +471,7 @@ public void enterField(int declarationStart, int[] javaDocPositions, int modifie
 	int nameStart, int nameEnd, int extendedTypeDimensionCount,
 	int extendedTypeDimensionEnd) {
 	int[] sourceRange = {declarationStart,
-		(extendedTypeDimensionEnd > nameEnd) ? extendedTypeDimensionEnd : nameEnd};
+		extendedTypeDimensionEnd > nameEnd ? extendedTypeDimensionEnd : nameEnd};
 	int[] nameRange = {nameStart, nameEnd};
 	int[] commentRange = {-1, -1};
 	if (javaDocPositions != null) {
@@ -586,10 +583,10 @@ protected void enterType(int declarationStart, int[] javaDocPositions,
 		int[] modifiersRange = {-1, -1};
 		if (modifiersStart > -1) {
 			modifiersRange[0] = modifiersStart;
-			modifiersRange[1] = (modifiersStart > -1) ? keywordStart - 1 : -1;
+			modifiersRange[1] = modifiersStart > -1 ? keywordStart - 1 : -1;
 		}
 		int[] typeKeywordRange = {keywordStart, nameStart - 1};
-		int[] nameRange = new int[] {nameStart, nameEnd};
+		int[] nameRange = {nameStart, nameEnd};
 		int[] extendsKeywordRange = {-1, -1};
 		int[] superclassRange = {-1, -1};
 		int[] implementsKeywordRange = {-1, -1};
@@ -612,14 +609,12 @@ protected void enterType(int declarationStart, int[] javaDocPositions,
 				interfacesRange[0] = superinterfaceStarts[0];
 				interfacesRange[1] = superinterfaceEnds[superinterfaces.length - 1];
 			}
-		} else {
-			if (superinterfaces != null && superinterfaces.length > 0) {
-				extendsKeywordRange[0] = nameEnd + 1;
-				extendsKeywordRange[1] = superinterfaceStarts[0] - 1;
-				interfacesRange[0] = superinterfaceStarts[0];
-				interfacesRange[1] = superinterfaceEnds[superinterfaces.length - 1];
-			}
-		}
+		} else if (superinterfaces != null && superinterfaces.length > 0) {
+        	extendsKeywordRange[0] = nameEnd + 1;
+        	extendsKeywordRange[1] = superinterfaceStarts[0] - 1;
+        	interfacesRange[0] = superinterfaceStarts[0];
+        	interfacesRange[1] = superinterfaceEnds[superinterfaces.length - 1];
+        }
 		int[] openBodyRange = {bodyStart, -1}; // fixed by setTypeRanges(DOMNode)
 		int[] closeBodyRange = {-1, -1}; // will be fixed in exit
 		this.fNode = new DOMType(this.fDocument, sourceRange, new String(name), nameRange, commentRange,

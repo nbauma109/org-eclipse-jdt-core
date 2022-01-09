@@ -114,33 +114,28 @@ public class File extends Resource implements IFile {
 				IFileStore store = getStore();
 				IFileInfo localInfo = store.fetchInfo();
 				if (BitMask.isSet(updateFlags, IResource.FORCE)) {
-					if (!Workspace.caseSensitive) {
-						if (localInfo.exists()) {
-							String name = getLocalManager().getLocalName(store);
-							if (name == null || localInfo.getName().equals(name)) {
-								delete(true, null);
-							} else {
-								// The file system is not case sensitive and there is already a file
-								// under this location.
-								message = NLS.bind(Messages.resources_existsLocalDifferentCase, new Path(store.toString()).removeLastSegments(1).append(name).toOSString());
-								throw new ResourceException(IResourceStatus.CASE_VARIANT_EXISTS, getFullPath(), message, null);
-							}
-						}
-					}
-				} else {
-					if (localInfo.exists()) {
-						//return an appropriate error message for case variant collisions
-						if (!Workspace.caseSensitive) {
-							String name = getLocalManager().getLocalName(store);
-							if (name != null && !localInfo.getName().equals(name)) {
-								message = NLS.bind(Messages.resources_existsLocalDifferentCase, new Path(store.toString()).removeLastSegments(1).append(name).toOSString());
-								throw new ResourceException(IResourceStatus.CASE_VARIANT_EXISTS, getFullPath(), message, null);
-							}
-						}
-						message = NLS.bind(Messages.resources_fileExists, store.toString());
-						throw new ResourceException(IResourceStatus.FAILED_WRITE_LOCAL, getFullPath(), message, null);
-					}
-				}
+					if (!Workspace.caseSensitive && localInfo.exists()) {
+                    	String name = getLocalManager().getLocalName(store);
+                    	if (name != null && !localInfo.getName().equals(name)) {
+                    		// The file system is not case sensitive and there is already a file
+                    		// under this location.
+                    		message = NLS.bind(Messages.resources_existsLocalDifferentCase, new Path(store.toString()).removeLastSegments(1).append(name).toOSString());
+                    		throw new ResourceException(IResourceStatus.CASE_VARIANT_EXISTS, getFullPath(), message, null);
+                    	}
+                        delete(true, null);
+                    }
+				} else if (localInfo.exists()) {
+                	//return an appropriate error message for case variant collisions
+                	if (!Workspace.caseSensitive) {
+                		String name = getLocalManager().getLocalName(store);
+                		if (name != null && !localInfo.getName().equals(name)) {
+                			message = NLS.bind(Messages.resources_existsLocalDifferentCase, new Path(store.toString()).removeLastSegments(1).append(name).toOSString());
+                			throw new ResourceException(IResourceStatus.CASE_VARIANT_EXISTS, getFullPath(), message, null);
+                		}
+                	}
+                	message = NLS.bind(Messages.resources_fileExists, store.toString());
+                	throw new ResourceException(IResourceStatus.FAILED_WRITE_LOCAL, getFullPath(), message, null);
+                }
 				subMonitor.worked(40);
 
 				info = workspace.createResource(this, updateFlags);
@@ -176,7 +171,7 @@ public class File extends Resource implements IFile {
 	@Override
 	public void create(InputStream content, boolean force, IProgressMonitor monitor) throws CoreException {
 		// funnel all operations to central method
-		create(content, (force ? IResource.FORCE : IResource.NONE), monitor);
+		create(content, force ? IResource.FORCE : IResource.NONE, monitor);
 	}
 
 	@Override
@@ -382,7 +377,6 @@ public class File extends Resource implements IFile {
 		// check to see if we are in the .settings directory
 		if (count == 3 && EclipsePreferences.DEFAULT_PREFERENCES_DIRNAME.equals(name)) {
 			ProjectPreferences.updatePreferences(this);
-			return;
 		}
 	}
 

@@ -36,7 +36,7 @@ public abstract class VariableBinding extends Binding {
 		this.modifiers = modifiers;
 		this.constant = constant;
 		if (type != null) {
-			this.tagBits |= (type.tagBits & TagBits.HasMissingType);
+			this.tagBits |= type.tagBits & TagBits.HasMissingType;
 		}
 	}
 
@@ -74,15 +74,15 @@ public abstract class VariableBinding extends Binding {
 	/** Answer true if null annotations are enabled and this field is specified @NonNull */
 	public boolean isNonNull() {
 		return (this.tagBits & TagBits.AnnotationNonNull) != 0
-				|| (this.type != null
-					&& (this.type.tagBits & TagBits.AnnotationNonNull) != 0);
+				|| this.type != null
+					&& (this.type.tagBits & TagBits.AnnotationNonNull) != 0;
 	}
 
 	/** Answer true if null annotations are enabled and this field is specified @Nullable */
 	public boolean isNullable() {
 		return (this.tagBits & TagBits.AnnotationNullable) != 0
-				|| (this.type != null
-				&& (this.type.tagBits & TagBits.AnnotationNullable) != 0);
+				|| this.type != null
+				&& (this.type.tagBits & TagBits.AnnotationNullable) != 0;
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public abstract class VariableBinding extends Binding {
 		}
 		output.append(this.type != null ? this.type.debugName() : "<no type>"); //$NON-NLS-1$
 		output.append(" "); //$NON-NLS-1$
-		output.append((this.name != null) ? new String(this.name) : "<no name>"); //$NON-NLS-1$
+		output.append(this.name != null ? new String(this.name) : "<no name>"); //$NON-NLS-1$
 		return output.toString();
 	}
 }

@@ -126,31 +126,29 @@ public void prepareSaveValueLocation(TryStatement targetTryStatement){
 }
 @Override
 public void resolve(BlockScope scope) {
-	if (this.expression != null) {
-		if (this.expression.resolveType(scope) != null) {
-			TypeBinding javaLangClass = scope.getJavaLangClass();
-			if (!javaLangClass.isValidBinding()) {
-				scope.problemReporter().codeSnippetMissingClass("java.lang.Class", this.sourceStart, this.sourceEnd); //$NON-NLS-1$
-				return;
-			}
-			TypeBinding javaLangObject = scope.getJavaLangObject();
-			if (!javaLangObject.isValidBinding()) {
-				scope.problemReporter().codeSnippetMissingClass("java.lang.Object", this.sourceStart, this.sourceEnd); //$NON-NLS-1$
-				return;
-			}
-			TypeBinding[] argumentTypes = new TypeBinding[] {javaLangObject, javaLangClass};
-			this.setResultMethod = scope.getImplicitMethod(SETRESULT_SELECTOR, argumentTypes, this);
-			if (!this.setResultMethod.isValidBinding()) {
-				scope.problemReporter().codeSnippetMissingMethod(ROOT_FULL_CLASS_NAME, new String(SETRESULT_SELECTOR), new String(SETRESULT_ARGUMENTS), this.sourceStart, this.sourceEnd);
-				return;
-			}
-			// in constant case, the implicit conversion cannot be left uninitialized
-			if (this.expression.constant != Constant.NotAConstant) {
-				// fake 'no implicit conversion' (the return type is always void)
-				this.expression.implicitConversion = this.expression.constant.typeID() << 4;
-			}
-		}
-	}
+	if (this.expression != null && this.expression.resolveType(scope) != null) {
+    	TypeBinding javaLangClass = scope.getJavaLangClass();
+    	if (!javaLangClass.isValidBinding()) {
+    		scope.problemReporter().codeSnippetMissingClass("java.lang.Class", this.sourceStart, this.sourceEnd); //$NON-NLS-1$
+    		return;
+    	}
+    	TypeBinding javaLangObject = scope.getJavaLangObject();
+    	if (!javaLangObject.isValidBinding()) {
+    		scope.problemReporter().codeSnippetMissingClass("java.lang.Object", this.sourceStart, this.sourceEnd); //$NON-NLS-1$
+    		return;
+    	}
+    	TypeBinding[] argumentTypes = {javaLangObject, javaLangClass};
+    	this.setResultMethod = scope.getImplicitMethod(SETRESULT_SELECTOR, argumentTypes, this);
+    	if (!this.setResultMethod.isValidBinding()) {
+    		scope.problemReporter().codeSnippetMissingMethod(ROOT_FULL_CLASS_NAME, new String(SETRESULT_SELECTOR), new String(SETRESULT_ARGUMENTS), this.sourceStart, this.sourceEnd);
+    		return;
+    	}
+    	// in constant case, the implicit conversion cannot be left uninitialized
+    	if (this.expression.constant != Constant.NotAConstant) {
+    		// fake 'no implicit conversion' (the return type is always void)
+    		this.expression.implicitConversion = this.expression.constant.typeID() << 4;
+    	}
+    }
 }
 @Override
 public void setActualReceiverType(ReferenceBinding receiverType) {

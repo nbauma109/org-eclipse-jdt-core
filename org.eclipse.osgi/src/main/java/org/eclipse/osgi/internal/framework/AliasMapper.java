@@ -71,11 +71,9 @@ public class AliasMapper {
 	public String getCanonicalOSName(String osname) {
 		String lowerName = osname.toLowerCase();
 		String result = osnameCanonicalTable.get(lowerName);
-		if (result == null) {
-			if (lowerName.startsWith("windows")) { //$NON-NLS-1$
-				return "win32"; //$NON-NLS-1$
-			}
-		}
+		if (result == null && lowerName.startsWith("windows")) { //$NON-NLS-1$
+        	return "win32"; //$NON-NLS-1$
+        }
 		return result == null ? osname : result;
 	}
 

@@ -68,12 +68,10 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 		AtomicInteger useCount = serviceObjects.get(service);
 		if (useCount == null) {
 			serviceObjects.put(service, new AtomicInteger(1));
-		} else {
-			if (useCount.getAndIncrement() == Integer.MAX_VALUE) {
-				useCount.getAndDecrement();
-				throw new ServiceException(Msg.SERVICE_USE_OVERFLOW);
-			}
-		}
+		} else if (useCount.getAndIncrement() == Integer.MAX_VALUE) {
+        	useCount.getAndDecrement();
+        	throw new ServiceException(Msg.SERVICE_USE_OVERFLOW);
+        }
 		return service;
 	}
 
@@ -89,7 +87,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	@Override
 	boolean releaseServiceObject(final S service) {
 		assert Thread.holdsLock(this);
-		if ((service == null) || !serviceObjects.containsKey(service)) {
+		if (service == null || !serviceObjects.containsKey(service)) {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
 		if (debug.DEBUG_SERVICES) {

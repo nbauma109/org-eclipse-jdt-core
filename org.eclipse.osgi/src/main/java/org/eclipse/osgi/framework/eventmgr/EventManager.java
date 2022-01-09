@@ -200,9 +200,7 @@ public class EventManager {
 			thread.start();
 		}
 
-		@SuppressWarnings("unchecked")
-		EventThread<K, V, E> result = (EventThread<K, V, E>) thread;
-		return result;
+		return (EventThread<K, V, E>) thread;
 	}
 
 	/**
@@ -370,12 +368,11 @@ public class EventManager {
 			if (head == null) /* if the queue was empty */
 			{
 				head = item;
-				tail = item;
 			} else /* else add to end of queue */
 			{
 				tail.next = item;
-				tail = item;
 			}
+            tail = item;
 
 			notify();
 		}
@@ -389,7 +386,7 @@ public class EventManager {
 		 * if the thread has been requested to stop.
 		 */
 		private synchronized Queued<K, V, E> getNextEvent() {
-			while (running && (head == null)) {
+			while (running && head == null) {
 				try {
 					wait();
 				} catch (InterruptedException e) {

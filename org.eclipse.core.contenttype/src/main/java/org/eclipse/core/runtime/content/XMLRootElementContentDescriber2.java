@@ -108,7 +108,7 @@ public final class XMLRootElementContentDescriber2 extends XMLContentDescriber i
 				qualifiedElement = qualifiedElement.substring(0, dtdSlash);
 			}
 			// Check if the name is a wildcard
-			element = ("*".equals(qualifiedElement) ? null : qualifiedElement); //$NON-NLS-1$
+			element = "*".equals(qualifiedElement) ? null : qualifiedElement; //$NON-NLS-1$
 		}
 
 		public boolean matches(String someNamespace, String someElement, String someDtd) {

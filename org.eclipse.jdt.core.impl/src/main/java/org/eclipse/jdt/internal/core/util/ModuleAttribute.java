@@ -29,10 +29,10 @@ import org.eclipse.jdt.core.util.IRequiresInfo;
  */
 public class ModuleAttribute extends ClassFileAttribute implements IModuleAttribute {
 
-	static final IRequiresInfo[] NO_REQUIRES = new IRequiresInfo[0];
-	static final IPackageVisibilityInfo[] NO_PACKAGE_VISIBILITY_INFOS = new IPackageVisibilityInfo[0];
-	static final int[] NO_USES = new int[0];
-	static final IProvidesInfo[] NO_PROVIDES_INFOS = new IProvidesInfo[0];
+	static final IRequiresInfo[] NO_REQUIRES = {};
+	static final IPackageVisibilityInfo[] NO_PACKAGE_VISIBILITY_INFOS = {};
+	static final int[] NO_USES = {};
+	static final IProvidesInfo[] NO_PROVIDES_INFOS = {};
 	private int moduleNameIndex;
 	private char[] moduleName;
 	private int moduleFlags;

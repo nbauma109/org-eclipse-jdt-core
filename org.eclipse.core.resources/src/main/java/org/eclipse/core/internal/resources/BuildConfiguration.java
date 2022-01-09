@@ -69,9 +69,7 @@ public class BuildConfiguration extends PlatformObject implements IBuildConfigur
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (obj == null || getClass() != obj.getClass())
 			return false;
 		BuildConfiguration other = (BuildConfiguration) obj;
 		return Objects.equals(this.name, other.name) && Objects.equals(this.project, other.project);
@@ -82,8 +80,7 @@ public class BuildConfiguration extends PlatformObject implements IBuildConfigur
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Objects.hashCode(name);
-		result = prime * result + Objects.hashCode(project);
-		return result;
+		return prime * result + Objects.hashCode(project);
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
  * @since 2.0
  * @deprecated Subclass {@link CompletionRequestor} instead.
  */
+@Deprecated
 public class CompletionRequestorAdapter implements ICompletionRequestor {
 
 	@Override

@@ -67,15 +67,11 @@ public static IMarker[] getProblemsFor(IResource resource) {
 			Set markerTypes = JavaModelManager.getJavaModelManager().compilationParticipants.managedMarkerTypes();
 			if (markerTypes.isEmpty()) return markers;
 			ArrayList markerList = new ArrayList(5);
-			for (int i = 0, length = markers.length; i < length; i++) {
-				markerList.add(markers[i]);
-			}
+			markerList.addAll(Arrays.asList(markers));
 			Iterator iterator = markerTypes.iterator();
 			while (iterator.hasNext()) {
 				markers = resource.findMarkers((String) iterator.next(), false, IResource.DEPTH_INFINITE);
-				for (int i = 0, length = markers.length; i < length; i++) {
-					markerList.add(markers[i]);
-				}
+				markerList.addAll(Arrays.asList(markers));
 			}
 			IMarker[] result;
 			markerList.toArray(result = new IMarker[markerList.size()]);
@@ -185,47 +181,43 @@ protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) thro
 				if (DEBUG)
 					System.out.println("JavaBuilder: Performing full build as requested"); //$NON-NLS-1$
 				buildAll();
-			} else {
-				if ((this.lastState = getLastState(this.currentProject)) == null) {
-					if (DEBUG)
-						System.out.println("JavaBuilder: Performing full build since last saved state was not found"); //$NON-NLS-1$
-					buildAll();
-				} else if (hasClasspathChanged()) {
-					// if the output location changes, do not delete the binary files from old location
-					// the user may be trying something
-					if (DEBUG)
-						System.out.println("JavaBuilder: Performing full build since classpath has changed"); //$NON-NLS-1$
-					buildAll();
-				} else if (this.nameEnvironment.sourceLocations.length > 0 || this.testNameEnvironment.sourceLocations.length > 0) {
-					// if there is no source to compile & no classpath changes then we are done
-					SimpleLookupTable deltas = findDeltas();
-					if (deltas == null) {
-						if (DEBUG)
-							System.out.println("JavaBuilder: Performing full build since deltas are missing after incremental request"); //$NON-NLS-1$
-						buildAll();
-					} else if (deltas.elementSize > 0) {
-						if (hasJdtCoreSettingsChange(deltas) && !DISABLE_AUTO_BUILDING_ON_SETTINGS_CHANGE) {
-							if (DEBUG)
-								System.out.println("JavaBuilder: Performing full build since project settings have changed"); //$NON-NLS-1$
-							buildAll();
-						} else {
-							buildDeltas(deltas);
-						}
-					} else if (DEBUG) {
-						System.out.println("JavaBuilder: Nothing to build since deltas were empty"); //$NON-NLS-1$
-					}
-				} else {
-					if (hasStructuralDelta()) { // double check that a jar file didn't get replaced in a binary project
-						if (DEBUG)
-							System.out.println("JavaBuilder: Performing full build since there are structural deltas"); //$NON-NLS-1$
-						buildAll();
-					} else {
-						if (DEBUG)
-							System.out.println("JavaBuilder: Nothing to build since there are no source folders and no deltas"); //$NON-NLS-1$
-						this.lastState.tagAsNoopBuild();
-					}
-				}
-			}
+			} else if ((this.lastState = getLastState(this.currentProject)) == null) {
+            	if (DEBUG)
+            		System.out.println("JavaBuilder: Performing full build since last saved state was not found"); //$NON-NLS-1$
+            	buildAll();
+            } else if (hasClasspathChanged()) {
+            	// if the output location changes, do not delete the binary files from old location
+            	// the user may be trying something
+            	if (DEBUG)
+            		System.out.println("JavaBuilder: Performing full build since classpath has changed"); //$NON-NLS-1$
+            	buildAll();
+            } else if (this.nameEnvironment.sourceLocations.length > 0 || this.testNameEnvironment.sourceLocations.length > 0) {
+            	// if there is no source to compile & no classpath changes then we are done
+            	SimpleLookupTable deltas = findDeltas();
+            	if (deltas == null) {
+            		if (DEBUG)
+            			System.out.println("JavaBuilder: Performing full build since deltas are missing after incremental request"); //$NON-NLS-1$
+            		buildAll();
+            	} else if (deltas.elementSize > 0) {
+            		if (hasJdtCoreSettingsChange(deltas) && !DISABLE_AUTO_BUILDING_ON_SETTINGS_CHANGE) {
+            			if (DEBUG)
+            				System.out.println("JavaBuilder: Performing full build since project settings have changed"); //$NON-NLS-1$
+            			buildAll();
+            		} else {
+            			buildDeltas(deltas);
+            		}
+            	} else if (DEBUG) {
+            		System.out.println("JavaBuilder: Nothing to build since deltas were empty"); //$NON-NLS-1$
+            	}
+            } else if (hasStructuralDelta()) { // double check that a jar file didn't get replaced in a binary project
+            	if (DEBUG)
+            		System.out.println("JavaBuilder: Performing full build since there are structural deltas"); //$NON-NLS-1$
+            	buildAll();
+            } else {
+            	if (DEBUG)
+            		System.out.println("JavaBuilder: Nothing to build since there are no source folders and no deltas"); //$NON-NLS-1$
+            	this.lastState.tagAsNoopBuild();
+            }
 			ok = true;
 		}
 	} catch (CoreException e) {
@@ -370,8 +362,8 @@ private void clearLastState() {
 boolean filterExtraResource(IResource resource) {
 	if (this.extraResourceFileFilters != null) {
 		char[] name = resource.getName().toCharArray();
-		for (int i = 0, l = this.extraResourceFileFilters.length; i < l; i++)
-			if (CharOperation.match(this.extraResourceFileFilters[i], name, true))
+		for (char[] extraResourceFileFilter : this.extraResourceFileFilters)
+            if (CharOperation.match(extraResourceFileFilter, name, true))
 				return true;
 	}
 	if (this.extraResourceFolderFilters != null) {
@@ -379,10 +371,10 @@ boolean filterExtraResource(IResource resource) {
 		String pathName = path.toString();
 		int count = path.segmentCount();
 		if (resource.getType() == IResource.FILE) count--;
-		for (int i = 0, l = this.extraResourceFolderFilters.length; i < l; i++)
-			if (pathName.indexOf(this.extraResourceFolderFilters[i]) != -1)
+		for (String extraResourceFolderFilter : this.extraResourceFolderFilters)
+            if (pathName.indexOf(extraResourceFolderFilter) != -1)
 				for (int j = 0; j < count; j++)
-					if (this.extraResourceFolderFilters[i].equals(path.segment(j)))
+					if (extraResourceFolderFilter.equals(path.segment(j)))
 						return true;
 	}
 	return false;
@@ -392,18 +384,17 @@ private SimpleLookupTable findDeltas() {
 	this.notifier.subTask(Messages.bind(Messages.build_readingDelta, this.currentProject.getName()));
 	IResourceDelta delta = getDelta(this.currentProject);
 	SimpleLookupTable deltas = new SimpleLookupTable(3);
-	if (delta != null) {
-		if (delta.getKind() != IResourceDelta.NO_CHANGE) {
-			if (DEBUG)
-				System.out.println("JavaBuilder: Found source delta for: " + this.currentProject.getName()); //$NON-NLS-1$
-			deltas.put(this.currentProject, delta);
-		}
-	} else {
+	if (delta == null) {
 		if (DEBUG)
 			System.out.println("JavaBuilder: Missing delta for: " + this.currentProject.getName()); //$NON-NLS-1$
 		this.notifier.subTask(""); //$NON-NLS-1$
 		return null;
 	}
+    if (delta.getKind() != IResourceDelta.NO_CHANGE) {
+    	if (DEBUG)
+    		System.out.println("JavaBuilder: Found source delta for: " + this.currentProject.getName()); //$NON-NLS-1$
+    	deltas.put(this.currentProject, delta);
+    }
 
 	Object[] keyTable = this.binaryLocationsPerProject.keyTable;
 	Object[] valueTable = this.binaryLocationsPerProject.valueTable;
@@ -427,18 +418,17 @@ private SimpleLookupTable findDeltas() {
 
 			this.notifier.subTask(Messages.bind(Messages.build_readingDelta, p.getName()));
 			delta = getDelta(p);
-			if (delta != null) {
-				if (delta.getKind() != IResourceDelta.NO_CHANGE) {
-					if (DEBUG)
-						System.out.println("JavaBuilder: Found binary delta for: " + p.getName()); //$NON-NLS-1$
-					deltas.put(p, delta);
-				}
-			} else {
+			if (delta == null) {
 				if (DEBUG)
 					System.out.println("JavaBuilder: Missing delta for: " + p.getName());	 //$NON-NLS-1$
 				this.notifier.subTask(""); //$NON-NLS-1$
 				return null;
 			}
+            if (delta.getKind() != IResourceDelta.NO_CHANGE) {
+            	if (DEBUG)
+            		System.out.println("JavaBuilder: Found binary delta for: " + p.getName()); //$NON-NLS-1$
+            	deltas.put(p, delta);
+            }
 		}
 	}
 	this.notifier.subTask(""); //$NON-NLS-1$
@@ -462,8 +452,7 @@ private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites) {
 	ExternalFoldersManager externalFoldersManager = JavaModelManager.getExternalManager();
 	try {
 		IClasspathEntry[] entries = this.javaProject.getExpandedClasspath();
-		for (int i = 0, l = entries.length; i < l; i++) {
-			IClasspathEntry entry = entries[i];
+		for (IClasspathEntry entry : entries) {
 			IPath path = entry.getPath();
 			IProject p = null;
 			switch (entry.getEntryKind()) {
@@ -498,8 +487,8 @@ private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites) {
 
 boolean hasBuildpathErrors() throws CoreException {
 	IMarker[] markers = this.currentProject.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_ZERO);
-	for (int i = 0, l = markers.length; i < l; i++)
-		if (markers[i].getAttribute(IJavaModelMarker.CATEGORY_ID, -1) == CategorizedProblem.CAT_BUILDPATH)
+	for (IMarker marker : markers)
+        if (marker.getAttribute(IJavaModelMarker.CATEGORY_ID, -1) == CategorizedProblem.CAT_BUILDPATH)
 			return true;
 	return false;
 }
@@ -528,7 +517,8 @@ private boolean hasClasspathChanged(CompilationGroup compilationGroup) {
 			if (newSourceLocations[n].sourceFolder.members().length == 0) { // added new empty source folder
 				o--;
 				continue;
-			} else if (this.lastState.isSourceFolderEmpty(oldSourceLocations[o].sourceFolder)) {
+			}
+            if (this.lastState.isSourceFolderEmpty(oldSourceLocations[o].sourceFolder)) {
 				n--;
 				continue;
 			}
@@ -590,8 +580,8 @@ private boolean hasClasspathChanged(CompilationGroup compilationGroup) {
 
 private boolean hasJavaBuilder(IProject project) throws CoreException {
 	ICommand[] buildCommands = project.getDescription().getBuildSpec();
-	for (int i = 0, l = buildCommands.length; i < l; i++)
-		if (buildCommands[i].getBuilderName().equals(JavaCore.BUILDER_ID))
+	for (ICommand buildCommand : buildCommands)
+        if (buildCommand.getBuilderName().equals(JavaCore.BUILDER_ID))
 			return true;
 	return false;
 }
@@ -602,8 +592,7 @@ private boolean hasStructuralDelta() {
 	if (delta != null && delta.getKind() != IResourceDelta.NO_CHANGE) {
 		ClasspathLocation[] classFoldersAndJars = (ClasspathLocation[]) this.binaryLocationsPerProject.get(this.currentProject);
 		if (classFoldersAndJars != null) {
-			for (int i = 0, l = classFoldersAndJars.length; i < l; i++) {
-				ClasspathLocation classFolderOrJar = classFoldersAndJars[i]; // either a .class file folder or a zip/jar file
+			for (ClasspathLocation classFolderOrJar : classFoldersAndJars) {
 				if (classFolderOrJar != null) {
 					IPath p = classFolderOrJar.getProjectRelativePath();
 					if (p != null) {
@@ -627,8 +616,8 @@ private int initializeBuilder(int kind, boolean forBuild) throws CoreException {
 		// cache the known participants for this project
 		this.participants = JavaModelManager.getJavaModelManager().compilationParticipants.getCompilationParticipants(this.javaProject);
 		if (this.participants != null)
-			for (int i = 0, l = this.participants.length; i < l; i++)
-				if (this.participants[i].aboutToBuild(this.javaProject) == CompilationParticipant.NEEDS_FULL_BUILD)
+            for (CompilationParticipant participant : this.participants)
+                if (participant.aboutToBuild(this.javaProject) == CompilationParticipant.NEEDS_FULL_BUILD)
 					kind = FULL_BUILD;
 
 		// Flush the existing external files cache if this is the beginning of a build cycle
@@ -653,15 +642,13 @@ private int initializeBuilder(int kind, boolean forBuild) throws CoreException {
 			this.extraResourceFolderFilters = null;
 		} else {
 			int fileCount = 0, folderCount = 0;
-			for (int i = 0, l = filters.length; i < l; i++) {
-				char[] f = filters[i];
+			for (char[] f : filters) {
 				if (f.length == 0) continue;
 				if (f[f.length - 1] == '/') folderCount++; else fileCount++;
 			}
 			this.extraResourceFileFilters = new char[fileCount][];
 			this.extraResourceFolderFilters = new String[folderCount];
-			for (int i = 0, l = filters.length; i < l; i++) {
-				char[] f = filters[i];
+			for (char[] f : filters) {
 				if (f.length == 0) continue;
 				if (f[f.length - 1] == '/')
 					this.extraResourceFolderFilters[--folderCount] = new String(f, 0, f.length - 1);
@@ -675,11 +662,11 @@ private int initializeBuilder(int kind, boolean forBuild) throws CoreException {
 
 private boolean isClasspathBroken(JavaProject jProj, boolean tryRepair) throws CoreException {
 	IMarker[] markers = jProj.getProject().findMarkers(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER, false, IResource.DEPTH_ZERO);
-	for (int i = 0, l = markers.length; i < l; i++) {
-		if (markers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR) {
+	for (IMarker marker : markers) {
+		if (marker.getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR) {
 			if (tryRepair) {
-				Object code = markers[i].getAttribute(IJavaModelMarker.ID);
-				if (code instanceof Integer && ((Integer)code) == IJavaModelStatusConstants.CP_INVALID_EXTERNAL_ANNOTATION_PATH) {
+				Object code = marker.getAttribute(IJavaModelMarker.ID);
+				if (code instanceof Integer && (Integer)code == IJavaModelStatusConstants.CP_INVALID_EXTERNAL_ANNOTATION_PATH) {
 					new ClasspathValidation(jProj).validate();
 					return isClasspathBroken(jProj, false);
 				}
@@ -722,8 +709,7 @@ private boolean isWorthBuilding() throws CoreException {
 	// make sure all prereq projects have valid build states... only when aborting builds since projects in cycles do not have build states
 	// except for projects involved in a 'warning' cycle (see below)
 	IProject[] requiredProjects = getRequiredProjects(false);
-	for (int i = 0, l = requiredProjects.length; i < l; i++) {
-		IProject p = requiredProjects[i];
+	for (IProject p : requiredProjects) {
 		if (getLastState(p) == null)  {
 			// The prereq project has no build state: if this prereq project has a 'warning' cycle marker then allow build (see bug id 23357)
 			JavaProject prereq = (JavaProject) JavaCore.create(p);
@@ -786,17 +772,17 @@ void mustPropagateStructuralChanges() {
 
 private void printLocations(ClasspathLocation[] newLocations, ClasspathLocation[] oldLocations) {
 	System.out.println("JavaBuilder: New locations:"); //$NON-NLS-1$
-	for (int i = 0, length = newLocations.length; i < length; i++)
-		System.out.println("    " + newLocations[i].debugPathString()); //$NON-NLS-1$
+	for (ClasspathLocation newLocation : newLocations)
+        System.out.println("    " + newLocation.debugPathString()); //$NON-NLS-1$
 	System.out.println("JavaBuilder: Old locations:"); //$NON-NLS-1$
-	for (int i = 0, length = oldLocations.length; i < length; i++)
-		System.out.println("    " + oldLocations[i].debugPathString()); //$NON-NLS-1$
+	for (ClasspathLocation oldLocation : oldLocations)
+        System.out.println("    " + oldLocation.debugPathString()); //$NON-NLS-1$
 }
 
 private void recordNewState(State state) {
 	Object[] keyTable = this.binaryLocationsPerProject.keyTable;
-	for (int i = 0, l = keyTable.length; i < l; i++) {
-		IProject prereqProject = (IProject) keyTable[i];
+	for (Object element : keyTable) {
+		IProject prereqProject = (IProject) element;
 		if (prereqProject != null && prereqProject != this.currentProject)
 			state.recordStructuralDependency(prereqProject, getLastState(prereqProject));
 	}

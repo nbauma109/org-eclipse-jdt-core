@@ -24,10 +24,12 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
 import org.eclipse.jdt.internal.compiler.env.IBinaryElementValuePair;
 import org.eclipse.jdt.internal.core.util.Util;
 
+import java.util.Objects;
+
 public class Annotation extends SourceRefElement implements IAnnotation {
 
-	public static final IAnnotation[] NO_ANNOTATIONS = new IAnnotation[0];
-	public static final IMemberValuePair[] NO_MEMBER_VALUE_PAIRS = new IMemberValuePair[0];
+	public static final IAnnotation[] NO_ANNOTATIONS = {};
+	public static final IMemberValuePair[] NO_MEMBER_VALUE_PAIRS = {};
 
 	protected String name;
 	// require to distinguish same annotations in different member value pairs
@@ -49,10 +51,7 @@ public class Annotation extends SourceRefElement implements IAnnotation {
 			return false;
 		}
 		Annotation other = (Annotation) o;
-		if (this.memberValuePairName == null) {
-			if (other.memberValuePairName != null)
-				return false;
-		} else if (!this.memberValuePairName.equals(other.memberValuePairName)) {
+		if (!Objects.equals(this.memberValuePairName, other.memberValuePairName)) {
 			return false;
 		}
 		// name equality is checked as part of the super.equals(..)
@@ -140,9 +139,8 @@ public class Annotation extends SourceRefElement implements IAnnotation {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((this.memberValuePairName == null) ? 0 : this.memberValuePairName.hashCode());
-		result = prime * result + this.name.hashCode();
-		return result;
+		result = prime * result + (this.memberValuePairName == null ? 0 : this.memberValuePairName.hashCode());
+		return prime * result + this.name.hashCode();
 	}
 
 	@Override

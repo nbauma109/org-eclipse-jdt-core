@@ -90,24 +90,23 @@ public RecoveredElement add(FieldDeclaration addedfieldDeclaration, int bracketB
 @Override
 public RecoveredElement add(Statement statement, int bracketBalanceValue) {
 
-	if (this.alreadyCompletedFieldInitialization || !(statement instanceof Expression &&  ((Expression) statement).isTrulyExpression())) {
+	if (this.alreadyCompletedFieldInitialization || !(statement instanceof Expression) || !((Expression) statement).isTrulyExpression()) {
 		return super.add(statement, bracketBalanceValue);
-	} else {
-		if (statement.sourceEnd > 0)
-				this.alreadyCompletedFieldInitialization = true;
-		// else we may still be inside the initialization, having parsed only a part of it yet
-		if (!(statement instanceof AllocationExpression) &&
-				this.fieldDeclaration.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
-			AllocationExpression alloc = new AllocationExpression();
-			alloc.arguments = new Expression[] {(Expression) statement};
-			this.fieldDeclaration.initialization = alloc;
-		} else {
-			this.fieldDeclaration.initialization = (Expression) statement;
-			this.fieldDeclaration.declarationSourceEnd = statement.sourceEnd;
-			this.fieldDeclaration.declarationEnd = statement.sourceEnd;
-		}
-		return this;
 	}
+    if (statement.sourceEnd > 0)
+    		this.alreadyCompletedFieldInitialization = true;
+    // else we may still be inside the initialization, having parsed only a part of it yet
+    if (!(statement instanceof AllocationExpression) &&
+    		this.fieldDeclaration.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
+    	AllocationExpression alloc = new AllocationExpression();
+    	alloc.arguments = new Expression[] {(Expression) statement};
+    	this.fieldDeclaration.initialization = alloc;
+    } else {
+    	this.fieldDeclaration.initialization = (Expression) statement;
+    	this.fieldDeclaration.declarationSourceEnd = statement.sourceEnd;
+    	this.fieldDeclaration.declarationEnd = statement.sourceEnd;
+    }
+    return this;
 }
 /*
  * Record a type declaration if this field is expecting an initialization expression
@@ -118,29 +117,26 @@ public RecoveredElement add(Statement statement, int bracketBalanceValue) {
 public RecoveredElement add(TypeDeclaration typeDeclaration, int bracketBalanceValue) {
 
 	if (this.alreadyCompletedFieldInitialization
-			|| ((typeDeclaration.bits & ASTNode.IsAnonymousType) == 0)
-			|| (this.fieldDeclaration.declarationSourceEnd != 0 && typeDeclaration.sourceStart > this.fieldDeclaration.declarationSourceEnd)) {
+			|| (typeDeclaration.bits & ASTNode.IsAnonymousType) == 0
+			|| this.fieldDeclaration.declarationSourceEnd != 0 && typeDeclaration.sourceStart > this.fieldDeclaration.declarationSourceEnd) {
 		return super.add(typeDeclaration, bracketBalanceValue);
-	} else {
-		// Prepare anonymous type list
-		if (this.anonymousTypes == null) {
-			this.anonymousTypes = new RecoveredType[5];
-			this.anonymousTypeCount = 0;
-		} else {
-			if (this.anonymousTypeCount == this.anonymousTypes.length) {
-				System.arraycopy(
-					this.anonymousTypes,
-					0,
-					(this.anonymousTypes = new RecoveredType[2 * this.anonymousTypeCount]),
-					0,
-					this.anonymousTypeCount);
-			}
-		}
-		// Store type declaration as an anonymous type
-		RecoveredType element = new RecoveredType(typeDeclaration, this, bracketBalanceValue);
-		this.anonymousTypes[this.anonymousTypeCount++] = element;
-		return element;
 	}
+    // Prepare anonymous type list
+    if (this.anonymousTypes == null) {
+    	this.anonymousTypes = new RecoveredType[5];
+    	this.anonymousTypeCount = 0;
+    } else if (this.anonymousTypeCount == this.anonymousTypes.length) {
+    	System.arraycopy(
+    		this.anonymousTypes,
+    		0,
+    		this.anonymousTypes = new RecoveredType[2 * this.anonymousTypeCount],
+    		0,
+    		this.anonymousTypeCount);
+    }
+    // Store type declaration as an anonymous type
+    RecoveredType element = new RecoveredType(typeDeclaration, this, bracketBalanceValue);
+    this.anonymousTypes[this.anonymousTypeCount++] = element;
+    return element;
 }
 public void attach(RecoveredAnnotation[] annots, int annotCount, int mods, int modsSourceStart) {
 	if (annotCount > 0) {
@@ -149,8 +145,8 @@ public void attach(RecoveredAnnotation[] annots, int annotCount, int mods, int m
 			this.annotations = new RecoveredAnnotation[annotCount];
 			this.annotationCount = 0;
 			next : for (int i = 0; i < annotCount; i++) {
-				for (int j = 0; j < existingAnnotations.length; j++) {
-					if (annots[i].annotation == existingAnnotations[j]) continue next;
+				for (Annotation existingAnnotation : existingAnnotations) {
+					if (annots[i].annotation == existingAnnotation) continue next;
 				}
 				this.annotations[this.annotationCount++] = annots[i];
 			}
@@ -299,13 +295,13 @@ public RecoveredElement updateOnClosingBrace(int braceStart, int braceEnd){
 			if(this.fieldDeclaration.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
 				updateSourceEndIfNecessary(braceEnd);
 				return this.parent;
-			} else {
-				if (this.fieldDeclaration.declarationSourceEnd > 0)
-					this.alreadyCompletedFieldInitialization = true;
 			}
+            if (this.fieldDeclaration.declarationSourceEnd > 0)
+            	this.alreadyCompletedFieldInitialization = true;
 		}
 		return this;
-	} else if (this.bracketBalance == 0) {
+	}
+    if (this.bracketBalance == 0) {
 		this.alreadyCompletedFieldInitialization = true;
 		updateSourceEndIfNecessary(braceEnd - 1);
 	}
@@ -320,19 +316,10 @@ public RecoveredElement updateOnClosingBrace(int braceStart, int braceEnd){
  */
 @Override
 public RecoveredElement updateOnOpeningBrace(int braceStart, int braceEnd){
-	if (this.fieldDeclaration.declarationSourceEnd == 0) {
-		if (this.fieldDeclaration.type instanceof ArrayTypeReference || this.fieldDeclaration.type instanceof ArrayQualifiedTypeReference) {
-			if (!this.alreadyCompletedFieldInitialization) {
-				this.bracketBalance++;
-				return null; // no update is necessary	(array initializer)
-			}
-		} else {  // https://bugs.eclipse.org/bugs/show_bug.cgi?id=308980
-			// in case an initializer bracket is opened in a non-array field
-			// e.g. int field = {..
-			this.bracketBalance++;
-			return null; // no update is necessary	(array initializer)
-		}
-	}
+	if (this.fieldDeclaration.declarationSourceEnd == 0 && (!(this.fieldDeclaration.type instanceof ArrayTypeReference) && !(this.fieldDeclaration.type instanceof ArrayQualifiedTypeReference) || !this.alreadyCompletedFieldInitialization)) {
+    	this.bracketBalance++;
+    	return null; // no update is necessary	(array initializer)
+    }
 	if (this.fieldDeclaration.declarationSourceEnd == 0
 		&& this.fieldDeclaration.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT){
 		this.bracketBalance++;

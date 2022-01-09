@@ -27,11 +27,11 @@ import org.eclipse.jdt.internal.compiler.env.ISourceType;
  */
 public class SourceTypeElementInfo extends AnnotatableInfo implements ISourceType {
 
-	protected static final ISourceImport[] NO_IMPORTS = new ISourceImport[0];
-	protected static final InitializerElementInfo[] NO_INITIALIZERS = new InitializerElementInfo[0];
-	protected static final SourceField[] NO_FIELDS = new SourceField[0];
-	protected static final SourceMethod[] NO_METHODS = new SourceMethod[0];
-	protected static final SourceType[] NO_TYPES = new SourceType[0];
+	protected static final ISourceImport[] NO_IMPORTS = {};
+	protected static final InitializerElementInfo[] NO_INITIALIZERS = {};
+	protected static final SourceField[] NO_FIELDS = {};
+	protected static final SourceMethod[] NO_METHODS = {};
+	protected static final SourceType[] NO_TYPES = {};
 
 	protected IJavaElement[] children = JavaElement.NO_ELEMENTS;
 
@@ -94,15 +94,14 @@ public IJavaElement[] getChildren() {
 @Override
 public ISourceType getEnclosingType() {
 	IJavaElement parent= this.handle.getParent();
-	if (parent != null && parent.getElementType() == IJavaElement.TYPE) {
-		try {
-			return (ISourceType)((JavaElement)parent).getElementInfo();
-		} catch (JavaModelException e) {
-			return null;
-		}
-	} else {
+	if (parent == null || parent.getElementType() != IJavaElement.TYPE) {
 		return null;
 	}
+    try {
+    	return (ISourceType)((JavaElement)parent).getElementInfo();
+    } catch (JavaModelException e) {
+    	return null;
+    }
 }
 /**
  * @see ISourceType

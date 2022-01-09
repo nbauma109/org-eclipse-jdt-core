@@ -52,14 +52,10 @@ public void generateOptimizedBoolean(BlockScope currentScope, CodeStream codeStr
 	// falseLabel being not nil means that we will not fall through into the FALSE case
 
 	int pc = codeStream.position;
-	if (valueRequired) {
-		if (falseLabel != null) {
-			// implicit falling through the TRUE case
-			if (trueLabel == null) {
-				codeStream.goto_(falseLabel);
-			}
-		}
-	}
+	// implicit falling through the TRUE case
+    if (valueRequired && falseLabel != null && trueLabel == null) {
+    	codeStream.goto_(falseLabel);
+    }
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 }
 @Override

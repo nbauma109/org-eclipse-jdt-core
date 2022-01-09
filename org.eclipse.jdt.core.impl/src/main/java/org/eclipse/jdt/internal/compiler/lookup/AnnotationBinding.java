@@ -275,8 +275,7 @@ public int hashCode() {
 	int c = this.getAnnotationType().hashCode();
 	result = 31 * result + c;
 	c =  Arrays.hashCode(this.getElementValuePairs());
-	result = 31 * result + c;
-	return result;
+	return 31 * result + c;
 }
 @Override
 public boolean equals(Object object) {
@@ -304,16 +303,15 @@ public boolean equals(Object object) {
 						continue loop;
 					}
 					return false;
-				} else {
-					if (thatPair.value == null) return false;
-					if (thatPair.value instanceof Object[] && thisPair.value instanceof Object[]) {
-						if (!Arrays.equals((Object[]) thisPair.value, (Object[]) thatPair.value)) {
-							return false;
-						}
-					} else if (!thatPair.value.equals(thisPair.value)) {
-						return false;
-					}
 				}
+                if (thatPair.value == null) return false;
+                if (thatPair.value instanceof Object[] && thisPair.value instanceof Object[]) {
+                	if (!Arrays.equals((Object[]) thisPair.value, (Object[]) thatPair.value)) {
+                		return false;
+                	}
+                } else if (!thatPair.value.equals(thisPair.value)) {
+                	return false;
+                }
 				continue loop;
 			}
 		}

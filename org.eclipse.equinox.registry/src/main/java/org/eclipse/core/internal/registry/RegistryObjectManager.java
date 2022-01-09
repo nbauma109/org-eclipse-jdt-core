@@ -34,10 +34,10 @@ public class RegistryObjectManager implements IObjectManager {
 	static final int CACHE_INITIAL_SIZE = 512; //This value has been picked because it is the minimal size required to startup an RCP app. (FYI, eclipse requires 3 growths).
 	static final float DEFAULT_LOADFACTOR = 0.75f; //This is the default factor used in reference map.
 
-	static final int[] EMPTY_INT_ARRAY = new int[0];
-	static final String[] EMPTY_STRING_ARRAY = new String[0];
+	static final int[] EMPTY_INT_ARRAY = {};
+	static final String[] EMPTY_STRING_ARRAY = {};
 
-	static final ExtensionHandle[] EMPTY_EXTENSIONS_ARRAY = new ExtensionHandle[0];
+	static final ExtensionHandle[] EMPTY_EXTENSIONS_ARRAY = {};
 
 	static int UNKNOWN = -1;
 
@@ -99,7 +99,7 @@ public class RegistryObjectManager implements IObjectManager {
 		}
 		fileOffsets = (OffsetTable) results[0];
 		extensionPoints = (HashtableOfStringAndInt) results[1];
-		nextId = ((Integer) results[2]).intValue();
+		nextId = (Integer) results[2];
 		fromCache = true;
 
 		if (!registry.useLazyCacheLoading()) {
@@ -219,10 +219,10 @@ public class RegistryObjectManager implements IObjectManager {
 
 	private KeyedHashSet getFormerContributions() {
 		KeyedHashSet result;
-		if (fromCache == false)
+		if (!fromCache)
 			return new KeyedHashSet(0);
 
-		if (formerContributions == null || (result = ((KeyedHashSet) ((formerContributions instanceof SoftReference) ? ((SoftReference<?>) formerContributions).get() : formerContributions))) == null) {
+		if (formerContributions == null || (result = (KeyedHashSet) (formerContributions instanceof SoftReference ? ((SoftReference<?>) formerContributions).get() : formerContributions)) == null) {
 			result = registry.getTableReader().loadContributions();
 			formerContributions = new SoftReference<>(result);
 		}
@@ -464,7 +464,7 @@ public class RegistryObjectManager implements IObjectManager {
 
 	synchronized void removeContribution(Object contributorId) {
 		boolean removed = newContributions.removeByKey(contributorId);
-		if (removed == false) {
+		if (!removed) {
 			removed = getFormerContributions().removeByKey(contributorId);
 			if (removed)
 				formerContributions = getFormerContributions(); //This forces the removed namespace to stay around, so we do not forget about removed namespaces
@@ -472,7 +472,6 @@ public class RegistryObjectManager implements IObjectManager {
 
 		if (removed) {
 			isDirty = true;
-			return;
 		}
 
 	}
@@ -483,7 +482,7 @@ public class RegistryObjectManager implements IObjectManager {
 		if (orphanExtensions == null && !fromCache) {
 			result = new HashMap<>();
 			orphanExtensions = result;
-		} else if (orphanExtensions == null || (result = ((orphanExtensions instanceof SoftReference) ? ((SoftReference<?>) orphanExtensions).get() : orphanExtensions)) == null) {
+		} else if (orphanExtensions == null || (result = orphanExtensions instanceof SoftReference ? ((SoftReference<?>) orphanExtensions).get() : orphanExtensions) == null) {
 			result = registry.getTableReader().loadOrphans();
 			orphanExtensions = new SoftReference<>(result);
 		}
@@ -557,7 +556,6 @@ public class RegistryObjectManager implements IObjectManager {
 				newOrphanExtensions[j++] = existingOrphanExtensions[i];
 
 		orphans.put(extensionPoint, newOrphanExtensions);
-		return;
 	}
 
 	//This method is only used by the writer to reach in
@@ -584,7 +582,7 @@ public class RegistryObjectManager implements IObjectManager {
 	// return contributors marked as removed.
 	HashMap<String, RegistryContributor> getContributors() {
 		if (contributors == null) {
-			if (fromCache == false)
+			if (!fromCache)
 				contributors = new HashMap<>();
 			else
 				contributors = registry.getTableReader().loadContributors();
@@ -632,7 +630,7 @@ public class RegistryObjectManager implements IObjectManager {
 
 	KeyedHashSet getNamespacesIndex() {
 		if (namespacesIndex == null) {
-			if (fromCache == false)
+			if (!fromCache)
 				namespacesIndex = new KeyedHashSet(0);
 			else
 				namespacesIndex = registry.getTableReader().loadNamespaces();
@@ -662,12 +660,12 @@ public class RegistryObjectManager implements IObjectManager {
 		Map<Integer, RegistryObject> actualObjects = new HashMap<>(xpts.length + exts.length);
 		for (int ext : exts) {
 			Extension tmp = (Extension) basicGetObject(ext, RegistryObjectManager.EXTENSION);
-			actualObjects.put(Integer.valueOf(ext), tmp);
+			actualObjects.put(ext, tmp);
 			collectChildren(tmp, 0, actualObjects);
 		}
 		for (int xpt2 : xpts) {
 			ExtensionPoint xpt = (ExtensionPoint) basicGetObject(xpt2, RegistryObjectManager.EXTENSION_POINT);
-			actualObjects.put(Integer.valueOf(xpt2), xpt);
+			actualObjects.put(xpt2, xpt);
 		}
 
 		return actualObjects;
@@ -693,16 +691,16 @@ public class RegistryObjectManager implements IObjectManager {
 				if (extPoint == null) // already removed?
 					continue;
 
-				Integer extPointIndex = Integer.valueOf(extPoint.getKeyHashCode());
+				Integer extPointIndex = extPoint.getKeyHashCode();
 				if (!associatedObjects.containsKey(extPointIndex))
-					result.put(Integer.valueOf(extPoint.getKeyHashCode()), extPoint);
+					result.put(extPoint.getKeyHashCode(), extPoint);
 
 				// add all extensions for the extension point
 				for (int childId : extPoint.getRawChildren()) {
 					Extension tmp = (Extension) basicGetObject(childId, RegistryObjectManager.EXTENSION);
 					if (tmp == null) // already removed
 						continue;
-					Integer extensionIndex = Integer.valueOf(childId);
+					Integer extensionIndex = childId;
 					if (!associatedObjects.containsKey(extensionIndex)) {
 						result.put(extensionIndex, tmp);
 						collectChildren(tmp, 0, result);
@@ -718,7 +716,7 @@ public class RegistryObjectManager implements IObjectManager {
 						Extension tmp = (Extension) basicGetObject(orphanId, RegistryObjectManager.EXTENSION);
 						if (tmp == null) // already removed
 							continue;
-						Integer extensionIndex = Integer.valueOf(orphanId);
+						Integer extensionIndex = orphanId;
 						if (!associatedObjects.containsKey(extensionIndex)) {
 							result.put(extensionIndex, tmp);
 							collectChildren(tmp, 0, result);
@@ -734,7 +732,7 @@ public class RegistryObjectManager implements IObjectManager {
 		//Remove the objects from the main object manager so they can no longer be accessed.
 		for (Object registryObject : associatedObjects.values()) {
 			RegistryObject toRemove = (RegistryObject) registryObject;
-			remove((toRemove).getObjectId(), true);
+			remove(toRemove.getObjectId(), true);
 			if (toRemove instanceof ExtensionPoint)
 				removeExtensionPoint(((ExtensionPoint) toRemove).getUniqueIdentifier());
 		}
@@ -747,7 +745,7 @@ public class RegistryObjectManager implements IObjectManager {
 	private void collectChildren(RegistryObject ce, int level, Map<Integer, RegistryObject> collector) {
 		ConfigurationElement[] children = (ConfigurationElement[]) getObjects(ce.getRawChildren(), level == 0 || ce.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 		for (ConfigurationElement child : children) {
-			collector.put(Integer.valueOf(child.getObjectId()), child);
+			collector.put(child.getObjectId(), child);
 			collectChildren(child, level + 1, collector);
 		}
 	}

@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.core.util.CharArrayBuffer;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 abstract class DOMMember extends DOMNode implements IDOMMember {
 
 	/**
@@ -211,9 +212,8 @@ protected char[] generateFlags() {
 	char[] flags= Flags.toString(getFlags()).toCharArray();
 	if (flags.length == 0) {
 		return flags;
-	} else {
-		return CharOperation.concat(flags, new char[] {' '});
 	}
+    return CharOperation.concat(flags, new char[] {' '});
 }
 /**
  * @see IDOMMember#getComment()
@@ -221,15 +221,13 @@ protected char[] generateFlags() {
 @Override
 public String getComment() {
 	becomeDetailed();
-	if (hasComment()) {
-		if (this.fComment != null) {
-			return this.fComment;
-		} else {
-			return new String(this.fDocument, this.fCommentRange[0], this.fCommentRange[1] + 1 - this.fCommentRange[0]);
-		}
-	} else {
+	if (!hasComment()) {
 		return null;
 	}
+    if (this.fComment != null) {
+    	return this.fComment;
+    }
+    return new String(this.fDocument, this.fCommentRange[0], this.fCommentRange[1] + 1 - this.fCommentRange[0]);
 }
 /**
  * @see IDOMMember#getFlags()
@@ -249,15 +247,13 @@ protected abstract int getMemberDeclarationStartPosition();
  * or the replacement value.
  */
 protected char[] getModifiersText() {
-	if (this.fModifiers == null) {
-		if (this.fModifierRange[0] < 0) {
-			return null;
-		} else {
-			return CharOperation.subarray(this.fDocument, this.fModifierRange[0], this.fModifierRange[1] + 1);
-		}
-	} else {
+	if (this.fModifiers != null) {
 		return this.fModifiers;
 	}
+    if (this.fModifierRange[0] < 0) {
+    	return null;
+    }
+    return CharOperation.subarray(this.fDocument, this.fModifierRange[0], this.fModifierRange[1] + 1);
 }
 /**
  * Returns true if this member currently has a body.
@@ -294,7 +290,7 @@ public void setComment(String comment) {
 		this.fFlags= this.fFlags | ClassFileConstants.AccDeprecated;
 		return;
 	}
-	this.fFlags= this.fFlags & (~ClassFileConstants.AccDeprecated);
+	this.fFlags= this.fFlags & ~ClassFileConstants.AccDeprecated;
 }
 /**
  * @see IDOMMember#setFlags(int)
@@ -305,7 +301,7 @@ public void setFlags(int flags) {
 	if (Flags.isDeprecated(this.fFlags)) {
 		this.fFlags= flags | ClassFileConstants.AccDeprecated;
 	} else {
-		this.fFlags= flags & (~ClassFileConstants.AccDeprecated);
+		this.fFlags= flags & ~ClassFileConstants.AccDeprecated;
 	}
 	fragment();
 	this.fModifiers= generateFlags();

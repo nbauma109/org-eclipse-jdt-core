@@ -255,7 +255,7 @@ public class CompilerOptions {
 	public static final String NO_TAG = "no_tag";	//$NON-NLS-1$
 	public static final String ALL_STANDARD_TAGS = "all_standard_tags";	//$NON-NLS-1$
 
-	private static final String[] NO_STRINGS = new String[0];
+	private static final String[] NO_STRINGS = {};
 
 	/**
 	 * Bit mask for configurable problems (error/warning threshold)
@@ -598,7 +598,8 @@ public class CompilerOptions {
 	/**
 	 * @deprecated used to preserve 3.1 and 3.2M4 compatibility of some Compiler constructors
 	 */
-	public CompilerOptions(Map settings, boolean parseLiteralExpressionsAsConstants){
+	@Deprecated
+    public CompilerOptions(Map settings, boolean parseLiteralExpressionsAsConstants){
 		this(settings);
 		this.parseLiteralExpressionsAsConstants = parseLiteralExpressionsAsConstants;
 	}
@@ -622,10 +623,10 @@ public class CompilerOptions {
 			case OverriddenPackageDefaultMethod  :
 				return OPTION_ReportOverridingPackageDefaultMethod;
 			case UsingDeprecatedAPI :
-			case (InvalidJavadoc | UsingDeprecatedAPI) :
+			case InvalidJavadoc | UsingDeprecatedAPI :
 				return OPTION_ReportDeprecation;
 			case UsingTerminallyDeprecatedAPI :
-			case (InvalidJavadoc | UsingTerminallyDeprecatedAPI) :
+			case InvalidJavadoc | UsingTerminallyDeprecatedAPI :
 				return OPTION_ReportTerminalDeprecation;
 			case MaskedCatchBlock  :
 				return OPTION_ReportHiddenCatchBlock;
@@ -852,8 +853,7 @@ public class CompilerOptions {
 		if (release != null && release.length() > 0) {
 			int major = Integer.parseInt(release) + ClassFileConstants.MAJOR_VERSION_0;
 			if (major <= ClassFileConstants.MAJOR_LATEST_VERSION) {
-				long jdkLevel = ((long) major << 16) + ClassFileConstants.MINOR_VERSION_0;
-				return jdkLevel;
+				return ((long) major << 16) + ClassFileConstants.MINOR_VERSION_0;
 			}
 		}
 		return 0;
@@ -898,10 +898,9 @@ public class CompilerOptions {
 					}
 					int major = Integer.parseInt(version) + ClassFileConstants.MAJOR_VERSION_0;
 					if (major > ClassFileConstants.MAJOR_LATEST_VERSION) {
-						if (supportUnreleased)
-							major = ClassFileConstants.MAJOR_LATEST_VERSION;
-						else
-							return 0; // unknown
+						if (!supportUnreleased)
+                            return 0; // unknown
+                        major = ClassFileConstants.MAJOR_LATEST_VERSION;
 					}
 					return ((long) major << 16) + ClassFileConstants.MINOR_VERSION_0;
 				} catch (NumberFormatException e) {
@@ -923,7 +922,7 @@ public class CompilerOptions {
 	 * @return all warning option names
 	 */
 	public static String[] warningOptionNames() {
-		String[] result = {
+		return new String[] {
 			OPTION_ReportAnnotationSuperInterface,
 			OPTION_ReportAssertIdentifier,
 			OPTION_ReportAutoboxing,
@@ -1035,7 +1034,6 @@ public class CompilerOptions {
 			OPTION_ReportPreviewFeatures,
 			OPTION_ReportSuppressWarningNotFullyAnalysed
 		};
-		return result;
 	}
 
 	/**
@@ -1044,10 +1042,10 @@ public class CompilerOptions {
 	public static String warningTokenFromIrritant(int irritant) {
 		// keep in sync with warningTokens and warningTokenToIrritant
 		switch (irritant) {
-			case (InvalidJavadoc | UsingDeprecatedAPI) :
+			case InvalidJavadoc | UsingDeprecatedAPI :
 			case UsingDeprecatedAPI :
 				return "deprecation"; //$NON-NLS-1$
-			case (InvalidJavadoc | UsingTerminallyDeprecatedAPI) :
+			case InvalidJavadoc | UsingTerminallyDeprecatedAPI :
 			case UsingTerminallyDeprecatedAPI :
 				return "removal"; //$NON-NLS-1$
 			case FinallyBlockNotCompleting :
@@ -1447,12 +1445,12 @@ public class CompilerOptions {
 		for (int i = 0; i < IrritantSet.GROUP_MAX; i++) {
 			int bit = bits[i];
 			for (int b = 0; b < IrritantSet.GROUP_SHIFT; b++) {
-				int single = bit & (1 << b);
+				int single = bit & 1 << b;
 				if (single > 0) {
-					single |= (i << IrritantSet.GROUP_SHIFT);
+					single |= i << IrritantSet.GROUP_SHIFT;
 					if (single == MissingNonNullByDefaultAnnotation)
 						continue;
-					if (!(this.warningThreshold.isSet(single) || this.errorThreshold.isSet(single) || this.infoThreshold.isSet(single))) {
+					if (!this.warningThreshold.isSet(single) && !this.errorThreshold.isSet(single) && !this.infoThreshold.isSet(single)) {
 						return single;
 					}
 				}
@@ -1763,15 +1761,13 @@ public class CompilerOptions {
 				this.isTaskCaseSensitive = false;
 			}
 		}
-		if ((optionValue = optionsMap.get(OPTION_InlineJsr)) != null) {
-			if (this.targetJDK < ClassFileConstants.JDK1_5) { // only optional if target < 1.5 (inlining on from 1.5 on)
-				if (ENABLED.equals(optionValue)) {
-					this.inlineJsrBytecode = true;
-				} else if (DISABLED.equals(optionValue)) {
-					this.inlineJsrBytecode = false;
-				}
-			}
-		}
+		if ((optionValue = optionsMap.get(OPTION_InlineJsr)) != null && this.targetJDK < ClassFileConstants.JDK1_5) { // only optional if target < 1.5 (inlining on from 1.5 on)
+        	if (ENABLED.equals(optionValue)) {
+        		this.inlineJsrBytecode = true;
+        	} else if (DISABLED.equals(optionValue)) {
+        		this.inlineJsrBytecode = false;
+        	}
+        }
 		if ((optionValue = optionsMap.get(OPTION_ShareCommonFinallyBlocks)) != null) {
 			if (ENABLED.equals(optionValue)) {
 				this.shareCommonFinallyBlocks = true;
@@ -2077,10 +2073,8 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_Store_Annotations)) != null) {
 			if (ENABLED.equals(optionValue)) {
 				this.storeAnnotations = true;
-			} else if (DISABLED.equals(optionValue)) {
-				if (!this.isAnnotationBasedNullAnalysisEnabled && !this.processAnnotations)
-					this.storeAnnotations = false;
-			}
+			} else if (DISABLED.equals(optionValue) && !this.isAnnotationBasedNullAnalysisEnabled && !this.processAnnotations)
+            	this.storeAnnotations = false;
 		}
 		if ((optionValue = optionsMap.get(OPTION_EmulateJavacBug8031744)) != null) {
 			if (ENABLED.equals(optionValue)) {

@@ -205,16 +205,13 @@ public class NonNullDefaultAwareTypeAnnotationWalker extends TypeAnnotationWalke
 	@Override
 	public IBinaryAnnotation[] getAnnotationsAtCursor(int currentTypeId, boolean mayApplyArrayContentsDefaultNullness) {
 		IBinaryAnnotation[] normalAnnotations = this.isEmpty ? NO_ANNOTATIONS : super.getAnnotationsAtCursor(currentTypeId, mayApplyArrayContentsDefaultNullness);
-		if ((this.atDefaultLocation || (mayApplyArrayContentsDefaultNullness && this.currentArrayContentIsNonNull)) &&
-				!(currentTypeId == -1) && // never apply default on type variable use or wildcard
-				!(this.atTypeBound && currentTypeId == TypeIds.T_JavaLangObject)) // for CLIMB-to-top consider a j.l.Object type bound as no explicit type bound
+		if ((this.atDefaultLocation || mayApplyArrayContentsDefaultNullness && this.currentArrayContentIsNonNull) &&
+				currentTypeId != -1 && // never apply default on type variable use or wildcard
+				(!this.atTypeBound || currentTypeId != TypeIds.T_JavaLangObject)) // for CLIMB-to-top consider a j.l.Object type bound as no explicit type bound
 		{
 			if (normalAnnotations == null || normalAnnotations.length == 0)
 				return new IBinaryAnnotation[] { this.nonNullAnnotation };
-			if (this.environment.containsNullTypeAnnotation(normalAnnotations)) {
-				// no default annotation if explicit annotation exists
-				return normalAnnotations;
-			} else {
+			if (!this.environment.containsNullTypeAnnotation(normalAnnotations)) {
 				// merge:
 				int len = normalAnnotations.length;
 				IBinaryAnnotation[] newAnnots = new IBinaryAnnotation[len+1];
@@ -241,41 +238,35 @@ public class NonNullDefaultAwareTypeAnnotationWalker extends TypeAnnotationWalke
 
 	public static ITypeAnnotationWalker updateWalkerForParamNonNullDefault(ITypeAnnotationWalker walker,
 			int defaultNullness, LookupEnvironment environment) {
-		if (environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
-			if (defaultNullness != Binding.NO_NULL_DEFAULT) {
-				if (defaultNullness == Binding.NULL_UNSPECIFIED_BY_DEFAULT) {
-					if (walker instanceof NonNullDefaultAwareTypeAnnotationWalker) {
-						NonNullDefaultAwareTypeAnnotationWalker nonNullDefaultAwareTypeAnnotationWalker = (NonNullDefaultAwareTypeAnnotationWalker) walker;
-						return new TypeAnnotationWalker(nonNullDefaultAwareTypeAnnotationWalker.typeAnnotations,
-								nonNullDefaultAwareTypeAnnotationWalker.matches,
-								nonNullDefaultAwareTypeAnnotationWalker.pathPtr);
-					} else {
-						return walker;
-					}
-				} else {
-					if (walker instanceof TypeAnnotationWalker) {
-						TypeAnnotationWalker typeAnnotationWalker = (TypeAnnotationWalker) walker;
+		if (environment.globalOptions.isAnnotationBasedNullAnalysisEnabled && defaultNullness != Binding.NO_NULL_DEFAULT) {
+        	if (defaultNullness == Binding.NULL_UNSPECIFIED_BY_DEFAULT) {
+        		if (walker instanceof NonNullDefaultAwareTypeAnnotationWalker) {
+        			NonNullDefaultAwareTypeAnnotationWalker nonNullDefaultAwareTypeAnnotationWalker = (NonNullDefaultAwareTypeAnnotationWalker) walker;
+        			return new TypeAnnotationWalker(nonNullDefaultAwareTypeAnnotationWalker.typeAnnotations,
+        					nonNullDefaultAwareTypeAnnotationWalker.matches,
+        					nonNullDefaultAwareTypeAnnotationWalker.pathPtr);
+        		}
+        	} else if (walker instanceof TypeAnnotationWalker) {
+            	TypeAnnotationWalker typeAnnotationWalker = (TypeAnnotationWalker) walker;
 
-						IBinaryAnnotation nonNullAnnotation2;
-						if (walker instanceof NonNullDefaultAwareTypeAnnotationWalker) {
-							NonNullDefaultAwareTypeAnnotationWalker nonNullDefaultAwareTypeAnnotationWalker = (NonNullDefaultAwareTypeAnnotationWalker) walker;
-							if(nonNullDefaultAwareTypeAnnotationWalker.isEmpty) {
-								return new NonNullDefaultAwareTypeAnnotationWalker(defaultNullness, environment);
-							}
-							nonNullAnnotation2 = nonNullDefaultAwareTypeAnnotationWalker.nonNullAnnotation;
-						} else {
-							nonNullAnnotation2 = getNonNullAnnotation(environment);
-						}
-						return new NonNullDefaultAwareTypeAnnotationWalker(typeAnnotationWalker.typeAnnotations,
-								typeAnnotationWalker.matches, typeAnnotationWalker.pathPtr, defaultNullness,
-								nonNullAnnotation2, false, false, environment, false);
-					} else {
-						// empty or walker from ExternalAnnotationProvider
-						return new NonNullDefaultAwareTypeAnnotationWalker(defaultNullness, environment);
-					}
-				}
-			}
-		}
+            	IBinaryAnnotation nonNullAnnotation2;
+            	if (walker instanceof NonNullDefaultAwareTypeAnnotationWalker) {
+            		NonNullDefaultAwareTypeAnnotationWalker nonNullDefaultAwareTypeAnnotationWalker = (NonNullDefaultAwareTypeAnnotationWalker) walker;
+            		if(nonNullDefaultAwareTypeAnnotationWalker.isEmpty) {
+            			return new NonNullDefaultAwareTypeAnnotationWalker(defaultNullness, environment);
+            		}
+            		nonNullAnnotation2 = nonNullDefaultAwareTypeAnnotationWalker.nonNullAnnotation;
+            	} else {
+            		nonNullAnnotation2 = getNonNullAnnotation(environment);
+            	}
+            	return new NonNullDefaultAwareTypeAnnotationWalker(typeAnnotationWalker.typeAnnotations,
+            			typeAnnotationWalker.matches, typeAnnotationWalker.pathPtr, defaultNullness,
+            			nonNullAnnotation2, false, false, environment, false);
+            } else {
+            	// empty or walker from ExternalAnnotationProvider
+            	return new NonNullDefaultAwareTypeAnnotationWalker(defaultNullness, environment);
+            }
+        }
 		return walker;
 	}
 }

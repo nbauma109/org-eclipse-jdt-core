@@ -122,29 +122,7 @@ public class BinaryModuleFactory {
 		if (descriptor == null) {
 			return null;
 		}
-		if (descriptor.isInJarFile()) {
-			ZipFile zip = null;
-			try {
-				zip = JavaModelManager.getJavaModelManager().getZipFile(new Path(new String(descriptor.workspacePath)),
-						useInvalidArchiveCache);
-				String entryName = TypeConstants.MODULE_INFO_CLASS_NAME_STRING;
-				ZipEntry ze = zip.getEntry(entryName);
-				if (ze != null) {
-					byte[] contents;
-					try {
-						contents = org.eclipse.jdt.internal.compiler.util.Util.getZipEntryByteContent(ze, zip);
-					} catch (IOException ioe) {
-						throw new JavaModelException(ioe, IJavaModelStatusConstants.IO_EXCEPTION);
-					}
-					ClassFileReader classFileReader = new ClassFileReader(contents, descriptor.indexPath, fullyInitialize);
-					return classFileReader.getModuleDeclaration();
-				}
-			} catch (CoreException e) {
-				throw new JavaModelException(e);
-			} finally {
-				JavaModelManager.getJavaModelManager().closeZipFile(zip);
-			}
-		} else {
+		if (!descriptor.isInJarFile()) {
 			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(new String(descriptor.workspacePath)));
 			byte[] contents;
 			try (InputStream stream = file.getContents(true)) {
@@ -161,6 +139,27 @@ public class BinaryModuleFactory {
 			ClassFileReader classFileReader = new ClassFileReader(contents, file.getFullPath().toString().toCharArray(), fullyInitialize);
 			return classFileReader.getModuleDeclaration();
 		}
+        ZipFile zip = null;
+        try {
+        	zip = JavaModelManager.getJavaModelManager().getZipFile(new Path(new String(descriptor.workspacePath)),
+        			useInvalidArchiveCache);
+        	String entryName = TypeConstants.MODULE_INFO_CLASS_NAME_STRING;
+        	ZipEntry ze = zip.getEntry(entryName);
+        	if (ze != null) {
+        		byte[] contents;
+        		try {
+        			contents = org.eclipse.jdt.internal.compiler.util.Util.getZipEntryByteContent(ze, zip);
+        		} catch (IOException ioe) {
+        			throw new JavaModelException(ioe, IJavaModelStatusConstants.IO_EXCEPTION);
+        		}
+        		ClassFileReader classFileReader = new ClassFileReader(contents, descriptor.indexPath, fullyInitialize);
+        		return classFileReader.getModuleDeclaration();
+        	}
+        } catch (CoreException e) {
+        	throw new JavaModelException(e);
+        } finally {
+        	JavaModelManager.getJavaModelManager().closeZipFile(zip);
+        }
 		return null;
 	}
 }

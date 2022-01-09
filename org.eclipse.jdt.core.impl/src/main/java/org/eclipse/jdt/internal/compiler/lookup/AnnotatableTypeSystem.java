@@ -81,8 +81,7 @@ public class AnnotatableTypeSystem extends TypeSystem {
 		}
 		ArrayBinding nakedType = null;
 		TypeBinding[] derivedTypes = getDerivedTypes(leafType);
-		for (int i = 0, length = derivedTypes.length; i < length; i++) {
-			TypeBinding derivedType = derivedTypes[i];
+		for (TypeBinding derivedType : derivedTypes) {
 			if (derivedType == null) break;
 			if (!derivedType.isArrayType() || derivedType.dimensions() != dimensions || derivedType.leafComponentType() != leafType) //$IDENTITY-COMPARISON$
 				continue;
@@ -152,8 +151,7 @@ public class AnnotatableTypeSystem extends TypeSystem {
 
 		RawTypeBinding nakedType = null;
 		TypeBinding[] derivedTypes = getDerivedTypes(genericType);
-		for (int i = 0, length = derivedTypes.length; i < length; i++) {
-			TypeBinding derivedType = derivedTypes[i];
+		for (TypeBinding derivedType : derivedTypes) {
 			if (derivedType == null)
 				break;
 			if (!derivedType.isRawType() || derivedType.actualType() != genericType || derivedType.enclosingType() != enclosingType) //$IDENTITY-COMPARISON$
@@ -190,10 +188,9 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			throw new IllegalStateException();
 
 		WildcardBinding nakedType = null;
-		boolean useDerivedTypesOfBound = bound instanceof TypeVariableBinding || (bound instanceof ParameterizedTypeBinding && !(bound instanceof RawTypeBinding)) ;
+		boolean useDerivedTypesOfBound = bound instanceof TypeVariableBinding || bound instanceof ParameterizedTypeBinding && !(bound instanceof RawTypeBinding) ;
 		TypeBinding[] derivedTypes = getDerivedTypes(useDerivedTypesOfBound ? bound : genericType);
-		for (int i = 0, length = derivedTypes.length; i < length; i++) {
-			TypeBinding derivedType = derivedTypes[i];
+		for (TypeBinding derivedType : derivedTypes) {
 			if (derivedType == null)
 				break;
 			if (!derivedType.isWildcard() || derivedType.actualType() != genericType || derivedType.rank() != rank) //$IDENTITY-COMPARISON$
@@ -273,9 +270,7 @@ public class AnnotatableTypeSystem extends TypeSystem {
 					if (annotations[i] != null && annotations[i].length > 0)
 						break;
 				}
-				if (i == levels) // empty annotations array ?
-					return type;
-				if (j < 0) // Not kosher, broken type that is not flagged as invalid while reporting compilation error ? don't touch.
+				if (i == levels || j < 0) // Not kosher, broken type that is not flagged as invalid while reporting compilation error ? don't touch.
 					return type;
 				// types[j] is the first component being annotated. Its annotations are annotations[i]
 				for (enclosingType = j == 0 ? null : types[j - 1]; i < levels; i++, j++) {
@@ -303,8 +298,7 @@ public class AnnotatableTypeSystem extends TypeSystem {
 		}
 		TypeBinding nakedType = null;
 		TypeBinding[] derivedTypes = getDerivedTypes(type);
-		for (int i = 0, length = derivedTypes.length; i < length; i++) {
-			TypeBinding derivedType = derivedTypes[i];
+		for (TypeBinding derivedType : derivedTypes) {
 			if (derivedType == null) break;
 
 			if (derivedType.enclosingType() != enclosingType || !Util.effectivelyEqual(derivedType.typeArguments(), type.typeArguments())) //$IDENTITY-COMPARISON$
@@ -356,26 +350,16 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			// propagate nullness unless overridden in 'annotations':
 			annotatedType.tagBits |= type.tagBits & TagBits.AnnotationNullMASK;
 		}
-		TypeBinding keyType;
-		switch (type.kind()) {
-			case Binding.ARRAY_TYPE:
-				keyType = type.leafComponentType();
-				break;
-			case Binding.RAW_TYPE:
-			case Binding.WILDCARD_TYPE:
-				keyType = type.actualType();
-				break;
-			default:
-				keyType = nakedType;
-				break;
-		}
+		TypeBinding keyType = switch (type.kind()) {
+            case Binding.ARRAY_TYPE -> type.leafComponentType();
+            case Binding.RAW_TYPE, Binding.WILDCARD_TYPE -> type.actualType();
+            default -> nakedType;
+        };
 		return cacheDerivedType(keyType, nakedType, annotatedType);
 	}
 
 	private boolean haveTypeAnnotations(TypeBinding baseType, TypeBinding someType, TypeBinding[] someTypes, AnnotationBinding[] annotations) {
-		if (baseType != null && baseType.hasTypeAnnotations())
-			return true;
-		if (someType != null && someType.hasTypeAnnotations())
+		if (baseType != null && baseType.hasTypeAnnotations() || someType != null && someType.hasTypeAnnotations())
 			return true;
 		for (int i = 0, length = annotations == null ? 0 : annotations.length; i < length; i++)
 			if (annotations [i] != null)

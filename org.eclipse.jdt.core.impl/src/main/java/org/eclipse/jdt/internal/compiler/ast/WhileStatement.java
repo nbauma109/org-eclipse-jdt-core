@@ -53,12 +53,12 @@ public class WhileStatement extends Statement {
 		int initialComplaintLevel = (flowInfo.reachMode() & FlowInfo.UNREACHABLE) != 0 ? Statement.COMPLAINED_FAKE_REACHABLE : Statement.NOT_COMPLAINED;
 
 		Constant cst = this.condition.constant;
-		boolean isConditionTrue = cst != Constant.NotAConstant && cst.booleanValue() == true;
-		boolean isConditionFalse = cst != Constant.NotAConstant && cst.booleanValue() == false;
+		boolean isConditionTrue = cst != Constant.NotAConstant && cst.booleanValue();
+		boolean isConditionFalse = cst != Constant.NotAConstant && !cst.booleanValue();
 
 		cst = this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedTrue = cst != Constant.NotAConstant && cst.booleanValue() == true;
-		boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && cst.booleanValue() == false;
+		boolean isConditionOptimizedTrue = cst != Constant.NotAConstant && cst.booleanValue();
+		boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && !cst.booleanValue();
 
 		this.preCondInitStateIndex = currentScope.methodScope().recordInitializationStates(flowInfo);
 		LoopingFlowContext condLoopContext;
@@ -69,9 +69,9 @@ public class WhileStatement extends Statement {
 		// or catch blocks
 		condInfo = this.condition.analyseCode(
 				currentScope,
-				(condLoopContext =
+				condLoopContext =
 					new LoopingFlowContext(flowContext, flowInfo, this, null,
-						null, currentScope, true)),
+						null, currentScope, true),
 				condInfo);
 		this.condition.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
 
@@ -79,91 +79,89 @@ public class WhileStatement extends Statement {
 		FlowInfo actionInfo;
 		FlowInfo exitBranch;
 		if (this.action == null
-			|| (this.action.isEmptyBlock() && currentScope.compilerOptions().complianceLevel <= ClassFileConstants.JDK1_3)) {
+			|| this.action.isEmptyBlock() && currentScope.compilerOptions().complianceLevel <= ClassFileConstants.JDK1_3) {
 			condLoopContext.complainOnDeferredFinalChecks(currentScope,
 					condInfo);
 			condLoopContext.complainOnDeferredNullChecks(currentScope,
 				condInfo.unconditionalInits());
 			if (isConditionTrue) {
 				return FlowInfo.DEAD_END;
-			} else {
-				FlowInfo mergedInfo = flowInfo.copy().addInitializationsFrom(condInfo.initsWhenFalse());
-				if (isConditionOptimizedTrue){
-					mergedInfo.setReachMode(FlowInfo.UNREACHABLE_OR_DEAD);
-				}
-				this.mergedInitStateIndex =
-					currentScope.methodScope().recordInitializationStates(mergedInfo);
-				return mergedInfo;
 			}
-		} else {
-			// in case the condition was inlined to false, record the fact that there is no way to reach any
-			// statement inside the looping action
-			loopingContext =
-				new LoopingFlowContext(
-					flowContext,
-					flowInfo,
-					this,
-					this.breakLabel,
-					this.continueLabel,
-					currentScope,
-					true);
-			loopingContext.copyNullCheckedFieldsFrom(condLoopContext);
-			if (isConditionFalse) {
-				actionInfo = FlowInfo.DEAD_END;
-			} else {
-				actionInfo = condInfo.initsWhenTrue().copy();
-				if (isConditionOptimizedFalse){
-					actionInfo.setReachMode(FlowInfo.UNREACHABLE_OR_DEAD);
-				}
-			}
-
-			// for computing local var attributes
-			this.condIfTrueInitStateIndex =
-				currentScope.methodScope().recordInitializationStates(
-					condInfo.initsWhenTrue());
-
-			if (this.action.complainIfUnreachable(actionInfo, currentScope, initialComplaintLevel, true) < Statement.COMPLAINED_UNREACHABLE) {
-				this.condition.updateFlowOnBooleanResult(actionInfo, true);
-				actionInfo = this.action.analyseCode(currentScope, loopingContext, actionInfo);
-			}
-
-			// code generation can be optimized when no need to continue in the loop
-			exitBranch = flowInfo.copy();
-			// need to start over from flowInfo so as to get null inits
-            int combinedTagBits = actionInfo.tagBits & loopingContext.initsOnContinue.tagBits;
-			if ((combinedTagBits & FlowInfo.UNREACHABLE) != 0) {
-				if ((combinedTagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0)
-					this.continueLabel = null;
-				exitBranch.addInitializationsFrom(condInfo.initsWhenFalse());
-				actionInfo = actionInfo.mergedWith(loopingContext.initsOnContinue.unconditionalInits());
-				condLoopContext.complainOnDeferredNullChecks(currentScope,
-						actionInfo, false);
-				loopingContext.complainOnDeferredNullChecks(currentScope,
-						actionInfo, false);
-			} else {
-				condLoopContext.complainOnDeferredFinalChecks(currentScope,
-						condInfo);
-				actionInfo = actionInfo.mergedWith(loopingContext.initsOnContinue.unconditionalInits());
-				condLoopContext.complainOnDeferredNullChecks(currentScope,
-						actionInfo);
-				loopingContext.complainOnDeferredFinalChecks(currentScope,
-						actionInfo);
-				loopingContext.complainOnDeferredNullChecks(currentScope,
-						actionInfo);
-				exitBranch.
-					addPotentialInitializationsFrom(
-						actionInfo.unconditionalInits()).
-					addInitializationsFrom(condInfo.initsWhenFalse());
-			}
-			if (loopingContext.hasEscapingExceptions()) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=321926
-				FlowInfo loopbackFlowInfo = flowInfo.copy();
-				if (this.continueLabel != null) {  // we do get to the bottom
-					// loopback | (loopback + action):
-					loopbackFlowInfo = loopbackFlowInfo.mergedWith(loopbackFlowInfo.unconditionalCopy().addNullInfoFrom(actionInfo).unconditionalInits());
-				}
-				loopingContext.simulateThrowAfterLoopBack(loopbackFlowInfo);
-			}
+            FlowInfo mergedInfo = flowInfo.copy().addInitializationsFrom(condInfo.initsWhenFalse());
+            if (isConditionOptimizedTrue){
+            	mergedInfo.setReachMode(FlowInfo.UNREACHABLE_OR_DEAD);
+            }
+            this.mergedInitStateIndex =
+            	currentScope.methodScope().recordInitializationStates(mergedInfo);
+            return mergedInfo;
 		}
+        // in case the condition was inlined to false, record the fact that there is no way to reach any
+        // statement inside the looping action
+        loopingContext =
+        	new LoopingFlowContext(
+        		flowContext,
+        		flowInfo,
+        		this,
+        		this.breakLabel,
+        		this.continueLabel,
+        		currentScope,
+        		true);
+        loopingContext.copyNullCheckedFieldsFrom(condLoopContext);
+        if (isConditionFalse) {
+        	actionInfo = FlowInfo.DEAD_END;
+        } else {
+        	actionInfo = condInfo.initsWhenTrue().copy();
+        	if (isConditionOptimizedFalse){
+        		actionInfo.setReachMode(FlowInfo.UNREACHABLE_OR_DEAD);
+        	}
+        }
+
+        // for computing local var attributes
+        this.condIfTrueInitStateIndex =
+        	currentScope.methodScope().recordInitializationStates(
+        		condInfo.initsWhenTrue());
+
+        if (this.action.complainIfUnreachable(actionInfo, currentScope, initialComplaintLevel, true) < Statement.COMPLAINED_UNREACHABLE) {
+        	this.condition.updateFlowOnBooleanResult(actionInfo, true);
+        	actionInfo = this.action.analyseCode(currentScope, loopingContext, actionInfo);
+        }
+
+        // code generation can be optimized when no need to continue in the loop
+        exitBranch = flowInfo.copy();
+        // need to start over from flowInfo so as to get null inits
+        int combinedTagBits = actionInfo.tagBits & loopingContext.initsOnContinue.tagBits;
+        if ((combinedTagBits & FlowInfo.UNREACHABLE) != 0) {
+        	if ((combinedTagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0)
+        		this.continueLabel = null;
+        	exitBranch.addInitializationsFrom(condInfo.initsWhenFalse());
+        	actionInfo = actionInfo.mergedWith(loopingContext.initsOnContinue.unconditionalInits());
+        	condLoopContext.complainOnDeferredNullChecks(currentScope,
+        			actionInfo, false);
+        	loopingContext.complainOnDeferredNullChecks(currentScope,
+        			actionInfo, false);
+        } else {
+        	condLoopContext.complainOnDeferredFinalChecks(currentScope,
+        			condInfo);
+        	actionInfo = actionInfo.mergedWith(loopingContext.initsOnContinue.unconditionalInits());
+        	condLoopContext.complainOnDeferredNullChecks(currentScope,
+        			actionInfo);
+        	loopingContext.complainOnDeferredFinalChecks(currentScope,
+        			actionInfo);
+        	loopingContext.complainOnDeferredNullChecks(currentScope,
+        			actionInfo);
+        	exitBranch.
+        		addPotentialInitializationsFrom(
+        			actionInfo.unconditionalInits()).
+        		addInitializationsFrom(condInfo.initsWhenFalse());
+        }
+        if (loopingContext.hasEscapingExceptions()) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=321926
+        	FlowInfo loopbackFlowInfo = flowInfo.copy();
+        	if (this.continueLabel != null) {  // we do get to the bottom
+        		// loopback | (loopback + action):
+        		loopbackFlowInfo = loopbackFlowInfo.mergedWith(loopbackFlowInfo.unconditionalCopy().addNullInfoFrom(actionInfo).unconditionalInits());
+        	}
+        	loopingContext.simulateThrowAfterLoopBack(loopbackFlowInfo);
+        }
 
 		// end of loop
 		FlowInfo mergedInfo = FlowInfo.mergedOptimizedBranches(
@@ -197,7 +195,7 @@ public class WhileStatement extends Statement {
 		}
 		int pc = codeStream.position;
 		Constant cst = this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && cst.booleanValue() == false;
+		boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && !cst.booleanValue();
 		if (isConditionOptimizedFalse) {
 			this.condition.generateCode(currentScope, codeStream, false);
 			// May loose some local variable initializations : affecting the local variable attributes
@@ -224,10 +222,7 @@ public class WhileStatement extends Statement {
 			}
 		} else {
 			this.continueLabel.initialize(codeStream);
-			if (!(((this.condition.constant != Constant.NotAConstant)
-				&& (this.condition.constant.booleanValue() == true))
-				|| (this.action == null)
-				|| this.action.isEmptyBlock())) {
+			if ((this.condition.constant == Constant.NotAConstant || !this.condition.constant.booleanValue()) && this.action != null && !this.action.isEmptyBlock()) {
 				int jumpPC = codeStream.position;
 				codeStream.goto_(this.continueLabel);
 				codeStream.recordPositionsFrom(jumpPC, this.condition.sourceStart);
@@ -329,9 +324,9 @@ public class WhileStatement extends Statement {
 	@Override
 	public boolean doesNotCompleteNormally() {
 		Constant cst = this.condition.constant;
-		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 		cst = this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+		boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 		return (isConditionTrue || isConditionOptimizedTrue) && (this.action == null || !this.action.breaksOut(null));
 	}
 
@@ -343,10 +338,10 @@ public class WhileStatement extends Statement {
 	@Override
 	public boolean canCompleteNormally() {
 		Constant cst = this.condition.constant;
-		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 		cst = this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
-		if (!(isConditionTrue || isConditionOptimizedTrue))
+		boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
+		if (!isConditionTrue && !isConditionOptimizedTrue)
 			return true;
 		return this.action != null && this.action.breaksOut(null);
 	}

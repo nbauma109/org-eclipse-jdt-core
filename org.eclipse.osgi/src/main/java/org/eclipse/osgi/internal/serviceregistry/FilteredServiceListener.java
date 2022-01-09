@@ -57,14 +57,14 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	 */
 	FilteredServiceListener(final BundleContextImpl context, final ServiceListener listener, final String filterstring) throws InvalidSyntaxException {
 		this.debug = context.getContainer().getConfiguration().getDebug();
-		this.unfiltered = (listener instanceof UnfilteredServiceListener);
+		this.unfiltered = listener instanceof UnfilteredServiceListener;
 		if (filterstring == null) {
 			this.filter = null;
 			this.objectClass = null;
 		} else {
 			FilterImpl filterImpl = FilterImpl.newInstance(filterstring, context.getContainer().getConfiguration().getDebug().DEBUG_FILTER);
 			String clazz = filterImpl.getRequiredObjectClass();
-			if (unfiltered || (clazz == null)) {
+			if (unfiltered || clazz == null) {
 				this.objectClass = null;
 				this.filter = filterImpl;
 			} else {
@@ -75,7 +75,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		this.removed = false;
 		this.listener = listener;
 		this.context = context;
-		this.allservices = (listener instanceof AllServiceListener);
+		this.allservices = listener instanceof AllServiceListener;
 	}
 
 	/**
@@ -131,7 +131,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	private ServiceEvent filterMatch(ServiceEvent delivered) {
 		boolean modified = delivered.getType() == ServiceEvent.MODIFIED;
 		ServiceEvent event = modified ? ((ModifiedServiceEvent) delivered).getModifiedEvent() : delivered;
-		if (unfiltered || (filter == null)) {
+		if (unfiltered || filter == null) {
 			return event;
 		}
 		ServiceReference<?> reference = event.getServiceReference();

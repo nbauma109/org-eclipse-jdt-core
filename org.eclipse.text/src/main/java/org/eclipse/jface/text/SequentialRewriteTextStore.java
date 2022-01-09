@@ -133,35 +133,36 @@ public class SequentialRewriteTextStore implements ITextStore {
 			return fSource.get(offset, length);
 
 			// after
-		} else if (offset >= lastReplace.newOffset + lastReplace.text.length()) {
+		}
+        if (offset >= lastReplace.newOffset + lastReplace.text.length()) {
 			int delta= getDelta(lastReplace);
 			return fSource.get(offset - delta, length);
 
-		} else if (ASSERT_SEQUENTIALITY) {
+		}
+        if (ASSERT_SEQUENTIALITY) {
 			throw new IllegalArgumentException();
 
-		} else {
-
-			int delta= 0;
-			for (Replace replace : fReplaceList) {
-				if (offset + length < replace.newOffset) {
-					return fSource.get(offset - delta, length);
-
-				} else if (offset >= replace.newOffset && offset + length <= replace.newOffset + replace.text.length()) {
-					return replace.text.substring(offset - replace.newOffset, offset - replace.newOffset + length);
-
-				} else if (offset >= replace.newOffset + replace.text.length()) {
-					delta= getDelta(replace);
-					continue;
-
-				} else {
-					commit();
-					return fSource.get(offset, length);
-				}
-			}
-
-			return fSource.get(offset - delta, length);
 		}
+        int delta= 0;
+        for (Replace replace : fReplaceList) {
+        	if (offset + length < replace.newOffset) {
+        		return fSource.get(offset - delta, length);
+
+        	}
+            if (offset >= replace.newOffset && offset + length <= replace.newOffset + replace.text.length()) {
+        		return replace.text.substring(offset - replace.newOffset, offset - replace.newOffset + length);
+
+        	}
+            if (offset >= replace.newOffset + replace.text.length()) {
+        		delta= getDelta(replace);
+        		continue;
+
+        	}
+            commit();
+            return fSource.get(offset, length);
+        }
+
+        return fSource.get(offset - delta, length);
 
 	}
 
@@ -189,28 +190,27 @@ public class SequentialRewriteTextStore implements ITextStore {
 			return fSource.get(offset);
 
 			// after
-		} else if (offset >= lastReplace.newOffset + lastReplace.text.length()) {
+		}
+        if (offset >= lastReplace.newOffset + lastReplace.text.length()) {
 			int delta= getDelta(lastReplace);
 			return fSource.get(offset - delta);
 
-		} else if (ASSERT_SEQUENTIALITY) {
+		}
+        if (ASSERT_SEQUENTIALITY) {
 			throw new IllegalArgumentException();
 
-		} else {
-
-			int delta= 0;
-			for (Replace replace : fReplaceList) {
-				if (offset < replace.newOffset)
-					return fSource.get(offset - delta);
-
-				else if (offset < replace.newOffset + replace.text.length())
-					return replace.text.charAt(offset - replace.newOffset);
-
-				delta= getDelta(replace);
-			}
-
-			return fSource.get(offset - delta);
 		}
+        int delta= 0;
+        for (Replace replace : fReplaceList) {
+        	if (offset < replace.newOffset)
+        		return fSource.get(offset - delta);
+            if (offset < replace.newOffset + replace.text.length())
+        		return replace.text.charAt(offset - replace.newOffset);
+
+        	delta= getDelta(replace);
+        }
+
+        return fSource.get(offset - delta);
 	}
 
 	@Override

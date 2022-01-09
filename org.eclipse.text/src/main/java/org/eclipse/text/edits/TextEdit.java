@@ -129,7 +129,7 @@ public abstract class TextEdit {
 		}
 	}
 
-	private static final TextEdit[] EMPTY_ARRAY= new TextEdit[0];
+	private static final TextEdit[] EMPTY_ARRAY= {};
 	private static final InsertionComparator INSERTION_COMPARATOR= new InsertionComparator();
 
 	private static final int DELETED_VALUE= -1;

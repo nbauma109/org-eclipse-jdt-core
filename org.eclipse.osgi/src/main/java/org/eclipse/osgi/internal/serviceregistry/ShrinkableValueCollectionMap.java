@@ -90,7 +90,7 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 		if (values != null) {
 			value = values.remove(key);
 		}
-		if ((value == null) && (entrySet != null)) {
+		if (value == null && entrySet != null) {
 			value = new ShrinkableEntrySetValueCollection<>(entrySet);
 		}
 		return value;
@@ -106,7 +106,6 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 	 */
 	private final class EntrySet extends AbstractSet<Map.Entry<K, Collection<V>>> {
 		EntrySet() {
-			super();
 		}
 
 		@Override
@@ -204,10 +203,10 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 	}
 
 	static int hash(Object one) {
-		return (one == null) ? 0 : one.hashCode();
+		return one == null ? 0 : one.hashCode();
 	}
 
 	static boolean equality(Object one, Object two) {
-		return (one == null) ? (two == null) : one.equals(two);
+		return one == null ? two == null : one.equals(two);
 	}
 }

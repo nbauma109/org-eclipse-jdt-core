@@ -56,7 +56,7 @@ class UndoCollector implements IDocumentListener {
 
 	private static int getDelta(DocumentEvent event) {
 		String text= event.getText();
-		return text == null ? -event.getLength() : (text.length() - event.getLength());
+		return text == null ? -event.getLength() : text.length() - event.getLength();
 	}
 
 	@Override

@@ -92,8 +92,8 @@ protected ASTNode generateElementAST(ASTRewrite rewriter, ICompilationUnit cu) t
 	while (imports.hasNext()) {
 		ImportDeclaration importDeclaration = (ImportDeclaration) imports.next();
 		if (importActualName.equals(importDeclaration.getName().getFullyQualifiedName())
-				&& (onDemand == importDeclaration.isOnDemand())
-				&& (Flags.isStatic(this.flags) == importDeclaration.isStatic())) {
+				&& onDemand == importDeclaration.isOnDemand()
+				&& Flags.isStatic(this.flags) == importDeclaration.isStatic()) {
 			this.creationOccurred = false;
 			return null;
 		}
@@ -151,9 +151,9 @@ protected void initializeDefaultPosition() {
 		}
 		IJavaElement[] children = cu.getChildren();
 		//look for the package declaration
-		for (int i = 0; i < children.length; i++) {
-			if (children[i].getElementType() == IJavaElement.PACKAGE_DECLARATION) {
-				createAfter(children[i]);
+		for (IJavaElement child : children) {
+			if (child.getElementType() == IJavaElement.PACKAGE_DECLARATION) {
+				createAfter(child);
 				return;
 			}
 		}

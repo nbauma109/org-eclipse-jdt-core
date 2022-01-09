@@ -604,11 +604,10 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 
 						int endOfUnicode = pos + 3;
 						if (end < endOfUnicode) {
-							if (endOfUnicode < source.length) {
-								end = endOfUnicode;
-							} else {
+							if (endOfUnicode >= source.length) {
 								return false; // not enough characters to decode an unicode
 							}
+                            end = endOfUnicode;
 						}
 
 						if ((c1 = ScannerHelper.getHexadecimalValue(source[pos++])) > 15
@@ -620,10 +619,9 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 							|| (c4 = ScannerHelper.getHexadecimalValue(source[pos++])) > 15
 							|| c4 < 0) {
 							return false;
-						} else {
-							currentCharacter = (char) (((c1 * 16 + c2) * 16 + c3) * 16 + c4);
-							nextCharacterPosition = pos;
 						}
+                        currentCharacter = (char) (((c1 * 16 + c2) * 16 + c3) * 16 + c4);
+                        nextCharacterPosition = pos;
 					} else {
 						currentCharacter = source[currentPosition];
 						nextCharacterPosition = currentPosition+1;
@@ -692,19 +690,15 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				}
 			} while (token != TerminalTokens.TokenNameEOF);
 		} else {
-			if (selectionStart == selectionEnd) { // Widen the selection to scan -> || :: if needed. No unicode handling for now.
-				if (selectionStart > 0 && selectionEnd < source.length - 1) {
-					if ((source[selectionStart] == '>' && source[selectionStart - 1] == '-') ||
-							source[selectionStart] == ':' && source[selectionStart - 1] == ':') {
-						selectionStart--;
-					} else {
-						if ((source[selectionStart] == '-' && source[selectionEnd + 1] == '>') ||
-								source[selectionStart] == ':' && source[selectionEnd + 1] == ':') {
-							selectionEnd++;
-						}
-					}
-				}
-			} // there could be some innocuous widening, shouldn't matter.
+			if (selectionStart == selectionEnd && selectionStart > 0 && selectionEnd < source.length - 1) {
+            	if (source[selectionStart] == '>' && source[selectionStart - 1] == '-' ||
+            			source[selectionStart] == ':' && source[selectionStart - 1] == ':') {
+            		selectionStart--;
+            	} else if (source[selectionStart] == '-' && source[selectionEnd + 1] == '>' ||
+                		source[selectionStart] == ':' && source[selectionEnd + 1] == ':') {
+                	selectionEnd++;
+                }
+            } // there could be some innocuous widening, shouldn't matter.
 			scanner.resetTo(selectionStart, selectionEnd, isModuleInfo);
 
 			boolean expectingIdentifier = true;
@@ -840,7 +834,6 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				Signature.createTypeSignature(typeRef, true);
 				return true;
 			} catch(IllegalArgumentException e) {
-				return false;
 			}
 		}
 
@@ -1008,8 +1001,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				}
 				ImportReference[] imports = parsedUnit.imports;
 				if (imports != null) {
-					for (int i = 0, length = imports.length; i < length; i++) {
-						ImportReference importReference = imports[i];
+					for (ImportReference importReference : imports) {
 						if (importReference instanceof SelectionOnImportReference) {
 							char[][] tokens = importReference.tokens;
 							this.noProposal = false;
@@ -1024,7 +1016,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 
 								if(qualifierTokens != null && qualifierTokens.length > 0) {
 									Binding binding = this.unitScope.getTypeOrPackage(qualifierTokens);
-									if(binding != null && binding instanceof ReferenceBinding) {
+									if(binding instanceof ReferenceBinding) {
 										ReferenceBinding ref = (ReferenceBinding) binding;
 										selectMemberTypeFromImport(parsedUnit, lastToken, ref, importReference.isStatic());
 										if(importReference.isStatic()) {
@@ -1140,16 +1132,8 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 	private void selectMemberTypeFromImport(CompilationUnitDeclaration parsedUnit, char[] lastToken, ReferenceBinding ref, boolean staticOnly) {
 		int fieldLength = lastToken.length;
 		ReferenceBinding[] memberTypes = ref.memberTypes();
-		next : for (int j = 0; j < memberTypes.length; j++) {
-			ReferenceBinding memberType = memberTypes[j];
-
-			if (fieldLength > memberType.sourceName.length)
-				continue next;
-
-			if (staticOnly && !memberType.isStatic())
-				continue next;
-
-			if (!CharOperation.equals(lastToken, memberType.sourceName, true))
+		next : for (ReferenceBinding memberType : memberTypes) {
+			if (fieldLength > memberType.sourceName.length || staticOnly && !memberType.isStatic() || !CharOperation.equals(lastToken, memberType.sourceName, true))
 				continue next;
 
 			selectFrom(memberType, parsedUnit, false);
@@ -1159,19 +1143,8 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 	private void selectStaticFieldFromStaticImport(CompilationUnitDeclaration parsedUnit, char[] lastToken, ReferenceBinding ref) {
 		int fieldLength = lastToken.length;
 		FieldBinding[] fields = ref.availableFields();
-		next : for (int j = 0; j < fields.length; j++) {
-			FieldBinding field = fields[j];
-
-			if (fieldLength > field.name.length)
-				continue next;
-
-			if (field.isSynthetic())
-				continue next;
-
-			if (!field.isStatic())
-				continue next;
-
-			if (!CharOperation.equals(lastToken, field.name, true))
+		next : for (FieldBinding field : fields) {
+			if (fieldLength > field.name.length || field.isSynthetic() || !field.isStatic() || !CharOperation.equals(lastToken, field.name, true))
 				continue next;
 
 			selectFrom(field, parsedUnit, false);
@@ -1181,21 +1154,10 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 	private void selectStaticMethodFromStaticImport(CompilationUnitDeclaration parsedUnit, char[] lastToken, ReferenceBinding ref) {
 		int methodLength = lastToken.length;
 		MethodBinding[] methods = ref.availableMethods();
-		next : for (int j = 0; j < methods.length; j++) {
-			MethodBinding method = methods[j];
+		next : for (MethodBinding method : methods) {
+			if (method.isSynthetic() || method.isDefaultAbstract() || method.isConstructor() || !method.isStatic()) continue next;
 
-			if (method.isSynthetic()) continue next;
-
-			if (method.isDefaultAbstract())	continue next;
-
-			if (method.isConstructor()) continue next;
-
-			if (!method.isStatic()) continue next;
-
-			if (methodLength > method.selector.length)
-				continue next;
-
-			if (!CharOperation.equals(lastToken, method.selector, true))
+			if (methodLength > method.selector.length || !CharOperation.equals(lastToken, method.selector, true))
 				continue next;
 
 			selectFrom(method, parsedUnit, false);
@@ -1440,11 +1402,10 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				if (constructorDeclaration.selector == assistIdentifier){
 					if (constructorDeclaration.binding != null) {
 						throw new SelectionNodeFound(constructorDeclaration.binding);
-					} else {
-						if (constructorDeclaration.scope != null) {
-							throw new SelectionNodeFound(new MethodBinding(constructorDeclaration.modifiers, constructorDeclaration.selector, null, null, null, constructorDeclaration.scope.referenceType().binding));
-						}
 					}
+                    if (constructorDeclaration.scope != null) {
+                    	throw new SelectionNodeFound(new MethodBinding(constructorDeclaration.modifiers, constructorDeclaration.selector, null, null, null, constructorDeclaration.scope.referenceType().binding));
+                    }
 				}
 				return true;
 			}
@@ -1457,9 +1418,8 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				if (localDeclaration.type instanceof SingleTypeReference && ((SingleTypeReference)localDeclaration.type).token == assistIdentifier) {
 					if(localDeclaration.binding != null) {
 						throw new SelectionNodeFound(localDeclaration.binding.type);
-					} else {
-						throw new SelectionNodeFound();
 					}
+                    throw new SelectionNodeFound();
 				}
 				return true; // do nothing by default, keep traversing
 			}
@@ -1489,11 +1449,10 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				if (methodDeclaration.selector == assistIdentifier){
 					if (methodDeclaration.binding != null) {
 						throw new SelectionNodeFound(methodDeclaration.binding);
-					} else {
-						if (methodDeclaration.scope != null) {
-							throw new SelectionNodeFound(new MethodBinding(methodDeclaration.modifiers, methodDeclaration.selector, null, null, null, methodDeclaration.scope.referenceType().binding));
-						}
 					}
+                    if (methodDeclaration.scope != null) {
+                    	throw new SelectionNodeFound(new MethodBinding(methodDeclaration.modifiers, methodDeclaration.selector, null, null, null, methodDeclaration.scope.referenceType().binding));
+                    }
 				}
 				return true;
 			}
@@ -1860,18 +1819,16 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 	 * or on the inheritDoc tag in its javadoc.
 	 */
 	private MethodBinding getCorrectMethodBinding(MethodBinding binding) {
-		if (this.parser.javadocParser instanceof SelectionJavadocParser) {
-			if (((SelectionJavadocParser)this.parser.javadocParser).inheritDocTagSelected){
-				try {
-					Object res = findMethodWithAttachedDocInHierarchy(binding);
-					if (res instanceof MethodBinding) {
-						return (MethodBinding) res;
-					}
-				} catch (JavaModelException e) {
-					return null;
-				}
-			}
-		}
+		if (this.parser.javadocParser instanceof SelectionJavadocParser && ((SelectionJavadocParser)this.parser.javadocParser).inheritDocTagSelected){
+        	try {
+        		Object res = findMethodWithAttachedDocInHierarchy(binding);
+        		if (res instanceof MethodBinding) {
+        			return (MethodBinding) res;
+        		}
+        	} catch (JavaModelException e) {
+        		return null;
+        	}
+        }
 		return binding;
 	}
 
@@ -1881,9 +1838,9 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 		MethodBinding[] overriddenMethods= overriddenType.availableMethods();
 		LookupEnvironment lookupEnv = this.lookupEnvironment;
 		if (lookupEnv != null && overriddenMethods != null) {
-			for (int i= 0; i < overriddenMethods.length; i++) {
-				if (lookupEnv.methodVerifier().isMethodSubsignature(overriding, overriddenMethods[i])) {
-					return overriddenMethods[i];
+			for (MethodBinding overriddenMethod : overriddenMethods) {
+				if (lookupEnv.methodVerifier().isMethodSubsignature(overriding, overriddenMethod)) {
+					return overriddenMethod;
 				}
 			}
 		}
@@ -1994,16 +1951,15 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				result= visit(superClass);
 				if (result == InheritDocVisitor.STOP_BRANCH) {
 					return null;
-				} else if (result == InheritDocVisitor.CONTINUE) {
-					visited.add(superClass);
-					result= visitInheritDocInterfaces(visited, superClass);
-					if (result != InheritDocVisitor.CONTINUE)
-						return result;
-					else
-						superClass= superClass.superclass();
-				} else {
+				}
+                if (result != InheritDocVisitor.CONTINUE) {
 					return result;
 				}
+                visited.add(superClass);
+                result= visitInheritDocInterfaces(visited, superClass);
+                if (result != InheritDocVisitor.CONTINUE)
+                	return result;
+                superClass= superClass.superclass();
 			}
 
 			return null;
@@ -2020,8 +1976,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 		private Object visitInheritDocInterfaces(ArrayList visited, ReferenceBinding currentType) throws JavaModelException {
 			ArrayList toVisitChildren= new ArrayList();
 			ReferenceBinding[] superInterfaces= currentType.superInterfaces();
-			for (int i= 0; i < superInterfaces.length; i++) {
-				ReferenceBinding superInterface= superInterfaces[i];
+			for (ReferenceBinding superInterface : superInterfaces) {
 				if (visited.contains(superInterface))
 					continue;
 				visited.add(superInterface);

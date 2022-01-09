@@ -162,10 +162,10 @@ public abstract class HierarchyBuilder {
 				System.out.println(" <None>"); //$NON-NLS-1$
 			} else {
 				System.out.println();
-				for (int i = 0, length = superinterfaceHandles.length; i < length; i++) {
-					if (superinterfaceHandles[i] == null) continue;
+				for (IType superinterfaceHandle : superinterfaceHandles) {
+					if (superinterfaceHandle == null) continue;
 					System.out.println(
-						"    " + ((JavaElement) superinterfaceHandles[i]).toStringWithAncestors()); //$NON-NLS-1$
+						"    " + ((JavaElement) superinterfaceHandle).toStringWithAncestors()); //$NON-NLS-1$
 				}
 			}
 		}
@@ -209,7 +209,8 @@ public abstract class HierarchyBuilder {
 				this.infoToHandle.put(genericType, handle);
 			}
 			return handle;
-		} else if (genericType.isBinaryType()) {
+		}
+        if (genericType.isBinaryType()) {
 			ClassFile classFile = (ClassFile) this.infoToHandle.get(genericType);
 			// if it's null, it's from outside the region, so do lookup
 			if (classFile == null) {
@@ -222,11 +223,12 @@ public abstract class HierarchyBuilder {
 				this.infoToHandle.put(genericType, classFile);
 			}
 			return new ResolvedBinaryType(classFile, classFile.getTypeName(), new String(binding.computeUniqueKey()));
-		} else if (genericType instanceof SourceTypeElementInfo) {
+		}
+        if (genericType instanceof SourceTypeElementInfo) {
 			IType handle = ((SourceTypeElementInfo) genericType).getHandle();
 			return (IType) ((JavaElement) handle).resolved(binding);
-		} else
-			return null;
+		}
+        return null;
 	}
 	protected IType getType() {
 		return this.hierarchy.getType();
@@ -237,24 +239,13 @@ public abstract class HierarchyBuilder {
 	protected IType lookupBinaryHandle(IBinaryType typeInfo) {
 		int flag;
 		String qualifiedName;
-		switch (TypeDeclaration.kind(typeInfo.getModifiers())) {
-			case TypeDeclaration.CLASS_DECL :
-				flag = NameLookup.ACCEPT_CLASSES;
-				break;
-			case TypeDeclaration.INTERFACE_DECL :
-				flag = NameLookup.ACCEPT_INTERFACES;
-				break;
-			case TypeDeclaration.ENUM_DECL :
-				flag = NameLookup.ACCEPT_ENUMS;
-				break;
-			case TypeDeclaration.RECORD_DECL :
-				flag = NameLookup.ACCEPT_RECORDS;
-				break;
-			default:
-				//case IGenericType.ANNOTATION :
-				flag = NameLookup.ACCEPT_ANNOTATIONS;
-				break;
-		}
+		flag = switch (TypeDeclaration.kind(typeInfo.getModifiers())) {
+            case TypeDeclaration.CLASS_DECL -> NameLookup.ACCEPT_CLASSES;
+            case TypeDeclaration.INTERFACE_DECL -> NameLookup.ACCEPT_INTERFACES;
+            case TypeDeclaration.ENUM_DECL -> NameLookup.ACCEPT_ENUMS;
+            case TypeDeclaration.RECORD_DECL -> NameLookup.ACCEPT_RECORDS;
+            default -> NameLookup.ACCEPT_ANNOTATIONS;
+        };
 		char[] bName = typeInfo.getName();
 		qualifiedName = new String(ClassFile.translatedName(bName));
 		if (qualifiedName.equals(this.focusQualifiedName)) return getType();
@@ -272,9 +263,8 @@ public abstract class HierarchyBuilder {
 		if (monitor != null) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
-			} else {
-				monitor.worked(work);
 			}
+            monitor.worked(work);
 		}
 	}
 /**

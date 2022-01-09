@@ -74,8 +74,7 @@ public class OneLineEnforcer extends ASTVisitor {
 
 	@Override
 	public void endVisit(EnumDeclaration node) {
-		List<ASTNode> items = new ArrayList<>();
-		items.addAll(node.bodyDeclarations());
+		List<ASTNode> items = new ArrayList<>(node.bodyDeclarations());
 		items.addAll(node.enumConstants());
 		tryKeepOnOneLine(node, node.getName(), items, this.options.keep_enum_declaration_on_one_line);
 	}
@@ -174,13 +173,9 @@ public class OneLineEnforcer extends ASTVisitor {
 
 	private void tryKeepOnOneLine(int openBraceIndex, int closeBraceIndex, int lastIndex, List<? extends ASTNode> items,
 			String oneLineOption) {
-		if (DefaultCodeFormatterConstants.ONE_LINE_NEVER.equals(oneLineOption))
+		if (DefaultCodeFormatterConstants.ONE_LINE_NEVER.equals(oneLineOption) || DefaultCodeFormatterConstants.ONE_LINE_IF_EMPTY.equals(oneLineOption) && !items.isEmpty())
 			return;
-		if (DefaultCodeFormatterConstants.ONE_LINE_IF_EMPTY.equals(oneLineOption) && !items.isEmpty())
-			return;
-		if (DefaultCodeFormatterConstants.ONE_LINE_IF_SINGLE_ITEM.equals(oneLineOption) && items.size() > 1)
-			return;
-		if (DefaultCodeFormatterConstants.ONE_LINE_PRESERVE.equals(oneLineOption)
+		if (DefaultCodeFormatterConstants.ONE_LINE_IF_SINGLE_ITEM.equals(oneLineOption) && items.size() > 1 || DefaultCodeFormatterConstants.ONE_LINE_PRESERVE.equals(oneLineOption)
 				&& this.tm.countLineBreaksBetween(this.tm.get(openBraceIndex), this.tm.get(lastIndex)) > 0)
 			return;
 
@@ -205,7 +200,7 @@ public class OneLineEnforcer extends ASTVisitor {
 			if (prev.getLineBreaksAfter() > 0 || token.getLineBreaksBefore() > 0) {
 				if (!breakIndexes.contains(i))
 					return; // extra line break within an item, can't remove it
-				isSpace = isSpace || !(i == closeBraceIndex && i == openBraceIndex + 1);
+				isSpace = isSpace || i != closeBraceIndex || i != openBraceIndex + 1;
 			}
 			if (isSpace)
 				pos++;

@@ -232,7 +232,7 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 			//replace the path in the list with the appropriate resource type
 			IResource resource = resourceFor((IPath) result.get(i), files);
 
-			if (resource == null || ((Resource) resource).isFiltered() || (((memberFlags & IContainer.INCLUDE_HIDDEN) == 0) && resource.isHidden(IResource.CHECK_ANCESTORS)) || (((memberFlags & IContainer.INCLUDE_TEAM_PRIVATE_MEMBERS) == 0) && resource.isTeamPrivateMember(IResource.CHECK_ANCESTORS)))
+			if (resource == null || ((Resource) resource).isFiltered() || (memberFlags & IContainer.INCLUDE_HIDDEN) == 0 && resource.isHidden(IResource.CHECK_ANCESTORS) || (memberFlags & IContainer.INCLUDE_TEAM_PRIVATE_MEMBERS) == 0 && resource.isTeamPrivateMember(IResource.CHECK_ANCESTORS))
 				resource = null;
 
 			result.set(i, resource);
@@ -429,7 +429,7 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 				return IFile.ENCODING_UTF_16BE;
 			if (first == 0xFF && second == 0xFE)
 				return IFile.ENCODING_UTF_16LE;
-			int third = (input.read() & 0xFF);
+			int third = input.read() & 0xFF;
 			if (third == -1)
 				return IFile.ENCODING_UNKNOWN;
 			//look for the UTF-8 BOM
@@ -549,7 +549,6 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 				ProjectDescription description = ((Project) target.getProject()).internalGetDescription();
 				if (description != null) {
 					setLocation(target, info, description.getGroupLocationURI(target.getProjectRelativePath()));
-					return info.getFileStoreRoot();
 				}
 				return info.getFileStoreRoot();
 			}
@@ -623,10 +622,8 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 		//write the project's private description to the metadata area
 		if (hasPrivateChanges)
 			getWorkspace().getMetaArea().writePrivateDescription(target);
-		if (!hasPublicChanges)
-			return false;
 		//can't do anything if there's no description
-		if (description == null)
+		if (!hasPublicChanges || description == null)
 			return false;
 
 		//write the model to a byte array
@@ -643,11 +640,9 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 		//write the contents to the IFile that represents the description
 		if (!descriptionFile.exists())
 			workspace.createResource(descriptionFile, false);
-		else {
-			//if the description has not changed, don't write anything
-			if (!descriptionChanged(descriptionFile, newContents))
-				return false;
-		}
+        else //if the description has not changed, don't write anything
+        if (!descriptionChanged(descriptionFile, newContents))
+        	return false;
 		ByteArrayInputStream in = new ByteArrayInputStream(newContents);
 		IFileStore descriptionFileStore = ((Resource) descriptionFile).getStore();
 		IFileInfo fileInfo = descriptionFileStore.fetchInfo();
@@ -1061,7 +1056,7 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 		IFileStore store = getStore(resource);
 		//when the executable bit is changed on a folder a refresh is required
 		boolean refresh = false;
-		if (resource instanceof IContainer && ((store.getFileSystem().attributes() & EFS.ATTRIBUTE_EXECUTABLE) != 0))
+		if (resource instanceof IContainer && (store.getFileSystem().attributes() & EFS.ATTRIBUTE_EXECUTABLE) != 0)
 			refresh = store.fetchInfo().getAttribute(EFS.ATTRIBUTE_EXECUTABLE) != attributes.isExecutable();
 		store.putInfo(FileUtil.attributesToFileInfo(attributes), EFS.SET_ATTRIBUTES, null);
 		//must refresh in the background because we are not inside an operation
@@ -1116,34 +1111,32 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 					String message = NLS.bind(Messages.resources_mustBeLocal, target.getFullPath());
 					throw new ResourceException(IResourceStatus.RESOURCE_NOT_LOCAL, target.getFullPath(), message, null);
 				}
-			} else {
-				if (target.isLocal(IResource.DEPTH_ZERO)) {
-					ResourceInfo info = ((Resource) target).getResourceInfo(true, false);
-					if (info == null) {
-						throw new IllegalStateException("No ResourceInfo for: " + target); //$NON-NLS-1$
-					}
-					// test if timestamp is the same since last synchronization
-					if (lastModified != info.getLocalSyncInfo()) {
-						asyncRefresh(target);
-						String message = NLS.bind(Messages.localstore_resourceIsOutOfSync, target.getFullPath());
-						throw new ResourceException(IResourceStatus.OUT_OF_SYNC_LOCAL, target.getFullPath(), message, null);
-					}
-					if (!fileInfo.exists()) {
-						asyncRefresh(target);
-						String message = NLS.bind(Messages.localstore_resourceDoesNotExist, target.getFullPath());
-						throw new ResourceException(IResourceStatus.NOT_FOUND_LOCAL, target.getFullPath(), message, null);
-					}
-				} else {
-					if (fileInfo.exists()) {
-						String message = NLS.bind(Messages.localstore_resourceExists, target.getFullPath());
-						throw new ResourceException(IResourceStatus.EXISTS_LOCAL, target.getFullPath(), message, null);
-					}
-					if (append) {
-						String message = NLS.bind(Messages.resources_mustBeLocal, target.getFullPath());
-						throw new ResourceException(IResourceStatus.RESOURCE_NOT_LOCAL, target.getFullPath(), message, null);
-					}
-				}
-			}
+			} else if (target.isLocal(IResource.DEPTH_ZERO)) {
+            	ResourceInfo info = ((Resource) target).getResourceInfo(true, false);
+            	if (info == null) {
+            		throw new IllegalStateException("No ResourceInfo for: " + target); //$NON-NLS-1$
+            	}
+            	// test if timestamp is the same since last synchronization
+            	if (lastModified != info.getLocalSyncInfo()) {
+            		asyncRefresh(target);
+            		String message = NLS.bind(Messages.localstore_resourceIsOutOfSync, target.getFullPath());
+            		throw new ResourceException(IResourceStatus.OUT_OF_SYNC_LOCAL, target.getFullPath(), message, null);
+            	}
+            	if (!fileInfo.exists()) {
+            		asyncRefresh(target);
+            		String message = NLS.bind(Messages.localstore_resourceDoesNotExist, target.getFullPath());
+            		throw new ResourceException(IResourceStatus.NOT_FOUND_LOCAL, target.getFullPath(), message, null);
+            	}
+            } else {
+            	if (fileInfo.exists()) {
+            		String message = NLS.bind(Messages.localstore_resourceExists, target.getFullPath());
+            		throw new ResourceException(IResourceStatus.EXISTS_LOCAL, target.getFullPath(), message, null);
+            	}
+            	if (append) {
+            		String message = NLS.bind(Messages.resources_mustBeLocal, target.getFullPath());
+            		throw new ResourceException(IResourceStatus.RESOURCE_NOT_LOCAL, target.getFullPath(), message, null);
+            	}
+            }
 			// add entry to History Store.
 			if (BitMask.isSet(updateFlags, IResource.KEEP_HISTORY) && fileInfo.exists()
 					&& FileSystemResourceManager.storeHistory(target))

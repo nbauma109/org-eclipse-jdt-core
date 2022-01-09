@@ -64,10 +64,8 @@ public class BufferedRandomInputStream extends InputStream {
 
 	@Override
 	public int read() throws IOException {
-		if (buffer_pos >= buffer_size) {
-			if (fillBuffer() <= 0)
-				return -1;
-		}
+		if (buffer_pos >= buffer_size && fillBuffer() <= 0)
+        	return -1;
 		return buffer[buffer_pos++] & 0xFF;
 	}
 
@@ -108,7 +106,7 @@ public class BufferedRandomInputStream extends InputStream {
 
 	@Override
 	public int available() {
-		return (buffer_size - buffer_pos);
+		return buffer_size - buffer_pos;
 	}
 
 	@Override

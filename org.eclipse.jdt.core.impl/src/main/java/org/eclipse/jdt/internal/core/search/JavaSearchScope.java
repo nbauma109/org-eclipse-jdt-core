@@ -130,7 +130,7 @@ void add(JavaProject javaProject, IPath pathToAdd, int includeMask, HashSet proj
 		if (this.excludeTestCode && entry.isTest()) {
 			continue;
 		}
-		AccessRuleSet access = null;
+		AccessRuleSet access;
 		ClasspathEntry cpEntry = (ClasspathEntry) entry;
 		if (referringEntry != null) {
 			// Add only exported entries.
@@ -372,7 +372,7 @@ private int indexOf(String fullPath) {
 		String currentRelativePath = this.relativePaths[i];
 		if (currentRelativePath == null) continue;
 		String currentContainerPath = this.containerPaths[i];
-		String currentFullPath = currentRelativePath.length() == 0 ? currentContainerPath : (currentContainerPath + '/' + currentRelativePath);
+		String currentFullPath = currentRelativePath.length() == 0 ? currentContainerPath : currentContainerPath + '/' + currentRelativePath;
 		if (encloses(currentFullPath, fullPath, i))
 			return i;
 	}
@@ -432,21 +432,20 @@ private boolean encloses(String enclosingPath, String path, int index) {
 	if (!this.isPkgPath[index]) {
 		return path.startsWith(enclosingPath)
 			&& path.charAt(enclosingLength) == '/';
-	} else {
-		// if looking at a package, this scope encloses the given path
-		// if the given path is a direct child of the folder
-		// or if the given path path is the folder path (see bug 13919 Declaration for package not found if scope is not project)
-        return path.startsWith(enclosingPath)
-                && ((enclosingPath.length() == path.lastIndexOf('/'))
-                || (enclosingPath.length() == path.length()));
 	}
+    // if looking at a package, this scope encloses the given path
+    // if the given path is a direct child of the folder
+    // or if the given path path is the folder path (see bug 13919 Declaration for package not found if scope is not project)
+    return path.startsWith(enclosingPath)
+            && (enclosingPath.length() == path.lastIndexOf('/')
+            || enclosingPath.length() == path.length());
 }
 
 @Override
 public boolean encloses(IJavaElement element) {
 	if (this.elements != null) {
-		for (int i = 0, length = this.elements.size(); i < length; i++) {
-			IJavaElement scopeElement = (IJavaElement)this.elements.get(i);
+		for (Object element2 : this.elements) {
+			IJavaElement scopeElement = (IJavaElement)element2;
 			IJavaElement searchedElement = element;
 			while (searchedElement != null) {
 				if (searchedElement.equals(scopeElement))
@@ -540,8 +539,7 @@ public void processDelta(IJavaElementDelta delta, int eventType) {
 	switch (delta.getKind()) {
 		case IJavaElementDelta.CHANGED:
 			IJavaElementDelta[] children = delta.getAffectedChildren();
-			for (int i = 0, length = children.length; i < length; i++) {
-				IJavaElementDelta child = children[i];
+			for (IJavaElementDelta child : children) {
 				processDelta(child, eventType);
 			}
 			break;
@@ -638,44 +636,42 @@ public String toString() {
 	StringBuilder result = new StringBuilder("JavaSearchScope on "); //$NON-NLS-1$
 	if (this.elements != null) {
 		result.append("["); //$NON-NLS-1$
-		for (int i = 0, length = this.elements.size(); i < length; i++) {
-			JavaElement element = (JavaElement)this.elements.get(i);
+		for (Object element2 : this.elements) {
+			JavaElement element = (JavaElement)element2;
 			result.append("\n\t"); //$NON-NLS-1$
 			result.append(element.toStringWithAncestors());
 		}
 		result.append("\n]"); //$NON-NLS-1$
-	} else {
-		if (this.pathsCount == 0) {
-			result.append("[empty scope]"); //$NON-NLS-1$
-		} else {
-			result.append("["); //$NON-NLS-1$
-			String[] paths = new String[this.relativePaths.length];
-			int index = 0;
-			for (int i = 0; i < this.relativePaths.length; i++) {
-				String path = this.relativePaths[i];
-				if (path == null) continue;
-				String containerPath;
-				if (ExternalFoldersManager.isInternalPathForExternalFolder(new Path(this.containerPaths[i]))) {
-					Object target = JavaModel.getWorkspaceTarget(new Path(this.containerPaths[i]));
-					containerPath = ((IFolder) target).getLocation().toOSString();
-				} else {
-					containerPath = this.containerPaths[i];
-				}
-				if (path.length() > 0) {
-					paths[index++] = containerPath + '/' + path;
-				} else {
-					paths[index++] = containerPath;
-				}
-			}
-			System.arraycopy(paths, 0, paths = new String[index], 0, index);
-			Util.sort(paths);
-			for (int i = 0; i < index; i++) {
-				result.append("\n\t"); //$NON-NLS-1$
-				result.append(paths[i]);
-			}
-			result.append("\n]"); //$NON-NLS-1$
-		}
-	}
+	} else if (this.pathsCount == 0) {
+    	result.append("[empty scope]"); //$NON-NLS-1$
+    } else {
+    	result.append("["); //$NON-NLS-1$
+    	String[] paths = new String[this.relativePaths.length];
+    	int index = 0;
+    	for (int i = 0; i < this.relativePaths.length; i++) {
+    		String path = this.relativePaths[i];
+    		if (path == null) continue;
+    		String containerPath;
+    		if (ExternalFoldersManager.isInternalPathForExternalFolder(new Path(this.containerPaths[i]))) {
+    			Object target = JavaModel.getWorkspaceTarget(new Path(this.containerPaths[i]));
+    			containerPath = ((IFolder) target).getLocation().toOSString();
+    		} else {
+    			containerPath = this.containerPaths[i];
+    		}
+    		if (path.length() > 0) {
+    			paths[index++] = containerPath + '/' + path;
+    		} else {
+    			paths[index++] = containerPath;
+    		}
+    	}
+    	System.arraycopy(paths, 0, paths = new String[index], 0, index);
+    	Util.sort(paths);
+    	for (int i = 0; i < index; i++) {
+    		result.append("\n\t"); //$NON-NLS-1$
+    		result.append(paths[i]);
+    	}
+    	result.append("\n]"); //$NON-NLS-1$
+    }
 	return result.toString();
 }
 

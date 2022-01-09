@@ -259,8 +259,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 					IBinaryMethod info = (IBinaryMethod) ((JavaElement)method).getElementInfo();
 					char[][] argumentNames = info.getArgumentNames();
 					if (argumentNames != null && argumentNames.length == length) {
-						parameters = argumentNames;
-						return parameters;
+						return argumentNames;
 					}
 
 					parameters = new char[length][];
@@ -339,7 +338,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	}
 
 	private IMethod findMethod(IType type, char[] selector, char[][] paramTypeNames) throws JavaModelException {
-		IMethod method = null;
+		IMethod method;
 		int startingIndex = 0;
 		String[] args;
 		IType enclosingType = type.getDeclaringType();
@@ -451,8 +450,8 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @param completionLocation original offset of code completion request
 	 */
 	public InternalCompletionProposal(int kind, int completionLocation) {
-		if ((kind < FIRST_KIND)
-				|| (kind > LAST_KIND)) {
+		if (kind < FIRST_KIND
+				|| kind > LAST_KIND) {
 			throw new IllegalArgumentException();
 		}
 		if (this.completion == null || completionLocation < 0) {
@@ -1174,30 +1173,27 @@ public class InternalCompletionProposal extends CompletionProposal {
 
 	@Override
 	public boolean canUseDiamond(CompletionContext coreContext) {
-		if (this.getKind() != CONSTRUCTOR_INVOCATION) return false;
-		if (coreContext instanceof InternalCompletionContext) {
-			InternalCompletionContext internalCompletionContext = (InternalCompletionContext) coreContext;
-			if (internalCompletionContext.extendedContext == null) return false;
-			char[] name1 = this.declarationPackageName;
-			char[] name2 = this.declarationTypeName;
-			char[] declarationType = CharOperation.concat(name1, name2, '.');  // fully qualified name
-			// even if the type arguments used in the method have been substituted,
-			// extract the original type arguments only, since thats what we want to compare with the class
-			// type variables (Substitution might have happened when the constructor is coming from another
-			// CU and not the current one).
-			char[] sign = (this.originalSignature != null)? this.originalSignature : getSignature();
-			if (!(sign == null || sign.length < 2)) {
-				sign = Signature.removeCapture(sign);
-			}
-			char[][] types= Signature.getParameterTypes(sign);
-			String[] paramTypeNames= new String[types.length];
-			for (int i= 0; i < types.length; i++) {
-				paramTypeNames[i]= new String(Signature.toCharArray(types[i]));
-			}
-			return internalCompletionContext.extendedContext.canUseDiamond(paramTypeNames,declarationType);
-		}
-		else {
+		if (this.getKind() != CONSTRUCTOR_INVOCATION || !(coreContext instanceof InternalCompletionContext)) {
 			return false;
 		}
+        InternalCompletionContext internalCompletionContext = (InternalCompletionContext) coreContext;
+        if (internalCompletionContext.extendedContext == null) return false;
+        char[] name1 = this.declarationPackageName;
+        char[] name2 = this.declarationTypeName;
+        char[] declarationType = CharOperation.concat(name1, name2, '.');  // fully qualified name
+        // even if the type arguments used in the method have been substituted,
+        // extract the original type arguments only, since thats what we want to compare with the class
+        // type variables (Substitution might have happened when the constructor is coming from another
+        // CU and not the current one).
+        char[] sign = this.originalSignature != null? this.originalSignature : getSignature();
+        if (sign != null && sign.length >= 2) {
+        	sign = Signature.removeCapture(sign);
+        }
+        char[][] types= Signature.getParameterTypes(sign);
+        String[] paramTypeNames= new String[types.length];
+        for (int i= 0; i < types.length; i++) {
+        	paramTypeNames[i]= new String(Signature.toCharArray(types[i]));
+        }
+        return internalCompletionContext.extendedContext.canUseDiamond(paramTypeNames,declarationType);
 	}
 }

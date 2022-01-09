@@ -51,8 +51,8 @@ public class JRTUtil {
 	public static final String JAVA_BASE = "java.base"; //$NON-NLS-1$
 	public static final char[] JAVA_BASE_CHAR = JAVA_BASE.toCharArray();
 	static final String MODULES_SUBDIR = "/modules"; //$NON-NLS-1$
-	static final String[] DEFAULT_MODULE = new String[]{JAVA_BASE};
-	static final String[] NO_MODULE = new String[0];
+	static final String[] DEFAULT_MODULE = {JAVA_BASE};
+	static final String[] NO_MODULE = {};
 	static final String MULTIPLE = "MU"; //$NON-NLS-1$
 	static final String DEFAULT_PACKAGE = ""; //$NON-NLS-1$
 	static String MODULE_TO_LOAD;
@@ -112,9 +112,9 @@ public class JRTUtil {
 	}
 
 	public static JrtFileSystem getJrtSystem(File image, String release) {
-		String key = image.toString();
-		if (release != null) key = key + "|" + release; //$NON-NLS-1$
-		Optional<JrtFileSystem> system = images.computeIfAbsent(key, x -> {
+		StringBuilder key = new StringBuilder().append(image.toString());
+		if (release != null) key.append("|").append(release); //$NON-NLS-1$
+		Optional<JrtFileSystem> system = images.computeIfAbsent(key.toString(), x -> {
 			try {
 				return Optional.ofNullable(JrtFileSystem.getNewJrtFileSystem(image, release));
 			} catch (IOException e) {
@@ -282,11 +282,11 @@ class JrtFileSystemWithOlderRelease extends JrtFileSystem {
 					if (count == 2) {
 						// e.g. /9A/java.base
 						java.nio.file.Path mod = dir.getName(1);
-						if ((JRTUtil.MODULE_TO_LOAD != null && JRTUtil.MODULE_TO_LOAD.length() > 0
-								&& JRTUtil.MODULE_TO_LOAD.indexOf(mod.toString()) == -1)) {
+						if (JRTUtil.MODULE_TO_LOAD != null && JRTUtil.MODULE_TO_LOAD.length() > 0
+								&& JRTUtil.MODULE_TO_LOAD.indexOf(mod.toString()) == -1) {
 							return FileVisitResult.SKIP_SUBTREE;
 						}
-						return ((notify & JRTUtil.NOTIFY_MODULES) == 0) ? FileVisitResult.CONTINUE
+						return (notify & JRTUtil.NOTIFY_MODULES) == 0 ? FileVisitResult.CONTINUE
 								: visitor.visitModule(dir, JRTUtil.sanitizedFileName(mod));
 					}
 					if ((notify & JRTUtil.NOTIFY_PACKAGES) == 0) {
@@ -329,9 +329,9 @@ final class RuntimeIOException extends RuntimeException {
 
 class JrtFileSystem {
 
-	private final Map<String, String> packageToModule = new HashMap<String, String>();
+	private final Map<String, String> packageToModule = new HashMap<>();
 
-	private final Map<String, List<String>> packageToModules = new HashMap<String, List<String>>();
+	private final Map<String, List<String>> packageToModules = new HashMap<>();
 
 
 	private final Map<Path, Optional<byte[]>> classCache = new ConcurrentHashMap<>(10007);
@@ -341,7 +341,7 @@ class JrtFileSystem {
 	String jdkHome;
 
 	public static JrtFileSystem getNewJrtFileSystem(File jrt, String release) throws IOException {
-		return (release == null) ? new JrtFileSystem(jrt) :
+		return release == null ? new JrtFileSystem(jrt) :
 				new JrtFileSystemWithOlderRelease(jrt, release);
 
 	}
@@ -402,10 +402,8 @@ class JrtFileSystem {
 				List<String> list = this.packageToModules.get(qualifiedPackageName);
 				if (list.contains(moduleName))
 					return Collections.singletonList(moduleName);
-			} else {
-				if (module.equals(moduleName))
-					return Collections.singletonList(moduleName);
-			}
+			} else if (module.equals(moduleName))
+            	return Collections.singletonList(moduleName);
 		}
 		return null;
 	}
@@ -423,9 +421,8 @@ class JrtFileSystem {
 			if (module == JRTUtil.MULTIPLE) {
 				List<String> list = this.packageToModules.get(pack);
 				return list.toArray(new String[0]);
-			} else {
-				return new String[]{module};
 			}
+            return new String[]{module};
 		}
 		return JRTUtil.DEFAULT_MODULE;
 	}
@@ -435,7 +432,7 @@ class JrtFileSystem {
 			return false;
 		// easy checks first:
 		String knownModule = this.packageToModule.get(qualifiedPackageName);
-		if (knownModule == null || (knownModule != JRTUtil.MULTIPLE && !knownModule.equals(module)))
+		if (knownModule == null || knownModule != JRTUtil.MULTIPLE && !knownModule.equals(module))
 			return false;
 		Path packagePath = this.fs.getPath(JRTUtil.MODULES_SUBDIR, module, qualifiedPackageName);
 		if (!Files.exists(packagePath))
@@ -510,20 +507,19 @@ class JrtFileSystem {
 		Path path = this.fs.getPath(JRTUtil.MODULES_SUBDIR, module, fileName);
 		if(JRTUtil.DISABLE_CACHE) {
 			return JRTUtil.safeReadBytes(path);
-		} else {
-			try {
-				Optional<byte[]> bytes = this.classCache.computeIfAbsent(path, key -> {
-					try {
-						return Optional.ofNullable(JRTUtil.safeReadBytes(key));
-					} catch (IOException e) {
-						throw new RuntimeIOException(e);
-					}
-				});
-				return bytes.orElse(null);
-			} catch (RuntimeIOException rio) {
-				throw rio.getCause();
-			}
 		}
+        try {
+        	Optional<byte[]> bytes = this.classCache.computeIfAbsent(path, key -> {
+        		try {
+        			return Optional.ofNullable(JRTUtil.safeReadBytes(key));
+        		} catch (IOException e) {
+        			throw new RuntimeIOException(e);
+        		}
+        	});
+        	return bytes.orElse(null);
+        } catch (RuntimeIOException rio) {
+        	throw rio.getCause();
+        }
 	}
 
 	public ClassFileReader getClassfile(String fileName, String module, Predicate<String> moduleNameFilter) throws IOException, ClassFormatException {
@@ -585,11 +581,11 @@ class JrtFileSystem {
 				if (count == 2) {
 					// e.g. /modules/java.base
 					java.nio.file.Path mod = dir.getName(1);
-					if ((JRTUtil.MODULE_TO_LOAD != null && JRTUtil.MODULE_TO_LOAD.length() > 0 &&
-							JRTUtil.MODULE_TO_LOAD.indexOf(mod.toString()) == -1)) {
+					if (JRTUtil.MODULE_TO_LOAD != null && JRTUtil.MODULE_TO_LOAD.length() > 0 &&
+							JRTUtil.MODULE_TO_LOAD.indexOf(mod.toString()) == -1) {
 						return FileVisitResult.SKIP_SUBTREE;
 					}
-					return ((notify & JRTUtil.NOTIFY_MODULES) == 0) ?
+					return (notify & JRTUtil.NOTIFY_MODULES) == 0 ?
 							FileVisitResult.CONTINUE : visitor.visitModule(dir, JRTUtil.sanitizedFileName(mod));
 				}
 				if ((notify & JRTUtil.NOTIFY_PACKAGES) == 0) {
@@ -639,7 +635,7 @@ class JrtFileSystem {
 			}
 		} else {
 			// We found a second module => create a list
-			List<String> list = new ArrayList<String>();
+			List<String> list = new ArrayList<>();
 			// Just do this as comparator might be overkill
 			if (JRTUtil.JAVA_BASE == currentModule || JRTUtil.JAVA_BASE.equals(currentModule)) {
 				list.add(currentModule.intern());

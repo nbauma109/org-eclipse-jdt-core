@@ -68,10 +68,8 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 		Module module = revision.getRevisions().getModule();
 		// If the bundle is active, uninstalled or stopping then the bundle has already
 		// been initialized (though it may have been destroyed) so just return the class.
-		if (alreadyActive.contains(module.getState()))
-			return;
 		// The bundle is not active and does not require activation, just return the class
-		if (!shouldActivateFor(name, module, revision, manager))
+		if (alreadyActive.contains(module.getState()) || !shouldActivateFor(name, module, revision, manager))
 			return;
 		Deque<ClasspathManager> stack = activationStack.get();
 		if (stack == null) {
@@ -185,7 +183,7 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 		if (dotPosition == -1)
 			return true;
 		String packageName = className.substring(0, dotPosition);
-		return ((includes == null || includes.contains(packageName)) && (excludes == null || !excludes.contains(packageName)));
+		return (includes == null || includes.contains(packageName)) && (excludes == null || !excludes.contains(packageName));
 	}
 
 	@Override

@@ -57,7 +57,7 @@ String extractTypeName() {
 	IPath fullPath = this.resource.getFullPath();
 	int resourceSegmentCount = fullPath.segmentCount();
 	int sourceFolderSegmentCount = this.sourceLocation.sourceFolder.getFullPath().segmentCount();
-	int charCount = (resourceSegmentCount - sourceFolderSegmentCount - 1);
+	int charCount = resourceSegmentCount - sourceFolderSegmentCount - 1;
 	resourceSegmentCount--; // deal with the last segment separately
 	for (int i = sourceFolderSegmentCount; i < resourceSegmentCount; i++)
 		charCount += fullPath.segment(i).length();

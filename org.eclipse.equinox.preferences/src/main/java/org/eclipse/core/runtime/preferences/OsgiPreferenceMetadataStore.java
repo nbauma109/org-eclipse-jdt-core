@@ -60,17 +60,23 @@ public final class OsgiPreferenceMetadataStore implements IPreferenceMetadataSto
 		V defaultValue = preference.defaultValue();
 		if (String.class.equals(valueClass)) {
 			return valueClass.cast(preferences.get(identifer, (String) defaultValue));
-		} else if (Boolean.class.equals(valueClass)) {
+		}
+        if (Boolean.class.equals(valueClass)) {
 			return valueClass.cast(preferences.getBoolean(identifer, (Boolean) defaultValue));
-		} else if (byte[].class.equals(valueClass)) {
+		}
+        if (byte[].class.equals(valueClass)) {
 			return valueClass.cast(preferences.getByteArray(identifer, (byte[]) defaultValue));
-		} else if (Double.class.equals(valueClass)) {
+		}
+        if (Double.class.equals(valueClass)) {
 			return valueClass.cast(preferences.getDouble(identifer, (Double) defaultValue));
-		} else if (Float.class.equals(valueClass)) {
+		}
+        if (Float.class.equals(valueClass)) {
 			return valueClass.cast(preferences.getFloat(identifer, (Float) defaultValue));
-		} else if (Integer.class.equals(valueClass)) {
+		}
+        if (Integer.class.equals(valueClass)) {
 			return valueClass.cast(preferences.getInt(identifer, (Integer) defaultValue));
-		} else if (Long.class.equals(valueClass)) {
+		}
+        if (Long.class.equals(valueClass)) {
 			return valueClass.cast(preferences.getLong(identifer, (Long) defaultValue));
 		}
 		String message = PrefsMessages.PreferenceStorage_e_load_unsupported;

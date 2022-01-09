@@ -30,7 +30,6 @@ public class PluginConversionException extends Exception {
 	 * Constructor for the class.
 	 */
 	public PluginConversionException() {
-		super();
 	}
 
 	/**

@@ -124,11 +124,11 @@ public int size() {
 }
 @Override
 public String toString() {
-	String s = ""; //$NON-NLS-1$
+	StringBuilder s = new StringBuilder();
 	ReferenceBinding type;
-	for (int i = 0, length = this.valueTable.length; i < length; i++)
-		if ((type = this.valueTable[i]) != null)
-			s += type + "\n"; //$NON-NLS-1$
-	return s;
+	for (ReferenceBinding element : this.valueTable)
+        if ((type = element) != null)
+			s.append(type).append("\n"); //$NON-NLS-1$
+	return s.toString();
 }
 }

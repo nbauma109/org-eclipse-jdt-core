@@ -384,12 +384,11 @@ public class ASTRewrite {
 		ASTNode parent;
 		if (RewriteEventStore.isNewNode(node)) { // remove a new node, bug 164862
 			PropertyLocation location= this.eventStore.getPropertyLocation(node, RewriteEventStore.NEW);
-			if (location != null) {
-				property= location.getProperty();
-				parent= location.getParent();
-			} else {
+			if (location == null) {
 				throw new IllegalArgumentException("Node is not part of the rewriter's AST"); //$NON-NLS-1$
 			}
+            property= location.getProperty();
+            parent= location.getParent();
 		} else {
 			property= node.getLocationInParent();
 			parent= node.getParent();
@@ -429,12 +428,11 @@ public class ASTRewrite {
 		ASTNode parent;
 		if (RewriteEventStore.isNewNode(node)) { // replace a new node, bug 164862
 			PropertyLocation location= this.eventStore.getPropertyLocation(node, RewriteEventStore.NEW);
-			if (location != null) {
-				property= location.getProperty();
-				parent= location.getParent();
-			} else {
+			if (location == null) {
 				throw new IllegalArgumentException("Node is not part of the rewriter's AST"); //$NON-NLS-1$
 			}
+            property= location.getProperty();
+            parent= location.getParent();
 		} else {
 			property= node.getLocationInParent();
 			parent= node.getParent();
@@ -551,9 +549,8 @@ public class ASTRewrite {
 			// rewrite has only a single property
 			if (propertyName.equals(this.property1)) {
 				return this.property2;
-			} else {
-				return null;
 			}
+            return null;
 		}
 		// otherwise rewrite has table of properties
 		Map m = (Map) this.property1;
@@ -697,8 +694,8 @@ public class ASTRewrite {
 		}
 		Block res= getNodeStore().createCollapsePlaceholder();
 		ListRewrite listRewrite= getListRewrite(res, Block.STATEMENTS_PROPERTY);
-		for (int i= 0; i < targetNodes.length; i++) {
-			listRewrite.insertLast(targetNodes[i], null);
+		for (ASTNode targetNode : targetNodes) {
+			listRewrite.insertLast(targetNode, null);
 		}
 		return res;
 	}
@@ -844,11 +841,8 @@ public class ASTRewrite {
 				this.property1 = entries[0].getKey();
 				this.property2 = entries[0].getValue();
 			}
-			return;
 		} else {
 			m.put(propertyName, data);
-			// still has two or more properties
-			return;
 		}
 	}
 

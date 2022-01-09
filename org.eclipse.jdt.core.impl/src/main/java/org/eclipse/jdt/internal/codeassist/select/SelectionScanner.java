@@ -43,18 +43,16 @@ protected boolean isAtAssistIdentifier() {
 @Override
 public char[] getCurrentIdentifierSource() {
 
-	if (this.selectionIdentifier == null){
-		if (this.selectionStart == this.startPosition && this.selectionEnd == this.currentPosition-1){
-			if (this.withoutUnicodePtr != 0){			// check unicode scenario
-				System.arraycopy(this.withoutUnicodeBuffer, 1, this.selectionIdentifier = new char[this.withoutUnicodePtr], 0, this.withoutUnicodePtr);
-			} else {
-				int length = this.currentPosition - this.startPosition;
-				// no char[] sharing around completionIdentifier, we want it to be unique so as to use identity checks
-				System.arraycopy(this.source, this.startPosition, (this.selectionIdentifier = new char[length]), 0, length);
-			}
-			return this.selectionIdentifier;
-		}
-	}
+	if (this.selectionIdentifier == null && this.selectionStart == this.startPosition && this.selectionEnd == this.currentPosition-1){
+    	if (this.withoutUnicodePtr != 0){			// check unicode scenario
+    		System.arraycopy(this.withoutUnicodeBuffer, 1, this.selectionIdentifier = new char[this.withoutUnicodePtr], 0, this.withoutUnicodePtr);
+    	} else {
+    		int length = this.currentPosition - this.startPosition;
+    		// no char[] sharing around completionIdentifier, we want it to be unique so as to use identity checks
+    		System.arraycopy(this.source, this.startPosition, this.selectionIdentifier = new char[length], 0, length);
+    	}
+    	return this.selectionIdentifier;
+    }
 	return super.getCurrentIdentifierSource();
 }
 /*

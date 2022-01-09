@@ -90,7 +90,7 @@ public static FieldInfo createField(byte[] classFileBytes, int[] offsets, int of
 					}
 			}
 		}
-		readOffset += (6 + fieldInfo.u4At(readOffset + 2));
+		readOffset += 6 + fieldInfo.u4At(readOffset + 2);
 	}
 	fieldInfo.attributeBytes = readOffset;
 
@@ -267,39 +267,37 @@ public IBinaryTypeAnnotation[] getTypeAnnotations() {
  */
 public Object getWrappedConstantValue() {
 
-	if (this.wrappedConstantValue == null) {
-		if (hasConstant()) {
-			Constant fieldConstant = getConstant();
-			switch (fieldConstant.typeID()) {
-				case TypeIds.T_int :
-					this.wrappedConstantValue = Integer.valueOf(fieldConstant.intValue());
-					break;
-				case TypeIds.T_byte :
-					this.wrappedConstantValue = Byte.valueOf(fieldConstant.byteValue());
-					break;
-				case TypeIds.T_short :
-					this.wrappedConstantValue = Short.valueOf(fieldConstant.shortValue());
-					break;
-				case TypeIds.T_char :
-					this.wrappedConstantValue = Character.valueOf(fieldConstant.charValue());
-					break;
-				case TypeIds.T_float :
-					this.wrappedConstantValue = Float.valueOf(fieldConstant.floatValue());
-					break;
-				case TypeIds.T_double :
-					this.wrappedConstantValue = Double.valueOf(fieldConstant.doubleValue());
-					break;
-				case TypeIds.T_boolean :
-					this.wrappedConstantValue = Util.toBoolean(fieldConstant.booleanValue());
-					break;
-				case TypeIds.T_long :
-					this.wrappedConstantValue = Long.valueOf(fieldConstant.longValue());
-					break;
-				case TypeIds.T_JavaLangString :
-					this.wrappedConstantValue = fieldConstant.stringValue();
-			}
-		}
-	}
+	if (this.wrappedConstantValue == null && hasConstant()) {
+    	Constant fieldConstant = getConstant();
+    	switch (fieldConstant.typeID()) {
+    		case TypeIds.T_int :
+    			this.wrappedConstantValue = Integer.valueOf(fieldConstant.intValue());
+    			break;
+    		case TypeIds.T_byte :
+    			this.wrappedConstantValue = Byte.valueOf(fieldConstant.byteValue());
+    			break;
+    		case TypeIds.T_short :
+    			this.wrappedConstantValue = Short.valueOf(fieldConstant.shortValue());
+    			break;
+    		case TypeIds.T_char :
+    			this.wrappedConstantValue = Character.valueOf(fieldConstant.charValue());
+    			break;
+    		case TypeIds.T_float :
+    			this.wrappedConstantValue = Float.valueOf(fieldConstant.floatValue());
+    			break;
+    		case TypeIds.T_double :
+    			this.wrappedConstantValue = Double.valueOf(fieldConstant.doubleValue());
+    			break;
+    		case TypeIds.T_boolean :
+    			this.wrappedConstantValue = Util.toBoolean(fieldConstant.booleanValue());
+    			break;
+    		case TypeIds.T_long :
+    			this.wrappedConstantValue = Long.valueOf(fieldConstant.longValue());
+    			break;
+    		case TypeIds.T_JavaLangString :
+    			this.wrappedConstantValue = fieldConstant.stringValue();
+    	}
+    }
 	return this.wrappedConstantValue;
 }
 /**
@@ -384,7 +382,7 @@ private void readConstantAttribute() {
 					break;
 			}
 		}
-		readOffset += (6 + u4At(readOffset + 2));
+		readOffset += 6 + u4At(readOffset + 2);
 	}
 	if (!isConstant) {
 		this.constant = Constant.NotAConstant;
@@ -409,7 +407,7 @@ private void readModifierRelatedAttributes() {
 					break;
 			}
 		}
-		readOffset += (6 + u4At(readOffset + 2));
+		readOffset += 6 + u4At(readOffset + 2);
 	}
 }
 /**

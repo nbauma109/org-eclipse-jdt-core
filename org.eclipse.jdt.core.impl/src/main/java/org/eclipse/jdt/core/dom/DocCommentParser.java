@@ -90,7 +90,8 @@ class DocCommentParser extends AbstractCommentParser {
 	 * Note the only purpose of this method is to hide deprecated warnings.
 	 * @deprecated mark deprecated to hide deprecated usage
 	 */
-	private void setComment(int start, int length) {
+	@Deprecated
+    private void setComment(int start, int length) {
 		this.docComment.setComment(new String(this.source, start, length));
 	}
 
@@ -130,12 +131,12 @@ class DocCommentParser extends AbstractCommentParser {
 				if (this.ast.apiLevel <= AST.JLS4_INTERNAL) {
 					for (int i=0; i<dim; i++) {
 						argType = this.ast.newArrayType(argType);
-						argType.setSourceRange(argStart, ((int) dimPositions[i])-argStart+1);
+						argType.setSourceRange(argStart, (int) dimPositions[i]-argStart+1);
 					}
 				} else {
 					ArrayType argArrayType = this.ast.newArrayType(argType, 0);
 					argType = argArrayType;
-					argType.setSourceRange(argStart, ((int) dimPositions[dim-1])-argStart+1);
+					argType.setSourceRange(argStart, (int) dimPositions[dim-1]-argStart+1);
 					for (int i=0; i<dim; i++) {
 						Dimension dimension = this.ast.newDimension();
 						int dimStart = (int) (dimPositions[i] >>> 32);
@@ -169,14 +170,13 @@ class DocCommentParser extends AbstractCommentParser {
 			fieldName.setSourceRange(start, end - start + 1);
 			if (receiver == null) {
 				start = this.memberStart;
-				fieldRef.setSourceRange(start, end - start + 1);
 			} else {
 				Name typeRef = (Name) receiver;
 				fieldRef.setQualifier(typeRef);
 				start = typeRef.getStartPosition();
 				end = fieldName.getStartPosition()+fieldName.getLength()-1;
-				fieldRef.setSourceRange(start, end-start+1);
 			}
+            fieldRef.setSourceRange(start, end - start + 1);
 			return fieldRef;
 		}
 		catch (ClassCastException ex) {
@@ -229,7 +229,7 @@ class DocCommentParser extends AbstractCommentParser {
 		StringBuilder tagName = new StringBuilder();
 		int start = this.tagSourceStart;
 		this.scanner.getNextChar();
-		while (this.scanner.currentPosition <= (this.tagSourceEnd+1)) {
+		while (this.scanner.currentPosition <= this.tagSourceEnd+1) {
 			tagName.append(this.scanner.currentCharacter);
 			this.scanner.getNextChar();
 		}
@@ -334,7 +334,7 @@ class DocCommentParser extends AbstractCommentParser {
 		}
 		ModuleQualifiedName moduleRef = new ModuleQualifiedName(this.ast);
 
-		ASTNode typeRef = null;
+		ASTNode typeRef;
 		typeRef = this.ast.internalNewName(identifiers);
 		int start = (int) (this.identifierPositionStack[0] >>> 32);
 		if (moduleRefTokenCount > 1) {
@@ -511,13 +511,14 @@ class DocCommentParser extends AbstractCommentParser {
 						if (length == TAG_CATEGORY_LENGTH && CharOperation.equals(TAG_CATEGORY, tagName)) {
 							this.tagValue = TAG_CATEGORY_VALUE;
 							valid = parseIdentifierTag(false); // TODO (frederic) reconsider parameter value when @category will be significant in spec
-						} else if (length == TAG_CODE_LENGTH && CharOperation.equals(TAG_CODE, tagName)) {
-							this.tagValue = TAG_CODE_VALUE;
-							createTag();
 						} else {
-							this.tagValue = TAG_OTHERS_VALUE;
-							createTag();
-						}
+                            if (length == TAG_CODE_LENGTH && CharOperation.equals(TAG_CODE, tagName)) {
+                            	this.tagValue = TAG_CODE_VALUE;
+                            } else {
+                            	this.tagValue = TAG_OTHERS_VALUE;
+                            }
+                            createTag();
+                        }
 						break;
 					case 'd':
 						if (length == TAG_DEPRECATED_LENGTH && CharOperation.equals(TAG_DEPRECATED, tagName)) {
@@ -531,7 +532,7 @@ class DocCommentParser extends AbstractCommentParser {
 					case 'i':
 						if (length == TAG_INHERITDOC_LENGTH && CharOperation.equals(TAG_INHERITDOC, tagName)) {
 							if (this.reportProblems) {
-								recordInheritedPosition((((long) this.tagSourceStart) << 32) + this.tagSourceEnd);
+								recordInheritedPosition(((long) this.tagSourceStart << 32) + this.tagSourceEnd);
 							}
 							this.tagValue = TAG_INHERITDOC_VALUE;
 						} else {

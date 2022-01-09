@@ -286,7 +286,7 @@ class ASTRecoveryPropagator extends DefaultASTVisitor {
 				ASTNode parent = node.getParent();
 				while (parent != null) {
 					parent.setFlags(node.getFlags() | ASTNode.RECOVERED);
-					if((parent.getStartPosition() + parent.getLength() - 1) != end) {
+					if(parent.getStartPosition() + parent.getLength() - 1 != end) {
 						parent = null;
 					} else {
 						parent = parent.getParent();
@@ -357,8 +357,8 @@ class ASTRecoveryPropagator extends DefaultASTVisitor {
 
 			int problemStart = problem.getSourceStart();
 			int problemEnd = problem.getSourceEnd();
-			if ((start <= problemStart) && (problemStart <= end) ||
-					(start <= problemEnd) && (problemEnd <= end)) {
+			if (start <= problemStart && problemStart <= end ||
+					start <= problemEnd && problemEnd <= end) {
 				this.usedOrIrrelevantProblems[i] = true;
 				foundProblems = true;
 			}
@@ -412,11 +412,10 @@ class ASTRecoveryPropagator extends DefaultASTVisitor {
 	public void endVisit(VariableDeclarationStatement node) {
 		endVisitNode(node);
 		List fragments = node.fragments();
-		for (int i = 0, max = fragments.size(); i <max; i++) {
-			VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.get(i);
+		for (Object fragment2 : fragments) {
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragment2;
 			Expression expression = fragment.getInitializer();
-			if (expression == null) continue;
-			if ((expression.getFlags() & ASTNode.RECOVERED) == 0) continue;
+			if (expression == null || (expression.getFlags() & ASTNode.RECOVERED) == 0) continue;
 			if (expression.getNodeType() == ASTNode.SIMPLE_NAME) {
 				SimpleName simpleName = (SimpleName) expression;
 				if (CharOperation.equals(RecoveryScanner.FAKE_IDENTIFIER, simpleName.getIdentifier().toCharArray())) {

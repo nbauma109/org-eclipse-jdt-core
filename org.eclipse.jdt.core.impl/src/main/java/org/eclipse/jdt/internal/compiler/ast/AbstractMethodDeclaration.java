@@ -114,13 +114,13 @@ public abstract class AbstractMethodDeclaration
 				if (useTypeAnnotations)
 					continue; // no business with SE7 null annotations in the 1.8 case.
 				// createBinding() has resolved annotations, now transfer nullness info from the argument to the method:
-				long argTypeTagBits = (argument.binding.tagBits & TagBits.AnnotationNullMASK);
+				long argTypeTagBits = argument.binding.tagBits & TagBits.AnnotationNullMASK;
 				if (argTypeTagBits != 0) {
 					if (binding.parameterNonNullness == null) {
 						binding.parameterNonNullness = new Boolean[arguments.length];
 						binding.tagBits |= TagBits.IsNullnessKnown;
 					}
-					binding.parameterNonNullness[i] = Boolean.valueOf(argTypeTagBits == TagBits.AnnotationNonNull);
+					binding.parameterNonNullness[i] = argTypeTagBits == TagBits.AnnotationNonNull;
 				}
 			}
 		}
@@ -134,8 +134,8 @@ public abstract class AbstractMethodDeclaration
 		if (this.arguments != null) {
 			// by default arguments in abstract/native methods are considered to be used (no complaint is expected)
 			if (this.binding == null) {
-				for (int i = 0, length = this.arguments.length; i < length; i++) {
-					this.arguments[i].bind(this.scope, null, true);
+				for (Argument argument : this.arguments) {
+					argument.bind(this.scope, null, true);
 				}
 				return;
 			}
@@ -198,13 +198,11 @@ public abstract class AbstractMethodDeclaration
 							thrownException.resolvedType = thrownExceptionBinding;
 							bindingIndex++;
 						}
-					} else {
-						// qualified type reference
-						if (CharOperation.equals(thrownException.getTypeName(), bindingCompoundName)) {
-							thrownException.resolvedType = thrownExceptionBinding;
-							bindingIndex++;
-						}
-					}
+					} else // qualified type reference
+                    if (CharOperation.equals(thrownException.getTypeName(), bindingCompoundName)) {
+                    	thrownException.resolvedType = thrownExceptionBinding;
+                    	bindingIndex++;
+                    }
 				}
 			}
 		}
@@ -228,18 +226,16 @@ public abstract class AbstractMethodDeclaration
 					else if (methodBinding.parameters[i].isFreeTypeVariable()) {
 						flowInfo.markNullStatus(methodArguments[i].binding, FlowInfo.FREE_TYPEVARIABLE);
 					}
-				} else {
-					if (methodBinding.parameterNonNullness != null) {
-						// leverage null-info from parameter annotations:
-						Boolean nonNullNess = methodBinding.parameterNonNullness[i];
-						if (nonNullNess != null) {
-							if (nonNullNess.booleanValue())
-								flowInfo.markAsDefinitelyNonNull(methodArguments[i].binding);
-							else
-								flowInfo.markPotentiallyNullBit(methodArguments[i].binding);
-						}
-					}
-				}
+				} else if (methodBinding.parameterNonNullness != null) {
+                	// leverage null-info from parameter annotations:
+                	Boolean nonNullNess = methodBinding.parameterNonNullness[i];
+                	if (nonNullNess != null) {
+                		if (nonNullNess)
+                			flowInfo.markAsDefinitelyNonNull(methodArguments[i].binding);
+                		else
+                			flowInfo.markPotentiallyNullBit(methodArguments[i].binding);
+                	}
+                }
 				// tag parameters as being set:
 				flowInfo.markAsDefinitelyAssigned(methodArguments[i].binding);
 			}
@@ -333,7 +329,7 @@ public abstract class AbstractMethodDeclaration
 		classFile.generateMethodInfoHeader(this.binding);
 		int methodAttributeOffset = classFile.contentsOffset;
 		int attributeNumber = classFile.generateMethodInfoAttributes(this.binding);
-		if ((!this.binding.isNative()) && (!this.binding.isAbstract())) {
+		if (!this.binding.isNative() && !this.binding.isAbstract()) {
 			int codeAttributeOffset = classFile.contentsOffset;
 			classFile.generateCodeAttributeHeader();
 			CodeStream codeStream = classFile.codeStream;
@@ -343,9 +339,9 @@ public abstract class AbstractMethodDeclaration
 
 			// arguments initialization for local variable debug attributes
 			if (this.arguments != null) {
-				for (int i = 0, max = this.arguments.length; i < max; i++) {
+				for (Argument argument : this.arguments) {
 					LocalVariableBinding argBinding;
-					codeStream.addVisibleLocalVariable(argBinding = this.arguments[i].binding);
+					codeStream.addVisibleLocalVariable(argBinding = argument.binding);
 					argBinding.recordInitializationStartPC(0);
 				}
 			}
@@ -536,9 +532,9 @@ public abstract class AbstractMethodDeclaration
 
 		output.append(" {"); //$NON-NLS-1$
 		if (this.statements != null) {
-			for (int i = 0; i < this.statements.length; i++) {
+			for (Statement statement : this.statements) {
 				output.append('\n');
-				this.statements[i].printStatement(indent, output);
+				statement.printStatement(indent, output);
 			}
 		}
 		output.append('\n');
@@ -611,7 +607,7 @@ public abstract class AbstractMethodDeclaration
 			enclosingReceiver = enclosingReceiver.enclosingType();
 		}
 
-		char[][] tokens = (this.receiver.qualifyingName == null) ? null : this.receiver.qualifyingName.getName();
+		char[][] tokens = this.receiver.qualifyingName == null ? null : this.receiver.qualifyingName.getName();
 		if (this.isConstructor()) {
 			if (tokens == null || tokens.length > 1 || !CharOperation.equals(enclosingReceiver.sourceName(), tokens[0])) {
 				this.scope.problemReporter().illegalQualifierForExplicitThis(this.receiver, enclosingReceiver);
@@ -647,7 +643,7 @@ public abstract class AbstractMethodDeclaration
 				if (classScope != null) {
 					javadocVisibility = Util.computeOuterMostVisibility(classScope.referenceType(), javadocVisibility);
 				}
-				int javadocModifiers = (this.binding.modifiers & ~ExtraCompilerModifiers.AccVisibilityMASK) | javadocVisibility;
+				int javadocModifiers = this.binding.modifiers & ~ExtraCompilerModifiers.AccVisibilityMASK | javadocVisibility;
 				reporter.javadocMissing(this.sourceStart, this.sourceEnd, severity, javadocModifiers);
 			}
 		}
@@ -656,15 +652,12 @@ public abstract class AbstractMethodDeclaration
 	public void resolveStatements() {
 
 		if (this.statements != null) {
- 			for (int i = 0, length = this.statements.length; i < length; i++) {
- 				Statement stmt = this.statements[i];
+ 			for (Statement stmt : this.statements) {
  				stmt.resolve(this.scope);
 			}
-		} else if ((this.bits & UndocumentedEmptyBlock) != 0) {
-			if (!this.isConstructor() || this.arguments != null) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=319626
-				this.scope.problemReporter().undocumentedEmptyBlock(this.bodyStart-1, this.bodyEnd+1);
-			}
-		}
+		} else if ((this.bits & UndocumentedEmptyBlock) != 0 && (!this.isConstructor() || this.arguments != null)) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=319626
+        	this.scope.problemReporter().undocumentedEmptyBlock(this.bodyStart-1, this.bodyEnd+1);
+        }
 	}
 
 	@Override
@@ -695,7 +688,7 @@ public abstract class AbstractMethodDeclaration
 				int length = this.binding.parameters.length;
 				for (int i=0; i<length; i++) {
 					if (this.binding.parameterNonNullness[i] != null) {
-						long nullAnnotationTagBit =  this.binding.parameterNonNullness[i].booleanValue()
+						long nullAnnotationTagBit =  this.binding.parameterNonNullness[i]
 								? TagBits.AnnotationNonNull : TagBits.AnnotationNullable;
 						if (!this.scope.validateNullAnnotation(nullAnnotationTagBit, this.arguments[i].type, this.arguments[i].annotations))
 							this.binding.parameterNonNullness[i] = null;

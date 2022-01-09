@@ -85,7 +85,7 @@ public final class ResourceChangeListenerRegistrar {
 		// TODO Add as public API https://bugs.eclipse.org/bugs/show_bug.cgi?id=564985
 		Object mask = properties.get("event.mask"); //$NON-NLS-1$
 		if (mask instanceof Integer) {
-			workspace.addResourceChangeListener(listener, ((Integer) mask).intValue());
+			workspace.addResourceChangeListener(listener, (Integer) mask);
 		} else {
 			Logger local = this.logger;
 			if (mask != null && local != null) {

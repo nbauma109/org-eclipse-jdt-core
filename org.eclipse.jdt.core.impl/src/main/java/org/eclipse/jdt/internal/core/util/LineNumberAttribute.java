@@ -24,7 +24,7 @@ public class LineNumberAttribute
 	extends ClassFileAttribute
 	implements ILineNumberAttribute {
 
-	private static final int[][] NO_ENTRIES = new int[0][0];
+	private static final int[][] NO_ENTRIES = {};
 	private int lineNumberTableLength;
 	private int[][] lineNumberTable;
 

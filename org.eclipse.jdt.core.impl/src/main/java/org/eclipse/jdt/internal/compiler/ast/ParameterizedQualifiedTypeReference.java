@@ -99,7 +99,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 		Annotation [][] allAnnotations = getMergedAnnotationsOnDimensions(additionalDimensions, additionalAnnotations);
 		ParameterizedQualifiedTypeReference pqtr = new ParameterizedQualifiedTypeReference(this.tokens, this.typeArguments, totalDimensions, allAnnotations, this.sourcePositions);
 		pqtr.annotations = this.annotations;
-		pqtr.bits |= (this.bits & ASTNode.HasTypeAnnotations);
+		pqtr.bits |= this.bits & ASTNode.HasTypeAnnotations;
 		if (!isVarargs)
 			pqtr.extendedDimensions = additionalDimensions;
 		return pqtr;
@@ -117,11 +117,10 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 	    	if (this.resolvedType != null && !this.resolvedType.hasNullTypeAnnotations())
 	    		return false; // shortcut
 	    	if (this.typeArguments != null) {
-	    		for (int i = 0; i < this.typeArguments.length; i++) {
-	    			TypeReference[] arguments = this.typeArguments[i];
+	    		for (TypeReference[] arguments : this.typeArguments) {
 	    			if (arguments != null) {
-		    			for (int j = 0; j < arguments.length; j++) {
-		    				if (arguments[j].hasNullTypeAnnotation(position))
+		    			for (TypeReference argument : arguments) {
+		    				if (argument.hasNullTypeAnnotation(position))
 		    					return true;
 		    			}
 					}
@@ -185,23 +184,19 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 	private TypeBinding internalResolveType(Scope scope, boolean checkBounds, int location) {
 		// handle the error here
 		this.constant = Constant.NotAConstant;
-		if ((this.bits & ASTNode.DidResolve) != 0) { // is a shared type reference which was already resolved
-			if (this.resolvedType != null) { // is a shared type reference which was already resolved
-				if (this.resolvedType.isValidBinding()) {
-					return this.resolvedType;
-				} else {
-					switch (this.resolvedType.problemId()) {
-						case ProblemReasons.NotFound :
-						case ProblemReasons.NotVisible :
-						case ProblemReasons.InheritedNameHidesEnclosingName :
-							TypeBinding type = this.resolvedType.closestMatch();
-							return type;
-						default :
-							return null;
-					}
-				}
-			}
-		}
+		if ((this.bits & ASTNode.DidResolve) != 0 && this.resolvedType != null) { // is a shared type reference which was already resolved
+        	if (this.resolvedType.isValidBinding()) {
+        		return this.resolvedType;
+        	}
+            switch (this.resolvedType.problemId()) {
+            	case ProblemReasons.NotFound :
+            	case ProblemReasons.NotVisible :
+            	case ProblemReasons.InheritedNameHidesEnclosingName :
+            		return this.resolvedType.closestMatch();
+            	default :
+            		return null;
+            }
+        }
 		this.bits |= ASTNode.DidResolve;
 		TypeBinding type = internalResolveLeafType(scope, checkBounds);
 		createArrayType(scope);
@@ -248,7 +243,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 		this.typesPerToken = new ReferenceBinding[max];
 		for (int i = packageBinding == null ? 0 : packageBinding.compoundName.length; i < max; i++) {
 			findNextTypeBinding(i, scope, packageBinding);
-			if (!(this.resolvedType.isValidBinding())) {
+			if (!this.resolvedType.isValidBinding()) {
 				reportInvalidType(scope);
 				// be resilient, still attempt resolving arguments
 				for (int j = i; j < max; j++) {
@@ -297,7 +292,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 			    	((ClassScope) scope).superTypeReference = null;
 			    }
 				int argLength = args.length;
-				boolean isDiamond = argLength == 0 && (i == (max -1)) && ((this.bits & ASTNode.IsDiamond) != 0);
+				boolean isDiamond = argLength == 0 && i == max -1 && (this.bits & ASTNode.IsDiamond) != 0;
 				TypeBinding[] argTypes = new TypeBinding[argLength];
 				boolean argHasError = false;
 				ReferenceBinding currentOriginal = (ReferenceBinding)currentType.original();
@@ -327,16 +322,15 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 						scope.problemReporter().nonGenericTypeCannotBeParameterized(i, this, currentType, argTypes);
 						return null;
 					}
-					this.resolvedType =  (qualifyingType != null && qualifyingType.isParameterizedType())
+					this.resolvedType =  qualifyingType != null && qualifyingType.isParameterizedType()
 						? scope.environment().createParameterizedType(currentOriginal, null, qualifyingType)
 						: currentType;
 					return this.resolvedType;
-				} else if (argLength != typeVariables.length) {
-					if (!isDiamond) { // check arity
-						scope.problemReporter().incorrectArityForParameterizedType(this, currentType, argTypes, i);
-						return null;
-					}
 				}
+                if (argLength != typeVariables.length && !isDiamond) { // check arity
+                	scope.problemReporter().incorrectArityForParameterizedType(this, currentType, argTypes, i);
+                	return null;
+                }
 				// check parameterizing (non-)static member type of raw type
 				if (typeIsConsistent) {
 					if (!currentType.hasEnclosingInstanceContext()) {
@@ -488,18 +482,17 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 			}
 			Annotation [][] annotationsOnDimensions = getAnnotationsOnDimensions(true);
 			if (annotationsOnDimensions != null) {
-				for (int i = 0, max = annotationsOnDimensions.length; i < max; i++) {
-					Annotation[] annotations2 = annotationsOnDimensions[i];
+				for (Annotation[] annotations2 : annotationsOnDimensions) {
 					for (int j = 0, max2 = annotations2 == null ? 0 : annotations2.length; j < max2; j++) {
 						Annotation annotation = annotations2[j];
 						annotation.traverse(visitor, scope);
 					}
 				}
 			}
-			for (int i = 0, max = this.typeArguments.length; i < max; i++) {
-				if (this.typeArguments[i] != null) {
-					for (int j = 0, max2 = this.typeArguments[i].length; j < max2; j++) {
-						this.typeArguments[i][j].traverse(visitor, scope);
+			for (TypeReference[] typeArgument : this.typeArguments) {
+				if (typeArgument != null) {
+					for (TypeReference element : typeArgument) {
+						element.traverse(visitor, scope);
 					}
 				}
 			}
@@ -520,18 +513,17 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 			}
 			Annotation [][] annotationsOnDimensions = getAnnotationsOnDimensions(true);
 			if (annotationsOnDimensions != null) {
-				for (int i = 0, max = annotationsOnDimensions.length; i < max; i++) {
-					Annotation[] annotations2 = annotationsOnDimensions[i];
+				for (Annotation[] annotations2 : annotationsOnDimensions) {
 					for (int j = 0, max2 = annotations2 == null ? 0 : annotations2.length; j < max2; j++) {
 						Annotation annotation = annotations2[j];
 						annotation.traverse(visitor, scope);
 					}
 				}
 			}
-			for (int i = 0, max = this.typeArguments.length; i < max; i++) {
-				if (this.typeArguments[i] != null) {
-					for (int j = 0, max2 = this.typeArguments[i].length; j < max2; j++) {
-						this.typeArguments[i][j].traverse(visitor, scope);
+			for (TypeReference[] typeArgument : this.typeArguments) {
+				if (typeArgument != null) {
+					for (TypeReference element : typeArgument) {
+						element.traverse(visitor, scope);
 					}
 				}
 			}

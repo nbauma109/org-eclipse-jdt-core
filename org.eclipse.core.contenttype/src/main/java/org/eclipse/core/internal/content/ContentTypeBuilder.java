@@ -65,8 +65,8 @@ public class ContentTypeBuilder {
 			return ContentType.PRIORITY_HIGH;
 		if ("low".equals(priority)) //$NON-NLS-1$
 			return ContentType.PRIORITY_LOW;
-		if (!"normal".equals(priority)) //$NON-NLS-1$
-			return ContentType.PRIORITY_NORMAL;
+		if (!"normal".equals(priority)) {
+        }
 		//TODO: should log - INVALID PRIORITY
 		return ContentType.PRIORITY_NORMAL;
 	}
@@ -186,7 +186,7 @@ public class ContentTypeBuilder {
 	}
 
 	// Store this around for performance
-	private final static IConfigurationElement[] emptyConfArray = new IConfigurationElement[0];
+	private final static IConfigurationElement[] emptyConfArray = {};
 
 	/**
 	 * Gets configuration elements for both "backward compatible" extension point

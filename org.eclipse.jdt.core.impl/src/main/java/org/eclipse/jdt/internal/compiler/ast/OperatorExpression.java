@@ -28,7 +28,6 @@ public abstract class OperatorExpression extends Expression implements OperatorI
 	 * OperatorExpression constructor comment.
 	 */
 	public OperatorExpression() {
-		super();
 	}
 	public static final void classInitialize() {
 		OperatorSignatures[AND] = get_AND();
@@ -60,7 +59,7 @@ public abstract class OperatorExpression extends Expression implements OperatorI
 		OperatorExpression.generateTableTestCase();
 		*/
 
-		int[] operators = new int[]{AND,AND_AND,DIVIDE,GREATER,GREATER_EQUAL,
+		int[] operators = {AND,AND_AND,DIVIDE,GREATER,GREATER_EQUAL,
 				LEFT_SHIFT,LESS,LESS_EQUAL,MINUS,MULTIPLY,OR,OR_OR,PLUS,REMAINDER,
 				RIGHT_SHIFT,UNSIGNED_RIGHT_SHIFT,XOR};
 
@@ -143,11 +142,9 @@ public abstract class OperatorExpression extends Expression implements OperatorI
 			"\n"; //$NON-NLS-1$
 
 		int error = 0;
-		for (int i=0; i < operators.length; i++)
-		{	int operator = operators[i];
-			for (int left=0; left<16;left++)
+		for (int operator : operators) {	for (int left=0; left<16;left++)
 			for (int right=0; right<16;right++)
-			{	int result = (OperatorSignatures[operator][(left<<4)+right]) & 0x0000F;
+			{	int result = OperatorSignatures[operator][(left<<4)+right] & 0x0000F;
 				if (result != T_undefined)
 
 					//1/ First regular computation then 2/ comparaison

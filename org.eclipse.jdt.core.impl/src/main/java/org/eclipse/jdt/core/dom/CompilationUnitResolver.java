@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
 import org.eclipse.jdt.internal.compiler.IProblemFactory;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.batch.FileSystem.Classpath;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
@@ -309,7 +310,7 @@ class CompilationUnitResolver extends Compiler {
 		}
 		ast.scanner.complianceLevel = complianceLevel;
 		ast.setDefaultNodeFlag(ASTNode.ORIGINAL);
-		CompilationUnit compilationUnit = null;
+		CompilationUnit compilationUnit;
 		ASTConverter converter = new ASTConverter(options, needToResolveBindings, monitor);
 		if (needToResolveBindings) {
 			resolver = new DefaultBindingResolver(compilationUnitDeclaration.scope, owner, bindingTables, (flags & ICompilationUnit.ENABLE_BINDINGS_RECOVERY) != 0, fromJavaProject);
@@ -362,12 +363,9 @@ class CompilationUnitResolver extends Compiler {
 	 * Answer the component to which will be handed back compilation results from the compiler
 	 */
 	protected static ICompilerRequestor getRequestor() {
-		return new ICompilerRequestor() {
-			@Override
-			public void acceptResult(CompilationResult compilationResult) {
-				// do nothing
-			}
-		};
+		return compilationResult -> {
+        	// do nothing
+        };
 	}
 
 	@Override
@@ -438,8 +436,8 @@ class CompilationUnitResolver extends Compiler {
 			//real parse of the method....
 			org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] types = compilationUnitDeclaration.types;
 			if (types != null) {
-				for (int j = 0, typeLength = types.length; j < typeLength; j++) {
-					types[j].parseMethods(parser, compilationUnitDeclaration);
+				for (TypeDeclaration type : types) {
+					type.parseMethods(parser, compilationUnitDeclaration);
 				}
 			}
 
@@ -500,8 +498,8 @@ class CompilationUnitResolver extends Compiler {
 			//real parse of the method....
 			org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] types = compilationUnitDeclaration.types;
 			if (types != null) {
-				for (int j = 0, typeLength = types.length; j < typeLength; j++) {
-					types[j].parseMethods(parser, compilationUnitDeclaration);
+				for (TypeDeclaration type : types) {
+					type.parseMethods(parser, compilationUnitDeclaration);
 				}
 			}
 
@@ -574,8 +572,8 @@ class CompilationUnitResolver extends Compiler {
 				//real parse of the method....
 				org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] types = compilationUnitDeclaration.types;
 				if (types != null) {
-					for (int j = 0, typeLength = types.length; j < typeLength; j++) {
-						types[j].parseMethods(parser, compilationUnitDeclaration);
+					for (TypeDeclaration type : types) {
+						type.parseMethods(parser, compilationUnitDeclaration);
 					}
 				}
 		}
@@ -598,7 +596,7 @@ class CompilationUnitResolver extends Compiler {
 		try {
 			int amountOfWork = (compilationUnits.length + bindingKeys.length) * 2; // 1 for beginToCompile, 1 for resolve
 			SubMonitor subMonitor = SubMonitor.convert(monitor, amountOfWork);
-			environment = new CancelableNameEnvironment(((JavaProject) javaProject), owner, subMonitor);
+			environment = new CancelableNameEnvironment((JavaProject) javaProject, owner, subMonitor);
 			problemFactory = new CancelableProblemFactory(subMonitor);
 			CompilerOptions compilerOptions = getCompilerOptions(options, (flags & ICompilationUnit.ENABLE_STATEMENTS_RECOVERY) != 0);
 			compilerOptions.ignoreMethodBodies = (flags & ICompilationUnit.IGNORE_METHOD_BODIES) != 0;
@@ -659,7 +657,7 @@ class CompilationUnitResolver extends Compiler {
 						subMonitor,
 						false);
 				resolver.resolve(sourceUnits, encodings, bindingKeys, requestor, apiLevel, options, flags);
-				if (NameLookup.VERBOSE && (environment instanceof CancelableNameEnvironment)) {
+				if (NameLookup.VERBOSE && environment instanceof CancelableNameEnvironment) {
 					CancelableNameEnvironment cancelableNameEnvironment = (CancelableNameEnvironment) environment;
 					cancelableNameEnvironment.printTimeSpent();
 				}
@@ -836,16 +834,16 @@ class CompilationUnitResolver extends Compiler {
 	public void removeUnresolvedBindings(CompilationUnitDeclaration compilationUnitDeclaration) {
 		final org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] types = compilationUnitDeclaration.types;
 		if (types != null) {
-			for (int i = 0, max = types.length; i < max; i++) {
-				removeUnresolvedBindings(types[i]);
+			for (TypeDeclaration type : types) {
+				removeUnresolvedBindings(type);
 			}
 		}
 	}
 	private void removeUnresolvedBindings(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration type) {
 		final org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] memberTypes = type.memberTypes;
 		if (memberTypes != null) {
-			for (int i = 0, max = memberTypes.length; i < max; i++){
-				removeUnresolvedBindings(memberTypes[i]);
+			for (TypeDeclaration memberType : memberTypes) {
+				removeUnresolvedBindings(memberType);
 			}
 		}
 		if (type.binding != null && (type.binding.modifiers & ExtraCompilerModifiers.AccUnresolved) != 0) {
@@ -1294,11 +1292,11 @@ class CompilationUnitResolver extends Compiler {
 			return false; // must process at least this many units before checking to see if all are done
 
 		Object[] sources = this.requestedSources.valueTable;
-		for (int i = 0, l = sources.length; i < l; i++)
-			if (sources[i] != null) return false;
+		for (Object element : sources)
+            if (element != null) return false;
 		Object[] keys = this.requestedKeys.valueTable;
-		for (int i = 0, l = keys.length; i < l; i++)
-			if (keys[i] != null) return false;
+		for (Object key : keys)
+            if (key != null) return false;
 		return true;
 	}
 

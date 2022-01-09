@@ -88,10 +88,9 @@ public class ModularClassFile extends AbstractClassFile implements IModularClass
 		if (buffer != null && (contents = buffer.getCharacters()) != null) {
 			BasicCompilationUnit cu = new BasicCompilationUnit(contents, null, TypeConstants.MODULE_INFO_FILE_NAME_STRING, this);
 			return super.codeSelect(cu, offset, length, owner);
-		} else {
-			// has no associated source
-			return new IJavaElement[] {};
 		}
+        // has no associated source
+        return new IJavaElement[] {};
 	}
 
 	@Override
@@ -153,9 +152,8 @@ public class ModularClassFile extends AbstractClassFile implements IModularClass
 		} catch (CoreException e) {
 			if (e instanceof JavaModelException) {
 				throw (JavaModelException)e;
-			} else {
-				throw new JavaModelException(e);
 			}
+            throw new JavaModelException(e);
 		}
 	}
 
@@ -167,23 +165,19 @@ public class ModularClassFile extends AbstractClassFile implements IModularClass
 		}
 		IBinaryModule result = null;
 		IPackageFragmentRoot root = getPackageFragmentRoot();
-		if (getPackageFragmentRoot() instanceof JarPackageFragmentRoot) {
-			if (root instanceof JrtPackageFragmentRoot || this.name.equals(IModule.MODULE_INFO)) {
-				PackageFragment pkg = (PackageFragment) getParent();
-				JarPackageFragmentRoot jarRoot = (JarPackageFragmentRoot) getPackageFragmentRoot();
-				String entryName = jarRoot.getClassFilePath(Util.concatWith(pkg.names, getElementName(), '/'));
-				byte[] contents = getClassFileContent(jarRoot, entryName);
-				if (contents != null) {
-					String fileName = root.getHandleIdentifier() + IDependent.JAR_FILE_ENTRY_SEPARATOR + entryName;
-					ClassFileReader classFileReader = new ClassFileReader(contents, fileName.toCharArray(), false);
-					return classFileReader.getModuleDeclaration();
-				}
-			} else {
-				result = BinaryModuleFactory.readModule(descriptor, null);
-			}
-		} else {
-			result = BinaryModuleFactory.readModule(descriptor, null);
-		}
+		if (getPackageFragmentRoot() instanceof JarPackageFragmentRoot && (root instanceof JrtPackageFragmentRoot || this.name.equals(IModule.MODULE_INFO))) {
+        	PackageFragment pkg = (PackageFragment) getParent();
+        	JarPackageFragmentRoot jarRoot = (JarPackageFragmentRoot) getPackageFragmentRoot();
+        	String entryName = jarRoot.getClassFilePath(Util.concatWith(pkg.names, getElementName(), '/'));
+        	byte[] contents = getClassFileContent(jarRoot, entryName);
+        	if (contents != null) {
+        		String fileName = root.getHandleIdentifier() + IDependent.JAR_FILE_ENTRY_SEPARATOR + entryName;
+        		ClassFileReader classFileReader = new ClassFileReader(contents, fileName.toCharArray(), false);
+        		return classFileReader.getModuleDeclaration();
+        	}
+        } else {
+        	result = BinaryModuleFactory.readModule(descriptor, null);
+        }
 
 		return result;
 	}
@@ -201,13 +195,12 @@ public class ModularClassFile extends AbstractClassFile implements IModularClass
 		SourceMapper mapper = root.getSourceMapper();
 		if (mapper == null) {
 			return null;
-		} else {
-			// ensure this class file's buffer is open so that source ranges are computed
-			getBuffer();
-
-			IModuleDescription module = getModule();
-			return findElement(module, position, mapper);
 		}
+        // ensure this class file's buffer is open so that source ranges are computed
+        getBuffer();
+
+        IModuleDescription module = getModule();
+        return findElement(module, position, mapper);
 	}
 	@Override
 	public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner owner) {
@@ -283,17 +276,16 @@ public class ModularClassFile extends AbstractClassFile implements IModularClass
 			mapper.mapSource((NamedMember) getModule(), contents, null);
 
 			return buffer;
-		} else {
-			// create buffer
-			IBuffer buffer = BufferManager.createNullBuffer(this);
-			if (buffer == null) return null;
-			BufferManager bufManager = getBufferManager();
-			bufManager.addBuffer(buffer);
-
-			// listen to buffer changes
-			buffer.addBufferChangedListener(this);
-			return buffer;
 		}
+        // create buffer
+        IBuffer buffer = BufferManager.createNullBuffer(this);
+        if (buffer == null) return null;
+        BufferManager bufManager = getBufferManager();
+        bufManager.addBuffer(buffer);
+
+        // listen to buffer changes
+        buffer.addBufferChangedListener(this);
+        return buffer;
 	}
 
 	@Override

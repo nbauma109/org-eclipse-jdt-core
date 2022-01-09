@@ -279,7 +279,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 			throw new IOException();
 
 		// validate cache entry
-		if (tmp != null && !(new File(tmp)).exists()) {
+		if (tmp != null && !new File(tmp).exists()) {
 			tmp = null;
 			cacheIndex.remove(url.getFile());
 		}
@@ -301,7 +301,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 			// attempt to cache
 			int ix = file.lastIndexOf('/');
 			tmp = file.substring(ix + 1);
-			tmp = cacheLocation + filePrefix + (new java.util.Date()).getTime() + "_" + tmp; //$NON-NLS-1$
+			tmp = cacheLocation + filePrefix + new java.util.Date().getTime() + "_" + tmp; //$NON-NLS-1$
 			tmp = tmp.replace(File.separatorChar, '/');
 			if (isJar) {
 				tmp = PlatformURLHandler.FILE + PlatformURLHandler.PROTOCOL_SEPARATOR + tmp + PlatformURLHandler.JAR_SEPARATOR + jarEntry;
@@ -370,14 +370,12 @@ public abstract class PlatformURLConnection extends URLConnection {
 		// don't cache files that are known to be local
 		String rp = resolvedURL.getProtocol();
 		String rf = resolvedURL.getFile();
-		if (rp.equals(PlatformURLHandler.FILE))
-			return false;
-		if (rp.equals(PlatformURLHandler.JAR) && (rf.startsWith(PlatformURLHandler.FILE)))
+		if (rp.equals(PlatformURLHandler.FILE) || rp.equals(PlatformURLHandler.JAR) && rf.startsWith(PlatformURLHandler.FILE))
 			return false;
 
 		// for other files force caching if local connection was requested
-		if (asLocal)
-			return true;
+		if (asLocal) {
+        }
 
 		// for now cache all files
 		// XXX: add cache policy support
@@ -401,7 +399,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 				return;
 			try {
 				// try to save cache index
-				FileOutputStream fos = null;
+				FileOutputStream fos;
 				fos = new FileOutputStream(cacheLocation + indexName);
 				try {
 					cacheIndex.store(fos, null);
@@ -452,7 +450,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 			tmp += CACHE_DIR;
 			props.put(CACHE_LOCATION_PROP, tmp);
 
-			tmp = Long.toString((new java.util.Date()).getTime());
+			tmp = Long.toString(new java.util.Date().getTime());
 			props.put(CACHE_PREFIX_PROP, tmp);
 
 			tmp += CACHE_INDEX;

@@ -37,7 +37,7 @@ final class Line implements IRegion {
 	 */
 	public Line(int offset, int end, String delimiter) {
 		this.offset= offset;
-		this.length= (end - offset) +1;
+		this.length= end - offset +1;
 		this.delimiter= delimiter;
 	}
 

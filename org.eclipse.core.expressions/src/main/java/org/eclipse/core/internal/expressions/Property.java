@@ -54,10 +54,9 @@ public class Property {
 	public boolean isValidCacheEntry(boolean forcePluginActivation) {
 		if (forcePluginActivation) {
 			return isInstantiated() && isDeclaringPluginActive();
-		} else {
-			return 	(isInstantiated() && isDeclaringPluginActive()) ||
-					(!isInstantiated() && !isDeclaringPluginActive());
 		}
+        return 	isInstantiated() && isDeclaringPluginActive() ||
+        		!isInstantiated() && !isDeclaringPluginActive();
 	}
 
 	public boolean test(Object receiver, Object[] args, Object expectedValue) throws CoreException {
@@ -79,7 +78,7 @@ public class Property {
 
 	@Override
 	public int hashCode() {
-		return (fType.hashCode() << 16) | fNamespace.hashCode() << 8 | fName.hashCode();
+		return fType.hashCode() << 16 | fNamespace.hashCode() << 8 | fName.hashCode();
 	}
 
 	@Override

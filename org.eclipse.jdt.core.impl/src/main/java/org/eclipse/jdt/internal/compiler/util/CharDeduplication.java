@@ -35,7 +35,7 @@ public class CharDeduplication {
 
 	public static final int OPTIMIZED_LENGTH = 6;
 
-	private final static char[] CHAR_ARRAY0 = new char[0];
+	private final static char[] CHAR_ARRAY0 = {};
 
 	/** avoid OOME by additional CharDeduplication memory **/
 	static final class CacheReference<T> {
@@ -147,7 +147,7 @@ public class CharDeduplication {
 		int i = this.newEntry2;
 		while (++i < INTERNAL_TABLE_SIZE) {
 			char[] charArray = table[i];
-			if ((c0 == charArray[0]) && (c1 == charArray[1]))
+			if (c0 == charArray[0] && c1 == charArray[1])
 				return charArray;
 		}
 		// ---------other side---------
@@ -155,7 +155,7 @@ public class CharDeduplication {
 		int max = this.newEntry2;
 		while (++i <= max) {
 			char[] charArray = table[i];
-			if ((c0 == charArray[0]) && (c1 == charArray[1]))
+			if (c0 == charArray[0] && c1 == charArray[1])
 				return charArray;
 		}
 		// --------add the entry-------
@@ -175,7 +175,7 @@ public class CharDeduplication {
 		int i = this.newEntry3;
 		while (++i < INTERNAL_TABLE_SIZE) {
 			char[] charArray = table[i];
-			if ((c0 == charArray[0]) && (c1 == charArray[1]) && (c2 == charArray[2]))
+			if (c0 == charArray[0] && c1 == charArray[1] && c2 == charArray[2])
 				return charArray;
 		}
 		// ---------other side---------
@@ -183,7 +183,7 @@ public class CharDeduplication {
 		int max = this.newEntry3;
 		while (++i <= max) {
 			char[] charArray = table[i];
-			if ((c0 == charArray[0]) && (c1 == charArray[1]) && (c2 == charArray[2]))
+			if (c0 == charArray[0] && c1 == charArray[1] && c2 == charArray[2])
 				return charArray;
 		}
 		// --------add the entry-------
@@ -203,7 +203,7 @@ public class CharDeduplication {
 		int i = this.newEntry4;
 		while (++i < INTERNAL_TABLE_SIZE) {
 			char[] charArray = table[i];
-			if ((c0 == charArray[0]) && (c1 == charArray[1]) && (c2 == charArray[2]) && (c3 == charArray[3]))
+			if (c0 == charArray[0] && c1 == charArray[1] && c2 == charArray[2] && c3 == charArray[3])
 				return charArray;
 		}
 		// ---------other side---------
@@ -211,7 +211,7 @@ public class CharDeduplication {
 		int max = this.newEntry4;
 		while (++i <= max) {
 			char[] charArray = table[i];
-			if ((c0 == charArray[0]) && (c1 == charArray[1]) && (c2 == charArray[2]) && (c3 == charArray[3]))
+			if (c0 == charArray[0] && c1 == charArray[1] && c2 == charArray[2] && c3 == charArray[3])
 				return charArray;
 		}
 		// --------add the entry-------
@@ -231,8 +231,8 @@ public class CharDeduplication {
 		int i = this.newEntry5;
 		while (++i < INTERNAL_TABLE_SIZE) {
 			char[] charArray = table[i];
-			if ((c0 == charArray[0]) && (c1 == charArray[1]) && (c2 == charArray[2]) && (c3 == charArray[3])
-					&& (c4 == charArray[4]))
+			if (c0 == charArray[0] && c1 == charArray[1] && c2 == charArray[2] && c3 == charArray[3]
+					&& c4 == charArray[4])
 				return charArray;
 		}
 		// ---------other side---------
@@ -240,8 +240,8 @@ public class CharDeduplication {
 		int max = this.newEntry5;
 		while (++i <= max) {
 			char[] charArray = table[i];
-			if ((c0 == charArray[0]) && (c1 == charArray[1]) && (c2 == charArray[2]) && (c3 == charArray[3])
-					&& (c4 == charArray[4]))
+			if (c0 == charArray[0] && c1 == charArray[1] && c2 == charArray[2] && c3 == charArray[3]
+					&& c4 == charArray[4])
 				return charArray;
 		}
 		// --------add the entry-------
@@ -261,8 +261,8 @@ public class CharDeduplication {
 		int i = this.newEntry6;
 		while (++i < INTERNAL_TABLE_SIZE) {
 			char[] charArray = table[i];
-			if ((c0 == charArray[0]) && (c1 == charArray[1]) && (c2 == charArray[2]) && (c3 == charArray[3])
-					&& (c4 == charArray[4]) && (c5 == charArray[5]))
+			if (c0 == charArray[0] && c1 == charArray[1] && c2 == charArray[2] && c3 == charArray[3]
+					&& c4 == charArray[4] && c5 == charArray[5])
 				return charArray;
 		}
 		// ---------other side---------
@@ -270,8 +270,8 @@ public class CharDeduplication {
 		int max = this.newEntry6;
 		while (++i <= max) {
 			char[] charArray = table[i];
-			if ((c0 == charArray[0]) && (c1 == charArray[1]) && (c2 == charArray[2]) && (c3 == charArray[3])
-					&& (c4 == charArray[4]) && (c5 == charArray[5]))
+			if (c0 == charArray[0] && c1 == charArray[1] && c2 == charArray[2] && c3 == charArray[3]
+					&& c4 == charArray[4] && c5 == charArray[5])
 				return charArray;
 		}
 		// --------add the entry-------

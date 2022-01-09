@@ -88,8 +88,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 		//    AND the receiverType is the invocationType or its subclass
 		//    OR the method is a static method accessed directly through a type
 		//    OR previous assertions are true for one of the enclosing type
-		if (TypeBinding.equalsEquals(invocationType, this.declaringClass)) return true;
-		if (invocationType.fPackage == this.declaringClass.fPackage) return true;
+		if (TypeBinding.equalsEquals(invocationType, this.declaringClass) || invocationType.fPackage == this.declaringClass.fPackage) return true;
 
 		ReferenceBinding currentType = invocationType;
 		int depth = 0;
@@ -102,11 +101,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 				// receiverType can be an array binding in one case... see if you can change it
 				if (receiverType instanceof ArrayBinding)
 					return false;
-				if (isStatic()) {
-					if (depth > 0) invocationSite.setDepth(depth);
-					return true; // see 1FMEPDL - return invocationSite.isTypeAccess();
-				}
-				if (TypeBinding.equalsEquals(currentType, receiverErasure) || receiverErasure.findSuperTypeOriginatingFrom(currentType) != null) {
+				if (isStatic() || TypeBinding.equalsEquals(currentType, receiverErasure) || receiverErasure.findSuperTypeOriginatingFrom(currentType) != null) {
 					if (depth > 0) invocationSite.setDepth(depth);
 					return true;
 				}
@@ -150,19 +145,15 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 
 	// isDefault()
 	PackageBinding declaringPackage = this.declaringClass.fPackage;
-	if (invocationType.fPackage != declaringPackage) return false;
-
 	// receiverType can be an array binding in one case... see if you can change it
-	if (receiverType instanceof ArrayBinding)
+	if (invocationType.fPackage != declaringPackage || receiverType instanceof ArrayBinding)
 		return false;
 	TypeBinding originalDeclaringClass = this.declaringClass.original();
 	ReferenceBinding currentType = (ReferenceBinding) receiverType;
 	do {
 		if (currentType.isCapture()) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=285002
 			if (TypeBinding.equalsEquals(originalDeclaringClass, currentType.erasure().original())) return true;
-		} else {
-			if (TypeBinding.equalsEquals(originalDeclaringClass, currentType.original())) return true;
-		}
+		} else if (TypeBinding.equalsEquals(originalDeclaringClass, currentType.original())) return true;
 		PackageBinding currentPackage = currentType.fPackage;
 		// package could be null for wildcards/intersection types, ignore and recurse in superclass
 		if (currentPackage != null && currentPackage != declaringPackage) return false;
@@ -264,13 +255,11 @@ public void fillInDefaultNonNullness(FieldDeclaration sourceField, Scope scope) 
 		} else if ((this.type.tagBits & TagBits.AnnotationNonNull) != 0) {
 			scope.problemReporter().nullAnnotationIsRedundant(sourceField);
 		}
-	} else {
-		if ( (this.tagBits & TagBits.AnnotationNullMASK) == 0 ) {
-			this.tagBits |= TagBits.AnnotationNonNull;
-		} else if ((this.tagBits & TagBits.AnnotationNonNull) != 0) {
-			scope.problemReporter().nullAnnotationIsRedundant(sourceField);
-		}
-	}
+	} else if ( (this.tagBits & TagBits.AnnotationNullMASK) == 0 ) {
+    	this.tagBits |= TagBits.AnnotationNonNull;
+    } else if ((this.tagBits & TagBits.AnnotationNonNull) != 0) {
+    	scope.problemReporter().nullAnnotationIsRedundant(sourceField);
+    }
 }
 
 /**
@@ -305,7 +294,7 @@ public long getAnnotationTagBits() {
 	if ((originalField.tagBits & TagBits.AnnotationResolved) == 0 && originalField.declaringClass instanceof SourceTypeBinding) {
 		ClassScope scope = ((SourceTypeBinding) originalField.declaringClass).scope;
 		if (scope == null) { // synthetic fields do not have a scope nor any annotations
-			this.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+			this.tagBits |= TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved;
 			return 0;
 		}
 		TypeDeclaration typeDecl = scope.referenceContext;

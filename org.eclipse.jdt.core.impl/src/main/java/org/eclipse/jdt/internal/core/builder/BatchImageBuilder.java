@@ -106,34 +106,27 @@ protected void cleanOutputFolders(boolean copyBack) throws CoreException {
 	boolean deleteAll = JavaCore.CLEAN.equals(
 		this.javaBuilder.javaProject.getOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, true));
 	if (deleteAll) {
-		if (this.compilationGroup != CompilationGroup.TEST) {
-			// CompilationGroup.MAIN is done first, so this notifies the participants only once
-			// calling this for CompilationGroup.TEST could cases generated files for CompilationGroup.MAIN to be deleted.
-			if (this.javaBuilder.participants != null)
-				for (int i = 0, l = this.javaBuilder.participants.length; i < l; i++)
-					this.javaBuilder.participants[i].cleanStarting(this.javaBuilder.javaProject);
-		}
+		// CompilationGroup.MAIN is done first, so this notifies the participants only once
+        // calling this for CompilationGroup.TEST could cases generated files for CompilationGroup.MAIN to be deleted.
+        if (this.compilationGroup != CompilationGroup.TEST && this.javaBuilder.participants != null)
+            for (CompilationParticipant participant : this.javaBuilder.participants)
+                participant.cleanStarting(this.javaBuilder.javaProject);
 
 		Set<IContainer> visited = new LinkedHashSet<>(this.sourceLocations.length);
-		for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
+		for (ClasspathMultiDirectory sourceLocation : this.sourceLocations) {
 			this.notifier.subTask(Messages.bind(Messages.build_cleaningOutput, this.javaBuilder.currentProject.getName()));
-			ClasspathMultiDirectory sourceLocation = this.sourceLocations[i];
 			if (sourceLocation.hasIndependentOutputFolder) {
 				IContainer outputFolder = sourceLocation.binaryFolder;
 				if (!visited.contains(outputFolder)) {
 					visited.add(outputFolder);
 					IResource[] members = outputFolder.members();
-					for (int j = 0, m = members.length; j < m; j++) {
-						IResource member = members[j];
+					for (IResource member : members) {
 						if (!member.isDerived()) {
 							member.accept(
-								new IResourceVisitor() {
-									@Override
-									public boolean visit(IResource resource) throws CoreException {
-										resource.setDerived(true, null);
-										return resource.getType() != IResource.FILE;
-									}
-								}
+								resource -> {
+                                	resource.setDerived(true, null);
+                                	return resource.getType() != IResource.FILE;
+                                }
 							);
 						}
 						try {
@@ -157,32 +150,29 @@ protected void cleanOutputFolders(boolean copyBack) throws CoreException {
 						? sourceLocation.inclusionPatterns
 						: null; // ignore inclusionPatterns if output folder == another source folder... not this one
 				sourceLocation.binaryFolder.accept(
-					new IResourceProxyVisitor() {
-						@Override
-						public boolean visit(IResourceProxy proxy) throws CoreException {
-							if (proxy.getType() == IResource.FILE) {
-								if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(proxy.getName())) {
-									IResource resource = proxy.requestResource();
-									if (exclusionPatterns != null || inclusionPatterns != null)
-										if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
-											return false;
-									if (!resource.isDerived())
-										resource.setDerived(true, null);
-									try {
-										resource.delete(IResource.FORCE, null);
-									} catch(CoreException e) {
-										Util.log(e, "Error occurred while deleting: " + resource.getFullPath()); //$NON-NLS-1$
-									}
-								}
-								return false;
-							}
-							if (exclusionPatterns != null && inclusionPatterns == null) // must walk children if inclusionPatterns != null
-								if (Util.isExcluded(proxy.requestFullPath(), null, exclusionPatterns, true))
-									return false;
-							BatchImageBuilder.this.notifier.checkCancel();
-							return true;
-						}
-					},
+					proxy -> {
+                    	if (proxy.getType() == IResource.FILE) {
+                    		if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(proxy.getName())) {
+                    			IResource resource = proxy.requestResource();
+                    			if (exclusionPatterns != null || inclusionPatterns != null)
+                    				if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
+                    					return false;
+                    			if (!resource.isDerived())
+                    				resource.setDerived(true, null);
+                    			try {
+                    				resource.delete(IResource.FORCE, null);
+                    			} catch(CoreException e) {
+                    				Util.log(e, "Error occurred while deleting: " + resource.getFullPath()); //$NON-NLS-1$
+                    			}
+                    		}
+                    		return false;
+                    	}
+                    	if (exclusionPatterns != null && inclusionPatterns == null) // must walk children if inclusionPatterns != null
+                    		if (Util.isExcluded(proxy.requestFullPath(), null, exclusionPatterns, true))
+                    			return false;
+                    	BatchImageBuilder.this.notifier.checkCancel();
+                    	return true;
+                    },
 					IResource.NONE
 				);
 				this.notifier.checkCancel();
@@ -190,8 +180,7 @@ protected void cleanOutputFolders(boolean copyBack) throws CoreException {
 			this.notifier.checkCancel();
 		}
 	} else if (copyBack) {
-		for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
-			ClasspathMultiDirectory sourceLocation = this.sourceLocations[i];
+		for (ClasspathMultiDirectory sourceLocation : this.sourceLocations) {
 			if (sourceLocation.hasIndependentOutputFolder)
 				copyExtraResourcesBack(sourceLocation, false);
 			this.notifier.checkCancel();
@@ -225,57 +214,52 @@ protected void copyExtraResourcesBack(ClasspathMultiDirectory sourceLocation, fi
 	final IContainer outputFolder = sourceLocation.binaryFolder;
 	final boolean isAlsoProject = sourceLocation.sourceFolder.equals(this.javaBuilder.currentProject);
 	sourceLocation.sourceFolder.accept(
-		new IResourceProxyVisitor() {
-			@Override
-			public boolean visit(IResourceProxy proxy) throws CoreException {
-				IResource resource = null;
-				switch(proxy.getType()) {
-					case IResource.FILE :
-						if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName()) ||
-							org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(proxy.getName())) return false;
+		proxy -> {
+        	IResource resource = null;
+        	switch(proxy.getType()) {
+        		case IResource.FILE :
+        			if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName()) ||
+        				org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(proxy.getName())) return false;
 
-						resource = proxy.requestResource();
-						if (BatchImageBuilder.this.javaBuilder.filterExtraResource(resource)) return false;
-						if (exclusionPatterns != null || inclusionPatterns != null)
-							if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
-								return false;
+        			resource = proxy.requestResource();
+        			if (BatchImageBuilder.this.javaBuilder.filterExtraResource(resource)) return false;
+        			if (exclusionPatterns != null || inclusionPatterns != null)
+        				if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
+        					return false;
 
-						IPath partialPath = resource.getFullPath().removeFirstSegments(segmentCount);
-						IResource copiedResource = outputFolder.getFile(partialPath);
-						if (copiedResource.exists()) {
-							if (deletedAll) {
-								IResource originalResource = findOriginalResource(partialPath);
-								String id = originalResource.getFullPath().removeFirstSegments(1).toString();
-								createProblemFor(
-									resource,
-									null,
-									Messages.bind(Messages.build_duplicateResource, id),
-									BatchImageBuilder.this.javaBuilder.javaProject.getOption(JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE, true));
-								return false;
-							}
-							copiedResource.delete(IResource.FORCE, null); // last one wins
-						}
-						createFolder(partialPath.removeLastSegments(1), outputFolder); // ensure package folder exists
-						copyResource(resource, copiedResource);
-						return false;
-					case IResource.FOLDER :
-						resource = proxy.requestResource();
-						if (BatchImageBuilder.this.javaBuilder.filterExtraResource(resource)) return false;
-						if (isAlsoProject && isExcludedFromProject(resource.getFullPath())) return false; // the sourceFolder == project
-						if (exclusionPatterns != null && inclusionPatterns == null) // must walk children if inclusionPatterns != null
-							if (Util.isExcluded(resource.getFullPath(), null, exclusionPatterns, true))
-								return false;
-				}
-				return true;
-			}
-		},
+        			IPath partialPath = resource.getFullPath().removeFirstSegments(segmentCount);
+        			IResource copiedResource = outputFolder.getFile(partialPath);
+        			if (copiedResource.exists()) {
+        				if (deletedAll) {
+        					IResource originalResource = findOriginalResource(partialPath);
+        					String id = originalResource.getFullPath().removeFirstSegments(1).toString();
+        					createProblemFor(
+        						resource,
+        						null,
+        						Messages.bind(Messages.build_duplicateResource, id),
+        						BatchImageBuilder.this.javaBuilder.javaProject.getOption(JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE, true));
+        					return false;
+        				}
+        				copiedResource.delete(IResource.FORCE, null); // last one wins
+        			}
+        			createFolder(partialPath.removeLastSegments(1), outputFolder); // ensure package folder exists
+        			copyResource(resource, copiedResource);
+        			return false;
+        		case IResource.FOLDER :
+        			resource = proxy.requestResource();
+        			if (BatchImageBuilder.this.javaBuilder.filterExtraResource(resource) || isAlsoProject && isExcludedFromProject(resource.getFullPath())) return false; // the sourceFolder == project
+        			if (exclusionPatterns != null && inclusionPatterns == null) // must walk children if inclusionPatterns != null
+        				if (Util.isExcluded(resource.getFullPath(), null, exclusionPatterns, true))
+        					return false;
+        	}
+        	return true;
+        },
 		IResource.NONE
 	);
 }
 
 protected IResource findOriginalResource(IPath partialPath) {
-	for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
-		ClasspathMultiDirectory sourceLocation = this.sourceLocations[i];
+	for (ClasspathMultiDirectory sourceLocation : this.sourceLocations) {
 		if (sourceLocation.hasIndependentOutputFolder) {
 			IResource originalResource = sourceLocation.sourceFolder.getFile(partialPath);
 			if (originalResource.exists()) return originalResource;
@@ -289,13 +273,13 @@ private void printStats() {
 	CompilerStats compilerStats = this.compiler.stats;
 	long time = compilerStats.elapsedTime();
 	long lineCount = compilerStats.lineCount;
-	double speed = ((int) (lineCount * 10000.0 / time)) / 10.0;
+	double speed = (int) (lineCount * 10000.0 / time) / 10.0;
 	System.out.println("\n>FULL BUILD STATS for: "+this.javaBuilder.javaProject.getElementName()); //$NON-NLS-1$
 	System.out.println(">   compiled " + lineCount + " lines in " + time + " ms: " + speed + " lines/s"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	System.out.print(">   parse: " + compilerStats.parseTime + " ms (" + ((int) (compilerStats.parseTime * 1000.0 / time)) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	System.out.print(", resolve: " + compilerStats.resolveTime + " ms (" + ((int) (compilerStats.resolveTime * 1000.0 / time)) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	System.out.print(", analyze: " + compilerStats.analyzeTime + " ms (" + ((int) (compilerStats.analyzeTime * 1000.0 / time)) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	System.out.println(", generate: " + compilerStats.generateTime + " ms (" + ((int) (compilerStats.generateTime * 1000.0 / time)) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	System.out.print(">   parse: " + compilerStats.parseTime + " ms (" + (int) (compilerStats.parseTime * 1000.0 / time) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	System.out.print(", resolve: " + compilerStats.resolveTime + " ms (" + (int) (compilerStats.resolveTime * 1000.0 / time) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	System.out.print(", analyze: " + compilerStats.analyzeTime + " ms (" + (int) (compilerStats.analyzeTime * 1000.0 / time) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	System.out.println(", generate: " + compilerStats.generateTime + " ms (" + (int) (compilerStats.generateTime * 1000.0 / time) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 }
 
 @Override

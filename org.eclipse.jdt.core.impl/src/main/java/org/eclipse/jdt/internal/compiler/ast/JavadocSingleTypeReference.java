@@ -51,17 +51,15 @@ public class JavadocSingleTypeReference extends SingleTypeReference implements I
 		if (this.resolvedType != null) { // is a shared type reference which was already resolved
 			if (this.resolvedType.isValidBinding()) {
 				return this.resolvedType;
-			} else {
-				switch (this.resolvedType.problemId()) {
-					case ProblemReasons.NotFound :
-					case ProblemReasons.NotVisible :
-					case ProblemReasons.InheritedNameHidesEnclosingName :
-						TypeBinding type = this.resolvedType.closestMatch();
-						return type;
-					default :
-						return null;
-				}
 			}
+            switch (this.resolvedType.problemId()) {
+            	case ProblemReasons.NotFound :
+            	case ProblemReasons.NotVisible :
+            	case ProblemReasons.InheritedNameHidesEnclosingName :
+            		return this.resolvedType.closestMatch();
+            	default :
+            		return null;
+            }
 		}
 		this.resolvedType = getTypeBinding(scope);
 		if (this.resolvedType instanceof LocalTypeBinding) {

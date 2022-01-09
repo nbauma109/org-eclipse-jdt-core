@@ -76,25 +76,20 @@ public class DeletePackageFragmentRootOperation extends JavaModelOperation {
 			}
 		} else {
 			final IPath[] nestedFolders = getNestedFolders(root);
-			IResourceProxyVisitor visitor = new IResourceProxyVisitor() {
-				@Override
-				public boolean visit(IResourceProxy proxy) throws CoreException {
-					if (proxy.getType() == IResource.FOLDER) {
-						IPath path = proxy.requestFullPath();
-						if (prefixesOneOf(path, nestedFolders)) {
-							// equals if nested source folder
-							return !equalsOneOf(path, nestedFolders);
-						} else {
-							// subtree doesn't contain any nested source folders
-							proxy.requestResource().delete(DeletePackageFragmentRootOperation.this.updateResourceFlags, DeletePackageFragmentRootOperation.this.progressMonitor);
-							return false;
-						}
-					} else {
-						proxy.requestResource().delete(DeletePackageFragmentRootOperation.this.updateResourceFlags, DeletePackageFragmentRootOperation.this.progressMonitor);
-						return false;
-					}
-				}
-			};
+			IResourceProxyVisitor visitor = proxy -> {
+            	if (proxy.getType() != IResource.FOLDER) {
+            		proxy.requestResource().delete(DeletePackageFragmentRootOperation.this.updateResourceFlags, DeletePackageFragmentRootOperation.this.progressMonitor);
+            		return false;
+            	}
+                IPath path = proxy.requestFullPath();
+                if (prefixesOneOf(path, nestedFolders)) {
+                	// equals if nested source folder
+                	return !equalsOneOf(path, nestedFolders);
+                }
+                // subtree doesn't contain any nested source folders
+                proxy.requestResource().delete(DeletePackageFragmentRootOperation.this.updateResourceFlags, DeletePackageFragmentRootOperation.this.progressMonitor);
+                return false;
+            };
 			try {
 				rootResource.accept(visitor, IResource.NONE);
 			} catch (CoreException e) {
@@ -111,8 +106,7 @@ public class DeletePackageFragmentRootOperation extends JavaModelOperation {
 	protected void updateReferringProjectClasspaths(IPath rootPath, IJavaProject projectOfRoot, Map oldRoots) throws JavaModelException {
 		IJavaModel model = getJavaModel();
 		IJavaProject[] projects = model.getJavaProjects();
-		for (int i = 0, length = projects.length; i < length; i++) {
-			IJavaProject project = projects[i];
+		for (IJavaProject project : projects) {
 			if (project.equals(projectOfRoot)) continue;
 			updateProjectClasspath(rootPath, project, oldRoots);
 		}
@@ -160,11 +154,9 @@ public class DeletePackageFragmentRootOperation extends JavaModelOperation {
 		}
 
 		IResource resource = ((JavaElement) root).resource();
-		if (resource instanceof IFolder) {
-			if (resource.isLinked()) {
-				return new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, root);
-			}
-		}
+		if (resource instanceof IFolder && resource.isLinked()) {
+        	return new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, root);
+        }
 		return JavaModelStatus.VERIFIED_OK;
 	}
 

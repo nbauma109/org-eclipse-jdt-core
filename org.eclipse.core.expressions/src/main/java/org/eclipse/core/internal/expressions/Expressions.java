@@ -76,7 +76,7 @@ public class Expressions {
 		if (nameMap != null) {
 			Object obj = nameMap.get(type);
 			if (obj != null)
-				return ((Boolean)obj).booleanValue();
+				return (Boolean)obj;
 		}
 		if (nameMap == null) {
 			nameMap = new HashMap<>();
@@ -215,19 +215,18 @@ public class Expressions {
 	public static IIterable<?> getAsIIterable(Object var, Expression expression) throws CoreException {
 		if (var instanceof IIterable) {
 			return (IIterable<?>)var;
-		} else {
-			IAdapterManager manager= Platform.getAdapterManager();
-			IIterable<?> result= manager.getAdapter(var, IIterable.class);
-			if (result != null)
-				return result;
-
-			if (manager.queryAdapter(var, IIterable.class.getName()) == IAdapterManager.NOT_LOADED)
-				return null;
-
-			throw new CoreException(new ExpressionStatus(
-				ExpressionStatus.VARIABLE_IS_NOT_A_COLLECTION,
-				Messages.format(ExpressionMessages.Expression_variable_not_iterable, expression.toString())));
 		}
+        IAdapterManager manager= Platform.getAdapterManager();
+        IIterable<?> result= manager.getAdapter(var, IIterable.class);
+        if (result != null)
+        	return result;
+
+        if (manager.queryAdapter(var, IIterable.class.getName()) == IAdapterManager.NOT_LOADED)
+        	return null;
+
+        throw new CoreException(new ExpressionStatus(
+        	ExpressionStatus.VARIABLE_IS_NOT_A_COLLECTION,
+        	Messages.format(ExpressionMessages.Expression_variable_not_iterable, expression.toString())));
 	}
 
 	/**
@@ -244,19 +243,18 @@ public class Expressions {
 	public static ICountable getAsICountable(Object var, Expression expression) throws CoreException {
 		if (var instanceof ICountable) {
 			return (ICountable)var;
-		} else {
-			IAdapterManager manager= Platform.getAdapterManager();
-			ICountable result= manager.getAdapter(var, ICountable.class);
-			if (result != null)
-				return result;
-
-			if (manager.queryAdapter(var, ICountable.class.getName()) == IAdapterManager.NOT_LOADED)
-				return null;
-
-			throw new CoreException(new ExpressionStatus(
-				ExpressionStatus.VARIABLE_IS_NOT_A_COLLECTION,
-				Messages.format(ExpressionMessages.Expression_variable_not_countable, expression.toString())));
 		}
+        IAdapterManager manager= Platform.getAdapterManager();
+        ICountable result= manager.getAdapter(var, ICountable.class);
+        if (result != null)
+        	return result;
+
+        if (manager.queryAdapter(var, ICountable.class.getName()) == IAdapterManager.NOT_LOADED)
+        	return null;
+
+        throw new CoreException(new ExpressionStatus(
+        	ExpressionStatus.VARIABLE_IS_NOT_A_COLLECTION,
+        	Messages.format(ExpressionMessages.Expression_variable_not_countable, expression.toString())));
 	}
 
 	public static boolean getOptionalBooleanAttribute(IConfigurationElement element, String attributeName) {
@@ -275,24 +273,22 @@ public class Expressions {
 
 	//---- Argument parsing --------------------------------------------
 
-	public static final Object[] EMPTY_ARGS= new Object[0];
+	public static final Object[] EMPTY_ARGS= {};
 
 	public static Object[] getArguments(IConfigurationElement element, String attributeName) throws CoreException {
 		String args= element.getAttribute(attributeName);
 		if (args != null) {
 			return parseArguments(args);
-		} else {
-			return EMPTY_ARGS;
 		}
+        return EMPTY_ARGS;
 	}
 
 	public static Object[] getArguments(Element element, String attributeName) throws CoreException {
 		String args= element.getAttribute(attributeName);
 		if (!args.isEmpty()) {
 			return parseArguments(args);
-		} else {
-			return EMPTY_ARGS;
 		}
+        return EMPTY_ARGS;
 	}
 
 	public static Object[] parseArguments(String args) throws CoreException {
@@ -336,27 +332,31 @@ public class Expressions {
 	public static Object convertArgument(String arg) throws CoreException {
 		if (arg == null) {
 			return null;
-		} else if (arg.isEmpty()) {
+		}
+        if (arg.isEmpty()) {
 			return arg;
-		} else if (arg.charAt(0) == '\'' && arg.charAt(arg.length() - 1) == '\'') {
+		}
+        if (arg.charAt(0) == '\'' && arg.charAt(arg.length() - 1) == '\'') {
 			return unEscapeString(arg.substring(1, arg.length() - 1));
-		} else if ("true".equals(arg)) { //$NON-NLS-1$
+		}
+        if ("true".equals(arg)) { //$NON-NLS-1$
 			return Boolean.TRUE;
-		} else if ("false".equals(arg)) { //$NON-NLS-1$
+		}
+        if ("false".equals(arg)) { //$NON-NLS-1$
 			return Boolean.FALSE;
-		} else if (arg.indexOf('.') != -1) {
+		}
+        if (arg.indexOf('.') != -1) {
 			try {
 				return Float.valueOf(arg);
 			} catch (NumberFormatException e) {
 				return arg;
 			}
-		} else {
-			try {
-				return Integer.valueOf(arg);
-			} catch (NumberFormatException e) {
-				return arg;
-			}
 		}
+        try {
+        	return Integer.valueOf(arg);
+        } catch (NumberFormatException e) {
+        	return arg;
+        }
 	}
 
 	public static String unEscapeString(String str) throws CoreException {

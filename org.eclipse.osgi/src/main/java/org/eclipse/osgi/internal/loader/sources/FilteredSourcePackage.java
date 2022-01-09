@@ -78,14 +78,9 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 			int len = s.length();
 			if (len == 0)
 				continue;
-			if (s.charAt(0) == ALL && len == 1) {
-				return true; // handles "*" wild card
-			}
-			if (s.charAt(len - 1) == ALL) {
-				if (name.startsWith(s.substring(0, len - 1))) {
-					return true;
-				}
-			}
+			if (s.charAt(0) == ALL && len == 1 || s.charAt(len - 1) == ALL && name.startsWith(s.substring(0, len - 1))) {
+            	return true;
+            }
 			if (name.equals(s)) {
 				return true;
 			}

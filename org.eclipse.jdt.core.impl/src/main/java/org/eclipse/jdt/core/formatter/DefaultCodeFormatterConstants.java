@@ -400,7 +400,8 @@ public class DefaultCodeFormatterConstants {
 	 *             {@link #FORMATTER_ALIGNMENT_FOR_ADDITIVE_OPERATOR}, {@link #FORMATTER_ALIGNMENT_FOR_STRING_CONCATENATION},
 	 *             {@link #FORMATTER_ALIGNMENT_FOR_BITWISE_OPERATOR}, {@link #FORMATTER_ALIGNMENT_FOR_LOGICAL_OPERATOR}
 	 */
-	public static final String FORMATTER_ALIGNMENT_FOR_BINARY_EXPRESSION = JavaCore.PLUGIN_ID + ".formatter.alignment_for_binary_expression";	 //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_ALIGNMENT_FOR_BINARY_EXPRESSION = JavaCore.PLUGIN_ID + ".formatter.alignment_for_binary_expression";	 //$NON-NLS-1$
 	/**
 	 * <pre>
 	 * FORMATTER / Option for alignment of compact if
@@ -2533,7 +2534,8 @@ public class DefaultCodeFormatterConstants {
 	 * {@link #FORMATTER_INSERT_SPACE_AFTER_SHIFT_OPERATOR}, {@link #FORMATTER_INSERT_SPACE_AFTER_RELATIONAL_OPERATOR},
 	 * {@link #FORMATTER_INSERT_SPACE_AFTER_BITWISE_OPERATOR}, {@link #FORMATTER_INSERT_SPACE_AFTER_LOGICAL_OPERATOR}
 	 */
-	public static final String FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR = JavaCore.PLUGIN_ID + ".formatter.insert_space_after_binary_operator"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR = JavaCore.PLUGIN_ID + ".formatter.insert_space_after_binary_operator"; //$NON-NLS-1$
 	/**
 	 * <pre>
 	 * FORMATTER / Option to insert a space after a multiplicative operator (*, /, %)
@@ -3426,7 +3428,8 @@ public class DefaultCodeFormatterConstants {
 	 * {@link #FORMATTER_INSERT_SPACE_BEFORE_SHIFT_OPERATOR}, {@link #FORMATTER_INSERT_SPACE_BEFORE_RELATIONAL_OPERATOR},
 	 * {@link #FORMATTER_INSERT_SPACE_BEFORE_BITWISE_OPERATOR}, {@link #FORMATTER_INSERT_SPACE_BEFORE_LOGICAL_OPERATOR}
 	 */
-	public static final String FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR = JavaCore.PLUGIN_ID + ".formatter.insert_space_before_binary_operator";	//$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR = JavaCore.PLUGIN_ID + ".formatter.insert_space_before_binary_operator";	//$NON-NLS-1$
 	/**
 	 * <pre>
 	 * FORMATTER / Option to insert a space before a multiplicative operator (*, /, %)
@@ -5308,7 +5311,8 @@ public class DefaultCodeFormatterConstants {
 	 * {@link #FORMATTER_WRAP_BEFORE_ADDITIVE_OPERATOR}, {@link #FORMATTER_WRAP_BEFORE_STRING_CONCATENATION},
 	 * {@link #FORMATTER_WRAP_BEFORE_BITWISE_OPERATOR}, {@link #FORMATTER_WRAP_BEFORE_LOGICAL_OPERATOR}
 	 */
-	public static final String FORMATTER_WRAP_BEFORE_BINARY_OPERATOR = JavaCore.PLUGIN_ID + ".formatter.wrap_before_binary_operator"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_WRAP_BEFORE_BINARY_OPERATOR = JavaCore.PLUGIN_ID + ".formatter.wrap_before_binary_operator"; //$NON-NLS-1$
 	/**
 	 * <pre>
 	 * FORMATTER / Option to wrap before the '|' operator in multi-catch statements
@@ -5841,11 +5845,11 @@ public class DefaultCodeFormatterConstants {
 			int existingValue = Integer.parseInt(value);
 			if ((existingValue & Alignment.M_INDENT_BY_ONE) != 0) {
 				return INDENT_BY_ONE;
-			} else if ((existingValue & Alignment.M_INDENT_ON_COLUMN) != 0) {
-				return INDENT_ON_COLUMN;
-			} else {
-				return INDENT_DEFAULT;
 			}
+            if ((existingValue & Alignment.M_INDENT_ON_COLUMN) != 0) {
+				return INDENT_ON_COLUMN;
+			}
+            return INDENT_DEFAULT;
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Alignment value is not an integer: " + value, e); //$NON-NLS-1$
 		}
@@ -5997,7 +6001,7 @@ public class DefaultCodeFormatterConstants {
 		try {
 			int existingValue = Integer.parseInt(value);
 			// clear existing split bits
-			existingValue &= ~(Alignment.SPLIT_MASK);
+			existingValue &= ~Alignment.SPLIT_MASK;
 			switch(wrappingStyle) {
 				case WRAP_COMPACT :
 					existingValue |= Alignment.M_COMPACT_SPLIT;

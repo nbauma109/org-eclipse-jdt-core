@@ -50,6 +50,7 @@ public interface StateObjectFactory {
 	 * @return the created state
 	 * @deprecated use {@link #createState(boolean) }
 	 */
+    @Deprecated
     State createState();
 
 	/**
@@ -94,6 +95,7 @@ public interface StateObjectFactory {
 	 * @return the created bundle description
 	 * @deprecated use {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
+    @Deprecated
     BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton);
 
 	/**
@@ -123,6 +125,7 @@ public interface StateObjectFactory {
 	 * @return the created bundle description
 	 * @deprecated use {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
+    @Deprecated
     BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
 
 	/**
@@ -218,6 +221,7 @@ public interface StateObjectFactory {
 	 * @throws BundleException if an error occurs while reading the manifest
 	 * @deprecated use {@link #createBundleDescription(State, Dictionary, String, long)}
 	 */
+    @Deprecated
     BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id) throws BundleException;
 
 	/**
@@ -339,6 +343,7 @@ public interface StateObjectFactory {
 	 * @return the created generic description
 	 * @deprecated use {@link #createGenericDescription(String, String, Version, Map)}
 	 */
+    @Deprecated
     GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes);
 
 	/**
@@ -433,6 +438,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @since 3.1
 	 */
+    @Deprecated
     void writeState(State state, OutputStream stream) throws IOException;
 
 	/**
@@ -447,6 +453,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @see #writeState(State, OutputStream)
 	 */
+    @Deprecated
     void writeState(State state, DataOutputStream stream) throws IOException;
 
 	/**
@@ -471,6 +478,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #readState(File)} instead
 	 * @since 3.1
 	 */
+    @Deprecated
     State readState(InputStream stream) throws IOException;
 
 	/**
@@ -483,6 +491,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #readState(File)} instead
 	 * @see #readState(InputStream)
 	 */
+    @Deprecated
     State readState(DataInputStream stream) throws IOException;
 
 	/**

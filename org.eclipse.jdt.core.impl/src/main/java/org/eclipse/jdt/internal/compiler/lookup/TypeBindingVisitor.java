@@ -110,12 +110,10 @@ public class TypeBindingVisitor {
 			case Binding.WILDCARD_TYPE:
 			case Binding.INTERSECTION_TYPE:
 		        WildcardBinding wildcard = (WildcardBinding) type;
-		        if (visitor.visit(wildcard)) {
-		        	if (wildcard.boundKind != Wildcard.UNBOUND) {
-		        		visit(visitor, wildcard.bound);
-		        		visit(visitor, wildcard.otherBounds);
-		        	}
-		        }
+		        if (visitor.visit(wildcard) && wildcard.boundKind != Wildcard.UNBOUND) {
+                	visit(visitor, wildcard.bound);
+                	visit(visitor, wildcard.otherBounds);
+                }
 				break;
 
 			case Binding.BASE_TYPE:

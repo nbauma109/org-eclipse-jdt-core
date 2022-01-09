@@ -35,7 +35,6 @@ public final class Messages {
 		private final Map fields;
 
 		public MessagesProperties(Field[] fieldArray, String bundleName) {
-			super();
 			final int len = fieldArray.length;
 			this.fields = new HashMap(len * 2);
 			for (int i = 0; i < len; i++) {
@@ -47,11 +46,8 @@ public final class Messages {
 		public synchronized Object put(Object key, Object value) {
 			try {
 				Field field = (Field) this.fields.get(key);
-				if (field == null) {
-					return null;
-				}
 				//can only set value of public static non-final fields
-				if ((field.getModifiers() & MOD_MASK) != MOD_EXPECTED)
+				if (field == null || (field.getModifiers() & MOD_MASK) != MOD_EXPECTED)
 					return null;
 				// Set the value into the field. We should never get an exception here because
 				// we know we have a public static non-final field. If we do get an exception, silently
@@ -232,7 +228,7 @@ public final class Messages {
 		final String[] variants = buildVariants(bundleName);
 		// search the dirs in reverse order so the cascading defaults is set correctly
 		for (int i = variants.length; --i >= 0;) {
-			InputStream input = (loader == null)
+			InputStream input = loader == null
 				? ClassLoader.getSystemResourceAsStream(variants[i])
 				: loader.getResourceAsStream(variants[i]);
 			if (input == null) continue;

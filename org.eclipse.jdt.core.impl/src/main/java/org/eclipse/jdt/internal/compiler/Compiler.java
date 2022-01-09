@@ -107,7 +107,8 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 	 *
 	 *  @deprecated this constructor is kept to preserve 3.1 and 3.2M4 compatibility
 	 */
-	public Compiler(
+	@Deprecated
+    public Compiler(
 			INameEnvironment environment,
 			IErrorHandlingPolicy policy,
 			Map<String, String> settings,
@@ -158,7 +159,8 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 	 *
 	 *  @deprecated this constructor is kept to preserve 3.1 and 3.2M4 compatibility
 	 */
-	public Compiler(
+	@Deprecated
+    public Compiler(
 			INameEnvironment environment,
 			IErrorHandlingPolicy policy,
 			Map settings,
@@ -250,7 +252,8 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 	 *      them back as part of the compilation unit result.
 	 * @deprecated
 	 */
-	public Compiler(
+	@Deprecated
+    public Compiler(
 			INameEnvironment environment,
 			IErrorHandlingPolicy policy,
 			CompilerOptions options,
@@ -276,15 +279,12 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 		if(DebugRequestor == null) {
 			this.requestor = requestor;
 		} else {
-			this.requestor = new ICompilerRequestor(){
-				@Override
-				public void acceptResult(CompilationResult result){
-					if (DebugRequestor.isActive()){
-						DebugRequestor.acceptDebugResult(result);
-					}
-					requestor.acceptResult(result);
-				}
-			};
+			this.requestor = result -> {
+            	if (DebugRequestor.isActive()){
+            		DebugRequestor.acceptDebugResult(result);
+            	}
+            	requestor.acceptResult(result);
+            };
 		}
 		this.problemReporter = new ProblemReporter(policy, this.options, problemFactory);
 		this.lookupEnvironment = new LookupEnvironment(this, this.options, this.problemReporter, environment);
@@ -345,11 +345,10 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 		} catch (AbortCompilationUnit e) {
 			// at this point, currentCompilationUnitResult may not be sourceUnit, but some other
 			// one requested further along to resolve sourceUnit.
-			if (unitResult.compilationUnit == sourceUnit) { // only report once
-				this.requestor.acceptResult(unitResult.tagAsAccepted());
-			} else {
+			if (unitResult.compilationUnit != sourceUnit) {
 				throw e; // want to abort enclosing request to compile
 			}
+            this.requestor.acceptResult(unitResult.tagAsAccepted());
 		}
 	}
 
@@ -376,7 +375,7 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 			System.arraycopy(
 				this.unitsToProcess,
 				0,
-				(this.unitsToProcess = new CompilationUnitDeclaration[size * 2]),
+				this.unitsToProcess = new CompilationUnitDeclaration[size * 2],
 				0,
 				this.totalUnits);
 		this.unitsToProcess[this.totalUnits++] = parsedUnit;
@@ -418,7 +417,7 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 				// We check cancellation again following the call to compile.
 				throw new AbortCompilation(true, null);
 			}
-			this.progress.worked(workIncrement, (this.totalUnits* this.remainingIterations) - currentUnitIndex - 1);
+			this.progress.worked(workIncrement, this.totalUnits* this.remainingIterations - currentUnitIndex - 1);
 		}
 	}
 
@@ -623,18 +622,16 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 							}));
 				}
 			}
-			if (!lastRound) {
-				if (this.annotationProcessorManager != null && this.totalUnits > this.annotationProcessorStartIndex) {
-					int backup = this.annotationProcessorStartIndex;
-					int prevUnits = this.totalUnits;
-					processAnnotations();
-					// Clean up the units that were left out previously for annotation processing.
-					for (int i = backup; i < prevUnits; i++) {
-						this.unitsToProcess[i].cleanUp();
-					}
-					processCompiledUnits(backup, lastRound);
-				}
-			}
+			if (!lastRound && this.annotationProcessorManager != null && this.totalUnits > this.annotationProcessorStartIndex) {
+            	int backup = this.annotationProcessorStartIndex;
+            	int prevUnits = this.totalUnits;
+            	processAnnotations();
+            	// Clean up the units that were left out previously for annotation processing.
+            	for (int i = backup; i < prevUnits; i++) {
+            		this.unitsToProcess[i].cleanUp();
+            	}
+            	processCompiledUnits(backup, lastRound);
+            }
 		} catch (AbortCompilation e) {
 			this.handleInternalException(e, unit);
 		} catch (Error | RuntimeException e) {
@@ -702,7 +699,7 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 		if (result != null) {
 			/* create and record a compilation problem */
 			// only keep leading portion of the trace
-			String[] pbArguments = new String[] {
+			String[] pbArguments = {
 				Messages.bind(Messages.compilation_internalError, Util.getExceptionSummary(internalException)),
 			};
 
@@ -783,13 +780,11 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 					}
 					result.record(distantProblem, unit, true);
 				}
-			} else {
-				/* distant internal exception which could not be reported back there */
-				if (abortException.exception != null) {
-					this.handleInternalException(abortException.exception, null, result);
-					return;
-				}
-			}
+			} else /* distant internal exception which could not be reported back there */
+            if (abortException.exception != null) {
+            	this.handleInternalException(abortException.exception, null, result);
+            	return;
+            }
 			/* hand back the compilation result */
 			if (!result.hasBeenAccepted) {
 				this.requestor.acceptResult(result.tagAsAccepted());
@@ -945,7 +940,7 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 				currentUnits[index++] = currentUnit;
 			}
 			if (index != length) {
-				System.arraycopy(currentUnits, 0, (currentUnits = new CompilationUnitDeclaration[index]), 0, index);
+				System.arraycopy(currentUnits, 0, currentUnits = new CompilationUnitDeclaration[index], 0, index);
 			}
 			this.annotationProcessorManager.processAnnotations(currentUnits, binaryTypeBindingsTemp, false);
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=407841

@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.compiler.parser.ScannerHelper;
 
 class SubwordMatcher {
 
-	private static final int[] EMPTY_REGIONS = new int[0];
+	private static final int[] EMPTY_REGIONS = {};
 
 	private final char[] name;
 	private final BitSet wordBoundaries;
@@ -58,7 +58,7 @@ class SubwordMatcher {
 		// the remaining cases are boundaries for capitalization changes:
 		// lowerUpper, UPPERLower, lowerUPPER
 		//      ^           ^           ^
-		return (c == Case.UPPER) && (p == Case.LOWER || n == Case.LOWER);
+		return c == Case.UPPER && (p == Case.LOWER || n == Case.LOWER);
 	}
 
 	private enum Case {
@@ -83,10 +83,7 @@ class SubwordMatcher {
 			char nameChar = this.name[iName];
 
 			// For as long as we're exactly matching, bring it on
-			if (patternChar == nameChar) {
-				continue;
-			}
-			if (!isWordBoundary(iName) && equalsIgnoreCase(patternChar, nameChar)) {
+			if (patternChar == nameChar || !isWordBoundary(iName) && equalsIgnoreCase(patternChar, nameChar)) {
 				// we're not at a word boundary, case-insensitive match is fine
 				continue;
 			}

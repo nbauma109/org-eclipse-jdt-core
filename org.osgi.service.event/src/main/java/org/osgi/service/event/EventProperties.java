@@ -66,11 +66,11 @@ public class EventProperties implements Map<String, Object> {
 	 *        (may be {@code null}).
 	 */
 	public EventProperties(Map<String, ?> properties) {
-		int size = (properties == null) ? 0 : properties.size();
-		Map<String, Object> p = new HashMap<String, Object>(size);
+		int size = properties == null ? 0 : properties.size();
+		Map<String, Object> p = new HashMap<>(size);
 		if (size > 0) {
 			for (Object key : properties.keySet()) {
-				if ((key instanceof String) && !EVENT_TOPIC.equals(key)) {
+				if (key instanceof String && !EVENT_TOPIC.equals(key)) {
 					Object value = properties.get(key);
 					p.put((String) key, value);
 				}
@@ -92,12 +92,12 @@ public class EventProperties implements Map<String, Object> {
 	 *        (may be {@code null}).
 	 */
 	EventProperties(Dictionary<String, ?> properties) {
-		int size = (properties == null) ? 0 : properties.size();
-		Map<String, Object> p = new HashMap<String, Object>(size);
+		int size = properties == null ? 0 : properties.size();
+		Map<String, Object> p = new HashMap<>(size);
 		if (size > 0) {
 			for (Enumeration<?> e = properties.keys(); e.hasMoreElements();) {
 				Object key = e.nextElement();
-				if ((key instanceof String) && !EVENT_TOPIC.equals(key)) {
+				if (key instanceof String && !EVENT_TOPIC.equals(key)) {
 					Object value = properties.get(key);
 					p.put((String) key, value);
 				}

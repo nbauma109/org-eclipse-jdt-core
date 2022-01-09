@@ -91,7 +91,7 @@ public class BindingKeyParser {
 			return
 				this.index < this.source.length
 				&& (this.source[this.index] == '$'
-					|| (this.source[this.index] == '.' && this.source[this.index-1] == '>'));
+					|| this.source[this.index] == '.' && this.source[this.index-1] == '>');
 		}
 
 		boolean isAtParametersEnd() {
@@ -197,21 +197,17 @@ public class BindingKeyParser {
 						}
 						break;
 					case ';':
-						if (this.index == previousTokenEnd) {
-							this.start = this.index+1;
-							dollarIndex = -1;
-							previousTokenEnd = this.start;
-						} else {
+						if (this.index != previousTokenEnd) {
 							if (dollarIndex != -1) this.index = dollarIndex;
 							this.token = TYPE;
 							return this.token;
 						}
+                        this.start = this.index+1;
+                        dollarIndex = -1;
+                        previousTokenEnd = this.start;
 						break;
 					case '$':
-						if (this.index == previousTokenEnd) {
-							this.start = this.index+1;
-							dollarIndex = -1;
-						} else {
+						if (this.index != previousTokenEnd) {
 							if (dollarIndex == -1) {
 								dollarIndex = this.index;
 								break;
@@ -220,15 +216,16 @@ public class BindingKeyParser {
 							this.token = TYPE;
 							return this.token;
 						}
+                        this.start = this.index+1;
+                        dollarIndex = -1;
 						break;
 					case '~':
-						if (this.index == previousTokenEnd) {
-							this.start = this.index+1;
-							dollarIndex = -1;
-						} else {
+						if (this.index != previousTokenEnd) {
 							this.token = TYPE;
 							return this.token;
 						}
+                        this.start = this.index+1;
+                        dollarIndex = -1;
 						break;
 					case '.':
 						if (this.token == MODULE)
@@ -260,15 +257,14 @@ public class BindingKeyParser {
 									}
 									return this.token;
 								default:
-									if (this.index == previousTokenEnd) {
-										this.start = this.index+1;
-										dollarIndex = -1;
-										previousTokenEnd = this.start;
-									} else {
+									if (this.index != previousTokenEnd) {
 										if (dollarIndex != -1) this.index = dollarIndex;
 										this.token = TYPE;
 										return this.token;
 									}
+                                    this.start = this.index+1;
+                                    dollarIndex = -1;
+                                    previousTokenEnd = this.start;
 							}
 						}
 						break;
@@ -285,14 +281,13 @@ public class BindingKeyParser {
 						previousTokenEnd = this.start;
 						break;
 					case '#':
-						if (this.index == previousTokenEnd) {
-							this.start = this.index+1;
-							dollarIndex = -1;
-							previousTokenEnd = this.start;
-						} else {
+						if (this.index != previousTokenEnd) {
 							this.token = LOCAL_VAR;
 							return this.token;
 						}
+                        this.start = this.index+1;
+                        dollarIndex = -1;
+                        previousTokenEnd = this.start;
 						break;
 					case Character.MIN_VALUE:
 						switch (this.token) {
@@ -806,7 +801,6 @@ public class BindingKeyParser {
 				break;
 			default:
 				malformedKey();
-				return;
 		}
 	}
 

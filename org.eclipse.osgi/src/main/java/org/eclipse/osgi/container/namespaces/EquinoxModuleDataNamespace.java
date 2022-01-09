@@ -63,7 +63,8 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	 * The Equinox specific header for specifying the lazy start policy
 	 * @deprecated use {@link #LAZYSTART_HEADER}
 	 */
-	public static final String AUTOSTART_HEADER = "Eclipse-AutoStart"; //$NON-NLS-1$
+	@Deprecated
+    public static final String AUTOSTART_HEADER = "Eclipse-AutoStart"; //$NON-NLS-1$
 
 	/**
 	 * Namespace name for equinox module data.  Unlike typical name spaces

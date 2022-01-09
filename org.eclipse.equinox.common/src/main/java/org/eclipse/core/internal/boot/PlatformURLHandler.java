@@ -41,7 +41,6 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 	 * Constructor for the class.
 	 */
 	public PlatformURLHandler() {
-		super();
 	}
 
 	@Override
@@ -62,7 +61,7 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 
 		PlatformURLConnection connection = null;
 		try {
-			connection = (PlatformURLConnection) construct.newInstance(new Object[] {url});
+			connection = (PlatformURLConnection) construct.newInstance(url);
 		} catch (Exception e) {
 			throw new IOException(NLS.bind(CommonMessages.url_createConnection, e.getMessage()));
 		}

@@ -309,34 +309,20 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			boolean acquired = stateChangeLock.tryLock(revisions.getContainer().getModuleLockTimeout(), TimeUnit.SECONDS);
 			Set<ModuleEvent> currentTransition = Collections.emptySet();
 			if (acquired) {
-				boolean isValidTransition = true;
-				switch (transitionEvent) {
-					case STARTED :
-					case UPDATED :
-					case UNINSTALLED :
-					case UNRESOLVED :
-						// These states must be initiating transition states
-						// no other transition state is allowed when these are kicked off
-						isValidTransition = stateTransitionEvents.isEmpty();
-						break;
-					case RESOLVED :
-						isValidTransition = VALID_RESOLVED_TRANSITION.containsAll(stateTransitionEvents);
-						break;
-					case STOPPED :
-						isValidTransition = VALID_STOPPED_TRANSITION.containsAll(stateTransitionEvents);
-						break;
-					default :
-						isValidTransition = false;
-						break;
-				}
-				if (!isValidTransition) {
-					currentTransition = EnumSet.copyOf(stateTransitionEvents);
-					invalid = true;
-					stateChangeLock.unlock();
-				} else {
+				boolean isValidTransition;
+				isValidTransition = switch (transitionEvent) {
+                    case STARTED, UPDATED, UNINSTALLED, UNRESOLVED -> stateTransitionEvents.isEmpty();
+                    case RESOLVED -> VALID_RESOLVED_TRANSITION.containsAll(stateTransitionEvents);
+                    case STOPPED -> VALID_STOPPED_TRANSITION.containsAll(stateTransitionEvents);
+                    default -> false;
+                };
+				if (isValidTransition) {
 					stateTransitionEvents.add(transitionEvent);
 					return;
 				}
+                currentTransition = EnumSet.copyOf(stateTransitionEvents);
+                invalid = true;
+                stateChangeLock.unlock();
 			} else {
 				currentTransition = EnumSet.copyOf(stateTransitionEvents);
 			}
@@ -451,11 +437,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				// need to check valid again in case someone uninstalled the bundle
 				checkValid();
 				ResolutionException e = report.getResolutionException();
-				if (e != null) {
-					if (e.getCause() instanceof BundleException) {
-						throw (BundleException) e.getCause();
-					}
-				}
+				if (e != null && e.getCause() instanceof BundleException) {
+                	throw (BundleException) e.getCause();
+                }
 				if (State.ACTIVE.equals(getState()))
 					return;
 				if (getState().equals(State.INSTALLED)) {
@@ -552,7 +536,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			return slcomp;
 		}
 		long idcomp = getId() - o.getId();
-		return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
+		return idcomp < 0L ? -1 : idcomp > 0L ? 1 : 0;
 	}
 
 	final void checkValid() {
@@ -582,17 +566,15 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (getContainer().DEBUG_MONITOR_LAZY) {
 				Debug.printStackTrace(new Exception("Module is being lazy activated: " + this)); //$NON-NLS-1$
 			}
-		} else {
-			if (isLazyActivate(options) && !isTriggerSet()) {
-				if (State.LAZY_STARTING.equals(getState())) {
-					// a sync listener must have tried to start this module again with the lazy option
-					return null; // no event to publish; nothing to do
-				}
-				// set the lazy starting state and return lazy activation event for firing
-				setState(State.LAZY_STARTING);
-				return ModuleEvent.LAZY_ACTIVATION;
-			}
-		}
+		} else if (isLazyActivate(options) && !isTriggerSet()) {
+        	if (State.LAZY_STARTING.equals(getState())) {
+        		// a sync listener must have tried to start this module again with the lazy option
+        		return null; // no event to publish; nothing to do
+        	}
+        	// set the lazy starting state and return lazy activation event for firing
+        	setState(State.LAZY_STARTING);
+        	return ModuleEvent.LAZY_ACTIVATION;
+        }
 
 		// time to actual start the module
 		if (!State.STARTING.equals(getState())) {

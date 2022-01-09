@@ -50,7 +50,7 @@ public FieldPattern(
 	this.declaringQualification = this.isCaseSensitive ? declaringQualification : CharOperation.toLowerCase(declaringQualification);
 	this.declaringSimpleName = this.isCaseSensitive ? declaringSimpleName : CharOperation.toLowerCase(declaringSimpleName);
 	this.typeQualification = this.isCaseSensitive ? typeQualification : CharOperation.toLowerCase(typeQualification);
-	this.typeSimpleName = (this.isCaseSensitive || this.isCamelCase) ? typeSimpleName : CharOperation.toLowerCase(typeSimpleName);
+	this.typeSimpleName = this.isCaseSensitive || this.isCamelCase ? typeSimpleName : CharOperation.toLowerCase(typeSimpleName);
 
 	this.mustResolve = mustResolve();
 }
@@ -101,8 +101,7 @@ public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 }
 @Override
 protected boolean mustResolve() {
-	if (this.declaringSimpleName != null || this.declaringQualification != null) return true;
-	if (this.typeSimpleName != null || this.typeQualification != null) return true;
+	if (this.declaringSimpleName != null || this.declaringQualification != null || this.typeSimpleName != null || this.typeQualification != null) return true;
 
 	return super.mustResolve();
 }

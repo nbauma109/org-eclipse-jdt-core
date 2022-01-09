@@ -103,9 +103,8 @@ public class MethodRefParameter extends ASTNode {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_3_0;
 		}
+        return PROPERTY_DESCRIPTORS_3_0;
 	}
 
 	/**
@@ -152,18 +151,16 @@ public class MethodRefParameter extends ASTNode {
 		if (property == TYPE_PROPERTY) {
 			if (get) {
 				return getType();
-			} else {
-				setType((Type) child);
-				return null;
 			}
+            setType((Type) child);
+            return null;
 		}
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((SimpleName) child);
-				return null;
 			}
+            setName((SimpleName) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -174,10 +171,9 @@ public class MethodRefParameter extends ASTNode {
 		if (property == VARARGS_PROPERTY) {
 			if (get) {
 				return isVarargs();
-			} else {
-				setVarargs(value);
-				return false;
 			}
+            setVarargs(value);
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);

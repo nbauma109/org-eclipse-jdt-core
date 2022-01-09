@@ -227,21 +227,23 @@ private IType findSuperClass(IGenericType type, ReferenceBinding typeBinding) {
 				this.hasMissingSuperClass = true;
 				this.builder.hierarchy.missingTypes.add(new String(superBinding.sourceName)); // note: this could be Map$Entry
 				return null;
-			} else if ((superBinding.id == TypeIds.T_JavaLangObject)) {
+			}
+            if (superBinding.id == TypeIds.T_JavaLangObject) {
 				char[] superclassName;
 				char separator;
 				if (type instanceof IBinaryType) {
 					superclassName = ((IBinaryType)type).getSuperclassName();
 					separator = '/';
-				} else if (type instanceof ISourceType) {
-					superclassName = ((ISourceType)type).getSuperclassName();
-					separator = '.';
-				} else if (type instanceof HierarchyType) {
-					superclassName = ((HierarchyType)type).superclassName;
-					separator = '.';
 				} else {
-					return null;
-				}
+                    if (type instanceof ISourceType) {
+                    	superclassName = ((ISourceType)type).getSuperclassName();
+                    } else if (type instanceof HierarchyType) {
+                    	superclassName = ((HierarchyType)type).superclassName;
+                    } else {
+                    	return null;
+                    }
+                    separator = '.';
+                }
 
 				if (superclassName != null) { // check whether subclass of Object due to broken hierarchy (as opposed to explicitly extending it)
 					int lastSeparator = CharOperation.lastIndexOf(separator, superclassName);
@@ -271,36 +273,31 @@ private IType[] findSuperInterfaces(IGenericType type, ReferenceBinding typeBind
 	if (type instanceof IBinaryType) {
 		superInterfaceNames = ((IBinaryType)type).getInterfaceNames();
 		separator = '/';
-	} else if (type instanceof ISourceType) {
-		ISourceType sourceType = (ISourceType)type;
-		if (sourceType.isAnonymous()) { // if anonymous type
-			if (typeBinding.superInterfaces() != null && typeBinding.superInterfaces().length > 0) {
-				superInterfaceNames = new char[][] {sourceType.getSuperclassName()};
-			} else {
-				superInterfaceNames = sourceType.getInterfaceNames();
-			}
-		} else {
-			if (TypeDeclaration.kind(sourceType.getModifiers()) == TypeDeclaration.ANNOTATION_TYPE_DECL)
-				superInterfaceNames = new char[][] {TypeConstants.CharArray_JAVA_LANG_ANNOTATION_ANNOTATION};
-			else
-				superInterfaceNames = sourceType.getInterfaceNames();
-		}
-		separator = '.';
-	} else if (type instanceof HierarchyType) {
-		HierarchyType hierarchyType = (HierarchyType)type;
-		if (hierarchyType.isAnonymous()) { // if anonymous type
-			if (typeBinding.superInterfaces() != null && typeBinding.superInterfaces().length > 0) {
-				superInterfaceNames = new char[][] {hierarchyType.superclassName};
-			} else {
-				superInterfaceNames = hierarchyType.superInterfaceNames;
-			}
-		} else {
-			superInterfaceNames = hierarchyType.superInterfaceNames;
-		}
-		separator = '.';
-	} else{
-		return null;
-	}
+	} else {
+        if (type instanceof ISourceType) {
+        	ISourceType sourceType = (ISourceType)type;
+        	if (sourceType.isAnonymous()) { // if anonymous type
+        		if (typeBinding.superInterfaces() != null && typeBinding.superInterfaces().length > 0) {
+        			superInterfaceNames = new char[][] {sourceType.getSuperclassName()};
+        		} else {
+        			superInterfaceNames = sourceType.getInterfaceNames();
+        		}
+        	} else if (TypeDeclaration.kind(sourceType.getModifiers()) == TypeDeclaration.ANNOTATION_TYPE_DECL)
+            	superInterfaceNames = new char[][] {TypeConstants.CharArray_JAVA_LANG_ANNOTATION_ANNOTATION};
+            else
+            	superInterfaceNames = sourceType.getInterfaceNames();
+        } else if (type instanceof HierarchyType) {
+        	HierarchyType hierarchyType = (HierarchyType)type;
+        	if (hierarchyType.isAnonymous() && typeBinding.superInterfaces() != null && typeBinding.superInterfaces().length > 0) {
+            	superInterfaceNames = new char[][] {hierarchyType.superclassName};
+            } else {
+            	superInterfaceNames = hierarchyType.superInterfaceNames;
+            }
+        } else{
+        	return null;
+        }
+        separator = '.';
+    }
 
 	ReferenceBinding[] interfaceBindings = typeBinding.superInterfaces();
 	int bindingIndex = 0;
@@ -376,12 +373,10 @@ private void fixSupertypeBindings() {
 				if (superclass != null) {
 					superclass = superclass.closestMatch();
 				}
-				if (superclass instanceof ReferenceBinding) {
-					// ensure we are not creating a cycle (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=215681 )
-					if (!(subTypeOfType((ReferenceBinding) superclass, typeBinding))) {
-						((SourceTypeBinding) typeBinding).setSuperClass((ReferenceBinding) superclass);
-					}
-				}
+				// ensure we are not creating a cycle (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=215681 )
+                if (superclass instanceof ReferenceBinding && !subTypeOfType((ReferenceBinding) superclass, typeBinding)) {
+                	((SourceTypeBinding) typeBinding).setSuperClass((ReferenceBinding) superclass);
+                }
 
 				TypeReference[] superInterfaces = typeDeclaration == null ? null : typeDeclaration.superInterfaces;
 				int length;
@@ -394,12 +389,10 @@ private void fixSupertypeBindings() {
 						if (superInterface != null) {
 							superInterface = superInterface.closestMatch();
 						}
-						if (superInterface instanceof ReferenceBinding) {
-							// ensure we are not creating a cycle (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=215681 )
-							if (!(subTypeOfType((ReferenceBinding) superInterface, typeBinding))) {
-								interfaceBindings[index++] = (ReferenceBinding) superInterface;
-							}
-						}
+						// ensure we are not creating a cycle (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=215681 )
+                        if (superInterface instanceof ReferenceBinding && !subTypeOfType((ReferenceBinding) superInterface, typeBinding)) {
+                        	interfaceBindings[index++] = (ReferenceBinding) superInterface;
+                        }
 					}
 					if (index < length)
 						System.arraycopy(interfaceBindings, 0, interfaceBindings = new ReferenceBinding[index], 0 , index);
@@ -508,12 +501,11 @@ private void remember(IType type, ReferenceBinding typeBinding) {
 private void rememberAllTypes(CompilationUnitDeclaration parsedUnit, org.eclipse.jdt.core.ICompilationUnit cu, boolean includeLocalTypes) {
 	TypeDeclaration[] types = parsedUnit.types;
 	if (types != null) {
-		for (int i = 0, length = types.length; i < length; i++) {
-			TypeDeclaration type = types[i];
+		for (TypeDeclaration type : types) {
 			rememberWithMemberTypes(type, cu.getType(new String(type.name)));
 		}
 	}
-	if (!includeLocalTypes || (parsedUnit.localTypes.isEmpty() && parsedUnit.functionalExpressions == null))
+	if (!includeLocalTypes || parsedUnit.localTypes.isEmpty() && parsedUnit.functionalExpressions == null)
 		return;
 
 	HandleFactory factory = new HandleFactory();
@@ -543,8 +535,7 @@ private void rememberWithMemberTypes(TypeDeclaration typeDecl, IType typeHandle)
 
 	TypeDeclaration[] memberTypes = typeDecl.memberTypes;
 	if (memberTypes != null) {
-		for (int i = 0, length = memberTypes.length; i < length; i++) {
-			TypeDeclaration memberType = memberTypes[i];
+		for (TypeDeclaration memberType : memberTypes) {
 			rememberWithMemberTypes(memberType, typeHandle.getType(new String(memberType.name)));
 		}
 	}
@@ -560,17 +551,15 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 		if (binaryTypeBinding != null) {
 			// binary type
 			this.focusType = binaryTypeBinding;
-		} else {
-			// source type
-			if (focusLocalType != null) {
-				// anonymous or local type
-				this.focusType = focusLocalType.binding;
-			} else {
-				// top level or member type
-				char[] fullyQualifiedName = focus.getFullyQualifiedName().toCharArray();
-				setFocusType(CharOperation.splitOn('.', fullyQualifiedName));
-			}
-		}
+		} else // source type
+        if (focusLocalType != null) {
+        	// anonymous or local type
+        	this.focusType = focusLocalType.binding;
+        } else {
+        	// top level or member type
+        	char[] fullyQualifiedName = focus.getFullyQualifiedName().toCharArray();
+        	setFocusType(CharOperation.splitOn('.', fullyQualifiedName));
+        }
 	}
 
 	// be resilient and fix super type bindings
@@ -947,8 +936,8 @@ public ReferenceBinding setFocusType(char[][] compoundName) {
 				this.focusType = this.lookupEnvironment.askForType(compoundName, this.lookupEnvironment.UnNamedModule);
 				if (this.focusType != null) {
 					char[][] memberTypeNames = CharOperation.splitOn('$', typeName, firstDollar+1, typeName.length);
-					for (int i = 0; i < memberTypeNames.length; i++) {
-						this.focusType = this.focusType.getMemberType(memberTypeNames[i]);
+					for (char[] memberTypeName : memberTypeNames) {
+						this.focusType = this.focusType.getMemberType(memberTypeName);
 						if (this.focusType == null)
 							return null;
 					}
@@ -961,8 +950,7 @@ public ReferenceBinding setFocusType(char[][] compoundName) {
 public boolean subOrSuperOfFocus(ReferenceBinding typeBinding) {
 	if (this.focusType == null) return true; // accept all types (case of hierarchy in a region)
 	try {
-		if (subTypeOfType(this.focusType, typeBinding)) return true;
-		if (!this.superTypesOnly && subTypeOfType(typeBinding, this.focusType)) return true;
+		if (subTypeOfType(this.focusType, typeBinding) || !this.superTypesOnly && subTypeOfType(typeBinding, this.focusType)) return true;
 	} catch (AbortCompilation e) {
 		// unresolved superclass/superinterface -> ignore
 	}
@@ -977,8 +965,8 @@ private boolean subTypeOfType(ReferenceBinding subType, ReferenceBinding typeBin
 	if (subTypeOfType(superclass, typeBinding)) return true;
 	ReferenceBinding[] superInterfaces = subType.superInterfaces();
 	if (superInterfaces != null) {
-		for (int i = 0, length = superInterfaces.length; i < length; i++) {
-			ReferenceBinding superInterface = (ReferenceBinding) superInterfaces[i].erasure();
+		for (ReferenceBinding element : superInterfaces) {
+			ReferenceBinding superInterface = (ReferenceBinding) element.erasure();
 			if (superInterface.isHierarchyInconsistent()) return false;
 			if (subTypeOfType(superInterface, typeBinding)) return true;
 		}
@@ -989,9 +977,8 @@ protected void worked(IProgressMonitor monitor, int work) {
 	if (monitor != null) {
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
-		} else {
-			monitor.worked(work);
 		}
+        monitor.worked(work);
 	}
 }
 }

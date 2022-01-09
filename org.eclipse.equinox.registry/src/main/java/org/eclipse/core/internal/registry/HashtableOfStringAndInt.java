@@ -138,12 +138,12 @@ public final class HashtableOfStringAndInt implements Cloneable {
 
 	@Override
 	public String toString() {
-		String s = ""; //$NON-NLS-1$
+		StringBuilder s = new StringBuilder();
 		int object;
 		for (int i = 0, length = valueTable.length; i < length; i++)
 			if ((object = valueTable[i]) != MISSING_ELEMENT)
-				s += keyTable[i] + " -> " + object + "\n"; //$NON-NLS-2$ //$NON-NLS-1$
-		return s;
+				s.append(keyTable[i]).append(" -> ").append(object).append("\n"); //$NON-NLS-2$ //$NON-NLS-1$
+		return s.toString();
 	}
 
 	public int[] getValues() {
@@ -185,7 +185,7 @@ public final class HashtableOfStringAndInt implements Cloneable {
 		int tableSize = in.readInt();
 		threshold = in.readInt();
 		boolean fastMode = true;
-		if (((double) tableSize / elementSize) < GROWTH_FACTOR) {
+		if ((double) tableSize / elementSize < GROWTH_FACTOR) {
 			keyTable = new String[(int) (elementSize * GROWTH_FACTOR)];
 			valueTable = new int[(int) (elementSize * GROWTH_FACTOR)];
 			elementSize = 0;
@@ -200,10 +200,8 @@ public final class HashtableOfStringAndInt implements Cloneable {
 			if (fastMode) {
 				keyTable[i] = key;
 				valueTable[i] = value;
-			} else {
-				if (key != null)
-					put(key, value);
-			}
+			} else if (key != null)
+            	put(key, value);
 		}
 	}
 

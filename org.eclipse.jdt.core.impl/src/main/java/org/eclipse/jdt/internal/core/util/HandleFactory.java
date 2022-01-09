@@ -105,7 +105,7 @@ public class HandleFactory {
 			String rootPath = this.lastPkgFragmentRoot.getPath().toOSString();
 			if (org.eclipse.jdt.internal.compiler.util.Util.isJrt(rootPath)) {
 				module = resourcePath.substring(separatorIndex + 1,
-						(separatorIndex = resourcePath.lastIndexOf(IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR)));
+						separatorIndex = resourcePath.lastIndexOf(IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR));
 			}
 			String classFilePath= resourcePath.substring(separatorIndex + 1);
 			if (classFilePath.endsWith(TypeConstants.AUTOMATIC_MODULE_NAME))
@@ -126,48 +126,45 @@ public class HandleFactory {
 			}
 			IClassFile classFile= pkgFragment.getClassFile(simpleNames[length]);
 			return (Openable) classFile;
-		} else {
-			// path to a file in a directory
-			// Optimization: cache package fragment root handle and package handles
-			int rootPathLength = -1;
-			if (this.lastPkgFragmentRootPath == null
-				|| !(resourcePath.startsWith(this.lastPkgFragmentRootPath)
-					&& !org.eclipse.jdt.internal.compiler.util.Util.isExcluded(resourcePath.toCharArray(), this.lastPkgFragmentRoot.fullInclusionPatternChars(), this.lastPkgFragmentRoot.fullExclusionPatternChars(), false)
-					&& (rootPathLength = this.lastPkgFragmentRootPath.length()) > 0
-					&& resourcePath.charAt(rootPathLength) == '/')) {
-				PackageFragmentRoot root= getPkgFragmentRoot(resourcePath);
-				if (root == null)
-					return null; // match is outside classpath
-				this.lastPkgFragmentRoot = root;
-				this.lastPkgFragmentRootPath = this.lastPkgFragmentRoot.internalPath().toString();
-				this.packageHandles = new HashtableOfArrayToObject(5);
-			}
-			// create handle
-			resourcePath = resourcePath.substring(this.lastPkgFragmentRootPath.length() + 1);
-			String[] simpleNames = new Path(resourcePath).segments();
-			String[] pkgName;
-			int length = simpleNames.length-1;
-			if (length > 0) {
-				pkgName = new String[length];
-				System.arraycopy(simpleNames, 0, pkgName, 0, length);
-			} else {
-				pkgName = CharOperation.NO_STRINGS;
-			}
-			IPackageFragment pkgFragment= (IPackageFragment) this.packageHandles.get(pkgName);
-			if (pkgFragment == null) {
-				pkgFragment= this.lastPkgFragmentRoot.getPackageFragment(pkgName);
-				this.packageHandles.put(pkgName, pkgFragment);
-			}
-			String simpleName= simpleNames[length];
-			if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(simpleName)) {
-				ICompilationUnit unit= pkgFragment.getCompilationUnit(simpleName);
-				return (Openable) unit;
-			} else if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(simpleName)){
-				IClassFile classFile= pkgFragment.getClassFile(simpleName);
-				return (Openable) classFile;
-			}
-			return null;
 		}
+        // path to a file in a directory
+        // Optimization: cache package fragment root handle and package handles
+        int rootPathLength = -1;
+        if (this.lastPkgFragmentRootPath == null
+        	|| !resourcePath.startsWith(this.lastPkgFragmentRootPath) || org.eclipse.jdt.internal.compiler.util.Util.isExcluded(resourcePath.toCharArray(), this.lastPkgFragmentRoot.fullInclusionPatternChars(), this.lastPkgFragmentRoot.fullExclusionPatternChars(), false) || (rootPathLength = this.lastPkgFragmentRootPath.length()) <= 0 || resourcePath.charAt(rootPathLength) != '/') {
+        	PackageFragmentRoot root= getPkgFragmentRoot(resourcePath);
+        	if (root == null)
+        		return null; // match is outside classpath
+        	this.lastPkgFragmentRoot = root;
+        	this.lastPkgFragmentRootPath = this.lastPkgFragmentRoot.internalPath().toString();
+        	this.packageHandles = new HashtableOfArrayToObject(5);
+        }
+        // create handle
+        resourcePath = resourcePath.substring(this.lastPkgFragmentRootPath.length() + 1);
+        String[] simpleNames = new Path(resourcePath).segments();
+        String[] pkgName;
+        int length = simpleNames.length-1;
+        if (length > 0) {
+        	pkgName = new String[length];
+        	System.arraycopy(simpleNames, 0, pkgName, 0, length);
+        } else {
+        	pkgName = CharOperation.NO_STRINGS;
+        }
+        IPackageFragment pkgFragment= (IPackageFragment) this.packageHandles.get(pkgName);
+        if (pkgFragment == null) {
+        	pkgFragment= this.lastPkgFragmentRoot.getPackageFragment(pkgName);
+        	this.packageHandles.put(pkgName, pkgFragment);
+        }
+        String simpleName= simpleNames[length];
+        if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(simpleName)) {
+        	ICompilationUnit unit= pkgFragment.getCompilationUnit(simpleName);
+        	return (Openable) unit;
+        }
+        if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(simpleName)){
+        	IClassFile classFile= pkgFragment.getClassFile(simpleName);
+        	return (Openable) classFile;
+        }
+        return null;
 	}
 
 	/**
@@ -223,13 +220,12 @@ public class HandleFactory {
 					    IMember member = (IMember)parentElement;
 					    if (member.isBinary()) {
 					        return null;
-					    } else {
-							newElement = member.getType(new String(scope.enclosingSourceType().sourceName), 1);
-							// increment occurrence count if collision is detected
-							if (newElement != null) {
-								while (!existingElements.add(newElement)) ((SourceRefElement)newElement).occurrenceCount++;
-							}
 					    }
+                        newElement = member.getType(new String(scope.enclosingSourceType().sourceName), 1);
+                        // increment occurrence count if collision is detected
+                        if (newElement != null) {
+                        	while (!existingElements.add(newElement)) ((SourceRefElement)newElement).occurrenceCount++;
+                        }
 						break;
 				}
 				if (newElement != null) {
@@ -269,7 +265,8 @@ public class HandleFactory {
 									break;
 							}
 							break;
-						} else if (field.getKind() == AbstractVariableDeclaration.INITIALIZER) {
+						}
+                        if (field.getKind() == AbstractVariableDeclaration.INITIALIZER) {
 							occurenceCount++;
 						}
 					}
@@ -358,18 +355,17 @@ public class HandleFactory {
 		IPath jarPath,
 		Object target,
 		IJavaProject[] projects) {
-		for (int i= 0, projectCount= projects.length; i < projectCount; i++) {
+		for (IJavaProject project : projects) {
 			try {
-				JavaProject javaProject= (JavaProject)projects[i];
+				JavaProject javaProject= (JavaProject)project;
 				IClasspathEntry classpathEnty = javaProject.getClasspathEntryFor(jarPath);
 				if (classpathEnty != null) {
 					if (target instanceof IFile) {
 						// internal jar
 						return (PackageFragmentRoot) javaProject.getPackageFragmentRoot((IFile)target, null, classpathEnty.getExtraAttributes());
-					} else {
-						// external jar
-						return (PackageFragmentRoot) javaProject.getPackageFragmentRoot0(jarPath, classpathEnty.getExtraAttributes());
 					}
+                    // external jar
+                    return (PackageFragmentRoot) javaProject.getPackageFragmentRoot0(jarPath, classpathEnty.getExtraAttributes());
 				}
 			} catch (JavaModelException e) {
 				// JavaModelException from getResolvedClasspath - a problem occurred while accessing project: nothing we can do, ignore
@@ -385,15 +381,14 @@ public class HandleFactory {
 
 		IPath path= new Path(pathString);
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (int i= 0, max= projects.length; i < max; i++) {
+		for (IProject project : projects) {
 			try {
-				IProject project = projects[i];
 				if (!project.isAccessible()
 					|| !project.hasNature(JavaCore.NATURE_ID)) continue;
 				IJavaProject javaProject= this.javaModel.getJavaProject(project);
 				IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
-				for (int j= 0, rootCount= roots.length; j < rootCount; j++) {
-					PackageFragmentRoot root= (PackageFragmentRoot)roots[j];
+				for (IPackageFragmentRoot root2 : roots) {
+					PackageFragmentRoot root= (PackageFragmentRoot)root2;
 					if (root.internalPath().isPrefixOf(path) && !Util.isExcluded(path, root.fullInclusionPatternChars(), root.fullExclusionPatternChars(), false)) {
 						return root;
 					}

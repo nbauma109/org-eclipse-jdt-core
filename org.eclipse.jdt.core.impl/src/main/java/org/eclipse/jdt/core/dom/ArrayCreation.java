@@ -135,18 +135,16 @@ public class ArrayCreation extends Expression {
 		if (property == INITIALIZER_PROPERTY) {
 			if (get) {
 				return getInitializer();
-			} else {
-				setInitializer((ArrayInitializer) child);
-				return null;
 			}
+            setInitializer((ArrayInitializer) child);
+            return null;
 		}
 		if (property == TYPE_PROPERTY) {
 			if (get) {
 				return getType();
-			} else {
-				setType((ArrayType) child);
-				return null;
 			}
+            setType((ArrayType) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -286,11 +284,10 @@ public class ArrayCreation extends Expression {
 
 	@Override
 	int treeSize() {
-		int size = memSize()
+		return memSize()
 			+ (this.arrayType == null ? 0 : getType().treeSize())
 			+ (this.optionalInitializer == null ? 0 : getInitializer().treeSize())
 			+ this.dimensions.listSize();
-		return size;
 	}
 }
 

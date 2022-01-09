@@ -104,7 +104,7 @@ public class JavaSearchPattern extends SearchPattern implements IIndexConstants,
 		}
 		StringBuilder buffer = new StringBuilder();
 		for (int i=1; i<=32; i++) {
-			int bit = fineGrain & (1<<(i-1));
+			int bit = fineGrain & 1<<i-1;
 			if (bit != 0 && buffer.length()>0) buffer.append(" | "); //$NON-NLS-1$
 			switch (bit) {
 				case IJavaSearchConstants.FIELD_DECLARATION_TYPE_REFERENCE:

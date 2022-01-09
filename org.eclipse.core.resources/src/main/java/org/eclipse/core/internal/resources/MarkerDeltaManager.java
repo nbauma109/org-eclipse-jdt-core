@@ -61,7 +61,7 @@ class MarkerDeltaManager {
 		long[] newIds = startIds;
 		Map<IPath, MarkerSet>[] newBatches = batches;
 		//shrink the arrays if it has grown too large
-		if (startIds.length > DEFAULT_SIZE && (nextFree - startOffset < DEFAULT_SIZE)) {
+		if (startIds.length > DEFAULT_SIZE && nextFree - startOffset < DEFAULT_SIZE) {
 			newIds = new long[DEFAULT_SIZE];
 			newBatches = new Map[DEFAULT_SIZE];
 		}

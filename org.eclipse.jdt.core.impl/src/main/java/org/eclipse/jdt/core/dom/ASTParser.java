@@ -238,7 +238,7 @@ public class ASTParser {
 
 	private List<Classpath> getClasspath() throws IllegalStateException {
 		Main main = new Main(new PrintWriter(System.out), new PrintWriter(System.err), false/*systemExit*/, null/*options*/, null/*progress*/);
-		ArrayList<Classpath> allClasspaths = new ArrayList<Classpath>();
+		ArrayList<Classpath> allClasspaths = new ArrayList<>();
 		try {
 			if ((this.bits & CompilationUnitResolver.INCLUDE_RUNNING_VM_BOOTCLASSPATH) != 0) {
 				org.eclipse.jdt.internal.compiler.util.Util.collectRunningVMBootclasspath(allClasspaths);
@@ -252,10 +252,10 @@ public class ASTParser {
 				}
 			}
 			if (this.classpaths != null) {
-				for (int i = 0, max = this.classpaths.length; i < max; i++) {
+				for (String classpath : this.classpaths) {
 					main.processPathEntries(
 							Main.DEFAULT_SIZE_CLASSPATH,
-							allClasspaths, this.classpaths[i], null, false, false);
+							allClasspaths, classpath, null, false, false);
 				}
 			}
 			ArrayList pendingErrors = main.pendingErrors;
@@ -337,11 +337,9 @@ public class ASTParser {
 		this.classpaths = classpathEntries;
 		this.sourcepaths = sourcepathEntries;
 		this.sourcepathsEncodings = encodings;
-		if (encodings != null) {
-			if (sourcepathEntries == null || sourcepathEntries.length != encodings.length) {
-				throw new IllegalArgumentException();
-			}
-		}
+		if (encodings != null && (sourcepathEntries == null || sourcepathEntries.length != encodings.length)) {
+        	throw new IllegalArgumentException();
+        }
 		if (includeRunningVMBootclasspath) {
 			this.bits |= CompilationUnitResolver.INCLUDE_RUNNING_VM_BOOTCLASSPATH;
 		}
@@ -565,10 +563,10 @@ public class ASTParser {
 	 * {@link #K_STATEMENTS}
 	 */
 	public void setKind(int kind) {
-	    if ((kind != K_COMPILATION_UNIT)
-		    && (kind != K_CLASS_BODY_DECLARATIONS)
-		    && (kind != K_EXPRESSION)
-		    && (kind != K_STATEMENTS)) {
+	    if (kind != K_COMPILATION_UNIT
+		    && kind != K_CLASS_BODY_DECLARATIONS
+		    && kind != K_EXPRESSION
+		    && kind != K_STATEMENTS) {
 	    	throw new IllegalArgumentException();
 	    }
 		this.astKind = kind;
@@ -1040,7 +1038,7 @@ public class ASTParser {
 				flags |= ICompilationUnit.IGNORE_METHOD_BODIES;
 			}
 			if ((this.bits & CompilationUnitResolver.RESOLVE_BINDING) != 0) {
-				if (this.classpaths == null && this.sourcepaths == null && ((this.bits & CompilationUnitResolver.INCLUDE_RUNNING_VM_BOOTCLASSPATH) == 0)) {
+				if (this.classpaths == null && this.sourcepaths == null && (this.bits & CompilationUnitResolver.INCLUDE_RUNNING_VM_BOOTCLASSPATH) == 0) {
 					throw new IllegalStateException("no environment is specified"); //$NON-NLS-1$
 				}
 				if ((this.bits & CompilationUnitResolver.BINDING_RECOVERY) != 0) {
@@ -1122,29 +1120,27 @@ public class ASTParser {
 			case K_CLASS_BODY_DECLARATIONS :
 			case K_EXPRESSION :
 			case K_STATEMENTS :
-				if (this.rawSource == null) {
-					if (this.typeRoot != null) {
-						// get the source from the type root
-						if (this.typeRoot instanceof ICompilationUnit) {
-							org.eclipse.jdt.internal.compiler.env.ICompilationUnit sourceUnit = (org.eclipse.jdt.internal.compiler.env.ICompilationUnit) this.typeRoot;
-							this.rawSource = sourceUnit.getContents();
-						} else if (this.typeRoot instanceof IClassFile) {
-							try {
-								String sourceString = this.typeRoot.getSource();
-								if (sourceString != null) {
-									this.rawSource = sourceString.toCharArray();
-								}
-							} catch(JavaModelException e) {
-								// an error occured accessing the java element
-								StringWriter stringWriter = new StringWriter();
-								try (PrintWriter writer = new PrintWriter(stringWriter)) {
-									e.printStackTrace(writer);
-								}
-								throw new IllegalStateException(String.valueOf(stringWriter.getBuffer()));
-							}
-						}
-					}
-				}
+				if (this.rawSource == null && this.typeRoot != null) {
+                	// get the source from the type root
+                	if (this.typeRoot instanceof ICompilationUnit) {
+                		org.eclipse.jdt.internal.compiler.env.ICompilationUnit sourceUnit = (org.eclipse.jdt.internal.compiler.env.ICompilationUnit) this.typeRoot;
+                		this.rawSource = sourceUnit.getContents();
+                	} else if (this.typeRoot instanceof IClassFile) {
+                		try {
+                			String sourceString = this.typeRoot.getSource();
+                			if (sourceString != null) {
+                				this.rawSource = sourceString.toCharArray();
+                			}
+                		} catch(JavaModelException e) {
+                			// an error occured accessing the java element
+                			StringWriter stringWriter = new StringWriter();
+                			try (PrintWriter writer = new PrintWriter(stringWriter)) {
+                				e.printStackTrace(writer);
+                			}
+                			throw new IllegalStateException(String.valueOf(stringWriter.getBuffer()));
+                		}
+                	}
+                }
 				if (this.rawSource != null) {
 					if (this.sourceOffset + this.sourceLength > this.rawSource.length) {
 						throw new IllegalStateException();
@@ -1214,12 +1210,12 @@ public class ASTParser {
 						}
 					} else if (this.rawSource != null) {
 						needToResolveBindings =
-							((this.bits & CompilationUnitResolver.RESOLVE_BINDING) != 0)
+							(this.bits & CompilationUnitResolver.RESOLVE_BINDING) != 0
 							&& this.unitName != null
 							&& (this.project != null
 									|| this.classpaths != null
 									|| this.sourcepaths != null
-									|| ((this.bits & CompilationUnitResolver.INCLUDE_RUNNING_VM_BOOTCLASSPATH) != 0))
+									|| (this.bits & CompilationUnitResolver.INCLUDE_RUNNING_VM_BOOTCLASSPATH) != 0)
 							&& this.compilerOptions != null;
 						sourceUnit = new BasicCompilationUnit(this.rawSource, null, this.unitName == null ? "" : this.unitName, this.project); //$NON-NLS-1$
 					} else {
@@ -1232,7 +1228,7 @@ public class ASTParser {
 					if ((this.bits & CompilationUnitResolver.STATEMENT_RECOVERY) != 0) {
 						flags |= ICompilationUnit.ENABLE_STATEMENTS_RECOVERY;
 					}
-					if (searcher == null && ((this.bits & CompilationUnitResolver.IGNORE_METHOD_BODIES) != 0)) {
+					if (searcher == null && (this.bits & CompilationUnitResolver.IGNORE_METHOD_BODIES) != 0) {
 						flags |= ICompilationUnit.IGNORE_METHOD_BODIES;
 					}
 					if (needToResolveBindings) {
@@ -1283,7 +1279,7 @@ public class ASTParser {
 					return result;
 				} finally {
 					if (compilationUnitDeclaration != null
-							&& ((this.bits & CompilationUnitResolver.RESOLVE_BINDING) != 0)) {
+							&& (this.bits & CompilationUnitResolver.RESOLVE_BINDING) != 0) {
 						compilationUnitDeclaration.cleanUp();
 					}
 				}
@@ -1475,16 +1471,15 @@ public class ASTParser {
 					ast.setDefaultNodeFlag(0);
 					ast.setOriginalModificationCount(ast.modificationCount());
 					return typeDeclaration;
-				} else {
-					// source has syntax error and the statement recovery is disabled
-					CategorizedProblem[] problems = recordedParsingInformation.problems;
-					if (problems != null) {
-						compilationUnit.setProblems(problems);
-					}
-					ast.setDefaultNodeFlag(0);
-					ast.setOriginalModificationCount(ast.modificationCount());
-					return compilationUnit;
 				}
+                // source has syntax error and the statement recovery is disabled
+                CategorizedProblem[] problems = recordedParsingInformation.problems;
+                if (problems != null) {
+                	compilationUnit.setProblems(problems);
+                }
+                ast.setDefaultNodeFlag(0);
+                ast.setOriginalModificationCount(ast.modificationCount());
+                return compilationUnit;
 		}
 		throw new IllegalStateException();
 	}

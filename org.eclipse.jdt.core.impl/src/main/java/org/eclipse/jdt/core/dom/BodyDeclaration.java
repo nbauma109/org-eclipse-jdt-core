@@ -14,7 +14,6 @@
 
 package org.eclipse.jdt.core.dom;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -75,7 +74,8 @@ public abstract class BodyDeclaration extends ASTNode {
 	 * @return the property descriptor
 	 * @deprecated In the JLS3 API, this method is replaced by {@link #internalModifiers2Property()}.
 	 */
-	abstract SimplePropertyDescriptor internalModifiersProperty();
+	@Deprecated
+    abstract SimplePropertyDescriptor internalModifiersProperty();
 
 	/**
 	 * Returns structural property descriptor for the "modifiers" property
@@ -133,7 +133,8 @@ public abstract class BodyDeclaration extends ASTNode {
 	 * @return the property descriptor
 	 * @deprecated In the JLS3 API, this method is replaced by {@link #internalModifiers2PropertyFactory(Class)}.
 	 */
-	static final SimplePropertyDescriptor internalModifiersPropertyFactory(Class nodeClass) {
+	@Deprecated
+    static final SimplePropertyDescriptor internalModifiersPropertyFactory(Class nodeClass) {
 		return new SimplePropertyDescriptor(nodeClass, "modifiers", int.class, MANDATORY); //$NON-NLS-1$
 	}
 
@@ -201,19 +202,17 @@ public abstract class BodyDeclaration extends ASTNode {
 		if (this.modifiers == null) {
 			// JLS2 behavior - bona fide property
 			return this.modifierFlags;
-		} else {
-			// JLS3 behavior - convenience method
-			// performance could be improved by caching computed flags
-			// but this would require tracking changes to this.modifiers
-			int computedmodifierFlags = Modifier.NONE;
-			for (Iterator it = modifiers().iterator(); it.hasNext(); ) {
-				Object x = it.next();
-				if (x instanceof Modifier) {
-					computedmodifierFlags |= ((Modifier) x).getKeyword().toFlagValue();
-				}
-			}
-			return computedmodifierFlags;
 		}
+        // JLS3 behavior - convenience method
+        // performance could be improved by caching computed flags
+        // but this would require tracking changes to this.modifiers
+        int computedmodifierFlags = Modifier.NONE;
+        for (Object x : modifiers()) {
+        	if (x instanceof Modifier) {
+        		computedmodifierFlags |= ((Modifier) x).getKeyword().toFlagValue();
+        	}
+        }
+        return computedmodifierFlags;
 	}
 
 	/**
@@ -226,7 +225,8 @@ public abstract class BodyDeclaration extends ASTNode {
 	 * @deprecated In the JLS3 API, this method is replaced by
 	 * {@link #modifiers()}, which contains a list of {@link Modifier} nodes.
 	 */
-	public void setModifiers(int modifiers) {
+	@Deprecated
+    public void setModifiers(int modifiers) {
 		internalSetModifiers(modifiers);
 	}
 

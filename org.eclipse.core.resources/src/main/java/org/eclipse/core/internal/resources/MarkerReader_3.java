@@ -112,20 +112,12 @@ public class MarkerReader_3 extends MarkerReader {
 			switch (type) {
 				case ATTRIBUTE_INTEGER :
 					int intValue = input.readInt();
-					//canonicalize well known values (marker severity, task priority)
-					switch (intValue) {
-						case 0 :
-							value = MarkerInfo.INTEGER_ZERO;
-							break;
-						case 1 :
-							value = MarkerInfo.INTEGER_ONE;
-							break;
-						case 2 :
-							value = MarkerInfo.INTEGER_TWO;
-							break;
-						default :
-							value = intValue;
-					}
+					value = switch (intValue) {
+                        case 0 -> MarkerInfo.INTEGER_ZERO;
+                        case 1 -> MarkerInfo.INTEGER_ONE;
+                        case 2 -> MarkerInfo.INTEGER_TWO;
+                        default -> intValue;
+                    };
 					break;
 				case ATTRIBUTE_BOOLEAN :
 					value = input.readBoolean();

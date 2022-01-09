@@ -29,7 +29,6 @@ public final class ModuleWire implements BundleWire {
 	private volatile boolean isValid = true;
 
 	ModuleWire(ModuleCapability capability, ModuleRevision hostingProvider, ModuleRequirement requirement, ModuleRevision hostingRequirer) {
-		super();
 		this.capability = capability;
 		this.hostingProvider = hostingProvider;
 		this.requirement = requirement;

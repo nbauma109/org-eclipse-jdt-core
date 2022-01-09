@@ -38,8 +38,8 @@ public class AND_AND_Expression extends BinaryExpression {
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 
 		Constant cst = this.left.optimizedBooleanConstant();
-		boolean isLeftOptimizedTrue = cst != Constant.NotAConstant && cst.booleanValue() == true;
-		boolean isLeftOptimizedFalse = cst != Constant.NotAConstant && cst.booleanValue() == false;
+		boolean isLeftOptimizedTrue = cst != Constant.NotAConstant && cst.booleanValue();
+		boolean isLeftOptimizedFalse = cst != Constant.NotAConstant && !cst.booleanValue();
 
 		if (isLeftOptimizedTrue) {
 			// TRUE && anything
@@ -64,12 +64,10 @@ public class AND_AND_Expression extends BinaryExpression {
 		this.rightInitStateIndex = currentScope.methodScope().recordInitializationStates(rightInfo);
 
 		int previousMode = rightInfo.reachMode();
-		if (isLeftOptimizedFalse) {
-			if ((rightInfo.reachMode() & FlowInfo.UNREACHABLE) == 0) {
-				currentScope.problemReporter().fakeReachable(this.right);
-				rightInfo.setReachMode(FlowInfo.UNREACHABLE_OR_DEAD);
-			}
-		}
+		if (isLeftOptimizedFalse && (rightInfo.reachMode() & FlowInfo.UNREACHABLE) == 0) {
+        	currentScope.problemReporter().fakeReachable(this.right);
+        	rightInfo.setReachMode(FlowInfo.UNREACHABLE_OR_DEAD);
+        }
 		this.left.updateFlowOnBooleanResult(rightInfo, true);
 		rightInfo = this.right.analyseCode(currentScope, flowContext, rightInfo);
 		if ((flowContext.tagBits & FlowContext.INSIDE_NEGATION) != 0)
@@ -102,7 +100,7 @@ public class AND_AND_Expression extends BinaryExpression {
 		Constant cst = this.right.constant;
 		if (cst != Constant.NotAConstant) {
 			// <expr> && true --> <expr>
-			if (cst.booleanValue() == true) {
+			if (cst.booleanValue()) {
 				this.left.generateCode(currentScope, codeStream, valueRequired);
 			} else {
 				// <expr> && false --> false
@@ -120,11 +118,11 @@ public class AND_AND_Expression extends BinaryExpression {
 		BranchLabel falseLabel = new BranchLabel(codeStream), endLabel;
 		cst = this.left.optimizedBooleanConstant();
 		boolean leftIsConst = cst != Constant.NotAConstant;
-		boolean leftIsTrue = leftIsConst && cst.booleanValue() == true;
+		boolean leftIsTrue = leftIsConst && cst.booleanValue();
 
 		cst = this.right.optimizedBooleanConstant();
 		boolean rightIsConst = cst != Constant.NotAConstant;
-		boolean rightIsTrue = rightIsConst && cst.booleanValue() == true;
+		boolean rightIsTrue = rightIsConst && cst.booleanValue();
 
 		generateOperands : {
 			if (leftIsConst) {
@@ -200,7 +198,7 @@ public class AND_AND_Expression extends BinaryExpression {
 
 		// <expr> && true --> <expr>
 		Constant cst = this.right.constant;
-		if (cst != Constant.NotAConstant && cst.booleanValue() == true) {
+		if (cst != Constant.NotAConstant && cst.booleanValue()) {
 			int pc = codeStream.position;
 			this.left.generateOptimizedBoolean(currentScope, codeStream, trueLabel, falseLabel, valueRequired);
 			if (this.mergedInitStateIndex != -1) {
@@ -211,11 +209,11 @@ public class AND_AND_Expression extends BinaryExpression {
 		}
 		cst = this.left.optimizedBooleanConstant();
 		boolean leftIsConst = cst != Constant.NotAConstant;
-		boolean leftIsTrue = leftIsConst && cst.booleanValue() == true;
+		boolean leftIsTrue = leftIsConst && cst.booleanValue();
 
 		cst = this.right.optimizedBooleanConstant();
 		boolean rightIsConst = cst != Constant.NotAConstant;
-		boolean rightIsTrue = rightIsConst && cst.booleanValue() == true;
+		boolean rightIsTrue = rightIsConst && cst.booleanValue();
 
 		// default case
 		generateOperands : {
@@ -241,32 +239,30 @@ public class AND_AND_Expression extends BinaryExpression {
 					}
 					internalFalseLabel.place();
 				}
-			} else {
-				// implicit falling through the TRUE case
-				if (trueLabel == null) {
-					this.left.generateOptimizedBoolean(currentScope, codeStream, null, falseLabel, !leftIsConst);
-					// need value, e.g. if (a == 1 && ((b = 2) > 0)) {} -> shouldn't initialize 'b' if a!=1
-					int pc = codeStream.position;
-					if (leftIsConst && !leftIsTrue) {
-						if (valueRequired) {
-							codeStream.goto_(falseLabel);
-						}
-						codeStream.recordPositionsFrom(pc, this.sourceEnd);
-						break generateOperands; // no need to generate right operand
-					}
-					if (this.rightInitStateIndex != -1) {
-						codeStream
-								.addDefinitelyAssignedVariables(currentScope, this.rightInitStateIndex);
-					}
-					this.right.generateOptimizedBoolean(currentScope, codeStream, null, falseLabel, valueRequired && !rightIsConst);
-					if (valueRequired && rightIsConst && !rightIsTrue) {
-						codeStream.goto_(falseLabel);
-						codeStream.recordPositionsFrom(pc, this.sourceEnd);
-					}
-				} else {
-					// no implicit fall through TRUE/FALSE --> should never occur
-				}
-			}
+			} else // implicit falling through the TRUE case
+            if (trueLabel == null) {
+            	this.left.generateOptimizedBoolean(currentScope, codeStream, null, falseLabel, !leftIsConst);
+            	// need value, e.g. if (a == 1 && ((b = 2) > 0)) {} -> shouldn't initialize 'b' if a!=1
+            	int pc = codeStream.position;
+            	if (leftIsConst && !leftIsTrue) {
+            		if (valueRequired) {
+            			codeStream.goto_(falseLabel);
+            		}
+            		codeStream.recordPositionsFrom(pc, this.sourceEnd);
+            		break generateOperands; // no need to generate right operand
+            	}
+            	if (this.rightInitStateIndex != -1) {
+            		codeStream
+            				.addDefinitelyAssignedVariables(currentScope, this.rightInitStateIndex);
+            	}
+            	this.right.generateOptimizedBoolean(currentScope, codeStream, null, falseLabel, valueRequired && !rightIsConst);
+            	if (valueRequired && rightIsConst && !rightIsTrue) {
+            		codeStream.goto_(falseLabel);
+            		codeStream.recordPositionsFrom(pc, this.sourceEnd);
+            	}
+            } else {
+            	// no implicit fall through TRUE/FALSE --> should never occur
+            }
 		}
 		if (this.mergedInitStateIndex != -1) {
 			codeStream.removeNotDefinitelyAssignedVariables(currentScope, this.mergedInitStateIndex);
@@ -304,10 +300,8 @@ public class AND_AND_Expression extends BinaryExpression {
 		TypeBinding result = super.resolveType(scope);
 		// check whether comparing identical expressions
 		Binding leftDirect = Expression.getDirectBinding(this.left);
-		if (leftDirect != null && leftDirect == Expression.getDirectBinding(this.right)) {
-			if (!(this.right instanceof Assignment))
-				scope.problemReporter().comparingIdenticalExpressions(this);
-		}
+		if (leftDirect != null && leftDirect == Expression.getDirectBinding(this.right) && !(this.right instanceof Assignment))
+        	scope.problemReporter().comparingIdenticalExpressions(this);
 		return result;
 	}
 

@@ -57,7 +57,8 @@ public final class NodeFinder {
 				if (this.fCoveringNode == node) { // nodeStart == fStart && nodeEnd == fEnd
 					this.fCoveredNode= node;
 					return true; // look further for node with same length as parent
-				} else if (this.fCoveredNode == null) { // no better found
+				}
+                if (this.fCoveredNode == null) { // no better found
 					this.fCoveredNode= node;
 				}
 				return false;
@@ -145,7 +146,7 @@ public final class NodeFinder {
 		if (result == null)
 			return null;
 		int nodeStart= result.getStartPosition();
-		if (start <= nodeStart && ((nodeStart + result.getLength()) <= (start + length))) {
+		if (start <= nodeStart && nodeStart + result.getLength() <= start + length) {
 			IBuffer buffer= source.getBuffer();
 			if (buffer != null) {
 				IScanner scanner= ToolFactory.createScanner(false, false, false, false);

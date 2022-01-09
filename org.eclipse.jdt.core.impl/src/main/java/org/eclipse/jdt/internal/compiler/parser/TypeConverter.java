@@ -161,8 +161,7 @@ public abstract class TypeConverter {
 						this.namePos++;
 						if (dim == 0)
 							return new SingleTypeReference(TypeBinding.BOOLEAN.simpleName, ((long) start << 32) + end);
-						else
-							return new ArrayTypeReference(TypeBinding.BOOLEAN.simpleName, dim, ((long) start << 32) + end);
+                        return new ArrayTypeReference(TypeBinding.BOOLEAN.simpleName, dim, ((long) start << 32) + end);
 					}
 					break;
 				case Signature.C_BYTE :
@@ -170,8 +169,7 @@ public abstract class TypeConverter {
 						this.namePos++;
 						if (dim == 0)
 							return new SingleTypeReference(TypeBinding.BYTE.simpleName, ((long) start << 32) + end);
-						else
-							return new ArrayTypeReference(TypeBinding.BYTE.simpleName, dim, ((long) start << 32) + end);
+                        return new ArrayTypeReference(TypeBinding.BYTE.simpleName, dim, ((long) start << 32) + end);
 					}
 					break;
 				case Signature.C_CHAR :
@@ -179,8 +177,7 @@ public abstract class TypeConverter {
 						this.namePos++;
 						if (dim == 0)
 							return new SingleTypeReference(TypeBinding.CHAR.simpleName, ((long) start << 32) + end);
-						else
-							return new ArrayTypeReference(TypeBinding.CHAR.simpleName, dim, ((long) start << 32) + end);
+                        return new ArrayTypeReference(TypeBinding.CHAR.simpleName, dim, ((long) start << 32) + end);
 					}
 					break;
 				case Signature.C_DOUBLE :
@@ -188,8 +185,7 @@ public abstract class TypeConverter {
 						this.namePos++;
 						if (dim == 0)
 							return new SingleTypeReference(TypeBinding.DOUBLE.simpleName, ((long) start << 32) + end);
-						else
-							return new ArrayTypeReference(TypeBinding.DOUBLE.simpleName, dim, ((long) start << 32) + end);
+                        return new ArrayTypeReference(TypeBinding.DOUBLE.simpleName, dim, ((long) start << 32) + end);
 					}
 					break;
 				case Signature.C_FLOAT :
@@ -197,8 +193,7 @@ public abstract class TypeConverter {
 						this.namePos++;
 						if (dim == 0)
 							return new SingleTypeReference(TypeBinding.FLOAT.simpleName, ((long) start << 32) + end);
-						else
-							return new ArrayTypeReference(TypeBinding.FLOAT.simpleName, dim, ((long) start << 32) + end);
+                        return new ArrayTypeReference(TypeBinding.FLOAT.simpleName, dim, ((long) start << 32) + end);
 					}
 					break;
 				case Signature.C_INT :
@@ -206,8 +201,7 @@ public abstract class TypeConverter {
 						this.namePos++;
 						if (dim == 0)
 							return new SingleTypeReference(TypeBinding.INT.simpleName, ((long) start << 32) + end);
-						else
-							return new ArrayTypeReference(TypeBinding.INT.simpleName, dim, ((long) start << 32) + end);
+                        return new ArrayTypeReference(TypeBinding.INT.simpleName, dim, ((long) start << 32) + end);
 					}
 					break;
 				case Signature.C_LONG :
@@ -215,8 +209,7 @@ public abstract class TypeConverter {
 						this.namePos++;
 						if (dim == 0)
 							return new SingleTypeReference(TypeBinding.LONG.simpleName, ((long) start << 32) + end);
-						else
-							return new ArrayTypeReference(TypeBinding.LONG.simpleName, dim, ((long) start << 32) + end);
+                        return new ArrayTypeReference(TypeBinding.LONG.simpleName, dim, ((long) start << 32) + end);
 					}
 					break;
 				case Signature.C_SHORT :
@@ -224,8 +217,7 @@ public abstract class TypeConverter {
 						this.namePos++;
 						if (dim == 0)
 							return new SingleTypeReference(TypeBinding.SHORT.simpleName, ((long) start << 32) + end);
-						else
-							return new ArrayTypeReference(TypeBinding.SHORT.simpleName, dim, ((long) start << 32) + end);
+                        return new ArrayTypeReference(TypeBinding.SHORT.simpleName, dim, ((long) start << 32) + end);
 					}
 					break;
 				case Signature.C_VOID :
@@ -305,70 +297,66 @@ public abstract class TypeConverter {
 					char[] nameFragment = new char[nameFragmentEnd - nameFragmentStart + 1];
 					typeSignature.getChars(nameFragmentStart, nameFragmentEnd +1, nameFragment, 0);
 					return new SingleTypeReference(nameFragment, ((long) start << 32) + end);
-				} else {
-					char[] nameFragment = new char[nameFragmentEnd - nameFragmentStart + 1];
-					typeSignature.getChars(nameFragmentStart, nameFragmentEnd +1, nameFragment, 0);
-					return new ArrayTypeReference(nameFragment, dim, ((long) start << 32) + end);
 				}
-			} else { // qualified type reference
-				long[] positions = new long[identCount];
-				long pos = ((long) start << 32) + end;
-				for (int i = 0; i < identCount; i++) {
-					positions[i] = pos;
-				}
-				char[][] identifiers = extractIdentifiers(typeSignature, nameFragmentStart, nameFragmentEnd, identCount);
-				if (dim == 0) {
-					return new QualifiedTypeReference(identifiers, positions);
-				} else {
-					return new ArrayQualifiedTypeReference(identifiers, dim, positions);
-				}
+                char[] nameFragment = new char[nameFragmentEnd - nameFragmentStart + 1];
+                typeSignature.getChars(nameFragmentStart, nameFragmentEnd +1, nameFragment, 0);
+                return new ArrayTypeReference(nameFragment, dim, ((long) start << 32) + end);
 			}
-		} else { // parameterized
-			// rebuild type reference from available fragments: char[][], arguments, char[][], arguments...
-			// check trailing qualified name
-			if (nameStarted) {
-				addIdentifiers(typeSignature, nameFragmentStart, nameFragmentEnd + 1, identCount, fragments);
-			}
-			int fragmentLength = fragments.size();
-			if (fragmentLength == 2) {
-				Object firstFragment = fragments.get(0);
-				if (firstFragment instanceof char[]) {
-					// parameterized single type
-					return new ParameterizedSingleTypeReference((char[]) firstFragment, (TypeReference[]) fragments.get(1), dim, ((long) start << 32) + end);
-				}
-			}
-			// parameterized qualified type
-			identCount = 0;
-			for (int i = 0; i < fragmentLength; i ++) {
-				Object element = fragments.get(i);
-				if (element instanceof char[][]) {
-					identCount += ((char[][])element).length;
-				} else if (element instanceof char[])
-					identCount++;
-			}
-			char[][] tokens = new char[identCount][];
-			TypeReference[][] arguments = new TypeReference[identCount][];
-			int index = 0;
-			for (int i = 0; i < fragmentLength; i ++) {
-				Object element = fragments.get(i);
-				if (element instanceof char[][]) {
-					char[][] fragmentTokens = (char[][]) element;
-					int fragmentTokenLength = fragmentTokens.length;
-					System.arraycopy(fragmentTokens, 0, tokens, index, fragmentTokenLength);
-					index += fragmentTokenLength;
-				} else if (element instanceof char[]) {
-					tokens[index++] = (char[]) element;
-				} else {
-					arguments[index-1] = (TypeReference[]) element;
-				}
-			}
-			long[] positions = new long[identCount];
-			long pos = ((long) start << 32) + end;
-			for (int i = 0; i < identCount; i++) {
-				positions[i] = pos;
-			}
-			return new ParameterizedQualifiedTypeReference(tokens, arguments, dim, positions);
+            long[] positions = new long[identCount];
+            long pos = ((long) start << 32) + end;
+            for (int i = 0; i < identCount; i++) {
+            	positions[i] = pos;
+            }
+            char[][] identifiers = extractIdentifiers(typeSignature, nameFragmentStart, nameFragmentEnd, identCount);
+            if (dim == 0) {
+            	return new QualifiedTypeReference(identifiers, positions);
+            }
+            return new ArrayQualifiedTypeReference(identifiers, dim, positions);
 		}
+        // rebuild type reference from available fragments: char[][], arguments, char[][], arguments...
+        // check trailing qualified name
+        if (nameStarted) {
+        	addIdentifiers(typeSignature, nameFragmentStart, nameFragmentEnd + 1, identCount, fragments);
+        }
+        int fragmentLength = fragments.size();
+        if (fragmentLength == 2) {
+        	Object firstFragment = fragments.get(0);
+        	if (firstFragment instanceof char[]) {
+        		// parameterized single type
+        		return new ParameterizedSingleTypeReference((char[]) firstFragment, (TypeReference[]) fragments.get(1), dim, ((long) start << 32) + end);
+        	}
+        }
+        // parameterized qualified type
+        identCount = 0;
+        for (int i = 0; i < fragmentLength; i ++) {
+        	Object element = fragments.get(i);
+        	if (element instanceof char[][]) {
+        		identCount += ((char[][])element).length;
+        	} else if (element instanceof char[])
+        		identCount++;
+        }
+        char[][] tokens = new char[identCount][];
+        TypeReference[][] arguments = new TypeReference[identCount][];
+        int index = 0;
+        for (int i = 0; i < fragmentLength; i ++) {
+        	Object element = fragments.get(i);
+        	if (element instanceof char[][]) {
+        		char[][] fragmentTokens = (char[][]) element;
+        		int fragmentTokenLength = fragmentTokens.length;
+        		System.arraycopy(fragmentTokens, 0, tokens, index, fragmentTokenLength);
+        		index += fragmentTokenLength;
+        	} else if (element instanceof char[]) {
+        		tokens[index++] = (char[]) element;
+        	} else {
+        		arguments[index-1] = (TypeReference[]) element;
+        	}
+        }
+        long[] positions = new long[identCount];
+        long pos = ((long) start << 32) + end;
+        for (int i = 0; i < identCount; i++) {
+        	positions[i] = pos;
+        }
+        return new ParameterizedQualifiedTypeReference(tokens, arguments, dim, positions);
 	}
 
 	private TypeReference decodeType2(char[] typeName, int length, int start, int end, boolean includeGenericsAnyway) {
@@ -444,9 +432,7 @@ public abstract class TypeConverter {
 					   Because of the way type signatures are encoded, TypeConverter.decodeType(String, int, int, int) is immune
 					   to this problem. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=325633
 					 */
-					if (this.has1_5Compliance || includeGenericsAnyway) {
-						if (fragments == null) fragments = new ArrayList(2);
-					}
+					if ((this.has1_5Compliance || includeGenericsAnyway) && fragments == null) fragments = new ArrayList(2);
 					nameFragmentEnd = this.namePos-1;
 					if (this.has1_5Compliance || includeGenericsAnyway) {
 						char[][] identifiers = CharOperation.splitOn('.', typeName, nameFragmentStart, this.namePos);
@@ -478,38 +464,7 @@ public abstract class TypeConverter {
 	private TypeReference decodeType3(char[] typeName, int length, int start, int end, int identCount, int dim,
 			int nameFragmentStart, int nameFragmentEnd, ArrayList fragments) {
 		if (nameFragmentEnd < 0) nameFragmentEnd = this.namePos-1;
-		if (fragments == null) { // non parameterized
-			/* rebuild identifiers and dimensions */
-			if (identCount == 1) { // simple type reference
-				if (dim == 0) {
-					char[] nameFragment;
-					if (nameFragmentStart != 0 || nameFragmentEnd >= 0) {
-						int nameFragmentLength = nameFragmentEnd - nameFragmentStart + 1;
-						System.arraycopy(typeName, nameFragmentStart, nameFragment = new char[nameFragmentLength], 0, nameFragmentLength);
-					} else {
-						nameFragment = typeName;
-					}
-					return new SingleTypeReference(nameFragment, ((long) start << 32) + end);
-				} else {
-					int nameFragmentLength = nameFragmentEnd - nameFragmentStart + 1;
-					char[] nameFragment = new char[nameFragmentLength];
-					System.arraycopy(typeName, nameFragmentStart, nameFragment, 0, nameFragmentLength);
-					return new ArrayTypeReference(nameFragment, dim, ((long) start << 32) + end);
-				}
-			} else { // qualified type reference
-				long[] positions = new long[identCount];
-				long pos = ((long) start << 32) + end;
-				for (int i = 0; i < identCount; i++) {
-					positions[i] = pos;
-				}
-				char[][] identifiers = CharOperation.splitOn('.', typeName, nameFragmentStart, nameFragmentEnd+1);
-				if (dim == 0) {
-					return new QualifiedTypeReference(identifiers, positions);
-				} else {
-					return new ArrayQualifiedTypeReference(identifiers, dim, positions);
-				}
-			}
-		} else { // parameterized
+		if (fragments != null) { // parameterized
 			// rebuild type reference from available fragments: char[][], arguments, char[][], arguments...
 			// check trailing qualified name
 			if (nameFragmentStart > 0 && nameFragmentStart < length) {
@@ -553,6 +508,33 @@ public abstract class TypeConverter {
 			}
 			return new ParameterizedQualifiedTypeReference(tokens, arguments, dim, positions);
 		}
+        /* rebuild identifiers and dimensions */
+        if (identCount != 1) { // qualified type reference
+        	long[] positions = new long[identCount];
+        	long pos = ((long) start << 32) + end;
+        	for (int i = 0; i < identCount; i++) {
+        		positions[i] = pos;
+        	}
+        	char[][] identifiers = CharOperation.splitOn('.', typeName, nameFragmentStart, nameFragmentEnd+1);
+        	if (dim == 0) {
+        		return new QualifiedTypeReference(identifiers, positions);
+        	}
+            return new ArrayQualifiedTypeReference(identifiers, dim, positions);
+        }
+        if (dim != 0) {
+        	int nameFragmentLength = nameFragmentEnd - nameFragmentStart + 1;
+        	char[] nameFragment = new char[nameFragmentLength];
+        	System.arraycopy(typeName, nameFragmentStart, nameFragment, 0, nameFragmentLength);
+        	return new ArrayTypeReference(nameFragment, dim, ((long) start << 32) + end);
+        }
+        char[] nameFragment;
+        if (nameFragmentStart != 0 || nameFragmentEnd >= 0) {
+        	int nameFragmentLength = nameFragmentEnd - nameFragmentStart + 1;
+        	System.arraycopy(typeName, nameFragmentStart, nameFragment = new char[nameFragmentLength], 0, nameFragmentLength);
+        } else {
+        	nameFragment = typeName;
+        }
+        return new SingleTypeReference(nameFragment, ((long) start << 32) + end);
 	}
 
 	private TypeReference[] decodeTypeArguments(char[] typeName, int length, int start, int end, boolean includeGenericsAnyway) {
@@ -562,8 +544,7 @@ public abstract class TypeConverter {
 			TypeReference argument = decodeType2(typeName, length, start, end, includeGenericsAnyway);
 			count++;
 			argumentList.add(argument);
-			if (this.namePos >= length) break argumentsLoop;
-			if (typeName[this.namePos] == '>') {
+			if (this.namePos >= length || typeName[this.namePos] == '>') {
 				break argumentsLoop;
 			}
 			this.namePos++; // skip ','
@@ -580,8 +561,7 @@ public abstract class TypeConverter {
 			TypeReference argument = decodeType(typeSignature, length, start, end);
 			count++;
 			argumentList.add(argument);
-			if (this.namePos >= length) break argumentsLoop;
-			if (typeSignature.charAt(this.namePos) == Signature.C_GENERIC_END) {
+			if (this.namePos >= length || typeSignature.charAt(this.namePos) == Signature.C_GENERIC_END) {
 				break argumentsLoop;
 			}
 		}

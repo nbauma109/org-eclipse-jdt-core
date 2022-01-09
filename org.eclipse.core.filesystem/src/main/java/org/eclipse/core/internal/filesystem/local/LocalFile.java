@@ -101,7 +101,7 @@ public class LocalFile extends FileStore {
 	@Override
 	public String[] childNames(int options, IProgressMonitor monitor) {
 		String[] names = file.list();
-		return (names == null ? EMPTY_STRING_ARRAY : names);
+		return names == null ? EMPTY_STRING_ARRAY : names;
 	}
 
 	@Override
@@ -290,10 +290,8 @@ public class LocalFile extends FileStore {
 		if (getFileSystem().isCaseSensitive()) {
 			if (thatPath.indexOf(thisPath) != 0)
 				return false;
-		} else {
-			if (thatPath.toLowerCase().indexOf(thisPath.toLowerCase()) != 0)
-				return false;
-		}
+		} else if (thatPath.toLowerCase().indexOf(thisPath.toLowerCase()) != 0)
+        	return false;
 		//The common portion must end with a separator character for this to be a parent of that
 		return thisPath.charAt(thisLength - 1) == File.separatorChar || thatPath.charAt(thisLength) == File.separatorChar;
 	}
@@ -364,17 +362,7 @@ public class LocalFile extends FileStore {
 			if (source.renameTo(destination)) {
 				// double-check to ensure we really did move
 				// since java.io.File#renameTo sometimes lies
-				if (!sourceEqualsDest && source.exists()) {
-					// XXX: document when this occurs
-					if (destination.exists()) {
-						// couldn't delete the source so remove the destination and throw an error
-						// XXX: if we fail deleting the destination, the destination (root) may still exist
-						new LocalFile(destination).delete(EFS.NONE, null);
-						String message = NLS.bind(Messages.couldnotDelete, source.getAbsolutePath());
-						Policy.error(EFS.ERROR_DELETE, message);
-					}
-					// source exists but destination doesn't so try to copy below
-				} else {
+				if (sourceEqualsDest || !source.exists()) {
 					// destination.exists() returns false for broken links, this has to be handled explicitly
 					if (!destination.exists() && !destFile.fetchInfo().getAttribute(EFS.ATTRIBUTE_SYMLINK)) {
 						// neither the source nor the destination exist. this is REALLY bad
@@ -384,6 +372,15 @@ public class LocalFile extends FileStore {
 					// the move was successful
 					return;
 				}
+                // XXX: document when this occurs
+                if (destination.exists()) {
+                	// couldn't delete the source so remove the destination and throw an error
+                	// XXX: if we fail deleting the destination, the destination (root) may still exist
+                	new LocalFile(destination).delete(EFS.NONE, null);
+                	String message = NLS.bind(Messages.couldnotDelete, source.getAbsolutePath());
+                	Policy.error(EFS.ERROR_DELETE, message);
+                }
+                // source exists but destination doesn't so try to copy below
 			}
 			// for some reason renameTo didn't work
 			if (sourceEqualsDest) {

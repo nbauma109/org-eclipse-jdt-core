@@ -76,7 +76,7 @@ public class FileBundleEntry extends BundleEntry {
 	 */
 	@Override
 	public String getName() {
-		return (name);
+		return name;
 	}
 
 	/**

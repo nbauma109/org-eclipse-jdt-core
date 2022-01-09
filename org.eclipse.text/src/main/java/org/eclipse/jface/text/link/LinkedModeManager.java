@@ -104,14 +104,14 @@ class LinkedModeManager {
 			if (mgr != null)
 				mgrs.add(mgr);
 		}
-		if (mgrs.size() > 1)
-			if (force) {
-				for (LinkedModeManager m : mgrs) {
-					m.closeAllEnvironments();
-				}
-			} else {
+		if (mgrs.size() > 1) {
+            if (!force) {
 				return null;
 			}
+            for (LinkedModeManager m : mgrs) {
+            	m.closeAllEnvironments();
+            }
+        }
 
 		if (mgrs.isEmpty())
 			mgr= new LinkedModeManager();
@@ -201,13 +201,13 @@ class LinkedModeManager {
 					model.addLinkingListener(fListener);
 					fEnvironments.push(model);
 					return true;
-				} else if (!force) {
-					return false;
-				} else { // force
-					fEnvironments.pop();
-					top.exit(ILinkedModeListener.NONE);
-					// continue;
 				}
+                if (!force) {
+					return false;
+				}
+                fEnvironments.pop();
+                top.exit(ILinkedModeListener.NONE);
+                // continue;
 			}
 		} finally {
 			// if we remove any, make sure the new one got inserted

@@ -37,7 +37,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	private boolean closed = false;
 	private final IExtensionRegistry registry; // the registry that this tacker works with
 
-	private static final Object[] EMPTY_ARRAY = new Object[0];
+	private static final Object[] EMPTY_ARRAY = {};
 
 	/**
 	 * Construct a new instance of the extension tracker.
@@ -143,10 +143,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		// Get a copy of the handlers for safe notification
 		Object[] handlersCopy = null;
 		synchronized (lock) {
-			if (closed)
-				return;
-
-			if (handlers == null || handlers.isEmpty())
+			if (closed || handlers == null || handlers.isEmpty())
 				return;
 			handlersCopy = handlers.getListeners();
 		}
@@ -289,7 +286,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		return (IExtensionPoint target) -> id.equals(target.getNamespaceIdentifier());
 	}
 
-	private class HandlerWrapper {
+	private static class HandlerWrapper {
 		IExtensionChangeHandler handler;
 		IFilter filter;
 

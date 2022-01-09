@@ -59,7 +59,8 @@ public class ThisReference extends Reference {
 		if (methodScope.isStatic) {
 			methodScope.problemReporter().errorThisSuperInStatic(this);
 			return false;
-		} else if (this.isUnqualifiedSuper()) {
+		}
+        if (this.isUnqualifiedSuper()) {
 			TypeDeclaration type = methodScope.referenceType();
 			if (type != null && TypeDeclaration.kind(type.modifiers) == TypeDeclaration.INTERFACE_DECL) {
 				methodScope.problemReporter().errorNoSuperInInterface(this);

@@ -73,7 +73,6 @@ public class LifecycleEvent {
 	private static final LifecycleEvent instance = new LifecycleEvent();
 
 	private LifecycleEvent() {
-		super();
 	}
 
 	public static LifecycleEvent newEvent(int kind, IResource resource) {

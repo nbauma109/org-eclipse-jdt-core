@@ -215,7 +215,7 @@ public abstract class MultiplexingFactory {
 			for (Object factory : current) {
 				try {
 					Method hasAuthorityMethod = factory.getClass().getMethod("hasAuthority", Class.class); //$NON-NLS-1$
-					if (((Boolean) hasAuthorityMethod.invoke(factory, new Object[] {clazz})).booleanValue()) {
+					if ((Boolean) hasAuthorityMethod.invoke(factory, clazz)) {
 						return factory;
 					}
 				} catch (Exception e) {
@@ -241,7 +241,7 @@ public abstract class MultiplexingFactory {
 		if (!(b instanceof EquinoxBundle)) {
 			return false;
 		}
-		return (container.getStorage().getModuleContainer() == ((EquinoxBundle) b).getModule().getContainer());
+		return container.getStorage().getModuleContainer() == ((EquinoxBundle) b).getModule().getContainer();
 	}
 
 	private synchronized List<Object> getFactories() {
@@ -258,7 +258,7 @@ public abstract class MultiplexingFactory {
 	}
 
 	private synchronized void addFactory(Object factory) {
-		List<Object> updated = (factories == null) ? new LinkedList<>() : new LinkedList<>(factories);
+		List<Object> updated = factories == null ? new LinkedList<>() : new LinkedList<>(factories);
 		updated.add(factory);
 		factories = updated;
 	}

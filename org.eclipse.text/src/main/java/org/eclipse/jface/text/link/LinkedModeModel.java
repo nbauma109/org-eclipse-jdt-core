@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -486,15 +485,15 @@ public class LinkedModeModel {
 		IDocument[] documents= getDocuments();
 		LinkedModeManager manager= LinkedModeManager.getLinkedManager(documents, force);
 		// if we force creation, we require a valid manager
-		Assert.isTrue(!(force && manager == null));
+		Assert.isTrue(!force || manager != null);
 		if (manager == null)
 			return false;
 
-		if (!manager.nestEnvironment(this, force))
-			if (force)
-				Assert.isTrue(false);
-			else
-				return false;
+		if (!manager.nestEnvironment(this, force)) {
+            if (!force)
+                return false;
+            Assert.isTrue(false);
+        }
 
 		// we set up successfully. After this point, exit has to be called to
 		// remove registered listeners...
@@ -583,7 +582,7 @@ public class LinkedModeModel {
 				pos= pg.adopt(group);
 				if (pos != null && fParentPosition != null && fParentPosition != pos)
 					return false; // group does not fit into one parent position, which is illegal
-				else if (fParentPosition == null && pos != null)
+                if (fParentPosition == null && pos != null)
 					fParentPosition= pos;
 			}
 		} catch (BadLocationException e) {

@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.compiler.parser.JavadocTagConstants;
 
 public class CompletionOnJavadocTag extends JavadocSingleNameReference implements JavadocTagConstants, CompletionOnJavadoc {
 	public int completionFlags = JAVADOC;
-	public final static char[][][] NO_CHAR_CHAR_CHAR = new char[0][][];
+	public final static char[][][] NO_CHAR_CHAR_CHAR = {};
 	private char[][][] possibleTags = NO_CHAR_CHAR_CHAR;
 
 	public CompletionOnJavadocTag(char[] source, long pos, int tagStart, int tagEnd, char[][][] possibleTags, boolean orphan) {
@@ -94,7 +94,7 @@ public class CompletionOnJavadocTag extends JavadocSingleNameReference implement
 					break;
 				}
 				if (compilationUnit != null &&
-						(compilationUnit.types.length > 0 && compilationUnit.types[0].name == CompletionParser.FAKE_TYPE_NAME)) {
+						compilationUnit.types.length > 0 && compilationUnit.types[0].name == CompletionParser.FAKE_TYPE_NAME) {
 					specifiedTags = CLASS_TAGS;
 				} else {
 					specifiedTags = COMPILATION_UNIT_TAGS;

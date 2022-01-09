@@ -37,7 +37,7 @@ public class HistoryBucket extends Bucket {
 		final static Comparator<byte[]> COMPARATOR = HistoryEntry::compareStates;
 
 		// the length of each component of the data array
-		private final static byte[][] EMPTY_DATA = new byte[0][];
+		private final static byte[][] EMPTY_DATA = {};
 		// the length of a long in bytes
 		private final static int LONG_LENGTH = 8;
 		// the length of a UUID in bytes

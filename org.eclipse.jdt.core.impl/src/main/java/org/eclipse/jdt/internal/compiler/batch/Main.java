@@ -59,7 +59,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -200,8 +199,7 @@ public class Main implements ProblemSeverities, SuffixConstants {
 			try {
 				Class<?> c = IProblem.class;
 				Field[] fields = c.getFields();
-				for (int i = 0, max = fields.length; i < max; i++) {
-					Field field = fields[i];
+				for (Field field : fields) {
 					if (field.getType().equals(Integer.TYPE)) {
 						Integer value = (Integer) field.get(null);
 						int key2 = value.intValue() & IProblem.IgnoreCategoriesMask;
@@ -302,19 +300,17 @@ public class Main implements ProblemSeverities, SuffixConstants {
 			//sanity .....
 			int startPosition = problem.getSourceStart();
 			int endPosition = problem.getSourceEnd();
-			if (unitSource == null) {
-				if (problem.getOriginatingFileName() != null) {
-					try {
-						unitSource = Util.getFileCharContent(new File(new String(problem.getOriginatingFileName())), null);
-					} catch (IOException e) {
-						// ignore;
-					}
-				}
-			}
+			if (unitSource == null && problem.getOriginatingFileName() != null) {
+            	try {
+            		unitSource = Util.getFileCharContent(new File(new String(problem.getOriginatingFileName())), null);
+            	} catch (IOException e) {
+            		// ignore;
+            	}
+            }
 			int length;
-			if ((startPosition > endPosition)
-				|| ((startPosition < 0) && (endPosition < 0))
-				|| (unitSource == null)
+			if (startPosition > endPosition
+				|| startPosition < 0 && endPosition < 0
+				|| unitSource == null
 				|| (length = unitSource.length) == 0)
 				return Messages.problem_noSourceInformation;
 
@@ -354,7 +350,7 @@ public class Main implements ProblemSeverities, SuffixConstants {
 
 			// compute underline
 			for (int i = begin; i <startPosition; i++) {
-				errorBuffer.append((unitSource[i] == TAB) ? TAB : SPACE);
+				errorBuffer.append(unitSource[i] == TAB ? TAB : SPACE);
 			}
 			for (int i = startPosition; i <= (endPosition >= length ? length - 1 : endPosition); i++) {
 				errorBuffer.append(MARK);
@@ -366,21 +362,19 @@ public class Main implements ProblemSeverities, SuffixConstants {
 			//sanity .....
 			int startPosition = problem.getSourceStart();
 			int endPosition = problem.getSourceEnd();
-			if (unitSource == null) {
-				if (problem.getOriginatingFileName() != null) {
-					try {
-						unitSource = Util.getFileCharContent(new File(new String(problem.getOriginatingFileName())), null);
-					} catch(IOException e) {
-						// ignore
-					}
-				}
-			}
+			if (unitSource == null && problem.getOriginatingFileName() != null) {
+            	try {
+            		unitSource = Util.getFileCharContent(new File(new String(problem.getOriginatingFileName())), null);
+            	} catch(IOException e) {
+            		// ignore
+            	}
+            }
 			int length;
-			if ((startPosition > endPosition)
-					|| ((startPosition < 0) && (endPosition < 0))
-					|| (unitSource == null)
-					|| ((length = unitSource.length) <= 0)
-					|| (endPosition > length)) {
+			if (startPosition > endPosition
+					|| startPosition < 0 && endPosition < 0
+					|| unitSource == null
+					|| (length = unitSource.length) <= 0
+					|| endPosition > length) {
 				HashMap<String, Object> parameters = new HashMap<>();
 				parameters.put(Logger.VALUE, Messages.problem_noSourceInformation);
 				parameters.put(Logger.SOURCE_START, "-1"); //$NON-NLS-1$
@@ -463,20 +457,20 @@ public class Main implements ProblemSeverities, SuffixConstants {
 				new String[] {
 					String.valueOf(lineCount),
 					String.valueOf(time),
-					String.valueOf(((int) (lineCount * 10000.0 / time)) / 10.0),
+					String.valueOf((int) (lineCount * 10000.0 / time) / 10.0),
 				}));
 			if ((this.main.timing & Main.TIMING_DETAILED) != 0) {
 				printlnOut(
 						this.main.bind("compile.detailedTime", //$NON-NLS-1$
 							new String[] {
 								String.valueOf(parseTime),
-								String.valueOf(((int) (parseTime * 1000.0 / time)) / 10.0),
+								String.valueOf((int) (parseTime * 1000.0 / time) / 10.0),
 								String.valueOf(resolveTime),
-								String.valueOf(((int) (resolveTime * 1000.0 / time)) / 10.0),
+								String.valueOf((int) (resolveTime * 1000.0 / time) / 10.0),
 								String.valueOf(analyzeTime),
-								String.valueOf(((int) (analyzeTime * 1000.0 / time)) / 10.0),
+								String.valueOf((int) (analyzeTime * 1000.0 / time) / 10.0),
 								String.valueOf(generateTime),
-								String.valueOf(((int) (generateTime * 1000.0 / time)) / 10.0),
+								String.valueOf((int) (generateTime * 1000.0 / time) / 10.0),
 							}));
 			}
 		}
@@ -532,14 +526,10 @@ public class Main implements ProblemSeverities, SuffixConstants {
 						String id = null;
 						if (f.isFile()) {
 							int kind = Util.archiveFormat(classpath);
-							switch (kind) {
-								case Util.ZIP_FILE:
-									id = Logger.CLASSPATH_JAR;
-									break;
-								default:
-									id = Logger.CLASSPATH_FILE;
-									break;
-							}
+							id = switch (kind) {
+                                case Util.ZIP_FILE -> Logger.CLASSPATH_JAR;
+                                default -> Logger.CLASSPATH_FILE;
+                            };
 						} else if (f.isDirectory()) {
 							id = Logger.CLASSPATH_FOLDER;
 						}
@@ -684,20 +674,16 @@ public class Main implements ProblemSeverities, SuffixConstants {
 						}
 					}
 				}
-				if ((this.tagBits & Logger.XML) != 0) {
-					if ((errors + warnings + infos) != 0) {
-						startLoggingExtraProblems(count);
-						for (int i = 0; i < count; i++) {
-							CategorizedProblem problem = problems.get(i);
-							if (!this.main.isIgnored(problem)) {
-								if (problem.getID() != IProblem.Task) {
-									logXmlExtraProblem(problem, localProblemCount, currentMain.globalProblemsCount);
-								}
-							}
-						}
-						endLoggingExtraProblems();
-					}
-				}
+				if ((this.tagBits & Logger.XML) != 0 && errors + warnings + infos != 0) {
+                	startLoggingExtraProblems(count);
+                	for (int i = 0; i < count; i++) {
+                		CategorizedProblem problem = problems.get(i);
+                		if (!this.main.isIgnored(problem) && problem.getID() != IProblem.Task) {
+                        	logXmlExtraProblem(problem, localProblemCount, currentMain.globalProblemsCount);
+                        }
+                	}
+                	endLoggingExtraProblems();
+                }
 			}
 		}
 
@@ -766,17 +752,13 @@ public class Main implements ProblemSeverities, SuffixConstants {
 				printTag(Logger.OPTIONS, new HashMap<>(), true, false);
 				final Set<Map.Entry<String, String>> entriesSet = options.entrySet();
 				Map.Entry<String, String>[] entries = entriesSet.toArray(new Map.Entry[entriesSet.size()]);
-				Arrays.sort(entries, new Comparator<Map.Entry<String, String>>() {
-					@Override
-					public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2) {
-						Map.Entry<String, String> entry1 = o1;
-						Map.Entry<String, String> entry2 = o2;
-						return entry1.getKey().compareTo(entry2.getKey());
-					}
-				});
+				Arrays.sort(entries, (o1, o2) -> {
+                	Map.Entry<String, String> entry1 = o1;
+                	Map.Entry<String, String> entry2 = o2;
+                	return entry1.getKey().compareTo(entry2.getKey());
+                });
 				HashMap<String, Object> parameters = new HashMap<>();
-				for (int i = 0, max = entries.length; i < max; i++) {
-					Map.Entry<String, String> entry = entries[i];
+				for (Entry<String, String> entry : entries) {
 					String key = entry.getKey();
 					parameters.put(Logger.KEY, key);
 					parameters.put(Logger.VALUE, entry.getValue());
@@ -819,13 +801,13 @@ public class Main implements ProblemSeverities, SuffixConstants {
 				String severity = problem.isError() ? "output.emacs.error" : //$NON-NLS-1$
 									problem.isInfo() ? "output.emacs.info" //$NON-NLS-1$
 											: "output.emacs.warning"; //$NON-NLS-1$
-				String result = (new String(problem.getOriginatingFileName())
+				String result = new String(problem.getOriginatingFileName())
 						+ ":" //$NON-NLS-1$
 						+ problem.getSourceLineNumber()
 						+ ": " //$NON-NLS-1$
-						+ (this.main.bind(severity))
+						+ this.main.bind(severity)
 						+ ": " //$NON-NLS-1$
-						+ problem.getMessage());
+						+ problem.getMessage();
 				this.printlnErr(result);
 				final String errorReportSource = errorReportSource(problem, unitSource, this.tagBits);
 				if (errorReportSource.length() != 0) this.printlnErr(errorReportSource);
@@ -881,15 +863,13 @@ public class Main implements ProblemSeverities, SuffixConstants {
 					}
 				}
 				if ((this.tagBits & Logger.XML) != 0) {
-					if ((errors + warnings + infos) != 0) {
+					if (errors + warnings + infos != 0) {
 						startLoggingProblems(errors, warnings, infos);
 						for (int i = 0; i < count; i++) {
 							CategorizedProblem problem = problems[i];
-							if (problem!= null) {
-								if (problem.getID() != IProblem.Task) {
-									logXmlProblem(problem, unitSource);
-								}
-							}
+							if (problem!= null && problem.getID() != IProblem.Task) {
+                            	logXmlProblem(problem, unitSource);
+                            }
 						}
 						endLoggingProblems();
 					}
@@ -897,11 +877,9 @@ public class Main implements ProblemSeverities, SuffixConstants {
 						startLoggingTasks(tasks);
 						for (int i = 0; i < count; i++) {
 							CategorizedProblem problem = problems[i];
-							if (problem!= null) {
-								if (problem.getID() == IProblem.Task) {
-									logXmlTask(problem, unitSource);
-								}
-							}
+							if (problem!= null && problem.getID() == IProblem.Task) {
+                            	logXmlTask(problem, unitSource);
+                            }
 						}
 						endLoggingTasks();
 					}
@@ -967,32 +945,30 @@ public class Main implements ProblemSeverities, SuffixConstants {
 						"compile.severalProblemsErrorsOrWarnings", //$NON-NLS-1$
 						String.valueOf(globalProblemsCount),
 						msg));
-				} else {
-					if (globalInfoCount == 0) {
-						printErr(this.main.bind(
-								"compile.severalProblemsErrorsAndWarnings", //$NON-NLS-1$
-								new String[] {
-									String.valueOf(globalProblemsCount),
-									errorMessage,
-									warningMessage
-								}));
-					} else {
-						if (errorMessage == null) {
-							errorMessage  = this.main.bind("compile.severalErrors", String.valueOf(globalErrorsCount)); //$NON-NLS-1$
-						}
-						if (warningMessage == null) {
-							warningMessage  = this.main.bind("compile.severalWarnings", String.valueOf(warningsNumber)); //$NON-NLS-1$
-						}
-						printErr(this.main.bind(
-								"compile.severalProblems", //$NON-NLS-1$
-								new String[] {
-									String.valueOf(globalProblemsCount),
-									errorMessage,
-									warningMessage,
-									infoMessage
-								}));
-					}
-				}
+				} else if (globalInfoCount == 0) {
+                	printErr(this.main.bind(
+                			"compile.severalProblemsErrorsAndWarnings", //$NON-NLS-1$
+                			new String[] {
+                				String.valueOf(globalProblemsCount),
+                				errorMessage,
+                				warningMessage
+                			}));
+                } else {
+                	if (errorMessage == null) {
+                		errorMessage  = this.main.bind("compile.severalErrors", String.valueOf(globalErrorsCount)); //$NON-NLS-1$
+                	}
+                	if (warningMessage == null) {
+                		warningMessage  = this.main.bind("compile.severalWarnings", String.valueOf(warningsNumber)); //$NON-NLS-1$
+                	}
+                	printErr(this.main.bind(
+                			"compile.severalProblems", //$NON-NLS-1$
+                			new String[] {
+                				String.valueOf(globalProblemsCount),
+                				errorMessage,
+                				warningMessage,
+                				infoMessage
+                			}));
+                }
 			}
 			if (this.main.failOnWarning && globalWarningsCount > 0) {
 				printErr("\n"); //$NON-NLS-1$
@@ -1039,7 +1015,7 @@ public class Main implements ProblemSeverities, SuffixConstants {
 						new String[] {
 							String.valueOf(lineCount),
 							String.valueOf(time),
-							String.valueOf(((int) (lineCount * 10000.0 / time)) / 10.0),
+							String.valueOf((int) (lineCount * 10000.0 / time) / 10.0),
 						}));
 			} else {
 				printlnOut(
@@ -1053,13 +1029,13 @@ public class Main implements ProblemSeverities, SuffixConstants {
 						this.main.bind("compile.detailedTime", //$NON-NLS-1$
 							new String[] {
 								String.valueOf(compilerStats.parseTime),
-								String.valueOf(((int) (compilerStats.parseTime * 1000.0 / time)) / 10.0),
+								String.valueOf((int) (compilerStats.parseTime * 1000.0 / time) / 10.0),
 								String.valueOf(compilerStats.resolveTime),
-								String.valueOf(((int) (compilerStats.resolveTime * 1000.0 / time)) / 10.0),
+								String.valueOf((int) (compilerStats.resolveTime * 1000.0 / time) / 10.0),
 								String.valueOf(compilerStats.analyzeTime),
-								String.valueOf(((int) (compilerStats.analyzeTime * 1000.0 / time)) / 10.0),
+								String.valueOf((int) (compilerStats.analyzeTime * 1000.0 / time) / 10.0),
 								String.valueOf(compilerStats.generateTime),
-								String.valueOf(((int) (compilerStats.generateTime * 1000.0 / time)) / 10.0),
+								String.valueOf((int) (compilerStats.generateTime * 1000.0 / time) / 10.0),
 							}));
 			}
 		}
@@ -1119,7 +1095,7 @@ public class Main implements ProblemSeverities, SuffixConstants {
 			final int sourceEnd = problem.getSourceEnd();
 			boolean isError = problem.isError();
 			HashMap<String, Object> parameters = new HashMap<>();
-			parameters.put(Logger.PROBLEM_SEVERITY, isError ? Logger.ERROR : (problem.isInfo() ? Logger.INFO : Logger.WARNING));
+			parameters.put(Logger.PROBLEM_SEVERITY, isError ? Logger.ERROR : problem.isInfo() ? Logger.INFO : Logger.WARNING);
 			parameters.put(Logger.PROBLEM_LINE, Integer.valueOf(problem.getSourceLineNumber()));
 			parameters.put(Logger.PROBLEM_SOURCE_START, Integer.valueOf(sourceStart));
 			parameters.put(Logger.PROBLEM_SOURCE_END, Integer.valueOf(sourceEnd));
@@ -1144,7 +1120,7 @@ public class Main implements ProblemSeverities, SuffixConstants {
 			parameters.put(Logger.PROBLEM_ID, Integer.valueOf(id)); // ID as numeric value
 			boolean isError = problem.isError();
 			int severity = isError ? ProblemSeverities.Error : ProblemSeverities.Warning;
-			parameters.put(Logger.PROBLEM_SEVERITY, isError ? Logger.ERROR : (problem.isInfo() ? Logger.INFO : Logger.WARNING));
+			parameters.put(Logger.PROBLEM_SEVERITY, isError ? Logger.ERROR : problem.isInfo() ? Logger.INFO : Logger.WARNING);
 			parameters.put(Logger.PROBLEM_LINE, Integer.valueOf(problem.getSourceLineNumber()));
 			parameters.put(Logger.PROBLEM_SOURCE_START, Integer.valueOf(sourceStart));
 			parameters.put(Logger.PROBLEM_SOURCE_END, Integer.valueOf(sourceEnd));
@@ -1272,26 +1248,21 @@ public class Main implements ProblemSeverities, SuffixConstants {
 			final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG, Locale.getDefault());
 			try {
 				int index = logFileName.lastIndexOf('.');
-				if (index != -1) {
-					if (logFileName.substring(index).equalsIgnoreCase(".xml")) { //$NON-NLS-1$
-						this.log = new GenericXMLWriter(new OutputStreamWriter(new FileOutputStream(logFileName, false), StandardCharsets.UTF_8), Util.LINE_SEPARATOR, true);
-						this.tagBits |= Logger.XML;
-						// insert time stamp as comment
-						this.log.println("<!-- " + dateFormat.format(date) + " -->");//$NON-NLS-1$//$NON-NLS-2$
-						this.log.println(Logger.XML_DTD_DECLARATION);
-						HashMap<String, Object> parameters = new HashMap<>();
-						parameters.put(Logger.COMPILER_NAME, this.main.bind("compiler.name")); //$NON-NLS-1$
-						parameters.put(Logger.COMPILER_VERSION, this.main.bind("compiler.version")); //$NON-NLS-1$
-						parameters.put(Logger.COMPILER_COPYRIGHT, this.main.bind("compiler.copyright")); //$NON-NLS-1$
-						printTag(Logger.COMPILER, parameters, true, false);
-					} else {
-						this.log = new PrintWriter(new FileOutputStream(logFileName, false));
-						this.log.println("# " + dateFormat.format(date));//$NON-NLS-1$
-					}
-				} else {
-					this.log = new PrintWriter(new FileOutputStream(logFileName, false));
-					this.log.println("# " + dateFormat.format(date));//$NON-NLS-1$
-				}
+				if (index != -1 && logFileName.substring(index).equalsIgnoreCase(".xml")) { //$NON-NLS-1$
+                	this.log = new GenericXMLWriter(new OutputStreamWriter(new FileOutputStream(logFileName, false), StandardCharsets.UTF_8), Util.LINE_SEPARATOR, true);
+                	this.tagBits |= Logger.XML;
+                	// insert time stamp as comment
+                	this.log.println("<!-- " + dateFormat.format(date) + " -->");//$NON-NLS-1$//$NON-NLS-2$
+                	this.log.println(Logger.XML_DTD_DECLARATION);
+                	HashMap<String, Object> parameters = new HashMap<>();
+                	parameters.put(Logger.COMPILER_NAME, this.main.bind("compiler.name")); //$NON-NLS-1$
+                	parameters.put(Logger.COMPILER_VERSION, this.main.bind("compiler.version")); //$NON-NLS-1$
+                	parameters.put(Logger.COMPILER_COPYRIGHT, this.main.bind("compiler.copyright")); //$NON-NLS-1$
+                	printTag(Logger.COMPILER, parameters, true, false);
+                } else {
+                	this.log = new PrintWriter(new FileOutputStream(logFileName, false));
+                	this.log.println("# " + dateFormat.format(date));//$NON-NLS-1$
+                }
 			} catch (FileNotFoundException e) {
 				throw new IllegalArgumentException(this.main.bind("configure.cannotOpenLog", logFileName), e); //$NON-NLS-1$
 			}
@@ -1480,6 +1451,7 @@ public class Main implements ProblemSeverities, SuffixConstants {
  * @deprecated - use {@link BatchCompiler#compile(String, PrintWriter, PrintWriter, CompilationProgress)} instead
  * 						  e.g. BatchCompiler.compile(commandLine, new PrintWriter(System.out), new PrintWriter(System.err), null);
  */
+@Deprecated
 public static boolean compile(String commandLine) {
 	return new Main(new PrintWriter(System.out), new PrintWriter(System.err), false /* systemExit */, null /* options */, null /* progress */).compile(tokenize(commandLine));
 }
@@ -1488,6 +1460,7 @@ public static boolean compile(String commandLine) {
  * @deprecated - use {@link BatchCompiler#compile(String, PrintWriter, PrintWriter, CompilationProgress)} instead
  *                       e.g. BatchCompiler.compile(commandLine, outWriter, errWriter, null);
  */
+@Deprecated
 public static boolean compile(String commandLine, PrintWriter outWriter, PrintWriter errWriter) {
 	return new Main(outWriter, errWriter, false /* systemExit */, null /* options */, null /* progress */).compile(tokenize(commandLine));
 }
@@ -1499,12 +1472,7 @@ public static boolean compile(String[] commandLineArguments, PrintWriter outWrit
 	return new Main(outWriter, errWriter, false /* systemExit */, null /* options */, progress).compile(commandLineArguments);
 }
 public static File[][] getLibrariesFiles(File[] files) {
-	FilenameFilter filter = new FilenameFilter() {
-		@Override
-		public boolean accept(File dir, String name) {
-			return Util.archiveFormat(name) > -1;
-		}
-	};
+	FilenameFilter filter = (dir, name) -> Util.archiveFormat(name) > -1;
 	final int filesLength = files.length;
 	File[][] result = new File[filesLength][];
 	for (int i = 0; i < filesLength; i++) {
@@ -1544,31 +1512,26 @@ public static String[] tokenize(String commandLine) {
 			} else {
 				startNewToken = true;
 			}
-		} else if (token.equals("\"")) { //$NON-NLS-1$
-			if (!insideQuotes && startNewToken) {
-				if (count == arguments.length)
-					System.arraycopy(arguments, 0, (arguments = new String[count * 2]), 0, count);
-				arguments[count++] = Util.EMPTY_STRING;
-			}
-			insideQuotes = !insideQuotes;
-			startNewToken = false;
 		} else {
-			if (insideQuotes) {
-				arguments[count - 1] += token;
-			} else {
-				if (token.length() > 0 && !startNewToken) {
-					arguments[count - 1] += token;
-				} else {
-					if (count == arguments.length)
-						System.arraycopy(arguments, 0, (arguments = new String[count * 2]), 0, count);
-					String trimmedToken = token.trim();
-					if (trimmedToken.length() != 0) {
-						arguments[count++] = trimmedToken;
-					}
-				}
-			}
-			startNewToken = false;
-		}
+            if (token.equals("\"")) { //$NON-NLS-1$
+            	if (!insideQuotes && startNewToken) {
+            		if (count == arguments.length)
+            			System.arraycopy(arguments, 0, arguments = new String[count * 2], 0, count);
+            		arguments[count++] = Util.EMPTY_STRING;
+            	}
+            	insideQuotes = !insideQuotes;
+            } else if (insideQuotes || token.length() > 0 && !startNewToken) {
+            	arguments[count - 1] += token;
+            } else {
+            	if (count == arguments.length)
+            		System.arraycopy(arguments, 0, arguments = new String[count * 2], 0, count);
+            	String trimmedToken = token.trim();
+            	if (trimmedToken.length() != 0) {
+            		arguments[count++] = trimmedToken;
+            	}
+            }
+            startNewToken = false;
+        }
 	}
 	System.arraycopy(arguments, 0, arguments = new String[count], 0, count);
 	return arguments;
@@ -1578,6 +1541,7 @@ public static String[] tokenize(String commandLine) {
  * @deprecated - use {@link #Main(PrintWriter, PrintWriter, boolean, Map, CompilationProgress)} instead
  *                       e.g. Main(outWriter, errWriter, systemExitWhenFinished, null, null)
  */
+@Deprecated
 public Main(PrintWriter outWriter, PrintWriter errWriter, boolean systemExitWhenFinished) {
 	this(outWriter, errWriter, systemExitWhenFinished, null /* options */, null /* progress */);
 }
@@ -1586,6 +1550,7 @@ public Main(PrintWriter outWriter, PrintWriter errWriter, boolean systemExitWhen
  * @deprecated - use {@link #Main(PrintWriter, PrintWriter, boolean, Map, CompilationProgress)} instead
  *                       e.g. Main(outWriter, errWriter, systemExitWhenFinished, customDefaultOptions, null)
  */
+@Deprecated
 public Main(PrintWriter outWriter, PrintWriter errWriter, boolean systemExitWhenFinished, Map<String, String> customDefaultOptions) {
 	this(outWriter, errWriter, systemExitWhenFinished, customDefaultOptions, null /* progress */);
 }
@@ -1621,21 +1586,21 @@ protected void addNewEntry(ArrayList<FileSystem.Classpath> paths, String current
 				switch (key) {
 					case '+':
 						accessRules[j++] = new AccessRule(pattern
-								.toCharArray(), 0);
+                    								.toCharArray(), 0);
 						break;
 					case '~':
 						accessRules[j++] = new AccessRule(pattern
-								.toCharArray(),
-								IProblem.DiscouragedReference);
+                    								.toCharArray(),
+                    								IProblem.DiscouragedReference);
 						break;
 					case '-':
 						accessRules[j++] = new AccessRule(pattern
-								.toCharArray(),
-								IProblem.ForbiddenReference);
+                    								.toCharArray(),
+                    								IProblem.ForbiddenReference);
 						break;
 					case '?':
 						accessRules[j++] = new AccessRule(pattern
-								.toCharArray(),
+                    								.toCharArray(),
 								IProblem.ForbiddenReference, true/*keep looking for accessible type*/);
 						break;
 					default:
@@ -1645,15 +1610,14 @@ protected void addNewEntry(ArrayList<FileSystem.Classpath> paths, String current
 				rulesOK = false;
 			}
 		}
-		if (rulesOK) {
-    		accessRuleSet = new AccessRuleSet(accessRules, AccessRestriction.COMMAND_LINE, currentClasspathName);
-		} else {
+		if (!rulesOK) {
 			if (currentClasspathName.length() != 0) {
 				// we go on anyway
 				addPendingErrors(this.bind("configure.incorrectClasspath", currentClasspathName));//$NON-NLS-1$
 			}
 			return;
 		}
+        accessRuleSet = new AccessRuleSet(accessRules, AccessRestriction.COMMAND_LINE, currentClasspathName);
 	}
 	if (NONE.equals(destPath)) {
 		destPath = NONE; // keep == comparison valid
@@ -1828,7 +1792,7 @@ public boolean compile(String[] argv) {
 			this.progress.done();
 	}
 	if (this.progress == null || !this.progress.isCanceled()) {
-		if (this.failOnWarning && (this.globalWarningsCount > 0))
+		if (this.failOnWarning && this.globalWarningsCount > 0)
 			return false;
         return this.globalErrorsCount == 0;
 	}
@@ -1841,7 +1805,7 @@ Decode the command line arguments
  */
 public void configure(String[] argv) {
 
-	if ((argv == null) || (argv.length == 0)) {
+	if (argv == null || argv.length == 0) {
 		printUsage();
 		return;
 	}
@@ -1946,7 +1910,7 @@ public void configure(String[] argv) {
 			if (newArgs != null) {
 				int newCommandLineArgsLength = newCommandLineArgs.length;
 				int newArgsLength = newArgs.length;
-				System.arraycopy(newCommandLineArgs, 0, (newCommandLineArgs = new String[newCommandLineArgsLength + newArgsLength - 1]), 0, index);
+				System.arraycopy(newCommandLineArgs, 0, newCommandLineArgs = new String[newCommandLineArgsLength + newArgsLength - 1], 0, index);
 				System.arraycopy(newArgs, 0, newCommandLineArgs, index, newArgsLength);
 				index += newArgsLength;
 			} else {
@@ -1990,21 +1954,20 @@ public void configure(String[] argv) {
 										"configure.invalidNowarnOption", currentArg)); //$NON-NLS-1$
 							}
 							String folders = currentArg.substring(foldersStart, foldersEnd);
-							if (folders.length() > 0) {
-								char[][] currentFolders = decodeIgnoreOptionalProblemsFromFolders(folders);
-								if (this.ignoreOptionalProblemsFromFolders != null) {
-									int length = this.ignoreOptionalProblemsFromFolders.length + currentFolders.length;
-									char[][] tempFolders = new char[length][];
-									System.arraycopy(this.ignoreOptionalProblemsFromFolders, 0, tempFolders, 0, this.ignoreOptionalProblemsFromFolders.length);
-									System.arraycopy(currentFolders, 0, tempFolders, this.ignoreOptionalProblemsFromFolders.length, currentFolders.length);
-									this.ignoreOptionalProblemsFromFolders = tempFolders;
-								} else {
-									this.ignoreOptionalProblemsFromFolders = currentFolders;
-								}
-							} else {
+							if (folders.length() <= 0) {
 								throw new IllegalArgumentException(this.bind(
 										"configure.invalidNowarnOption", currentArg)); //$NON-NLS-1$
 							}
+                            char[][] currentFolders = decodeIgnoreOptionalProblemsFromFolders(folders);
+                            if (this.ignoreOptionalProblemsFromFolders != null) {
+                            	int length = this.ignoreOptionalProblemsFromFolders.length + currentFolders.length;
+                            	char[][] tempFolders = new char[length][];
+                            	System.arraycopy(this.ignoreOptionalProblemsFromFolders, 0, tempFolders, 0, this.ignoreOptionalProblemsFromFolders.length);
+                            	System.arraycopy(currentFolders, 0, tempFolders, this.ignoreOptionalProblemsFromFolders.length, currentFolders.length);
+                            	this.ignoreOptionalProblemsFromFolders = tempFolders;
+                            } else {
+                            	this.ignoreOptionalProblemsFromFolders = currentFolders;
+                            }
 					}
 					mode = DEFAULT;
 					continue;
@@ -2059,25 +2022,25 @@ public void configure(String[] argv) {
 						System.arraycopy(
 							this.filenames,
 							0,
-							(this.filenames = new String[length + argCount - index]),
+							this.filenames = new String[length + argCount - index],
 							0,
 							length);
 						System.arraycopy(
 							this.encodings,
 							0,
-							(this.encodings = new String[length + argCount - index]),
+							this.encodings = new String[length + argCount - index],
 							0,
 							length);
 						System.arraycopy(
 							this.destinationPaths,
 							0,
-							(this.destinationPaths = new String[length + argCount - index]),
+							this.destinationPaths = new String[length + argCount - index],
 							0,
 							length);
 						System.arraycopy(
 								this.modNames,
 								0,
-								(this.modNames = new String[length + argCount - index]),
+								this.modNames = new String[length + argCount - index],
 								0,
 								length);
 					}
@@ -2139,7 +2102,7 @@ public void configure(String[] argv) {
 					if (this.destinationPath != null) {
 						StringBuilder errorMessage = new StringBuilder();
 						errorMessage.append(currentArg);
-						if ((index + 1) < argCount) {
+						if (index + 1 < argCount) {
 							errorMessage.append(' ');
 							errorMessage.append(newCommandLineArgs[index + 1]);
 						}
@@ -2158,7 +2121,7 @@ public void configure(String[] argv) {
 					if (bootclasspaths.size() > 0) {
 						StringBuilder errorMessage = new StringBuilder();
 						errorMessage.append(currentArg);
-						if ((index + 1) < argCount) {
+						if (index + 1 < argCount) {
 							errorMessage.append(' ');
 							errorMessage.append(newCommandLineArgs[index + 1]);
 						}
@@ -2212,7 +2175,7 @@ public void configure(String[] argv) {
 					if (sourcepathClasspathArg != null) {
 						StringBuilder errorMessage = new StringBuilder();
 						errorMessage.append(currentArg);
-						if ((index + 1) < argCount) {
+						if (index + 1 < argCount) {
 							errorMessage.append(' ');
 							errorMessage.append(newCommandLineArgs[index + 1]);
 						}
@@ -2229,7 +2192,7 @@ public void configure(String[] argv) {
 					if (extdirsClasspaths != null) {
 						StringBuilder errorMessage = new StringBuilder();
 						errorMessage.append(currentArg);
-						if ((index + 1) < argCount) {
+						if (index + 1 < argCount) {
 							errorMessage.append(' ');
 							errorMessage.append(newCommandLineArgs[index + 1]);
 						}
@@ -2243,7 +2206,7 @@ public void configure(String[] argv) {
 					if (endorsedDirClasspaths != null) {
 						StringBuilder errorMessage = new StringBuilder();
 						errorMessage.append(currentArg);
-						if ((index + 1) < argCount) {
+						if (index + 1 < argCount) {
 							errorMessage.append(' ');
 							errorMessage.append(newCommandLineArgs[index + 1]);
 						}
@@ -2262,12 +2225,11 @@ public void configure(String[] argv) {
 					mode = DEFAULT;
 					int length = currentArg.length();
 					if (length > 15) {
-						if (currentArg.equals("-proceedOnError:Fatal")) { //$NON-NLS-1$
-							this.options.put(CompilerOptions.OPTION_FatalOptionalError, CompilerOptions.ENABLED);
-						} else {
+						if (!currentArg.equals("-proceedOnError:Fatal")) {
 							throw new IllegalArgumentException(
 									this.bind("configure.invalidWarningConfiguration", currentArg)); //$NON-NLS-1$
 						}
+                        this.options.put(CompilerOptions.OPTION_FatalOptionalError, CompilerOptions.ENABLED);
 					} else {
 						this.options.put(CompilerOptions.OPTION_FatalOptionalError, CompilerOptions.DISABLED);
 					}
@@ -2420,22 +2382,21 @@ public void configure(String[] argv) {
 							this.bind("configure.invalidInfoConfiguration", infoOption)); //$NON-NLS-1$
 					}
 					int infoTokenStart;
-					boolean isEnabling;
-					switch (infoOption.charAt(6)) {
-						case '+' :
-							infoTokenStart = 7;
-							isEnabling = true;
-							break;
-						case '-' :
-							infoTokenStart = 7;
-							isEnabling = false; // specified warnings are disabled
-							break;
-						default:
-							disableAll(ProblemSeverities.Info);
-							infoTokenStart = 6;
-							isEnabling = true;
-					}
-
+					boolean isEnabling = switch (infoOption.charAt(6)) {
+                        case '+' -> {
+                            infoTokenStart = 7;
+                            yield true;
+                        }
+                        case '-' -> {
+                            infoTokenStart = 7;
+                            yield false; // specified warnings are disabled
+                        }
+                        default -> {
+                            disableAll(ProblemSeverities.Info);
+                            infoTokenStart = 6;
+                            yield true;
+                        }
+                    };
 					StringTokenizer tokenizer =
 						new StringTokenizer(infoOption.substring(infoTokenStart), ","); //$NON-NLS-1$
 					int tokenCounter = 0;
@@ -2473,22 +2434,21 @@ public void configure(String[] argv) {
 							this.bind("configure.invalidWarningConfiguration", warningOption)); //$NON-NLS-1$
 					}
 					int warnTokenStart;
-					boolean isEnabling;
-					switch (warningOption.charAt(6)) {
-						case '+' :
-							warnTokenStart = 7;
-							isEnabling = true;
-							break;
-						case '-' :
-							warnTokenStart = 7;
-							isEnabling = false; // specified warnings are disabled
-							break;
-						default:
-							disableAll(ProblemSeverities.Warning);
-							warnTokenStart = 6;
-							isEnabling = true;
-					}
-
+					boolean isEnabling = switch (warningOption.charAt(6)) {
+                        case '+' -> {
+                            warnTokenStart = 7;
+                            yield true;
+                        }
+                        case '-' -> {
+                            warnTokenStart = 7;
+                            yield false; // specified warnings are disabled
+                        }
+                        default -> {
+                            disableAll(ProblemSeverities.Warning);
+                            warnTokenStart = 6;
+                            yield true;
+                        }
+                    };
 					StringTokenizer tokenizer =
 						new StringTokenizer(warningOption.substring(warnTokenStart), ","); //$NON-NLS-1$
 					int tokenCounter = 0;
@@ -2526,22 +2486,21 @@ public void configure(String[] argv) {
 							this.bind("configure.invalidErrorConfiguration", errorOption)); //$NON-NLS-1$
 					}
 					int errorTokenStart;
-					boolean isEnabling;
-					switch (errorOption.charAt(5)) {
-						case '+' :
-							errorTokenStart = 6;
-							isEnabling = true;
-							break;
-						case '-' :
-							errorTokenStart = 6;
-							isEnabling = false; // specified errors are disabled
-							break;
-						default:
-							disableAll(ProblemSeverities.Error);
-							errorTokenStart = 5;
-							isEnabling = true;
-					}
-
+					boolean isEnabling = switch (errorOption.charAt(5)) {
+                        case '+' -> {
+                            errorTokenStart = 6;
+                            yield true;
+                        }
+                        case '-' -> {
+                            errorTokenStart = 6;
+                            yield false; // specified errors are disabled
+                        }
+                        default -> {
+                            disableAll(ProblemSeverities.Error);
+                            errorTokenStart = 5;
+                            yield true;
+                        }
+                    };
 					StringTokenizer tokenizer =
 						new StringTokenizer(errorOption.substring(errorTokenStart), ","); //$NON-NLS-1$
 					int tokenCounter = 0;
@@ -2624,17 +2583,10 @@ public void configure(String[] argv) {
 					mode = INSIDE_S_start;
 					continue;
 				}
-				if (currentArg.equals("-XprintProcessorInfo") //$NON-NLS-1$
-						|| currentArg.equals("-XprintRounds")) { //$NON-NLS-1$
-					mode = DEFAULT;
-					continue;
-				}
+				
 				// tolerated javac options - quietly filtered out
-				if (currentArg.startsWith("-X")) { //$NON-NLS-1$
-					mode = DEFAULT;
-					continue;
-				}
-				if (currentArg.startsWith("-J")) { //$NON-NLS-1$
+				if (currentArg.equals("-XprintProcessorInfo") //$NON-NLS-1$
+						|| currentArg.equals("-XprintRounds") || currentArg.startsWith("-X") || currentArg.startsWith("-J")) { //$NON-NLS-1$
 					mode = DEFAULT;
 					continue;
 				}
@@ -2680,11 +2632,10 @@ public void configure(String[] argv) {
 					this.options.put(CompilerOptions.OPTION_InlineJsr, CompilerOptions.ENABLED);
 				} else {
 					String version = optionStringToVersion(currentArg);
-					if (version != null) {
-						this.options.put(CompilerOptions.OPTION_TargetPlatform, version);
-					} else {
+					if (version == null) {
 						throw new IllegalArgumentException(this.bind("configure.targetJDK", currentArg)); //$NON-NLS-1$
 					}
+                    this.options.put(CompilerOptions.OPTION_TargetPlatform, version);
 				}
 				mode = DEFAULT;
 				continue;
@@ -2749,11 +2700,10 @@ public void configure(String[] argv) {
 				}
 				this.didSpecifySource = true;
 				String version = optionStringToVersion(currentArg);
-				if (version != null) {
-					this.options.put(CompilerOptions.OPTION_Source, version);
-				} else {
+				if (version == null) {
 					throw new IllegalArgumentException(this.bind("configure.source", currentArg)); //$NON-NLS-1$
 				}
+                this.options.put(CompilerOptions.OPTION_Source, version);
 				mode = DEFAULT;
 				continue;
 			case INSIDE_DEFAULT_ENCODING :
@@ -2882,14 +2832,13 @@ public void configure(String[] argv) {
 				mode = DEFAULT;
 				continue;
 			case INSIDE_SOURCE_DIRECTORY_DESTINATION_PATH:
-				if (currentArg.endsWith("]")) { //$NON-NLS-1$
-					customDestinationPath = currentArg.substring(0,
-						currentArg.length() - 1);
-				} else {
+				if (!currentArg.endsWith("]")) {
 					throw new IllegalArgumentException(
 						this.bind("configure.incorrectDestinationPathEntry", //$NON-NLS-1$
 							"[-d " + currentArg)); //$NON-NLS-1$
 				}
+                customDestinationPath = currentArg.substring(0,
+                	currentArg.length() - 1);
 				break;
 			case INSIDE_PROCESSOR_PATH_start :
 				// nothing to do here. This is consumed again by the AnnotationProcessorManager
@@ -2917,7 +2866,7 @@ public void configure(String[] argv) {
 						System.arraycopy(
 							this.classNames,
 							0,
-							(this.classNames = new String[classCount * 2]),
+							this.classNames = new String[classCount * 2],
 							0,
 							classCount);
 					}
@@ -2937,7 +2886,7 @@ public void configure(String[] argv) {
 					this.annotationsFromClasspath = true;
 				} else {
 					if (this.annotationPaths == null)
-						this.annotationPaths = new ArrayList<String>();
+						this.annotationPaths = new ArrayList<>();
 					StringTokenizer tokens = new StringTokenizer(currentArg, File.pathSeparator);
 					while (tokens.hasMoreTokens())
 						this.annotationPaths.add(tokens.nextToken());
@@ -2973,25 +2922,25 @@ public void configure(String[] argv) {
 			System.arraycopy(
 				this.filenames,
 				0,
-				(this.filenames = new String[length + filesCount]),
+				this.filenames = new String[length + filesCount],
 				0,
 				filesCount);
 			System.arraycopy(
 				this.encodings,
 				0,
-				(this.encodings = new String[length + filesCount]),
+				this.encodings = new String[length + filesCount],
 				0,
 				filesCount);
 			System.arraycopy(
 				this.destinationPaths,
 				0,
-				(this.destinationPaths = new String[length + filesCount]),
+				this.destinationPaths = new String[length + filesCount],
 				0,
 				filesCount);
 			System.arraycopy(
 					this.modNames,
 					0,
-					(this.modNames = new String[length + filesCount]),
+					this.modNames = new String[length + filesCount],
 					0,
 					filesCount);
 			System.arraycopy(result, 0, this.filenames, filesCount, length);
@@ -3001,9 +2950,6 @@ public void configure(String[] argv) {
 				this.modNames[filesCount + i] = moduleName;
 			}
 			filesCount += length;
-			customEncoding = null;
-			customDestinationPath = null;
-			currentSourceDirectory = null;
 		} else {
 			this.filenames = result;
 			filesCount = this.filenames.length;
@@ -3014,10 +2960,10 @@ public void configure(String[] argv) {
 				this.encodings[i] = customEncoding;
 				this.destinationPaths[i] = customDestinationPath;
 			}
-			customEncoding = null;
-			customDestinationPath = null;
-			currentSourceDirectory = null;
 		}
+        customEncoding = null;
+        customDestinationPath = null;
+        currentSourceDirectory = null;
 		mode = DEFAULT;
 		continue;
 	}
@@ -3061,7 +3007,7 @@ public void configure(String[] argv) {
 			CompilerOptions.OPTION_ReportMissingJavadocTagsVisibility,
 			CompilerOptions.PRIVATE);
 	}
-	if (printUsageRequired || (filesCount == 0 && classCount == 0)) {
+	if (printUsageRequired || filesCount == 0 && classCount == 0) {
 		if (usageSection ==  null) {
 			printUsage(); // default
 		} else {
@@ -3101,7 +3047,7 @@ public void configure(String[] argv) {
 		System.arraycopy(
 			this.filenames,
 			0,
-			(this.filenames = new String[filesCount]),
+			this.filenames = new String[filesCount],
 			0,
 			filesCount);
 	}
@@ -3110,7 +3056,7 @@ public void configure(String[] argv) {
 		System.arraycopy(
 			this.classNames,
 			0,
-			(this.classNames = new String[classCount]),
+			this.classNames = new String[classCount],
 			0,
 			classCount);
 	}
@@ -3131,8 +3077,7 @@ public void configure(String[] argv) {
 				getAllEncodings(specifiedEncodings)));
 	}
 	if (this.pendingErrors != null) {
-		for (Iterator<String> iterator = this.pendingErrors.iterator(); iterator.hasNext(); ) {
-			String message = iterator.next();
+		for (String message : this.pendingErrors) {
 			this.logger.logPendingError(message);
 		}
 		this.pendingErrors = null;
@@ -3215,7 +3160,7 @@ private IModule extractModuleDesc(String fileName) {
 	IModule mod = null;
 	// this.options may not be completely populated yet, and definitely not
 	// validated. Make sure the source level is set for the parser
-	Map<String,String> opts = new HashMap<String, String>(this.options);
+	Map<String,String> opts = new HashMap<>(this.options);
 	opts.put(CompilerOptions.OPTION_Source, this.options.get(CompilerOptions.OPTION_Compliance));
 	Parser parser = new Parser(new ProblemReporter(getHandlingPolicy(),
 			new CompilerOptions(opts), getProblemFactory()), false);
@@ -3343,8 +3288,7 @@ protected void enableAll(int severity) {
 			break;
 	}
 	Map.Entry<String, String>[] entries = this.options.entrySet().toArray(new Map.Entry[this.options.size()]);
-	for (int i = 0, max = entries.length; i < max; i++) {
-		Map.Entry<String, String> entry = entries[i];
+	for (Entry<String, String> entry : entries) {
 		if (entry.getValue().equals(CompilerOptions.IGNORE)) {
 			this.options.put(entry.getKey(), newValue);
 		}
@@ -3530,8 +3474,8 @@ public IProblemFactory getProblemFactory() {
 protected ArrayList<Classpath> handleBootclasspath(ArrayList<String> bootclasspaths, String customEncoding) {
  	final int bootclasspathsSize;
  	ArrayList<Classpath> result = new ArrayList<>(DEFAULT_SIZE_CLASSPATH);
-	if ((bootclasspaths != null)
-		&& ((bootclasspathsSize = bootclasspaths.size()) != 0)) {
+	if (bootclasspaths != null
+		&& (bootclasspathsSize = bootclasspaths.size()) != 0) {
 		result = new ArrayList<>(bootclasspathsSize);
 		for (String path : bootclasspaths) {
 			processPathEntries(DEFAULT_SIZE_CLASSPATH, result, path, customEncoding, false, true);
@@ -3549,43 +3493,41 @@ private void processAddonModuleOptions(FileSystem env) {
 	Map<String, IPackageExport[]> exports = new HashMap<>();
 	for (String option : this.addonExports) {
 		AddExport addExport = ModuleFinder.extractAddonExport(option);
-		if (addExport != null) {
-			String modName = addExport.sourceModuleName;
-			IPackageExport export = addExport.export;
-			IPackageExport[] existing = exports.get(modName);
-			if (existing == null) {
-				existing = new IPackageExport[1];
-				existing[0] = export;
-				exports.put(modName, existing);
-			} else {
-				for (IPackageExport iPackageExport : existing) {
-					if (CharOperation.equals(iPackageExport.name(), export.name())) {
-						throw new IllegalArgumentException(this.bind("configure.duplicateExport")); //$NON-NLS-1$
-					}
-				}
-				IPackageExport[] updated = new IPackageExport[existing.length + 1];
-				System.arraycopy(existing, 0, updated, 0, existing.length);
-				updated[existing.length] = export;
-				exports.put(modName, updated);
-			}
-			env.addModuleUpdate(modName, m -> m.addExports(export.name(), export.targets()), UpdateKind.PACKAGE);
-		} else {
+		if (addExport == null) {
 			throw new IllegalArgumentException(this.bind("configure.invalidModuleOption", "--add-exports " + option)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+        String modName = addExport.sourceModuleName;
+        IPackageExport export = addExport.export;
+        IPackageExport[] existing = exports.get(modName);
+        if (existing == null) {
+        	existing = new IPackageExport[1];
+        	existing[0] = export;
+        	exports.put(modName, existing);
+        } else {
+        	for (IPackageExport iPackageExport : existing) {
+        		if (CharOperation.equals(iPackageExport.name(), export.name())) {
+        			throw new IllegalArgumentException(this.bind("configure.duplicateExport")); //$NON-NLS-1$
+        		}
+        	}
+        	IPackageExport[] updated = new IPackageExport[existing.length + 1];
+        	System.arraycopy(existing, 0, updated, 0, existing.length);
+        	updated[existing.length] = export;
+        	exports.put(modName, updated);
+        }
+        env.addModuleUpdate(modName, m -> m.addExports(export.name(), export.targets()), UpdateKind.PACKAGE);
 	}
 	for (String option : this.addonReads) {
 		String[] result = ModuleFinder.extractAddonRead(option);
-		if (result != null && result.length == 2) {
-			env.addModuleUpdate(result[0], m -> m.addReads(result[1].toCharArray()), UpdateKind.MODULE);
-		} else {
+		if (result == null || result.length != 2) {
 			throw new IllegalArgumentException(this.bind("configure.invalidModuleOption", "--add-reads " + option)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+        env.addModuleUpdate(result[0], m -> m.addReads(result[1].toCharArray()), UpdateKind.MODULE);
 	}
 }
 protected ArrayList<FileSystem.Classpath> handleModulepath(String arg) {
 	ArrayList<String> modulePaths = processModulePathEntries(arg);
 	ArrayList<Classpath> result = new ArrayList<>();
-	if ((modulePaths != null && modulePaths.size() > 0)) {
+	if (modulePaths != null && modulePaths.size() > 0) {
 		for (String path : modulePaths) {
 			File file = new File(path);
 			if (file.isDirectory()) {
@@ -3604,16 +3546,16 @@ protected ArrayList<FileSystem.Classpath> handleModulepath(String arg) {
 protected ArrayList<FileSystem.Classpath> handleModuleSourcepath(String arg) {
 	ArrayList<String> modulePaths = processModulePathEntries(arg);
 	ArrayList<FileSystem.Classpath> result = new ArrayList<>();
-	if ((modulePaths != null)
-		&& (modulePaths.size() != 0)) {
+	if (modulePaths != null
+		&& modulePaths.size() != 0) {
 
 		if (this.destinationPath == null) {
 			addPendingErrors(this.bind("configure.missingDestinationPath"));//$NON-NLS-1$
 		}
 		String[] paths = new String[modulePaths.size()];
 		modulePaths.toArray(paths);
-		for (int i = 0; i < paths.length; i++) {
-			File dir = new File(paths[i]);
+		for (String path : paths) {
+			File dir = new File(path);
 			if (dir.isDirectory()) {
 				// 1. Create FileSystem.Classpath for each module
 				// 2. Iterator each module in case of directory for source files and add to this.fileNames
@@ -3664,7 +3606,7 @@ protected ArrayList<FileSystem.Classpath> handleClasspath(ArrayList<String> clas
 	} else {
 		// no user classpath specified.
 		String classProp = System.getProperty("java.class.path"); //$NON-NLS-1$
-		if ((classProp == null) || (classProp.length() == 0)) {
+		if (classProp == null || classProp.length() == 0) {
 			addPendingErrors(this.bind("configure.noClasspath")); //$NON-NLS-1$
 			final Classpath classpath = FileSystem.getClasspath(System.getProperty("user.dir"), customEncoding, null, this.options, this.releaseVersion);//$NON-NLS-1$
 			if (classpath != null) {
@@ -3752,10 +3694,10 @@ protected ArrayList<FileSystem.Classpath> handleEndorseddirs(ArrayList<String> e
 			for (int i = 0, max = endorsedDirsJars.length; i < max; i++) {
 				File[] current = endorsedDirsJars[i];
 				if (current != null) {
-					for (int j = 0, max2 = current.length; j < max2; j++) {
+					for (File element : current) {
 						FileSystem.Classpath classpath =
 							FileSystem.getClasspath(
-									current[j].getAbsolutePath(),
+									element.getAbsolutePath(),
 									null, null, this.options, this.releaseVersion);
 						if (classpath != null) {
 							result.add(classpath);
@@ -3813,10 +3755,10 @@ protected ArrayList<FileSystem.Classpath> handleExtdirs(ArrayList<String> extdir
 			for (int i = 0, max = extdirsJars.length; i < max; i++) {
 				File[] current = extdirsJars[i];
 				if (current != null) {
-					for (int j = 0, max2 = current.length; j < max2; j++) {
+					for (File element : current) {
 						FileSystem.Classpath classpath =
 							FileSystem.getClasspath(
-									current[j].getAbsolutePath(),
+									element.getAbsolutePath(),
 									null, null, this.options, this.releaseVersion);
 						if (classpath != null) {
 							result.add(classpath);
@@ -3922,32 +3864,38 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 					CompilerOptions.OPTION_ReportDeprecationWhenOverridingDeprecatedMethod,
 					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("allJavadoc")) { //$NON-NLS-1$
+			}
+            if (token.equals("allJavadoc")) { //$NON-NLS-1$
 				this.warnAllJavadocOn = this.warnJavadocOn = isEnabling;
 				setSeverity(CompilerOptions.OPTION_ReportInvalidJavadoc, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportMissingJavadocTags, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportMissingJavadocComments, severity, isEnabling);
 				return;
-			} else if (token.equals("assertIdentifier")) { //$NON-NLS-1$
+			}
+            if (token.equals("assertIdentifier")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportAssertIdentifier, severity, isEnabling);
 				return;
-			} else if (token.equals("allDeadCode")) { //$NON-NLS-1$
+			}
+            if (token.equals("allDeadCode")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportDeadCode, severity, isEnabling);
 				this.options.put(
 					CompilerOptions.OPTION_ReportDeadCodeInTrivialIfStatement,
 					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("allOver-ann")) { //$NON-NLS-1$
+			}
+            if (token.equals("allOver-ann")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, severity, isEnabling);
 				this.options.put(
 					CompilerOptions.OPTION_ReportMissingOverrideAnnotationForInterfaceMethodImplementation,
 					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("all-static-method")) { //$NON-NLS-1$
+			}
+            if (token.equals("all-static-method")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMethodCanBeStatic, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportMethodCanBePotentiallyStatic, severity, isEnabling);
 				return;
-			} else if (token.equals("all")) { //$NON-NLS-1$
+			}
+            if (token.equals("all")) { //$NON-NLS-1$
 				if (isEnabling) {
 					enableAll(severity);
 				} else {
@@ -3966,13 +3914,16 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			if (token.equals("constructorName")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMethodWithConstructorName, severity, isEnabling);
 				return;
-			} else if (token.equals("conditionAssign")) { //$NON-NLS-1$
+			}
+            if (token.equals("conditionAssign")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportPossibleAccidentalBooleanAssignment, severity, isEnabling);
 				return;
-			} else if (token.equals("compareIdentical")) { //$NON-NLS-1$
+			}
+            if (token.equals("compareIdentical")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportComparingIdentical, severity, isEnabling);
 				return;
-			} else if (token.equals("charConcat") /*|| token.equals("noImplicitStringConversion")/*backward compatible*/) {//$NON-NLS-1$
+			}
+            if (token.equals("charConcat") /*|| token.equals("noImplicitStringConversion")/*backward compatible*/) {//$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNoImplicitStringConversion, severity, isEnabling);
 				return;
 			}
@@ -3987,13 +3938,16 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 					CompilerOptions.OPTION_ReportDeprecationWhenOverridingDeprecatedMethod,
 					CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("dep-ann")) { //$NON-NLS-1$
+			}
+            if (token.equals("dep-ann")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingDeprecatedAnnotation, severity, isEnabling);
 				return;
-			} else if (token.equals("discouraged")) { //$NON-NLS-1$
+			}
+            if (token.equals("discouraged")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportDiscouragedReference, severity, isEnabling);
 				return;
-			} else if (token.equals("deadCode")) { //$NON-NLS-1$
+			}
+            if (token.equals("deadCode")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportDeadCode, severity, isEnabling);
 				this.options.put(
 					CompilerOptions.OPTION_ReportDeadCodeInTrivialIfStatement,
@@ -4005,7 +3959,8 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			if (token.equals("enumSwitch")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportIncompleteEnumSwitch, severity, isEnabling);
 				return;
-			} else if (token.equals("enumSwitchPedantic")) { //$NON-NLS-1$
+			}
+            if (token.equals("enumSwitchPedantic")) { //$NON-NLS-1$
 				if (isEnabling) {
 					switch (severity) {
 						case ProblemSeverities.Error:
@@ -4022,13 +3977,16 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				this.options.put(CompilerOptions.OPTION_ReportMissingEnumCaseDespiteDefault,
 								 isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("emptyBlock")) {//$NON-NLS-1$
+			}
+            if (token.equals("emptyBlock")) {//$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUndocumentedEmptyBlock, severity, isEnabling);
 				return;
-			} else if (token.equals("enumIdentifier")) { //$NON-NLS-1$
+			}
+            if (token.equals("enumIdentifier")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportEnumIdentifier, severity, isEnabling);
 				return;
-			} else if (token.equals("exports")) { //$NON-NLS-1$
+			}
+            if (token.equals("exports")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportAPILeak, severity, isEnabling);
 				return;
 			}
@@ -4037,16 +3995,20 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			if (token.equals("fieldHiding")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportFieldHiding, severity, isEnabling);
 				return;
-			} else if (token.equals("finalBound")) {//$NON-NLS-1$
+			}
+            if (token.equals("finalBound")) {//$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportFinalParameterBound, severity, isEnabling);
 				return;
-			} else if (token.equals("finally")) { //$NON-NLS-1$
+			}
+            if (token.equals("finally")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportFinallyBlockNotCompletingNormally, severity, isEnabling);
 				return;
-			} else if (token.equals("forbidden")) { //$NON-NLS-1$
+			}
+            if (token.equals("forbidden")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportForbiddenReference, severity, isEnabling);
 				return;
-			} else if (token.equals("fallthrough")) { //$NON-NLS-1$
+			}
+            if (token.equals("fallthrough")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportFallthroughCase, severity, isEnabling);
 				return;
 			}
@@ -4058,7 +4020,8 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				setSeverity(CompilerOptions.OPTION_ReportFieldHiding, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportTypeParameterHiding, severity, isEnabling);
 				return;
-			} else if (token.equals("hashCode")) { //$NON-NLS-1$
+			}
+            if (token.equals("hashCode")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingHashCodeMethod, severity, isEnabling);
 				return;
 			}
@@ -4067,26 +4030,32 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			if (token.equals("indirectStatic")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportIndirectStaticAccess, severity, isEnabling);
 				return;
-			} else if (token.equals("inheritNullAnnot")) { //$NON-NLS-1$
+			}
+            if (token.equals("inheritNullAnnot")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_InheritNullAnnotations,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("intfNonInherited") || token.equals("interfaceNonInherited")/*backward compatible*/) { //$NON-NLS-1$ //$NON-NLS-2$
+			}
+            if (token.equals("intfNonInherited") || token.equals("interfaceNonInherited")/*backward compatible*/) { //$NON-NLS-1$ //$NON-NLS-2$
 				setSeverity(CompilerOptions.OPTION_ReportIncompatibleNonInheritedInterfaceMethod, severity, isEnabling);
 				return;
-			} else if (token.equals("intfAnnotation")) { //$NON-NLS-1$
+			}
+            if (token.equals("intfAnnotation")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportAnnotationSuperInterface, severity, isEnabling);
 				return;
-			} else if (token.equals("intfRedundant") /*|| token.equals("redundantSuperinterface")*/) { //$NON-NLS-1$
+			}
+            if (token.equals("intfRedundant") /*|| token.equals("redundantSuperinterface")*/) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportRedundantSuperinterface, severity, isEnabling);
 				return;
-			} else if (token.equals("includeAssertNull")) { //$NON-NLS-1$
+			}
+            if (token.equals("includeAssertNull")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_IncludeNullInfoFromAsserts,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("invalidJavadoc")) { //$NON-NLS-1$
+			}
+            if (token.equals("invalidJavadoc")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportInvalidJavadoc, severity, isEnabling);
 				this.options.put(
 					CompilerOptions.OPTION_ReportInvalidJavadocTags,
@@ -4106,22 +4075,26 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 						CompilerOptions.PRIVATE);
 				}
 				return;
-			} else if (token.equals("invalidJavadocTag")) { //$NON-NLS-1$
+			}
+            if (token.equals("invalidJavadocTag")) { //$NON-NLS-1$
 				this.options.put(
 					CompilerOptions.OPTION_ReportInvalidJavadocTags,
 					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("invalidJavadocTagDep")) { //$NON-NLS-1$
+			}
+            if (token.equals("invalidJavadocTagDep")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_ReportInvalidJavadocTagsDeprecatedRef,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("invalidJavadocTagNotVisible")) { //$NON-NLS-1$
+			}
+            if (token.equals("invalidJavadocTagNotVisible")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_ReportInvalidJavadocTagsNotVisibleRef,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.startsWith("invalidJavadocTagVisibility")) { //$NON-NLS-1$
+			}
+            if (token.startsWith("invalidJavadocTagVisibility")) { //$NON-NLS-1$
 				int start = token.indexOf('(');
 				int end = token.indexOf(')');
 				String visibility = null;
@@ -4136,9 +4109,8 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 							CompilerOptions.OPTION_ReportInvalidJavadocTagsVisibility,
 							visibility);
 					return;
-				} else {
-					throw new IllegalArgumentException(this.bind("configure.invalidJavadocTagVisibility", token)); //$NON-NLS-1$
 				}
+                throw new IllegalArgumentException(this.bind("configure.invalidJavadocTagVisibility", token)); //$NON-NLS-1$
 			}
 			break;
 		case 'j' :
@@ -4159,7 +4131,8 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			if (token.equals("maskedCatchBlock") || token.equals("maskedCatchBlocks")/*backward compatible*/) { //$NON-NLS-1$ //$NON-NLS-2$
 				setSeverity(CompilerOptions.OPTION_ReportHiddenCatchBlock, severity, isEnabling);
 				return;
-			} else if (token.equals("missingJavadocTags")) { //$NON-NLS-1$
+			}
+            if (token.equals("missingJavadocTags")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingJavadocTags, severity, isEnabling);
 				this.options.put(
 					CompilerOptions.OPTION_ReportMissingJavadocTagsOverriding,
@@ -4176,17 +4149,20 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 						CompilerOptions.PRIVATE);
 				}
 				return;
-			} else if (token.equals("missingJavadocTagsOverriding")) { //$NON-NLS-1$
+			}
+            if (token.equals("missingJavadocTagsOverriding")) { //$NON-NLS-1$
 				this.options.put(
 					CompilerOptions.OPTION_ReportMissingJavadocTagsOverriding,
 					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("missingJavadocTagsMethod")) { //$NON-NLS-1$
+			}
+            if (token.equals("missingJavadocTagsMethod")) { //$NON-NLS-1$
 				this.options.put(
 					CompilerOptions.OPTION_ReportMissingJavadocTagsMethodTypeParameters,
 					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.startsWith("missingJavadocTagsVisibility")) { //$NON-NLS-1$
+			}
+            if (token.startsWith("missingJavadocTagsVisibility")) { //$NON-NLS-1$
 				int start = token.indexOf('(');
 				int end = token.indexOf(')');
 				String visibility = null;
@@ -4201,10 +4177,10 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 							CompilerOptions.OPTION_ReportMissingJavadocTagsVisibility,
 							visibility);
 					return;
-				} else {
-					throw new IllegalArgumentException(this.bind("configure.missingJavadocTagsVisibility", token)); //$NON-NLS-1$
 				}
-			} else if (token.equals("missingJavadocComments")) { //$NON-NLS-1$
+                throw new IllegalArgumentException(this.bind("configure.missingJavadocTagsVisibility", token)); //$NON-NLS-1$
+			}
+            if (token.equals("missingJavadocComments")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingJavadocComments, severity, isEnabling);
 				this.options.put(
 					CompilerOptions.OPTION_ReportMissingJavadocCommentsOverriding,
@@ -4218,13 +4194,15 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 						CompilerOptions.PRIVATE);
 				}
 				return;
-			} else if (token.equals("missingJavadocCommentsOverriding")) { //$NON-NLS-1$
+			}
+            if (token.equals("missingJavadocCommentsOverriding")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingJavadocComments, severity, isEnabling);
 				this.options.put(
 					CompilerOptions.OPTION_ReportMissingJavadocCommentsOverriding,
 					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.startsWith("missingJavadocCommentsVisibility")) { //$NON-NLS-1$
+			}
+            if (token.startsWith("missingJavadocCommentsVisibility")) { //$NON-NLS-1$
 				int start = token.indexOf('(');
 				int end = token.indexOf(')');
 				String visibility = null;
@@ -4239,10 +4217,10 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 							CompilerOptions.OPTION_ReportMissingJavadocCommentsVisibility,
 							visibility);
 					return;
-				} else {
-					throw new IllegalArgumentException(this.bind("configure.missingJavadocCommentsVisibility", token)); //$NON-NLS-1$
 				}
-			} else if (token.equals("module")) { //$NON-NLS-1$
+                throw new IllegalArgumentException(this.bind("configure.missingJavadocCommentsVisibility", token)); //$NON-NLS-1$
+			}
+            if (token.equals("module")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnstableAutoModuleName, severity, isEnabling);
 				return;
 			}
@@ -4251,31 +4229,38 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			if (token.equals("nls")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNonExternalizedStringLiteral, severity, isEnabling);
 				return;
-			} else if (token.equals("noEffectAssign")) { //$NON-NLS-1$
+			}
+            if (token.equals("noEffectAssign")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNoEffectAssignment, severity, isEnabling);
 				return;
-			} else if (/*token.equals("charConcat") ||*/ token.equals("noImplicitStringConversion")/*backward compatible*/) {//$NON-NLS-1$
+			}
+            if (/*token.equals("charConcat") ||*/ token.equals("noImplicitStringConversion")/*backward compatible*/) {//$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNoImplicitStringConversion, severity, isEnabling);
 				return;
-			} else if (token.equals("null")) { //$NON-NLS-1$
+			}
+            if (token.equals("null")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNullReference, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportPotentialNullReference, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportRedundantNullCheck, severity, isEnabling);
 				return;
-			} else if (token.equals("nullDereference")) { //$NON-NLS-1$
+			}
+            if (token.equals("nullDereference")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNullReference, severity, isEnabling);
 				if (!isEnabling) {
 					setSeverity(CompilerOptions.OPTION_ReportPotentialNullReference, ProblemSeverities.Ignore, isEnabling);
 					setSeverity(CompilerOptions.OPTION_ReportRedundantNullCheck, ProblemSeverities.Ignore, isEnabling);
 				}
 				return;
-			}else if (token.equals("nullAnnotConflict")) { //$NON-NLS-1$
+			}
+            if (token.equals("nullAnnotConflict")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNullAnnotationInferenceConflict, severity, isEnabling);
 				return;
-			} else if (token.equals("nullAnnotRedundant")) { //$NON-NLS-1$
+			}
+            if (token.equals("nullAnnotRedundant")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportRedundantNullAnnotation, severity, isEnabling);
 				return;
-			} else if (token.startsWith("nullAnnot")) { //$NON-NLS-1$
+			}
+            if (token.startsWith("nullAnnot")) { //$NON-NLS-1$
 				String annotationNames = Util.EMPTY_STRING;
 				int start = token.indexOf('(');
 				int end = token.indexOf(')');
@@ -4324,10 +4309,12 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				setSeverity(CompilerOptions.OPTION_ReportNullUncheckedConversion, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportRedundantNullAnnotation, severity, isEnabling);
 				return;
-			} else if (token.equals("nullUncheckedConversion")) { //$NON-NLS-1$
+			}
+            if (token.equals("nullUncheckedConversion")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNullUncheckedConversion, severity, isEnabling);
 				return;
-			} else if (token.equals("nonnullNotRepeated")) { //$NON-NLS-1$
+			}
+            if (token.equals("nonnullNotRepeated")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNonnullParameterAnnotationDropped, severity, isEnabling);
 				return;
 			}
@@ -4337,7 +4324,8 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			if (token.equals("over-sync") /*|| token.equals("syncOverride")*/) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingSynchronizedOnInheritedMethod, severity, isEnabling);
 				return;
-			} else if (token.equals("over-ann")) { //$NON-NLS-1$
+			}
+            if (token.equals("over-ann")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, severity, isEnabling);
 				this.options.put(
 					CompilerOptions.OPTION_ReportMissingOverrideAnnotationForInterfaceMethodImplementation,
@@ -4349,7 +4337,8 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			if (token.equals("pkgDefaultMethod") || token.equals("packageDefaultMethod")/*backward compatible*/ ) { //$NON-NLS-1$ //$NON-NLS-2$
 				setSeverity(CompilerOptions.OPTION_ReportOverridingPackageDefaultMethod, severity, isEnabling);
 				return;
-			} else if (token.equals("paramAssign")) { //$NON-NLS-1$
+			}
+            if (token.equals("paramAssign")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportParameterAssignment, severity, isEnabling);
 				return;
 			}
@@ -4358,15 +4347,18 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			if (token.equals("raw")) {//$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportRawTypeReference, severity, isEnabling);
 				return;
-			} else if (/*token.equals("intfRedundant") ||*/ token.equals("redundantSuperinterface")) { //$NON-NLS-1$
+			}
+            if (/*token.equals("intfRedundant") ||*/ token.equals("redundantSuperinterface")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportRedundantSuperinterface, severity, isEnabling);
 				return;
-			} else if (token.equals("resource")) { //$NON-NLS-1$
+			}
+            if (token.equals("resource")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnclosedCloseable, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportPotentiallyUnclosedCloseable, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportExplicitlyClosedAutoCloseable, severity, isEnabling);
 				return;
-			} else if (token.equals("removal")) { //$NON-NLS-1$
+			}
+            if (token.equals("removal")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportTerminalDeprecation, severity, isEnabling);
 				this.options.put(
 					CompilerOptions.OPTION_ReportDeprecationInDeprecatedCode,
@@ -4383,22 +4375,28 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 					CompilerOptions.OPTION_ReportSpecialParameterHidingField,
 					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("syntheticAccess") || token.equals("synthetic-access")) { //$NON-NLS-1$ //$NON-NLS-2$
+			}
+            if (token.equals("syntheticAccess") || token.equals("synthetic-access")) { //$NON-NLS-1$ //$NON-NLS-2$
 				setSeverity(CompilerOptions.OPTION_ReportSyntheticAccessEmulation, severity, isEnabling);
 				return;
-			} else if (token.equals("staticReceiver")) { //$NON-NLS-1$
+			}
+            if (token.equals("staticReceiver")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNonStaticAccessToStatic, severity, isEnabling);
 				return;
-			} else 	if (/*token.equals("over-sync") ||*/ token.equals("syncOverride")) { //$NON-NLS-1$
+			}
+            if (/*token.equals("over-sync") ||*/ token.equals("syncOverride")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingSynchronizedOnInheritedMethod, severity, isEnabling);
 				return;
-			} else if (token.equals("semicolon")) {//$NON-NLS-1$
+			}
+            if (token.equals("semicolon")) {//$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportEmptyStatement, severity, isEnabling);
 				return;
-			} else if (token.equals("serial")) {//$NON-NLS-1$
+			}
+            if (token.equals("serial")) {//$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingSerialVersion, severity, isEnabling);
 				return;
-			} else if (token.equals("suppress")) {//$NON-NLS-1$
+			}
+            if (token.equals("suppress")) {//$NON-NLS-1$
 				switch(severity) {
 					case ProblemSeverities.Warning :
 						this.options.put(
@@ -4417,20 +4415,25 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 							isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				}
 				return;
-			} else if (token.equals("static-access")) { //$NON-NLS-1$
+			}
+            if (token.equals("static-access")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNonStaticAccessToStatic, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportIndirectStaticAccess, severity, isEnabling);
 				return;
-			} else if (token.equals("super")) { //$NON-NLS-1$
+			}
+            if (token.equals("super")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportOverridingMethodWithoutSuperInvocation, severity, isEnabling);
 				return;
-			} else if (token.equals("static-method")) { //$NON-NLS-1$
+			}
+            if (token.equals("static-method")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMethodCanBeStatic, severity, isEnabling);
 				return;
-			} else if (token.equals("switchDefault")) { //$NON-NLS-1$
+			}
+            if (token.equals("switchDefault")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingDefaultCase, severity, isEnabling);
 				return;
-			} else if (token.equals("syntacticAnalysis")) { //$NON-NLS-1$
+			}
+            if (token.equals("syntacticAnalysis")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_SyntacticNullAnalysisForFields,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
@@ -4455,7 +4458,8 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 
 				setSeverity(CompilerOptions.OPTION_ReportTasks, severity, isEnabling);
 				return;
-			} else if (token.equals("typeHiding")) { //$NON-NLS-1$
+			}
+            if (token.equals("typeHiding")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportTypeParameterHiding, severity, isEnabling);
 				return;
 			}
@@ -4464,61 +4468,78 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			if (token.equals("unusedLocal") || token.equals("unusedLocals")/*backward compatible*/) { //$NON-NLS-1$ //$NON-NLS-2$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedLocal, severity, isEnabling);
 				return;
-			} else if (token.equals("unusedArgument") || token.equals("unusedArguments")/*backward compatible*/) { //$NON-NLS-1$ //$NON-NLS-2$
+			}
+            if (token.equals("unusedArgument") || token.equals("unusedArguments")/*backward compatible*/) { //$NON-NLS-1$ //$NON-NLS-2$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedParameter, severity, isEnabling);
 				return;
-			} else if (token.equals("unusedExceptionParam")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedExceptionParam")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedExceptionParameter, severity, isEnabling);
 				return;
-			} else if (token.equals("unusedImport") || token.equals("unusedImports")/*backward compatible*/) { //$NON-NLS-1$ //$NON-NLS-2$
+			}
+            if (token.equals("unusedImport") || token.equals("unusedImports")/*backward compatible*/) { //$NON-NLS-1$ //$NON-NLS-2$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedImport, severity, isEnabling);
 				return;
-			} else if (token.equals("unusedAllocation")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedAllocation")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedObjectAllocation, severity, isEnabling);
 				return;
-			} else if (token.equals("unusedPrivate")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedPrivate")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedPrivateMember, severity, isEnabling);
 				return;
-			} else if (token.equals("unusedLabel")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedLabel")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedLabel, severity, isEnabling);
 				return;
-			} else if (token.equals("uselessTypeCheck")) {//$NON-NLS-1$
+			}
+            if (token.equals("uselessTypeCheck")) {//$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnnecessaryTypeCheck, severity, isEnabling);
 				return;
-			} else if (token.equals("unchecked") || token.equals("unsafe")) {//$NON-NLS-1$ //$NON-NLS-2$
+			}
+            if (token.equals("unchecked") || token.equals("unsafe")) {//$NON-NLS-1$ //$NON-NLS-2$
 				setSeverity(CompilerOptions.OPTION_ReportUncheckedTypeOperation, severity, isEnabling);
 				return;
-			} else if (token.equals("unlikelyCollectionMethodArgumentType")) { //$NON-NLS-1$
+			}
+            if (token.equals("unlikelyCollectionMethodArgumentType")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnlikelyCollectionMethodArgumentType, severity, isEnabling);
 				return;
-			} else if (token.equals("unlikelyEqualsArgumentType")) { //$NON-NLS-1$
+			}
+            if (token.equals("unlikelyEqualsArgumentType")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnlikelyEqualsArgumentType, severity, isEnabling);
 				return;
-			} else if (token.equals("unnecessaryElse")) {//$NON-NLS-1$
+			}
+            if (token.equals("unnecessaryElse")) {//$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnnecessaryElse, severity, isEnabling);
 				return;
-			} else if (token.equals("unusedThrown")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedThrown")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedDeclaredThrownException, severity, isEnabling);
 				return;
-			} else if (token.equals("unusedThrownWhenOverriding")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedThrownWhenOverriding")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_ReportUnusedDeclaredThrownExceptionWhenOverriding,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("unusedThrownIncludeDocComment")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedThrownIncludeDocComment")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_ReportUnusedDeclaredThrownExceptionIncludeDocCommentReference,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("unusedThrownExemptExceptionThrowable")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedThrownExemptExceptionThrowable")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_ReportUnusedDeclaredThrownExceptionExemptExceptionAndThrowable,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("unqualifiedField") || token.equals("unqualified-field-access")) { //$NON-NLS-1$ //$NON-NLS-2$
+			}
+            if (token.equals("unqualifiedField") || token.equals("unqualified-field-access")) { //$NON-NLS-1$ //$NON-NLS-2$
 				setSeverity(CompilerOptions.OPTION_ReportUnqualifiedFieldAccess, severity, isEnabling);
 				return;
-			} else if (token.equals("unused")) { //$NON-NLS-1$
+			}
+            if (token.equals("unused")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportDeadCode, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportRedundantSuperinterface, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportRedundantSpecificationOfTypeArguments, severity, isEnabling);
@@ -4533,32 +4554,39 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				setSeverity(CompilerOptions.OPTION_ReportUnusedTypeArgumentsForMethodInvocation, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportUnusedTypeParameter, severity,isEnabling);
 				return;
-			} else if (token.equals("unusedParam")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedParam")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedParameter, severity, isEnabling);
 				return;
-			} else if (token.equals("unusedTypeParameter")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedTypeParameter")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedTypeParameter, severity, isEnabling);
 				return;
-			} else if (token.equals("unusedParamIncludeDoc")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedParamIncludeDoc")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_ReportUnusedParameterIncludeDocCommentReference,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("unusedParamOverriding")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedParamOverriding")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_ReportUnusedParameterWhenOverridingConcrete,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			} else if (token.equals("unusedParamImplementing")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedParamImplementing")) { //$NON-NLS-1$
 				this.options.put(
 						CompilerOptions.OPTION_ReportUnusedParameterWhenImplementingAbstract,
 						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
-			}  else if (token.equals("unusedTypeArgs")) { //$NON-NLS-1$
+			}
+            if (token.equals("unusedTypeArgs")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedTypeArgumentsForMethodInvocation, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportRedundantSpecificationOfTypeArguments, severity, isEnabling);
 				return;
-			} else if (token.equals("unavoidableGenericProblems")) { //$NON-NLS-1$
+			}
+            if (token.equals("unavoidableGenericProblems")) { //$NON-NLS-1$
 				this.options.put(
 					CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems,
 					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
@@ -4596,6 +4624,7 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
  * @deprecated - use {@link #initialize(PrintWriter, PrintWriter, boolean, Map, CompilationProgress)} instead
  *                       e.g. initialize(outWriter, errWriter, systemExit, null, null)
  */
+@Deprecated
 protected void initialize(PrintWriter outWriter, PrintWriter errWriter, boolean systemExit) {
 	this.initialize(outWriter, errWriter, systemExit, null /* options */, null /* progress */);
 }
@@ -4603,6 +4632,7 @@ protected void initialize(PrintWriter outWriter, PrintWriter errWriter, boolean 
  * @deprecated - use {@link #initialize(PrintWriter, PrintWriter, boolean, Map, CompilationProgress)} instead
  *                       e.g. initialize(outWriter, errWriter, systemExit, customDefaultOptions, null)
  */
+@Deprecated
 protected void initialize(PrintWriter outWriter, PrintWriter errWriter, boolean systemExit, Map<String, String> customDefaultOptions) {
 	this.initialize(outWriter, errWriter, systemExit, customDefaultOptions, null /* progress */);
 }
@@ -4619,8 +4649,7 @@ protected void initialize(PrintWriter outWriter, PrintWriter errWriter, boolean 
 	if (customDefaultOptions != null) {
 		this.didSpecifySource = customDefaultOptions.get(CompilerOptions.OPTION_Source) != null;
 		this.didSpecifyTarget = customDefaultOptions.get(CompilerOptions.OPTION_TargetPlatform) != null;
-		for (Iterator<Map.Entry<String, String>> iter = customDefaultOptions.entrySet().iterator(); iter.hasNext();) {
-			Map.Entry<String, String> entry = iter.next();
+		for (Entry<String, String> entry : customDefaultOptions.entrySet()) {
 			this.options.put(entry.getKey(), entry.getValue());
 		}
 	} else {
@@ -4650,10 +4679,7 @@ protected void initializeAnnotationProcessorManager() {
 	}
 }
 private static boolean isParentOf(char[] folderName, char[] fileName) {
-	if (folderName.length >= fileName.length) {
-		return false;
-	}
-	if (fileName[folderName.length] != '\\' && fileName[folderName.length] != '/') {
+	if (folderName.length >= fileName.length || fileName[folderName.length] != '\\' && fileName[folderName.length] != '/') {
 		return false;
 	}
 	for (int i = folderName.length - 1; i >= 0; i--) {
@@ -4666,7 +4692,7 @@ private static boolean isParentOf(char[] folderName, char[] fileName) {
 // Dump classfiles onto disk for all compilation units that where successful
 // and do not carry a -d none spec, either directly or inherited from Main.
 public void outputClassFiles(CompilationResult unitResult) {
-	if (!((unitResult == null) || (unitResult.hasErrors() && !this.proceedOnError))) {
+	if (unitResult != null && (!unitResult.hasErrors() || this.proceedOnError)) {
 		ClassFile[] classFiles = unitResult.getClassFiles();
 		String currentDestinationPath = null;
 		boolean generateClasspathStructure = false;
@@ -4685,9 +4711,7 @@ public void outputClassFiles(CompilationResult unitResult) {
 			generateClasspathStructure = true;
 		} // else leave currentDestinationPath null
 		if (currentDestinationPath != null) {
-			for (int i = 0, fileCount = classFiles.length; i < fileCount; i++) {
-				// retrieve the key and the corresponding classfile
-				ClassFile classFile = classFiles[i];
+			for (ClassFile classFile : classFiles) {
 				char[] filename = classFile.fileName();
 				int length = filename.length;
 				char[] relativeName = new char[length + 6];
@@ -4795,14 +4819,14 @@ public void printUsage() {
 }
 private void printUsage(String sectionID) {
 	this.logger.logUsage(
-		this.bind(
-			sectionID,
-			new String[] {
-				System.getProperty("path.separator"), //$NON-NLS-1$
-				this.bind("compiler.name"), //$NON-NLS-1$
-				this.bind("compiler.version"), //$NON-NLS-1$
-				this.bind("compiler.copyright") //$NON-NLS-1$
-			}));
+    this.bind(
+    sectionID,
+    new String[] {
+    File.pathSeparator,
+    this.bind("compiler.name"), //$NON-NLS-1$
+    this.bind("compiler.version"), //$NON-NLS-1$
+    this.bind("compiler.copyright") //$NON-NLS-1$
+    }));
 	this.logger.flush();
 }
 private void initRootModules(LookupEnvironment environment, FileSystem fileSystem) {
@@ -4873,15 +4897,14 @@ private ReferenceBinding[] processClassNames(LookupEnvironment environment) {
 		}
 		ModuleBinding mod = modules[i];
 		ReferenceBinding type = mod != null ? environment.getType(compoundName, mod) : environment.getType(compoundName);
-		if (type != null && type.isValidBinding()) {
-			if (type.isBinaryBinding()) {
-				referenceBindings[i] = type;
-				type.superclass();
-			}
-		} else {
+		if (type == null || !type.isValidBinding()) {
 			throw new IllegalArgumentException(
 					this.bind("configure.invalidClassName", this.classNames[i]));//$NON-NLS-1$
 		}
+        if (type.isBinaryBinding()) {
+        	referenceBindings[i] = type;
+        	type.superclass();
+        }
 	}
 	return referenceBindings;
 }
@@ -4992,20 +5015,13 @@ public void processPathEntries(final int defaultSize, final ArrayList<FileSystem
 				state = error;
 			}
 		} else if (token.equals("]")) { //$NON-NLS-1$
-			switch (state) {
-			case rulesReadyToClose:
-				state = readyToCloseEndingWithRules;
-				break;
-			case destinationPathReadyToClose:
-				state = readyToCloseEndingWithDestinationPath;
-				break;
-			case bracketOpened:
-				state = bracketClosed;
-				break;
-			case bracketClosed:
-			default:
-				state = error;
-			}
+			state = switch (state) {
+                case rulesReadyToClose -> readyToCloseEndingWithRules;
+                case destinationPathReadyToClose -> readyToCloseEndingWithDestinationPath;
+                case bracketOpened -> bracketClosed;
+                case bracketClosed -> error;
+                default -> error;
+            };
 		} else {
 			// regular word
 			switch (state) {
@@ -5129,14 +5145,14 @@ private int processPaths(String[] args, int index, String currentArg, ArrayList<
 				currentPath.append(nextArg);
 				paths.add(currentPath.toString());
 				return localIndex - index;
-			} else if (count < 0) {
+			}
+            if (count < 0) {
 				throw new IllegalArgumentException(
 						this.bind("configure.unexpectedBracket", //$NON-NLS-1$
 									nextArg));
-			} else {
-				currentPath.append(' ');
-				currentPath.append(nextArg);
 			}
+            currentPath.append(' ');
+            currentPath.append(nextArg);
 		}
 
 	}
@@ -5187,14 +5203,14 @@ private int processPaths(String[] args, int index, String currentArg, String[] p
 				currentPath.append(nextArg);
 				paths[0] = currentPath.toString();
 				return localIndex - index;
-			} else if (count < 0) {
+			}
+            if (count < 0) {
 				throw new IllegalArgumentException(
 						this.bind("configure.unexpectedBracket", //$NON-NLS-1$
 									currentArg));
-			} else {
-				currentPath.append(' ');
-				currentPath.append(nextArg);
 			}
+            currentPath.append(' ');
+            currentPath.append(nextArg);
 		}
 
 	}
@@ -5251,7 +5267,7 @@ protected void setPaths(ArrayList<String> bootclasspaths,
 
 	if (this.releaseVersion != null && this.complianceLevel < jdkLevel) {
 		// TODO: Revisit for access rules
-		allPaths = new ArrayList<Classpath>();
+		allPaths = new ArrayList<>();
 		allPaths.add(
 				FileSystem.getOlderSystemRelease(this.javaHomeCache.getAbsolutePath(), this.releaseVersion, null));
 	} else {
@@ -5312,8 +5328,7 @@ public final static boolean shouldIgnoreOptionalProblems(char[][] folderNames, c
 	if (folderNames == null || fileName == null) {
 		return false;
 	}
-	for (int i = 0, max = folderNames.length; i < max; i++) {
-		char[] folderName = folderNames[i];
+	for (char[] folderName : folderNames) {
 		if (isParentOf(folderName, fileName)) {
 			return true;
 		}
@@ -5354,9 +5369,7 @@ protected void validateOptions(boolean didSpecifyCompliance) {
 				Object source = this.options.get(CompilerOptions.OPTION_Source);
 				if (CompilerOptions.VERSION_1_3.equals(source)) {
 					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_2);
-				} else if (CompilerOptions.VERSION_1_4.equals(source)) {
-					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_4);
-				}
+				} else if (CompilerOptions.VERSION_1_4.equals(source) && !this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_4);
 			} else {
 				this.options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_3);
 				if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_2);
@@ -5367,9 +5380,7 @@ protected void validateOptions(boolean didSpecifyCompliance) {
 				if (CompilerOptions.VERSION_1_3.equals(source)
 						|| CompilerOptions.VERSION_1_4.equals(source)) {
 					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_4);
-				} else if (CompilerOptions.VERSION_1_5.equals(source)) {
-					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_5);
-				}
+				} else if (CompilerOptions.VERSION_1_5.equals(source) && !this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_5);
 			} else {
 				this.options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_5);
 				if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_5);
@@ -5380,10 +5391,8 @@ protected void validateOptions(boolean didSpecifyCompliance) {
 				if (CompilerOptions.VERSION_1_3.equals(source)
 						|| CompilerOptions.VERSION_1_4.equals(source)) {
 					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_4);
-				} else if (CompilerOptions.VERSION_1_5.equals(source)
-						|| CompilerOptions.VERSION_1_6.equals(source)) {
-					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_6);
-				}
+				} else if ((CompilerOptions.VERSION_1_5.equals(source)
+                		|| CompilerOptions.VERSION_1_6.equals(source)) && !this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_6);
 			} else {
 				this.options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_6);
 				if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_6);
@@ -5397,9 +5406,7 @@ protected void validateOptions(boolean didSpecifyCompliance) {
 				} else if (CompilerOptions.VERSION_1_5.equals(source)
 						|| CompilerOptions.VERSION_1_6.equals(source)) {
 					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_6);
-				} else if (CompilerOptions.VERSION_1_7.equals(source)) {
-					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_7);
-				}
+				} else if (CompilerOptions.VERSION_1_7.equals(source) && !this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_7);
 			} else {
 				this.options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_7);
 				if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_7);
@@ -5415,9 +5422,7 @@ protected void validateOptions(boolean didSpecifyCompliance) {
 					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_6);
 				} else if (CompilerOptions.VERSION_1_7.equals(source)) {
 					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_7);
-				} else if (CompilerOptions.VERSION_1_8.equals(source)) {
-					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_8);
-				}
+				} else if (CompilerOptions.VERSION_1_8.equals(source) && !this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_8);
 			} else {
 				this.options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_8);
 				if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_8);
@@ -5435,9 +5440,7 @@ protected void validateOptions(boolean didSpecifyCompliance) {
 					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_7);
 				} else if (CompilerOptions.VERSION_1_8.equals(source)) {
 					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_8);
-				} else if (CompilerOptions.VERSION_9.equals(source)) {
-					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_9);
-				}
+				} else if (CompilerOptions.VERSION_9.equals(source) && !this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_9);
 			} else {
 				this.options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_9);
 				if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_9);
@@ -5457,37 +5460,29 @@ protected void validateOptions(boolean didSpecifyCompliance) {
 					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_8);
 				} else if (CompilerOptions.VERSION_9.equals(source)) {
 					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_9);
-				} else if (CompilerOptions.VERSION_10.equals(source)) {
-					if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_10);
-				}
+				} else if (CompilerOptions.VERSION_10.equals(source) && !this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_10);
 			} else {
 				this.options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_10);
 				if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_10);
 			}
-		} else {
-			if (!this.didSpecifyTarget) {
-				if (this.didSpecifySource) {
-					String source = this.options.get(CompilerOptions.OPTION_Source);
-					if (CompilerOptions.VERSION_1_3.equals(source)
-							|| CompilerOptions.VERSION_1_4.equals(source)) {
-						if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_4);
-					} else if (CompilerOptions.VERSION_1_5.equals(source)
-							|| CompilerOptions.VERSION_1_6.equals(source)) {
-						this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_6);
-					} else {
-						// 1.3 is the lowest version that can be specified as -source
-						// The following check will ensure '0' is ignored.
-						if (CompilerOptions.versionToJdkLevel(source) >= ClassFileConstants.JDK1_7)
-							this.options.put(CompilerOptions.OPTION_TargetPlatform, source);
-					}
-				} else {
-					if (CompilerOptions.versionToJdkLevel(version) > ClassFileConstants.JDK10) {
-						this.options.put(CompilerOptions.OPTION_Source, version);
-						this.options.put(CompilerOptions.OPTION_TargetPlatform, version);
-					}
-				}
-			}
-		}
+		} else if (!this.didSpecifyTarget) {
+        	if (this.didSpecifySource) {
+        		String source = this.options.get(CompilerOptions.OPTION_Source);
+        		if (CompilerOptions.VERSION_1_3.equals(source)
+        				|| CompilerOptions.VERSION_1_4.equals(source)) {
+        			if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_4);
+        		} else if (CompilerOptions.VERSION_1_5.equals(source)
+        				|| CompilerOptions.VERSION_1_6.equals(source)) {
+        			this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_6);
+        		} else // 1.3 is the lowest version that can be specified as -source
+                // The following check will ensure '0' is ignored.
+                if (CompilerOptions.versionToJdkLevel(source) >= ClassFileConstants.JDK1_7)
+                	this.options.put(CompilerOptions.OPTION_TargetPlatform, source);
+        	} else if (CompilerOptions.versionToJdkLevel(version) > ClassFileConstants.JDK10) {
+            	this.options.put(CompilerOptions.OPTION_Source, version);
+            	this.options.put(CompilerOptions.OPTION_TargetPlatform, version);
+            }
+        }
 
 	} else if (this.didSpecifySource) {
 		String version = this.options.get(CompilerOptions.OPTION_Source);
@@ -5513,12 +5508,10 @@ protected void validateOptions(boolean didSpecifyCompliance) {
 		} else if (CompilerOptions.VERSION_10.equals(version)) {
 			if (!didSpecifyCompliance) this.options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_10);
 			if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_10);
-		} else {
-			if (CompilerOptions.versionToJdkLevel(version) > ClassFileConstants.JDK10) {
-				if (!didSpecifyCompliance) this.options.put(CompilerOptions.OPTION_Compliance, version);
-				if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, version);
-			}
-		}
+		} else if (CompilerOptions.versionToJdkLevel(version) > ClassFileConstants.JDK10) {
+        	if (!didSpecifyCompliance) this.options.put(CompilerOptions.OPTION_Compliance, version);
+        	if (!this.didSpecifyTarget) this.options.put(CompilerOptions.OPTION_TargetPlatform, version);
+        }
 	}
 
 	final String sourceVersion = this.options.get(CompilerOptions.OPTION_Source);
@@ -5530,35 +5523,40 @@ protected void validateOptions(boolean didSpecifyCompliance) {
 			&& this.complianceLevel < ClassFileConstants.JDK10) {
 		// compliance must be 10 if source is 10
 		throw new IllegalArgumentException(this.bind("configure.incompatibleComplianceForSource", this.options.get(CompilerOptions.OPTION_Compliance), CompilerOptions.VERSION_10)); //$NON-NLS-1$
-	} else if (sourceVersion.equals(CompilerOptions.VERSION_9)
+	}
+    if (sourceVersion.equals(CompilerOptions.VERSION_9)
 			&& this.complianceLevel < ClassFileConstants.JDK9) {
 		// compliance must be 9 if source is 9
 		throw new IllegalArgumentException(this.bind("configure.incompatibleComplianceForSource", this.options.get(CompilerOptions.OPTION_Compliance), CompilerOptions.VERSION_9)); //$NON-NLS-1$
-	} else if (sourceVersion.equals(CompilerOptions.VERSION_1_8)
+	}
+    if (sourceVersion.equals(CompilerOptions.VERSION_1_8)
 			&& this.complianceLevel < ClassFileConstants.JDK1_8) {
 		// compliance must be 1.8 if source is 1.8
 		throw new IllegalArgumentException(this.bind("configure.incompatibleComplianceForSource", this.options.get(CompilerOptions.OPTION_Compliance), CompilerOptions.VERSION_1_8)); //$NON-NLS-1$
-	} else if (sourceVersion.equals(CompilerOptions.VERSION_1_7)
+	}
+    if (sourceVersion.equals(CompilerOptions.VERSION_1_7)
 			&& this.complianceLevel < ClassFileConstants.JDK1_7) {
 		// compliance must be 1.7 if source is 1.7
 		throw new IllegalArgumentException(this.bind("configure.incompatibleComplianceForSource", this.options.get(CompilerOptions.OPTION_Compliance), CompilerOptions.VERSION_1_7)); //$NON-NLS-1$
-	} else if (sourceVersion.equals(CompilerOptions.VERSION_1_6)
+	}
+    if (sourceVersion.equals(CompilerOptions.VERSION_1_6)
 			&& this.complianceLevel < ClassFileConstants.JDK1_6) {
 		// compliance must be 1.6 if source is 1.6
 		throw new IllegalArgumentException(this.bind("configure.incompatibleComplianceForSource", this.options.get(CompilerOptions.OPTION_Compliance), CompilerOptions.VERSION_1_6)); //$NON-NLS-1$
-	} else if (sourceVersion.equals(CompilerOptions.VERSION_1_5)
+	}
+    if (sourceVersion.equals(CompilerOptions.VERSION_1_5)
 			&& this.complianceLevel < ClassFileConstants.JDK1_5) {
 		// compliance must be 1.5 if source is 1.5
 		throw new IllegalArgumentException(this.bind("configure.incompatibleComplianceForSource", this.options.get(CompilerOptions.OPTION_Compliance), CompilerOptions.VERSION_1_5)); //$NON-NLS-1$
-	} else if (sourceVersion.equals(CompilerOptions.VERSION_1_4)
+	}
+    if (sourceVersion.equals(CompilerOptions.VERSION_1_4)
 			&& this.complianceLevel < ClassFileConstants.JDK1_4) {
 		// compliance must be 1.4 if source is 1.4
 		throw new IllegalArgumentException(this.bind("configure.incompatibleComplianceForSource", this.options.get(CompilerOptions.OPTION_Compliance), CompilerOptions.VERSION_1_4)); //$NON-NLS-1$
-	} else {
-		long ver = CompilerOptions.versionToJdkLevel(sourceVersion);
-		if(this.complianceLevel < ver)
-			throw new IllegalArgumentException(this.bind("configure.incompatibleComplianceForSource", this.options.get(CompilerOptions.OPTION_Compliance), sourceVersion)); //$NON-NLS-1$
 	}
+    long ver = CompilerOptions.versionToJdkLevel(sourceVersion);
+    if(this.complianceLevel < ver)
+    	throw new IllegalArgumentException(this.bind("configure.incompatibleComplianceForSource", this.options.get(CompilerOptions.OPTION_Compliance), sourceVersion)); //$NON-NLS-1$
 	if (this.enablePreview && this.complianceLevel != ClassFileConstants.getLatestJDKLevel()) {
 		throw new IllegalArgumentException(this.bind("configure.unsupportedPreview")); //$NON-NLS-1$
 	}

@@ -79,8 +79,7 @@ public class CDSBundleFile extends BundleFileWrapper {
 			return super.getEntry(path);
 		}
 
-		BundleEntry be = new CDSBundleEntry(path, classbytes, this);
-		return be;
+		return new CDSBundleEntry(path, classbytes, this);
 	}
 
 	BundleEntry getWrappedEntry(String path) {

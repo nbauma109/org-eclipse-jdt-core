@@ -53,10 +53,8 @@ public class ReferenceURLConnection extends URLConnection {
 			path = url.getPath().substring(5);
 			File file = new File(path);
 
-			if (!file.isAbsolute()) {
-				if (installPath != null)
-					file = makeAbsolute(installPath, file);
-			}
+			if (!file.isAbsolute() && installPath != null)
+            	file = makeAbsolute(installPath, file);
 
 			file = LocationHelper.decodePath(file);
 

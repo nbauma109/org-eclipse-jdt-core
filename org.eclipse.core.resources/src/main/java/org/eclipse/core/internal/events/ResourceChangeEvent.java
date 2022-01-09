@@ -21,7 +21,7 @@ import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.IPath;
 
 public class ResourceChangeEvent extends EventObject implements IResourceChangeEvent {
-	private static final IMarkerDelta[] NO_MARKER_DELTAS = new IMarkerDelta[0];
+	private static final IMarkerDelta[] NO_MARKER_DELTAS = {};
 	private static final long serialVersionUID = 1L;
 	IResourceDelta delta;
 	IResource resource;

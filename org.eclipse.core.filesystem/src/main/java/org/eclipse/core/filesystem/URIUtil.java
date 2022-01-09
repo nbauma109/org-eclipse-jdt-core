@@ -135,7 +135,7 @@ public class URIUtil {
 		final int length = pathString.length();
 		StringBuilder pathBuf = new StringBuilder(length + 1);
 		//mark if path is relative
-		if (length > 0 && (pathString.charAt(0) != '/') && forceAbsolute) {
+		if (length > 0 && pathString.charAt(0) != '/' && forceAbsolute) {
 			pathBuf.append('/');
 		}
 		//additional double-slash for UNC paths to distinguish from host separator
@@ -144,7 +144,7 @@ public class URIUtil {
 		pathBuf.append(pathString);
 		try {
 			String scheme = null;
-			if (length > 0 && (pathBuf.charAt(0) == '/')) {
+			if (length > 0 && pathBuf.charAt(0) == '/') {
 				scheme = EFS.SCHEME_FILE;
 			}
 			return new URI(scheme, null, pathBuf.toString(), null);
@@ -178,6 +178,5 @@ public class URIUtil {
 	 * Private constructor to prevent instantiation.
 	 */
 	private URIUtil() {
-		super();
 	}
 }

@@ -44,8 +44,7 @@ public class ConsoleManager {
 	}
 
 	public static ConsoleManager startConsole(BundleContext context, EquinoxConfiguration equinoxConfig) {
-		ConsoleManager consoleManager = new ConsoleManager(context, equinoxConfig);
-		return consoleManager;
+		return new ConsoleManager(context, equinoxConfig);
 	}
 
 	@SuppressWarnings("deprecation")

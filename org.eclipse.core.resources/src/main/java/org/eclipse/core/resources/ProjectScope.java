@@ -56,7 +56,6 @@ public final class ProjectScope extends AbstractScope {
 	 * @exception IllegalArgumentException if the project is <code>null</code>
 	 */
 	public ProjectScope(IProject context) {
-		super();
 		if (context == null)
 			throw new IllegalArgumentException();
 		this.project = context;
@@ -87,9 +86,7 @@ public final class ProjectScope extends AbstractScope {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
-			return false;
-		if (!(obj instanceof ProjectScope))
+		if (!super.equals(obj) || !(obj instanceof ProjectScope))
 			return false;
 		ProjectScope other = (ProjectScope) obj;
 		return project.equals(other.project);

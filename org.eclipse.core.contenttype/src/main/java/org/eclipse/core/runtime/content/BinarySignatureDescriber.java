@@ -68,9 +68,7 @@ public final class BinarySignatureDescriber implements IContentDescriber, IExecu
 	public int describe(InputStream contents, IContentDescription description) throws IOException {
 		byte[] buffer = new byte[signature.length];
 		int notValid = required ? INVALID : INDETERMINATE;
-		if (contents.skip(offset) < offset)
-			return notValid;
-		if (contents.read(buffer) != buffer.length)
+		if (contents.skip(offset) < offset || contents.read(buffer) != buffer.length)
 			return notValid;
 		for (int i = 0; i < signature.length; i++)
 			if (signature[i] != buffer[i])
@@ -110,10 +108,10 @@ public final class BinarySignatureDescriber implements IContentDescriber, IExecu
 		List<Byte> bytes = new ArrayList<>();
 		StringTokenizer tokenizer = new StringTokenizer(data, " \t\n\r\f,"); //$NON-NLS-1$
 		while (tokenizer.hasMoreTokens())
-			bytes.add(Byte.valueOf((byte) Integer.parseInt(tokenizer.nextToken().trim(), 16)));
+			bytes.add((byte) Integer.parseInt(tokenizer.nextToken().trim(), 16));
 		byte[] signature = new byte[bytes.size()];
 		for (int i = 0; i < signature.length; i++)
-			signature[i] = bytes.get(i).byteValue();
+			signature[i] = bytes.get(i);
 		return signature;
 	}
 }

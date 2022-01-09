@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IMarker;
  * @see ICodeAssist
  * @deprecated Use {@link CompletionRequestor} instead.
  */
+@Deprecated
 public interface ICodeCompletionRequestor {
 /**
  * Code assist notification of a class completion.

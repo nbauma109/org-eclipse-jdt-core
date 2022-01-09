@@ -23,6 +23,7 @@ package org.eclipse.jdt.core;
  * @since 2.0
  * @deprecated Use {@link org.eclipse.jdt.core.formatter.CodeFormatter} instead (note: options have changed)
  */
+@Deprecated
 public interface ICodeFormatter {
 
 	/**

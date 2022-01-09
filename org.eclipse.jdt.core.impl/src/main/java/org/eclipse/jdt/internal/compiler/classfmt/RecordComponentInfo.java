@@ -88,7 +88,7 @@ public static RecordComponentInfo createComponent(byte[] classFileBytes, int[] o
 					}
 			}
 		}
-		readOffset += (6 + componentInfo.u4At(readOffset + 2));
+		readOffset += 6 + componentInfo.u4At(readOffset + 2);
 	}
 	componentInfo.attributeBytes = readOffset;
 

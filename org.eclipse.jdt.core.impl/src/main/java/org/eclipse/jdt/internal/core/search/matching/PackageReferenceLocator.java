@@ -93,7 +93,7 @@ public int match(Reference node, MatchingNodeSet nodeSet) { // interested in Qua
 @Override
 public int match(TypeReference node, MatchingNodeSet nodeSet) { // interested in QualifiedTypeReference only
 	if (node instanceof JavadocSingleTypeReference) {
-		char[][] tokens = new char[][] { ((JavadocSingleTypeReference) node).token };
+		char[][] tokens = { ((JavadocSingleTypeReference) node).token };
 		return nodeSet.addMatch(node, matchLevelForTokens(tokens));
 	}
 	if (!(node instanceof QualifiedTypeReference)) return IMPOSSIBLE_MATCH;
@@ -130,11 +130,8 @@ protected int matchLevelForTokens(char[][] tokens) {
 
 		case SearchPattern.R_CAMELCASE_MATCH:
 			char[] packageName = CharOperation.concatWith(tokens, '.');
-			if (CharOperation.camelCaseMatch(this.pattern.pkgName, packageName, false)) {
-				return POSSIBLE_MATCH;
-			}
 			// only test case insensitive as CamelCase already verified prefix case sensitive
-			if (!this.isCaseSensitive && CharOperation.prefixEquals(this.pattern.pkgName, packageName, false)) {
+			if (CharOperation.camelCaseMatch(this.pattern.pkgName, packageName, false) || !this.isCaseSensitive && CharOperation.prefixEquals(this.pattern.pkgName, packageName, false)) {
 				return POSSIBLE_MATCH;
 			}
 			break;
@@ -173,25 +170,23 @@ protected void matchLevelAndReportImportRef(ImportReference importRef, Binding b
 protected void matchReportImportRef(ImportReference importRef, Binding binding, IJavaElement element, int accuracy, MatchLocator locator) throws CoreException {
 	if (binding == null) {
 		this.matchReportReference(importRef, element, null/*no binding*/, accuracy, locator);
-	} else {
-		if (locator.encloses(element)) {
-			long[] positions = importRef.sourcePositions;
-			int last = positions.length - 1;
-			if (binding instanceof ProblemReferenceBinding)
-				binding = ((ProblemReferenceBinding) binding).closestMatch();
-			if (binding instanceof ReferenceBinding) {
-				PackageBinding pkgBinding = ((ReferenceBinding) binding).fPackage;
-				if (pkgBinding != null)
-					last = pkgBinding.compoundName.length;
-			}
-			if (binding instanceof PackageBinding)
-				last = ((PackageBinding) binding).compoundName.length;
-			int start = (int) (positions[0] >>> 32);
-			int end = (int) positions[last > 0 ? last - 1 : 0];
-			this.match = locator.newPackageReferenceMatch(element, accuracy, start, end-start+1, importRef);
-			locator.report(this.match);
-		}
-	}
+	} else if (locator.encloses(element)) {
+    	long[] positions = importRef.sourcePositions;
+    	int last = positions.length - 1;
+    	if (binding instanceof ProblemReferenceBinding)
+    		binding = ((ProblemReferenceBinding) binding).closestMatch();
+    	if (binding instanceof ReferenceBinding) {
+    		PackageBinding pkgBinding = ((ReferenceBinding) binding).fPackage;
+    		if (pkgBinding != null)
+    			last = pkgBinding.compoundName.length;
+    	}
+    	if (binding instanceof PackageBinding)
+    		last = ((PackageBinding) binding).compoundName.length;
+    	int start = (int) (positions[0] >>> 32);
+    	int end = (int) positions[last > 0 ? last - 1 : 0];
+    	this.match = locator.newPackageReferenceMatch(element, accuracy, start, end-start+1, importRef);
+    	locator.report(this.match);
+    }
 }
 @Override
 protected void matchReportReference(ASTNode reference, IJavaElement element, Binding elementBinding, int accuracy, MatchLocator locator) throws CoreException {
@@ -240,7 +235,7 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
 		} else if (reference instanceof JavadocSingleTypeReference) {
 			JavadocSingleTypeReference jsTypeRef = (JavadocSingleTypeReference) reference;
 			positions = new long[1];
-			positions[0] = (((long)jsTypeRef.sourceStart) << 32) + jsTypeRef.sourceEnd;
+			positions[0] = ((long)jsTypeRef.sourceStart << 32) + jsTypeRef.sourceEnd;
 			typeBinding = jsTypeRef.resolvedType;
 		}
 		if (positions == null) return;
@@ -271,7 +266,7 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
 	if (last == 0) return;
 	if (last > positions.length) last = positions.length;
 	int sourceStart = (int) (positions[0] >>> 32);
-	int sourceEnd = ((int) positions[last - 1]);
+	int sourceEnd = (int) positions[last - 1];
 	PackageReferenceMatch packageReferenceMatch = locator.newPackageReferenceMatch(element, accuracy, sourceStart, sourceEnd-sourceStart+1, reference);
 	packageReferenceMatch.setLocalElement(localElement);
 	this.match = packageReferenceMatch;
@@ -325,11 +320,9 @@ public int resolveLevel(Binding binding) {
 		}
 	}
 	if (compoundName != null && matchesName(this.pattern.pkgName, CharOperation.concatWith(compoundName, '.'))) {
-		if (this.pattern.focus instanceof IPackageFragment && binding instanceof ReferenceBinding) {
-			// check that type is located inside this instance of a package fragment
-			if (!isDeclaringPackageFragment((IPackageFragment) this.pattern.focus, (ReferenceBinding)binding))
-				return IMPOSSIBLE_MATCH;
-		}
+		// check that type is located inside this instance of a package fragment
+        if (this.pattern.focus instanceof IPackageFragment && binding instanceof ReferenceBinding && !isDeclaringPackageFragment((IPackageFragment) this.pattern.focus, (ReferenceBinding)binding))
+        	return IMPOSSIBLE_MATCH;
 		return ACCURATE_MATCH;
 	}
 	return IMPOSSIBLE_MATCH;

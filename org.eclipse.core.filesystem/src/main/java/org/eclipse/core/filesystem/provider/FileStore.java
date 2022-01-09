@@ -295,7 +295,7 @@ public abstract class FileStore extends PlatformObject implements IFileStore {
 			segment = path.segment(i);
 			if (segment.equals(".")) //$NON-NLS-1$
 				continue;
-			else if (segment.equals("..") && result.getParent() != null) //$NON-NLS-1$
+            if (segment.equals("..") && result.getParent() != null) //$NON-NLS-1$
 				result = result.getParent();
 			else
 				result = result.getChild(segment);

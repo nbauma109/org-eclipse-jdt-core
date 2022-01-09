@@ -137,7 +137,7 @@ public Map<String, ReferenceCollection> getReferences() {
 StringSet getStructurallyChangedTypes(State prereqState) {
 	if (prereqState != null && prereqState.previousStructuralBuildTime > 0) {
 		Object o = this.structuralBuildTimes.get(prereqState.javaProjectName);
-		long previous = o == null ? 0 : ((Long) o).longValue();
+		long previous = o == null ? 0 : (Long) o;
 		if (previous == prereqState.previousStructuralBuildTime)
 			return prereqState.structurallyChangedTypes;
 	}
@@ -223,8 +223,8 @@ void removePackage(IResourceDelta sourceDelta) {
 	switch(resource.getType()) {
 		case IResource.FOLDER :
 			IResourceDelta[] children = sourceDelta.getAffectedChildren();
-			for (int i = 0, l = children.length; i < l; i++)
-				removePackage(children[i]);
+			for (IResourceDelta child : children)
+                removePackage(child);
 			return;
 		case IResource.FILE :
 			IPath typeLocatorPath = resource.getProjectRelativePath();
@@ -477,7 +477,7 @@ void tagAsStructurallyChanged() {
 boolean wasStructurallyChanged(IProject prereqProject, State prereqState) {
 	if (prereqState != null) {
 		Object o = this.structuralBuildTimes.get(prereqProject.getName());
-		long previous = o == null ? 0 : ((Long) o).longValue();
+		long previous = o == null ? 0 : (Long) o;
         return previous != prereqState.lastStructuralBuildTime;
 	}
 	return true;
@@ -549,7 +549,7 @@ void write(DataOutputStream out) throws IOException {
 			if (keyTable[i] != null) {
 				length--;
 				out.writeUTF((String) keyTable[i]);
-				out.writeLong(((Long) valueTable[i]).longValue());
+				out.writeLong((Long) valueTable[i]);
 			}
 		}
 		if (JavaBuilder.DEBUG && length != 0)
@@ -589,7 +589,7 @@ void write(DataOutputStream out) throws IOException {
 				length--;
 				out.writeUTF(key);
 				Integer index = (Integer) internedTypeLocators.get(value);
-				out.writeInt(index.intValue());
+				out.writeInt(index);
 			}
 		}
 		if (JavaBuilder.DEBUG && length != 0)
@@ -606,26 +606,22 @@ void write(DataOutputStream out) throws IOException {
 	SimpleLookupTable internedSimpleNames = new SimpleLookupTable(31);
 	for (ReferenceCollection collection : this.references.values()) {
 		char[][] rNames = collection.rootReferences;
-		for (int j = 0, m = rNames.length; j < m; j++) {
-			char[] rName = rNames[j];
+		for (char[] rName : rNames) {
 			if (!internedRootNames.containsKey(rName)) // remember the names have been interned
 				internedRootNames.put(rName, Integer.valueOf(internedRootNames.elementSize));
 		}
 		char[][][] qNames = collection.qualifiedNameReferences;
-		for (int j = 0, m = qNames.length; j < m; j++) {
-			char[][] qName = qNames[j];
+		for (char[][] qName : qNames) {
 			if (!internedQualifiedNames.containsKey(qName)) { // remember the names have been interned
 				internedQualifiedNames.put(qName, Integer.valueOf(internedQualifiedNames.elementSize));
-				for (int k = 0, n = qName.length; k < n; k++) {
-					char[] sName = qName[k];
+				for (char[] sName : qName) {
 					if (!internedSimpleNames.containsKey(sName)) // remember the names have been interned
 						internedSimpleNames.put(sName, Integer.valueOf(internedSimpleNames.elementSize));
 				}
 			}
 		}
 		char[][] sNames = collection.simpleNameReferences;
-		for (int j = 0, m = sNames.length; j < m; j++) {
-			char[] sName = sNames[j];
+		for (char[] sName : sNames) {
 			if (!internedSimpleNames.containsKey(sName)) // remember the names have been interned
 				internedSimpleNames.put(sName, Integer.valueOf(internedSimpleNames.elementSize));
 		}
@@ -635,7 +631,7 @@ void write(DataOutputStream out) throws IOException {
 	Object[] positions = internedRootNames.valueTable;
 	for (int i = positions.length; --i >= 0; ) {
 		if (positions[i] != null) {
-			int index = ((Integer) positions[i]).intValue();
+			int index = (Integer) positions[i];
 			internedArray[index] = (char[]) rootNames[i];
 		}
 	}
@@ -646,7 +642,7 @@ void write(DataOutputStream out) throws IOException {
 	positions = internedSimpleNames.valueTable;
 	for (int i = positions.length; --i >= 0; ) {
 		if (positions[i] != null) {
-			int index = ((Integer) positions[i]).intValue();
+			int index = (Integer) positions[i];
 			internedArray[index] = (char[]) simpleNames[i];
 		}
 	}
@@ -657,7 +653,7 @@ void write(DataOutputStream out) throws IOException {
 	positions = internedQualifiedNames.valueTable;
 	for (int i = positions.length; --i >= 0; ) {
 		if (positions[i] != null) {
-			int index = ((Integer) positions[i]).intValue();
+			int index = (Integer) positions[i];
 			internedQArray[index] = (char[][]) qualifiedNames[i];
 		}
 	}
@@ -668,7 +664,7 @@ void write(DataOutputStream out) throws IOException {
 		out.writeInt(qLength);
 		for (int j = 0; j < qLength; j++) {
 			Integer index = (Integer) internedSimpleNames.get(qName[j]);
-			out.writeInt(index.intValue());
+			out.writeInt(index);
 		}
 	}
 
@@ -683,7 +679,7 @@ void write(DataOutputStream out) throws IOException {
 			String key = entry.getKey();
 			length--;
 			Integer index = (Integer) internedTypeLocators.get(key);
-			out.writeInt(index.intValue());
+			out.writeInt(index);
 			ReferenceCollection collection = entry.getValue();
 			if (collection instanceof AdditionalTypeCollection) {
 				out.writeByte(1);
@@ -697,21 +693,21 @@ void write(DataOutputStream out) throws IOException {
 			out.writeInt(qLength);
 			for (int j = 0; j < qLength; j++) {
 				index = (Integer) internedQualifiedNames.get(qNames[j]);
-				out.writeInt(index.intValue());
+				out.writeInt(index);
 			}
 			char[][] sNames = collection.simpleNameReferences;
 			int sLength = sNames.length;
 			out.writeInt(sLength);
 			for (int j = 0; j < sLength; j++) {
 				index = (Integer) internedSimpleNames.get(sNames[j]);
-				out.writeInt(index.intValue());
+				out.writeInt(index);
 			}
 			char[][] rNames = collection.rootReferences;
 			int rLength = rNames.length;
 			out.writeInt(rLength);
 			for (int j = 0; j < rLength; j++) {
 				index = (Integer) internedRootNames.get(rNames[j]);
-				out.writeInt(index.intValue());
+				out.writeInt(index);
 			}
 		}
 		if (JavaBuilder.DEBUG && length != 0)
@@ -744,8 +740,7 @@ private void writeBinaryLocations(DataOutputStream out, ClasspathLocation[] loca
 	*/
 
 	out.writeInt(locations.length);
-	for (int i = 0; i < locations.length; i++) {
-		ClasspathLocation c = locations[i];
+	for (ClasspathLocation c : locations) {
 		if (c instanceof ClasspathMultiDirectory) {
 			out.writeByte(SOURCE_FOLDER);
 			for (int j = 0, m = srcLocations.length; j < m; j++) {
@@ -810,8 +805,8 @@ private void writeBinaryLocations(DataOutputStream out, ClasspathLocation[] loca
 					try {
 						writeName(pkgName.toCharArray(), out);
 						char[][] targetModules = entry.getValue().stream()
-								.map(addExport -> addExport.getTargetModules()).filter(targets -> targets != null)
-								.reduce((f, s) -> CharOperation.arrayConcat(f, s)).orElse(null);
+								.map(AddExports::getTargetModules).filter(targets -> targets != null)
+								.reduce(CharOperation::arrayConcat).orElse(null);
 						writeNames(targetModules, out);
 					} catch (IOException e) {
 						// ignore

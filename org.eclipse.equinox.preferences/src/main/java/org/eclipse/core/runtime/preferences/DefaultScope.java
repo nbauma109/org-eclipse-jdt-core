@@ -61,8 +61,8 @@ public final class DefaultScope extends AbstractScope {
 	 * Create and return a new default scope instance.
 	 * @deprecated use <code>DefaultScope.INSTANCE</code> instead
 	 */
-	public DefaultScope() {
-		super();
+	@Deprecated
+    public DefaultScope() {
 	}
 
 

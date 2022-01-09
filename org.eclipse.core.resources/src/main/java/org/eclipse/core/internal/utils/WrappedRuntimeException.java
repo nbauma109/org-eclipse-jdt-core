@@ -23,7 +23,6 @@ public class WrappedRuntimeException extends RuntimeException {
 	private Throwable target;
 
 	public WrappedRuntimeException(Throwable target) {
-		super();
 		this.target = target;
 	}
 

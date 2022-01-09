@@ -35,11 +35,11 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 
 public class ModuleDescriptionInfo extends AnnotatableInfo implements ISourceModule {
 
-	protected static final char[][] NO_USES = new char[0][0];
-	protected static final ModuleReferenceInfo[] NO_REQUIRES = new ModuleReferenceInfo[0];
-	protected static final PackageExportInfo[] NO_EXPORTS = new PackageExportInfo[0];
-	protected static final ServiceInfo[] NO_PROVIDES = new ServiceInfo[0];
-	protected static final PackageExportInfo[] NO_OPENS = new PackageExportInfo[0];
+	protected static final char[][] NO_USES = {};
+	protected static final ModuleReferenceInfo[] NO_REQUIRES = {};
+	protected static final PackageExportInfo[] NO_EXPORTS = {};
+	protected static final ServiceInfo[] NO_PROVIDES = {};
+	protected static final PackageExportInfo[] NO_OPENS = {};
 
 	protected IJavaElement[] children = JavaElement.NO_ELEMENTS;
 
@@ -300,44 +300,44 @@ public class ModuleDescriptionInfo extends AnnotatableInfo implements ISourceMod
 		buffer.append('{').append('\n');
 		if (this.requires != null && this.requires.length > 0) {
 			buffer.append('\n');
-			for(int i = 0; i < this.requires.length; i++) {
+			for (ModuleReferenceInfo require : this.requires) {
 				buffer.append("\trequires "); //$NON-NLS-1$
-				if (this.requires[i].isTransitive()) {
+				if (require.isTransitive()) {
 					buffer.append("transitive "); //$NON-NLS-1$
 				}
-				if (this.requires[i].isStatic()) {
+				if (require.isStatic()) {
 					buffer.append("static "); //$NON-NLS-1$
 				}
-				buffer.append(this.requires[i].name);
+				buffer.append(require.name);
 				buffer.append(';').append('\n');
 			}
 		}
 		if (this.exports != null && this.exports.length > 0) {
 			buffer.append('\n');
-			for(int i = 0; i < this.exports.length; i++) {
+			for (PackageExportInfo export : this.exports) {
 				buffer.append("\texports "); //$NON-NLS-1$
-				buffer.append(this.exports[i].toString()).append('\n');
+				buffer.append(export.toString()).append('\n');
 			}
 		}
 		if (this.usedServices != null && this.usedServices.length > 0) {
 			buffer.append('\n');
-			for(int i = 0; i < this.usedServices.length; i++) {
+			for (char[] element : this.usedServices) {
 				buffer.append("\tuses "); //$NON-NLS-1$
-				buffer.append(this.usedServices[i]).append('\n');
+				buffer.append(element).append('\n');
 			}
 		}
 		if (this.services != null && this.services.length > 0) {
 			buffer.append('\n');
-			for(int i = 0; i < this.services.length; i++) {
+			for (ServiceInfo element : this.services) {
 				buffer.append("\tprovides "); //$NON-NLS-1$
-				buffer.append(this.services[i].toString()).append('\n');
+				buffer.append(element.toString()).append('\n');
 			}
 		}
 		if (this.opens != null && this.opens.length > 0) {
 			buffer.append('\n');
-			for(int i = 0; i < this.opens.length; i++) {
+			for (PackageExportInfo open : this.opens) {
 				buffer.append("\topens "); //$NON-NLS-1$
-				buffer.append(this.opens[i].toString()).append('\n');
+				buffer.append(open.toString()).append('\n');
 			}
 		}
 		buffer.append('\n').append('}').toString();

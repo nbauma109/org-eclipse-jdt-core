@@ -107,7 +107,7 @@ public class Marker extends PlatformObject implements IMarker {
 		if (!(object instanceof IMarker))
 			return false;
 		IMarker other = (IMarker) object;
-		return (id == other.getId() && resource.equals(other.getResource()));
+		return id == other.getId() && resource.equals(other.getResource());
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class Marker extends PlatformObject implements IMarker {
 			return defaultValue;
 		Object value = info.getAttribute(attributeName);
 		if (value instanceof Integer)
-			return ((Integer) value).intValue();
+			return (Integer) value;
 		return defaultValue;
 	}
 
@@ -170,7 +170,7 @@ public class Marker extends PlatformObject implements IMarker {
 			return defaultValue;
 		Object value = info.getAttribute(attributeName);
 		if (value instanceof Boolean)
-			return ((Boolean) value).booleanValue();
+			return (Boolean) value;
 		return defaultValue;
 	}
 

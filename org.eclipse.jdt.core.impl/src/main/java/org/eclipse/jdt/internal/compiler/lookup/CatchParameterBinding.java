@@ -35,7 +35,6 @@ public class CatchParameterBinding extends LocalVariableBinding {
 		}
 		System.arraycopy(this.preciseTypes, 0, this.preciseTypes = new TypeBinding [length + 1], 0, length);
 		this.preciseTypes[length] = raisedException;
-		return;
 	}
 	@Override
 	public boolean isCatchParameter() {

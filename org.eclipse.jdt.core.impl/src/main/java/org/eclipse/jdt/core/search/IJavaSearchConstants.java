@@ -512,14 +512,16 @@ public interface IJavaSearchConstants {
 	 * @deprecated Use {@link SearchPattern#R_EXACT_MATCH} instead.
 	 * @category matchRule
 	 */
-	int EXACT_MATCH = 0;
+	@Deprecated
+    int EXACT_MATCH = 0;
 	/**
 	 * The search pattern is a prefix of the search result.
 	 *
 	 * @deprecated Use {@link SearchPattern#R_PREFIX_MATCH} instead.
 	 * @category matchRule
 	 */
-	int PREFIX_MATCH = 1;
+	@Deprecated
+    int PREFIX_MATCH = 1;
 	/**
 	 * The search pattern contains one or more wild cards ('*') where a
 	 * wild-card can replace 0 or more characters in the search result.
@@ -527,7 +529,8 @@ public interface IJavaSearchConstants {
 	 * @deprecated Use {@link SearchPattern#R_PATTERN_MATCH} instead.
 	 * @category matchRule
 	 */
-	int PATTERN_MATCH = 2;
+	@Deprecated
+    int PATTERN_MATCH = 2;
 
 
 	/* Case sensitivity */
@@ -540,7 +543,8 @@ public interface IJavaSearchConstants {
 	 *   with {@link SearchPattern#R_CASE_SENSITIVE} as a matchRule instead.
 	 * @category matchRule
 	 */
-	boolean CASE_SENSITIVE = true;
+	@Deprecated
+    boolean CASE_SENSITIVE = true;
 	/**
 	 * The search pattern ignores cases in the search result.
 	 *
@@ -548,7 +552,8 @@ public interface IJavaSearchConstants {
 	 *   without {@link SearchPattern#R_CASE_SENSITIVE} as a matchRule instead.
 	 * @category matchRule
 	 */
-	boolean CASE_INSENSITIVE = false;
+	@Deprecated
+    boolean CASE_INSENSITIVE = false;
 
 
 	/* Waiting policies */

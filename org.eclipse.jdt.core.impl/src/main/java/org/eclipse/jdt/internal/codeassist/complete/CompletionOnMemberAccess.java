@@ -80,8 +80,7 @@ public class CompletionOnMemberAccess extends FieldReference {
 
 		if (this.actualReceiverType == null || !this.actualReceiverType.isValidBinding())
 			throw new CompletionNodeFound();
-		else
-			throw new CompletionNodeFound(this, this.actualReceiverType, scope);
-		// array types are passed along to find the length field
+        throw new CompletionNodeFound(this, this.actualReceiverType, scope);
+// array types are passed along to find the length field
 	}
 }

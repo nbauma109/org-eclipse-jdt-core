@@ -39,7 +39,6 @@ public class BadPositionCategoryException extends Exception {
 	 * Creates a new bad position category exception.
 	 */
 	public BadPositionCategoryException() {
-		super();
 	}
 
 	/**

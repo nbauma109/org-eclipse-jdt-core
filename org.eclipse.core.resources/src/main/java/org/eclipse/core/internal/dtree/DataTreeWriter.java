@@ -87,7 +87,7 @@ public class DataTreeWriter {
 			writeNumber(children.length);
 
 			/* write the children */
-			int newDepth = (depth == D_INFINITE) ? D_INFINITE : depth - 1;
+			int newDepth = depth == D_INFINITE ? D_INFINITE : depth - 1;
 			for (AbstractDataTreeNode element : children) {
 				writeNode(element, path.append(element.getName()), newDepth);
 			}
@@ -168,13 +168,12 @@ public class DataTreeWriter {
 			node = node.childAtOrNull(nextSegment);
 
 			/* write the number of children for this node */
-			if (node != null) {
-				writeNumber(1);
-			} else {
+			if (node == null) {
 				/* can't navigate down the path, just give up with what we have so far */
 				writeNumber(0);
 				return;
 			}
+            writeNumber(1);
 		}
 
 		Assert.isTrue(currentPath.equals(path), "dtree.navigationError"); //$NON-NLS-1$

@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.core.hierarchy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -159,8 +160,7 @@ private void createTypeHierarchyBasedOnRegion(HashMap allOpenablesInRegion, IPro
 			if (devPathRoots == null) {
 				return;
 			}
-			for (int j = 0; j < devPathRoots.length; j++) {
-				IPackageFragmentRoot root = devPathRoots[j];
+			for (IPackageFragmentRoot root : devPathRoots) {
 				injectAllOpenablesForPackageFragmentRoot(root, openables);
 			}
 		} catch (JavaModelException e) {
@@ -180,17 +180,13 @@ private void createTypeHierarchyBasedOnRegion(HashMap allOpenablesInRegion, IPro
 			IPackageFragmentRoot root = (IPackageFragmentRoot) packFrag.getParent();
 			int kind = root.getKind();
 			if (kind != 0) {
-				boolean isSourcePackageFragment = (kind == IPackageFragmentRoot.K_SOURCE);
+				boolean isSourcePackageFragment = kind == IPackageFragmentRoot.K_SOURCE;
 				if (isSourcePackageFragment) {
 					ICompilationUnit[] cus = packFrag.getCompilationUnits();
-					for (int i = 0, length = cus.length; i < length; i++) {
-						openables.add(cus[i]);
-					}
+					openables.addAll(Arrays.asList(cus));
 				} else {
 					IOrdinaryClassFile[] classFiles = packFrag.getOrdinaryClassFiles();
-					for (int i = 0, length = classFiles.length; i < length; i++) {
-						openables.add(classFiles[i]);
-					}
+					openables.addAll(Arrays.asList(classFiles));
 				}
 			}
 		} catch (JavaModelException e) {
@@ -207,8 +203,8 @@ private void createTypeHierarchyBasedOnRegion(HashMap allOpenablesInRegion, IPro
 		ArrayList openables) {
 		try {
 			IJavaElement[] packFrags = root.getChildren();
-			for (int k = 0; k < packFrags.length; k++) {
-				IPackageFragment packFrag = (IPackageFragment) packFrags[k];
+			for (IJavaElement packFrag2 : packFrags) {
+				IPackageFragment packFrag = (IPackageFragment) packFrag2;
 				injectAllOpenablesForPackageFragment(packFrag, openables);
 			}
 		} catch (JavaModelException e) {

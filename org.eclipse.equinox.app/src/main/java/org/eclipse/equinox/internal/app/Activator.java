@@ -173,37 +173,24 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (System.getSecurityManager() == null)
 			tracker.open(allServices);
 		else
-			AccessController.doPrivileged(new PrivilegedAction() {
-				@Override
-				public Object run() {
-					tracker.open(allServices);
-					return null;
-				}
-			});
+			AccessController.doPrivileged((PrivilegedAction) () -> {
+            	tracker.open(allServices);
+            	return null;
+            });
 	}
 
 	// helper used to protect callers from permission checks when get services
 	static Object getService(final ServiceTracker tracker) {
 		if (System.getSecurityManager() == null)
 			return tracker.getService();
-		return AccessController.doPrivileged(new PrivilegedAction() {
-			@Override
-			public Object run() {
-				return tracker.getService();
-			}
-		});
+		return AccessController.doPrivileged((PrivilegedAction) () -> tracker.getService());
 	}
 
 	// helper used to protect callers from permission checks when getting locations
 	static String getLocation(final Bundle bundle) {
 		if (System.getSecurityManager() == null)
 			return bundle.getLocation();
-		return (String) AccessController.doPrivileged(new PrivilegedAction() {
-			@Override
-			public Object run() {
-				return bundle.getLocation();
-			}
-		});
+		return (String) AccessController.doPrivileged((PrivilegedAction) () -> bundle.getLocation());
 	}
 
 	// helper method to get a bundle from a contributor.

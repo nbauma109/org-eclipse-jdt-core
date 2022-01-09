@@ -46,7 +46,6 @@ public class DataTreeLookup {
 	 * Constructors for internal use only.  Use factory methods.
 	 */
 	private DataTreeLookup() {
-		super();
 	}
 
 	/**

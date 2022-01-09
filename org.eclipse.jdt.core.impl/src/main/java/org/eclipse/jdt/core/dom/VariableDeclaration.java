@@ -45,7 +45,8 @@ public abstract class VariableDeclaration extends ASTNode {
 	 * @since 2.1
 	 * @deprecated In JLS8 and later, use {@link #extraDimensions} instead.
 	 */
-	int extraArrayDimensions = 0;
+	@Deprecated
+    int extraArrayDimensions = 0;
 
 	/**
 	 * List of extra dimensions this node has with optional annotations
@@ -80,7 +81,8 @@ public abstract class VariableDeclaration extends ASTNode {
 	 * @return the property descriptor
 	 * @deprecated In JLS8 and later, use {@link #internalExtraDimensions2PropertyFactory(Class)} instead.
 	 */
-	static final SimplePropertyDescriptor internalExtraDimensionsPropertyFactory(Class nodeClass) {
+	@Deprecated
+    static final SimplePropertyDescriptor internalExtraDimensionsPropertyFactory(Class nodeClass) {
 		return 	new SimplePropertyDescriptor(nodeClass, "extraDimensions", int.class, MANDATORY); //$NON-NLS-1$
 	}
 
@@ -133,7 +135,8 @@ public abstract class VariableDeclaration extends ASTNode {
 	 * @since 3.1
 	 * @deprecated In JLS8 and later, use {@link #internalExtraDimensions2Property()} instead.
 	 */
-	abstract SimplePropertyDescriptor internalExtraDimensionsProperty();
+	@Deprecated
+    abstract SimplePropertyDescriptor internalExtraDimensionsProperty();
 
 	/**
 	 * Returns the structural property descriptor for the "extraDimensions" property
@@ -143,7 +146,8 @@ public abstract class VariableDeclaration extends ASTNode {
 	 * @since 3.1
 	 * @deprecated In JLS8 and later, use {@link #getExtraDimensions2Property()} instead.
 	 */
-	public final SimplePropertyDescriptor getExtraDimensionsProperty() {
+	@Deprecated
+    public final SimplePropertyDescriptor getExtraDimensionsProperty() {
 		return internalExtraDimensionsProperty();
 	}
 
@@ -267,9 +271,8 @@ public abstract class VariableDeclaration extends ASTNode {
 		if (this.extraDimensions == null) {
 			// JLS2,3,4 behavior - bona fide property
 			return this.extraArrayDimensions;
-		} else {
-			return this.extraDimensions.size();
 		}
+        return this.extraDimensions.size();
 	}
 
 	/**
@@ -293,7 +296,8 @@ public abstract class VariableDeclaration extends ASTNode {
 	 * {@link #extraDimensions()} which contains a list of {@link Dimension} nodes.
 	 * @since 2.1
 	 */
-	public void setExtraDimensions(int dimensions) {
+	@Deprecated
+    public void setExtraDimensions(int dimensions) {
 		internalSetExtraDimensions(dimensions);
 	}
 

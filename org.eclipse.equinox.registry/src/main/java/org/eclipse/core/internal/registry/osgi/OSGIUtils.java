@@ -48,7 +48,6 @@ public class OSGIUtils {
 	 * Private constructor to block instance creation.
 	 */
 	private OSGIUtils() {
-		super();
 		initServices();
 	}
 

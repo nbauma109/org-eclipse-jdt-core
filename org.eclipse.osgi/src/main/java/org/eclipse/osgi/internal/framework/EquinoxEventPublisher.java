@@ -42,8 +42,8 @@ import org.osgi.framework.hooks.bundle.EventHook;
 
 public class EquinoxEventPublisher {
 	@SuppressWarnings("deprecation")
-	static final int FRAMEWORK_STOPPED_MASK = (FrameworkEvent.STOPPED | FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED
-			| FrameworkEvent.STOPPED_UPDATE | FrameworkEvent.STOPPED_SYSTEM_REFRESHED);
+	static final int FRAMEWORK_STOPPED_MASK = FrameworkEvent.STOPPED | FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED
+			| FrameworkEvent.STOPPED_UPDATE | FrameworkEvent.STOPPED_SYSTEM_REFRESHED;
 
 	static final int BUNDLEEVENT = 1;
 	static final int BUNDLEEVENTSYNC = 2;
@@ -230,7 +230,7 @@ public class EquinoxEventPublisher {
 		}
 
 		/* Dispatch the event to the snapshot for async listeners */
-		if ((listenersAsync != null) && !listenersAsync.isEmpty()) {
+		if (listenersAsync != null && !listenersAsync.isEmpty()) {
 			ListenerQueue<BundleListener, BundleListener, BundleEvent> queue = newListenerQueue();
 			for (Map.Entry<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>> entry : listenersAsync.entrySet()) {
 				@SuppressWarnings({"rawtypes", "unchecked"})

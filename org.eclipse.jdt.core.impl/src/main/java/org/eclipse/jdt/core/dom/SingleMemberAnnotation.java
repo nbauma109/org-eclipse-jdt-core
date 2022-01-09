@@ -94,40 +94,34 @@ public final class SingleMemberAnnotation extends Annotation {
 	    unsupportedIn2();
 	}
 
-	@Override
-	final List internalStructuralPropertiesForType(int apiLevel) {
+	@Override List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
 
-	@Override
-	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child) {
+	@Override ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child) {
 		if (property == TYPE_NAME_PROPERTY) {
 			if (get) {
 				return getTypeName();
-			} else {
-				setTypeName((Name) child);
-				return null;
 			}
+            setTypeName((Name) child);
+            return null;
 		}
 		if (property == VALUE_PROPERTY) {
 			if (get) {
 				return getValue();
-			} else {
-				setValue((Expression) child);
-				return null;
 			}
+            setValue((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
 	}
 
-	@Override
-	final ChildPropertyDescriptor internalTypeNameProperty() {
+	@Override ChildPropertyDescriptor internalTypeNameProperty() {
 		return TYPE_NAME_PROPERTY;
 	}
 
-	@Override
-	final int getNodeType0() {
+	@Override int getNodeType0() {
 		return SINGLE_MEMBER_ANNOTATION;
 	}
 
@@ -140,8 +134,7 @@ public final class SingleMemberAnnotation extends Annotation {
 		return result;
 	}
 
-	@Override
-	final boolean subtreeMatch0(ASTMatcher matcher, Object other) {
+	@Override boolean subtreeMatch0(ASTMatcher matcher, Object other) {
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}

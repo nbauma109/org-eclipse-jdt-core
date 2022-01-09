@@ -59,7 +59,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 
 	static final LogFilter NULL_LOGGER_FILTER = (b, loggerName, logLevel) -> true;
 
-	private static final LogFilter[] ALWAYS_LOG = new LogFilter[0];
+	private static final LogFilter[] ALWAYS_LOG = {};
 
 	private static PrintStream errorStream;
 
@@ -157,9 +157,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			listenersLock.readLock().unlock();
 		}
 		try {
-			if (incrementNestedCount() == MAX_RECURSIONS)
-				return false;
-			if (filtersCopy == null)
+			if (incrementNestedCount() == MAX_RECURSIONS || filtersCopy == null)
 				return false;
 
 			if (filtersCopy == ALWAYS_LOG)
@@ -261,7 +259,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			Object[] listenerObjects = listenersCopy.get(listener);
 			if (listenerObjects == null) {
 				// Only create a task queue for non-SynchronousLogListeners
-				OrderedTaskQueue taskQueue = (listener instanceof SynchronousLogListener) ? null : executor.createQueue();
+				OrderedTaskQueue taskQueue = listener instanceof SynchronousLogListener ? null : executor.createQueue();
 				listenerObjects = new Object[] {filter, taskQueue};
 			} else if (filter != listenerObjects[0]) {
 				// update the filter

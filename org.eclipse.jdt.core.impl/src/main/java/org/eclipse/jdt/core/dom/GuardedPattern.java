@@ -94,17 +94,16 @@ public class GuardedPattern extends Pattern{
 		if (property == EXPRESSION_PROPERTY) {
 			if (get) {
 				return getExpression();
-			} else {
-				setExpression((Expression) child);
-				return null;
 			}
-		} else if (property == PATTERN_PROPERTY) {
+            setExpression((Expression) child);
+            return null;
+		}
+        if (property == PATTERN_PROPERTY) {
 			if (get) {
 				return getPattern();
-			} else {
-				setPattern((Pattern)child);
-				return null;
 			}
+            setPattern((Pattern)child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

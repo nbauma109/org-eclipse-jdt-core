@@ -483,6 +483,5 @@ public class EFS {
 	 * This class is not intended to be instantiated.
 	 */
 	private EFS() {
-		super();
 	}
 }

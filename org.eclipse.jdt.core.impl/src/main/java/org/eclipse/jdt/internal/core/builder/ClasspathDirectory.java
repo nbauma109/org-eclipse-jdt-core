@@ -76,21 +76,18 @@ IModule initializeModule() {
 	try {
 		members = this.binaryFolder.members();
 		if (members != null) {
-			for (int i = 0, l = members.length; i < l; i++) {
-				IResource m = members[i];
+			for (IResource m : members) {
 				String name = m.getName();
 				// Note: Look only inside the default package.
-				if (m.getType() == IResource.FILE && org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(name)) {
-					if (name.equalsIgnoreCase(IModule.MODULE_INFO_CLASS)) {
-						try {
-							ClassFileReader cfr = Util.newClassFileReader(m);
-							return cfr.getModuleDeclaration();
-						} catch (ClassFormatException | IOException e) {
-							// TODO Java 9 Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}
+				if (m.getType() == IResource.FILE && org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(name) && name.equalsIgnoreCase(IModule.MODULE_INFO_CLASS)) {
+                	try {
+                		ClassFileReader cfr = Util.newClassFileReader(m);
+                		return cfr.getModuleDeclaration();
+                	} catch (ClassFormatException | IOException e) {
+                		// TODO Java 9 Auto-generated catch block
+                		e.printStackTrace();
+                	}
+                }
 			}
 		}
 	} catch (CoreException e1) {
@@ -110,11 +107,10 @@ String[] directoryList(String qualifiedPackageName) {
 			IResource[] members = ((IContainer) container).members();
 			dirList = new String[members.length];
 			int index = 0;
-			for (int i = 0, l = members.length; i < l; i++) {
-				IResource m = members[i];
+			for (IResource m : members) {
 				String name = m.getName();
 				if (m.getType() == IResource.FOLDER || // include folders so we recognize empty parent packages
-						(m.getType() == IResource.FILE && org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(name))) {
+						m.getType() == IResource.FILE && org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(name)) {
 					// add exclusion pattern check here if we want to hide .class files
 					dirList[index++] = name;
 				}
@@ -200,10 +196,8 @@ public boolean isOutputFolder() {
 
 @Override
 public boolean isPackage(String qualifiedPackageName, String moduleName) {
-	if (moduleName != null) {
-		if (this.module == null || !moduleName.equals(String.valueOf(this.module.name())))
-			return false;
-	}
+	if (moduleName != null && (this.module == null || !moduleName.equals(String.valueOf(this.module.name()))))
+    	return false;
 	String[] list = directoryList(qualifiedPackageName);
 	if (list != null) {
 		// 1. search files here:
@@ -214,10 +208,8 @@ public boolean isPackage(String qualifiedPackageName, String moduleName) {
 		}
 		// 2. recurse into sub directories
 		for (String entry : list) {
-			if (entry.indexOf('.') == -1) { // no plain files without '.' are returned by directoryList()
-				if (isPackage(qualifiedPackageName+'/'+entry, null/*already checked*/))
-					return true;
-			}
+			if (entry.indexOf('.') == -1 && isPackage(qualifiedPackageName+'/'+entry, null/*already checked*/))
+            	return true;
 		}
 	}
 	return false;
@@ -266,7 +258,7 @@ public char[][] listPackages() {
 	try {
 		this.binaryFolder.accept(r -> {
 			String extension = r.getFileExtension();
-			if (r instanceof IFile && extension != null && SuffixConstants.EXTENSION_class.equalsIgnoreCase(extension)) {
+			if (r instanceof IFile && SuffixConstants.EXTENSION_class.equalsIgnoreCase(extension)) {
 				packageNames.add(r.getParent().getFullPath().makeRelativeTo(basePath).toString().replace('/', '.'));
 			}
 			return true;

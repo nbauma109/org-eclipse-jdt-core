@@ -172,15 +172,12 @@ public class BindingKeyResolver extends BindingKeyParser {
 		AnnotationBinding[] annotationBindings;
 		if (this.compilerBinding == null && this.typeBinding instanceof ReferenceBinding) {
 			annotationBindings = this.typeBinding.getAnnotations();
-		} else if (this.compilerBinding instanceof MethodBinding) {
-			annotationBindings = this.compilerBinding.getAnnotations();
-		} else if (this.compilerBinding instanceof VariableBinding) {
+		} else if (this.compilerBinding instanceof MethodBinding || this.compilerBinding instanceof VariableBinding) {
 			annotationBindings = this.compilerBinding.getAnnotations();
 		} else {
 			return;
 		}
-		for (int i = 0, length = annotationBindings.length; i < length; i++) {
-			AnnotationBinding binding = annotationBindings[i];
+		for (AnnotationBinding binding : annotationBindings) {
 			if (binding.getAnnotationType() == annotationType) {
 				this.annotationBinding = binding;
 				break;
@@ -225,8 +222,8 @@ public class BindingKeyResolver extends BindingKeyParser {
 					case Binding.PARAMETERIZED_TYPE:
 						TypeBinding[] arguments = ((ParameterizedTypeBinding) binding).arguments;
 						if (arguments == null) return false;
-						for (int i = 0, length = arguments.length; i < length; i++) {
-							if (checkType(arguments[i]))
+						for (TypeBinding argument : arguments) {
+							if (checkType(argument))
 								return true;
 						}
 						break;
@@ -237,8 +234,8 @@ public class BindingKeyResolver extends BindingKeyParser {
 							return true;
 						TypeBinding[] otherBounds = ((WildcardBinding) binding).otherBounds;
 						// per construction, otherBounds is never null
-						for (int i = 0, length = otherBounds.length; i < length; i++) {
-							if (checkType(otherBounds[i]))
+						for (TypeBinding otherBound : otherBounds) {
+							if (checkType(otherBound))
 								return true;
 						}
 						break;
@@ -248,10 +245,8 @@ public class BindingKeyResolver extends BindingKeyParser {
 						if (binding.isCapture()) {
 							CaptureBinding captureBinding = (CaptureBinding) binding;
 							if (captureBinding.end == position && captureBinding.wildcard == wildcardBinding) {
-								if (captureBinding instanceof CaptureBinding18) {
-									if (captureBinding.captureID != capture18id)
-										return false;
-								}
+								if (captureBinding instanceof CaptureBinding18 && captureBinding.captureID != capture18id)
+                                	return false;
 								this.capture = captureBinding;
 								return true;
 							}
@@ -324,8 +319,7 @@ public class BindingKeyResolver extends BindingKeyParser {
 		if (this.typeBinding == null)
 			return;
 		FieldBinding[] fields = ((ReferenceBinding) this.typeBinding).availableFields(); // resilience
-	 	for (int i = 0, length = fields.length; i < length; i++) {
-			FieldBinding field = fields[i];
+	 	for (FieldBinding field : fields) {
 			if (CharOperation.equals(fieldName, field.name)) {
 				this.typeBinding = null;
 				this.compilerBinding = field;
@@ -412,9 +406,8 @@ public class BindingKeyResolver extends BindingKeyParser {
 		if (this.typeBinding == null)
 			return;
 		MethodBinding[] methods = ((ReferenceBinding) this.typeBinding).availableMethods(); // resilience
-	 	for (int i = 0, methodLength = methods.length; i < methodLength; i++) {
-			MethodBinding method = methods[i];
-			if (CharOperation.equals(selector, method.selector) || (selector.length == 0 && method.isConstructor())) {
+	 	for (MethodBinding method : methods) {
+			if (CharOperation.equals(selector, method.selector) || selector.length == 0 && method.isConstructor()) {
 				char[] methodSignature = method.genericSignature();
 				if (methodSignature == null)
 					methodSignature = method.signature();
@@ -423,7 +416,8 @@ public class BindingKeyResolver extends BindingKeyParser {
 					this.methodBinding = method;
 					this.compilerBinding = this.methodBinding;
 					return;
-				} else if ((method.tagBits & TagBits.AnnotationPolymorphicSignature) != 0) {
+				}
+                if ((method.tagBits & TagBits.AnnotationPolymorphicSignature) != 0) {
 					this.typeBinding = null;
 					char[][] typeParameters = Signature.getParameterTypes(signature);
 					int length = typeParameters.length;
@@ -611,8 +605,7 @@ public class BindingKeyResolver extends BindingKeyParser {
 	 	} else {
 	 		return;
 	 	}
-	 	for (int i = 0, length = typeVariableBindings.length; i < length; i++) {
-			TypeVariableBinding typeVariableBinding = typeVariableBindings[i];
+	 	for (TypeVariableBinding typeVariableBinding : typeVariableBindings) {
 			if (CharOperation.equals(typeVariableName, typeVariableBinding.sourceName())) {
 				this.typeBinding = typeVariableBinding;
 				return;
@@ -716,8 +709,7 @@ public class BindingKeyResolver extends BindingKeyParser {
 	 */
 	public CompilationUnitDeclaration getCompilationUnitDeclaration() {
 		char[][] name = this.compoundName;
-		if (name.length == 0) return null;
-		if (this.environment == null) return null;
+		if (name.length == 0 || this.environment == null) return null;
 		ReferenceBinding binding = this.environment.getType(name);
 		if (!(binding instanceof SourceTypeBinding)) {
 			if (this.secondarySimpleName == null)
@@ -757,11 +749,10 @@ public class BindingKeyResolver extends BindingKeyParser {
 		}
 		TypeDeclaration[] typeDeclarations =
 			this.typeDeclaration == null ?
-				(this.parsedUnit == null ? null : this.parsedUnit.types) :
+				this.parsedUnit == null ? null : this.parsedUnit.types :
 				this.typeDeclaration.memberTypes;
 		if (typeDeclarations == null) return null;
-		for (int i = 0, length = typeDeclarations.length; i < length; i++) {
-			TypeDeclaration declaration = typeDeclarations[i];
+		for (TypeDeclaration declaration : typeDeclarations) {
 			if (CharOperation.equals(simpleTypeName, declaration.name)) {
 				this.typeDeclaration = declaration;
 				return declaration.binding;

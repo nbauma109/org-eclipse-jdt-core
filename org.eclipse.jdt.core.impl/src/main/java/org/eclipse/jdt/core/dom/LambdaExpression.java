@@ -137,10 +137,9 @@ public class LambdaExpression extends Expression {
 		if (property == PARENTHESES_PROPERTY) {
 			if (get) {
 				return hasParentheses();
-			} else {
-				setParentheses(value);
-				return false;
 			}
+            setParentheses(value);
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
@@ -160,10 +159,9 @@ public class LambdaExpression extends Expression {
 		if (property == BODY_PROPERTY) {
 			if (get) {
 				return getBody();
-			} else {
-				setBody( child);
-				return null;
 			}
+            setBody( child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -280,7 +278,7 @@ public class LambdaExpression extends Expression {
 	 * </ul>
 	 */
 	public void setBody(ASTNode body) {
-		if (!(body instanceof Expression || body instanceof Block)) {
+		if (!(body instanceof Expression) && !(body instanceof Block)) {
 			throw new IllegalArgumentException();
 		}
 		ASTNode oldChild = this.body;

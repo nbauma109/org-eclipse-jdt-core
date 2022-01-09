@@ -173,7 +173,8 @@ public interface IBytecodeVisitor {
 	 * @since 3.6
 	 * @deprecated This has been replaced with {@link #_invokedynamic(int, int, IConstantPoolEntry)}
 	 */
-	void _invokedynamic(
+	@Deprecated
+    void _invokedynamic(
 			int pc,
 			int index,
 			IConstantPoolEntry nameEntry,

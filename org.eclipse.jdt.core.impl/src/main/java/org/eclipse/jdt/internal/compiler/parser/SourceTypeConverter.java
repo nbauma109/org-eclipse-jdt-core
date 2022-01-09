@@ -134,15 +134,14 @@ public class SourceTypeConverter extends TypeConverter {
 		final CompilationUnitElementInfo compilationUnitElementInfo = (CompilationUnitElementInfo) ((JavaElement) this.cu).getElementInfo();
 		if (this.has1_5Compliance &&
 				(compilationUnitElementInfo.annotationNumber >= CompilationUnitElementInfo.ANNOTATION_THRESHOLD_FOR_DIET_PARSE ||
-				(compilationUnitElementInfo.hasFunctionalTypes && (this.flags & LOCAL_TYPE) != 0))) {
+				compilationUnitElementInfo.hasFunctionalTypes && (this.flags & LOCAL_TYPE) != 0)) {
 			// If more than 10 annotations, diet parse as this is faster, but not if
 			// the client wants local and anonymous types to be converted (https://bugs.eclipse.org/bugs/show_bug.cgi?id=254738)
 			// Also see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=405843
 			if ((this.flags & LOCAL_TYPE) == 0) {
 				return new Parser(this.problemReporter, true).dietParse(this.cu, compilationResult);
-			} else {
-				return new Parser(this.problemReporter, true).parse(this.cu, compilationResult);
 			}
+            return new Parser(this.problemReporter, true).parse(this.cu, compilationResult);
 		}
 
 		/* only positions available */
@@ -384,20 +383,18 @@ public class SourceTypeConverter extends TypeConverter {
 				/* conversion of default value */
 				SourceAnnotationMethodInfo annotationMethodInfo = (SourceAnnotationMethodInfo) methodInfo;
 				boolean hasDefaultValue = annotationMethodInfo.defaultValueStart != -1 || annotationMethodInfo.defaultValueEnd != -1;
-				if ((this.flags & FIELD_INITIALIZATION) != 0) {
-					if (hasDefaultValue) {
-						char[] defaultValueSource = CharOperation.subarray(getSource(), annotationMethodInfo.defaultValueStart, annotationMethodInfo.defaultValueEnd+1);
-						if (defaultValueSource != null) {
-    						Expression expression =  parseMemberValue(defaultValueSource);
-    						if (expression != null) {
-    							annotationMethodDeclaration.defaultValue = expression;
-    						}
-						} else {
-							// could not retrieve the default value
-							hasDefaultValue = false;
-						}
-					}
-				}
+				if ((this.flags & FIELD_INITIALIZATION) != 0 && hasDefaultValue) {
+                	char[] defaultValueSource = CharOperation.subarray(getSource(), annotationMethodInfo.defaultValueStart, annotationMethodInfo.defaultValueEnd+1);
+                	if (defaultValueSource != null) {
+                		Expression expression =  parseMemberValue(defaultValueSource);
+                		if (expression != null) {
+                			annotationMethodDeclaration.defaultValue = expression;
+                		}
+                	} else {
+                		// could not retrieve the default value
+                		hasDefaultValue = false;
+                	}
+                }
 				if (hasDefaultValue)
 					modifiers |= ClassFileConstants.AccAnnotationDefault;
 				decl = annotationMethodDeclaration;
@@ -502,7 +499,7 @@ public class SourceTypeConverter extends TypeConverter {
 			throw new AnonymousMemberFound();
 		/* create type/record declaration - can be member type */
 		TypeDeclaration type = new TypeDeclaration(compilationResult);
-		if ((TypeDeclaration.kind(typeInfo.getModifiers()) == TypeDeclaration.RECORD_DECL)) {
+		if (TypeDeclaration.kind(typeInfo.getModifiers()) == TypeDeclaration.RECORD_DECL) {
 			// The first choice constructor that takes CompilationResult as arg is not setting all the fields
 			// Hence, use the one that does
 			type.modifiers |= ExtraCompilerModifiers.AccRecord;
@@ -515,12 +512,10 @@ public class SourceTypeConverter extends TypeConverter {
 		if (typeInfo.getEnclosingType() == null) {
 			if (typeHandle.isAnonymous()) {
 				type.name = CharOperation.NO_CHAR;
-				type.bits |= (ASTNode.IsAnonymousType|ASTNode.IsLocalType);
-			} else {
-				if (typeHandle.isLocal()) {
-					type.bits |= ASTNode.IsLocalType;
-				}
-			}
+				type.bits |= ASTNode.IsAnonymousType|ASTNode.IsLocalType;
+			} else if (typeHandle.isLocal()) {
+            	type.bits |= ASTNode.IsLocalType;
+            }
 		}  else {
 			type.bits |= ASTNode.IsMemberType;
 		}
@@ -656,7 +651,7 @@ public class SourceTypeConverter extends TypeConverter {
 				if ((methodInfo.getModifiers() & ClassFileConstants.AccAbstract) != 0) {
 					hasAbstractMethods = true;
 				}
-				if ((isConstructor ? needConstructor : needMethod)) {
+				if (isConstructor ? needConstructor : needMethod) {
 					AbstractMethodDeclaration method = convert(sourceMethod, methodInfo, compilationResult);
 					if (isAbstract || method.isAbstract()) { // fix-up flag
 						method.modifiers |= ExtraCompilerModifiers.AccSemicolonBody;
@@ -697,7 +692,7 @@ public class SourceTypeConverter extends TypeConverter {
 			}
 			if (length != recordedAnnotations) {
 				// resize to remove null annotations
-				System.arraycopy(astAnnotations, 0, (astAnnotations = new Annotation[recordedAnnotations]), 0, recordedAnnotations);
+				System.arraycopy(astAnnotations, 0, astAnnotations = new Annotation[recordedAnnotations], 0, recordedAnnotations);
 			}
 		}
 		return astAnnotations;

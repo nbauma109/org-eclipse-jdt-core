@@ -104,8 +104,7 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 			childOfInterest = IJavaElement.CLASS_FILE;
 		}
 		ArrayList correctKindChildren = new ArrayList(children.length);
-		for (int i = 0; i < children.length; i++) {
-			IJavaElement child = children[i];
+		for (IJavaElement child : children) {
 			if (child.getElementType() == childOfInterest) {
 				correctKindChildren.add(((JavaElement) child).resource());
 			}
@@ -113,8 +112,8 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 		// Gather non-java resources
 		Object[] nonJavaResources = source.getNonJavaResources();
 		int actualNonJavaResourceCount = 0;
-		for (int i = 0, max = nonJavaResources.length; i < max; i++){
-			if (nonJavaResources[i] instanceof IResource) actualNonJavaResourceCount++;
+		for (Object element : nonJavaResources) {
+			if (element instanceof IResource) actualNonJavaResourceCount++;
 		}
 		IResource[] actualNonJavaResources = new IResource[actualNonJavaResourceCount];
 		for (int i = 0, max = nonJavaResources.length, index = 0; i < max; i++){
@@ -127,11 +126,10 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 			correctKindChildren.toArray(result);
 			System.arraycopy(actualNonJavaResources, 0, result, correctKindChildrenSize, actualNonJavaResourceCount);
 			return result;
-		} else {
-			IResource[] result = new IResource[correctKindChildren.size()];
-			correctKindChildren.toArray(result);
-			return result;
 		}
+        IResource[] result = new IResource[correctKindChildren.size()];
+        correctKindChildren.toArray(result);
+        return result;
 	}
 	/**
 	 * Creates any destination package fragment(s) which do not exists yet.
@@ -150,7 +148,7 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 			IResource subFolder = parentFolder.findMember(subFolderName);
 			if (subFolder == null) {
 				// create deepest folder only if not a move (folder will be moved in processPackageFragmentResource)
-				if (!(moveFolder && i == newFragName.length-1)) {
+				if (!moveFolder || i != newFragName.length-1) {
 					createFolder(parentFolder, subFolderName, this.force);
 				}
 				parentFolder = parentFolder.getFolder(new Path(subFolderName));
@@ -288,12 +286,10 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 				getDeltaFor(destProject).movedTo(destinationElement, sourceElement);
 				return;
 			}
-		} else {
-			if (!overWriteCU) {
-				getDeltaFor(destProject).added(destinationElement);
-				return;
-			}
-		}
+		} else if (!overWriteCU) {
+        	getDeltaFor(destProject).added(destinationElement);
+        	return;
+        }
 		getDeltaFor(destinationElement.getJavaProject()).changed(destinationElement, IJavaElementDelta.F_CONTENT);
 	}
 	/**
@@ -307,7 +303,7 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 	 */
 	private void processCompilationUnitResource(ICompilationUnit source, PackageFragment dest) throws JavaModelException {
 		String newCUName = getNewNameFor(source);
-		String destName = (newCUName != null) ? newCUName : source.getElementName();
+		String destName = newCUName != null ? newCUName : source.getElementName();
 		TextEdit edit = updateContent(source, dest, newCUName); // null if unchanged
 
 		// TODO (frederic) remove when bug 67606 will be fixed (bug 67823)
@@ -329,16 +325,15 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 			try {
 				if (!destCU.isWorkingCopy()) {
 					if (destFile.exists()) {
-						if (this.force) {
-							// we can remove it
-							deleteResource(destFile, IResource.KEEP_HISTORY);
-							destCU.close(); // ensure the in-memory buffer for the dest CU is closed
-						} else {
+						if (!this.force) {
 							// abort
 							throw new JavaModelException(new JavaModelStatus(
 								IJavaModelStatusConstants.NAME_COLLISION,
 								Messages.bind(Messages.status_nameCollision, destFile.getFullPath().toString())));
 						}
+                        // we can remove it
+                        deleteResource(destFile, IResource.KEEP_HISTORY);
+                        destCU.close(); // ensure the in-memory buffer for the dest CU is closed
 					}
 					int flags = this.force ? IResource.FORCE : IResource.NONE;
 					if (isMove()) {
@@ -451,7 +446,7 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 	 */
 	private void processPackageFragmentResource(PackageFragment source, PackageFragmentRoot root, String newName) throws JavaModelException {
 		try {
-			String[] newFragName = (newName == null) ? source.names : Util.getTrimmedSimpleNames(newName);
+			String[] newFragName = newName == null ? source.names : Util.getTrimmedSimpleNames(newName);
 			PackageFragment newFrag = root.getPackageFragment(newFragName);
 			IResource[] resources = collectResourcesOfInterest(source);
 
@@ -466,8 +461,8 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 				} else {
 					// check if there are no sub-packages
 					IResource[] members = srcFolder.members();
-					for (int i = 0; i < members.length; i++) {
-						if ( members[i] instanceof IFolder) {
+					for (IResource member : members) {
+						if ( member instanceof IFolder) {
 							shouldMoveFolder = false;
 							break;
 						}
@@ -489,54 +484,50 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 					Util.setReadOnly(srcFolder, true);
 				}
 				setAttribute(HAS_MODIFIED_RESOURCE_ATTR, TRUE);
-			} else {
-				// process the leaf resources
-				if (resources.length > 0) {
-					if (isRename()) {
-						if (! destPath.equals(source.getPath())) {
-							moveResources(resources, destPath);
-						}
-					} else if (isMove()) {
-						// we need to delete this resource if this operation wants to override existing resources
-						for (int i = 0, max = resources.length; i < max; i++) {
-							IResource destinationResource = ResourcesPlugin.getWorkspace().getRoot().findMember(destPath.append(resources[i].getName()));
-							if (destinationResource != null) {
-								if (this.force) {
-									deleteResource(destinationResource, IResource.KEEP_HISTORY);
-								} else {
-									throw new JavaModelException(new JavaModelStatus(
-										IJavaModelStatusConstants.NAME_COLLISION,
-										Messages.bind(Messages.status_nameCollision, destinationResource.getFullPath().toString())));
-								}
-							}
-						}
-						moveResources(resources, destPath);
-					} else {
-						// we need to delete this resource if this operation wants to override existing resources
-						for (int i = 0, max = resources.length; i < max; i++) {
-							IResource destinationResource = ResourcesPlugin.getWorkspace().getRoot().findMember(destPath.append(resources[i].getName()));
-							if (destinationResource != null) {
-								if (this.force) {
-									// we need to delete this resource if this operation wants to override existing resources
-									deleteResource(destinationResource, IResource.KEEP_HISTORY);
-								} else {
-									throw new JavaModelException(new JavaModelStatus(
-										IJavaModelStatusConstants.NAME_COLLISION,
-										Messages.bind(Messages.status_nameCollision, destinationResource.getFullPath().toString())));
-								}
-							}
-						}
-						copyResources(resources, destPath);
-					}
-				}
-			}
+			} else // process the leaf resources
+            if (resources.length > 0) {
+            	if (isRename()) {
+            		if (! destPath.equals(source.getPath())) {
+            			moveResources(resources, destPath);
+            		}
+            	} else if (isMove()) {
+            		// we need to delete this resource if this operation wants to override existing resources
+            		for (IResource element : resources) {
+            			IResource destinationResource = ResourcesPlugin.getWorkspace().getRoot().findMember(destPath.append(element.getName()));
+            			if (destinationResource != null) {
+            				if (!this.force) {
+            					throw new JavaModelException(new JavaModelStatus(
+            						IJavaModelStatusConstants.NAME_COLLISION,
+            						Messages.bind(Messages.status_nameCollision, destinationResource.getFullPath().toString())));
+            				}
+                            deleteResource(destinationResource, IResource.KEEP_HISTORY);
+            			}
+            		}
+            		moveResources(resources, destPath);
+            	} else {
+            		// we need to delete this resource if this operation wants to override existing resources
+            		for (IResource element : resources) {
+            			IResource destinationResource = ResourcesPlugin.getWorkspace().getRoot().findMember(destPath.append(element.getName()));
+            			if (destinationResource != null) {
+            				if (!this.force) {
+            					throw new JavaModelException(new JavaModelStatus(
+            						IJavaModelStatusConstants.NAME_COLLISION,
+            						Messages.bind(Messages.status_nameCollision, destinationResource.getFullPath().toString())));
+            				}
+                            // we need to delete this resource if this operation wants to override existing resources
+                            deleteResource(destinationResource, IResource.KEEP_HISTORY);
+            			}
+            		}
+            		copyResources(resources, destPath);
+            	}
+            }
 
 			// Update package statement in compilation unit if needed
 			if (!Util.equalArraysOrNull(newFragName, source.names)) { // if package has been renamed, update the compilation units
 				char[][] inclusionPatterns = root.fullInclusionPatternChars();
 				char[][] exclusionPatterns = root.fullExclusionPatternChars();
-				for (int i = 0; i < resources.length; i++) {
-					String resourceName = resources[i].getName();
+				for (IResource element : resources) {
+					String resourceName = element.getName();
 					if (Util.isJavaLikeFileName(resourceName)) {
 						// we only consider potential compilation units
 						ICompilationUnit cu = newFrag.getCompilationUnit(resourceName);
@@ -561,8 +552,7 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 				updateReadOnlyPackageFragmentsForMove((IContainer) source.getParent().resource(), root, newFragName, sourceIsReadOnly);
 				if (srcFolder.exists()) {
 					IResource[] remaining = srcFolder.members();
-					for (int i = 0, length = remaining.length; i < length; i++) {
-						IResource file = remaining[i];
+					for (IResource file : remaining) {
 						if (file instanceof IFile) {
 							if (Util.isReadOnly(file)) {
 								Util.setReadOnly(file, false);
@@ -590,7 +580,7 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 				updateReadOnlyPackageFragmentsForCopy((IContainer) source.getParent().resource(), root, newFragName);
 			}
 			// workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=24505
-			if (isEmpty && isMove() && !(Util.isExcluded(source) || Util.isExcluded(newFrag))) {
+			if (isEmpty && isMove() && !Util.isExcluded(source) && !Util.isExcluded(newFrag)) {
 				IJavaProject sourceProject = source.getJavaProject();
 				getDeltaFor(sourceProject).movedFrom(source, newFrag);
 				IJavaProject destProject = newFrag.getJavaProject();
@@ -631,17 +621,16 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 		String[] destPackageName = dest.names;
 		if (Util.equalArraysOrNull(currPackageName, destPackageName) && newName == null) {
 			return null; //nothing to change
-		} else {
-			// ensure cu is consistent (noop if already consistent)
-			cu.makeConsistent(this.progressMonitor);
-			this.parser.setSource(cu);
-			CompilationUnit astCU = (CompilationUnit) this.parser.createAST(this.progressMonitor);
-			AST ast = astCU.getAST();
-			ASTRewrite rewrite = ASTRewrite.create(ast);
-			updateTypeName(cu, astCU, cu.getElementName(), newName, rewrite);
-			updatePackageStatement(astCU, destPackageName, rewrite, cu);
-			return rewrite.rewriteAST();
 		}
+        // ensure cu is consistent (noop if already consistent)
+        cu.makeConsistent(this.progressMonitor);
+        this.parser.setSource(cu);
+        CompilationUnit astCU = (CompilationUnit) this.parser.createAST(this.progressMonitor);
+        AST ast = astCU.getAST();
+        ASTRewrite rewrite = ASTRewrite.create(ast);
+        updateTypeName(cu, astCU, cu.getElementName(), newName, rewrite);
+        updatePackageStatement(astCU, destPackageName, rewrite, cu);
+        return rewrite.rewriteAST();
 	}
 	private void updatePackageStatement(CompilationUnit astCU, String[] pkgName, ASTRewrite rewriter, ICompilationUnit cu) throws JavaModelException {
 		boolean defaultPackage = pkgName.length == 0;
@@ -685,8 +674,7 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 
 	private void updateReadOnlyPackageFragmentsForCopy(IContainer sourceFolder, PackageFragmentRoot root, String[] newFragName) {
 		IContainer parentFolder = (IContainer) root.resource();
-		for (int i = 0, length = newFragName.length; i <length; i++) {
-			String subFolderName = newFragName[i];
+		for (String subFolderName : newFragName) {
 			parentFolder = parentFolder.getFolder(new Path(subFolderName));
 			sourceFolder = sourceFolder.getFolder(new Path(subFolderName));
 			if (sourceFolder.exists() && Util.isReadOnly(sourceFolder)) {
@@ -701,7 +689,7 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 			String subFolderName = newFragName[i];
 			parentFolder = parentFolder.getFolder(new Path(subFolderName));
 			sourceFolder = sourceFolder.getFolder(new Path(subFolderName));
-			if ((sourceFolder.exists() && Util.isReadOnly(sourceFolder)) || (i == length - 1 && sourceFolderIsReadOnly)) {
+			if (sourceFolder.exists() && Util.isReadOnly(sourceFolder) || i == length - 1 && sourceFolderIsReadOnly) {
 				Util.setReadOnly(parentFolder, true);
 				// the source folder will be deleted anyway (move operation)
 				Util.setReadOnly(sourceFolder, false);
@@ -718,8 +706,7 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 				AST ast = astCU.getAST();
 				// update main type name
 				IType[] types = cu.getTypes();
-				for (int i = 0, max = types.length; i < max; i++) {
-					IType currentType = types[i];
+				for (IType currentType : types) {
 					if (currentType.getElementName().equals(oldTypeName)) {
 						AbstractTypeDeclaration typeNode = (AbstractTypeDeclaration) ((JavaElement) currentType).findNode(astCU);
 						if (typeNode != null) {
@@ -776,11 +763,9 @@ public class CopyResourceElementsOperation extends MultiOperation implements Suf
 			error(IJavaModelStatusConstants.READ_ONLY, element);
 
 		IResource resource = ((JavaElement) element).resource();
-		if (resource instanceof IFolder) {
-			if (resource.isLinked()) {
-				error(IJavaModelStatusConstants.INVALID_RESOURCE, element);
-			}
-		}
+		if (resource instanceof IFolder && resource.isLinked()) {
+        	error(IJavaModelStatusConstants.INVALID_RESOURCE, element);
+        }
 
 		int elementType = element.getElementType();
 

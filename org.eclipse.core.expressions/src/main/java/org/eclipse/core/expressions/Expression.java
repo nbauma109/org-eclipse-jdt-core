@@ -43,8 +43,8 @@ public abstract class Expression {
 	 * @since 3.2
 	 */
 	protected static final boolean equals(final Object left, final Object right) {
-		return left == null ? right == null : ((right != null) && left
-				.equals(right));
+		return left == null ? right == null : right != null && left
+				.equals(right);
 	}
 
 	/**
@@ -68,19 +68,16 @@ public abstract class Expression {
 		}
 
 		if (leftArray == null) {
-			return (rightArray == null);
-		} else if (rightArray == null) {
-			return false;
+			return rightArray == null;
 		}
-
-		if (leftArray.length != rightArray.length) {
+        if (rightArray == null || leftArray.length != rightArray.length) {
 			return false;
 		}
 
 		for (int i= 0; i < leftArray.length; i++) {
 			final Object left= leftArray[i];
 			final Object right= rightArray[i];
-			final boolean equal= (left == null) ? (right == null) : (left.equals(right));
+			final boolean equal= left == null ? right == null : left.equals(right);
 			if (!equal) {
 				return false;
 			}

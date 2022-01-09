@@ -80,7 +80,7 @@ public class DoubleConstant extends Constant {
 	@Override
 	public int hashCode() {
 		long temp = Double.doubleToLongBits(this.value);
-		return (int) (temp ^ (temp >>> 32));
+		return (int) (temp ^ temp >>> 32);
 	}
 
 	@Override
@@ -88,10 +88,7 @@ public class DoubleConstant extends Constant {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
 		}
 		DoubleConstant other = (DoubleConstant) obj;

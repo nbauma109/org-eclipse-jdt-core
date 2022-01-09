@@ -48,9 +48,7 @@ public class SortedProperties extends Properties {
 			String s2 = (String) e2.getKey();
 			return s1.compareTo(s2);
 		});
-		for (Map.Entry<Object, Object> entry : super.entrySet()) {
-			set.add(entry);
-		}
+		set.addAll(super.entrySet());
 		return set;
 	}
 }

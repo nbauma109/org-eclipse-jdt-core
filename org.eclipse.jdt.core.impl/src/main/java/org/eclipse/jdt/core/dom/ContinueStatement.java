@@ -95,10 +95,9 @@ public class ContinueStatement extends Statement {
 		if (property == LABEL_PROPERTY) {
 			if (get) {
 				return getLabel();
-			} else {
-				setLabel((SimpleName) child);
-				return null;
 			}
+            setLabel((SimpleName) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

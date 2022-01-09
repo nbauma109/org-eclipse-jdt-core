@@ -489,7 +489,6 @@ public final class Platform {
 	 * Private constructor to block instance creation.
 	 */
 	private Platform() {
-		super();
 	}
 
 	/**

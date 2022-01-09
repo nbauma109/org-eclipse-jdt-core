@@ -37,16 +37,14 @@ public class RecoveredPackageVisibilityStatement extends RecoveredModuleStatemen
 		if (this.targets == null) {
 			this.targets = new RecoveredModuleReference[5];
 			this.targetCount = 0;
-		} else {
-			if (this.targetCount == this.targets.length) {
-				System.arraycopy(
-					this.targets,
-					0,
-					(this.targets = new RecoveredModuleReference[2 * this.targetCount]),
-					0,
-					this.targetCount);
-			}
-		}
+		} else if (this.targetCount == this.targets.length) {
+        	System.arraycopy(
+        		this.targets,
+        		0,
+        		this.targets = new RecoveredModuleReference[2 * this.targetCount],
+        		0,
+        		this.targetCount);
+        }
 		RecoveredModuleReference element = new RecoveredModuleReference(target, this, bracketBalance1);
 		this.targets[this.targetCount++] = element;
 		return this;

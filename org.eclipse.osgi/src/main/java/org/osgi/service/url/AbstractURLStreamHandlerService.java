@@ -140,7 +140,8 @@ public abstract class AbstractURLStreamHandlerService extends URLStreamHandler i
 	 * @deprecated This method is only for compatibility with handlers written
 	 *             for JDK 1.1.
 	 */
-	@Override
+	@Deprecated
+    @Override
 	protected void setURL(URL u, String proto, String host, int port, String file, String ref) {
 		realHandler.setURL(u, proto, host, port, file, ref);
 	}

@@ -166,9 +166,7 @@ class OSGiFrameworkHooks {
 		private ServiceReferenceImpl<ResolverHookFactory>[] getHookReferences(final ServiceRegistry registry, final BundleContextImpl context) {
 			return AccessController.doPrivileged((PrivilegedAction<ServiceReferenceImpl<ResolverHookFactory>[]>) () -> {
 				try {
-					@SuppressWarnings("unchecked")
-					ServiceReferenceImpl<ResolverHookFactory>[] result = (ServiceReferenceImpl<ResolverHookFactory>[]) registry.getServiceReferences(context, ResolverHookFactory.class.getName(), null, false);
-					return result;
+					return (ServiceReferenceImpl<ResolverHookFactory>[]) registry.getServiceReferences(context, ResolverHookFactory.class.getName(), null, false);
 				} catch (InvalidSyntaxException e) {
 					// cannot happen; no filter
 					return null;
@@ -237,12 +235,10 @@ class OSGiFrameworkHooks {
 					// only allow the system bundle and its fragments resolve during boot up and init
 					for (Iterator<BundleRevision> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 						BundleRevision revision = iCandidates.next();
-						if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
-							// host bundle; check if it is the system bundle
-							if (revision.getBundle().getBundleId() != 0) {
-								iCandidates.remove();
-							}
-						}
+						// host bundle; check if it is the system bundle
+                        if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0 && revision.getBundle().getBundleId() != 0) {
+                        	iCandidates.remove();
+                        }
 						// just leave all fragments.  Only the ones that are system bundle fragments will resolve
 						// since we removed all the other possible hosts.
 					}
@@ -264,7 +260,7 @@ class OSGiFrameworkHooks {
 			}
 
 			private boolean isBootInit() {
-				return systemModule == null || !Module.RESOLVED_SET.contains(systemModule.getState()) || (systemModule.getState().equals(State.STARTING) && inInit);
+				return systemModule == null || !Module.RESOLVED_SET.contains(systemModule.getState()) || systemModule.getState().equals(State.STARTING) && inInit;
 			}
 
 			@Override

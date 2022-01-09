@@ -59,7 +59,7 @@ public class PlatformURLFragmentConnection extends PlatformURLConnection {
 		if (target == null)
 			throw new IOException(NLS.bind(CommonMessages.url_resolveFragment, url));
 		URL result = target.getEntry("/"); //$NON-NLS-1$
-		if (ix == -1 || (ix + 1) >= spec.length())
+		if (ix == -1 || ix + 1 >= spec.length())
 			return result;
 		return new URL(result, spec.substring(ix + 1));
 	}

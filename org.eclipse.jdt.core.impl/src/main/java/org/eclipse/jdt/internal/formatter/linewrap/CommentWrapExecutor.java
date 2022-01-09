@@ -158,7 +158,7 @@ public class CommentWrapExecutor extends TokenTraverser {
 			}
 		}
 
-		if (index > 1 && getNext() != null && (token.getAlign() + token.getIndent()) > 0)
+		if (index > 1 && getNext() != null && token.getAlign() + token.getIndent() > 0)
 			this.counter = Math.max(this.counter, getStartingPosition(token, getLineBreaksBefore() > 0));
 		this.counter += this.tm.getLength(token, this.counter);
 		this.counterIfWrapped += this.tm.getLength(token, this.counterIfWrapped);
@@ -224,7 +224,7 @@ public class CommentWrapExecutor extends TokenTraverser {
 			return;
 		int commentIndex = this.tm.indexOf(commentToken);
 		boolean isHeader = this.tm.isInHeader(commentIndex);
-		boolean formattingEnabled = (isHeader ? this.options.comment_format_header : this.options.comment_format_line_comment);
+		boolean formattingEnabled = isHeader ? this.options.comment_format_header : this.options.comment_format_line_comment;
 		if (!formattingEnabled)
 			return;
 

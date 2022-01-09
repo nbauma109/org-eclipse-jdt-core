@@ -71,7 +71,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 @SuppressWarnings({})
 public abstract class TypeReference extends Expression {
-	public static final TypeReference[] NO_TYPE_ARGUMENTS = new TypeReference[0];
+	public static final TypeReference[] NO_TYPE_ARGUMENTS = {};
 
 	/**
 	 * Simplified specification of where in a (possibly complex) type reference
@@ -307,42 +307,42 @@ public static final TypeReference baseTypeReference(int baseType, int dim, Annot
 
 	if (dim == 0) {
 		switch (baseType) {
-			case (TypeIds.T_void) :
+			case TypeIds.T_void :
 				return new SingleTypeReference(TypeBinding.VOID.simpleName, 0);
-			case (TypeIds.T_boolean) :
+			case TypeIds.T_boolean :
 				return new SingleTypeReference(TypeBinding.BOOLEAN.simpleName, 0);
-			case (TypeIds.T_char) :
+			case TypeIds.T_char :
 				return new SingleTypeReference(TypeBinding.CHAR.simpleName, 0);
-			case (TypeIds.T_float) :
+			case TypeIds.T_float :
 				return new SingleTypeReference(TypeBinding.FLOAT.simpleName, 0);
-			case (TypeIds.T_double) :
+			case TypeIds.T_double :
 				return new SingleTypeReference(TypeBinding.DOUBLE.simpleName, 0);
-			case (TypeIds.T_byte) :
+			case TypeIds.T_byte :
 				return new SingleTypeReference(TypeBinding.BYTE.simpleName, 0);
-			case (TypeIds.T_short) :
+			case TypeIds.T_short :
 				return new SingleTypeReference(TypeBinding.SHORT.simpleName, 0);
-			case (TypeIds.T_int) :
+			case TypeIds.T_int :
 				return new SingleTypeReference(TypeBinding.INT.simpleName, 0);
 			default : //T_long
 				return new SingleTypeReference(TypeBinding.LONG.simpleName, 0);
 		}
 	}
 	switch (baseType) {
-		case (TypeIds.T_void) :
+		case TypeIds.T_void :
 			return new ArrayTypeReference(TypeBinding.VOID.simpleName, dim, dimAnnotations, 0);
-		case (TypeIds.T_boolean) :
+		case TypeIds.T_boolean :
 			return new ArrayTypeReference(TypeBinding.BOOLEAN.simpleName, dim, dimAnnotations, 0);
-		case (TypeIds.T_char) :
+		case TypeIds.T_char :
 			return new ArrayTypeReference(TypeBinding.CHAR.simpleName, dim, dimAnnotations, 0);
-		case (TypeIds.T_float) :
+		case TypeIds.T_float :
 			return new ArrayTypeReference(TypeBinding.FLOAT.simpleName, dim, dimAnnotations, 0);
-		case (TypeIds.T_double) :
+		case TypeIds.T_double :
 			return new ArrayTypeReference(TypeBinding.DOUBLE.simpleName, dim, dimAnnotations, 0);
-		case (TypeIds.T_byte) :
+		case TypeIds.T_byte :
 			return new ArrayTypeReference(TypeBinding.BYTE.simpleName, dim, dimAnnotations, 0);
-		case (TypeIds.T_short) :
+		case TypeIds.T_short :
 			return new ArrayTypeReference(TypeBinding.SHORT.simpleName, dim, dimAnnotations, 0);
-		case (TypeIds.T_int) :
+		case TypeIds.T_int :
 			return new ArrayTypeReference(TypeBinding.INT.simpleName, dim, dimAnnotations, 0);
 		default : //T_long
 			return new ArrayTypeReference(TypeBinding.LONG.simpleName, dim, dimAnnotations, 0);
@@ -442,11 +442,10 @@ public void getAllAnnotationContexts(int targetType, int info, List<AnnotationCo
 	AnnotationCollector collector = new AnnotationCollector(this, targetType, info, allAnnotationContexts, annotationsOnDimensions, dimensions);
 	this.traverse(collector, (BlockScope) null);
 	if (annotationsOnDimensions != null) {
-		for (int i = 0, max = annotationsOnDimensions.length; i < max; i++) {
-			Annotation[] annotationsOnDimension = annotationsOnDimensions[i];
+		for (Annotation[] annotationsOnDimension : annotationsOnDimensions) {
 			if (annotationsOnDimension != null) {
-				for (int j = 0, max2 = annotationsOnDimension.length; j< max2; j++) {
-					annotationsOnDimension[j].traverse(collector, (BlockScope) null);
+				for (Annotation element : annotationsOnDimension) {
+					element.traverse(collector, (BlockScope) null);
 				}
 			}
 		}
@@ -505,24 +504,24 @@ protected TypeBinding internalResolveType(Scope scope, int location) {
 	if (this.resolvedType != null) { // is a shared type reference which was already resolved
 		if (this.resolvedType.isValidBinding()) {
 			return this.resolvedType;
-		} else {
-			switch (this.resolvedType.problemId()) {
-				case ProblemReasons.NotFound :
-				case ProblemReasons.NotVisible :
-				case ProblemReasons.InheritedNameHidesEnclosingName :
-					TypeBinding type = this.resolvedType.closestMatch();
-					if (type == null) return null;
-					return scope.environment().convertToRawType(type, false /*do not force conversion of enclosing types*/);
-				default :
-					return null;
-			}
 		}
+        switch (this.resolvedType.problemId()) {
+        	case ProblemReasons.NotFound :
+        	case ProblemReasons.NotVisible :
+        	case ProblemReasons.InheritedNameHidesEnclosingName :
+        		TypeBinding type = this.resolvedType.closestMatch();
+        		if (type == null) return null;
+        		return scope.environment().convertToRawType(type, false /*do not force conversion of enclosing types*/);
+        	default :
+        		return null;
+        }
 	}
 	boolean hasError = false;
 	TypeBinding type = this.resolvedType = getTypeBinding(scope);
 	if (type == null) {
 		return null; // detected cycle while resolving hierarchy
-	} else if ((hasError = !type.isValidBinding()) == true) {
+	}
+    if (hasError = !type.isValidBinding()) {
 		if (this.isTypeNameVar(scope)) {
 			reportVarIsNotAllowedHere(scope);
 		} else if (!scope.problemReporter().validateRestrictedKeywords(getLastToken(), this)) {
@@ -558,12 +557,11 @@ protected TypeBinding internalResolveType(Scope scope, int location) {
 	if (hasError) {
 		resolveAnnotations(scope, 0); // don't apply null defaults to buggy type
 		return type;
-	} else {
-		// store the computed type only if no error, otherwise keep the problem type instead
-		this.resolvedType = type;
-		resolveAnnotations(scope, location);
-		return this.resolvedType; // pick up value that may have been changed in resolveAnnotations(..)
 	}
+    // store the computed type only if no error, otherwise keep the problem type instead
+    this.resolvedType = type;
+    resolveAnnotations(scope, location);
+    return this.resolvedType; // pick up value that may have been changed in resolveAnnotations(..)
 }
 @Override
 public boolean isTypeReference() {
@@ -703,7 +701,7 @@ protected void resolveAnnotations(Scope scope, int location) {
 			scope.problemReporter().implicitObjectBoundNoNullDefault(this);
 		} else {
 			LookupEnvironment environment = scope.environment();
-			AnnotationBinding[] annots = new AnnotationBinding[]{environment.getNonNullAnnotation()};
+			AnnotationBinding[] annots = {environment.getNonNullAnnotation()};
 			this.resolvedType = environment.createAnnotatedType(this.resolvedType, annots);
 		}
 	}
@@ -714,8 +712,7 @@ public int getAnnotatableLevels() {
 /** Check all typeArguments for illegal null annotations on base types. */
 protected void checkIllegalNullAnnotations(Scope scope, TypeReference[] typeArguments) {
 	if (scope.environment().usesNullTypeAnnotations() && typeArguments != null) {
-		for (int i = 0; i < typeArguments.length; i++) {
-			TypeReference arg = typeArguments[i];
+		for (TypeReference arg : typeArguments) {
 			if (arg.resolvedType != null)
 				arg.checkIllegalNullAnnotation(scope);
 		}
@@ -725,10 +722,8 @@ protected void checkIllegalNullAnnotations(Scope scope, TypeReference[] typeArgu
 protected void checkNullConstraints(Scope scope, Substitution substitution, TypeBinding[] variables, int rank) {
 	if (variables != null && variables.length > rank) {
 		TypeBinding variable = variables[rank];
-		if (variable.hasNullTypeAnnotations()) {
-			if (NullAnnotationMatching.analyse(variable, this.resolvedType, null, substitution, -1, null, CheckMode.BOUND_CHECK).isAnyMismatch())
-				scope.problemReporter().nullityMismatchTypeArgument(variable, this.resolvedType, this);
-    	}
+		if (variable.hasNullTypeAnnotations() && NullAnnotationMatching.analyse(variable, this.resolvedType, null, substitution, -1, null, CheckMode.BOUND_CHECK).isAnyMismatch())
+        	scope.problemReporter().nullityMismatchTypeArgument(variable, this.resolvedType, this);
 	}
 	checkIllegalNullAnnotation(scope);
 }
@@ -742,9 +737,9 @@ public Annotation findAnnotation(long nullTagBits) {
 		Annotation[] innerAnnotations = this.annotations[this.annotations.length-1];
 		if (innerAnnotations != null) {
 			int annBit = nullTagBits == TagBits.AnnotationNonNull ? TypeIds.BitNonNullAnnotation : TypeIds.BitNullableAnnotation;
-			for (int i = 0; i < innerAnnotations.length; i++) {
-				if (innerAnnotations[i] != null && innerAnnotations[i].hasNullBit(annBit))
-					return innerAnnotations[i];
+			for (Annotation innerAnnotation : innerAnnotations) {
+				if (innerAnnotation != null && innerAnnotation.hasNullBit(annBit))
+					return innerAnnotation;
 			}
 		}
 	}
@@ -755,19 +750,18 @@ public boolean hasNullTypeAnnotation(AnnotationPosition position) {
 		if (position == AnnotationPosition.MAIN_TYPE) {
 			Annotation[] innerAnnotations = this.annotations[this.annotations.length-1];
 			return containsNullAnnotation(innerAnnotations);
-		} else {
-			for (Annotation[] someAnnotations: this.annotations) {
-				if (containsNullAnnotation(someAnnotations))
-					return true;
-			}
 		}
+        for (Annotation[] someAnnotations: this.annotations) {
+        	if (containsNullAnnotation(someAnnotations))
+        		return true;
+        }
 	}
 	return false;
 }
 public static boolean containsNullAnnotation(Annotation[] annotations) {
 	if (annotations != null) {
-		for (int i = 0; i < annotations.length; i++) {
-			if (annotations[i] != null && (annotations[i].hasNullBit(TypeIds.BitNonNullAnnotation|TypeIds.BitNullableAnnotation)))
+		for (Annotation annotation2 : annotations) {
+			if (annotation2 != null && annotation2.hasNullBit(TypeIds.BitNonNullAnnotation|TypeIds.BitNullableAnnotation))
 				return true;
 		}
 	}

@@ -84,7 +84,6 @@ void setMissingSuperclass(ReferenceBinding missingSuperclass) {
 
 @Override
 public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNullAnnotations) {
-	return; // reject misguided attempts.
 }
 
 @Override

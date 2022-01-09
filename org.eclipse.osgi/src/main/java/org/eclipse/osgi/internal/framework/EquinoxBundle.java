@@ -121,8 +121,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 					String systemProvideHeader = getEquinoxContainer().getConfiguration().getConfiguration(EquinoxConfiguration.PROP_SYSTEM_PROVIDE_HEADER, EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM_EXTRA);
 					boolean useSystemExtra = systemProvideHeader.equals(EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM_EXTRA);
 					boolean useSystem = systemProvideHeader.equals(EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM) || useSystemExtra;
-					String systemProp = useSystem ? (Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey) ? Constants.FRAMEWORK_SYSTEMPACKAGES : Constants.FRAMEWORK_SYSTEMCAPABILITIES) : null;
-					String systemExtraProp = useSystemExtra ? (Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey) ? Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA : Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA) : null;
+					String systemProp = useSystem ? Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey) ? Constants.FRAMEWORK_SYSTEMPACKAGES : Constants.FRAMEWORK_SYSTEMCAPABILITIES : null;
+					String systemExtraProp = useSystemExtra ? Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey) ? Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA : Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA : null;
 					return getExtra(sKey, systemProp, systemExtraProp);
 				}
 
@@ -271,11 +271,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 					Debug.println("Initializing framework with framework listeners: " + listeners); //$NON-NLS-1$
 				}
 				initListeners.addAll(Arrays.asList(listeners));
-			} else {
-				if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
-					Debug.println("Initializing framework with framework no listeners"); //$NON-NLS-1$
-				}
-			}
+			} else if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
+            	Debug.println("Initializing framework with framework no listeners"); //$NON-NLS-1$
+            }
 			try {
 				((SystemModule) getModule()).init();
 			} finally {
@@ -407,7 +405,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	@Override
 	public int compareTo(Bundle bundle) {
 		long idcomp = getBundleId() - bundle.getBundleId();
-		return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
+		return idcomp < 0L ? -1 : idcomp > 0L ? 1 : 0;
 	}
 
 	@Override
@@ -723,13 +721,11 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			return null;
 		}
 		synchronized (this.monitor) {
-			if (context == null) {
-				// only create the context if we are starting, active or stopping
-				// this is so that SCR can get the context for lazy-start bundles
-				if (Module.ACTIVE_SET.contains(module.getState())) {
-					context = new BundleContextImpl(this, equinoxContainer);
-				}
-			}
+			// only create the context if we are starting, active or stopping
+            // this is so that SCR can get the context for lazy-start bundles
+            if (context == null && Module.ACTIVE_SET.contains(module.getState())) {
+            	context = new BundleContextImpl(this, equinoxContainer);
+            }
 			return context;
 		}
 	}
@@ -886,7 +882,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				return null;
 			}
 			BundleContextImpl current = getBundleContextImpl();
-			ServiceReference<?>[] references = (current == null) ? null : equinoxContainer.getServiceRegistry().getRegisteredServices(current);
+			ServiceReference<?>[] references = current == null ? null : equinoxContainer.getServiceRegistry().getRegisteredServices(current);
 			return (A) DTOBuilder.newArrayServiceReferenceDTO(references);
 		}
 
@@ -1072,6 +1068,6 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		String name = getSymbolicName();
 		if (name == null)
 			name = "unknown"; //$NON-NLS-1$
-		return (name + '_' + getVersion() + " [" + getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+		return name + '_' + getVersion() + " [" + getBundleId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

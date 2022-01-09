@@ -68,8 +68,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	Constant cst = this.condition.optimizedBooleanConstant();
 	this.condition.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
-	boolean isConditionOptimizedTrue = cst != Constant.NotAConstant && cst.booleanValue() == true;
-	boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && cst.booleanValue() == false;
+	boolean isConditionOptimizedTrue = cst != Constant.NotAConstant && cst.booleanValue();
+	boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && !cst.booleanValue();
 
 	flowContext.conditionalLevel++;
 
@@ -82,13 +82,13 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	if (isConditionOptimizedTrue) {
 		elseFlowInfo.setReachMode(FlowInfo.UNREACHABLE_OR_DEAD);
 	}
-	if (((flowInfo.tagBits & FlowInfo.UNREACHABLE) == 0) &&
-			((thenFlowInfo.tagBits & FlowInfo.UNREACHABLE) != 0)) {
+	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE) == 0 &&
+			(thenFlowInfo.tagBits & FlowInfo.UNREACHABLE) != 0) {
 		// Mark then block as unreachable
 		// No need if the whole if-else construct itself lies in unreachable code
 		this.bits |= ASTNode.IsThenStatementUnreachable;
-	} else if (((flowInfo.tagBits & FlowInfo.UNREACHABLE) == 0) &&
-			((elseFlowInfo.tagBits & FlowInfo.UNREACHABLE) != 0)) {
+	} else if ((flowInfo.tagBits & FlowInfo.UNREACHABLE) == 0 &&
+			(elseFlowInfo.tagBits & FlowInfo.UNREACHABLE) != 0) {
 		// Mark else block as unreachable
 		// No need if the whole if-else construct itself lies in unreachable code
 		this.bits |= ASTNode.IsElseStatementUnreachable;
@@ -97,7 +97,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	if (this.thenStatement != null) {
 		// Save info for code gen
 		this.thenInitStateIndex = currentScope.methodScope().recordInitializationStates(thenFlowInfo);
-		if (isConditionOptimizedFalse || ((this.bits & ASTNode.IsThenStatementUnreachable) != 0)) {
+		if (isConditionOptimizedFalse || (this.bits & ASTNode.IsThenStatementUnreachable) != 0) {
 			if (reportDeadCodeForKnownPattern) {
 				this.thenStatement.complainIfUnreachable(thenFlowInfo, currentScope, initialComplaintLevel, false);
 			} else {
@@ -128,7 +128,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		}
 		// Save info for code gen
 		this.elseInitStateIndex = currentScope.methodScope().recordInitializationStates(elseFlowInfo);
-		if (isConditionOptimizedTrue || ((this.bits & ASTNode.IsElseStatementUnreachable) != 0)) {
+		if (isConditionOptimizedTrue || (this.bits & ASTNode.IsElseStatementUnreachable) != 0) {
 			if (reportDeadCodeForKnownPattern) {
 				this.elseStatement.complainIfUnreachable(elseFlowInfo, currentScope, initialComplaintLevel, false);
 			} else {
@@ -175,18 +175,13 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 	// optimizing the then/else part code gen
 	Constant cst;
 	boolean hasThenPart =
-		!(((cst = this.condition.optimizedBooleanConstant()) != Constant.NotAConstant
-				&& cst.booleanValue() == false)
-			|| this.thenStatement == null
-			|| this.thenStatement.isEmptyBlock());
+		((cst = this.condition.optimizedBooleanConstant()) == Constant.NotAConstant || cst.booleanValue()) && this.thenStatement != null && !this.thenStatement.isEmptyBlock();
 	boolean hasElsePart =
-		!((cst != Constant.NotAConstant && cst.booleanValue() == true)
-			|| this.elseStatement == null
-			|| this.elseStatement.isEmptyBlock());
+		(cst == Constant.NotAConstant || !cst.booleanValue()) && this.elseStatement != null && !this.elseStatement.isEmptyBlock();
 	if (hasThenPart) {
 		BranchLabel falseLabel = null;
 		// generate boolean condition only if needed
-		if (cst != Constant.NotAConstant && cst.booleanValue() == true) {
+		if (cst != Constant.NotAConstant && cst.booleanValue()) {
 			this.condition.generateCode(currentScope, codeStream, false);
 		} else {
 			this.condition.generateOptimizedBoolean(
@@ -225,7 +220,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 		}
 	} else if (hasElsePart) {
 		// generate boolean condition only if needed
-		if (cst != Constant.NotAConstant && cst.booleanValue() == false) {
+		if (cst != Constant.NotAConstant && !cst.booleanValue()) {
 			this.condition.generateCode(currentScope, codeStream, false);
 		} else {
 			this.condition.generateOptimizedBoolean(
@@ -345,8 +340,8 @@ public boolean completesByContinue() {
 }
 @Override
 public boolean canCompleteNormally() {
-	return ((this.thenStatement == null || this.thenStatement.canCompleteNormally()) ||
-		(this.elseStatement == null || this.elseStatement.canCompleteNormally()));
+	return this.thenStatement == null || this.thenStatement.canCompleteNormally() ||
+		this.elseStatement == null || this.elseStatement.canCompleteNormally();
 }
 @Override
 public boolean continueCompletes() {

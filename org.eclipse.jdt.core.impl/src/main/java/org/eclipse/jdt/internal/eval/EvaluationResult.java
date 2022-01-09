@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
  */
 public class EvaluationResult {
 
-	static final CategorizedProblem[] NO_PROBLEMS = new CategorizedProblem[0];
+	static final CategorizedProblem[] NO_PROBLEMS = {};
 
 	char[] evaluationID;
 	int evaluationType;
@@ -152,21 +152,20 @@ public char[] getValueTypeName() {
  */
 public boolean hasErrors() {
 	if (this.problems == null) {
-		return false;
 	} else {
-		for (int i = 0; i < this.problems.length; i++) {
-			if (this.problems[i].isError()) {
+		for (CategorizedProblem problem : this.problems) {
+			if (problem.isError()) {
 				return true;
 			}
 		}
-		return false;
 	}
+    return false;
 }
 /**
  * Returns whether there are problems in the code snippet or the global variable definition.
  */
 public boolean hasProblems() {
-	return (this.problems != null) && (this.problems.length != 0);
+	return this.problems != null && this.problems.length != 0;
 }
 /**
  * Returns whether this result has a value.
@@ -179,15 +178,14 @@ public boolean hasValue() {
  */
 public boolean hasWarnings() {
 	if (this.problems == null) {
-		return false;
 	} else {
-		for (int i = 0; i < this.problems.length; i++) {
-			if (this.problems[i].isWarning()) {
+		for (CategorizedProblem problem : this.problems) {
+			if (problem.isWarning()) {
 				return true;
 			}
 		}
-		return false;
 	}
+    return false;
 }
 /**
  * Returns a readable representation of this result.
@@ -218,19 +216,17 @@ public String toString() {
 	buffer.append("\n"); //$NON-NLS-1$
 	if (hasProblems()) {
 		buffer.append("Problems:\n"); //$NON-NLS-1$
-		for (int i = 0; i < this.problems.length; i++) {
-			buffer.append(this.problems[i].toString());
+		for (CategorizedProblem problem : this.problems) {
+			buffer.append(problem.toString());
 		}
-	} else {
-		if (hasValue()) {
-			buffer.append("("); //$NON-NLS-1$
-			buffer.append(this.typeName);
-			buffer.append(") "); //$NON-NLS-1$
-			buffer.append(this.displayString);
-		} else {
-			buffer.append("(No explicit return value)"); //$NON-NLS-1$
-		}
-	}
+	} else if (hasValue()) {
+    	buffer.append("("); //$NON-NLS-1$
+    	buffer.append(this.typeName);
+    	buffer.append(") "); //$NON-NLS-1$
+    	buffer.append(this.displayString);
+    } else {
+    	buffer.append("(No explicit return value)"); //$NON-NLS-1$
+    }
 	return buffer.toString();
 }
 }

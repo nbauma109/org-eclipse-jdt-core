@@ -69,7 +69,7 @@ public abstract class AbstractNamedHandleEvent extends
 	 * @return <code>true</code>, iff the description property changed.
 	 */
 	public final boolean isDescriptionChanged() {
-		return ((changedValues & CHANGED_DESCRIPTION) != 0);
+		return (changedValues & CHANGED_DESCRIPTION) != 0;
 	}
 
 	/**
@@ -78,7 +78,7 @@ public abstract class AbstractNamedHandleEvent extends
 	 * @return <code>true</code>, iff the name property changed.
 	 */
 	public final boolean isNameChanged() {
-		return ((changedValues & CHANGED_NAME) != 0);
+		return (changedValues & CHANGED_NAME) != 0;
 	}
 
 }

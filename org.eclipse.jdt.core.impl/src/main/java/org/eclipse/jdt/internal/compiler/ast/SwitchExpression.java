@@ -69,7 +69,7 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 	List<LocalVariableBinding> typesOnStack;
 
 	static {
-		type_map = new HashMap<TypeBinding, TypeBinding[]>();
+		type_map = new HashMap<>();
 		type_map.put(TypeBinding.CHAR, new TypeBinding[] {TypeBinding.CHAR, TypeBinding.INT});
 		type_map.put(TypeBinding.SHORT, new TypeBinding[] {TypeBinding.SHORT, TypeBinding.BYTE, TypeBinding.INT});
 		type_map.put(TypeBinding.BYTE, new TypeBinding[] {TypeBinding.BYTE, TypeBinding.INT});
@@ -99,7 +99,7 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 	}
 	@Override
 	protected int getFallThroughState(Statement stmt, BlockScope blockScope) {
-		if ((stmt instanceof Expression && ((Expression) stmt).isTrulyExpression())|| stmt instanceof ThrowStatement)
+		if (stmt instanceof Expression && ((Expression) stmt).isTrulyExpression()|| stmt instanceof ThrowStatement)
 			return BREAKING;
 		if ((this.switchBits & LabeledRules) != 0 // do this check for every block if '->' (Switch Labeled Rules)
 				&& stmt instanceof Block) {
@@ -166,12 +166,11 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 		Statement firstTrailingCaseStmt = null;
 		for (int i = sz - 1; i >= 0; i--) {
 			Statement stmt = this.statements[sz - 1];
-			if (stmt instanceof CaseStatement)
-				firstTrailingCaseStmt = stmt;
-			else {
+			if (!(stmt instanceof CaseStatement)) {
 				lastNonCaseStmt = stmt;
 				break;
 			}
+            firstTrailingCaseStmt = stmt;
 		}
 		if (lastNonCaseStmt != null) {
 			if (lastNonCaseStmt.canCompleteNormally())
@@ -230,10 +229,10 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 	}
 	@Override
 	protected void statementGenerateCode(BlockScope currentScope, CodeStream codeStream, Statement statement) {
-		if (!(statement instanceof Expression && ((Expression) statement).isTrulyExpression())
+		if (!(statement instanceof Expression) || !((Expression) statement).isTrulyExpression()
 				|| statement instanceof Assignment
 				|| statement instanceof MessageSend
-				|| (statement instanceof SwitchStatement && !(statement instanceof SwitchExpression))) {
+				|| statement instanceof SwitchStatement && !(statement instanceof SwitchExpression)) {
 			super.statementGenerateCode(currentScope, codeStream, statement);
 			return;
 		}
@@ -266,7 +265,7 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 		return lvb;
 	}
 	private int getNextOffset(LocalVariableBinding local) {
-		int delta =  ((TypeBinding.equalsEquals(local.type, TypeBinding.LONG)) || (TypeBinding.equalsEquals(local.type, TypeBinding.DOUBLE))) ?
+		int delta =  TypeBinding.equalsEquals(local.type, TypeBinding.LONG) || TypeBinding.equalsEquals(local.type, TypeBinding.DOUBLE) ?
 				2 : 1;
 		return local.resolvedPosition + delta;
 	}
@@ -293,8 +292,8 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 		}
 		// now keep a position reserved for yield result value
 		this.yieldResolvedPosition = nextResolvedPosition;
-		nextResolvedPosition += ((TypeBinding.equalsEquals(this.resolvedType, TypeBinding.LONG)) ||
-				(TypeBinding.equalsEquals(this.resolvedType, TypeBinding.DOUBLE))) ?
+		nextResolvedPosition += TypeBinding.equalsEquals(this.resolvedType, TypeBinding.LONG) ||
+				TypeBinding.equalsEquals(this.resolvedType, TypeBinding.DOUBLE) ?
 				2 : 1;
 
 		codeStream.lastSwitchCumulativeSyntheticVars += count + 1; // 1 for yield var
@@ -347,10 +346,8 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 					codeStream.pop();
 					break;
 			}
-		} else {
-			if (!this.isPolyExpression()) // not in invocation or assignment contexts
-				codeStream.generateImplicitConversion(this.implicitConversion);
-		}
+		} else if (!this.isPolyExpression()) // not in invocation or assignment contexts
+        	codeStream.generateImplicitConversion(this.implicitConversion);
 	}
 	protected boolean computeConversions(BlockScope blockScope, TypeBinding targetType) {
 		boolean ok = true;
@@ -369,20 +366,16 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 				if (resultExpressionType.needsUncheckedConversion(targetType)) {
 					blockScope.problemReporter().unsafeTypeConversion(resultExpression, resultExpressionType, targetType);
 				}
-				if (resultExpression instanceof CastExpression
-						&& (resultExpression.bits & (ASTNode.UnnecessaryCast|ASTNode.DisableUnnecessaryCastCheck)) == 0) {
-					CastExpression.checkNeedForAssignedCast(blockScope, targetType, (CastExpression) resultExpression);
-				}
 			} else if (isBoxingCompatible(resultExpressionType, targetType, resultExpression, blockScope)) {
 				resultExpression.computeConversion(blockScope, targetType, resultExpressionType);
-				if (resultExpression instanceof CastExpression
-						&& (resultExpression.bits & (ASTNode.UnnecessaryCast|ASTNode.DisableUnnecessaryCastCheck)) == 0) {
-					CastExpression.checkNeedForAssignedCast(blockScope, targetType, (CastExpression) resultExpression);
-				}
 			} else {
 				blockScope.problemReporter().typeMismatchError(resultExpressionType, targetType, resultExpression, null);
 				return false;
 			}
+            if (resultExpression instanceof CastExpression
+            		&& (resultExpression.bits & (ASTNode.UnnecessaryCast|ASTNode.DisableUnnecessaryCastCheck)) == 0) {
+            	CastExpression.checkNeedForAssignedCast(blockScope, targetType, (CastExpression) resultExpression);
+            }
 		}
 		return true;
 	}
@@ -568,8 +561,7 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 			 */
 			if (typeBbolean) {
 				for (int i = 0; i < resultExpressionsCount; ++i) {
-					if (this.originalValueResultExpressionTypes[i] == null) continue;
-					if (this.originalValueResultExpressionTypes[i].id == T_boolean) continue;
+					if (this.originalValueResultExpressionTypes[i] == null || this.originalValueResultExpressionTypes[i].id == T_boolean) continue;
 					this.finalValueResultExpressionTypes[i] = env.computeBoxingType(this.originalValueResultExpressionTypes[i]);
 					this.resultExpressions.get(i).computeConversion(this.scope, this.finalValueResultExpressionTypes[i], this.originalValueResultExpressionTypes[i]);
 				}
@@ -607,7 +599,7 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 				 *  Otherwise, if any result expression is of type long, then other result expressions that are not of
 				 *  type long are widened to long.
 				 */
-				TypeBinding[] dfl = new TypeBinding[]{// do not change the order JLS 13 5.6
+				TypeBinding[] dfl = {// do not change the order JLS 13 5.6
 						TypeBinding.DOUBLE,
 						TypeBinding.FLOAT,
 						TypeBinding.LONG};
@@ -750,7 +742,7 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 		 */
 
 		// DO NOT Change the order below [as per JLS 13 5.6 ].
-		TypeBinding[] csb = new TypeBinding[] {TypeBinding.SHORT, TypeBinding.BYTE, TypeBinding.CHAR};
+		TypeBinding[] csb = {TypeBinding.SHORT, TypeBinding.BYTE, TypeBinding.CHAR};
 		for (TypeBinding c : csb) {
 			TypeBinding result = check_csb(typeSet, c);
 			if (result != null)
@@ -789,7 +781,7 @@ public class SwitchExpression extends SwitchStatement implements IPolyExpression
 			return super.isBoxingCompatibleWith(targetType, skope);
 
 		for (Expression e : this.resultExpressions) {
-			if (!(e.isCompatibleWith(targetType, skope) || e.isBoxingCompatibleWith(targetType, skope)))
+			if (!e.isCompatibleWith(targetType, skope) && !e.isBoxingCompatibleWith(targetType, skope))
 				return false;
 		}
 		return true;

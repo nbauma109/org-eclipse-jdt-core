@@ -23,7 +23,8 @@ public class LongConstant extends Constant {
 public static Constant fromValue(long value) {
 	if (value == 0L) {
 		return ZERO;
-	} else if (value == Long.MIN_VALUE) {
+	}
+    if (value == Long.MIN_VALUE) {
 		return MIN_VALUE;
 	}
 	return new LongConstant(value);
@@ -87,7 +88,7 @@ public int typeID() {
 
 @Override
 public int hashCode() {
-	return (int) (this.value ^ (this.value >>> 32));
+	return (int) (this.value ^ this.value >>> 32);
 }
 
 @Override
@@ -95,10 +96,7 @@ public boolean equals(Object obj) {
 	if (this == obj) {
 		return true;
 	}
-	if (obj == null) {
-		return false;
-	}
-	if (getClass() != obj.getClass()) {
+	if (obj == null || getClass() != obj.getClass()) {
 		return false;
 	}
 	LongConstant other = (LongConstant) obj;

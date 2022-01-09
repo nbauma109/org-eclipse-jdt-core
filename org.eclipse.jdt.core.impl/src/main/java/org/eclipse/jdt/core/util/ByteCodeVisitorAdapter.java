@@ -1059,7 +1059,8 @@ public class ByteCodeVisitorAdapter implements IBytecodeVisitor {
 	 * @since 3.6
 	 * @deprecated This has been replaced with {@link IBytecodeVisitor#_invokedynamic(int, int, IConstantPoolEntry)}
 	 */
-	@Override
+	@Deprecated
+    @Override
 	public void _invokedynamic(
 			int pc,
 			int index,

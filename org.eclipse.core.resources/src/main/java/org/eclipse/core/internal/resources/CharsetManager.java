@@ -89,7 +89,7 @@ public class CharsetManager implements IManager {
 						IProject project = next.getKey();
 						try {
 							if (project.isAccessible()) {
-								boolean shouldDisableCharsetDeltaJob = next.getValue().booleanValue();
+								boolean shouldDisableCharsetDeltaJob = next.getValue();
 								// flush preferences for non-derived resources
 								flushPreferences(getPreferences(project, false, false, true), shouldDisableCharsetDeltaJob);
 								// flush preferences for derived resources
@@ -187,7 +187,7 @@ public class CharsetManager implements IManager {
 			for (Map.Entry<Boolean, String[]> entry : affectedResourcesMap.entrySet()) {
 				Boolean isDerived = entry.getKey();
 				String[] affectedResources = entry.getValue();
-				Preferences projectPrefs = isDerived.booleanValue() ? projectDerivedPrefs : projectRegularPrefs;
+				Preferences projectPrefs = isDerived ? projectDerivedPrefs : projectRegularPrefs;
 				for (String affectedResource : affectedResources) {
 					IResourceDelta memberDelta = projectDelta.findMember(new Path(affectedResource));
 					// no changes for the given resource
@@ -215,7 +215,7 @@ public class CharsetManager implements IManager {
 									projectsToSave.put(targetProject, Boolean.FALSE);
 							}
 						}
-						projectsToSave.put(currentProject, Boolean.valueOf(shouldDisableCharsetDeltaJobForCurrentProject));
+						projectsToSave.put(currentProject, shouldDisableCharsetDeltaJobForCurrentProject);
 					}
 				}
 				if (moveSettingsIfDerivedChanged(projectDelta, currentProject, projectPrefs, affectedResources)) {
@@ -471,17 +471,15 @@ public class CharsetManager implements IManager {
 			affectedResources = projectRegularPrefs.keys();
 			for (String path : affectedResources) {
 				IResource resource = project.findMember(path);
-				if (resource != null) {
-					if (resource.isDerived(IResource.CHECK_ANCESTORS)) {
-						String value = projectRegularPrefs.get(path, null);
-						projectRegularPrefs.remove(path);
-						// lazy creation of derived preferences
-						if (projectDerivedPrefs == null)
-							projectDerivedPrefs = getPreferences(project, true, true, true);
-						projectDerivedPrefs.put(path, value);
-						prefsChanged = true;
-					}
-				}
+				if (resource != null && resource.isDerived(IResource.CHECK_ANCESTORS)) {
+                	String value = projectRegularPrefs.get(path, null);
+                	projectRegularPrefs.remove(path);
+                	// lazy creation of derived preferences
+                	if (projectDerivedPrefs == null)
+                		projectDerivedPrefs = getPreferences(project, true, true, true);
+                	projectDerivedPrefs.put(path, value);
+                	prefsChanged = true;
+                }
 			}
 			if (prefsChanged) {
 				Map<IProject, Boolean> projectsToSave = new HashMap<>();

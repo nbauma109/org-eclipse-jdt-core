@@ -78,7 +78,7 @@ public final class ChildPropertyDescriptor extends StructuralPropertyDescriptor 
 	 *
 	 * @return the child type of the property
 	 */
-	public final Class getChildType() {
+	public Class getChildType() {
 		return this.childClass;
 	}
 
@@ -89,7 +89,7 @@ public final class ChildPropertyDescriptor extends StructuralPropertyDescriptor 
 	 * @return <code>true</code> if the property is mandatory,
 	 * and <code>false</code> if it is may be <code>null</code>
 	 */
-	public final boolean isMandatory() {
+	public boolean isMandatory() {
 		return this.mandatory;
 	}
 
@@ -111,7 +111,7 @@ public final class ChildPropertyDescriptor extends StructuralPropertyDescriptor 
 	 * @return <code>true</code> if cycles are possible,
 	 * and <code>false</code> if cycles are impossible
 	 */
-	public final boolean cycleRisk() {
+	public boolean cycleRisk() {
 		return this.cycleRisk;
 	}
 }

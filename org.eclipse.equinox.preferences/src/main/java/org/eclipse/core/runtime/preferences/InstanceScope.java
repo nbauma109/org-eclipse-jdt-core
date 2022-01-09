@@ -56,8 +56,8 @@ public final class InstanceScope extends AbstractScope {
 	 * Create and return a new instance scope instance.
 	 * @deprecated call <code>InstanceScope.INSTANCE</code> instead.
 	 */
-	public InstanceScope() {
-		super();
+	@Deprecated
+    public InstanceScope() {
 	}
 
 

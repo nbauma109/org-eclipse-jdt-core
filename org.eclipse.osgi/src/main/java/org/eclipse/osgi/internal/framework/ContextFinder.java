@@ -70,12 +70,10 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		for (int i = 1; i < stack.length; i++) {
 			ClassLoader tmp = stack[i].getClassLoader();
 			if (stack[i] != THIS && tmp != null && tmp != this) {
-				if (checkClassLoader(tmp)) {
-					if (previousLoader != tmp) {
-						result.add(tmp);
-						previousLoader = tmp;
-					}
-				}
+				if (checkClassLoader(tmp) && previousLoader != tmp) {
+                	result.add(tmp);
+                	previousLoader = tmp;
+                }
 				// stop at the framework classloader or the first bundle classloader
 				if (tmp == finderClassLoader || tmp instanceof ModuleClassLoader)
 					break;
@@ -129,7 +127,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	@Override
 	protected Class<?> loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
 		//Shortcut cycle
-		if (startLoading(arg0) == false)
+		if (!startLoading(arg0))
 			throw new ClassNotFoundException(arg0);
 
 		try {
@@ -150,7 +148,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	@Override
 	public URL getResource(String arg0) {
 		//Shortcut cycle
-		if (startLoading(arg0) == false)
+		if (!startLoading(arg0))
 			return null;
 		try {
 			List<ClassLoader> toConsult = findClassLoaders();

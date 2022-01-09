@@ -99,7 +99,7 @@ public class ImplicitNullAnnotationVerifier {
 			complain &= isInstanceMethod;
 			if (!needToApplyNonNullDefault
 					&& !complain
-					&& !(this.inheritNullAnnotations && isInstanceMethod)) {
+					&& (!this.inheritNullAnnotations || !isInstanceMethod)) {
 				return; // short cut, no work to be done
 			}
 
@@ -142,12 +142,10 @@ public class ImplicitNullAnnotationVerifier {
 					if (tagBits != 0) {
 						if (!usesTypeAnnotations) {
 							currentMethod.tagBits |= tagBits;
-						} else {
-							if (!currentMethod.returnType.isBaseType()) {
-								LookupEnvironment env = scope.environment();
-								currentMethod.returnType = env.createAnnotatedType(currentMethod.returnType, env.nullAnnotationsFromTagBits(tagBits));
-							}
-						}
+						} else if (!currentMethod.returnType.isBaseType()) {
+                        	LookupEnvironment env = scope.environment();
+                        	currentMethod.returnType = env.createAnnotatedType(currentMethod.returnType, env.nullAnnotationsFromTagBits(tagBits));
+                        }
 					}
 				}
 				for (int i=0; i<paramLen; i++) {
@@ -209,11 +207,7 @@ public class ImplicitNullAnnotationVerifier {
 		boolean added = false;
 		for  (int i=0; i<length; i++) {
 			MethodBinding currentMethod = ifcMethods[i];
-			if (!CharOperation.equals(selector, currentMethod.selector))
-				continue;
-			if (!currentMethod.doesParameterLengthMatch(suggestedParameterLength))
-				continue;
-			if (currentMethod.isStatic())
+			if (!CharOperation.equals(selector, currentMethod.selector) || !currentMethod.doesParameterLengthMatch(suggestedParameterLength) || currentMethod.isStatic())
 				continue;
 			if (MethodVerifier.doesMethodOverride(original, currentMethod, this.environment)) {
 				result.add(currentMethod);
@@ -273,24 +267,20 @@ public class ImplicitNullAnnotationVerifier {
 				break returnType; // no nullness for primitive types
 			if (currentNullnessBits == 0) {
 				// unspecified, may fill in either from super or from default
-				if (shouldInherit) {
-					if (inheritedNullnessBits != 0) {
-						if (hasReturnNonNullDefault) {
-							// both inheritance and default: check for conflict?
-							if (shouldComplain && inheritedNullnessBits == TagBits.AnnotationNullable)
-								scope.problemReporter().conflictingNullAnnotations(currentMethod, ((MethodDeclaration) srcMethod).returnType, inheritedMethod);
-							// 	still use the inherited bits to avoid incompatibility
-						}
-						if (inheritedNonNullnessInfos != null && srcMethod != null) {
-							recordDeferredInheritedNullness(scope, ((MethodDeclaration) srcMethod).returnType,
-									inheritedMethod, Boolean.valueOf(inheritedNullnessBits == TagBits.AnnotationNonNull), inheritedNonNullnessInfos[0]);
-						} else {
-							// no need to defer, record this info now:
-							applyReturnNullBits(currentMethod, inheritedNullnessBits);
-						}
-						break returnType; // compatible by construction, skip complain phase below
-					}
-				}
+				if (shouldInherit && inheritedNullnessBits != 0) {
+                	// both inheritance and default: check for conflict?
+                    if (hasReturnNonNullDefault && shouldComplain && inheritedNullnessBits == TagBits.AnnotationNullable)
+                    	scope.problemReporter().conflictingNullAnnotations(currentMethod, ((MethodDeclaration) srcMethod).returnType, inheritedMethod);
+                    // 	still use the inherited bits to avoid incompatibility
+                	if (inheritedNonNullnessInfos != null && srcMethod != null) {
+                		recordDeferredInheritedNullness(scope, ((MethodDeclaration) srcMethod).returnType,
+                				inheritedMethod, inheritedNullnessBits == TagBits.AnnotationNonNull, inheritedNonNullnessInfos[0]);
+                	} else {
+                		// no need to defer, record this info now:
+                		applyReturnNullBits(currentMethod, inheritedNullnessBits);
+                	}
+                	break returnType; // compatible by construction, skip complain phase below
+                }
 				if (hasReturnNonNullDefault && (!useTypeAnnotations || currentMethod.returnType.acceptsNonNullDefault())) { // conflict with inheritance already checked
 					currentNullnessBits = TagBits.AnnotationNonNull;
 					applyReturnNullBits(currentMethod, currentNullnessBits);
@@ -304,10 +294,9 @@ public class ImplicitNullAnnotationVerifier {
 						scope.problemReporter().illegalReturnRedefinition(srcMethod, inheritedMethod,
 																	this.environment.getNonNullAnnotationName());
 						break returnType;
-					} else {
-						scope.problemReporter().cannotImplementIncompatibleNullness(scope.referenceContext(), currentMethod, inheritedMethod, useTypeAnnotations);
-						return;
 					}
+                    scope.problemReporter().cannotImplementIncompatibleNullness(scope.referenceContext(), currentMethod, inheritedMethod, useTypeAnnotations);
+                    return;
 				}
 				if (useTypeAnnotations) {
 					TypeBinding substituteReturnType = null; // for TVB identity checks inside NullAnnotationMatching.analyze()
@@ -361,31 +350,25 @@ public class ImplicitNullAnnotationVerifier {
 
 			if (currentNonNullNess == null) {
 				// unspecified, may fill in either from super or from default
-				if (inheritedNonNullNess != null) {
-					if (shouldInherit) {
-						if (hasParameterNonNullDefault.hasNonNullDefaultForParam(i)) {
-							// both inheritance and default: check for conflict?
-							if (shouldComplain
-									&& inheritedNonNullNess == Boolean.FALSE
-									&& currentArgument != null)
-							{
-								scope.problemReporter().conflictingNullAnnotations(currentMethod, currentArgument, inheritedMethod);
-							}
-							// 	still use the inherited info to avoid incompatibility
-						}
-						if (inheritedNonNullnessInfos != null && srcMethod != null) {
-							recordDeferredInheritedNullness(scope, srcMethod.arguments[i].type,
-									inheritedMethod, inheritedNonNullNess, inheritedNonNullnessInfos[i+1]);
-						} else {
-							// no need to defer, record this info now:
-							if (!useTypeAnnotations)
-								recordArgNonNullness(currentMethod, length, i, currentArgument, inheritedNonNullNess);
-							else
-								recordArgNonNullness18(currentMethod, i, currentArgument, inheritedNonNullNess, this.environment);
-						}
-						continue; // compatible by construction, skip complain phase below
-					}
-				}
+				if (inheritedNonNullNess != null && shouldInherit) {
+                	// both inheritance and default: check for conflict?
+                    if (hasParameterNonNullDefault.hasNonNullDefaultForParam(i) && shouldComplain
+                    		&& inheritedNonNullNess == Boolean.FALSE
+                    		&& currentArgument != null)
+                    {
+                    	scope.problemReporter().conflictingNullAnnotations(currentMethod, currentArgument, inheritedMethod);
+                    }
+                    // 	still use the inherited info to avoid incompatibility
+                	if (inheritedNonNullnessInfos != null && srcMethod != null) {
+                		recordDeferredInheritedNullness(scope, srcMethod.arguments[i].type,
+                				inheritedMethod, inheritedNonNullNess, inheritedNonNullnessInfos[i+1]);
+                	} else // no need to defer, record this info now:
+                    if (!useTypeAnnotations)
+                    	recordArgNonNullness(currentMethod, length, i, currentArgument, inheritedNonNullNess);
+                    else
+                    	recordArgNonNullness18(currentMethod, i, currentArgument, inheritedNonNullNess, this.environment);
+                	continue; // compatible by construction, skip complain phase below
+                }
 				if (hasParameterNonNullDefault.hasNonNullDefaultForParam(i)) { // conflict with inheritance already checked
 					currentNonNullNess = Boolean.TRUE;
 					if (!useTypeAnnotations)
@@ -411,12 +394,13 @@ public class ImplicitNullAnnotationVerifier {
 						scope.problemReporter().illegalRedefinitionToNonNullParameter(
 								currentArgument,
 								inheritedMethod.declaringClass,
-								(inheritedNonNullNess == null) ? null : this.environment.getNullableAnnotationName());
+								inheritedNonNullNess == null ? null : this.environment.getNullableAnnotationName());
 					} else {
 						scope.problemReporter().cannotImplementIncompatibleNullness(scope.referenceContext(), currentMethod, inheritedMethod, false);
 					}
 					continue;
-				} else if (currentNonNullNess == null)
+				}
+                if (currentNonNullNess == null)
 				{
 					// unannotated strictly conflicts only with inherited @Nullable
 					if (inheritedNonNullNess == Boolean.FALSE) {
@@ -429,7 +413,8 @@ public class ImplicitNullAnnotationVerifier {
 							scope.problemReporter().cannotImplementIncompatibleNullness(scope.referenceContext(), currentMethod, inheritedMethod, false);
 						}
 						continue;
-					} else if (inheritedNonNullNess == Boolean.TRUE) {
+					}
+                    if (inheritedNonNullNess == Boolean.TRUE) {
 						// not strictly a conflict, but a configurable warning is given anyway:
 						if (allInheritedMethods != null) {
 							// avoid this optional warning if the conflict already existed in one supertype (merging of two methods into one?)
@@ -489,11 +474,11 @@ public class ImplicitNullAnnotationVerifier {
 			if (parameter != null) {
 				long nullBits = NullAnnotationMatching.validNullTagBits(parameter.tagBits);
 				if (nullBits != 0L)
-					return Boolean.valueOf(nullBits == TagBits.AnnotationNonNull);
+					return nullBits == TagBits.AnnotationNonNull;
 			}
 			return null;
 		}
-		return (method.parameterNonNullness == null)
+		return method.parameterNonNullness == null
 						? null : method.parameterNonNullness[i];
 	}
 
@@ -513,8 +498,8 @@ public class ImplicitNullAnnotationVerifier {
 	{
 		if (nullnessInfo.inheritedNonNullness != null && nullnessInfo.inheritedNonNullness != inheritedNonNullness) {
 			scope.problemReporter().conflictingInheritedNullAnnotations(location,
-					nullnessInfo.inheritedNonNullness.booleanValue(), nullnessInfo.annotationOrigin,
-					inheritedNonNullness.booleanValue(), inheritedMethod);
+					nullnessInfo.inheritedNonNullness, nullnessInfo.annotationOrigin,
+					inheritedNonNullness, inheritedMethod);
 			nullnessInfo.complained = true;
 			// leave previous info intact, so subsequent errors are reported against the same first method
 		} else {
@@ -529,12 +514,12 @@ public class ImplicitNullAnnotationVerifier {
 			method.parameterNonNullness = new Boolean[paramCount];
 		method.parameterNonNullness[paramIdx] = nonNullNess;
 		if (currentArgument != null) {
-			currentArgument.binding.tagBits |= nonNullNess.booleanValue() ?
+			currentArgument.binding.tagBits |= nonNullNess ?
 					TagBits.AnnotationNonNull : TagBits.AnnotationNullable;
 		}
 	}
 	void recordArgNonNullness18(MethodBinding method, int paramIdx, Argument currentArgument, Boolean nonNullNess, LookupEnvironment env) {
-		AnnotationBinding annotationBinding = nonNullNess.booleanValue() ? env.getNonNullAnnotation() : env.getNullableAnnotation();
+		AnnotationBinding annotationBinding = nonNullNess ? env.getNonNullAnnotation() : env.getNullableAnnotation();
 		method.parameters[paramIdx] = env.createAnnotatedType(method.parameters[paramIdx], new AnnotationBinding[]{ annotationBinding});
 		if (currentArgument != null) {
 			currentArgument.binding.type = method.parameters[paramIdx];
@@ -557,20 +542,18 @@ public class ImplicitNullAnnotationVerifier {
 		int i;
 		foundRAW: for (i = 0; i < length; i++) {
 			if (!areTypesEqual(oneArgs[i], twoArgs[i])) {
-				if (oneArgs[i].leafComponentType().isRawType()) {
-					if (oneArgs[i].dimensions() == twoArgs[i].dimensions() && oneArgs[i].leafComponentType().isEquivalentTo(twoArgs[i].leafComponentType())) {
-						// raw mode does not apply if the method defines its own type variables
-						if (one.typeVariables != Binding.NO_TYPE_VARIABLES)
-							return false;
-						// one parameter type is raw, hence all parameters types must be raw or non generic
-						// otherwise we have a mismatch check backwards
-						for (int j = 0; j < i; j++)
-							if (oneArgs[j].leafComponentType().isParameterizedTypeWithActualArguments())
-								return false;
-						// switch to all raw mode
-						break foundRAW;
-					}
-				}
+				if (oneArgs[i].leafComponentType().isRawType() && oneArgs[i].dimensions() == twoArgs[i].dimensions() && oneArgs[i].leafComponentType().isEquivalentTo(twoArgs[i].leafComponentType())) {
+                	// raw mode does not apply if the method defines its own type variables
+                	if (one.typeVariables != Binding.NO_TYPE_VARIABLES)
+                		return false;
+                	// one parameter type is raw, hence all parameters types must be raw or non generic
+                	// otherwise we have a mismatch check backwards
+                	for (int j = 0; j < i; j++)
+                		if (oneArgs[j].leafComponentType().isParameterizedTypeWithActualArguments())
+                			return false;
+                	// switch to all raw mode
+                	break foundRAW;
+                }
 				return false;
 			}
 		}
@@ -581,7 +564,8 @@ public class ImplicitNullAnnotationVerifier {
 					if (oneArgs[i].dimensions() == twoArgs[i].dimensions() && oneArgs[i].leafComponentType().isEquivalentTo(twoArgs[i].leafComponentType()))
 						continue;
 				return false;
-			} else if (oneArgs[i].leafComponentType().isParameterizedTypeWithActualArguments()) {
+			}
+            if (oneArgs[i].leafComponentType().isParameterizedTypeWithActualArguments()) {
 				return false; // no remaining parameter can be a Parameterized type (if one has been converted then all RAW types must be converted)
 			}
 		}

@@ -83,9 +83,9 @@ public RecoveredElement add(FieldDeclaration newFieldDeclaration, int bracketBal
 	/* local variables inside initializer can only be final and non void */
 	char[][] fieldTypeName;
 	if ((newFieldDeclaration.modifiers & ~ClassFileConstants.AccFinal) != 0 /* local var can only be final */
-			|| (newFieldDeclaration.type == null) // initializer
-			|| ((fieldTypeName = newFieldDeclaration.type.getTypeName()).length == 1 // non void
-				&& CharOperation.equals(fieldTypeName[0], TypeBinding.VOID.sourceName()))){
+			|| newFieldDeclaration.type == null // initializer
+			|| (fieldTypeName = newFieldDeclaration.type.getTypeName()).length == 1 // non void
+				&& CharOperation.equals(fieldTypeName[0], TypeBinding.VOID.sourceName())){
 		if (this.parent == null) return this; // ignore
 		this.updateSourceEndIfNecessary(previousAvailableLineEnd(newFieldDeclaration.declarationSourceStart - 1));
 		return this.parent.add(newFieldDeclaration, bracketBalanceValue);
@@ -198,16 +198,14 @@ public RecoveredElement add(TypeDeclaration typeDeclaration, int bracketBalanceV
 	if (this.localTypes == null) {
 		this.localTypes = new RecoveredType[5];
 		this.localTypeCount = 0;
-	} else {
-		if (this.localTypeCount == this.localTypes.length) {
-			System.arraycopy(
-				this.localTypes,
-				0,
-				(this.localTypes = new RecoveredType[2 * this.localTypeCount]),
-				0,
-				this.localTypeCount);
-		}
-	}
+	} else if (this.localTypeCount == this.localTypes.length) {
+    	System.arraycopy(
+    		this.localTypes,
+    		0,
+    		this.localTypes = new RecoveredType[2 * this.localTypeCount],
+    		0,
+    		this.localTypeCount);
+    }
 	RecoveredType element = new RecoveredType(typeDeclaration, this, bracketBalanceValue);
 	this.localTypes[this.localTypeCount++] = element;
 
@@ -232,16 +230,14 @@ public RecoveredElement addAnnotationName(int identifierPtr, int identifierLengt
 	if (this.pendingAnnotations == null) {
 		this.pendingAnnotations = new RecoveredAnnotation[5];
 		this.pendingAnnotationCount = 0;
-	} else {
-		if (this.pendingAnnotationCount == this.pendingAnnotations.length) {
-			System.arraycopy(
-				this.pendingAnnotations,
-				0,
-				(this.pendingAnnotations = new RecoveredAnnotation[2 * this.pendingAnnotationCount]),
-				0,
-				this.pendingAnnotationCount);
-		}
-	}
+	} else if (this.pendingAnnotationCount == this.pendingAnnotations.length) {
+    	System.arraycopy(
+    		this.pendingAnnotations,
+    		0,
+    		this.pendingAnnotations = new RecoveredAnnotation[2 * this.pendingAnnotationCount],
+    		0,
+    		this.pendingAnnotationCount);
+    }
 
 	RecoveredAnnotation element = new RecoveredAnnotation(identifierPtr, identifierLengthPtr, annotationStart, this, bracketBalanceValue);
 
@@ -309,7 +305,7 @@ public FieldDeclaration updatedFieldDeclaration(int depth, Set<TypeDeclaration> 
  */
 @Override
 public RecoveredElement updateOnClosingBrace(int braceStart, int braceEnd){
-	if ((--this.bracketBalance <= 0) && (this.parent != null)){
+	if (--this.bracketBalance <= 0 && this.parent != null){
 		this.updateSourceEndIfNecessary(braceStart, braceEnd);
 		return this.parent;
 	}

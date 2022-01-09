@@ -113,7 +113,7 @@ IJavaElement[] getOtherElements(int idx) {
 	if (this.nodesCount == 1) {
 		if (this.otherElements != null) {
 			int length = this.otherElements.length;
-			if (this.ptr < (length-1)) {
+			if (this.ptr < length-1) {
 				System.arraycopy(this.otherElements, 0, this.otherElements = new IJavaElement[this.ptr+1], 0, this.ptr+1);
 			}
 		}
@@ -122,7 +122,7 @@ IJavaElement[] getOtherElements(int idx) {
 	IJavaElement[] elements = this.allOtherElements == null ? null : this.allOtherElements[idx];
 	if (elements != null) {
 		int length = elements.length;
-		if (this.ptrs[idx] < (length-1)) {
+		if (this.ptrs[idx] < length-1) {
 			System.arraycopy(elements, 0, elements = this.allOtherElements[idx] = new IJavaElement[this.ptrs[idx]+1], 0, this.ptrs[idx]+1);
 		}
 	}
@@ -180,37 +180,35 @@ private void storeHandle(int idx) {
 		    	this.otherElements[this.ptr] = annotHandle == null ? handle : annotHandle;
     		}
     	}
+    } else if (this.localElements[idx] == null) {
+    	if (this.annotation == null) {
+        	this.localElements[idx] =  handle;
+    	} else {
+        	IJavaElement annotHandle = this.locator.createHandle(this.annotation, (IAnnotatable) handle);
+        	if (annotHandle == null) {
+    	    	annotHandle = this.locator.createHandle(this.annotation, (IAnnotatable) this.enclosingElement);
+        	}
+        	this.localElements[idx] = annotHandle == null ? handle : annotHandle;
+    	}
+    	this.ptrs[idx] = -1;
     } else {
-    	if (this.localElements[idx] == null) {
-	    	if (this.annotation == null) {
-		    	this.localElements[idx] =  handle;
-    		} else {
-		    	IJavaElement annotHandle = this.locator.createHandle(this.annotation, (IAnnotatable) handle);
-		    	if (annotHandle == null) {
-			    	annotHandle = this.locator.createHandle(this.annotation, (IAnnotatable) this.enclosingElement);
-		    	}
-		    	this.localElements[idx] = annotHandle == null ? handle : annotHandle;
-    		}
-			this.ptrs[idx] = -1;
-	    } else {
-	        int oPtr = ++this.ptrs[idx];
-	    	if (oPtr== 0) {
-    			this.allOtherElements[idx] = new IJavaElement[10];
-    		} else {
-            	int length = this.allOtherElements[idx].length;
-	            if (oPtr == length) {
-	            	System.arraycopy(this.allOtherElements[idx], 0, this.allOtherElements[idx] = new IJavaElement[length+10], 0, length);
-        	    }
-	        }
-	    	if (this.annotation == null) {
-	 		   	this.allOtherElements[idx][oPtr] = handle;
-    		} else {
-		    	IJavaElement annotHandle = this.locator.createHandle(this.annotation, (IAnnotatable) handle);
-		    	if (annotHandle == null) {
-			    	annotHandle = this.locator.createHandle(this.annotation, (IAnnotatable) this.enclosingElement);
-		    	}
-	 		   	this.allOtherElements[idx][oPtr] = annotHandle == null ? handle : annotHandle;
-    		}
+        int oPtr = ++this.ptrs[idx];
+    	if (oPtr== 0) {
+    		this.allOtherElements[idx] = new IJavaElement[10];
+    	} else {
+        	int length = this.allOtherElements[idx].length;
+            if (oPtr == length) {
+            	System.arraycopy(this.allOtherElements[idx], 0, this.allOtherElements[idx] = new IJavaElement[length+10], 0, length);
+    	    }
+        }
+    	if (this.annotation == null) {
+    	   	this.allOtherElements[idx][oPtr] = handle;
+    	} else {
+        	IJavaElement annotHandle = this.locator.createHandle(this.annotation, (IAnnotatable) handle);
+        	if (annotHandle == null) {
+    	    	annotHandle = this.locator.createHandle(this.annotation, (IAnnotatable) this.enclosingElement);
+        	}
+    	   	this.allOtherElements[idx][oPtr] = annotHandle == null ? handle : annotHandle;
     	}
     }
 }
@@ -223,11 +221,9 @@ public boolean visit(Argument argument, BlockScope scope) {
 public boolean visit(LambdaExpression lambdaExpression, BlockScope scope) {
 	Integer level = (Integer) this.nodeSet.matchingNodes.removeKey(lambdaExpression);
 	try {
-		if (lambdaExpression.resolvedType != null && lambdaExpression.resolvedType.isValidBinding() &&
-				!(lambdaExpression.descriptor instanceof ProblemMethodBinding))
-			this.locator.reportMatching(lambdaExpression, this.enclosingElement, level != null ? level.intValue() : -1, this.nodeSet, this.typeInHierarchy);
-		else
-			return true;
+		if (lambdaExpression.resolvedType == null || !lambdaExpression.resolvedType.isValidBinding() || lambdaExpression.descriptor instanceof ProblemMethodBinding)
+            return true;
+        this.locator.reportMatching(lambdaExpression, this.enclosingElement, level != null ? level : -1, this.nodeSet, this.typeInHierarchy);
 	} catch (CoreException e) {
 		throw new WrappedCoreException(e);
 	}
@@ -301,7 +297,7 @@ int getInTypeOccurrenceCountForBinaryAnonymousType(TypeDeclaration typeDeclarati
 	    IMember member = (IMember) parent;
 		if (member.isBinary())  {
 			int tmp = this.inTypeOccurrencesCounts.get(name);
-			ret =  (tmp == HashtableOfIntValues.NO_VALUE) ? 1 : tmp + 1;
+			ret =  tmp == HashtableOfIntValues.NO_VALUE ? 1 : tmp + 1;
 			this.inTypeOccurrencesCounts.put(name, ret);
 		}
 	}
@@ -330,7 +326,7 @@ public boolean visit(TypeDeclaration typeDeclaration, BlockScope unused) {
 			this.locator.reportMatching(typeDeclaration, this.enclosingElement, -1, this.nodeSet, occurrenceCount);
 		} else {
 			Integer level = (Integer) this.nodeSet.matchingNodes.removeKey(typeDeclaration);
-			this.locator.reportMatching(typeDeclaration, this.enclosingElement, level != null ? level.intValue() : -1, this.nodeSet, occurrenceCount);
+			this.locator.reportMatching(typeDeclaration, this.enclosingElement, level != null ? level : -1, this.nodeSet, occurrenceCount);
 		}
 		this.locator.inTypeOccurrencesCounts = oldOccurencesCount;
 		return false; // don't visit members as this was done during reportMatching(...)

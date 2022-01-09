@@ -347,7 +347,7 @@ public class ManifestElement {
 	 */
 	public static ManifestElement[] parseHeader(String header, String value) throws BundleException {
 		if (value == null)
-			return (null);
+			return null;
 		List<ManifestElement> headerElements = new ArrayList<>(10);
 		Tokenizer tokenizer = new Tokenizer(value);
 		parseloop: while (true) {
@@ -437,7 +437,7 @@ public class ManifestElement {
 			}
 			headerElements.add(manifestElement);
 			if (SupplementDebug.STATIC_DEBUG_MANIFEST)
-				System.out.println(); //$NON-NLS-1$
+				System.out.println();
 			if (c == ',') /* another manifest element */
 				continue parseloop;
 			if (c == '\0') /* end of value */
@@ -446,10 +446,9 @@ public class ManifestElement {
 		}
 		int size = headerElements.size();
 		if (size == 0)
-			return (null);
+			return null;
 
-		ManifestElement[] result = headerElements.toArray(new ManifestElement[size]);
-		return (result);
+		return headerElements.toArray(new ManifestElement[size]);
 	}
 
 	/**
@@ -517,7 +516,7 @@ public class ManifestElement {
 				 * for duplicate manifest headers.
 				 */
 
-				if ((line == null) || (line.length() == 0)) /* EOF or empty line */
+				if (line == null || line.length() == 0) /* EOF or empty line */
 				{
 					break; /* done processing main attributes */
 				}
@@ -584,7 +583,7 @@ public class ManifestElement {
 			}
 			buffer.write(c);
 		}
-		String result = buffer.toString(StandardCharsets.UTF_8); //$NON-NLS-1$
+		String result = buffer.toString(StandardCharsets.UTF_8);
 		buffer.reset();
 		return result;
 	}

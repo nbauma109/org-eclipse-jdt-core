@@ -82,10 +82,8 @@ public class ProductPreferencesService implements IProductPreferencesService {
 			}
 		}
 
-		if (url == null) {
-			if (InternalPlatform.DEBUG_PLUGIN_PREFERENCES)
-				InternalPlatform.message("Product preference customization file: " + customizationValue + " not found for bundle: " + productID); //$NON-NLS-1$//$NON-NLS-2$
-		}
+		if (url == null && InternalPlatform.DEBUG_PLUGIN_PREFERENCES)
+        	InternalPlatform.message("Product preference customization file: " + customizationValue + " not found for bundle: " + productID); //$NON-NLS-1$//$NON-NLS-2$
 
 		return loadProperties(url);
 	}

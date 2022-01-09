@@ -36,7 +36,7 @@ public class AnnotationInfo extends ClassFileStruct implements IBinaryAnnotation
 	long standardAnnotationTagBits = 0;
 	int readOffset = 0;
 
-	static Object[] EmptyValueArray = new Object[0];
+	static Object[] EmptyValueArray = {};
 
 	public RuntimeException exceptionDuringDecode;
 
@@ -90,8 +90,7 @@ private void sanitizePairs(ElementValuePairInfo[] oldPairs) {
 	if (oldPairs != null) {
 		ElementValuePairInfo[] newPairs = new ElementValuePairInfo[oldPairs.length];
 		int count = 0;
-		for (int i = 0; i < oldPairs.length; i++) {
-			ElementValuePairInfo evpInfo = oldPairs[i];
+		for (ElementValuePairInfo evpInfo : oldPairs) {
 			if (evpInfo != null)
 				newPairs[count++] = evpInfo;
 		}
@@ -441,18 +440,14 @@ public int hashCode() {
 	final int prime = 31;
 	int result = 1;
 	result = prime * result + Util.hashCode(this.pairs);
-	result = prime * result + CharOperation.hashCode(this.typename);
-	return result;
+	return prime * result + CharOperation.hashCode(this.typename);
 }
 @Override
 public boolean equals(Object obj) {
 	if (this == obj) {
 		return true;
 	}
-	if (obj == null) {
-		return false;
-	}
-	if (getClass() != obj.getClass()) {
+	if (obj == null || getClass() != obj.getClass()) {
 		return false;
 	}
 	AnnotationInfo other = (AnnotationInfo) obj;

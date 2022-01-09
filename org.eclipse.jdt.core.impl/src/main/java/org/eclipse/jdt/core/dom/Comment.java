@@ -56,7 +56,7 @@ public abstract class Comment extends ASTNode {
 	 *    <code>false</code> otherwise
 	 */
 	public final boolean isBlockComment() {
-		return (this instanceof BlockComment);
+		return this instanceof BlockComment;
 	}
 
 	/**
@@ -67,7 +67,7 @@ public abstract class Comment extends ASTNode {
 	 *    <code>false</code> otherwise
 	 */
 	public final boolean isLineComment() {
-		return (this instanceof LineComment);
+		return this instanceof LineComment;
 	}
 
 	/**
@@ -78,7 +78,7 @@ public abstract class Comment extends ASTNode {
 	 *    <code>false</code> otherwise
 	 */
 	public final boolean isDocComment() {
-		return (this instanceof Javadoc);
+		return this instanceof Javadoc;
 	}
 
 	/**

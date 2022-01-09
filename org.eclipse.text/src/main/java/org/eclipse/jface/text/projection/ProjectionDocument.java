@@ -112,8 +112,6 @@ public class ProjectionDocument extends AbstractDocument {
 	 * @param masterDocument the master document
 	 */
 	public ProjectionDocument(IDocument masterDocument) {
-		super();
-
 		fMasterDocument= masterDocument;
 		if (fMasterDocument instanceof IDocumentExtension)
 			fMasterDocumentExtension= (IDocumentExtension) fMasterDocument;
@@ -241,9 +239,7 @@ public class ProjectionDocument extends AbstractDocument {
 				offset += fragment.length;
 			}
 
-		} catch (BadPositionCategoryException x) {
-			internalError();
-		} catch (BadLocationException x) {
+		} catch (BadPositionCategoryException | BadLocationException x) {
 			internalError();
 		}
 	}
@@ -297,11 +293,12 @@ public class ProjectionDocument extends AbstractDocument {
 
 			if (index < fragments.length) {
 				Fragment fragment= (Fragment) fragments[index];
-				if (offsetInMaster == fragment.offset)
-					if (fragment.length == 0) // the fragment does not overlap - it is a zero-length fragment at the same offset
-						left= fragment;
-					else
+				if (offsetInMaster == fragment.offset) {
+                    if (fragment.length != 0) {
 						throw new IllegalArgumentException("overlaps with existing fragment"); //$NON-NLS-1$
+					}
+                    left= fragment;
+                }
 				if (offsetInMaster + lengthInMaster == fragment.offset)
 					right= fragment;
 			}
@@ -683,7 +680,8 @@ public class ProjectionDocument extends AbstractDocument {
 			addMasterDocumentRange(masterEvent.getOffset(), masterEvent.getLength(), masterEvent);
 			return true;
 
-		} else if (fMapping.getImageLength() == 0 && masterEvent.getLength() == 0) {
+		}
+        if (fMapping.getImageLength() == 0 && masterEvent.getLength() == 0) {
 
 			Position[] fragments= getFragments();
 			if (fragments.length == 0) {
@@ -799,7 +797,7 @@ public class ProjectionDocument extends AbstractDocument {
 		Position[] segments= getSegments();
 		for (int i= 0; i < segments.length; i++) {
 			Segment segment= (Segment) segments[i];
-			if (segment.isDeleted() || (segment.getLength() == 0 && (i < segments.length - 1 || (i > 0 && segments[i - 1].isDeleted())))) {
+			if (segment.isDeleted() || segment.getLength() == 0 && (i < segments.length - 1 || i > 0 && segments[i - 1].isDeleted())) {
 				try {
 					removePosition(fSegmentsCategory, segment);
 					fMasterDocument.removePosition(fFragmentsCategory, segment.fragment);
@@ -828,9 +826,7 @@ public class ProjectionDocument extends AbstractDocument {
 				try {
 					fMasterDocument.addPosition(fFragmentsCategory, fragment);
 					createSegmentFor(fragment, 0);
-				} catch (BadLocationException e) {
-					internalError();
-				} catch (BadPositionCategoryException e) {
+				} catch (BadLocationException | BadPositionCategoryException e) {
 					internalError();
 				}
 			}

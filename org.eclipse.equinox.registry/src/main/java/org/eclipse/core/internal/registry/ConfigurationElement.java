@@ -23,7 +23,7 @@ import org.eclipse.osgi.util.NLS;
  * in a plug-in manifest.
  */
 public class ConfigurationElement extends RegistryObject {
-	static final ConfigurationElement[] EMPTY_ARRAY = new ConfigurationElement[0];
+	static final ConfigurationElement[] EMPTY_ARRAY = {};
 
 	//The id of the parent element. It can be a configuration element or an extension
 	int parentId;
@@ -82,7 +82,7 @@ public class ConfigurationElement extends RegistryObject {
 	String getAttributeAsIs(String attrName) {
 		if (propertiesAndValue.length <= 1)
 			return null;
-		int size = propertiesAndValue.length - (propertiesAndValue.length % 2);
+		int size = propertiesAndValue.length - propertiesAndValue.length % 2;
 		for (int i = 0; i < size; i += 2) {
 			if (propertiesAndValue[i].equals(attrName))
 				return propertiesAndValue[i + 1];

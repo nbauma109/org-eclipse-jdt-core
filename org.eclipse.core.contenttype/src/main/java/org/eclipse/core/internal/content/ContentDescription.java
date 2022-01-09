@@ -50,7 +50,7 @@ public final class ContentDescription extends BasicDescription {
 		byte[] bom = (byte[]) getProperty(BYTE_ORDER_MARK);
 		if (bom == BOM_UTF_8)
 			return CHARSET_UTF_8;
-		else if (bom == BOM_UTF_16BE || bom == BOM_UTF_16LE)
+        if (bom == BOM_UTF_16BE || bom == BOM_UTF_16LE)
 			// UTF-16 will properly recognize the BOM
 			return CHARSET_UTF_16;
 		return (String) getProperty(CHARSET);

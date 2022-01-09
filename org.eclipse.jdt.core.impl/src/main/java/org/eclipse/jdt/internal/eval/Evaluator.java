@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.eval;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -68,8 +69,8 @@ protected EvaluationResult[] evaluationResultsForCompilationProblems(Compilation
 	// Break down the problems and group them by ids in evaluation results
 	CategorizedProblem[] problems = result.getAllProblems();
 	HashMap<char[], EvaluationResult> resultsByIDs = new HashMap<>(5);
-	for (int i = 0; i < problems.length; i++) {
-		addEvaluationResultForCompilationProblem(resultsByIDs, problems[i], cuSource);
+	for (CategorizedProblem problem : problems) {
+		addEvaluationResultForCompilationProblem(resultsByIDs, problem, cuSource);
 	}
 
 	// Copy results
@@ -97,11 +98,10 @@ ClassFile[] getClasses() {
 		public void acceptResult(CompilationResult result) {
 			if (result.hasProblems()) {
 				EvaluationResult[] evalResults = evaluationResultsForCompilationProblems(result, source);
-				for (int i = 0; i < evalResults.length; i++) {
-					EvaluationResult evalResult = evalResults[i];
+				for (EvaluationResult evalResult : evalResults) {
 					CategorizedProblem[] problems = evalResult.getProblems();
-					for (int j = 0; j < problems.length; j++) {
-						Evaluator.this.requestor.acceptProblem(problems[j], evalResult.getEvaluationID(), evalResult.getEvaluationType());
+					for (CategorizedProblem problem : problems) {
+						Evaluator.this.requestor.acceptProblem(problem, evalResult.getEvaluationID(), evalResult.getEvaluationType());
 					}
 				}
 			}
@@ -109,22 +109,7 @@ ClassFile[] getClasses() {
 				this.hasErrors = true;
 			} else {
 				ClassFile[] classFiles = result.getClassFiles();
-				for (int i = 0; i < classFiles.length; i++) {
-					ClassFile classFile = classFiles[i];
-/*
-
-					char[] filename = classFile.fileName();
-					int length = filename.length;
-					char[] relativeName = new char[length + 6];
-					System.arraycopy(filename, 0, relativeName, 0, length);
-					System.arraycopy(".class".toCharArray(), 0, relativeName, length, 6);
-					CharOperation.replace(relativeName, '/', java.io.File.separatorChar);
-					ClassFile.writeToDisk("d:/test/snippet", new String(relativeName), classFile.getBytes());
-					String str = "d:/test/snippet" + "/" + new String(relativeName);
-					System.out.println(org.eclipse.jdt.core.tools.classfmt.disassembler.ClassFileDisassembler.disassemble(str));
- */
-					classDefinitions.add(classFile);
-				}
+				classDefinitions.addAll(Arrays.asList(classFiles));
 			}
 		}
 	}
@@ -162,11 +147,10 @@ ClassFile[] getClasses() {
 	}});
 	if (compilerRequestor.hasErrors) {
 		return null;
-	} else {
-		ClassFile[] result = new ClassFile[classDefinitions.size()];
-		classDefinitions.toArray(result);
-		return result;
 	}
+    ClassFile[] result = new ClassFile[classDefinitions.size()];
+    classDefinitions.toArray(result);
+    return result;
 }
 /**
  * Returns the name of the current class. This is the simple name of the class.

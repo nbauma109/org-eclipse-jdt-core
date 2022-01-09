@@ -131,9 +131,8 @@ public ISourceRange getNameRange() throws JavaModelException {
 		getClassFile().getBuffer();
 
 		return mapper.getNameRange(this);
-	} else {
-		return SourceMapper.UNKNOWN_RANGE;
 	}
+    return SourceMapper.UNKNOWN_RANGE;
 }
 /*
  * @see ISourceReference
@@ -146,9 +145,8 @@ public ISourceRange getSourceRange() throws JavaModelException {
 		getClassFile().getBuffer();
 
 		return mapper.getSourceRange(this);
-	} else {
-		return SourceMapper.UNKNOWN_RANGE;
 	}
+    return SourceMapper.UNKNOWN_RANGE;
 }
 /*
  * @see IMember

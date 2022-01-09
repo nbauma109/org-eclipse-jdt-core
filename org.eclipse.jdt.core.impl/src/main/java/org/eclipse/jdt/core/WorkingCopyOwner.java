@@ -210,7 +210,8 @@ public abstract class WorkingCopyOwner {
 	 * 	Note that if this deprecated method is used, problems may be reported twice
 	 * 	if the given requestor is not the same as the current working copy owner one.
 	 */
-	public final ICompilationUnit newWorkingCopy(String name, IClasspathEntry[] classpath, IProblemRequestor problemRequestor, IProgressMonitor monitor) throws JavaModelException {
+	@Deprecated
+    public final ICompilationUnit newWorkingCopy(String name, IClasspathEntry[] classpath, IProblemRequestor problemRequestor, IProgressMonitor monitor) throws JavaModelException {
 		ExternalJavaProject project = new ExternalJavaProject(classpath);
 		IPackageFragment parent = ((PackageFragmentRoot) project.getPackageFragmentRoot(project.getProject())).getPackageFragment(CharOperation.NO_STRINGS);
 		CompilationUnit result = new CompilationUnit((PackageFragment) parent, name, this);

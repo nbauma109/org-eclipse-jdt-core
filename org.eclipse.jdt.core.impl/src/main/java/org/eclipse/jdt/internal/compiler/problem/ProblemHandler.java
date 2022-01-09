@@ -135,9 +135,8 @@ public void handle(
 			 if ((severity & ProblemSeverities.Error) != 0) { // non reportable error is fatal
 				 CategorizedProblem problem = this.createProblem(null, problemId, problemArguments, elaborationId, messageArguments, severity, 0, 0, 0, 0);
 				 throw new AbortCompilation(null, problem);
-			 } else {
-				 return; // ignore non reportable warning
 			 }
+            return; // ignore non reportable warning
 		 }
 		 if (mandatory)
 			 referenceContext.tagAsHavingIgnoredMandatoryErrors(problemId);
@@ -160,9 +159,8 @@ public void handle(
 		if ((severity & ProblemSeverities.Error) != 0) { // non reportable error is fatal
 			CategorizedProblem problem = this.createProblem(null, problemId, problemArguments, elaborationId, messageArguments, severity, 0, 0, 0, 0);
 			throw new AbortCompilation(null, problem);
-		} else {
-			return; // ignore non reportable warning
 		}
+        return; // ignore non reportable warning
 	}
 
 	int[] lineEnds;

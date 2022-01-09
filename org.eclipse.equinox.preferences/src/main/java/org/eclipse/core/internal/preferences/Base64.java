@@ -50,7 +50,7 @@ public class Base64 {
 			allBits = 0;
 			// Loop 4 times gathering input bits (4 * 6 = 24)
 			for (int j = 0; j < 4; j++)
-				allBits = (allBits << 6) | decodeDigit(data[dataIndex++]);
+				allBits = allBits << 6 | decodeDigit(data[dataIndex++]);
 			// Loop 3 times generating output bits (3 * 8 = 24)
 			for (int j = resultIndex + 2; j >= resultIndex; j--) {
 				result[j] = (byte) (allBits & 0xff); // Bottom 8 bits
@@ -68,7 +68,7 @@ public class Base64 {
 				allBits = 0;
 				// Loop 3 times gathering input bits
 				for (int j = 0; j < 3; j++)
-					allBits = (allBits << 6) | decodeDigit(data[dataIndex++]);
+					allBits = allBits << 6 | decodeDigit(data[dataIndex++]);
 				// NOTE - The code below ends up being equivalent to allBits =
 				// allBits>>>2
 				// But we code it in a non-optimized way for clarity
@@ -90,7 +90,7 @@ public class Base64 {
 				allBits = 0;
 				// Loop 2 times gathering input bits
 				for (int j = 0; j < 2; j++)
-					allBits = (allBits << 6) | decodeDigit(data[dataIndex++]);
+					allBits = allBits << 6 | decodeDigit(data[dataIndex++]);
 				// NOTE - The code below ends up being equivalent to allBits =
 				// allBits>>>4
 				// But we code it in a non-optimized way for clarity
@@ -141,9 +141,9 @@ public class Base64 {
 	 */
 	public static byte[] encode(byte[] data) {
 		int sourceChunks = data.length / 3;
-		int len = ((data.length + 2) / 3) * 4;
+		int len = (data.length + 2) / 3 * 4;
 		byte[] result = new byte[len];
-		int extraBytes = data.length - (sourceChunks * 3);
+		int extraBytes = data.length - sourceChunks * 3;
 		// Each 4 bytes of input (encoded) we end up with 3 bytes of output
 		int dataIndex = 0;
 		int resultIndex = 0;
@@ -152,10 +152,10 @@ public class Base64 {
 			allBits = 0;
 			// Loop 3 times gathering input bits (3 * 8 = 24)
 			for (int j = 0; j < 3; j++)
-				allBits = (allBits << 8) | (data[dataIndex++] & 0xff);
+				allBits = allBits << 8 | data[dataIndex++] & 0xff;
 			// Loop 4 times generating output bits (4 * 6 = 24)
 			for (int j = resultIndex + 3; j >= resultIndex; j--) {
-				result[j] = (byte) digits[(allBits & 0x3f)]; // Bottom
+				result[j] = (byte) digits[allBits & 0x3f]; // Bottom
 				// 6
 				// bits
 				allBits = allBits >>> 6;
@@ -171,7 +171,7 @@ public class Base64 {
 				allBits = allBits << 8; // 8 bits of zeroes
 				// Loop 4 times generating output bits (4 * 6 = 24)
 				for (int j = resultIndex + 3; j >= resultIndex; j--) {
-					result[j] = (byte) digits[(allBits & 0x3f)]; // Bottom
+					result[j] = (byte) digits[allBits & 0x3f]; // Bottom
 					// 6
 					// bits
 					allBits = allBits >>> 6;
@@ -182,12 +182,12 @@ public class Base64 {
 				break;
 			case 2 :
 				allBits = data[dataIndex++]; // actual byte
-				allBits = (allBits << 8) | (data[dataIndex++] & 0xff); // actual
+				allBits = allBits << 8 | data[dataIndex++] & 0xff; // actual
 				// byte
 				allBits = allBits << 8; // 8 bits of zeroes
 				// Loop 4 times generating output bits (4 * 6 = 24)
 				for (int j = resultIndex + 3; j >= resultIndex; j--) {
-					result[j] = (byte) digits[(allBits & 0x3f)]; // Bottom
+					result[j] = (byte) digits[allBits & 0x3f]; // Bottom
 					// 6
 					// bits
 					allBits = allBits >>> 6;

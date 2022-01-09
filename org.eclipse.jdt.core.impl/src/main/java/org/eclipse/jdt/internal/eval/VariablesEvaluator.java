@@ -66,7 +66,7 @@ protected void addEvaluationResultForCompilationProblem(Map<char[], EvaluationRe
 
 	// check imports
 	char[][] imports = this.context.imports;
-	if ((currentLine <= pbLine) && (pbLine < (currentLine + imports.length))) {
+	if (currentLine <= pbLine && pbLine < currentLine + imports.length) {
 		// set evaluation id and type
 		evaluationID = imports[pbLine - currentLine];
 		evaluationType = EvaluationResult.T_IMPORT;
@@ -80,7 +80,7 @@ protected void addEvaluationResultForCompilationProblem(Map<char[], EvaluationRe
 
 	// check variable declarations
 	int varCount = this.context.variableCount;
-	if ((currentLine <= pbLine) && (pbLine < currentLine + varCount)) {
+	if (currentLine <= pbLine && pbLine < currentLine + varCount) {
 		GlobalVariable var = this.context.variables[pbLine - currentLine];
 
 		// set evaluation id and type
@@ -91,7 +91,7 @@ protected void addEvaluationResultForCompilationProblem(Map<char[], EvaluationRe
 		int pbStart = problem.getSourceStart() - var.declarationStart;
 		int pbEnd = problem.getSourceEnd() - var.declarationStart;
 		int typeLength = var.getTypeName().length;
-		if ((0 <= pbStart) && (pbEnd < typeLength)) {
+		if (0 <= pbStart && pbEnd < typeLength) {
 			// problem on the type of the variable
 			problem.setSourceLineNumber(-1);
 		} else {
@@ -110,13 +110,14 @@ protected void addEvaluationResultForCompilationProblem(Map<char[], EvaluationRe
 		GlobalVariable var = this.context.variables[i];
 		char[] initializer = var.getInitializer();
 		int initializerLength = initializer == null ? 0 : initializer.length;
-		if ((var.initializerStart <= problem.getSourceStart()) && (problem.getSourceEnd() < var.initializerStart + var.name.length)) {
+		if (var.initializerStart <= problem.getSourceStart() && problem.getSourceEnd() < var.initializerStart + var.name.length) {
 			/* Problem with the variable name.
 			   Ignore because it must have already been reported
 			   when checking the declaration.
 			 */
 			return;
-		} else if ((var.initExpressionStart <= problem.getSourceStart()) && (problem.getSourceEnd() < var.initExpressionStart + initializerLength)) {
+		}
+        if (var.initExpressionStart <= problem.getSourceStart() && problem.getSourceEnd() < var.initExpressionStart + initializerLength) {
 			// set evaluation id and type
 			evaluationID = var.name;
 			evaluationType = EvaluationResult.T_VARIABLE;
@@ -161,8 +162,7 @@ Compiler getCompiler(ICompilerRequestor compilerRequestor) {
 	VariablesInfo installedVars = this.context.installedVars;
 	if (installedVars != null) {
 		ClassFile[] classFiles = installedVars.classFiles;
-		for (int i = 0; i < classFiles.length; i++) {
-			ClassFile classFile = classFiles[i];
+		for (ClassFile classFile : classFiles) {
 			IBinaryType binary = null;
 			try {
 				binary = new ClassFileReader(classFile.getBytes(), null);
@@ -200,9 +200,9 @@ protected char[] getSource() {
 
 	// import declarations
 	char[][] imports = this.context.imports;
-	for (int i = 0; i < imports.length; i++) {
+	for (char[] import1 : imports) {
 		buffer.append("import "); //$NON-NLS-1$
-		buffer.append(imports[i]);
+		buffer.append(import1);
 		buffer.append(';').append(this.context.lineSeparator);
 		lineNumberOffset++;
 	}
@@ -293,8 +293,7 @@ protected char[] getSource() {
 private int numberOfCRs(char[] source) {
 	int numberOfCRs = 0;
 	boolean lastWasCR = false;
-	for (int i = 0; i < source.length; i++) {
-		char currentChar = source[i];
+	for (char currentChar : source) {
 		switch(currentChar){
 			case '\r' :
 				lastWasCR = true;

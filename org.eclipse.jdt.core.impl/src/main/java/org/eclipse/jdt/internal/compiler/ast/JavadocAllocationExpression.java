@@ -105,9 +105,10 @@ public class JavadocAllocationExpression extends AllocationExpression {
 				scope.problemReporter().javadocInvalidConstructor(this, this.binding, scope.getDeclarationModifiers());
 			}
 			return this.resolvedType;
-		} else if (this.binding.isVarargs()) {
+		}
+        if (this.binding.isVarargs()) {
 			int length = this.argumentTypes.length;
-			if (!(this.binding.parameters.length == length && this.argumentTypes[length-1].isArrayType())) {
+			if (this.binding.parameters.length != length || !this.argumentTypes[length-1].isArrayType()) {
 				MethodBinding problem = new ProblemMethodBinding(this.binding, this.binding.selector, this.argumentTypes, ProblemReasons.NotFound);
 				scope.problemReporter().javadocInvalidConstructor(this, problem, scope.getDeclarationModifiers());
 			}
@@ -168,16 +169,16 @@ public class JavadocAllocationExpression extends AllocationExpression {
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.typeArguments != null) {
-				for (int i = 0, typeArgumentsLength = this.typeArguments.length; i < typeArgumentsLength; i++) {
-					this.typeArguments[i].traverse(visitor, scope);
+				for (TypeReference typeArgument : this.typeArguments) {
+					typeArgument.traverse(visitor, scope);
 				}
 			}
 			if (this.type != null) { // enum constant scenario
 				this.type.traverse(visitor, scope);
 			}
 			if (this.arguments != null) {
-				for (int i = 0, argumentsLength = this.arguments.length; i < argumentsLength; i++)
-					this.arguments[i].traverse(visitor, scope);
+				for (Expression argument : this.arguments)
+                    argument.traverse(visitor, scope);
 			}
 		}
 		visitor.endVisit(this, scope);
@@ -186,16 +187,16 @@ public class JavadocAllocationExpression extends AllocationExpression {
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.typeArguments != null) {
-				for (int i = 0, typeArgumentsLength = this.typeArguments.length; i < typeArgumentsLength; i++) {
-					this.typeArguments[i].traverse(visitor, scope);
+				for (TypeReference typeArgument : this.typeArguments) {
+					typeArgument.traverse(visitor, scope);
 				}
 			}
 			if (this.type != null) { // enum constant scenario
 				this.type.traverse(visitor, scope);
 			}
 			if (this.arguments != null) {
-				for (int i = 0, argumentsLength = this.arguments.length; i < argumentsLength; i++)
-					this.arguments[i].traverse(visitor, scope);
+				for (Expression argument : this.arguments)
+                    argument.traverse(visitor, scope);
 			}
 		}
 		visitor.endVisit(this, scope);

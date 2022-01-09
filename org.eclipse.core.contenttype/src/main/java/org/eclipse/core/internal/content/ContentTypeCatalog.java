@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.osgi.util.NLS;
 
 public final class ContentTypeCatalog {
-	private static final IContentType[] NO_CONTENT_TYPES = new IContentType[0];
+	private static final IContentType[] NO_CONTENT_TYPES = {};
 
 	/**
 	 * All fields are guarded by lock on "this"
@@ -154,7 +154,7 @@ public final class ContentTypeCatalog {
 	 * Applies a client-provided selection policy.
 	 */
 	private IContentType[] applyPolicy(final IContentTypeManager.ISelectionPolicy policy, final IContentType[] candidates, final boolean fileName, final boolean contents) {
-		final IContentType[][] result = new IContentType[][] {candidates};
+		final IContentType[][] result = {candidates};
 		SafeRunner.run(new ISafeRunnable() {
 			@Override
 			public void handleException(Throwable exception) {
@@ -242,18 +242,19 @@ public final class ContentTypeCatalog {
 			if (contents.isText()) {
 				if (describer instanceof XMLRootElementContentDescriber2) {
 					return ((XMLRootElementContentDescriber2) describer).describe((Reader) contents, description, properties);
-				} else if (describer instanceof XMLRootElementContentDescriber) {
+				}
+                if (describer instanceof XMLRootElementContentDescriber) {
 					return ((XMLRootElementContentDescriber) describer).describe((Reader) contents, description, properties);
 				}
 				return ((ITextContentDescriber) describer).describe((Reader) contents, description);
-			} else {
-				if (describer instanceof XMLRootElementContentDescriber2) {
-					return ((XMLRootElementContentDescriber2) describer).describe((InputStream) contents, description, properties);
-				} else if (describer instanceof XMLRootElementContentDescriber) {
-					return ((XMLRootElementContentDescriber) describer).describe((InputStream) contents, description, properties);
-				}
-				return (describer).describe((InputStream) contents, description);
 			}
+            if (describer instanceof XMLRootElementContentDescriber2) {
+            	return ((XMLRootElementContentDescriber2) describer).describe((InputStream) contents, description, properties);
+            }
+            if (describer instanceof XMLRootElementContentDescriber) {
+            	return ((XMLRootElementContentDescriber) describer).describe((InputStream) contents, description, properties);
+            }
+            return describer.describe((InputStream) contents, description);
 		} catch (RuntimeException re) {
 			// describer seems to be buggy. just disable it (logging the reason)
 			type.invalidateDescriber(re);
@@ -277,7 +278,7 @@ public final class ContentTypeCatalog {
 	}
 
 	synchronized void dissociate(ContentType contentType, String text, int type) {
-		Map<String, Set<ContentType>> fileSpecMap = ((type & IContentType.FILE_NAME_SPEC) != 0) ? fileNames : fileExtensions;
+		Map<String, Set<ContentType>> fileSpecMap = (type & IContentType.FILE_NAME_SPEC) != 0 ? fileNames : fileExtensions;
 		String mappingKey = FileSpec.getMappingKeyFor(text);
 		Set<ContentType> existing = fileSpecMap.get(mappingKey);
 		if (existing == null)
@@ -374,7 +375,7 @@ public final class ContentTypeCatalog {
 
 	public ContentType getContentType(String contentTypeIdentifier) {
 		ContentType type = internalGetContentType(contentTypeIdentifier);
-		return (type != null && type.isValid() && !type.isAlias()) ? type : null;
+		return type != null && type.isValid() && !type.isAlias() ? type : null;
 	}
 
 	private IContentDescription getDescriptionFor(ContentTypeMatcher matcher, ILazySource contents, String fileName, QualifiedName[] options) throws IOException {
@@ -483,7 +484,7 @@ public final class ContentTypeCatalog {
 			return NO_CONTENT_TYPES;
 		if (!forceValidation && total == 1) {
 			// do not do validation if not forced and only one was found (caller will validate later)
-			IContentType[] found = subset[0].length == 1 ? subset[0] : (subset[1].length == 1 ? subset[1] : subset[2]);
+			IContentType[] found = subset[0].length == 1 ? subset[0] : subset[1].length == 1 ? subset[1] : subset[2];
 			// bug 100032 - ignore binary content type if contents are text
 			if (!buffer.isText())
 				// binary buffer, caller can call the describer with no risk
@@ -621,7 +622,7 @@ public final class ContentTypeCatalog {
 			// copy so we can modify
 			contentTypes = new HashSet<>(contentTypes);
 			// invert the last two bits so it is easier to compare
-			typeMask ^= (IContentType.IGNORE_PRE_DEFINED | IContentType.IGNORE_USER_DEFINED);
+			typeMask ^= IContentType.IGNORE_PRE_DEFINED | IContentType.IGNORE_USER_DEFINED;
 			for (Iterator<ContentType> i = contentTypes.iterator(); i.hasNext();) {
 				ContentType contentType = i.next();
 				if (!contentType.hasFileSpec(text, typeMask, true))
@@ -680,22 +681,16 @@ public final class ContentTypeCatalog {
 		for (ContentType root : source) {
 			// From a given content type, check if it matches, and
 			// include any children that match as well.
-			internalAccept(new ContentTypeVisitor() {
-				@Override
-				public int visit(ContentType type) {
-					if (type != root && type.hasBuiltInAssociations())
-						// this content type has built-in associations - visit it later as root
-						return RETURN;
-					if (type == root && !type.hasFileSpec(context, fileSpecText, fileSpecType))
-						// it is the root and does not match the file name - do not add it nor look into its children
-						return RETURN;
-					// either the content type is the root and matches the file name or
-					// is a sub content type and does not have built-in files specs
-					if (!existing.contains(type))
-						destination.add(type);
-					return CONTINUE;
-				}
-			}, root);
+			internalAccept(type -> {
+            	if (type != root && type.hasBuiltInAssociations() || type == root && !type.hasFileSpec(context, fileSpecText, fileSpecType))
+            		// it is the root and does not match the file name - do not add it nor look into its children
+            		return ContentTypeVisitor.RETURN;
+            	// either the content type is the root and matches the file name or
+            	// is a sub content type and does not have built-in files specs
+            	if (!existing.contains(type))
+            		destination.add(type);
+            	return ContentTypeVisitor.CONTINUE;
+            }, root);
 		}
 		return destination;
 	}

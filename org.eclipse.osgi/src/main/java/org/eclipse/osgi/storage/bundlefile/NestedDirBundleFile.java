@@ -97,9 +97,7 @@ public class NestedDirBundleFile extends BundleFile {
 
 	@Override
 	public boolean containsDir(String dir) {
-		if (dir == null)
-			return false;
-		if (filterPath(dir)) {
+		if (dir == null || filterPath(dir)) {
 			return false;
 		}
 		return baseBundleFile.containsDir(prependNestedDir(dir));
@@ -120,7 +118,7 @@ public class NestedDirBundleFile extends BundleFile {
 		final int cpLength = nestedDirName.length();
 		if (basePaths == null)
 			return null;
-		return new Enumeration<String>() {
+		return new Enumeration<>() {
 
 		@Override
 			public boolean hasMoreElements() {

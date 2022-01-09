@@ -61,8 +61,8 @@ import org.osgi.framework.namespace.HostNamespace;
  * @since 3.2
  */
 public class ClasspathManager {
-	private static final FragmentClasspath[] emptyFragments = new FragmentClasspath[0];
-	private static final String[] DEFAULT_CLASSPATH = new String[] {"."}; //$NON-NLS-1$
+	private static final FragmentClasspath[] emptyFragments = {};
+	private static final String[] DEFAULT_CLASSPATH = {"."}; //$NON-NLS-1$
 
 	private final Generation generation;
 	private final ModuleClassLoader classloader;
@@ -385,7 +385,7 @@ public class ClasspathManager {
 
 	private URL findLocalResourceImpl(String resource, int classPathIndex) {
 		Module m = generation.getRevision().getRevisions().getModule();
-		URL result = null;
+		URL result;
 		int[] curIndex = {0};
 
 		// look in hook specific entries if any
@@ -489,7 +489,7 @@ public class ClasspathManager {
 	 * @return the requested entry or null if the entry does not exist
 	 */
 	public BundleEntry findLocalEntry(String path, int classPathIndex) {
-		BundleEntry result = null;
+		BundleEntry result;
 		int[] curIndex = {0};
 
 		// look in hook specific entries if any
@@ -520,14 +520,12 @@ public class ClasspathManager {
 
 	private BundleEntry findLocalEntry(String path, ClasspathEntry[] cpEntries, int classPathIndex, int[] curIndex) {
 		for (ClasspathEntry cpEntry : cpEntries) {
-			if (cpEntry != null) {
-				if (classPathIndex == -1 || classPathIndex == curIndex[0]) {
-					BundleEntry result = cpEntry.findEntry(path);
-					if (result != null) {
-						return result;
-					}
-				}
-			}
+			if (cpEntry != null && (classPathIndex == -1 || classPathIndex == curIndex[0])) {
+            	BundleEntry result = cpEntry.findEntry(path);
+            	if (result != null) {
+            		return result;
+            	}
+            }
 			curIndex[0]++;
 		}
 		return null;
@@ -628,7 +626,7 @@ public class ClasspathManager {
 		} catch (IOException e) {
 			if (debug.DEBUG_LOADER)
 				Debug.println("  IOException reading " + filename + " from " + classpathEntry.getBundleFile()); //$NON-NLS-1$ //$NON-NLS-2$
-			throw (LinkageError) new LinkageError("Error reading class bytes: " + name, e); //$NON-NLS-1$
+			throw new LinkageError("Error reading class bytes: " + name, e); //$NON-NLS-1$
 		}
 		if (debug.DEBUG_LOADER) {
 			Debug.println("  read " + classbytes.length + " bytes from " + classpathEntry.getBundleFile() + "!/" + filename); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

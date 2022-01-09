@@ -42,7 +42,6 @@ public class CDSBundleEntry extends BundleEntry {
 	 * @param bundleFile the bundle file where the class comes from
 	 */
 	public CDSBundleEntry(String path, byte[] classbytes, CDSBundleFile bundleFile) {
-		super();
 		this.path = path;
 		this.classbytes = classbytes;
 		this.bundleFile = bundleFile;

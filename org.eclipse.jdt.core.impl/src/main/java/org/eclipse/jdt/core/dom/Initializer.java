@@ -42,7 +42,8 @@ public class Initializer extends BodyDeclaration {
 	 * @since 3.0
 	 * @deprecated In the JLS3 API, this property is replaced by {@link #MODIFIERS2_PROPERTY}.
 	 */
-	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
+	@Deprecated
+    public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
 		internalModifiersPropertyFactory(Initializer.class);
 
 	/**
@@ -105,9 +106,8 @@ public class Initializer extends BodyDeclaration {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_3_0;
 		}
+        return PROPERTY_DESCRIPTORS_3_0;
 	}
 
 	/**
@@ -143,10 +143,9 @@ public class Initializer extends BodyDeclaration {
 		if (property == MODIFIERS_PROPERTY) {
 			if (get) {
 				return getModifiers();
-			} else {
-				internalSetModifiers(value);
-				return 0;
 			}
+            internalSetModifiers(value);
+            return 0;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetIntProperty(property, get, value);
@@ -157,18 +156,16 @@ public class Initializer extends BodyDeclaration {
 		if (property == JAVADOC_PROPERTY) {
 			if (get) {
 				return getJavadoc();
-			} else {
-				setJavadoc((Javadoc) child);
-				return null;
 			}
+            setJavadoc((Javadoc) child);
+            return null;
 		}
 		if (property == BODY_PROPERTY) {
 			if (get) {
 				return getBody();
-			} else {
-				setBody((Block) child);
-				return null;
 			}
+            setBody((Block) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

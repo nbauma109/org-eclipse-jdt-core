@@ -112,7 +112,7 @@ public class UniversalUniqueIdentifier implements java.io.Serializable {
 		BigInteger nowMillis = BigInteger.valueOf(now.getTime().getTime());
 		BigInteger baseMillis = BigInteger.valueOf(now.getGregorianChange().getTime());
 
-		return (nowMillis.subtract(baseMillis).multiply(BigInteger.valueOf(10000L)));
+		return nowMillis.subtract(baseMillis).multiply(BigInteger.valueOf(10000L));
 	}
 
 	public static int compareTime(byte[] fBits1, byte[] fBits2) {
@@ -203,7 +203,7 @@ public class UniversalUniqueIdentifier implements java.io.Serializable {
 	}
 
 	private void setClockSequence(int clockSeq) {
-		int clockSeqHigh = (clockSeq >>> ShiftByte) & LOW_NIBBLE_MASK;
+		int clockSeqHigh = clockSeq >>> ShiftByte & LOW_NIBBLE_MASK;
 		int reserved = fBits[CLOCK_SEQUENCE_HIGH_AND_RESERVED] & HIGH_NIBBLE_MASK;
 
 		fBits[CLOCK_SEQUENCE_HIGH_AND_RESERVED] = (byte) (reserved | clockSeqHigh);
@@ -241,15 +241,15 @@ public class UniversalUniqueIdentifier implements java.io.Serializable {
 		int clockSeqHigh = fBits[CLOCK_SEQUENCE_HIGH_AND_RESERVED] & LOW_NIBBLE_MASK;
 		int variant = variantIdentifier & LOW_NIBBLE_MASK;
 
-		fBits[CLOCK_SEQUENCE_HIGH_AND_RESERVED] = (byte) ((variant << SHIFT_NIBBLE) | clockSeqHigh);
-		return (variant);
+		fBits[CLOCK_SEQUENCE_HIGH_AND_RESERVED] = (byte) (variant << SHIFT_NIBBLE | clockSeqHigh);
+		return variant;
 	}
 
 	protected void setVersion(int versionIdentifier) {
 		int timeHigh = fBits[TIME_HIGH_AND_VERSION] & LOW_NIBBLE_MASK;
 		int version = versionIdentifier & LOW_NIBBLE_MASK;
 
-		fBits[TIME_HIGH_AND_VERSION] = (byte) (timeHigh | (version << SHIFT_NIBBLE));
+		fBits[TIME_HIGH_AND_VERSION] = (byte) (timeHigh | version << SHIFT_NIBBLE);
 	}
 
 	private static BigInteger timestamp() {

@@ -256,9 +256,8 @@ public abstract class ClasspathContainerInitializer {
 		// but this may be refined by other container initializer implementations.
 		if (containerPath == null) {
 			return null;
-		} else {
-			return containerPath.segment(0);
 		}
+        return containerPath.segment(0);
 	}
 
 	/**

@@ -37,23 +37,18 @@ public class InferenceVariable extends TypeVariableBinding {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + (int) (this.position ^ (this.position >>> 32));
+			result = prime * result + (int) (this.position ^ this.position >>> 32);
 			result = prime * result + this.rank;
-			result = prime * result + this.typeParameter.id;
-			return result;
+			return prime * result + this.typeParameter.id;
 		}
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
-			if (obj == null)
-				return false;
-			if (!(obj instanceof InferenceVarKey))
+			if (obj == null || !(obj instanceof InferenceVarKey))
 				return false;
 			InferenceVarKey other = (InferenceVarKey) obj;
-			if (this.position != other.position)
-				return false;
-			if (this.rank != other.rank)
+			if (this.position != other.position || this.rank != other.rank)
 				return false;
             return !TypeBinding.notEquals(this.typeParameter, other.typeParameter);
         }

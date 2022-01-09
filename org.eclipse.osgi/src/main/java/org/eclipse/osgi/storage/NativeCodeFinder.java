@@ -36,7 +36,7 @@ import org.osgi.framework.wiring.BundleRevision;
 
 public class NativeCodeFinder {
 	public static final String REQUIREMENT_NATIVE_PATHS_ATTRIBUTE = "native.paths"; //$NON-NLS-1$
-	private static final String[] EMPTY_STRINGS = new String[0];
+	private static final String[] EMPTY_STRINGS = {};
 	public static final String EXTERNAL_LIB_PREFIX = "external:"; //$NON-NLS-1$
 	private final Generation generation;
 	private final Debug debug;
@@ -138,7 +138,7 @@ public class NativeCodeFinder {
 	}
 
 	private String findBundleNativeCode(String libname, String mappedName, String[] altMappedNames) {
-		String path = null;
+		String path;
 		if (debug.DEBUG_LOADER)
 			Debug.println("  mapped library name: " + mappedName); //$NON-NLS-1$
 		List<String> nativePaths = getNativePaths();

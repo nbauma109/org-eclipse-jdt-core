@@ -52,34 +52,33 @@ public class LabeledStatement extends Statement {
 		// with those relative to the exit path from break statement occurring inside the labeled statement.
 		if (this.statement == null) {
 			return flowInfo;
-		} else {
-			LabelFlowContext labelContext;
-			FlowInfo statementInfo, mergedInfo;
-			statementInfo = this.statement.analyseCode(
-				currentScope,
-				(labelContext =
-					new LabelFlowContext(
-						flowContext,
-						this,
-						this.label,
-						(this.targetLabel = new BranchLabel()),
-						currentScope)),
-				flowInfo);
-			boolean reinjectNullInfo = (statementInfo.tagBits & FlowInfo.UNREACHABLE) != 0 &&
-				(labelContext.initsOnBreak.tagBits & FlowInfo.UNREACHABLE) == 0;
-			mergedInfo = statementInfo.mergedWith(labelContext.initsOnBreak);
-			if (reinjectNullInfo) {
-				// an embedded loop has had no chance to reinject forgotten null info
-				mergedInfo.addNullInfoFrom(flowInfo.unconditionalFieldLessCopy()).
-					addNullInfoFrom(labelContext.initsOnBreak.unconditionalFieldLessCopy());
-			}
-			this.mergedInitStateIndex =
-				currentScope.methodScope().recordInitializationStates(mergedInfo);
-			if ((this.bits & ASTNode.LabelUsed) == 0) {
-				currentScope.problemReporter().unusedLabel(this);
-			}
-			return mergedInfo;
 		}
+        LabelFlowContext labelContext;
+        FlowInfo statementInfo, mergedInfo;
+        statementInfo = this.statement.analyseCode(
+        	currentScope,
+        	labelContext =
+        		new LabelFlowContext(
+        			flowContext,
+        			this,
+        			this.label,
+        			this.targetLabel = new BranchLabel(),
+        			currentScope),
+        	flowInfo);
+        boolean reinjectNullInfo = (statementInfo.tagBits & FlowInfo.UNREACHABLE) != 0 &&
+        	(labelContext.initsOnBreak.tagBits & FlowInfo.UNREACHABLE) == 0;
+        mergedInfo = statementInfo.mergedWith(labelContext.initsOnBreak);
+        if (reinjectNullInfo) {
+        	// an embedded loop has had no chance to reinject forgotten null info
+        	mergedInfo.addNullInfoFrom(flowInfo.unconditionalFieldLessCopy()).
+        		addNullInfoFrom(labelContext.initsOnBreak.unconditionalFieldLessCopy());
+        }
+        this.mergedInitStateIndex =
+        	currentScope.methodScope().recordInitializationStates(mergedInfo);
+        if ((this.bits & ASTNode.LabelUsed) == 0) {
+        	currentScope.problemReporter().unusedLabel(this);
+        }
+        return mergedInfo;
 	}
 
 	@Override
@@ -144,9 +143,7 @@ public class LabeledStatement extends Statement {
 		ASTVisitor visitor,
 		BlockScope blockScope) {
 
-		if (visitor.visit(this, blockScope)) {
-			if (this.statement != null) this.statement.traverse(visitor, blockScope);
-		}
+		if (visitor.visit(this, blockScope) && this.statement != null) this.statement.traverse(visitor, blockScope);
 		visitor.endVisit(this, blockScope);
 	}
 

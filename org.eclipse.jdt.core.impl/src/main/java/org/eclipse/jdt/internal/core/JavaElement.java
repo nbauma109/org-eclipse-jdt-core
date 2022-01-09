@@ -72,13 +72,13 @@ import org.eclipse.jdt.internal.core.util.Util;
 public abstract class JavaElement extends PlatformObject implements IJavaElement {
 //	private static final QualifiedName PROJECT_JAVADOC= new QualifiedName(JavaCore.PLUGIN_ID, "project_javadoc_location"); //$NON-NLS-1$
 
-	private static final byte[] CLOSING_DOUBLE_QUOTE = new byte[] { 34 };
+	private static final byte[] CLOSING_DOUBLE_QUOTE = { 34 };
 	/* To handle the pre - HTML 5 format: <META http-equiv="Content-Type" content="text/html; charset=UTF-8">  */
-	private static final byte[] CHARSET = new byte[] { 99, 104, 97, 114, 115, 101, 116, 61 };
+	private static final byte[] CHARSET = { 99, 104, 97, 114, 115, 101, 116, 61 };
 	/* To handle the HTML 5 format: <meta http-equiv="Content-Type" content="text/html" charset="UTF-8"> */
-	private static final byte[] CHARSET_HTML5 = new byte[] { 99, 104, 97, 114, 115, 101, 116, 61, 34 };
-	private static final byte[] META_START = new byte[] { 60, 109, 101, 116, 97 };
-	private static final byte[] META_END = new byte[] { 34, 62 };
+	private static final byte[] CHARSET_HTML5 = { 99, 104, 97, 114, 115, 101, 116, 61, 34 };
+	private static final byte[] META_START = { 60, 109, 101, 116, 97 };
+	private static final byte[] META_END = { 34, 62 };
 	public static final char JEM_ESCAPE = '\\';
 	public static final char JEM_JAVAPROJECT = '=';
 	public static final char JEM_PACKAGEFRAGMENTROOT = '/';
@@ -127,8 +127,8 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 	/* cached result */
 	private JavaProject project;
 
-	protected static final String[] NO_STRINGS = new String[0];
-	protected static final JavaElement[] NO_ELEMENTS = new JavaElement[0];
+	protected static final String[] NO_STRINGS = {};
+	protected static final JavaElement[] NO_ELEMENTS = {};
 	protected static final Object NO_INFO = new Object();
 
 	private static Set<String> invalidURLs = null;
@@ -270,9 +270,8 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		Object elementInfo = getElementInfo();
 		if (elementInfo instanceof JavaElementInfo) {
 			return ((JavaElementInfo)elementInfo).getChildren();
-		} else {
-			return NO_ELEMENTS;
 		}
+        return NO_ELEMENTS;
 	}
 	/**
 	 * Returns a collection of (immediate) children of this node of the
@@ -460,20 +459,19 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 							do {
 								// check name range
 								range = child.getNameRange();
-								if (position <= range.getOffset() + range.getLength()) {
-									candidate = child;
-								} else {
+								if (position > range.getOffset() + range.getLength()) {
 									return candidate == null ? child.getSourceElementAt(position) : candidate.getSourceElementAt(position);
 								}
+                                candidate = child;
 								child = --i>=0 ? (SourceRefElement) children[i] : null;
 							} while (child != null && child.getSourceRange().getOffset() == declarationStart);
 							// position in field's type: use first field
 							return candidate.getSourceElementAt(position);
-						} else if (child instanceof IParent) {
-							return child.getSourceElementAt(position);
-						} else {
-							return child;
 						}
+                        if (child instanceof IParent) {
+							return child.getSourceElementAt(position);
+						}
+                        return child;
 					}
 				}
 			}
@@ -495,34 +493,31 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 	@Override
 	public ISchedulingRule getSchedulingRule() {
 		IResource resource = resource();
-		if (resource == null) {
-			class NoResourceSchedulingRule implements ISchedulingRule {
-				public IPath path;
-				public NoResourceSchedulingRule(IPath path) {
-					this.path = path;
-				}
-				@Override
-				public boolean contains(ISchedulingRule rule) {
-					if (rule instanceof NoResourceSchedulingRule) {
-						return this.path.isPrefixOf(((NoResourceSchedulingRule)rule).path);
-					} else {
-						return false;
-					}
-				}
-				@Override
-				public boolean isConflicting(ISchedulingRule rule) {
-					if (rule instanceof NoResourceSchedulingRule) {
-						IPath otherPath = ((NoResourceSchedulingRule)rule).path;
-						return this.path.isPrefixOf(otherPath) || otherPath.isPrefixOf(this.path);
-					} else {
-						return false;
-					}
-				}
-			}
-			return new NoResourceSchedulingRule(getPath());
-		} else {
+		if (resource != null) {
 			return resource;
 		}
+        class NoResourceSchedulingRule implements ISchedulingRule {
+        	public IPath path;
+        	public NoResourceSchedulingRule(IPath path) {
+        		this.path = path;
+        	}
+        	@Override
+        	public boolean contains(ISchedulingRule rule) {
+        		if (rule instanceof NoResourceSchedulingRule) {
+        			return this.path.isPrefixOf(((NoResourceSchedulingRule)rule).path);
+        		}
+                return false;
+        	}
+        	@Override
+        	public boolean isConflicting(ISchedulingRule rule) {
+        		if (rule instanceof NoResourceSchedulingRule) {
+        			IPath otherPath = ((NoResourceSchedulingRule)rule).path;
+        			return this.path.isPrefixOf(otherPath) || otherPath.isPrefixOf(this.path);
+        		}
+                return false;
+        	}
+        }
+        return new NoResourceSchedulingRule(getPath());
 	}
 	/**
 	 * @see IParent
@@ -533,9 +528,8 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		Object elementInfo = JavaModelManager.getJavaModelManager().getInfo(this);
 		if (elementInfo instanceof JavaElementInfo) {
 			return ((JavaElementInfo)elementInfo).getChildren().length > 0;
-		} else {
-			return true;
 		}
+        return true;
 	}
 
 	/**
@@ -583,8 +577,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 	public JavaModelException newJavaModelException(IStatus status) {
 		if (status instanceof IJavaModelStatus)
 			return new JavaModelException((IJavaModelStatus) status);
-		else
-			return new JavaModelException(new JavaModelStatus(status.getSeverity(), status.getCode(), status.getMessage()));
+        return new JavaModelException(new JavaModelStatus(status.getSeverity(), status.getCode(), status.getMessage()));
 	}
 	/*
 	 * Opens an <code>Openable</code> that is known to be closed (no check for <code>isOpen()</code>).
@@ -612,7 +605,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 				// Bug 62854: close only the openable's buffer
 				if (newElements.containsKey(openable)
 						// Bug 526116: do not close current working copy, which can impact save actions
-						&& !(openable instanceof ICompilationUnit && ((ICompilationUnit) openable).isWorkingCopy())) {
+						&& (!(openable instanceof ICompilationUnit) || !((ICompilationUnit) openable).isWorkingCopy())) {
 					openable.closeBuffer();
 				}
 				throw newNotPresentException();
@@ -704,9 +697,9 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 	protected void toStringChildren(int tab, StringBuffer buffer, Object info) {
 		if (info == null || !(info instanceof JavaElementInfo)) return;
 		IJavaElement[] children = ((JavaElementInfo)info).getChildren();
-		for (int i = 0; i < children.length; i++) {
+		for (IJavaElement child : children) {
 			buffer.append("\n"); //$NON-NLS-1$
-			((JavaElement)children[i]).toString(tab + 1, buffer);
+			((JavaElement)child).toString(tab + 1, buffer);
 		}
 	}
 	/**
@@ -776,8 +769,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		}
 
 		IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
-		for (int i= 0; i < extraAttributes.length; i++) {
-			IClasspathAttribute attrib= extraAttributes[i];
+		for (IClasspathAttribute attrib : extraAttributes) {
 			if (IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME.equals(attrib.getName())) {
 				String value = attrib.getValue();
 				try {
@@ -799,7 +791,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		if (array == null || toBeFound == null)
 			return -1;
 		final int toBeFoundLength = toBeFound.length;
-		final int arrayLength = (end != -1 && end < array.length) ? end : array.length;
+		final int arrayLength = end != -1 && end < array.length ? end : array.length;
 		if (arrayLength < toBeFoundLength)
 			return -1;
 		loop: for (int i = start, max = arrayLength - toBeFoundLength + 1; i < max; i++) {
@@ -832,12 +824,12 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 			URLConnection connection = baseLoc.openConnection();
 			input = connection.getInputStream();
 			if (validURLs == null) {
-				validURLs = new HashSet<String>(1);
+				validURLs = new HashSet<>(1);
 			}
 			validURLs.add(url);
 		} catch (Exception e1) {
 			if (invalidURLs == null) {
-				invalidURLs = new HashSet<String>(1);
+				invalidURLs = new HashSet<>(1);
 			}
 			invalidURLs.add(url);
 			throw new JavaModelException(e, IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC);
@@ -892,7 +884,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 				if (index != -1) {
 					int end = getIndexOf(contents, META_END, index, -1);
 					if (end != -1) {
-						if ((end + 1) <= contents.length) end++;
+						if (end + 1 <= contents.length) end++;
 						int charsetIndex = getIndexOf(contents, CHARSET_HTML5, index, end);
 						if (charsetIndex == -1) {
 							charsetIndex = getIndexOf(contents, CHARSET, index, end);
@@ -918,10 +910,9 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 			if (contents != null) {
 				if (encoding != null) {
 					return new String(contents, encoding);
-				} else {
-					// platform encoding is used
-					return new String(contents);
 				}
+                // platform encoding is used
+                return new String(contents);
 			}
 		} catch (IllegalArgumentException | NullPointerException e) {
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=304316

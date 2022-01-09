@@ -129,13 +129,13 @@ public class LRUCache<K, V> implements Cloneable {
 			int days = 0;
 			if (ageInSeconds > 60) {
 				long ageInMin = ageInSeconds / 60;
-				seconds = (int) (ageInSeconds - (60 * ageInMin));
+				seconds = (int) (ageInSeconds - 60 * ageInMin);
 				if (ageInMin > 60) {
 					long ageInHours = ageInMin / 60;
-					minutes = (int) (ageInMin - (60 * ageInHours));
+					minutes = (int) (ageInMin - 60 * ageInHours);
 					if (ageInHours > 24) {
 						long ageInDays = ageInHours / 24;
-						hours = (int) (ageInHours - (24 * ageInDays));
+						hours = (int) (ageInHours - 24 * ageInDays);
 						days = (int) ageInDays;
 					} else {
 						hours = (int) ageInHours;
@@ -201,7 +201,7 @@ public class LRUCache<K, V> implements Cloneable {
 					accumulatedTime += timeStamps;
 					elementCounter++;
 				}
-				if (elementCounter >= numberOfElementsPerGroup && (groupNumber < numberOfGroups)) {
+				if (elementCounter >= numberOfElementsPerGroup && groupNumber < numberOfGroups) {
 					buffer.append("\nGroup "); //$NON-NLS-1$
 					buffer.append(groupNumber);
 					if (groupNumber == 1) {
@@ -326,7 +326,7 @@ public class LRUCache<K, V> implements Cloneable {
 	}
 
 	public double fillingRatio() {
-		return (this.currentSpace) * 100.0 / this.spaceLimit;
+		return this.currentSpace * 100.0 / this.spaceLimit;
 	}
 
 	/**
@@ -434,7 +434,7 @@ public class LRUCache<K, V> implements Cloneable {
 	 * currently in the cache.
 	 */
 	public ICacheEnumeration<K, V> keysAndValues() {
-		return new ICacheEnumeration<K, V>() {
+		return new ICacheEnumeration<>() {
 
 			Enumeration<LRUCacheEntry<K, V>> values = LRUCache.this.entryTable.elements();
 			LRUCacheEntry<K, V> entry;
@@ -606,9 +606,8 @@ public class LRUCache<K, V> implements Cloneable {
 				entry.space = newSpace;
 				this.currentSpace = newTotal;
 				return value;
-			} else {
-				privateRemoveEntry (entry, false);
 			}
+            privateRemoveEntry (entry, false);
 		}
 		if (makeSpace(newSpace)) {
 			privateAdd (key, value, newSpace);
@@ -651,9 +650,8 @@ public class LRUCache<K, V> implements Cloneable {
 	protected int spaceFor (V value) {
 		if (value instanceof ILRUCacheable) {
 			return ((ILRUCacheable) value).getCacheFootprint();
-		} else {
-			return 1;
 		}
+        return 1;
 	}
 
 	/**
@@ -706,6 +704,5 @@ public class LRUCache<K, V> implements Cloneable {
 			privateRemoveEntry (entry, true);
 			privateAddEntry (entry, true);
 		}
-		return;
 	}
 }

@@ -75,14 +75,12 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				this.expression, FlowContext.CAN_ONLY_NULL | FlowContext.IN_INSTANCEOF, flowInfo);
 		// no impact upon enclosing try context
 		flowInfo =  FlowInfo.conditional(initsWhenTrue.copy(), flowInfo.copy());
-	} else if (this.expression instanceof Reference) {
-		if (currentScope.compilerOptions().enableSyntacticNullAnalysisForFields) {
-			FieldBinding field = ((Reference)this.expression).lastFieldBinding();
-			if (field != null && (field.type.tagBits & TagBits.IsBaseType) == 0) {
-				flowContext.recordNullCheckedFieldReference((Reference) this.expression, 1);
-			}
-		}
-	}
+	} else if (this.expression instanceof Reference && currentScope.compilerOptions().enableSyntacticNullAnalysisForFields) {
+    	FieldBinding field = ((Reference)this.expression).lastFieldBinding();
+    	if (field != null && (field.type.tagBits & TagBits.IsBaseType) == 0) {
+    		flowContext.recordNullCheckedFieldReference((Reference) this.expression, 1);
+    	}
+    }
 	if (initsWhenTrue == null) {
 		flowInfo = this.expression.analyseCode(currentScope, flowContext, flowInfo).
 				unconditionalInits();
@@ -93,7 +91,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	if (this.elementVariable != null) {
 		initsWhenTrue.markAsDefinitelyAssigned(this.elementVariable.binding);
 	}
-	return (initsWhenTrue == null) ? flowInfo :
+	return initsWhenTrue == null ? flowInfo :
 			FlowInfo.conditional(initsWhenTrue, flowInfo.copy());
 }
 /**
@@ -178,28 +176,18 @@ public void generateOptimizedBoolean(BlockScope currentScope, CodeStream codeStr
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 
 
-	if ((cst != Constant.NotAConstant) && (cst.typeID() == TypeIds.T_boolean)) {
+	if (cst != Constant.NotAConstant && cst.typeID() == TypeIds.T_boolean) {
 		pc = codeStream.position;
-		if (cst.booleanValue() == true) {
+		if (cst.booleanValue()) {
 			// constant == true
-			if (valueRequired) {
-				if (falseLabel == null) {
-					// implicit falling through the FALSE case
-					if (trueLabel != null) {
-						codeStream.goto_(trueLabel);
-					}
-				}
-			}
-		} else {
-			if (valueRequired) {
-				if (falseLabel != null) {
-					// implicit falling through the TRUE case
-					if (trueLabel == null) {
-						codeStream.goto_(falseLabel);
-					}
-				}
-			}
-		}
+			// implicit falling through the FALSE case
+            if (valueRequired && falseLabel == null && trueLabel != null) {
+            	codeStream.goto_(trueLabel);
+            }
+		} else // implicit falling through the TRUE case
+        if (valueRequired && falseLabel != null && trueLabel == null) {
+        	codeStream.goto_(falseLabel);
+        }
 		codeStream.recordPositionsFrom(pc, this.sourceStart);
 	} else  {
 		// branching
@@ -210,14 +198,12 @@ public void generateOptimizedBoolean(BlockScope currentScope, CodeStream codeStr
 					// Implicit falling through the FALSE case
 					codeStream.if_acmpeq(trueLabel);
 				}
-			} else {
-				if (trueLabel == null) {
-					// Implicit falling through the TRUE case
-					codeStream.if_acmpne(falseLabel);
-				} else {
-					// No implicit fall through TRUE/FALSE --> should never occur
-				}
-			}
+			} else if (trueLabel == null) {
+            	// Implicit falling through the TRUE case
+            	codeStream.if_acmpne(falseLabel);
+            } else {
+            	// No implicit fall through TRUE/FALSE --> should never occur
+            }
 		}
 		codeStream.recordPositionsFrom(position, this.sourceEnd);
 	}
@@ -337,17 +323,15 @@ public TypeBinding resolveType(BlockScope scope) {
 		// Report same as before for older compliances
 		if (options.complianceLevel < ClassFileConstants.JDK16) {
 			scope.problemReporter().illegalInstanceOfGenericType(checkedType, this);
-		} else {
-			if (expressionType != TypeBinding.NULL) {
-				boolean isLegal = checkCastTypesCompatibility(scope, checkedType, expressionType, this.expression, true);
-				if (!isLegal || (this.bits & ASTNode.UnsafeCast) != 0) {
-					scope.problemReporter().unsafeCastInInstanceof(this.expression, checkedType, expressionType);
-				}
-			}
-		}
+		} else if (expressionType != TypeBinding.NULL) {
+        	boolean isLegal = checkCastTypesCompatibility(scope, checkedType, expressionType, this.expression, true);
+        	if (!isLegal || (this.bits & ASTNode.UnsafeCast) != 0) {
+        		scope.problemReporter().unsafeCastInInstanceof(this.expression, checkedType, expressionType);
+        	}
+        }
 	} else if (checkedType.isValidBinding()) {
 		// if not a valid binding, an error has already been reported for unresolved type
-		if ((expressionType != TypeBinding.NULL && expressionType.isBaseType()) // disallow autoboxing
+		if (expressionType != TypeBinding.NULL && expressionType.isBaseType() // disallow autoboxing
 				|| checkedType.isBaseType()
 				|| !checkCastTypesCompatibility(scope, checkedType, expressionType, null, true)) {
 			scope.problemReporter().notCompatibleTypesError(this, expressionType, checkedType);
@@ -364,8 +348,7 @@ public TypeBinding resolveType(BlockScope scope) {
 public boolean checkUnsafeCast(Scope scope, TypeBinding castType, TypeBinding expressionType, TypeBinding match, boolean isNarrowing) {
 	if (!castType.isReifiable())
 		return CastExpression.checkUnsafeCast(this, scope, castType, expressionType, match, isNarrowing);
-	else
-		return super.checkUnsafeCast(scope, castType, expressionType, match, isNarrowing);
+    return super.checkUnsafeCast(scope, castType, expressionType, match, isNarrowing);
 }
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#tagAsUnnecessaryCast(Scope,TypeBinding)

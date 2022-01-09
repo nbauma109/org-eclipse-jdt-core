@@ -49,7 +49,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	private final int cardinality;
 	private final String name;
 	private final URL iconURL;
-	private final boolean[] registrationLock = new boolean[] {true};
+	private final boolean[] registrationLock = {true};
 
 	protected EclipseAppDescriptor(Bundle contributor, String pid, String name, String iconPath, int flags, int cardinality, EclipseAppContainer appContainer) {
 		super(pid);
@@ -89,7 +89,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	@Override
 	protected ApplicationHandle launchSpecific(Map arguments) throws Exception {
 		// if this application is locked throw an exception.
-		if (getLocked().booleanValue())
+		if (getLocked())
 			throw new IllegalStateException("Cannot launch a locked application."); //$NON-NLS-1$
 		// initialize the appHandle
 		EclipseAppHandle appHandle = createAppHandle(arguments);

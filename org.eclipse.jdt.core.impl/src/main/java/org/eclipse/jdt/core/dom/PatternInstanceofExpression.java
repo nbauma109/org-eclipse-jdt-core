@@ -105,18 +105,16 @@ public class PatternInstanceofExpression extends Expression {
 		if (property == LEFT_OPERAND_PROPERTY) {
 			if (get) {
 				return getLeftOperand();
-			} else {
-				setLeftOperand((Expression) child);
-				return null;
 			}
+            setLeftOperand((Expression) child);
+            return null;
 		}
 		if (property == RIGHT_OPERAND_PROPERTY) {
 			if (get) {
 				return getRightOperand();
-			} else {
-				setRightOperand((SingleVariableDeclaration) child);
-				return null;
 			}
+            setRightOperand((SingleVariableDeclaration) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

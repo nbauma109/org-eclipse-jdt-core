@@ -141,23 +141,21 @@ protected void analyseArguments(BlockScope currentScope, FlowContext flowContext
 		int varArgPos = -1;
 		TypeBinding varArgsType = null;
 		boolean passThrough = false;
-		if (considerTypeAnnotations || hasJDK15NullAnnotations) {
-			// check if varargs need special treatment:
-			if (methodBinding.isVarargs()) {
-				varArgPos = numParamsToCheck-1;
-				// this if-block essentially copied from generateArguments(..):
-				varArgsType = methodBinding.parameters[varArgPos];
-				if (numParamsToCheck == arguments.length) {
-					TypeBinding lastType = arguments[varArgPos].resolvedType;
-					if (lastType == TypeBinding.NULL
-							|| (varArgsType.dimensions() == lastType.dimensions()
-							&& lastType.isCompatibleWith(varArgsType)))
-						passThrough = true; // pass directly as-is
-				}
-				if (!passThrough)
-					numParamsToCheck--; // with non-passthrough varargs last param is fed from individual args -> don't check
-			}
-		}
+		// check if varargs need special treatment:
+        if ((considerTypeAnnotations || hasJDK15NullAnnotations) && methodBinding.isVarargs()) {
+        	varArgPos = numParamsToCheck-1;
+        	// this if-block essentially copied from generateArguments(..):
+        	varArgsType = methodBinding.parameters[varArgPos];
+        	if (numParamsToCheck == arguments.length) {
+        		TypeBinding lastType = arguments[varArgPos].resolvedType;
+        		if (lastType == TypeBinding.NULL
+        				|| varArgsType.dimensions() == lastType.dimensions()
+        				&& lastType.isCompatibleWith(varArgsType))
+        			passThrough = true; // pass directly as-is
+        	}
+        	if (!passThrough)
+        		numParamsToCheck--; // with non-passthrough varargs last param is fed from individual args -> don't check
+        }
 		if (considerTypeAnnotations) {
 			for (int i=0; i<numParamsToCheck; i++) {
 				TypeBinding expectedType = methodBinding.parameters[i];
@@ -194,7 +192,8 @@ void analyseOneArgument18(BlockScope currentScope, FlowContext flowContext, Flow
 		ce.internalAnalyseOneArgument18(currentScope, flowContext, expectedType, ce.valueIfTrue, flowInfo, ce.ifTrueNullStatus, expectedNonNullness, originalExpected);
 		ce.internalAnalyseOneArgument18(currentScope, flowContext, expectedType, ce.valueIfFalse, flowInfo, ce.ifFalseNullStatus, expectedNonNullness, originalExpected);
 		return;
-	} else 	if (argument instanceof SwitchExpression && argument.isPolyExpression()) {
+	}
+    if (argument instanceof SwitchExpression && argument.isPolyExpression()) {
 		SwitchExpression se = (SwitchExpression) argument;
 		for (int i = 0; i < se.resultExpressions.size(); i++) {
 			se.internalAnalyseOneArgument18(currentScope, flowContext, expectedType,
@@ -238,7 +237,7 @@ void internalAnalyseOneArgument18(BlockScope currentScope, FlowContext flowConte
 	boolean useTypeAnnotations = scope.environment().usesNullTypeAnnotations();
 	try {
 		methodBinding = scope.methodScope().referenceMethodBinding();
-		tagBits = (useTypeAnnotations) ? methodBinding.returnType.tagBits : methodBinding.tagBits;
+		tagBits = useTypeAnnotations ? methodBinding.returnType.tagBits : methodBinding.tagBits;
 	} catch (NullPointerException npe) {
 		// chain of references in try-block has several potential nulls;
 		// any null means we cannot perform the following check
@@ -246,12 +245,10 @@ void internalAnalyseOneArgument18(BlockScope currentScope, FlowContext flowConte
 	}
 	if (useTypeAnnotations) {
 		checkAgainstNullTypeAnnotation(scope, methodBinding.returnType, expr, flowContext, flowInfo);
-	} else if (nullStatus != FlowInfo.NON_NULL) {
-		// if we can't prove non-null check against declared null-ness of the enclosing method:
-		if ((tagBits & TagBits.AnnotationNonNull) != 0) {
-			flowContext.recordNullityMismatch(scope, expr, expr.resolvedType, methodBinding.returnType, flowInfo, nullStatus, null);
-		}
-	}
+	} else // if we can't prove non-null check against declared null-ness of the enclosing method:
+    if (nullStatus != FlowInfo.NON_NULL && (tagBits & TagBits.AnnotationNonNull) != 0) {
+    	flowContext.recordNullityMismatch(scope, expr, expr.resolvedType, methodBinding.returnType, flowInfo, nullStatus, null);
+    }
 }
 
 protected void checkAgainstNullTypeAnnotation(BlockScope scope, TypeBinding requiredType, Expression expression, FlowContext flowContext, FlowInfo flowInfo) {
@@ -261,7 +258,8 @@ protected void checkAgainstNullTypeAnnotation(BlockScope scope, TypeBinding requ
 		internalCheckAgainstNullTypeAnnotation(scope, requiredType, ce.valueIfTrue, ce.ifTrueNullStatus, flowContext, flowInfo);
 		internalCheckAgainstNullTypeAnnotation(scope, requiredType, ce.valueIfFalse, ce.ifFalseNullStatus, flowContext, flowInfo);
 		return;
-	} else 	if (expression instanceof SwitchExpression && expression.isPolyExpression()) {
+	}
+    if (expression instanceof SwitchExpression && expression.isPolyExpression()) {
 		SwitchExpression se = (SwitchExpression) expression;
 		for (int i = 0; i < se.resultExpressions.size(); i++) {
 			internalCheckAgainstNullTypeAnnotation(scope, requiredType,
@@ -368,14 +366,13 @@ public int complainIfUnreachable(FlowInfo flowInfo, BlockScope scope, int previo
 					scope.checkUnclosedCloseables(flowInfo, null, null, null);
 			}
 			return COMPLAINED_UNREACHABLE;
-		} else {
-			if (previousComplaintLevel < COMPLAINED_FAKE_REACHABLE) {
-				scope.problemReporter().fakeReachable(this);
-				if (endOfBlock)
-					scope.checkUnclosedCloseables(flowInfo, null, null, null);
-			}
-			return COMPLAINED_FAKE_REACHABLE;
 		}
+        if (previousComplaintLevel < COMPLAINED_FAKE_REACHABLE) {
+        	scope.problemReporter().fakeReachable(this);
+        	if (endOfBlock)
+        		scope.checkUnclosedCloseables(flowInfo, null, null, null);
+        }
+        return COMPLAINED_FAKE_REACHABLE;
 	}
 	return previousComplaintLevel;
 }
@@ -417,8 +414,8 @@ public void generateArguments(MethodBinding binding, Expression[] arguments, Blo
 			// right number of arguments - could be inexact - pass argument as is
 			TypeBinding lastType = arguments[varArgIndex].resolvedType;
 			if (lastType == TypeBinding.NULL
-				|| (varArgsType.dimensions() == lastType.dimensions()
-					&& lastType.isCompatibleWith(codeGenVarArgsType))) {
+				|| varArgsType.dimensions() == lastType.dimensions()
+					&& lastType.isCompatibleWith(codeGenVarArgsType)) {
 				// foo(1, new int[]{2, 3}) or foo(1, null) --> last arg is passed as-is
 				arguments[varArgIndex].generateCode(currentScope, codeStream, true);
 			} else {
@@ -438,8 +435,8 @@ public void generateArguments(MethodBinding binding, Expression[] arguments, Blo
 			codeStream.newArray(codeGenVarArgsType); // create a mono-dimensional array
 		}
 	} else if (arguments != null) { // standard generation for method arguments
-		for (int i = 0, max = arguments.length; i < max; i++)
-			arguments[i].generateCode(currentScope, codeStream, true);
+		for (Expression argument : arguments)
+            argument.generateCode(currentScope, codeStream, true);
 	}
 }
 
@@ -518,7 +515,7 @@ private LocalVariableBinding[] addPatternVariables(LocalVariableBinding[] curren
 		return current;
 	}
 	int newLength = current.length + 1;
-	System.arraycopy(current, 0, (current = new LocalVariableBinding[newLength]), 0, oldSize);
+	System.arraycopy(current, 0, current = new LocalVariableBinding[newLength], 0, oldSize);
 	current[oldSize] = add;
 	return current;
 }

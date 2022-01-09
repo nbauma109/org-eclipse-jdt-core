@@ -66,7 +66,7 @@ public class Event {
 		validateTopicName(topic);
 		this.topic = topic;
 		// safely publish the event properties
-		this.properties = (properties instanceof EventProperties) ? (EventProperties) properties : new EventProperties(properties);
+		this.properties = properties instanceof EventProperties ? (EventProperties) properties : new EventProperties(properties);
 	}
 
 	/**
@@ -186,8 +186,7 @@ public class Event {
 	@Override
 	public int hashCode() {
 		int h = 31 * 17 + topic.hashCode();
-		h = 31 * h + properties.hashCode();
-		return h;
+		return 31 * h + properties.hashCode();
 	}
 
 	/**
@@ -216,25 +215,16 @@ public class Event {
 			char ch = chars[i];
 			if (ch == '/') {
 				// Can't start or end with a '/' but anywhere else is okay
-				if (i == 0 || (i == length - 1)) {
-					throw new IllegalArgumentException("invalid topic: " + topic);
-				}
 				// Can't have "//" as that implies empty token
-				if (chars[i - 1] == '/') {
+				if (i == 0 || i == length - 1 || chars[i - 1] == '/') {
 					throw new IllegalArgumentException("invalid topic: " + topic);
 				}
 				continue;
 			}
-			if (('A' <= ch) && (ch <= 'Z')) {
+			if ('A' <= ch && ch <= 'Z' || 'a' <= ch && ch <= 'z') {
 				continue;
 			}
-			if (('a' <= ch) && (ch <= 'z')) {
-				continue;
-			}
-			if (('0' <= ch) && (ch <= '9')) {
-				continue;
-			}
-			if ((ch == '_') || (ch == '-')) {
+			if ('0' <= ch && ch <= '9' || ch == '_' || ch == '-') {
 				continue;
 			}
 			throw new IllegalArgumentException("invalid topic: " + topic);
@@ -256,7 +246,7 @@ public class Event {
 		@Override
 		public Enumeration<Object> elements() {
 			Collection<Object> values = properties.values();
-			List<Object> result = new ArrayList<Object>(values.size() + 1);
+			List<Object> result = new ArrayList<>(values.size() + 1);
 			result.add(topic);
 			result.addAll(values);
 			return Collections.enumeration(result);
@@ -278,7 +268,7 @@ public class Event {
 		@Override
 		public Enumeration<String> keys() {
 			Collection<String> keys = properties.keySet();
-			List<String> result = new ArrayList<String>(keys.size() + 1);
+			List<String> result = new ArrayList<>(keys.size() + 1);
 			result.add(EVENT_TOPIC);
 			result.addAll(keys);
 			return Collections.enumeration(result);

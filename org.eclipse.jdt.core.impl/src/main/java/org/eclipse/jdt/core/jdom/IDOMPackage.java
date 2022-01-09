@@ -22,6 +22,7 @@ package org.eclipse.jdt.core.jdom;
  * org.eclipse.jdt.core.dom package.
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@Deprecated
 public interface IDOMPackage extends IDOMNode {
 /**
  * The <code>IDOMPackage</code> refinement of this <code>IDOMNode</code>

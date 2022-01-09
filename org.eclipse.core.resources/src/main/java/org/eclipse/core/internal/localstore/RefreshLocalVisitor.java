@@ -98,13 +98,11 @@ public class RefreshLocalVisitor implements IUnifiedTreeVisitor, ILocalStoreCons
 		int flags = target.getFlags(info);
 		if (target.exists(flags, true)) {
 			target = (Folder) ((File) target).changeToFolder();
-		} else {
-			if (!target.exists(flags, false)) {
-				target = (Resource) workspace.getRoot().getFolder(target.getFullPath());
-				// Use the basic file creation protocol since we don't want to create any content on disk.
-				workspace.createResource(target, false);
-			}
-		}
+		} else if (!target.exists(flags, false)) {
+        	target = (Resource) workspace.getRoot().getFolder(target.getFullPath());
+        	// Use the basic file creation protocol since we don't want to create any content on disk.
+        	workspace.createResource(target, false);
+        }
 		node.setResource(target);
 		info = target.getResourceInfo(false, true);
 		target.getLocalManager().updateLocalSync(info, node.getLastModified());
@@ -115,14 +113,12 @@ public class RefreshLocalVisitor implements IUnifiedTreeVisitor, ILocalStoreCons
 		int flags = target.getFlags(info);
 		if (target.exists(flags, true))
 			target = (File) ((Folder) target).changeToFile();
-		else {
-			if (!target.exists(flags, false)) {
-				target = (Resource) workspace.getRoot().getFile(target.getFullPath());
-				// Use the basic file creation protocol since we don't want to
-				// create any content on disk.
-				workspace.createResource(target, false);
-			}
-		}
+        else if (!target.exists(flags, false)) {
+        	target = (Resource) workspace.getRoot().getFile(target.getFullPath());
+        	// Use the basic file creation protocol since we don't want to
+        	// create any content on disk.
+        	workspace.createResource(target, false);
+        }
 		node.setResource(target);
 		info = target.getResourceInfo(false, true);
 		target.getLocalManager().updateLocalSync(info, node.getLastModified());
@@ -201,10 +197,7 @@ public class RefreshLocalVisitor implements IUnifiedTreeVisitor, ILocalStoreCons
 					// do we have any alphabetic variants in the workspace?
 					IResource variant = target.findExistingResourceVariant(target.getFullPath());
 					if (variant != null) {
-						deleteResource(node, ((Resource) variant));
-						createResource(node, target);
-						resourceChanged = true;
-						return RL_NOT_IN_SYNC;
+						deleteResource(node, (Resource) variant);
 					}
 				}
 				createResource(node, target);
@@ -231,13 +224,11 @@ public class RefreshLocalVisitor implements IUnifiedTreeVisitor, ILocalStoreCons
 				resourceChanged = true;
 				return false;
 			}
-		} else {
-			if (!node.isFolder()) {
-				folderToFile(node, target);
-				resourceChanged = true;
-				return false;
-			}
-		}
+		} else if (!node.isFolder()) {
+        	folderToFile(node, target);
+        	resourceChanged = true;
+        	return false;
+        }
 		return true;
 	}
 

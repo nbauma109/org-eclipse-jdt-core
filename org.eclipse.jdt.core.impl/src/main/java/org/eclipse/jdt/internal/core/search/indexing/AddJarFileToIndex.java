@@ -193,8 +193,8 @@ class AddJarFileToIndex extends BinaryContainer {
 					boolean needToReindex = indexedFileNames.elementSize != max; // a new file was added
 					if (!needToReindex) {
 						Object[] valueTable = indexedFileNames.valueTable;
-						for (int i = 0, l = valueTable.length; i < l; i++) {
-							if (valueTable[i] == DELETED) {
+						for (Object element : valueTable) {
+							if (element == DELETED) {
 								needToReindex = true; // a file was deleted so re-index
 								break;
 							}
@@ -312,6 +312,6 @@ class AddJarFileToIndex extends BinaryContainer {
 	}
 
 	protected boolean hasPreBuiltIndex() {
-		return !this.forceIndexUpdate && (this.indexFileURL != null && this.indexFileURL.exists());
+		return !this.forceIndexUpdate && this.indexFileURL != null && this.indexFileURL.exists();
 	}
 }

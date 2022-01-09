@@ -143,12 +143,12 @@ public class PolicyHandler implements SynchronousBundleListener {
 	}
 
 	public Class<?> doBuddyClassLoading(String name) {
-		if (startLoading(name) == false)
+		if (!startLoading(name))
 			return null;
 
 		Class<?> result = null;
 		Object[] policiesSnapshot = policies;
-		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
+		int policyCount = policiesSnapshot == null ? 0 : policiesSnapshot.length;
 		for (int i = 0; i < policyCount && result == null; i++) {
 			IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
 			if (policy != null)
@@ -159,12 +159,12 @@ public class PolicyHandler implements SynchronousBundleListener {
 	}
 
 	public URL doBuddyResourceLoading(String name) {
-		if (startLoading(name) == false)
+		if (!startLoading(name))
 			return null;
 
 		URL result = null;
 		Object[] policiesSnapshot = policies;
-		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
+		int policyCount = policiesSnapshot == null ? 0 : policiesSnapshot.length;
 		for (int i = 0; i < policyCount && result == null; i++) {
 			IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
 			if (policy != null)
@@ -175,12 +175,12 @@ public class PolicyHandler implements SynchronousBundleListener {
 	}
 
 	public Enumeration<URL> doBuddyResourcesLoading(String name) {
-		if (startLoading(name) == false)
+		if (!startLoading(name))
 			return null;
 
 		List<URL> results = null;
 		Object[] policiesSnapshot = policies;
-		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
+		int policyCount = policiesSnapshot == null ? 0 : policiesSnapshot.length;
 		for (int i = 0; i < policyCount; i++) {
 			IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
 			if (policy == null)

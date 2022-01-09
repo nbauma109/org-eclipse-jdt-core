@@ -154,7 +154,7 @@ public SuperTypeReferencePattern(
 	this(matchRule);
 
 	this.superQualification = this.isCaseSensitive ? superQualification : CharOperation.toLowerCase(superQualification);
-	this.superSimpleName = (this.isCaseSensitive || this.isCamelCase) ? superSimpleName : CharOperation.toLowerCase(superSimpleName);
+	this.superSimpleName = this.isCaseSensitive || this.isCamelCase ? superSimpleName : CharOperation.toLowerCase(superSimpleName);
 	this.mustResolve = superQualification != null;
 	this.superRefKind = superRefKind;
 }
@@ -193,7 +193,7 @@ public void decodeIndexKey(char[] key) {
 		this.enclosingTypeName = null;
 	} else {
 		slash = CharOperation.indexOf(SEPARATOR, key, start);
-		if (slash == (start+1) && key[start] == ZERO_CHAR) {
+		if (slash == start+1 && key[start] == ZERO_CHAR) {
 			this.enclosingTypeName = ONE_ZERO;
 		} else {
 			char[] names = CharOperation.subarray(key, start, slash);
@@ -214,7 +214,7 @@ public void decodeIndexKey(char[] key) {
 		this.pkgName = null;
 	} else {
 		slash = CharOperation.indexOf(SEPARATOR, key, start);
-		if (slash == (start+1) && key[start] == ZERO_CHAR) {
+		if (slash == start+1 && key[start] == ZERO_CHAR) {
 			this.pkgName = this.superQualification;
 		} else {
 			char[] names = CharOperation.subarray(key, start, slash);

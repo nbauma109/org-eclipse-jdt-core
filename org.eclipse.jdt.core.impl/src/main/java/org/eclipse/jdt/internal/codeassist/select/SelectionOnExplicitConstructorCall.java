@@ -69,10 +69,8 @@ public class SelectionOnExplicitConstructorCall extends ExplicitConstructorCall 
 
 		// tolerate some error cases
 		if (this.binding == null ||
-				!(this.binding.isValidBinding() ||
-					this.binding.problemId() == ProblemReasons.NotVisible))
+				!this.binding.isValidBinding() && this.binding.problemId() != ProblemReasons.NotVisible)
 			throw new SelectionNodeFound();
-		else
-			throw new SelectionNodeFound(this.binding);
+        throw new SelectionNodeFound(this.binding);
 	}
 }

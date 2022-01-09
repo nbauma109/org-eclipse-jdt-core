@@ -28,7 +28,6 @@ public class JavadocModuleReference extends Expression implements IJavadocTypeRe
 	public ModuleReference moduleReference;
 
 	public JavadocModuleReference(char[][] sources, long[] pos, int tagStart, int tagEnd) {
-		super();
 		this.moduleReference = new ModuleReference(sources, pos);
 		this.tagSourceStart = tagStart;
 		this.tagSourceEnd = tagEnd;
@@ -115,7 +114,7 @@ public class JavadocModuleReference extends Expression implements IJavadocTypeRe
 	@Override
 	public TypeBinding resolveType(ClassScope classScope) {
 		this.resolveModule(classScope);
-		assert(this.moduleReference.binding != null);
+		assert this.moduleReference.binding != null;
 		if (this.typeReference != null) {
 			return this.typeReference.resolveType(classScope, -1);
 		}

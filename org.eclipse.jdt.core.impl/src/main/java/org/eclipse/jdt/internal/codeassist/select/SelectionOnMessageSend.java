@@ -57,9 +57,9 @@ public class SelectionOnMessageSend extends MessageSend {
 				ReferenceBinding currentType = interfacesToVisit[i];
 				MethodBinding[] methods = currentType.getMethods(methodBinding.selector);
 				if(methods != null) {
-					for (int k = 0; k < methods.length; k++) {
-						if(methodBinding.areParametersEqual(methods[k]))
-							return methods[k];
+					for (MethodBinding method : methods) {
+						if(methodBinding.areParametersEqual(method))
+							return method;
 					}
 				}
 
@@ -103,18 +103,12 @@ public class SelectionOnMessageSend extends MessageSend {
 
 		// tolerate some error cases
 		if(this.binding == null ||
-					!(this.binding.isValidBinding() ||
-						this.binding.problemId() == ProblemReasons.NotVisible
-						|| this.binding.problemId() == ProblemReasons.InheritedNameHidesEnclosingName
-						|| this.binding.problemId() == ProblemReasons.NonStaticReferenceInConstructorInvocation
-						|| this.binding.problemId() == ProblemReasons.NonStaticReferenceInStaticContext)) {
+					!this.binding.isValidBinding() && this.binding.problemId() != ProblemReasons.NotVisible && this.binding.problemId() != ProblemReasons.InheritedNameHidesEnclosingName && this.binding.problemId() != ProblemReasons.NonStaticReferenceInConstructorInvocation && this.binding.problemId() != ProblemReasons.NonStaticReferenceInStaticContext) {
 			throw new SelectionNodeFound();
-		} else {
-			if(this.binding.isDefaultAbstract()) {
-				throw new SelectionNodeFound(findNonDefaultAbstractMethod(this.binding)); // 23594
-			} else {
-				throw new SelectionNodeFound(this.binding);
-			}
 		}
+        if(this.binding.isDefaultAbstract()) {
+        	throw new SelectionNodeFound(findNonDefaultAbstractMethod(this.binding)); // 23594
+        }
+        throw new SelectionNodeFound(this.binding);
 	}
 }

@@ -66,9 +66,7 @@ public class BucketTree {
 	public void accept(Bucket.Visitor visitor, IPath base, int depth) throws CoreException {
 		if (Path.ROOT.equals(base)) {
 			current.load(null, locationFor(Path.ROOT));
-			if (current.accept(visitor, base, DEPTH_ZERO) != Visitor.CONTINUE)
-				return;
-			if (depth == DEPTH_ZERO)
+			if (current.accept(visitor, base, DEPTH_ZERO) != Visitor.CONTINUE || depth == DEPTH_ZERO)
 				return;
 			boolean keepVisiting = true;
 			depth--;
@@ -110,11 +108,9 @@ public class BucketTree {
 		if (subDirs == null)
 			return true;
 		for (File subDir : subDirs) {
-			if (subDir.isDirectory()) {
-				if (!internalAccept(visitor, base, subDir, depthRequested, currentDepth + 1)) {
-					return false;
-				}
-			}
+			if (subDir.isDirectory() && !internalAccept(visitor, base, subDir, depthRequested, currentDepth + 1)) {
+            	return false;
+            }
 		}
 		return true;
 	}

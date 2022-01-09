@@ -24,7 +24,6 @@ public class JavadocImplicitTypeReference extends TypeReference {
 	public char[] token;
 
 	public JavadocImplicitTypeReference(char[] name, int pos) {
-		super();
 		this.token = name;
 		this.sourceStart = pos;
 		this.sourceEnd = pos;
@@ -49,8 +48,7 @@ public class JavadocImplicitTypeReference extends TypeReference {
 	@Override
 	public char[][] getTypeName() {
 		if (this.token != null) {
-			char[][] tokens = { this.token };
-			return tokens;
+			return new char[][] { this.token };
 		}
 		return null;
 	}
@@ -70,22 +68,21 @@ public class JavadocImplicitTypeReference extends TypeReference {
 		if (this.resolvedType != null) { // is a shared type reference which was already resolved
 			if (this.resolvedType.isValidBinding()) {
 				return this.resolvedType;
-			} else {
-				switch (this.resolvedType.problemId()) {
-					case ProblemReasons.NotFound :
-					case ProblemReasons.NotVisible :
-						TypeBinding type = this.resolvedType.closestMatch();
-						return type;
-					default :
-						return null;
-				}
 			}
+            switch (this.resolvedType.problemId()) {
+            	case ProblemReasons.NotFound :
+            	case ProblemReasons.NotVisible :
+            		return this.resolvedType.closestMatch();
+            	default :
+            		return null;
+            }
 		}
 		boolean hasError;
 		TypeBinding type = this.resolvedType = getTypeBinding(scope);
 		if (type == null) {
 			return null; // detected cycle while resolving hierarchy
-		} else if ((hasError = !type.isValidBinding())== true) {
+		}
+        if (hasError = !type.isValidBinding()) {
 			reportInvalidType(scope);
 			switch (type.problemId()) {
 				case ProblemReasons.NotFound :

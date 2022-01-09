@@ -146,9 +146,7 @@ private IType createTypeFromPath(String resourcePath, String simpleTypeName, cha
 	// Optimization: cache package fragment root handle and package handles
 	int rootPathLength = -1;
 	if (this.lastPkgFragmentRootPath == null
-		|| !(resourcePath.startsWith(this.lastPkgFragmentRootPath)
-			&& (rootPathLength = this.lastPkgFragmentRootPath.length()) > 0
-			&& resourcePath.charAt(rootPathLength) == '/')) {
+		|| !resourcePath.startsWith(this.lastPkgFragmentRootPath) || (rootPathLength = this.lastPkgFragmentRootPath.length()) <= 0 || resourcePath.charAt(rootPathLength) != '/') {
 		PackageFragmentRoot root = (PackageFragmentRoot) ((AbstractJavaSearchScope)this.scope).packageFragmentRoot(resourcePath, -1/*not a jar*/, null/*no jar path*/);
 		if (root == null) return null;
 		this.lastPkgFragmentRoot = root;
@@ -175,7 +173,7 @@ private IType createTypeFromPath(String resourcePath, String simpleTypeName, cha
 	if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(simpleName)) {
 		ICompilationUnit unit= pkgFragment.getCompilationUnit(simpleName);
 		int etnLength = enclosingTypeNames == null ? 0 : enclosingTypeNames.length;
-		IType type = (etnLength == 0) ? unit.getType(simpleTypeName) : unit.getType(new String(enclosingTypeNames[0]));
+		IType type = etnLength == 0 ? unit.getType(simpleTypeName) : unit.getType(new String(enclosingTypeNames[0]));
 		if (etnLength > 0) {
 			for (int i=1; i<etnLength; i++) {
 				type = type.getType(new String(enclosingTypeNames[i]));
@@ -183,7 +181,8 @@ private IType createTypeFromPath(String resourcePath, String simpleTypeName, cha
 			type = type.getType(simpleTypeName);
 		}
 		return type;
-	} else if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(simpleName)){
+	}
+    if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(simpleName)){
 		IOrdinaryClassFile classFile= pkgFragment.getOrdinaryClassFile(simpleName);
 		return classFile.getType();
 	}

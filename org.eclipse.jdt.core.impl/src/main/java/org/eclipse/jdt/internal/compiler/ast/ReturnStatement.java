@@ -75,15 +75,13 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	// lookup the label, this should answer the returnContext
 
-	if (this.expression instanceof FunctionalExpression) {
-		if (this.expression.resolvedType == null || !this.expression.resolvedType.isValidBinding()) {
-			/* Don't descend without proper target types. For lambda shape analysis, what is pertinent is value vs void return and the fact that
-			   this constitutes an abrupt exit. The former is already gathered, the latter is handled here.
-			*/
-			flowContext.recordAbruptExit();
-			return FlowInfo.DEAD_END;
-		}
-	}
+	if (this.expression instanceof FunctionalExpression && (this.expression.resolvedType == null || !this.expression.resolvedType.isValidBinding())) {
+    	/* Don't descend without proper target types. For lambda shape analysis, what is pertinent is value vs void return and the fact that
+    	   this constitutes an abrupt exit. The former is already gathered, the latter is handled here.
+    	*/
+    	flowContext.recordAbruptExit();
+    	return FlowInfo.DEAD_END;
+    }
 
 	MethodScope methodScope = currentScope.methodScope();
 	if (this.expression != null) {
@@ -118,7 +116,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				this.subroutines = new SubRoutineStatement[5];
 			}
 			if (subCount == this.subroutines.length) {
-				System.arraycopy(this.subroutines, 0, (this.subroutines = new SubRoutineStatement[subCount*2]), 0, subCount); // grow
+				System.arraycopy(this.subroutines, 0, this.subroutines = new SubRoutineStatement[subCount*2], 0, subCount); // grow
 			}
 			this.subroutines[subCount++] = sub;
 			if (sub.isSubRoutineEscaping()) {
@@ -126,11 +124,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				this.bits |= ASTNode.IsAnySubRoutineEscaping;
 				break;
 			}
-			if (sub instanceof TryStatement) {
-				if (((TryStatement) sub).resources.length > 0) {
-					noAutoCloseables = false;
-				}
-			}
+			if (sub instanceof TryStatement && ((TryStatement) sub).resources.length > 0) {
+            	noAutoCloseables = false;
+            }
 		}
 		traversedContext.recordReturnFrom(flowInfo.unconditionalInits());
 
@@ -157,8 +153,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	} while ((traversedContext = traversedContext.getLocalParent()) != null);
 
 	// resize subroutines
-	if ((this.subroutines != null) && (subCount != this.subroutines.length)) {
-		System.arraycopy(this.subroutines, 0, (this.subroutines = new SubRoutineStatement[subCount]), 0, subCount);
+	if (this.subroutines != null && subCount != this.subroutines.length) {
+		System.arraycopy(this.subroutines, 0, this.subroutines = new SubRoutineStatement[subCount], 0, subCount);
 	}
 
 	// secret local variable for return value (note that this can only occur in a real method)
@@ -168,11 +164,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		}
 	} else {
 		this.saveValueVariable = null;
-		if (((this.bits & ASTNode.IsSynchronized) == 0) && this.expression != null && TypeBinding.equalsEquals(this.expression.resolvedType, TypeBinding.BOOLEAN)) {
-			if (noAutoCloseables) { // can't abruptly return in the presence of autocloseables. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=367566
-				this.expression.bits |= ASTNode.IsReturnedValue;
-			}
-		}
+		if ((this.bits & ASTNode.IsSynchronized) == 0 && this.expression != null && TypeBinding.equalsEquals(this.expression.resolvedType, TypeBinding.BOOLEAN) && noAutoCloseables) { // can't abruptly return in the presence of autocloseables. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=367566
+        	this.expression.bits |= ASTNode.IsReturnedValue;
+        }
 	}
 	currentScope.checkUnclosedCloseables(flowInfo, flowContext, this, currentScope);
 	// inside conditional structure respect that a finally-block may conditionally be entered directly from here
@@ -271,7 +265,7 @@ private boolean needValueStore() {
 public boolean needValue() {
 	return this.saveValueVariable != null
 					|| (this.bits & ASTNode.IsSynchronized) != 0
-					|| ((this.bits & ASTNode.IsAnySubRoutineEscaping) == 0);
+					|| (this.bits & ASTNode.IsAnySubRoutineEscaping) == 0;
 }
 
 public void prepareSaveValueLocation(TryStatement targetTryStatement){
@@ -293,10 +287,10 @@ public void resolve(BlockScope scope) {
 	LambdaExpression lambda = methodScope.referenceContext instanceof LambdaExpression ? (LambdaExpression) methodScope.referenceContext : null;
 	TypeBinding methodType =
 		lambda != null ? lambda.expectedResultType() :
-		(methodScope.referenceContext instanceof AbstractMethodDeclaration)
-			? ((methodBinding = ((AbstractMethodDeclaration) methodScope.referenceContext).binding) == null
+		methodScope.referenceContext instanceof AbstractMethodDeclaration
+			? (methodBinding = ((AbstractMethodDeclaration) methodScope.referenceContext).binding) == null
 				? null
-				: methodBinding.returnType)
+				: methodBinding.returnType
 			: TypeBinding.VOID;
 	TypeBinding expressionType;
 
@@ -346,11 +340,9 @@ public void resolve(BlockScope scope) {
 	if (methodType == null)
 		return;
 
-	if (methodType.isProperType(true) && lambda != null) {
-		// ensure that type conversions don't leak a preliminary local type:
-		if (lambda.updateLocalTypes())
-			methodType = lambda.expectedResultType();
-	}
+	// ensure that type conversions don't leak a preliminary local type:
+    if (methodType.isProperType(true) && lambda != null && lambda.updateLocalTypes())
+    	methodType = lambda.expectedResultType();
 	if (TypeBinding.notEquals(methodType, expressionType)) // must call before computeConversion() and typeMismatchError()
 		scope.compilationUnitScope().recordTypeConversion(methodType, expressionType);
 	if (this.expression.isConstantValueOfTypeAssignableToType(expressionType, methodType)
@@ -363,14 +355,13 @@ public void resolve(BlockScope scope) {
 		if (this.expression instanceof CastExpression) {
 			if ((this.expression.bits & (ASTNode.UnnecessaryCast|ASTNode.DisableUnnecessaryCastCheck)) == 0) {
 				CastExpression.checkNeedForAssignedCast(scope, methodType, (CastExpression) this.expression);
-			} else if (lambda != null && lambda.argumentsTypeElided() && (this.expression.bits & ASTNode.UnnecessaryCast) != 0) {
-				if (TypeBinding.equalsEquals(((CastExpression)this.expression).expression.resolvedType, methodType)) {
-					scope.problemReporter().unnecessaryCast((CastExpression)this.expression);
-				}
-			}
+			} else if (lambda != null && lambda.argumentsTypeElided() && (this.expression.bits & ASTNode.UnnecessaryCast) != 0 && TypeBinding.equalsEquals(((CastExpression)this.expression).expression.resolvedType, methodType)) {
+            	scope.problemReporter().unnecessaryCast((CastExpression)this.expression);
+            }
 		}
 		return;
-	} else if (isBoxingCompatible(expressionType, methodType, this.expression, scope)) {
+	}
+    if (isBoxingCompatible(expressionType, methodType, this.expression, scope)) {
 		this.expression.computeConversion(scope, methodType, expressionType);
 		if (this.expression instanceof CastExpression
 				&& (this.expression.bits & (ASTNode.UnnecessaryCast|ASTNode.DisableUnnecessaryCastCheck)) == 0) {
@@ -385,10 +376,8 @@ public void resolve(BlockScope scope) {
 
 @Override
 public void traverse(ASTVisitor visitor, BlockScope scope) {
-	if (visitor.visit(this, scope)) {
-		if (this.expression != null)
-			this.expression.traverse(visitor, scope);
-	}
+	if (visitor.visit(this, scope) && this.expression != null)
+    	this.expression.traverse(visitor, scope);
 	visitor.endVisit(this, scope);
 }
 }

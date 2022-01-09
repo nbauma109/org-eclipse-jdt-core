@@ -50,8 +50,7 @@ public class ListRewriteEvent extends RewriteEvent {
 	public ListRewriteEvent(RewriteEvent[] children) {
 		this.listEntries= new ArrayList(children.length * 2);
 		this.originalNodes= new ArrayList(children.length * 2);
-		for (int i= 0; i < children.length; i++) {
-			RewriteEvent curr= children[i];
+		for (RewriteEvent curr : children) {
 			this.listEntries.add(curr);
 			if (curr.getOriginalValue() != null) {
 				this.originalNodes.add(curr.getOriginalValue());
@@ -76,8 +75,8 @@ public class ListRewriteEvent extends RewriteEvent {
 	@Override
 	public int getChangeKind() {
 		if (this.listEntries != null) {
-			for (int i= 0; i < this.listEntries.size(); i++) {
-				RewriteEvent curr= (RewriteEvent) this.listEntries.get(i);
+			for (Object element : this.listEntries) {
+				RewriteEvent curr= (RewriteEvent) element;
 				if (curr.getChangeKind() != UNCHANGED) {
 					return CHILDREN_CHANGED;
 				}
@@ -106,8 +105,8 @@ public class ListRewriteEvent extends RewriteEvent {
 	public Object getNewValue() {
 		List entries= getEntries();
 		ArrayList res= new ArrayList(entries.size());
-		for (int i= 0; i < entries.size(); i++) {
-			RewriteEvent curr= (RewriteEvent) entries.get(i);
+		for (Object entry : entries) {
+			RewriteEvent curr= (RewriteEvent) entry;
 			Object newVal= curr.getNewValue();
 			if (newVal != null) {
 				res.add(newVal);
@@ -157,10 +156,7 @@ public class ListRewriteEvent extends RewriteEvent {
 		List entries= getEntries();
 		for (int i= entries.size() - 1; i >= 0; i--) {
 			RewriteEvent curr= (RewriteEvent) entries.get(i);
-			if (((kind & OLD) != 0) && (curr.getOriginalValue() == node)) {
-				return i;
-			}
-			if (((kind & NEW) != 0) && (curr.getNewValue() == node)) {
+			if ((kind & OLD) != 0 && curr.getOriginalValue() == node || (kind & NEW) != 0 && curr.getNewValue() == node) {
 				return i;
 			}
 		}

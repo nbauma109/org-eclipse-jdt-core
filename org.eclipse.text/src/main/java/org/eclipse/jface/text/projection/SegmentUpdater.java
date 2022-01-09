@@ -57,7 +57,7 @@ class SegmentUpdater extends DefaultPositionUpdater {
 
 			fOffset= event.getOffset();
 			fLength= event.getLength();
-			fReplaceLength= (event.getText() == null ? 0 : event.getText().length());
+			fReplaceLength= event.getText() == null ? 0 : event.getText().length();
 			fDocument= event.getDocument();
 
 			for (int i= 0; i < category.length; i++) {
@@ -108,18 +108,15 @@ class SegmentUpdater extends DefaultPositionUpdater {
 
 			if (fLength <= 0) {
 
-				if (myStart < (yoursStart + (segment.isMarkedForShift ? 0 : 1)))
+				if (myStart < yoursStart + (segment.isMarkedForShift ? 0 : 1))
 					fPosition.length += fReplaceLength;
 				else
 					fPosition.offset += fReplaceLength;
 
-			} else {
-
-				if (myStart <= yoursStart && fOriginalPosition.offset <= yoursStart)
-					fPosition.length += fReplaceLength;
-				else
-					fPosition.offset += fReplaceLength;
-			}
+			} else if (myStart <= yoursStart && fOriginalPosition.offset <= yoursStart)
+            	fPosition.length += fReplaceLength;
+            else
+            	fPosition.offset += fReplaceLength;
 
 		} finally {
 			segment.clearMark();

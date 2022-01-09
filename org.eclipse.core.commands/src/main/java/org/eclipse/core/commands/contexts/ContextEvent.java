@@ -74,7 +74,7 @@ public final class ContextEvent extends AbstractNamedHandleEvent {
 	 * @return the instance of the interface that changed. Guaranteed not to be
 	 *         <code>null</code>.
 	 */
-	public final Context getContext() {
+	public Context getContext() {
 		return context;
 	}
 
@@ -83,7 +83,7 @@ public final class ContextEvent extends AbstractNamedHandleEvent {
 	 *
 	 * @return <code>true</code>, iff the parentId property changed.
 	 */
-	public final boolean isParentIdChanged() {
-		return ((changedValues & CHANGED_PARENT_ID) != 0);
+	public boolean isParentIdChanged() {
+		return (changedValues & CHANGED_PARENT_ID) != 0;
 	}
 }

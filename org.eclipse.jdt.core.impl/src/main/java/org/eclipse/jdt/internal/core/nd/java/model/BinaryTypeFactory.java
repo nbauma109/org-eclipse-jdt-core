@@ -138,32 +138,7 @@ public class BinaryTypeFactory {
 		if (descriptor == null) {
 			return null;
 		}
-		if (descriptor.isInJarFile()) {
-			if (CharOperation.indexOf("jrt-fs.jar".toCharArray(), descriptor.location, false) == -1) { //$NON-NLS-1$
-				ZipFile zip = null;
-				try {
-					zip = JavaModelManager.getJavaModelManager().getZipFile(new Path(new String(descriptor.workspacePath)),
-							useInvalidArchiveCache);
-					char[] entryNameCharArray = CharArrayUtils.concat(
-							fieldDescriptorToBinaryName(descriptor.fieldDescriptor), SuffixConstants.SUFFIX_class);
-					String entryName = new String(entryNameCharArray);
-					ZipEntry ze = zip.getEntry(entryName);
-					if (ze != null) {
-						byte[] contents;
-						try {
-							contents = org.eclipse.jdt.internal.compiler.util.Util.getZipEntryByteContent(ze, zip);
-						} catch (IOException ioe) {
-							throw new JavaModelException(ioe, IJavaModelStatusConstants.IO_EXCEPTION);
-						}
-						return new ClassFileReader(contents, descriptor.indexPath, fullyInitialize);
-					}
-				} catch (CoreException e) {
-					throw new JavaModelException(e);
-				} finally {
-					JavaModelManager.getJavaModelManager().closeZipFile(zip);
-				}
-			}
-		} else {
+		if (!descriptor.isInJarFile()) {
 			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(new String(descriptor.workspacePath)));
 			byte[] contents;
 			try (InputStream stream = file.getContents(true)) {
@@ -179,6 +154,30 @@ public class BinaryTypeFactory {
 			}
 			return new ClassFileReader(contents, file.getFullPath().toString().toCharArray(), fullyInitialize);
 		}
+        if (CharOperation.indexOf("jrt-fs.jar".toCharArray(), descriptor.location, false) == -1) { //$NON-NLS-1$
+        	ZipFile zip = null;
+        	try {
+        		zip = JavaModelManager.getJavaModelManager().getZipFile(new Path(new String(descriptor.workspacePath)),
+        				useInvalidArchiveCache);
+        		char[] entryNameCharArray = CharArrayUtils.concat(
+        				fieldDescriptorToBinaryName(descriptor.fieldDescriptor), SuffixConstants.SUFFIX_class);
+        		String entryName = new String(entryNameCharArray);
+        		ZipEntry ze = zip.getEntry(entryName);
+        		if (ze != null) {
+        			byte[] contents;
+        			try {
+        				contents = org.eclipse.jdt.internal.compiler.util.Util.getZipEntryByteContent(ze, zip);
+        			} catch (IOException ioe) {
+        				throw new JavaModelException(ioe, IJavaModelStatusConstants.IO_EXCEPTION);
+        			}
+        			return new ClassFileReader(contents, descriptor.indexPath, fullyInitialize);
+        		}
+        	} catch (CoreException e) {
+        		throw new JavaModelException(e);
+        	} finally {
+        		JavaModelManager.getJavaModelManager().closeZipFile(zip);
+        	}
+        }
 		return null;
 	}
 

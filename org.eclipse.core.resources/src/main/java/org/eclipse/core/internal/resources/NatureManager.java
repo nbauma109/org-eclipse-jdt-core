@@ -43,7 +43,6 @@ public class NatureManager implements ILifecycleListener, IManager {
 	private static final byte BLACK = 2;
 
 	protected NatureManager() {
-		super();
 	}
 
 	/**
@@ -540,7 +539,7 @@ public class NatureManager implements ILifecycleListener, IManager {
 				if (hasLinks == null) {
 					hasLinks = hasLinks(project) ? Boolean.TRUE : Boolean.FALSE;
 				}
-				if (hasLinks.booleanValue())
+				if (hasLinks)
 					return failure(NLS.bind(Messages.links_vetoNature, project.getName(), id));
 			}
 		}

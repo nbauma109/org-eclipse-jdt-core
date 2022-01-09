@@ -49,7 +49,6 @@ class ResourceTree implements IResourceTree {
 	 * Constructor for this class.
 	 */
 	public ResourceTree(FileSystemResourceManager localManager, ILock lock, MultiStatus status, int updateFlags) {
-		super();
 		this.localManager = localManager;
 		this.lock = lock;
 		this.multistatus = status;
@@ -844,7 +843,7 @@ class ResourceTree implements IResourceTree {
 			// Delete project content.  Don't do anything if the user specified explicitly asked
 			// not to delete the project content or if the project is closed and
 			// ALWAYS_DELETE_PROJECT_CONTENT was not specified.
-			if (alwaysDeleteContent || (project.isOpen() && !neverDeleteContent)) {
+			if (alwaysDeleteContent || project.isOpen() && !neverDeleteContent) {
 				// Force is implied if alwaysDeleteContent is true or if the project is in sync
 				// with the local file system.
 				if (alwaysDeleteContent || isSynchronized(project, IResource.DEPTH_INFINITE)) {
@@ -967,7 +966,6 @@ class ResourceTree implements IResourceTree {
 				}
 			}
 			monitor.worked(Policy.totalWork / 4);
-			return;
 		} finally {
 			lock.release();
 			monitor.done();
@@ -1145,14 +1143,11 @@ class ResourceTree implements IResourceTree {
 	 */
 	private void updateTimestamps(IResource root, final boolean isDeep) {
 		IResourceVisitor visitor = resource -> {
-			if (resource.isLinked()) {
-				if (isDeep && !((Resource) resource).isUnderVirtual()) {
-					//clear the linked resource bit, if any
-					ResourceInfo info = ((Resource) resource).getResourceInfo(false, true);
-					info.clear(ICoreConstants.M_LINK);
-				}
-				return true;
-			}
+			if (resource.isLinked() && isDeep && !((Resource) resource).isUnderVirtual()) {
+            	//clear the linked resource bit, if any
+            	ResourceInfo info = ((Resource) resource).getResourceInfo(false, true);
+            	info.clear(ICoreConstants.M_LINK);
+            }
 			//only needed if underlying file system does not preserve timestamps
 			//				if (resource.getType() == IResource.FILE) {
 			//					IFile file = (IFile) resource;

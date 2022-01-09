@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.FakedTrackingVariable;
-import org.eclipse.jdt.internal.compiler.ast.LabeledStatement;
 import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
 import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
@@ -252,7 +251,7 @@ public void checkExceptionHandlers(TypeBinding raisedException, ASTNode location
 	}
 	while (traversedContext != null) {
 		SubRoutineStatement sub;
-		if (((sub = traversedContext.subroutine()) != null) && sub.isSubRoutineEscaping()) {
+		if ((sub = traversedContext.subroutine()) != null && sub.isSubRoutineEscaping()) {
 			// traversing a non-returning subroutine means that all unhandled
 			// exceptions will actually never get sent...
 			return;
@@ -266,44 +265,41 @@ public void checkExceptionHandlers(TypeBinding raisedException, ASTNode location
 			ReferenceBinding[] caughtExceptions;
 			if ((caughtExceptions = exceptionContext.handledExceptions) != Binding.NO_EXCEPTIONS) {
 				boolean definitelyCaught = false;
-				for (int caughtIndex = 0, caughtCount = caughtExceptions.length;
-					caughtIndex < caughtCount;
-					caughtIndex++) {
-					ReferenceBinding caughtException = caughtExceptions[caughtIndex];
-					FlowInfo exceptionFlow = flowInfo;
-				    int state = caughtException == null
-				    	? Scope.EQUAL_OR_MORE_SPECIFIC /* any exception */
-				        : Scope.compareTypes(raisedException, caughtException);
-				    if (abruptlyExitedLoops != null && caughtException != null && state != Scope.NOT_RELATED) {
-				    	for (int i = 0, abruptlyExitedLoopsCount = abruptlyExitedLoops.size(); i < abruptlyExitedLoopsCount; i++) {
-							LoopingFlowContext loop = (LoopingFlowContext) abruptlyExitedLoops.get(i);
-							loop.recordCatchContextOfEscapingException(exceptionContext, caughtException, flowInfo);
-						}
-				    	exceptionFlow = FlowInfo.DEAD_END; // don't use flow info on first round, flow info will be evaluated during loopback simulation
-					}
-					switch (state) {
-						case Scope.EQUAL_OR_MORE_SPECIFIC :
-							exceptionContext.recordHandlingException(
-								caughtException,
-								exceptionFlow.unconditionalInits(),
-								raisedException,
-								raisedException, // precise exception that will be caught
-								location,
-								definitelyCaught);
-							// was it already definitely caught ?
-							definitelyCaught = true;
-							break;
-						case Scope.MORE_GENERIC :
-							exceptionContext.recordHandlingException(
-								caughtException,
-								exceptionFlow.unconditionalInits(),
-								raisedException,
-								caughtException,
-								location,
-								false);
-							// was not caught already per construction
-					}
-				}
+				for (ReferenceBinding caughtException : caughtExceptions) {
+                FlowInfo exceptionFlow = flowInfo;
+                int state = caughtException == null
+                	? Scope.EQUAL_OR_MORE_SPECIFIC /* any exception */
+                    : Scope.compareTypes(raisedException, caughtException);
+                if (abruptlyExitedLoops != null && caughtException != null && state != Scope.NOT_RELATED) {
+                	for (Object abruptlyExitedLoop : abruptlyExitedLoops) {
+                		LoopingFlowContext loop = (LoopingFlowContext) abruptlyExitedLoop;
+                		loop.recordCatchContextOfEscapingException(exceptionContext, caughtException, flowInfo);
+                	}
+                	exceptionFlow = FlowInfo.DEAD_END; // don't use flow info on first round, flow info will be evaluated during loopback simulation
+                }
+                switch (state) {
+                	case Scope.EQUAL_OR_MORE_SPECIFIC :
+                		exceptionContext.recordHandlingException(
+                			caughtException,
+                			exceptionFlow.unconditionalInits(),
+                			raisedException,
+                			raisedException, // precise exception that will be caught
+                			location,
+                			definitelyCaught);
+                		// was it already definitely caught ?
+                		definitelyCaught = true;
+                		break;
+                	case Scope.MORE_GENERIC :
+                		exceptionContext.recordHandlingException(
+                			caughtException,
+                			exceptionFlow.unconditionalInits(),
+                			raisedException,
+                			caughtException,
+                			location,
+                			false);
+                		// was not caught already per construction
+                }
+}
 				if (definitelyCaught)
 					return;
 			}
@@ -335,15 +331,13 @@ public void checkExceptionHandlers(TypeBinding raisedException, ASTNode location
 
 		traversedContext.recordReturnFrom(flowInfo.unconditionalInits());
 
-		if (!isExceptionOnAutoClose) {
-			if (traversedContext instanceof InsideSubRoutineFlowContext) {
-				ASTNode node = traversedContext.associatedNode;
-				if (node instanceof TryStatement) {
-					TryStatement tryStatement = (TryStatement) node;
-					flowInfo.addInitializationsFrom(tryStatement.subRoutineInits); // collect inits
-				}
-			}
-		}
+		if (!isExceptionOnAutoClose && traversedContext instanceof InsideSubRoutineFlowContext) {
+        	ASTNode node = traversedContext.associatedNode;
+        	if (node instanceof TryStatement) {
+        		TryStatement tryStatement = (TryStatement) node;
+        		flowInfo.addInitializationsFrom(tryStatement.subRoutineInits); // collect inits
+        	}
+        }
 		traversedContext = traversedContext.getLocalParent();
 	}
 	// if reaches this point, then there are some remaining unhandled exception types.
@@ -361,8 +355,8 @@ public void checkExceptionHandlers(TypeBinding[] raisedExceptions, ASTNode locat
 	// until the point where it is safely handled (Smarter - see comment at the end)
 	int remainingCount; // counting the number of remaining unhandled exceptions
 	int raisedCount; // total number of exceptions raised
-	if ((raisedExceptions == null)
-		|| ((raisedCount = raisedExceptions.length) == 0))
+	if (raisedExceptions == null
+		|| (raisedCount = raisedExceptions.length) == 0)
 		return;
 	remainingCount = raisedCount;
 
@@ -371,7 +365,7 @@ public void checkExceptionHandlers(TypeBinding[] raisedExceptions, ASTNode locat
 	System.arraycopy(
 		raisedExceptions,
 		0,
-		(raisedExceptions = new TypeBinding[raisedCount]),
+		raisedExceptions = new TypeBinding[raisedCount],
 		0,
 		raisedCount);
 	FlowContext traversedContext = this;
@@ -379,7 +373,7 @@ public void checkExceptionHandlers(TypeBinding[] raisedExceptions, ASTNode locat
 	ArrayList abruptlyExitedLoops = null;
 	while (traversedContext != null) {
 		SubRoutineStatement sub;
-		if (((sub = traversedContext.subroutine()) != null) && sub.isSubRoutineEscaping()) {
+		if ((sub = traversedContext.subroutine()) != null && sub.isSubRoutineEscaping()) {
 			// traversing a non-returning subroutine means that all unhandled
 			// exceptions will actually never get sent...
 			return;
@@ -404,8 +398,8 @@ public void checkExceptionHandlers(TypeBinding[] raisedExceptions, ASTNode locat
 						    	? Scope.EQUAL_OR_MORE_SPECIFIC /* any exception */
 						        : Scope.compareTypes(raisedException, caughtException);
 						    if (abruptlyExitedLoops != null && caughtException != null && state != Scope.NOT_RELATED) {
-						    	for (int i = 0, abruptlyExitedLoopsCount = abruptlyExitedLoops.size(); i < abruptlyExitedLoopsCount; i++) {
-									LoopingFlowContext loop = (LoopingFlowContext) abruptlyExitedLoops.get(i);
+						    	for (Object abruptlyExitedLoop : abruptlyExitedLoops) {
+									LoopingFlowContext loop = (LoopingFlowContext) abruptlyExitedLoop;
 									loop.recordCatchContextOfEscapingException(exceptionContext, caughtException, flowInfo);
 								}
 						    	exceptionFlow = FlowInfo.DEAD_END; // don't use flow info on first round, flow info will be evaluated during loopback simulation
@@ -450,12 +444,10 @@ public void checkExceptionHandlers(TypeBinding[] raisedExceptions, ASTNode locat
 			if (exceptionContext.isMethodContext) {
 				for (int i = 0; i < raisedCount; i++) {
 					TypeBinding raisedException;
-					if ((raisedException = raisedExceptions[i]) != null) {
-						if (raisedException.isUncheckedException(false)) {
-							remainingCount--;
-							raisedExceptions[i] = null;
-						}
-					}
+					if ((raisedException = raisedExceptions[i]) != null && raisedException.isUncheckedException(false)) {
+                    	remainingCount--;
+                    	raisedExceptions[i] = null;
+                    }
 				}
 				boolean shouldMergeUnhandledException = exceptionContext instanceof ExceptionInferenceFlowContext;
 				// anonymous constructors are allowed to throw any exceptions (their thrown exceptions
@@ -548,7 +540,7 @@ public FlowContext getTargetContextForBreakLabel(char[] labelName) {
 			lastNonReturningSubRoutine = current;
 		}
 		char[] currentLabelName;
-		if (((currentLabelName = current.labelName()) != null)
+		if ((currentLabelName = current.labelName()) != null
 			&& CharOperation.equals(currentLabelName, labelName)) {
 			current.associatedNode.bits |= ASTNode.LabelUsed;
 			if (lastNonReturningSubRoutine == null)
@@ -572,19 +564,17 @@ public FlowContext getTargetContextForContinueLabel(char[] labelName) {
 	while (current != null) {
 		if (current.isNonReturningContext()) {
 			lastNonReturningSubRoutine = current;
-		} else {
-			if (current.isContinuable()) {
-				lastContinuable = current;
-			}
-		}
+		} else if (current.isContinuable()) {
+        	lastContinuable = current;
+        }
 
 		char[] currentLabelName;
 		if ((currentLabelName = current.labelName()) != null && CharOperation.equals(currentLabelName, labelName)) {
 			current.associatedNode.bits |= ASTNode.LabelUsed;
 
 			// matching label found
-			if ((lastContinuable != null)
-					&& (current.associatedNode.concreteStatement()	== lastContinuable.associatedNode)) {
+			if (lastContinuable != null
+					&& current.associatedNode.concreteStatement()	== lastContinuable.associatedNode) {
 
 				if (lastNonReturningSubRoutine == null) return lastContinuable;
 				return lastNonReturningSubRoutine;
@@ -710,8 +700,7 @@ public char[] labelName() {
  * @param nullStatus the null status of local at the current point in the flow
  */
 public void markFinallyNullStatus(LocalVariableBinding local, int nullStatus) {
-	if (this.initsOnFinally == null) return;
-	if (this.conditionalLevel == -1) return;
+	if (this.initsOnFinally == null || this.conditionalLevel == -1) return;
 	if (this.conditionalLevel == 0) {
 		// node is unconditionally reached, take nullStatus as is:
 		this.initsOnFinally.markNullStatus(local, nullStatus);
@@ -730,8 +719,7 @@ public void markFinallyNullStatus(LocalVariableBinding local, int nullStatus) {
  * @param flowInfo info after executing a statement of the try-block.
  */
 public void mergeFinallyNullInfo(FlowInfo flowInfo) {
-	if (this.initsOnFinally == null) return;
-	if (this.conditionalLevel == -1) return;
+	if (this.initsOnFinally == null || this.conditionalLevel == -1) return;
 	if (this.conditionalLevel == 0) {
 		// node is unconditionally reached, take null info as is:
 		this.initsOnFinally.addNullInfoFrom(flowInfo);
@@ -865,10 +853,12 @@ protected void checkUnboxing(Scope scope, Expression expression, FlowInfo flowIn
 	if ((status & FlowInfo.NULL) != 0) {
 		scope.problemReporter().nullUnboxing(expression, expression.resolvedType);
 		return;
-	} else if ((status & FlowInfo.POTENTIALLY_NULL) != 0) {
+	}
+    if ((status & FlowInfo.POTENTIALLY_NULL) != 0) {
 		scope.problemReporter().potentialNullUnboxing(expression, expression.resolvedType);
 		return;
-	} else if ((status & FlowInfo.NON_NULL) != 0) {
+	}
+    if ((status & FlowInfo.NON_NULL) != 0) {
 		return;
 	}
 	// not handled, perhaps our parent will eventually have something to say?
@@ -926,7 +916,7 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 		return;
 	}
 	// if reference is being recorded inside an assert, we will not raise redundant null check warnings
-	checkType |= (this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING);
+	checkType |= this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING;
 	int checkTypeWithoutHideNullWarning = checkType & ~FlowContext.HIDE_NULL_COMPARISON_WARNING_MASK;
 	switch (checkTypeWithoutHideNullWarning) {
 		case CAN_ONLY_NULL_NON_NULL | IN_COMPARISON_NULL:
@@ -943,7 +933,7 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 				}
 				return;
 			}
-			else if (flowInfo.cannotBeDefinitelyNullOrNonNull(local)) {
+            if (flowInfo.cannotBeDefinitelyNullOrNonNull(local)) {
 				return;
 			}
 			//$FALL-THROUGH$
@@ -955,7 +945,7 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 			if (flowInfo.isDefinitelyNull(local)) {
 				switch(checkTypeWithoutHideNullWarning & CONTEXT_MASK) {
 					case FlowContext.IN_COMPARISON_NULL:
-						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if ((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariableNullReference(local, reference);
 							return;
 						}
@@ -965,7 +955,7 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 						flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 						return;
 					case FlowContext.IN_COMPARISON_NON_NULL:
-						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if ((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariableNullReference(local, reference);
 							return;
 						}
@@ -982,13 +972,13 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 			} else if (flowInfo.isPotentiallyNull(local)) {
 				switch(checkTypeWithoutHideNullWarning & CONTEXT_MASK) {
 					case FlowContext.IN_COMPARISON_NULL:
-						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if ((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariablePotentialNullReference(local, reference);
 							return;
 						}
 						break;
 					case FlowContext.IN_COMPARISON_NON_NULL:
-						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if ((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariablePotentialNullReference(local, reference);
 							return;
 						}

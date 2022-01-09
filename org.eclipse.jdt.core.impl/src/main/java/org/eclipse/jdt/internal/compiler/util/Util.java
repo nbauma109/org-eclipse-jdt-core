@@ -236,14 +236,14 @@ public class Util implements SuffixConstants {
 
 	private static final int DEFAULT_WRITING_SIZE = 1024;
 	public final static String UTF_8 = "UTF-8";	//$NON-NLS-1$
-	public static final String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
+	public static final String LINE_SEPARATOR = System.lineSeparator();
 
 	public static final String EMPTY_STRING = new String(CharOperation.NO_CHAR);
 	/**
 	 * @since 3.14
 	 */
 	public static final String COMMA_SEPARATOR = new String(CharOperation.COMMA_SEPARATOR);
-	public static final int[] EMPTY_INT_ARRAY= new int[0];
+	public static final int[] EMPTY_INT_ARRAY= {};
 
 	/**
 	 * Build all the directories and subdirectories corresponding to the packages names
@@ -276,88 +276,75 @@ public class Util implements SuffixConstants {
 				outputDirPath = outputPath;
 				fileName = outputPath + fileSeparator + relativeFileName;
 			}
-		} else {
-			if (outputPath.endsWith(fileSeparator)) {
-				outputDirPath = outputPath +
-					relativeFileName.substring(0, separatorIndex);
-				fileName = outputPath + relativeFileName;
-			} else {
-				outputDirPath = outputPath + fileSeparator +
-					relativeFileName.substring(0, separatorIndex);
-				fileName = outputPath + fileSeparator + relativeFileName;
-			}
-		}
+		} else if (outputPath.endsWith(fileSeparator)) {
+        	outputDirPath = outputPath +
+        		relativeFileName.substring(0, separatorIndex);
+        	fileName = outputPath + relativeFileName;
+        } else {
+        	outputDirPath = outputPath + fileSeparator +
+        		relativeFileName.substring(0, separatorIndex);
+        	fileName = outputPath + fileSeparator + relativeFileName;
+        }
 		f = new File(outputDirPath);
 		f.mkdirs();
 		if (f.isDirectory()) {
 			return fileName;
-		} else {
-			// the directory creation failed for some reason - retry using
-			// a slower algorithm so as to refine the diagnostic
-			if (outputPath.endsWith(fileSeparator)) {
-				outputPath = outputPath.substring(0, outputPath.length() - 1);
-			}
-			f = new File(outputPath);
-			boolean checkFileType = false;
-			if (f.exists()) {
-				  checkFileType = true; // pre-existed
-			} else {
-				// we have to create that directory
-				if (!f.mkdirs()) {
-					  if (f.exists()) {
-							// someone else created f -- need to check its type
-							checkFileType = true;
-					  } else {
-							// no one could create f -- complain
-						throw new IOException(Messages.bind(
-							Messages.output_notValidAll, f.getAbsolutePath()));
-					  }
-				}
-			}
-			if (checkFileType) {
-				  if (!f.isDirectory()) {
-					throw new IOException(Messages.bind(
-						Messages.output_isFile, f.getAbsolutePath()));
-				  }
-			}
-			StringBuilder outDir = new StringBuilder(outputPath);
-			outDir.append(fileSeparator);
-			StringTokenizer tokenizer =
-				new StringTokenizer(relativeFileName, fileSeparator);
-			String token = tokenizer.nextToken();
-			while (tokenizer.hasMoreTokens()) {
-				f = new File(outDir.append(token).append(fileSeparator).toString());
-				  checkFileType = false; // reset
-				if (f.exists()) {
-					  checkFileType = true; // this is suboptimal, but it catches corner cases
-											// in which a regular file pre-exists
-				} else {
-				// we have to create that directory
-					if (!f.mkdir()) {
-						  if (f.exists()) {
-								// someone else created f -- need to check its type
-								checkFileType = true;
-						  } else {
-								// no one could create f -- complain
-							throw new IOException(Messages.bind(
-								Messages.output_notValid,
-									outDir.substring(outputPath.length() + 1,
-										outDir.length() - 1),
-									outputPath));
-						  }
-					}
-				}
-				if (checkFileType) {
-					  if (!f.isDirectory()) {
-						throw new IOException(Messages.bind(
-							Messages.output_isFile, f.getAbsolutePath()));
-					  }
-				}
-				token = tokenizer.nextToken();
-			}
-			// token contains the last one
-			return outDir.append(token).toString();
 		}
+        // the directory creation failed for some reason - retry using
+        // a slower algorithm so as to refine the diagnostic
+        if (outputPath.endsWith(fileSeparator)) {
+        	outputPath = outputPath.substring(0, outputPath.length() - 1);
+        }
+        f = new File(outputPath);
+        boolean checkFileType = false;
+        if (f.exists()) {
+        	  checkFileType = true; // pre-existed
+        } else // we have to create that directory
+        if (!f.mkdirs()) {
+        	  if (!f.exists()) {
+        			// no one could create f -- complain
+        		throw new IOException(Messages.bind(
+        			Messages.output_notValidAll, f.getAbsolutePath()));
+        	  }
+            // someone else created f -- need to check its type
+            checkFileType = true;
+        }
+        if (checkFileType && !f.isDirectory()) {
+        	throw new IOException(Messages.bind(
+        		Messages.output_isFile, f.getAbsolutePath()));
+          }
+        StringBuilder outDir = new StringBuilder(outputPath);
+        outDir.append(fileSeparator);
+        StringTokenizer tokenizer =
+        	new StringTokenizer(relativeFileName, fileSeparator);
+        String token = tokenizer.nextToken();
+        while (tokenizer.hasMoreTokens()) {
+        	f = new File(outDir.append(token).append(fileSeparator).toString());
+        	  checkFileType = false; // reset
+        	if (f.exists()) {
+        		  checkFileType = true; // this is suboptimal, but it catches corner cases
+        								// in which a regular file pre-exists
+        	} else // we have to create that directory
+            if (!f.mkdir()) {
+            	  if (!f.exists()) {
+            			// no one could create f -- complain
+            		throw new IOException(Messages.bind(
+            			Messages.output_notValid,
+            				outDir.substring(outputPath.length() + 1,
+            					outDir.length() - 1),
+            				outputPath));
+            	  }
+                // someone else created f -- need to check its type
+                checkFileType = true;
+            }
+        	if (checkFileType && !f.isDirectory()) {
+            	throw new IOException(Messages.bind(
+            		Messages.output_isFile, f.getAbsolutePath()));
+              }
+        	token = tokenizer.nextToken();
+        }
+        // token contains the last one
+        return outDir.append(token).toString();
 	}
 
 	/**
@@ -436,30 +423,29 @@ public class Util implements SuffixConstants {
 	private static FileOutputStream getFileOutputStream(boolean generatePackagesStructure, String outputPath, String relativeFileName) throws IOException {
 		if (generatePackagesStructure) {
 			return new FileOutputStream(new File(buildAllDirectoriesInto(outputPath, relativeFileName)));
-		} else {
-			String fileName = null;
-			char fileSeparatorChar = File.separatorChar;
-			String fileSeparator = File.separator;
-			// First we ensure that the outputPath exists
-			outputPath = outputPath.replace('/', fileSeparatorChar);
-			// To be able to pass the mkdirs() method we need to remove the extra file separator at the end of the outDir name
-			int indexOfPackageSeparator = relativeFileName.lastIndexOf(fileSeparatorChar);
-			if (indexOfPackageSeparator == -1) {
-				if (outputPath.endsWith(fileSeparator)) {
-					fileName = outputPath + relativeFileName;
-				} else {
-					fileName = outputPath + fileSeparator + relativeFileName;
-				}
-			} else {
-				int length = relativeFileName.length();
-				if (outputPath.endsWith(fileSeparator)) {
-					fileName = outputPath + relativeFileName.substring(indexOfPackageSeparator + 1, length);
-				} else {
-					fileName = outputPath + fileSeparator + relativeFileName.substring(indexOfPackageSeparator + 1, length);
-				}
-			}
-			return new FileOutputStream(new File(fileName));
 		}
+        String fileName = null;
+        char fileSeparatorChar = File.separatorChar;
+        String fileSeparator = File.separator;
+        // First we ensure that the outputPath exists
+        outputPath = outputPath.replace('/', fileSeparatorChar);
+        // To be able to pass the mkdirs() method we need to remove the extra file separator at the end of the outDir name
+        int indexOfPackageSeparator = relativeFileName.lastIndexOf(fileSeparatorChar);
+        if (indexOfPackageSeparator == -1) {
+        	if (outputPath.endsWith(fileSeparator)) {
+        		fileName = outputPath + relativeFileName;
+        	} else {
+        		fileName = outputPath + fileSeparator + relativeFileName;
+        	}
+        } else {
+        	int length = relativeFileName.length();
+        	if (outputPath.endsWith(fileSeparator)) {
+        		fileName = outputPath + relativeFileName.substring(indexOfPackageSeparator + 1, length);
+        	} else {
+        		fileName = outputPath + fileSeparator + relativeFileName.substring(indexOfPackageSeparator + 1, length);
+        	}
+        }
+        return new FileOutputStream(new File(fileName));
 	}
 
 	/**
@@ -482,7 +468,7 @@ public class Util implements SuffixConstants {
 		return input.readNBytes(byteLength);
 	}
 
-	private static Map<String, byte[]> bomByEncoding = new HashMap<String, byte[]>();
+	private static Map<String, byte[]> bomByEncoding = new HashMap<>();
 	static {
 		// org.eclipse.core.runtime.content.IContentDescription.BOM_UTF_8:
 		bomByEncoding.put("UTF-8", new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }); //$NON-NLS-1$
@@ -584,9 +570,7 @@ public class Util implements SuffixConstants {
 	}
 
 	public static int getLineNumber(int position, int[] lineEnds, int g, int d) {
-		if (lineEnds == null)
-			return 1;
-		if (d == -1)
+		if (lineEnds == null || d == -1)
 			return 1;
 		int m = g, start;
 		while (g <= d) {
@@ -633,8 +617,8 @@ public class Util implements SuffixConstants {
 			return 0;
 		}
 		int result = 1;
-		for (int index = 0; index < array.length; index++) {
-			result = prime * result + (array[index] == null ? 0 : array[index].hashCode());
+		for (Object element : array) {
+			result = prime * result + (element == null ? 0 : element.hashCode());
 		}
 		return result;
 	}
@@ -644,9 +628,8 @@ public class Util implements SuffixConstants {
 	 */
 	public final static boolean isPotentialZipArchive(String name) {
 		int lastDot = name.lastIndexOf('.');
-		if (lastDot == -1)
-			return false; // no file extension, it cannot be a zip archive name
-		if (name.lastIndexOf(File.separatorChar) > lastDot)
+		 // no file extension, it cannot be a zip archive name
+		if (lastDot == -1 || name.lastIndexOf(File.separatorChar) > lastDot)
 			return false; // dot was before the last file separator, it cannot be a zip archive name
 		int length = name.length();
 		int extensionLength = length - lastDot - 1;
@@ -680,9 +663,8 @@ public class Util implements SuffixConstants {
 	 */
 	public final static int archiveFormat(String name) {
 		int lastDot = name.lastIndexOf('.');
-		if (lastDot == -1)
-			return -1; // no file extension, it cannot be a zip archive name
-		if (name.lastIndexOf(File.separatorChar) > lastDot)
+		 // no file extension, it cannot be a zip archive name
+		if (lastDot == -1 || name.lastIndexOf(File.separatorChar) > lastDot)
 			return -1; // dot was before the last file separator, it cannot be a zip archive name
 		int length = name.length();
 		int extensionLength = length - lastDot - 1;
@@ -765,9 +747,9 @@ public class Util implements SuffixConstants {
 					int lastSlash = CharOperation.lastIndexOf('/', pattern);
 					if (lastSlash != -1 && lastSlash != pattern.length-1){ // trailing slash -> adds '**' for free (see http://ant.apache.org/manual/dirtasks.html)
 						int star = CharOperation.indexOf('*', pattern, lastSlash);
-						if ((star == -1
+						if (star == -1
 								|| star >= pattern.length-1
-								|| pattern[star+1] != '*')) {
+								|| pattern[star+1] != '*') {
 							folderPattern = CharOperation.subarray(pattern, 0, lastSlash);
 						}
 					}
@@ -782,8 +764,8 @@ public class Util implements SuffixConstants {
 			path = CharOperation.concat(path, new char[] {'*'}, '/');
 		}
 		if (exclusionPatterns != null) {
-			for (int i = 0, length = exclusionPatterns.length; i < length; i++) {
-				if (CharOperation.pathMatch(exclusionPatterns[i], path, true, '/')) {
+			for (char[] exclusionPattern : exclusionPatterns) {
+				if (CharOperation.pathMatch(exclusionPattern, path, true, '/')) {
 					return true;
 				}
 			}
@@ -835,7 +817,7 @@ public class Util implements SuffixConstants {
 	public static void reverseQuickSort(char[][] list, int left, int right) {
 		int original_left= left;
 		int original_right= right;
-		char[] mid= list[left + ((right-left)/2)];
+		char[] mid= list[left + (right-left)/2];
 		do {
 			while (CharOperation.compareTo(list[left], mid) > 0) {
 				left++;
@@ -861,7 +843,7 @@ public class Util implements SuffixConstants {
 	public static void reverseQuickSort(char[][] list, int left, int right, int[] result) {
 		int original_left= left;
 		int original_right= right;
-		char[] mid= list[left + ((right-left)/2)];
+		char[] mid= list[left + (right-left)/2];
 		do {
 			while (CharOperation.compareTo(list[left], mid) > 0) {
 				left++;
@@ -915,22 +897,18 @@ public class Util implements SuffixConstants {
 	public static Boolean toBoolean(boolean bool) {
 		if (bool) {
 			return Boolean.TRUE;
-		} else {
-			return Boolean.FALSE;
 		}
+        return Boolean.FALSE;
 	}
 	/**
 	 * Converts an array of Objects into String.
 	 */
 	public static String toString(Object[] objects) {
 		return toString(objects,
-			new Displayable(){
-				@Override
-				public String displayString(Object o) {
-					if (o == null) return "null"; //$NON-NLS-1$
-					return o.toString();
-				}
-			});
+			o -> {
+            	if (o == null) return "null"; //$NON-NLS-1$
+            	return o.toString();
+            });
 	}
 
 	/**
@@ -995,7 +973,7 @@ public class Util implements SuffixConstants {
 		}
 		classFile.visitedTypes.add(typeBinding);
 		if (typeBinding.isParameterizedType()
-				&& ((typeBinding.tagBits & TagBits.ContainsNestedTypeReferences) != 0)) {
+				&& (typeBinding.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 			ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) typeBinding;
 			ReferenceBinding genericType = parameterizedTypeBinding.genericType();
 			if ((genericType.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
@@ -1003,24 +981,22 @@ public class Util implements SuffixConstants {
 			}
 			TypeBinding[] arguments = parameterizedTypeBinding.arguments;
 			if (arguments != null) {
-				for (int j = 0, max2 = arguments.length; j < max2; j++) {
-					TypeBinding argument = arguments[j];
+				for (TypeBinding argument : arguments) {
 					if (argument.isWildcard()) {
 						WildcardBinding wildcardBinding = (WildcardBinding) argument;
 						TypeBinding bound = wildcardBinding.bound;
 						if (bound != null
-								&& ((bound.tagBits & TagBits.ContainsNestedTypeReferences) != 0)) {
+								&& (bound.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 							recordNestedType(classFile, bound);
 						}
 						ReferenceBinding superclass = wildcardBinding.superclass();
 						if (superclass != null
-								&& ((superclass.tagBits & TagBits.ContainsNestedTypeReferences) != 0)) {
+								&& (superclass.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 							recordNestedType(classFile, superclass);
 						}
 						ReferenceBinding[] superInterfaces = wildcardBinding.superInterfaces();
 						if (superInterfaces != null) {
-							for (int k = 0, max3 =  superInterfaces.length; k < max3; k++) {
-								ReferenceBinding superInterface = superInterfaces[k];
+							for (ReferenceBinding superInterface : superInterfaces) {
 								if ((superInterface.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 									recordNestedType(classFile, superInterface);
 								}
@@ -1032,16 +1008,15 @@ public class Util implements SuffixConstants {
 				}
 			}
 		} else if (typeBinding.isTypeVariable()
-				&& ((typeBinding.tagBits & TagBits.ContainsNestedTypeReferences) != 0)) {
+				&& (typeBinding.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 			TypeVariableBinding typeVariableBinding = (TypeVariableBinding) typeBinding;
 			TypeBinding upperBound = typeVariableBinding.upperBound();
-			if (upperBound != null && ((upperBound.tagBits & TagBits.ContainsNestedTypeReferences) != 0)) {
+			if (upperBound != null && (upperBound.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 				recordNestedType(classFile, upperBound);
 			}
 			TypeBinding[] upperBounds = typeVariableBinding.otherUpperBounds();
 			if (upperBounds != null) {
-				for (int k = 0, max3 =  upperBounds.length; k < max3; k++) {
-					TypeBinding otherUpperBound = upperBounds[k];
+				for (TypeBinding otherUpperBound : upperBounds) {
 					if ((otherUpperBound.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 						recordNestedType(classFile, otherUpperBound);
 					}
@@ -1091,7 +1066,7 @@ public class Util implements SuffixConstants {
 		 * we can try to retrieve the default librairies of the VM used to run
 		 * the batch compiler
 		 */
-		String javaversion = null;
+		String javaversion;
 		javaversion = System.getProperty("java.version"); //$NON-NLS-1$
 		// Surely, this ain't required anymore?
 		if (javaversion != null && javaversion.equalsIgnoreCase("1.1.8")) { //$NON-NLS-1$
@@ -1114,16 +1089,16 @@ public class Util implements SuffixConstants {
 		 */
 		// check bootclasspath properties for Sun, JRockit and Harmony VMs
 		String bootclasspathProperty = System.getProperty("sun.boot.class.path"); //$NON-NLS-1$
-		if ((bootclasspathProperty == null) || (bootclasspathProperty.length() == 0)) {
+		if (bootclasspathProperty == null || bootclasspathProperty.length() == 0) {
 			// IBM J9 VMs
 			bootclasspathProperty = System.getProperty("vm.boot.class.path"); //$NON-NLS-1$
-			if ((bootclasspathProperty == null) || (bootclasspathProperty.length() == 0)) {
+			if (bootclasspathProperty == null || bootclasspathProperty.length() == 0) {
 				// Harmony using IBM VME
 				bootclasspathProperty = System.getProperty("org.apache.harmony.boot.class.path"); //$NON-NLS-1$
 			}
 		}
 		Set<String> filePaths = new HashSet<>();
-		if ((bootclasspathProperty != null) && (bootclasspathProperty.length() != 0)) {
+		if (bootclasspathProperty != null && bootclasspathProperty.length() != 0) {
 			StringTokenizer tokenizer = new StringTokenizer(bootclasspathProperty, File.pathSeparator);
 			while (tokenizer.hasMoreTokens()) {
 				filePaths.add(tokenizer.nextToken());
@@ -1147,11 +1122,10 @@ public class Util implements SuffixConstants {
 				}
 				File[][] systemLibrariesJars = Main.getLibrariesFiles(directoriesToCheck);
 				if (systemLibrariesJars != null) {
-					for (int i = 0, max = systemLibrariesJars.length; i < max; i++) {
-						File[] current = systemLibrariesJars[i];
+					for (File[] current : systemLibrariesJars) {
 						if (current != null) {
-							for (int j = 0, max2 = current.length; j < max2; j++) {
-								filePaths.add(current[j].getAbsolutePath());
+							for (File element : current) {
+								filePaths.add(element.getAbsolutePath());
 							}
 						}
 					}
@@ -1173,9 +1147,8 @@ public class Util implements SuffixConstants {
 			int i = CharOperation.indexOf(C_PARAM_START, methodSignature);
 			if (i < 0) {
 				throw new IllegalArgumentException(String.valueOf(methodSignature));
-			} else {
-				i++;
 			}
+            i++;
 			for (;;) {
 				if (methodSignature[i] == C_PARAM_END) {
 					return count;
@@ -1183,9 +1156,8 @@ public class Util implements SuffixConstants {
 				int e= Util.scanTypeSignature(methodSignature, i);
 				if (e < 0) {
 					throw new IllegalArgumentException(String.valueOf(methodSignature));
-				} else {
-					i = e + 1;
 				}
+                i = e + 1;
 				count++;
 			}
 		} catch (ArrayIndexOutOfBoundsException e) {
@@ -1269,9 +1241,8 @@ public class Util implements SuffixConstants {
 		char c = string[start];
 		if ("BCDFIJSVZ".indexOf(c) >= 0) { //$NON-NLS-1$
 			return start;
-		} else {
-			throw newIllegalArgumentException(string, start);
 		}
+        throw newIllegalArgumentException(string, start);
 	}
 
 	/**
@@ -1361,9 +1332,8 @@ public class Util implements SuffixConstants {
 		c = string[id + 1];
 		if (c == C_SEMICOLON) {
 			return id + 1;
-		} else {
-			throw newIllegalArgumentException(string, start);
 		}
+        throw newIllegalArgumentException(string, start);
 	}
 
 	/**
@@ -1428,16 +1398,22 @@ public class Util implements SuffixConstants {
 				throw newIllegalArgumentException(string, start);
 			}
 			c = string[p];
-			if (c == C_SEMICOLON) {
-				// all done
-				return p;
-			} else if (c == C_GENERIC_START) {
-				int e = scanTypeArgumentSignatures(string, p);
-				p = e;
-			} else if (c == C_DOT || c == '/') {
-				int id = scanIdentifier(string, p + 1);
-				p = id;
-			}
+			switch (c) {
+                case C_SEMICOLON:
+                    // all done
+                    return p;
+                case C_GENERIC_START:
+                    int e = scanTypeArgumentSignatures(string, p);
+                    p = e;
+                    break;
+                case C_DOT:
+                case '/':
+                    int id = scanIdentifier(string, p + 1);
+                    p = id;
+                    break;
+                default:
+                    break;
+            }
 			p++;
 		}
 	}

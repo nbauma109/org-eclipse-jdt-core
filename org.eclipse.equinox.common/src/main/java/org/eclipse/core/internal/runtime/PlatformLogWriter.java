@@ -134,26 +134,13 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	private static IStatus convertRawEntryToStatus(LogEntry logEntry) {
-		int severity;
-		switch (logEntry.getLogLevel()) {
-			case ERROR :
-				severity = IStatus.ERROR;
-				break;
-			case WARN :
-				severity = IStatus.WARNING;
-				break;
-			case INFO :
-				severity = IStatus.INFO;
-				break;
-			case DEBUG :
-			case TRACE :
-			case AUDIT :
-				severity = IStatus.OK;
-				break;
-			default :
-				severity = -1;
-				break;
-		}
+		int severity = switch (logEntry.getLogLevel()) {
+            case ERROR -> IStatus.ERROR;
+            case WARN -> IStatus.WARNING;
+            case INFO -> IStatus.INFO;
+            case DEBUG, TRACE, AUDIT -> IStatus.OK;
+            default -> -1;
+        };
 		Bundle bundle = logEntry.getBundle();
 		return new Status(severity, bundle == null ? null : bundle.getSymbolicName(), logEntry.getMessage(), logEntry.getException());
 	}

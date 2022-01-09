@@ -145,10 +145,9 @@ public class CtSym {
 		this.fs = fst;
 		if (fst == null) {
 			throw new IOException("Failed to create ct.sym file system for " + this.ctSymFile); //$NON-NLS-1$
-		} else {
-			this.root = fst.getPath("/"); //$NON-NLS-1$
-			this.isJRE12Plus = isCurrentRelease12plus();
 		}
+        this.root = fst.getPath("/"); //$NON-NLS-1$
+        this.isJRE12Plus = isCurrentRelease12plus();
 	}
 
 	/**
@@ -179,29 +178,23 @@ public class CtSym {
 	 * @return set with all root paths related to given release in ct.sym file
 	 */
 	public List<Path> releaseRoots(String releaseCode) {
-		List<Path> list = this.releaseRootPaths.computeIfAbsent(releaseCode, x -> {
+		return this.releaseRootPaths.computeIfAbsent(releaseCode, x -> {
 			List<Path> rootDirs = new ArrayList<>();
 			try (DirectoryStream<Path> stream = Files.newDirectoryStream(this.root)) {
 				for (final Path subdir : stream) {
 					String rel = subdir.getFileName().toString();
-					if (rel.contains("-")) { //$NON-NLS-1$
-						// Ignore META-INF etc. We are only interested in A-Z 0-9
-						continue;
-					}
 					// com.sun.tools.javac.platform.JDKPlatformProvider.PlatformDescriptionImpl.getFileManager()
 					// https://github.com/openjdk/jdk/blob/master/src/jdk.compiler/share/classes/com/sun/tools/javac/platform/JDKPlatformProvider.java
-					if (rel.contains(releaseCode)) {
-						rootDirs.add(subdir);
-					} else {
+					if (rel.contains("-") || !rel.contains(releaseCode)) {
 						continue;
 					}
+                    rootDirs.add(subdir);
 				}
 			} catch (IOException e) {
 				return Collections.emptyList();
 			}
 			return Collections.unmodifiableList(rootDirs);
 		});
-		return list;
 	}
 
 	/**
@@ -290,11 +283,9 @@ public class CtSym {
 			try (DirectoryStream<Path> stream = Files.newDirectoryStream(rroot)) {
 				for (final Path subdir : stream) {
 					Path p = subdir.resolve(qualifiedSignatureFileName);
-					if (Files.exists(p)) {
-						if (subdir.getNameCount() == 2) {
-							return subdir.getName(1).toString();
-						}
-					}
+					if (Files.exists(p) && subdir.getNameCount() == 2) {
+                    	return subdir.getName(1).toString();
+                    }
 				}
 			} catch (IOException e) {
 				// not found...
@@ -317,7 +308,7 @@ public class CtSym {
 	 * before 12: javax/net/ssl/SSLSocketFactory.sig -> /89ABC/java.base/javax/net/ssl/SSLSocketFactory.sig
 	 */
 	private Map<String, Path> getCachedReleasePaths(String releaseCode) {
-		Map<String, Path> result = this.allReleasesPaths.computeIfAbsent(releaseCode, x -> {
+		return this.allReleasesPaths.computeIfAbsent(releaseCode, x -> {
 			List<Path> roots = releaseRoots(releaseCode);
 			Map<String, Path> allReleaseFiles = new HashMap<>(4999);
 			for (Path start : roots) {
@@ -342,25 +333,23 @@ public class CtSym {
 			}
 			return Collections.unmodifiableMap(allReleaseFiles);
 		});
-		return result;
 	}
 
 	public byte[] getFileBytes(Path path) throws IOException {
 		if (DISABLE_CACHE) {
 			return JRTUtil.safeReadBytes(path);
-		} else {
-			Optional<byte[]> bytes = this.fileCache.computeIfAbsent(path, key -> {
-				try {
-					return Optional.ofNullable(JRTUtil.safeReadBytes(key));
-				} catch (IOException e) {
-					return Optional.empty();
-				}
-			});
-			if (VERBOSE) {
-				System.out.println("got bytes: " + path); //$NON-NLS-1$
-			}
-			return bytes.orElse(null);
 		}
+        Optional<byte[]> bytes = this.fileCache.computeIfAbsent(path, key -> {
+        	try {
+        		return Optional.ofNullable(JRTUtil.safeReadBytes(key));
+        	} catch (IOException e) {
+        		return Optional.empty();
+        	}
+        });
+        if (VERBOSE) {
+        	System.out.println("got bytes: " + path); //$NON-NLS-1$
+        }
+        return bytes.orElse(null);
 	}
 
 	private boolean isCurrentRelease12plus() throws IOException {

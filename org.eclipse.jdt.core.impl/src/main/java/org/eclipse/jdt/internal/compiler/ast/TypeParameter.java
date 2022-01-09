@@ -57,8 +57,8 @@ public class TypeParameter extends AbstractVariableDeclaration {
 			this.type.checkBounds(scope);
 		}
 		if (this.bounds != null) {
-			for (int i = 0, length = this.bounds.length; i < length; i++) {
-				this.bounds[i].checkBounds(scope);
+			for (TypeReference bound : this.bounds) {
+				bound.checkBounds(scope);
 			}
 		}
 	}
@@ -142,31 +142,29 @@ public class TypeParameter extends AbstractVariableDeclaration {
 				this.binding.setTypeAnnotations(annotationBindings, isAnnotationBasedNullAnalysisEnabled);
 				scope.referenceCompilationUnit().compilationResult.hasAnnotations = true;
 			}
-			if (isAnnotationBasedNullAnalysisEnabled) {
-				if (this.binding != null && this.binding.isValidBinding()) {
-					if (!this.binding.hasNullTypeAnnotations()
-							&& scope.hasDefaultNullnessFor(Binding.DefaultLocationTypeParameter, this.sourceStart())) {
-						AnnotationBinding[] annots = new AnnotationBinding[] { environment.getNonNullAnnotation() };
-						TypeVariableBinding previousBinding = this.binding;
-						this.binding = (TypeVariableBinding) environment.createAnnotatedType(this.binding, annots);
+			if (isAnnotationBasedNullAnalysisEnabled && this.binding != null && this.binding.isValidBinding()) {
+            	if (!this.binding.hasNullTypeAnnotations()
+            			&& scope.hasDefaultNullnessFor(Binding.DefaultLocationTypeParameter, this.sourceStart())) {
+            		AnnotationBinding[] annots = { environment.getNonNullAnnotation() };
+            		TypeVariableBinding previousBinding = this.binding;
+            		this.binding = (TypeVariableBinding) environment.createAnnotatedType(this.binding, annots);
 
-						if (scope instanceof MethodScope) {
-							/*
-							 * for method type parameters, references to the bindings have already been copied into
-							 * MethodBinding.typeVariables - update them.
-							 */
-							MethodScope methodScope = (MethodScope) scope;
-							if (methodScope.referenceContext instanceof AbstractMethodDeclaration) {
-								MethodBinding methodBinding = ((AbstractMethodDeclaration) methodScope.referenceContext).binding;
-								if (methodBinding != null) {
-									methodBinding.updateTypeVariableBinding(previousBinding, this.binding);
-								}
-							}
-						}
-					}
-					this.binding.evaluateNullAnnotations(scope, this);
-				}
-			}
+            		if (scope instanceof MethodScope) {
+            			/*
+            			 * for method type parameters, references to the bindings have already been copied into
+            			 * MethodBinding.typeVariables - update them.
+            			 */
+            			MethodScope methodScope = (MethodScope) scope;
+            			if (methodScope.referenceContext instanceof AbstractMethodDeclaration) {
+            				MethodBinding methodBinding = ((AbstractMethodDeclaration) methodScope.referenceContext).binding;
+            				if (methodBinding != null) {
+            					methodBinding.updateTypeVariableBinding(previousBinding, this.binding);
+            				}
+            			}
+            		}
+            	}
+            	this.binding.evaluateNullAnnotations(scope, this);
+            }
 		}
 	}
 
@@ -182,9 +180,9 @@ public class TypeParameter extends AbstractVariableDeclaration {
 			this.type.print(0, output);
 		}
 		if (this.bounds != null){
-			for (int i = 0; i < this.bounds.length; i++) {
+			for (TypeReference bound : this.bounds) {
 				output.append(" & "); //$NON-NLS-1$
-				this.bounds[i].print(0, output);
+				bound.print(0, output);
 			}
 		}
 		return output;

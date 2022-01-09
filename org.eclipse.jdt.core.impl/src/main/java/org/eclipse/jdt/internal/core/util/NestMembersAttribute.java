@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.util.INestMembersAttribute;
  * Default implementation of INestMembersAttribute.
  */
 public class NestMembersAttribute extends ClassFileAttribute implements INestMembersAttribute {
-	private static final INestMemberAttributeEntry[] NO_ENTRIES = new INestMemberAttributeEntry[0];
+	private static final INestMemberAttributeEntry[] NO_ENTRIES = {};
 
 	private int nestMembers;
 	private INestMemberAttributeEntry[] entries;

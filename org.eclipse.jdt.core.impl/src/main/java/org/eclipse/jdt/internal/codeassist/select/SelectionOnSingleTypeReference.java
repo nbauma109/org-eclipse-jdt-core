@@ -50,7 +50,8 @@ protected TypeBinding getTypeBinding(Scope scope) {
 		if(binding instanceof ProblemReferenceBinding && binding.problemId() == ProblemReasons.NotVisible) {
 			ProblemReferenceBinding problemReferenceBinding = (ProblemReferenceBinding) binding;
 			throw new SelectionNodeFound(problemReferenceBinding.closestMatch());
-		} else if (binding instanceof TypeBinding) {
+		}
+        if (binding instanceof TypeBinding) {
 			scope.problemReporter().invalidType(this, (TypeBinding) binding);
 		} else if (binding instanceof PackageBinding) {
 			ProblemReferenceBinding problemBinding = new ProblemReferenceBinding(((PackageBinding)binding).compoundName, null, binding.problemId());
@@ -71,10 +72,8 @@ public TypeBinding resolveTypeEnclosing(BlockScope scope, ReferenceBinding enclo
 
 		// tolerate some error cases
 		if (this.resolvedType == null ||
-				!(this.resolvedType.isValidBinding() ||
-					this.resolvedType.problemId() == ProblemReasons.NotVisible))
+				!this.resolvedType.isValidBinding() && this.resolvedType.problemId() != ProblemReasons.NotVisible)
 		throw new SelectionNodeFound();
-	else
-		throw new SelectionNodeFound(this.resolvedType);
+        throw new SelectionNodeFound(this.resolvedType);
 }
 }

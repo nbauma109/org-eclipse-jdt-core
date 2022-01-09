@@ -123,12 +123,12 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	public void checkModifiers() {
 
 		//only potential valid modifier is <<final>>
-		if (((this.modifiers & ExtraCompilerModifiers.AccJustFlag) & ~ClassFileConstants.AccFinal) != 0)
+		if ((this.modifiers & ExtraCompilerModifiers.AccJustFlag & ~ClassFileConstants.AccFinal) != 0)
 			//AccModifierProblem -> other (non-visibility problem)
 			//AccAlternateModifierProblem -> duplicate modifier
 			//AccModifierProblem | AccAlternateModifierProblem -> visibility problem"
 
-			this.modifiers = (this.modifiers & ~ExtraCompilerModifiers.AccAlternateModifierProblem) | ExtraCompilerModifiers.AccModifierProblem;
+			this.modifiers = this.modifiers & ~ExtraCompilerModifiers.AccAlternateModifierProblem | ExtraCompilerModifiers.AccModifierProblem;
 	}
 
 	/**
@@ -162,8 +162,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			this.initialization.generateCode(currentScope, codeStream, true);
 			// 26903, need extra cast to store null in array local var
 			if (this.binding.type.isArrayType()
-				&& ((this.initialization instanceof CastExpression)	// arrayLoc = (type[])null
-						&& (((CastExpression)this.initialization).innermostCastedExpression().resolvedType == TypeBinding.NULL))){
+				&& this.initialization instanceof CastExpression	// arrayLoc = (type[])null
+						&& ((CastExpression)this.initialization).innermostCastedExpression().resolvedType == TypeBinding.NULL){
 				codeStream.checkcast(this.binding.type);
 			}
 			codeStream.store(this.binding, false);
@@ -282,7 +282,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			variableType = this.type.resolveType(scope, true /* check bounds*/);
 		}
 
-		this.bits |= (this.type.bits & ASTNode.HasTypeAnnotations);
+		this.bits |= this.type.bits & ASTNode.HasTypeAnnotations;
 		checkModifiers();
 		if (variableType != null) {
 			if (variableType == TypeBinding.VOID) {
@@ -338,26 +338,24 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		// allow to recursivelly target the binding....
 		// the correct constant is harmed if correctly computed at the end of this method
 
-		if (variableType == null) {
-			if (this.initialization != null) {
-				if (this.initialization instanceof CastExpression) {
-					((CastExpression)this.initialization).setVarTypeDeclaration(true);
-				}
-				this.initialization.resolveType(scope); // want to report all possible errors
-				if (isTypeNameVar && this.initialization.resolvedType != null) {
-					if (TypeBinding.equalsEquals(TypeBinding.NULL, this.initialization.resolvedType)) {
-						scope.problemReporter().varLocalInitializedToNull(this);
-						variableTypeInferenceError = true;
-					} else if (TypeBinding.equalsEquals(TypeBinding.VOID, this.initialization.resolvedType)) {
-						scope.problemReporter().varLocalInitializedToVoid(this);
-						variableTypeInferenceError = true;
-					}
-					variableType = patchType(this.initialization.resolvedType);
-				} else {
-					variableTypeInferenceError = true;
-				}
-			}
-		}
+		if (variableType == null && this.initialization != null) {
+        	if (this.initialization instanceof CastExpression) {
+        		((CastExpression)this.initialization).setVarTypeDeclaration(true);
+        	}
+        	this.initialization.resolveType(scope); // want to report all possible errors
+        	if (isTypeNameVar && this.initialization.resolvedType != null) {
+        		if (TypeBinding.equalsEquals(TypeBinding.NULL, this.initialization.resolvedType)) {
+        			scope.problemReporter().varLocalInitializedToNull(this);
+        			variableTypeInferenceError = true;
+        		} else if (TypeBinding.equalsEquals(TypeBinding.VOID, this.initialization.resolvedType)) {
+        			scope.problemReporter().varLocalInitializedToVoid(this);
+        			variableTypeInferenceError = true;
+        		}
+        		variableType = patchType(this.initialization.resolvedType);
+        	} else {
+        		variableTypeInferenceError = true;
+        	}
+        }
 		this.binding.markInitialized();
 		if (variableTypeInferenceError) {
 			return;
@@ -407,12 +405,10 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 								&& (this.initialization.bits & ASTNode.UnnecessaryCast) == 0) {
 							CastExpression.checkNeedForAssignedCast(scope, variableType, (CastExpression) this.initialization);
 						}
-					} else {
-						if ((variableType.tagBits & TagBits.HasMissingType) == 0) {
-							// if problem already got signaled on type, do not report secondary problem
-							scope.problemReporter().typeMismatchError(initializationType, variableType, this.initialization, null);
-						}
-					}
+					} else if ((variableType.tagBits & TagBits.HasMissingType) == 0) {
+                    	// if problem already got signaled on type, do not report secondary problem
+                    	scope.problemReporter().typeMismatchError(initializationType, variableType, this.initialization, null);
+                    }
 				}
 			}
 			// check for assignment with no effect
@@ -500,7 +496,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	public boolean isRecoveredFromLoneIdentifier() { // recovered from lonely identifier or identifier cluster ?
 		return this.name == RecoveryScanner.FAKE_IDENTIFIER &&
-				(this.type instanceof SingleTypeReference || (this.type instanceof QualifiedTypeReference && !(this.type instanceof ArrayQualifiedTypeReference))) && this.initialization == null && !this.type.isBaseTypeReference();
+				(this.type instanceof SingleTypeReference || this.type instanceof QualifiedTypeReference && !(this.type instanceof ArrayQualifiedTypeReference)) && this.initialization == null && !this.type.isBaseTypeReference();
 	}
 
 	public boolean isTypeNameVar(Scope scope) {

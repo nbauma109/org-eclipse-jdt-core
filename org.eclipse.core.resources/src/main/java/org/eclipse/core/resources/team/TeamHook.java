@@ -51,7 +51,6 @@ public abstract class TeamHook extends InternalTeamHook {
 	 * resources plug-in only.
 	 */
 	protected TeamHook() {
-		super();
 	}
 
 	/**

@@ -39,7 +39,7 @@ void checkLabelValidity(BlockScope scope) {
 	FlowContext current = this.getLocalParent();
 	while (current != null) {
 		char[] currentLabelName;
-		if (((currentLabelName = current.labelName()) != null)
+		if ((currentLabelName = current.labelName()) != null
 			&& CharOperation.equals(currentLabelName, this.labelName)) {
 			scope.problemReporter().alreadyDefinedLabel(this.labelName, this.associatedNode);
 		}

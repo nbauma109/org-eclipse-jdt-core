@@ -57,7 +57,7 @@ public class ResourceChangeListenerList {
 	/**
 	 * The empty array singleton instance.
 	 */
-	private static final ListenerEntry[] EMPTY_ARRAY = new ListenerEntry[0];
+	private static final ListenerEntry[] EMPTY_ARRAY = {};
 
 	private int count1 = 0;
 	private int count2 = 0;

@@ -59,7 +59,6 @@ public class LocalMetaArea implements ICoreConstants {
 	protected final IPath projectMetaLocation;
 
 	public LocalMetaArea() {
-		super();
 		metaAreaLocation = ResourcesPlugin.getPlugin().getStateLocation();
 		projectMetaLocation = metaAreaLocation.append(F_PROJECTS);
 	}

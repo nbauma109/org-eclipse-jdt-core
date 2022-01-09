@@ -141,7 +141,7 @@ public void addUnknownRef(NameReference nameRef) {
 public void checkComment() {
 	int lastComment = getCommentPtr();
 	// discard obsolete comments while inside methods or fields initializer (see bug 74369)
-	if (!(this.diet && this.dietInt==0) && lastComment >= 0) {
+	if ((!this.diet || this.dietInt != 0) && lastComment >= 0) {
 		flushCommentsDefinedPriorTo(this.endStatementPosition);
 		lastComment = getCommentPtr();
 	}
@@ -185,8 +185,7 @@ public void checkComment() {
 		// Report reference info in javadoc comment @throws/@exception tags
 		TypeReference[] thrownExceptions = this.javadoc.exceptionReferences;
 		if (thrownExceptions != null) {
-			for (int i = 0, max=thrownExceptions.length; i < max; i++) {
-				TypeReference typeRef = thrownExceptions[i];
+			for (TypeReference typeRef : thrownExceptions) {
 				if (typeRef instanceof JavadocSingleTypeReference) {
 					JavadocSingleTypeReference singleRef = (JavadocSingleTypeReference) typeRef;
 					this.requestor.acceptTypeReference(singleRef.token, singleRef.sourceStart);
@@ -200,8 +199,7 @@ public void checkComment() {
 		// Report reference info in javadoc comment @see tags
 		Expression[] references = this.javadoc.seeReferences;
 		if (references != null) {
-			for (int i = 0, max=references.length; i < max; i++) {
-				Expression reference = references[i];
+			for (Expression reference : references) {
 				acceptJavadocTypeReference(reference);
 				if (reference instanceof JavadocFieldReference) {
 					JavadocFieldReference fieldRef = (JavadocFieldReference) reference;
@@ -804,8 +802,7 @@ protected void consumeUsesStatement() {
 protected void consumeWithClause() {
 	super.consumeWithClause();
 	ProvidesStatement service = (ProvidesStatement) this.astStack[this.astPtr];
-		for (int i = 0; i < service.implementations.length; i++) {
-			TypeReference ref = service.implementations[i];
+		for (TypeReference ref : service.implementations) {
 			this.requestor.acceptTypeReference(ref.getTypeName(), ref.sourceStart, ref.sourceEnd);
 		}
 }
@@ -827,11 +824,9 @@ protected CompilationUnitDeclaration endParse(int act) {
 		this.requestor.acceptLineSeparatorPositions(this.scanner.getLineEnds());
 	}
 	if (this.compilationUnit != null) {
-		CompilationUnitDeclaration result = super.endParse(act);
-		return result;
-	} else {
-		return null;
+		return super.endParse(act);
 	}
+    return null;
 }
 @Override
 public TypeReference getTypeReference(int dim) {
@@ -962,24 +957,23 @@ public NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 			addUnknownRef(ref);
 		}
 		return ref;
-	} else {
-		//Qualified variable reference
-		char[][] tokens = new char[length][];
-		this.identifierPtr -= length;
-		System.arraycopy(this.identifierStack, this.identifierPtr + 1, tokens, 0, length);
-		long[] positions = new long[length];
-		System.arraycopy(this.identifierPositionStack, this.identifierPtr + 1, positions, 0, length);
-		QualifiedNameReference ref =
-			newQualifiedNameReference(
-				tokens,
-				positions,
-				(int) (this.identifierPositionStack[this.identifierPtr + 1] >> 32), // sourceStart
-				(int) this.identifierPositionStack[this.identifierPtr + length]); // sourceEnd
-		if (this.reportReferenceInfo) {
-			addUnknownRef(ref);
-		}
-		return ref;
 	}
+    //Qualified variable reference
+    char[][] tokens = new char[length][];
+    this.identifierPtr -= length;
+    System.arraycopy(this.identifierStack, this.identifierPtr + 1, tokens, 0, length);
+    long[] positions = new long[length];
+    System.arraycopy(this.identifierPositionStack, this.identifierPtr + 1, positions, 0, length);
+    QualifiedNameReference ref =
+    	newQualifiedNameReference(
+    		tokens,
+    		positions,
+    		(int) (this.identifierPositionStack[this.identifierPtr + 1] >> 32), // sourceStart
+    		(int) this.identifierPositionStack[this.identifierPtr + length]); // sourceEnd
+    if (this.reportReferenceInfo) {
+    	addUnknownRef(ref);
+    }
+    return ref;
 }
 @Override
 public NameReference getUnspecifiedReferenceOptimized() {

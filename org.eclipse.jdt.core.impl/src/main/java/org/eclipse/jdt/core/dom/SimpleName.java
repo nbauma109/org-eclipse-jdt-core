@@ -92,9 +92,8 @@ public class SimpleName extends Name {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel < AST.JLS10_INTERNAL) {
 			return PROPERTY_DESCRIPTORS;
-		} else {
-			return PROPERTY_DESCRIPTORS_10_0;
 		}
+        return PROPERTY_DESCRIPTORS_10_0;
 	}
 
 	/**
@@ -144,10 +143,9 @@ public class SimpleName extends Name {
 		if (property == IDENTIFIER_PROPERTY) {
 			if (get) {
 				return getIdentifier();
-			} else {
-				setIdentifier((String) value);
-				return null;
 			}
+            setIdentifier((String) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
@@ -158,14 +156,13 @@ public class SimpleName extends Name {
 		if (property == VAR_PROPERTY) {
 			if (get) {
 				return isVar();
-			} else {
-				if (Long.compare(this.ast.scanner.complianceLevel, ClassFileConstants.JDK10) < 0) {
-					setVar(false);
-				} else {
-					setVar(value);
-				}
-				return false;
 			}
+            if (Long.compare(this.ast.scanner.complianceLevel, ClassFileConstants.JDK10) < 0) {
+            	setVar(false);
+            } else {
+            	setVar(value);
+            }
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
@@ -239,10 +236,7 @@ public class SimpleName extends Name {
 			scanner.resetTo(0, length - 1);
 			try {
 				int tokenType = scanner.scanIdentifier();
-				if (tokenType != TerminalTokens.TokenNameIdentifier) {
-					throw new IllegalArgumentException("Invalid identifier : >" + identifier + "<");  //$NON-NLS-1$//$NON-NLS-2$
-				}
-				if (scanner.currentPosition != length) {
+				if (tokenType != TerminalTokens.TokenNameIdentifier || scanner.currentPosition != length) {
 					// this is the case when there is only one identifier see 87849
 					throw new IllegalArgumentException("Invalid identifier : >" + identifier + "<");  //$NON-NLS-1$//$NON-NLS-2$
 				}
@@ -325,33 +319,33 @@ public class SimpleName extends Name {
 		}
 		ASTNode parent = getParent();
 		if (parent instanceof TypeDeclaration) {
-			return (d == TypeDeclaration.NAME_PROPERTY);
+			return d == TypeDeclaration.NAME_PROPERTY;
 		}
 		if (parent instanceof MethodDeclaration) {
 			MethodDeclaration p = (MethodDeclaration) parent;
 			// could be the name of the method or constructor
-			return !p.isConstructor() && (d == MethodDeclaration.NAME_PROPERTY);
+			return !p.isConstructor() && d == MethodDeclaration.NAME_PROPERTY;
 		}
 		if (parent instanceof SingleVariableDeclaration) {
-			return (d == SingleVariableDeclaration.NAME_PROPERTY);
+			return d == SingleVariableDeclaration.NAME_PROPERTY;
 		}
 		if (parent instanceof VariableDeclarationFragment) {
-			return (d == VariableDeclarationFragment.NAME_PROPERTY);
+			return d == VariableDeclarationFragment.NAME_PROPERTY;
 		}
 		if (parent instanceof EnumDeclaration) {
-			return (d == EnumDeclaration.NAME_PROPERTY);
+			return d == EnumDeclaration.NAME_PROPERTY;
 		}
 		if (parent instanceof EnumConstantDeclaration) {
-			return (d == EnumConstantDeclaration.NAME_PROPERTY);
+			return d == EnumConstantDeclaration.NAME_PROPERTY;
 		}
 		if (parent instanceof TypeParameter) {
-			return (d == TypeParameter.NAME_PROPERTY);
+			return d == TypeParameter.NAME_PROPERTY;
 		}
 		if (parent instanceof AnnotationTypeDeclaration) {
-			return (d == AnnotationTypeDeclaration.NAME_PROPERTY);
+			return d == AnnotationTypeDeclaration.NAME_PROPERTY;
 		}
 		if (parent instanceof AnnotationTypeMemberDeclaration) {
-			return (d == AnnotationTypeMemberDeclaration.NAME_PROPERTY);
+			return d == AnnotationTypeMemberDeclaration.NAME_PROPERTY;
 		}
 		return false;
 	}

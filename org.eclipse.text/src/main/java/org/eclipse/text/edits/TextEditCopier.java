@@ -43,7 +43,6 @@ public final class TextEditCopier {
 	 * @see #perform()
 	 */
 	public TextEditCopier(TextEdit edit) {
-		super();
 		Assert.isNotNull(edit);
 		fEdit= edit;
 		fCopies= new HashMap<>();

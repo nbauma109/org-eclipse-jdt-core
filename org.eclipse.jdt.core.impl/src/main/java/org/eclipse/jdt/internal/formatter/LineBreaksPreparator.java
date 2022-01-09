@@ -92,7 +92,8 @@ public class LineBreaksPreparator extends ASTVisitor {
 	 * to alleviate deprecation warnings once AST.JLS14 is deprecated in future.
 	 * @deprecated
 	 */
-	private static final int AST_INTERNAL_JLS14 = AST.JLS14;
+	@Deprecated
+    private static final int AST_INTERNAL_JLS14 = AST.JLS14;
 
 	public LineBreaksPreparator(TokenManager tokenManager, DefaultCodeFormatterOptions options) {
 		this.tm = tokenManager;
@@ -190,7 +191,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 		}
 		if (previous != null) {
 			ASTNode parent = previous.getParent();
-			if (!(parent instanceof TypeDeclaration && this.tm.isFake((TypeDeclaration) parent))) {
+			if (!(parent instanceof TypeDeclaration) || !this.tm.isFake((TypeDeclaration) parent)) {
 				Token lastToken = this.tm.lastTokenIn(parent, -1);
 				putBlankLinesBefore(lastToken, this.options.blank_lines_after_last_class_body_declaration);
 			}
@@ -198,9 +199,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 	}
 
 	private boolean sameChunk(BodyDeclaration bd1, BodyDeclaration bd2) {
-		if (bd1.getClass().equals(bd2.getClass()))
-			return true;
-		if (bd1 instanceof AbstractTypeDeclaration && bd2 instanceof AbstractTypeDeclaration)
+		if (bd1.getClass().equals(bd2.getClass()) || bd1 instanceof AbstractTypeDeclaration && bd2 instanceof AbstractTypeDeclaration)
 			return true;
 		return (bd1 instanceof FieldDeclaration || bd1 instanceof Initializer)
 				&& (bd2 instanceof FieldDeclaration || bd2 instanceof Initializer); // special case: initializers are often related to fields, don't separate
@@ -237,10 +236,9 @@ public class LineBreaksPreparator extends ASTVisitor {
 			Token token = this.tm.get(index);
 			if (token.isComment())
 				continue;
-			if (token.tokenType == TokenNameSEMICOLON)
-				token.breakAfter();
-			else
-				break;
+			if (token.tokenType != TokenNameSEMICOLON)
+                break;
+            token.breakAfter();
 		}
 		return true;
 	}
@@ -302,16 +300,15 @@ public class LineBreaksPreparator extends ASTVisitor {
 				breakLineBefore(statement);
 		}
 		ASTNode parent = node.getParent();
-		if (parent.getLength() == 0)
-			return true; // this is a fake block created by parsing in statements mode
-		if (parent instanceof MethodDeclaration)
+		 // this is a fake block created by parsing in statements mode
+		if (parent.getLength() == 0 || parent instanceof MethodDeclaration)
 			return true; // braces have been handled in #visit(MethodDeclaration)
 
 		String bracePosition = this.options.brace_position_for_block;
 		if (parent instanceof SwitchStatement) {
 			List<Statement> siblings = ((SwitchStatement) parent).statements();
 			int blockPosition = siblings.indexOf(node);
-			boolean isFirstInCase = blockPosition > 0 && (siblings.get(blockPosition - 1) instanceof SwitchCase);
+			boolean isFirstInCase = blockPosition > 0 && siblings.get(blockPosition - 1) instanceof SwitchCase;
 			if (isFirstInCase)
 				bracePosition = this.options.brace_position_for_block_in_case;
 		} else if (parent instanceof LambdaExpression) {
@@ -381,8 +378,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 						this.tm.get(nonBreakStatementEnd + 1).indent();
 						this.tm.firstTokenIn(statement, -1).unindent();
 					}
-				} else if (!(statement instanceof BreakStatement || statement instanceof YieldStatement
-						|| statement instanceof Block)) {
+				} else if (!(statement instanceof BreakStatement) && !(statement instanceof YieldStatement) && !(statement instanceof Block)) {
 					indent(statement);
 				}
 				nonBreakStatementEnd = isBreaking ? -1 : this.tm.lastIndexIn(statement, -1);
@@ -407,8 +403,8 @@ public class LineBreaksPreparator extends ASTVisitor {
 		Statement previous = null;
 		for (Statement statement : statements) {
 			boolean skip = statement instanceof Block // will add break in visit(Block) if necessary
-					|| (arrowMode && !(statement instanceof SwitchCase))
-					|| (statement instanceof EmptyStatement && !this.options.put_empty_statement_on_new_line);
+					|| arrowMode && !(statement instanceof SwitchCase)
+					|| statement instanceof EmptyStatement && !this.options.put_empty_statement_on_new_line;
 			if (!skip) {
 				boolean newGroup = !arrowMode && statement instanceof SwitchCase && isSwitchBreakingStatement(previous);
 				int blankLines = newGroup ? this.options.blank_lines_between_statement_groups_in_switch : 0;
@@ -431,7 +427,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 		if (!sameLine)
 			handleLoopBody(body);
 		if (this.options.insert_new_line_before_while_in_do_statement
-				|| (!(body instanceof Block) && !(body instanceof EmptyStatement) && !sameLine)) {
+				|| !(body instanceof Block) && !(body instanceof EmptyStatement) && !sameLine) {
 			Token whileToken = this.tm.firstTokenBefore(node.getExpression(), TokenNamewhile);
 			whileToken.breakBefore();
 		}
@@ -559,9 +555,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 	}
 
 	private void handleLoopBody(Statement body) {
-		if (body instanceof Block)
-			return;
-		if (body instanceof EmptyStatement && !this.options.put_empty_statement_on_new_line
+		if (body instanceof Block || body instanceof EmptyStatement && !this.options.put_empty_statement_on_new_line
 				&& !(body.getParent() instanceof IfStatement))
 			return;
 		breakLineBefore(body);
@@ -577,14 +571,14 @@ public class LineBreaksPreparator extends ASTVisitor {
 			if (this.options.insert_new_line_before_else_in_if_statement || !(thenNode instanceof Block))
 				this.tm.firstTokenBefore(elseNode, TokenNameelse).breakBefore();
 
-			boolean keepElseOnSameLine = (this.options.keep_else_statement_on_same_line)
-					|| (this.options.compact_else_if && (elseNode instanceof IfStatement));
+			boolean keepElseOnSameLine = this.options.keep_else_statement_on_same_line
+					|| this.options.compact_else_if && elseNode instanceof IfStatement;
 			if (!keepElseOnSameLine)
 				handleLoopBody(elseNode);
 		}
 
 		boolean keepThenOnSameLine = this.options.keep_then_statement_on_same_line
-				|| (this.options.keep_simple_if_on_one_line && elseNode == null);
+				|| this.options.keep_simple_if_on_one_line && elseNode == null;
 		if (!keepThenOnSameLine)
 			handleLoopBody(thenNode);
 

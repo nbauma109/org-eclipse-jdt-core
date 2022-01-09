@@ -40,7 +40,8 @@ public class SwitchCase extends Statement {
 	 * @since 3.0
 	 * @deprecated In the JLS 12 15.28.1 API, this property is replaced by {@link #EXPRESSIONS2_PROPERTY }.
 	 */
-	public static final ChildPropertyDescriptor EXPRESSION_PROPERTY =
+	@Deprecated
+    public static final ChildPropertyDescriptor EXPRESSION_PROPERTY =
 		new ChildPropertyDescriptor(SwitchCase.class, "expression", Expression.class, OPTIONAL, CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -148,10 +149,9 @@ public class SwitchCase extends Statement {
 		if (property == SWITCH_LABELED_RULE_PROPERTY) {
 			if (get) {
 				return isSwitchLabeledRule();
-			} else {
-				setSwitchLabeledRule(value);
-				return false;
 			}
+            setSwitchLabeledRule(value);
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
@@ -162,10 +162,9 @@ public class SwitchCase extends Statement {
 		if (property == EXPRESSION_PROPERTY) {
 			if (get) {
 				return getExpression();
-			} else {
-				setExpression((Expression) child);
-				return null;
 			}
+            setExpression((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -227,7 +226,8 @@ public class SwitchCase extends Statement {
 	 * @return the expression node, or <code>null</code> if there is none
 	 * @deprecated use expressions() (see JLS 12)
 	 */
-	public Expression getExpression() {
+	@Deprecated
+    public Expression getExpression() {
 		if (!this.expressionInitialized) {
 			// lazy init must be thread-safe for readers
 			synchronized (this) {
@@ -272,7 +272,8 @@ public class SwitchCase extends Statement {
 	 * </ul>
 	 * @deprecated see JLS 12
 	 */
-	public void setExpression(Expression expression) {
+	@Deprecated
+    public void setExpression(Expression expression) {
 		ASTNode oldChild = this.optionalExpression;
 		preReplaceChild(oldChild, expression, EXPRESSION_PROPERTY);
 		this.optionalExpression = expression;

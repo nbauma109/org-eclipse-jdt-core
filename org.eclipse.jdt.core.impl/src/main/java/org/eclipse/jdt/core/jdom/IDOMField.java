@@ -24,6 +24,7 @@ package org.eclipse.jdt.core.jdom;
  * org.eclipse.jdt.core.dom package.
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@Deprecated
 public interface IDOMField extends IDOMMember {
 /**
  * Returns the initializer expression for this field.

@@ -43,7 +43,7 @@ public class TypeExtensionManager implements IRegistryChangeListener {
 
 	private static final String TYPE= "type"; //$NON-NLS-1$
 
-	private static final IPropertyTester[] EMPTY_PROPERTY_TESTER_ARRAY= new IPropertyTester[0];
+	private static final IPropertyTester[] EMPTY_PROPERTY_TESTER_ARRAY= {};
 
 	private static final IPropertyTester NULL_PROPERTY_TESTER= new IPropertyTester() {
 		@Override
@@ -183,20 +183,18 @@ public class TypeExtensionManager implements IRegistryChangeListener {
 		List<IConfigurationElement> typeConfigs= fConfigurationElementMap.get(typeName);
 		if (typeConfigs == null)
 			return EMPTY_PROPERTY_TESTER_ARRAY;
-		else {
-			IPropertyTester[] result= new IPropertyTester[typeConfigs.size()];
-			for (int i= 0; i < result.length; i++) {
-				IConfigurationElement config= typeConfigs.get(i);
-				try {
-					result[i]= new PropertyTesterDescriptor(config);
-				} catch (CoreException e) {
-					Platform.getLog(TypeExtensionManager.class).log(e.getStatus());
-					result[i]= NULL_PROPERTY_TESTER;
-				}
-			}
-			fConfigurationElementMap.remove(typeName);
-			return result;
-		}
+        IPropertyTester[] result= new IPropertyTester[typeConfigs.size()];
+        for (int i= 0; i < result.length; i++) {
+        	IConfigurationElement config= typeConfigs.get(i);
+        	try {
+        		result[i]= new PropertyTesterDescriptor(config);
+        	} catch (CoreException e) {
+        		Platform.getLog(TypeExtensionManager.class).log(e.getStatus());
+        		result[i]= NULL_PROPERTY_TESTER;
+        	}
+        }
+        fConfigurationElementMap.remove(typeName);
+        return result;
 	}
 
 	@Override

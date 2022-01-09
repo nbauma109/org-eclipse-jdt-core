@@ -106,7 +106,7 @@ public final class AST {
 	 * new Class[] {AST.class}
 	 * @since 3.0
 	 */
-	private static final Class[] AST_CLASS = new Class[] {AST.class};
+	private static final Class[] AST_CLASS = {AST.class};
 
 	/**
 	 * Constant for indicating the AST API that handles JLS2.
@@ -123,7 +123,8 @@ public final class AST {
 	 * @since 3.0
 	 * @deprecated Clients should use the  {@link #getJLSLatest()} AST API instead.
 	 */
-	public static final int JLS2 = 2;
+	@Deprecated
+    public static final int JLS2 = 2;
 
 	/**
 	 * Internal synonym for {@link #JLS2}. Use to alleviate
@@ -147,7 +148,8 @@ public final class AST {
 	 * @since 3.1
 	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
-	public static final int JLS3 = 3;
+	@Deprecated
+    public static final int JLS3 = 3;
 
 	/**
 	 * Internal synonym for {@link #JLS3}. Use to alleviate
@@ -171,7 +173,8 @@ public final class AST {
 	 * @since 3.7.1
 	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
-	public static final int JLS4 = 4;
+	@Deprecated
+    public static final int JLS4 = 4;
 
 	/**
 	 * Internal synonym for {@link #JLS4}. Use to alleviate
@@ -195,7 +198,8 @@ public final class AST {
 	 * @since 3.10
 	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
-	public static final int JLS8 = 8;
+	@Deprecated
+    public static final int JLS8 = 8;
 
 	/**
 	 * Internal synonym for {@link #JLS8}. Use to alleviate
@@ -219,7 +223,8 @@ public final class AST {
 	 * @since 3.14
 	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
-	public static final int JLS9 = 9;
+	@Deprecated
+    public static final int JLS9 = 9;
 
 	/**
 	 * Internal synonym for {@link #JLS9}. Use to alleviate
@@ -243,7 +248,8 @@ public final class AST {
 	 * @since 3.14
 	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
-	public static final int JLS10 = 10;
+	@Deprecated
+    public static final int JLS10 = 10;
 
 	/**
 	 * Internal synonym for {@link #JLS10}. Use to alleviate
@@ -267,7 +273,8 @@ public final class AST {
 	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 * @since 3.16
 	 */
-	public static final int JLS11 = 11;
+	@Deprecated
+    public static final int JLS11 = 11;
 
 	/**
 	 * Internal synonym for {@link #JLS11}. Use to alleviate
@@ -290,7 +297,8 @@ public final class AST {
 	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 * @since 3.18
 	 */
-	public static final int JLS12 = 12;
+	@Deprecated
+    public static final int JLS12 = 12;
 	/**
 	 * Internal synonym for {@link #JLS12}. Use to alleviate
 	 * deprecation warnings once JLS12 is deprecated
@@ -313,7 +321,8 @@ public final class AST {
 	 * @since 3.20
 	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 */
-	public static final int JLS13 = 13;
+	@Deprecated
+    public static final int JLS13 = 13;
 
 	/**
 	 * Internal synonym for {@link #JLS13}. Use to alleviate
@@ -336,7 +345,8 @@ public final class AST {
 	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 * @since 3.22
 	 */
-	public static final int JLS14 = 14;
+	@Deprecated
+    public static final int JLS14 = 14;
 
 	/**
 	 * Internal synonym for {@link #JLS14}. Use to alleviate
@@ -359,7 +369,8 @@ public final class AST {
 	 * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 * @since 3.24
 	 */
-	public static final int JLS15 = 15;
+	@Deprecated
+    public static final int JLS15 = 15;
 	/**
 	 * Constant for indicating the AST API that handles JLS16.
 	 * <p>
@@ -374,7 +385,8 @@ public final class AST {
 	 * * @deprecated Clients should use the {@link #getJLSLatest()} AST API instead.
 	 * @since 3.26
 	 */
-	public static final int JLS16 = 16;
+	@Deprecated
+    public static final int JLS16 = 16;
 	/**
 	 * Constant for indicating the AST API that handles JLS17.
 	 * <p>
@@ -418,7 +430,8 @@ public final class AST {
 	 * This provides the latest JLS level.
 	 * @deprecated use {@link #getJLSLatest()}
 	 */
-	public static final int JLS_Latest = JLS17;
+	@Deprecated
+    public static final int JLS_Latest = JLS17;
 
 	/*
 	 * Must not collide with a value for ICompilationUnit constants
@@ -448,7 +461,8 @@ public final class AST {
 	 * @deprecated Use org.eclipse.jdt.core.dom.AST.convertCompilationUnit(int, CompilationUnitDeclaration, Map, boolean, CompilationUnit, int, IProgressMonitor) instead
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
-	public static CompilationUnit convertCompilationUnit(
+	@Deprecated
+    public static CompilationUnit convertCompilationUnit(
 			int level,
 			org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration compilationUnitDeclaration,
 			char[] source,
@@ -543,7 +557,8 @@ public final class AST {
 	 *    {@link #newAST(int, boolean) AST.newAST(AST.JLS12, false)} instead of using this constructor.
      * @since 3.0
 	 */
-	public static AST newAST(int level) {
+	@Deprecated
+    public static AST newAST(int level) {
 		return new AST(level, false);
 	}
 
@@ -633,7 +648,8 @@ public final class AST {
 	 * @since 2.0
 	 * @deprecated Use {@link ASTParser} instead.
 	 */
-	public static CompilationUnit parseCompilationUnit(char[] source) {
+	@Deprecated
+    public static CompilationUnit parseCompilationUnit(char[] source) {
 		if (source == null) {
 			throw new IllegalArgumentException();
 		}
@@ -710,7 +726,8 @@ public final class AST {
 	 * @since 2.0
 	 * @deprecated Use {@link ASTParser} instead.
 	 */
-	public static CompilationUnit parseCompilationUnit(
+	@Deprecated
+    public static CompilationUnit parseCompilationUnit(
 		char[] source,
 		String unitName,
 		IJavaProject project) {
@@ -786,7 +803,8 @@ public final class AST {
 	 * @since 2.1
 	 * @deprecated Use {@link ASTParser} instead.
 	 */
-	public static CompilationUnit parseCompilationUnit(
+	@Deprecated
+    public static CompilationUnit parseCompilationUnit(
 		IClassFile classFile,
 		boolean resolveBindings) {
 
@@ -863,7 +881,8 @@ public final class AST {
 	 * @since 2.0
 	 * @deprecated Use {@link ASTParser} instead.
 	 */
-	public static CompilationUnit parseCompilationUnit(
+	@Deprecated
+    public static CompilationUnit parseCompilationUnit(
 		ICompilationUnit unit,
 		boolean resolveBindings) {
 
@@ -958,7 +977,7 @@ public final class AST {
 	 * new Object[] {this}
 	 * @since 3.0
 	 */
-	private final Object[] THIS_AST= new Object[] {this};
+	private final Object[] THIS_AST= {this};
 
 	/**
 	 * Creates a new, empty abstract syntax tree using default options.
@@ -967,7 +986,8 @@ public final class AST {
 	 * @deprecated Clients should port their code to use the latest JLS* AST API and call
 	 *    {@link #newAST(int, boolean) AST.newAST(AST.JLS12, false)} instead of using this constructor.
 	 */
-	public AST() {
+	@Deprecated
+    public AST() {
 		this(JavaCore.getDefaultOptions());
 	}
 
@@ -1107,21 +1127,20 @@ public final class AST {
 				JavaCore.ENABLED.equals(options.get(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES)));
 
 		long sourceLevel;
-		long complianceLevel;
-		switch(this.apiLevel) {
-			case JLS2_INTERNAL :
-			case JLS3_INTERNAL :
-				sourceLevel = ClassFileConstants.JDK1_3;
-				complianceLevel = ClassFileConstants.JDK1_5;
-				break;
-			case JLS4_INTERNAL :
-				sourceLevel = ClassFileConstants.JDK1_7;
-				complianceLevel = ClassFileConstants.JDK1_7;
-				break;
-			default :
-				sourceLevel = AST.jdkLevelMap.get(options.get(JavaCore.COMPILER_SOURCE));
-				complianceLevel = sourceLevel;
-		}
+		long complianceLevel = switch (this.apiLevel) {
+            case JLS2_INTERNAL, JLS3_INTERNAL -> {
+                sourceLevel = ClassFileConstants.JDK1_3;
+                yield ClassFileConstants.JDK1_5;
+            }
+            case JLS4_INTERNAL -> {
+                sourceLevel = ClassFileConstants.JDK1_7;
+                yield ClassFileConstants.JDK1_7;
+            }
+            default -> {
+                sourceLevel = AST.jdkLevelMap.get(options.get(JavaCore.COMPILER_SOURCE));
+                yield sourceLevel;
+            }
+        };
 		this.scanner = new Scanner(
 			true /*comment*/,
 			true /*whitespace*/,
@@ -1245,7 +1264,7 @@ public final class AST {
 	 * @see #reenableEvents()
      * @since 3.0
      */
-	final void disableEvents() {
+	void disableEvents() {
 		synchronized (this.internalASTLock) {
 			// guard against concurrent access by another reader
 			this.disableEvents++;
@@ -1390,7 +1409,8 @@ public final class AST {
 	 * A local method to workaround calling deprecated method in array type.
 	 * @deprecated
 	 */
-	private void setArrayComponentType(ArrayType arrayType, Type type) {
+	@Deprecated
+    private void setArrayComponentType(ArrayType arrayType, Type type) {
 		arrayType.setComponentType(type);
 	}
 
@@ -1405,8 +1425,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	public AnnotationTypeDeclaration newAnnotationTypeDeclaration() {
-		AnnotationTypeDeclaration result = new AnnotationTypeDeclaration(this);
-		return result;
+		return new AnnotationTypeDeclaration(this);
 	}
 
 	/**
@@ -1421,8 +1440,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	public AnnotationTypeMemberDeclaration newAnnotationTypeMemberDeclaration() {
-		AnnotationTypeMemberDeclaration result = new AnnotationTypeMemberDeclaration(this);
-		return result;
+		return new AnnotationTypeMemberDeclaration(this);
 	}
 
 	/**
@@ -1432,8 +1450,7 @@ public final class AST {
 	 * @return a new unparented anonymous class declaration node
 	 */
 	public AnonymousClassDeclaration newAnonymousClassDeclaration() {
-		AnonymousClassDeclaration result = new AnonymousClassDeclaration(this);
-		return result;
+		return new AnonymousClassDeclaration(this);
 	}
 
 	/**
@@ -1444,8 +1461,7 @@ public final class AST {
 	 * @return a new unparented array access expression node
 	 */
 	public ArrayAccess newArrayAccess() {
-		ArrayAccess result = new ArrayAccess(this);
-		return result;
+		return new ArrayAccess(this);
 	}
 
 	/**
@@ -1487,8 +1503,7 @@ public final class AST {
 	 * @return a new unparented array creation expression node
 	 */
 	public ArrayCreation newArrayCreation() {
-		ArrayCreation result = new ArrayCreation(this);
-		return result;
+		return new ArrayCreation(this);
 	}
 
 	/**
@@ -1498,8 +1513,7 @@ public final class AST {
 	 * @return a new unparented array initializer node
 	 */
 	public ArrayInitializer newArrayInitializer() {
-		ArrayInitializer result = new ArrayInitializer(this);
-		return result;
+		return new ArrayInitializer(this);
 	}
 
 	/**
@@ -1558,10 +1572,7 @@ public final class AST {
 	 * </ul>
 	 */
 	public ArrayType newArrayType(Type elementType, int dimensions) {
-		if (elementType == null) {
-			throw new IllegalArgumentException();
-		}
-		if (dimensions < 0 || dimensions > 255) {
+		if (elementType == null || dimensions < 0 || dimensions > 255) {
 			// max as per Java VM spec
 			throw new IllegalArgumentException();
 		}
@@ -1610,8 +1621,7 @@ public final class AST {
 	 * @return a new unparented assignment expression node
 	 */
 	public Assignment newAssignment() {
-		Assignment result = new Assignment(this);
-		return result;
+		return new Assignment(this);
 	}
 
 	/**
@@ -1638,8 +1648,7 @@ public final class AST {
 	 * @since 3.0
 	 */
 	public BlockComment newBlockComment() {
-		BlockComment result = new BlockComment(this);
-		return result;
+		return new BlockComment(this);
 	}
 
 	/**
@@ -1681,8 +1690,7 @@ public final class AST {
 	 * @since 3.28
 	 */
 	public CaseDefaultExpression newCaseDefaultExpression() {
-		CaseDefaultExpression result = new CaseDefaultExpression(this);
-		return result;
+		return new CaseDefaultExpression(this);
 	}
 
 	/**
@@ -1693,8 +1701,7 @@ public final class AST {
 	 * @return a new unparented cast expression node
 	 */
 	public CastExpression newCastExpression() {
-		CastExpression result = new CastExpression(this);
-		return result;
+		return new CastExpression(this);
 	}
 
 	/**
@@ -1728,8 +1735,7 @@ public final class AST {
 	 * @return a new unparented class instance creation expression node
 	 */
 	public ClassInstanceCreation newClassInstanceCreation() {
-		ClassInstanceCreation result = new ClassInstanceCreation(this);
-		return result;
+		return new ClassInstanceCreation(this);
 	}
 
 	//=============================== DECLARATIONS ===========================
@@ -1752,8 +1758,7 @@ public final class AST {
 	 * @return a new unparented array conditional expression node
 	 */
 	public ConditionalExpression newConditionalExpression() {
-		ConditionalExpression result = new ConditionalExpression(this);
-		return result;
+		return new ConditionalExpression(this);
 	}
 
 	/**
@@ -1769,8 +1774,7 @@ public final class AST {
 	 * @return a new unparented alternate constructor invocation statement node
 	 */
 	public ConstructorInvocation newConstructorInvocation() {
-		ConstructorInvocation result = new ConstructorInvocation(this);
-		return result;
+		return new ConstructorInvocation(this);
 	}
 
 	/**
@@ -1792,8 +1796,7 @@ public final class AST {
 	 * @since 3.10
 	 */
 	public CreationReference newCreationReference() {
-		CreationReference result = new CreationReference(this);
-		return result;
+		return new CreationReference(this);
 	}
 
 	/**
@@ -1842,8 +1845,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	public EnumConstantDeclaration newEnumConstantDeclaration() {
-		EnumConstantDeclaration result = new EnumConstantDeclaration(this);
-		return result;
+		return new EnumConstantDeclaration(this);
 	}
 
 	/**
@@ -1859,8 +1861,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	public EnumDeclaration newEnumDeclaration() {
-		EnumDeclaration result = new EnumDeclaration(this);
-		return result;
+		return new EnumDeclaration(this);
 	}
 
 	/**
@@ -1872,8 +1873,7 @@ public final class AST {
 	 * @since 3.14
 	 */
 	public ExportsDirective newExportsStatement() {
-		ExportsDirective result = new ExportsDirective(this);
-		return result;
+		return new ExportsDirective(this);
 	}
 
 	/**
@@ -1886,8 +1886,7 @@ public final class AST {
 	 * @since 3.10
 	 */
 	public ExpressionMethodReference newExpressionMethodReference() {
-		ExpressionMethodReference result = new ExpressionMethodReference(this);
-		return result;
+		return new ExpressionMethodReference(this);
 	}
 
 	/**
@@ -1930,8 +1929,7 @@ public final class AST {
 	 * @since 3.10
 	 */
 	public Dimension newDimension() {
-		Dimension result = new Dimension(this);
-		return result;
+		return new Dimension(this);
 	}
 
 	/**
@@ -1942,8 +1940,7 @@ public final class AST {
 	 * @return a new unparented field access expression node
 	 */
 	public FieldAccess newFieldAccess() {
-		FieldAccess result = new FieldAccess(this);
-		return result;
+		return new FieldAccess(this);
 	}
 
 	/**
@@ -1996,8 +1993,7 @@ public final class AST {
 	 * @since 3.28
 	 */
 	public GuardedPattern newGuardedPattern() {
-		GuardedPattern result = new GuardedPattern(this);
-		return result;
+		return new GuardedPattern(this);
 	}
 
 	/**
@@ -2019,8 +2015,7 @@ public final class AST {
 	 * @return the new unparented import declaration node
 	 */
 	public ImportDeclaration newImportDeclaration() {
-		ImportDeclaration result = new ImportDeclaration(this);
-		return result;
+		return new ImportDeclaration(this);
 	}
 
 	/**
@@ -2032,8 +2027,7 @@ public final class AST {
 	 * @return a new unparented infix expression node
 	 */
 	public InfixExpression newInfixExpression() {
-		InfixExpression result = new InfixExpression(this);
-		return result;
+		return new InfixExpression(this);
 	}
 
 	/**
@@ -2044,8 +2038,7 @@ public final class AST {
 	 * @return a new unparented initializer node
 	 */
 	public Initializer newInitializer() {
-		Initializer result = new Initializer(this);
-		return result;
+		return new Initializer(this);
 	}
 
 	/**
@@ -2056,8 +2049,7 @@ public final class AST {
 	 * @return a new unparented instanceof expression node
 	 */
 	public InstanceofExpression newInstanceofExpression() {
-		InstanceofExpression result = new InstanceofExpression(this);
-		return result;
+		return new InstanceofExpression(this);
 	}
 
 	/**
@@ -2069,8 +2061,7 @@ public final class AST {
 	 * @return a new unparented doc comment node
 	 */
 	public Javadoc newJavadoc() {
-		Javadoc result = new Javadoc(this);
-		return result;
+		return new Javadoc(this);
 	}
 
 	/**
@@ -2093,8 +2084,7 @@ public final class AST {
 	 * @since 3.10
 	 */
 	public LambdaExpression newLambdaExpression() {
-		LambdaExpression result = new LambdaExpression(this);
-		return result;
+		return new LambdaExpression(this);
 	}
 
 	/**
@@ -2111,8 +2101,7 @@ public final class AST {
 	 * @since 3.0
 	 */
 	public LineComment newLineComment() {
-		LineComment result = new LineComment(this);
-		return result;
+		return new LineComment(this);
 	}
 
 	/**
@@ -2125,8 +2114,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	public MarkerAnnotation newMarkerAnnotation() {
-		MarkerAnnotation result = new MarkerAnnotation(this);
-		return result;
+		return new MarkerAnnotation(this);
 	}
 
 	/**
@@ -2142,8 +2130,7 @@ public final class AST {
 	 * @since 3.0
 	 */
 	public MemberRef newMemberRef() {
-		MemberRef result = new MemberRef(this);
-		return result;
+		return new MemberRef(this);
 	}
 
 	//=============================== COMMENTS ===========================
@@ -2158,8 +2145,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	public MemberValuePair newMemberValuePair() {
-		MemberValuePair result = new MemberValuePair(this);
-		return result;
+		return new MemberValuePair(this);
 	}
 
 	/**
@@ -2191,8 +2177,7 @@ public final class AST {
 	 * @return a new unparented method invocation expression node
 	 */
 	public MethodInvocation newMethodInvocation() {
-		MethodInvocation result = new MethodInvocation(this);
-		return result;
+		return new MethodInvocation(this);
 	}
 
 	/**
@@ -2209,8 +2194,7 @@ public final class AST {
 	 * @since 3.0
 	 */
 	public MethodRef newMethodRef() {
-		MethodRef result = new MethodRef(this);
-		return result;
+		return new MethodRef(this);
 	}
 
 	/**
@@ -2226,8 +2210,7 @@ public final class AST {
 	 * @since 3.0
 	 */
 	public MethodRefParameter newMethodRefParameter() {
-		MethodRefParameter result = new MethodRefParameter(this);
-		return result;
+		return new MethodRefParameter(this);
 	}
 
 	/**
@@ -2341,8 +2324,7 @@ public final class AST {
 	 * @since 3.14
 	 */
 	public ModuleDeclaration newModuleDeclaration() {
-		ModuleDeclaration result = new ModuleDeclaration(this);
-		return result;
+		return new ModuleDeclaration(this);
 	}
 
 	/**
@@ -2467,8 +2449,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	public NormalAnnotation newNormalAnnotation() {
-		NormalAnnotation result = new NormalAnnotation(this);
-		return result;
+		return new NormalAnnotation(this);
 	}
 
 	/**
@@ -2487,8 +2468,7 @@ public final class AST {
 	 * @since 3.28
 	 */
 	public NullPattern newNullPattern() {
-		NullPattern result = new NullPattern(this);
-		return result;
+		return new NullPattern(this);
 	}
 
 	/**
@@ -2498,8 +2478,7 @@ public final class AST {
 	 * @return a new unparented number literal node
 	 */
 	public NumberLiteral newNumberLiteral() {
-		NumberLiteral result = new NumberLiteral(this);
-		return result;
+		return new NumberLiteral(this);
 	}
 
 	/**
@@ -2528,8 +2507,7 @@ public final class AST {
 	 * @since 3.14
 	 */
 	public OpensDirective newOpensDirective() {
-		OpensDirective result = new OpensDirective(this);
-		return result;
+		return new OpensDirective(this);
 	}
 
 	/**
@@ -2540,8 +2518,7 @@ public final class AST {
 	 * @return the new unparented package declaration node
 	 */
 	public PackageDeclaration newPackageDeclaration() {
-		PackageDeclaration result = new PackageDeclaration(this);
-		return result;
+		return new PackageDeclaration(this);
 	}
 
 	/**
@@ -2572,8 +2549,7 @@ public final class AST {
 	 * @return a new unparented parenthesized expression node
 	 */
 	public ParenthesizedExpression newParenthesizedExpression() {
-		ParenthesizedExpression result = new ParenthesizedExpression(this);
-		return result;
+		return new ParenthesizedExpression(this);
 	}
 
 	/**
@@ -2585,8 +2561,7 @@ public final class AST {
 	 * @since 3.26
 	 */
 	public PatternInstanceofExpression newPatternInstanceofExpression() {
-		PatternInstanceofExpression result = new PatternInstanceofExpression(this);
-		return result;
+		return new PatternInstanceofExpression(this);
 	}
 
 	/**
@@ -2597,8 +2572,7 @@ public final class AST {
 	 * @return a new unparented postfix expression node
 	 */
 	public PostfixExpression newPostfixExpression() {
-		PostfixExpression result = new PostfixExpression(this);
-		return result;
+		return new PostfixExpression(this);
 	}
 
 	/**
@@ -2609,8 +2583,7 @@ public final class AST {
 	 * @return a new unparented prefix expression node
 	 */
 	public PrefixExpression newPrefixExpression() {
-		PrefixExpression result = new PrefixExpression(this);
-		return result;
+		return new PrefixExpression(this);
 	}
 
 	/**
@@ -2637,8 +2610,7 @@ public final class AST {
 	 * @since 3.14
 	 */
 	public ProvidesDirective newProvidesDirective() {
-		ProvidesDirective result = new ProvidesDirective(this);
-		return result;
+		return new ProvidesDirective(this);
 	}
 
 	/**
@@ -2698,8 +2670,7 @@ public final class AST {
 	 * @since 3.23
 	 */
 	public RecordDeclaration newRecordDeclaration() {
-		RecordDeclaration result = new RecordDeclaration(this);
-		return result;
+		return new RecordDeclaration(this);
 	}
 	/**
 	 * Creates and returns a new unparented requires directive
@@ -2710,8 +2681,7 @@ public final class AST {
 	 * @since 3.14
 	 */
 	public RequiresDirective newRequiresDirective() {
-		RequiresDirective result = new RequiresDirective(this);
-		return result;
+		return new RequiresDirective(this);
 	}
 
 	/**
@@ -2776,8 +2746,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	public SingleMemberAnnotation newSingleMemberAnnotation() {
-		SingleMemberAnnotation result = new SingleMemberAnnotation(this);
-		return result;
+		return new SingleMemberAnnotation(this);
 	}
 
 	/**
@@ -2789,8 +2758,7 @@ public final class AST {
 	 * @return a new unparented single variable declaration node
 	 */
 	public SingleVariableDeclaration newSingleVariableDeclaration() {
-		SingleVariableDeclaration result = new SingleVariableDeclaration(this);
-		return result;
+		return new SingleVariableDeclaration(this);
 	}
 
 	//=============================== EXPRESSIONS ===========================
@@ -2817,9 +2785,7 @@ public final class AST {
 	 * @return a new unparented super constructor invocation statement node
 	 */
 	public SuperConstructorInvocation newSuperConstructorInvocation() {
-		SuperConstructorInvocation result =
-			new SuperConstructorInvocation(this);
-		return result;
+		return new SuperConstructorInvocation(this);
 	}
 
 	/**
@@ -2830,8 +2796,7 @@ public final class AST {
 	 * @return a new unparented super field access expression node
 	 */
 	public SuperFieldAccess newSuperFieldAccess() {
-		SuperFieldAccess result = new SuperFieldAccess(this);
-		return result;
+		return new SuperFieldAccess(this);
 	}
 
 	/**
@@ -2843,8 +2808,7 @@ public final class AST {
 	 *    expression node
 	 */
 	public SuperMethodInvocation newSuperMethodInvocation() {
-		SuperMethodInvocation result = new SuperMethodInvocation(this);
-		return result;
+		return new SuperMethodInvocation(this);
 	}
 
 	/**
@@ -2856,8 +2820,7 @@ public final class AST {
 	 * @since 3.10
 	 */
 	public SuperMethodReference newSuperMethodReference() {
-		SuperMethodReference result = new SuperMethodReference(this);
-		return result;
+		return new SuperMethodReference(this);
 	}
 
 	/**
@@ -2869,8 +2832,7 @@ public final class AST {
 	 * @since 3.18
 	 */
 	public SwitchExpression newSwitchExpression() {
-		SwitchExpression result = new SwitchExpression(this);
-		return result;
+		return new SwitchExpression(this);
 	}
 
 	/**
@@ -2918,8 +2880,7 @@ public final class AST {
 	 * @since 3.0
 	 */
 	public TagElement newTagElement() {
-		TagElement result = new TagElement(this);
-		return result;
+		return new TagElement(this);
 	}
 
 	/**
@@ -2945,8 +2906,7 @@ public final class AST {
 	 * @since 3.0
 	 */
 	public TextElement newTextElement() {
-		TextElement result = new TextElement(this);
-		return result;
+		return new TextElement(this);
 	}
 
 	/**
@@ -2956,8 +2916,7 @@ public final class AST {
 	 * @return a new unparented "this" expression node
 	 */
 	public ThisExpression newThisExpression() {
-		ThisExpression result = new ThisExpression(this);
-		return result;
+		return new ThisExpression(this);
 	}
 
 	/**
@@ -3060,8 +3019,7 @@ public final class AST {
 	 * @return a new unparented type literal node
 	 */
 	public TypeLiteral newTypeLiteral() {
-		TypeLiteral result = new TypeLiteral(this);
-		return result;
+		return new TypeLiteral(this);
 	}
 
 	/**
@@ -3074,8 +3032,7 @@ public final class AST {
 	 * @since 3.10
 	 */
 	public TypeMethodReference newTypeMethodReference() {
-		TypeMethodReference result = new TypeMethodReference(this);
-		return result;
+		return new TypeMethodReference(this);
 	}
 
 	/**
@@ -3088,8 +3045,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	public TypeParameter newTypeParameter() {
-		TypeParameter result = new TypeParameter(this);
-		return result;
+		return new TypeParameter(this);
 	}
 
 	/**
@@ -3100,8 +3056,7 @@ public final class AST {
 	 * @since 3.28
 	 */
 	public TypePattern newTypePattern() {
-		TypePattern result = new TypePattern(this);
-		return result;
+		return new TypePattern(this);
 	}
 
 	/**
@@ -3126,8 +3081,7 @@ public final class AST {
 	 * @since 3.14
 	 */
 	public UsesDirective newUsesDirective() {
-		UsesDirective result = new UsesDirective(this);
-		return result;
+		return new UsesDirective(this);
 	}
 
 	/**
@@ -3183,8 +3137,7 @@ public final class AST {
 	 * @return a new unparented variable declaration fragment node
 	 */
 	public VariableDeclarationFragment newVariableDeclarationFragment() {
-		VariableDeclarationFragment result = new VariableDeclarationFragment(this);
-		return result;
+		return new VariableDeclarationFragment(this);
 	}
 
 	//=============================== STATEMENTS ===========================
@@ -3241,8 +3194,7 @@ public final class AST {
 	 * @since 3.1
 	 */
 	public WildcardType newWildcardType() {
-		WildcardType result = new WildcardType(this);
-		return result;
+		return new WildcardType(this);
 	}
 
 	/**
@@ -3272,9 +3224,8 @@ public final class AST {
 				// doing lazy init OR already processing an event
 				// System.out.println("[BOUNCE ADD]");
 				return;
-			} else {
-				disableEvents();
 			}
+            disableEvents();
 		}
 		try {
 			this.eventHandler.postAddChildEvent(node, child, property);
@@ -3299,9 +3250,8 @@ public final class AST {
 				// doing lazy init OR already processing an event
 				// System.out.println("[BOUNCE CLONE]");
 				return;
-			} else {
-				disableEvents();
 			}
+            disableEvents();
 		}
 		try {
 			this.eventHandler.postCloneNodeEvent(node, clone);
@@ -3328,9 +3278,8 @@ public final class AST {
 				// doing lazy init OR already processing an event
 				// System.out.println("[BOUNCE DEL]");
 				return;
-			} else {
-				disableEvents();
 			}
+            disableEvents();
 		}
 		try {
 			this.eventHandler.postRemoveChildEvent(node, child, property);
@@ -3358,9 +3307,8 @@ public final class AST {
 				// doing lazy init OR already processing an event
 				// System.out.println("[BOUNCE REP]");
 				return;
-			} else {
-				disableEvents();
 			}
+            disableEvents();
 		}
 		try {
 			this.eventHandler.postReplaceChildEvent(node, child, newChild, property);
@@ -3387,9 +3335,8 @@ public final class AST {
 				// doing lazy init OR already processing an event
 				// System.out.println("[BOUNCE CHANGE]");
 				return;
-			} else {
-				disableEvents();
 			}
+            disableEvents();
 		}
 		try {
 			this.eventHandler.postValueChangeEvent(node, property);
@@ -3416,9 +3363,8 @@ public final class AST {
 				// doing lazy init OR already processing an event
 				// System.out.println("[BOUNCE ADD]");
 				return;
-			} else {
-				disableEvents();
 			}
+            disableEvents();
 		}
 		try {
 			this.eventHandler.preAddChildEvent(node, child, property);
@@ -3442,9 +3388,8 @@ public final class AST {
 				// doing lazy init OR already processing an event
 				// System.out.println("[BOUNCE CLONE]");
 				return;
-			} else {
-				disableEvents();
 			}
+            disableEvents();
 		}
 		try {
 			this.eventHandler.preCloneNodeEvent(node);
@@ -3471,9 +3416,8 @@ public final class AST {
 				// doing lazy init OR already processing an event
 				// System.out.println("[BOUNCE DEL]");
 				return;
-			} else {
-				disableEvents();
 			}
+            disableEvents();
 		}
 		try {
 			this.eventHandler.preRemoveChildEvent(node, child, property);
@@ -3501,9 +3445,8 @@ public final class AST {
 				// doing lazy init OR already processing an event
 				// System.out.println("[BOUNCE REP]");
 				return;
-			} else {
-				disableEvents();
 			}
+            disableEvents();
 		}
 		try {
 			this.eventHandler.preReplaceChildEvent(node, child, newChild, property);
@@ -3530,9 +3473,8 @@ public final class AST {
 				// doing lazy init OR already processing an event
 				// System.out.println("[BOUNCE CHANGE]");
 				return;
-			} else {
-				disableEvents();
 			}
+            disableEvents();
 		}
 		try {
 			this.eventHandler.preValueChangeEvent(node, property);
@@ -3564,11 +3506,14 @@ public final class AST {
 	void recordModifications(CompilationUnit root) {
 		if(this.modificationCount != this.originalModificationCount) {
 			throw new IllegalArgumentException("AST is already modified"); //$NON-NLS-1$
-		} else if(this.rewriter  != null) {
+		}
+        if(this.rewriter  != null) {
 			throw new IllegalArgumentException("AST modifications are already recorded"); //$NON-NLS-1$
-		} else if((root.getFlags() & ASTNode.PROTECT) != 0) {
+		}
+        if((root.getFlags() & ASTNode.PROTECT) != 0) {
 			throw new IllegalArgumentException("Root node is unmodifiable"); //$NON-NLS-1$
-		} else if(root.getAST() != this) {
+		}
+        if(root.getAST() != this) {
 			throw new IllegalArgumentException("Root node is not owned by this ast"); //$NON-NLS-1$
 		}
 
@@ -3585,7 +3530,7 @@ public final class AST {
 	 * @see #disableEvents()
      * @since 3.0
      */
-	final void reenableEvents() {
+	void reenableEvents() {
 		synchronized (this.internalASTLock) {
 			// guard against concurrent access by another reader
 			this.disableEvents--;

@@ -286,12 +286,11 @@ public class CorrectionEngine {
 			int position = completionPosition;
 
 			for (int i = 0; i < 4; i++) {
-				if(scanner.getNextCharAsJavaIdentifierPart()) {
-					completionPosition = position;
-					position = scanner.currentPosition;
-				} else {
+				if(!scanner.getNextCharAsJavaIdentifierPart()) {
 					break;
 				}
+                completionPosition = position;
+                position = scanner.currentPosition;
 			}
 			Hashtable oldOptions = JavaCore.getOptions();
 			try {
@@ -321,7 +320,7 @@ public class CorrectionEngine {
 			switch (proposal.getKind()) {
 				case CompletionProposal.TYPE_REF:
 					int flags = proposal.getFlags();
-					if (!(Flags.isEnum(flags) || Flags.isAnnotation(flags))) {
+					if (!Flags.isEnum(flags) && !Flags.isAnnotation(flags)) {
 						if((CorrectionEngine.this.filter & (CLASSES | INTERFACES)) != 0) {
 							char[] completionName = proposal.getCompletion();
 							CorrectionEngine.this.correctionRequestor.acceptClass(

@@ -111,18 +111,16 @@ public class ArrayAccess extends Expression {
 		if (property == ARRAY_PROPERTY) {
 			if (get) {
 				return getArray();
-			} else {
-				setArray((Expression) child);
-				return null;
 			}
+            setArray((Expression) child);
+            return null;
 		}
 		if (property == INDEX_PROPERTY) {
 			if (get) {
 				return getIndex();
-			} else {
-				setIndex((Expression) child);
-				return null;
 			}
+            setIndex((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

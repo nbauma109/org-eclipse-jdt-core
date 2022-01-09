@@ -29,7 +29,7 @@ public abstract class NestedTypeBinding extends SourceTypeBinding {
 
 public NestedTypeBinding(char[][] typeName, ClassScope scope, SourceTypeBinding enclosingType) {
 	super(typeName, enclosingType.fPackage, scope);
-	this.tagBits |= (TagBits.IsNestedType | TagBits.ContainsNestedTypeReferences);
+	this.tagBits |= TagBits.IsNestedType | TagBits.ContainsNestedTypeReferences;
 	this.enclosingType = enclosingType;
 }
 

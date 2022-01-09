@@ -70,7 +70,7 @@ public final class ProposedResourceDelta extends PlatformObject implements IReso
 	 */
 	protected void addFlags(int flags) {
 		//make sure the provided flags don't influence the kind
-		this.status |= (flags & ~KIND_MASK);
+		this.status |= flags & ~KIND_MASK;
 	}
 
 	@Override
@@ -158,11 +158,11 @@ public final class ProposedResourceDelta extends PlatformObject implements IReso
 	}
 
 	public void setFlags(int flags) {
-		status = getKind() | (flags & ~KIND_MASK);
+		status = getKind() | flags & ~KIND_MASK;
 	}
 
 	protected void setKind(int kind) {
-		status = getFlags() | (kind & KIND_MASK);
+		status = getFlags() | kind & KIND_MASK;
 	}
 
 	protected void setMovedFromPath(IPath path) {

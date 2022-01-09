@@ -118,7 +118,6 @@ public class MultiStringMatcher {
 				return new MultiStringMatcher() {
 					@Override
 					public void find(CharSequence text, int offset, Consumer<Match> matches) {
-						return;
 					}
 
 					@Override
@@ -209,7 +208,7 @@ public class MultiStringMatcher {
 			if (children == null) {
 				children= new HashMap<>();
 			}
-			return children.computeIfAbsent(Character.valueOf(c), key -> new Node(depth + 1));
+			return children.computeIfAbsent(c, key -> new Node(depth + 1));
 		}
 
 		boolean hasChildren() {
@@ -304,7 +303,7 @@ public class MultiStringMatcher {
 		int textEnd= text.length();
 		Node node= root;
 		for (int i= offset; i < textEnd; i++) {
-			Character c= Character.valueOf(text.charAt(i));
+			Character c= text.charAt(i);
 			Node next;
 			while ((next= node.next(c)) == null) {
 				node= node.fail;
@@ -377,7 +376,7 @@ public class MultiStringMatcher {
 		Match subMatch= null;
 		Node node= root;
 		for (int i= offset; i < textEnd; i++) {
-			Character c= Character.valueOf(text.charAt(i));
+			Character c= text.charAt(i);
 			Node next= node.next(c);
 			if (next == null) {
 				// Can't continue on this path.
@@ -389,19 +388,11 @@ public class MultiStringMatcher {
 				do {
 					node= node.fail;
 				} while ((next= node.next(c)) == null);
-				if (subMatch != null) {
-					if (next == root) {
-						// We fell off the trie and could not switch to another. Return the best
-						// sub-match.
-						return subMatch;
-					} else if (subMatch.getOffset() < i - node.depth) {
-						// The new path starts at i - node.depth == i - next.depth + 1, so if a
-						// sub-match is earlier, we may return it. Any primary match on this path
-						// or on any other path we might switch to later on will have a higher
-						// offset, and so will any sub-matches we might discover on these paths.
-						return subMatch;
-					}
-				}
+				if (subMatch != null && (next == root || subMatch.getOffset() < i - node.depth)) {
+                	// We fell off the trie and could not switch to another. Return the best
+                	// sub-match.
+                	return subMatch;
+                }
 			}
 			node= next;
 			if (node.match != null) {
@@ -421,7 +412,7 @@ public class MultiStringMatcher {
 					int newOffset= i - out.depth + 1;
 					if (subMatch == null
 							|| newOffset < subMatch.getOffset()
-							|| (newOffset == subMatch.getOffset() && out.depth > subMatch.getText().length())) {
+							|| newOffset == subMatch.getOffset() && out.depth > subMatch.getText().length()) {
 						subMatch= new MatchResult(out.match, newOffset);
 					}
 				}

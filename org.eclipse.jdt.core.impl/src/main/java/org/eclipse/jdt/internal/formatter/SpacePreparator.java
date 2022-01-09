@@ -642,8 +642,8 @@ public class SpacePreparator extends ASTVisitor {
 
 		ASTNode parent = node.getParent();
 		boolean skipSpaceAfter = parent instanceof Annotation || parent instanceof MemberValuePair
-				|| (parent instanceof AnnotationTypeMemberDeclaration
-						&& ((AnnotationTypeMemberDeclaration) parent).getDefault() == node)
+				|| parent instanceof AnnotationTypeMemberDeclaration
+						&& ((AnnotationTypeMemberDeclaration) parent).getDefault() == node
 				|| parent instanceof ArrayInitializer;
 		if (!skipSpaceAfter)
 			this.tm.lastTokenIn(node, -1).spaceAfter();
@@ -677,9 +677,8 @@ public class SpacePreparator extends ASTVisitor {
 		handleSemicolon(node.statements());
 
 		ASTNode parent = node.getParent();
-		if (parent.getLength() == 0)
-			return true; // this is a fake block created by parsing in statements mode
-		if (parent instanceof MethodDeclaration)
+		 // this is a fake block created by parsing in statements mode
+		if (parent.getLength() == 0 || parent instanceof MethodDeclaration)
 			return true; // spaces handled in #visit(MethodDeclaration)
 
 		handleToken(node, TokenNameLBRACE, this.options.insert_space_before_opening_brace_in_block, false);
@@ -995,7 +994,7 @@ public class SpacePreparator extends ASTVisitor {
 							&& !(node.getParent() instanceof ArrayInitializer)
 							&& !(node.getParent() instanceof SingleMemberAnnotation),
 					this.options.insert_space_after_opening_brace_in_array_initializer
-							&& !(endsWithComma && node.expressions().isEmpty()));
+							&& (!endsWithComma || !node.expressions().isEmpty()));
 			handleCommas(node.expressions(), this.options.insert_space_before_comma_in_array_initializer,
 					this.options.insert_space_after_comma_in_array_initializer);
 			if (endsWithComma) {
@@ -1004,7 +1003,7 @@ public class SpacePreparator extends ASTVisitor {
 			}
 			handleToken(this.tm.get(closingBraceIndex),
 					this.options.insert_space_before_closing_brace_in_array_initializer
-							&& !(endsWithComma && node.expressions().isEmpty()), false);
+							&& (!endsWithComma || !node.expressions().isEmpty()), false);
 		}
 		return true;
 	}

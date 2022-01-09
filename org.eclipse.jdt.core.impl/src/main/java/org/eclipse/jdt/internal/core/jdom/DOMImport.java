@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.core.util.Util;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 // TODO (jerome) - add implementation support for 1.5 features
 class DOMImport extends DOMNode implements IDOMImport {
 
@@ -119,9 +120,8 @@ protected void appendFragmentedContents(CharArrayBuffer buffer) {
 public String getContents() {
 	if (this.fName == null) {
 		return null;
-	} else {
-		return super.getContents();
 	}
+    return super.getContents();
 }
 /**
  * @see DOMNode#getDetailedNode()
@@ -137,9 +137,8 @@ protected DOMNode getDetailedNode() {
 public IJavaElement getJavaElement(IJavaElement parent) throws IllegalArgumentException {
 	if (parent.getElementType() == IJavaElement.COMPILATION_UNIT) {
 		return ((ICompilationUnit)parent).getImport(getName());
-	} else {
-		throw new IllegalArgumentException(Messages.element_illegalParent);
 	}
+    throw new IllegalArgumentException(Messages.element_illegalParent);
 }
 /**
  * @see IDOMNode#getNodeType()

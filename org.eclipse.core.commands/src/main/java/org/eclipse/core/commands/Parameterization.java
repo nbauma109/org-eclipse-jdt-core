@@ -85,7 +85,7 @@ public final class Parameterization {
 	}
 
 	@Override
-	public final boolean equals(final Object object) {
+	public boolean equals(final Object object) {
 		if (this == object) {
 			return true;
 		}
@@ -95,7 +95,7 @@ public final class Parameterization {
 		}
 
 		final Parameterization parameterization = (Parameterization) object;
-		if (!(Objects.equals(this.parameter.getId(), parameterization.parameter.getId()))) {
+		if (!Objects.equals(this.parameter.getId(), parameterization.parameter.getId())) {
 			return false;
 		}
 
@@ -107,7 +107,7 @@ public final class Parameterization {
 	 *
 	 * @return The parameter; never <code>null</code>.
 	 */
-	public final IParameter getParameter() {
+	public IParameter getParameter() {
 		return parameter;
 	}
 
@@ -116,7 +116,7 @@ public final class Parameterization {
 	 *
 	 * @return The value; may be <code>null</code>.
 	 */
-	public final String getValue() {
+	public String getValue() {
 		return value;
 	}
 
@@ -129,7 +129,7 @@ public final class Parameterization {
 	 * @throws ParameterValuesException
 	 *             If the parameter needed to be initialized, but couldn't be.
 	 */
-	public final String getValueName() throws ParameterValuesException {
+	public String getValueName() throws ParameterValuesException {
 		final Map<?, ?> parameterValues = parameter.getValues().getParameterValues();
 		final Iterator<?> parameterValueItr = parameterValues.entrySet().iterator();
 		String returnValue = null;
@@ -150,7 +150,7 @@ public final class Parameterization {
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		if (hashCode == HASH_CODE_NOT_COMPUTED) {
 			hashCode = HASH_INITIAL * HASH_FACTOR + Objects.hashCode(parameter);
 			hashCode = hashCode * HASH_FACTOR + Objects.hashCode(value);

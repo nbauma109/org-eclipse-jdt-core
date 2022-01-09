@@ -409,7 +409,7 @@ public final class Command extends NamedHandleObjectWithState implements Compara
 		final IHandler handler = this.handler;
 
 		// Perform the execution, if there is a handler.
-		if ((handler != null) && (handler.isHandled())) {
+		if (handler != null && handler.isHandled()) {
 			try {
 				final Object returnValue = handler.execute(event);
 				if (shouldFireEvents) {
@@ -473,7 +473,7 @@ public final class Command extends NamedHandleObjectWithState implements Compara
 		}
 
 		// Perform the execution, if there is a handler.
-		if ((handler != null) && (handler.isHandled())) {
+		if (handler != null && handler.isHandled()) {
 			setEnabled(event.getApplicationContext());
 			if (!isEnabled()) {
 				final NotEnabledException exception = new NotEnabledException(
@@ -762,7 +762,7 @@ public final class Command extends NamedHandleObjectWithState implements Compara
 					+ id);
 		}
 
-		if ((parameters == null) || (parameters.length == 0)) {
+		if (parameters == null || parameters.length == 0) {
 			return null;
 		}
 
@@ -970,7 +970,7 @@ public final class Command extends NamedHandleObjectWithState implements Compara
 		string = null;
 
 		// Debugging output
-		if ((DEBUG_HANDLERS) && ((DEBUG_HANDLERS_COMMAND_ID == null) || (DEBUG_HANDLERS_COMMAND_ID.equals(id)))) {
+		if (DEBUG_HANDLERS && (DEBUG_HANDLERS_COMMAND_ID == null || DEBUG_HANDLERS_COMMAND_ID.equals(id))) {
 			final StringBuilder buffer = new StringBuilder("Command('"); //$NON-NLS-1$
 			buffer.append(id);
 			buffer.append("') has changed to "); //$NON-NLS-1$

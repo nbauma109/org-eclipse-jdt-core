@@ -89,12 +89,10 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		FakedTrackingVariable.cleanUpAfterAssignment(currentScope, this.lhs.bits, this.expression);
 
 	int nullStatus = this.expression.nullStatus(flowInfo, flowContext);
-	if (local != null && (local.type.tagBits & TagBits.IsBaseType) == 0) {
-		if (nullStatus == FlowInfo.NULL) {
-			flowContext.recordUsingNullReference(currentScope, local, this.lhs,
-				FlowContext.CAN_ONLY_NULL | FlowContext.IN_ASSIGNMENT, flowInfo);
-		}
-	}
+	if (local != null && (local.type.tagBits & TagBits.IsBaseType) == 0 && nullStatus == FlowInfo.NULL) {
+    	flowContext.recordUsingNullReference(currentScope, local, this.lhs,
+    		FlowContext.CAN_ONLY_NULL | FlowContext.IN_ASSIGNMENT, flowInfo);
+    }
 	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
 		VariableBinding var = this.lhs.nullAnnotatedVariableBinding(compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8);
 		if (var != null) {
@@ -120,7 +118,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 void checkAssignment(BlockScope scope, TypeBinding lhsType, TypeBinding rhsType) {
 	FieldBinding leftField = getLastField(this.lhs);
-	if (leftField != null &&  rhsType != TypeBinding.NULL && (lhsType.kind() == Binding.WILDCARD_TYPE) && ((WildcardBinding)lhsType).boundKind != Wildcard.SUPER) {
+	if (leftField != null &&  rhsType != TypeBinding.NULL && lhsType.kind() == Binding.WILDCARD_TYPE && ((WildcardBinding)lhsType).boundKind != Wildcard.SUPER) {
 	    scope.problemReporter().wildcardAssignment(lhsType, rhsType, this.expression);
 	} else if (leftField != null && !leftField.isStatic() && leftField.declaringClass != null /*length pseudo field*/&& leftField.declaringClass.isRawType()) {
 	    scope.problemReporter().unsafeRawFieldAssignment(leftField, rhsType, this.lhs);
@@ -151,12 +149,11 @@ FieldBinding getLastField(Expression someExpression) {
         return ((FieldReference)someExpression).binding;
     } else if (someExpression instanceof QualifiedNameReference) {
         QualifiedNameReference qName = (QualifiedNameReference) someExpression;
-        if (qName.otherBindings == null) {
-        	if ((someExpression.bits & RestrictiveFlagMASK) == Binding.FIELD) {
-        		return (FieldBinding)qName.binding;
-        	}
-        } else {
+        if (qName.otherBindings != null) {
             return qName.otherBindings[qName.otherBindings.length - 1];
+        }
+        if ((someExpression.bits & RestrictiveFlagMASK) == Binding.FIELD) {
+        	return (FieldBinding)qName.binding;
         }
     }
     return null;
@@ -235,7 +232,8 @@ public TypeBinding resolveType(BlockScope scope) {
 			CastExpression.checkNeedForAssignedCast(scope, lhsType, (CastExpression) this.expression);
 		}
 		return this.resolvedType;
-	} else if (isBoxingCompatible(rhsType, lhsType, this.expression, scope)) {
+	}
+    if (isBoxingCompatible(rhsType, lhsType, this.expression, scope)) {
 		this.expression.computeConversion(scope, lhsType, rhsType);
 		if (this.expression instanceof CastExpression
 				&& (this.expression.bits & ASTNode.UnnecessaryCast) == 0) {
@@ -281,6 +279,6 @@ public LocalVariableBinding localVariableBinding() {
 }
 @Override
 public boolean statementExpression() {
-	return ((this.bits & ASTNode.ParenthesizedMASK) == 0);
+	return (this.bits & ASTNode.ParenthesizedMASK) == 0;
 }
 }

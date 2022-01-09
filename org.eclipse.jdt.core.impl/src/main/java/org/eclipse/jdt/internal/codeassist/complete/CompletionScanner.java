@@ -93,7 +93,7 @@ public char[] getCurrentIdentifierSource() {
 			} else {
 				// no char[] sharing around completionIdentifier, we want it to be unique so as to use identity checks
 				int length = this.cursorLocation + 1 - this.startPosition;
-				System.arraycopy(this.source, this.startPosition, (this.completionIdentifier = new char[length]), 0, length);
+				System.arraycopy(this.source, this.startPosition, this.completionIdentifier = new char[length], 0, length);
 			}
 			return this.completionIdentifier;
 		}
@@ -103,22 +103,20 @@ public char[] getCurrentIdentifierSource() {
 
 @Override
 public char[] getCurrentTokenSourceString() {
-	if (this.completionIdentifier == null){
-		if (this.cursorLocation+1 >= this.startPosition && this.cursorLocation < this.currentPosition){
-			// remember actual identifier positions
-			this.completedIdentifierStart = this.startPosition;
-			this.completedIdentifierEnd = this.currentPosition - 1;
-			if (this.withoutUnicodePtr != 0){			// check unicode scenario
-				int length = this.cursorLocation - this.startPosition - this.unicodeCharSize;
-				System.arraycopy(this.withoutUnicodeBuffer, 2, this.completionIdentifier = new char[length], 0, length);
-			} else {
-				// no char[] sharing around completionIdentifier, we want it to be unique so as to use identity checks
-				int length = this.cursorLocation - this.startPosition;
-				System.arraycopy(this.source, this.startPosition + 1, (this.completionIdentifier = new char[length]), 0, length);
-			}
-			return this.completionIdentifier;
-		}
-	}
+	if (this.completionIdentifier == null && this.cursorLocation+1 >= this.startPosition && this.cursorLocation < this.currentPosition){
+    	// remember actual identifier positions
+    	this.completedIdentifierStart = this.startPosition;
+    	this.completedIdentifierEnd = this.currentPosition - 1;
+    	if (this.withoutUnicodePtr != 0){			// check unicode scenario
+    		int length = this.cursorLocation - this.startPosition - this.unicodeCharSize;
+    		System.arraycopy(this.withoutUnicodeBuffer, 2, this.completionIdentifier = new char[length], 0, length);
+    	} else {
+    		// no char[] sharing around completionIdentifier, we want it to be unique so as to use identity checks
+    		int length = this.cursorLocation - this.startPosition;
+    		System.arraycopy(this.source, this.startPosition + 1, this.completionIdentifier = new char[length], 0, length);
+    	}
+    	return this.completionIdentifier;
+    }
 	return super.getCurrentTokenSourceString();
 }
 @Override
@@ -145,10 +143,10 @@ protected int getNextToken0() throws InvalidInputException {
 				this.startPosition = this.currentPosition;
 				boolean checkIfUnicode = false;
 				try {
-					checkIfUnicode = ((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-						&& (this.source[this.currentPosition] == 'u');
+					checkIfUnicode = (this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+						&& this.source[this.currentPosition] == 'u';
 				} catch(IndexOutOfBoundsException e) {
-					if (this.tokenizeWhiteSpace && (whiteStart != this.currentPosition - 1)) {
+					if (this.tokenizeWhiteSpace && whiteStart != this.currentPosition - 1) {
 						// reposition scanner in case we are interested by spaces as tokens
 						this.currentPosition--;
 						this.startPosition = whiteStart;
@@ -169,24 +167,22 @@ protected int getNextToken0() throws InvalidInputException {
 					offset = 6;
 				} else {
 					offset = 1;
-					if ((this.currentCharacter == '\r') || (this.currentCharacter == '\n')) {
-						//checkNonExternalizedString();
-						if (this.recordLineSeparator) {
-							pushLineSeparator();
-						}
-					}
+					//checkNonExternalizedString();
+                    if ((this.currentCharacter == '\r' || this.currentCharacter == '\n') && this.recordLineSeparator) {
+                    	pushLineSeparator();
+                    }
 					isWhiteSpace =
-						(this.currentCharacter == ' ') || CharOperation.isWhitespace(this.currentCharacter);
+						this.currentCharacter == ' ' || CharOperation.isWhitespace(this.currentCharacter);
 				}
 				if (isWhiteSpace) {
 					hasWhiteSpaces = true;
 				}
 				/* completion requesting strictly inside blanks */
-				if ((whiteStart != this.currentPosition)
+				if (whiteStart != this.currentPosition
 					//&& (previousToken == TokenNameDOT)
-					&& (this.completionIdentifier == null)
-					&& (whiteStart <= this.cursorLocation+1)
-					&& (this.cursorLocation < this.startPosition)
+					&& this.completionIdentifier == null
+					&& whiteStart <= this.cursorLocation+1
+					&& this.cursorLocation < this.startPosition
 					&& !ScannerHelper.isJavaIdentifierStart(this.complianceLevel, this.currentCharacter)){
 					this.currentPosition = this.startPosition; // for next token read
 					return TokenNameIdentifier;
@@ -248,17 +244,12 @@ protected int getNextToken0() throws InvalidInputException {
 						return scanNumber(true);
 					}
 					int temp = this.currentPosition;
-					if (getNextChar('.')) {
-						if (getNextChar('.')) {
-							return TokenNameELLIPSIS;
-						} else {
-							this.currentPosition = temp;
-							return TokenNameDOT;
-						}
-					} else {
-						this.currentPosition = temp;
-						return TokenNameDOT;
-					}
+					if (getNextChar('.') && getNextChar('.')) {
+                    	return TokenNameELLIPSIS;
+                    } else {
+                    	this.currentPosition = temp;
+                    	return TokenNameDOT;
+                    }
 				case '+' :
 					{
 						int test;
@@ -366,9 +357,7 @@ protected int getNextToken0() throws InvalidInputException {
 						if (test > 0) {
 							// relocate if finding another quote fairly close: thus unicode '/u000D' will be fully consumed
 							for (int lookAhead = 0; lookAhead < 3; lookAhead++) {
-								if (this.currentPosition + lookAhead == this.eofPosition)
-									break;
-								if (this.source[this.currentPosition + lookAhead] == '\n')
+								if (this.currentPosition + lookAhead == this.eofPosition || this.source[this.currentPosition + lookAhead] == '\n')
 									break;
 								if (this.source[this.currentPosition + lookAhead] == '\'') {
 									this.currentPosition += lookAhead + 1;
@@ -381,9 +370,7 @@ protected int getNextToken0() throws InvalidInputException {
 					if (getNextChar('\'')) {
 						// relocate if finding another quote fairly close: thus unicode '/u000D' will be fully consumed
 						for (int lookAhead = 0; lookAhead < 3; lookAhead++) {
-							if (this.currentPosition + lookAhead == this.eofPosition)
-								break;
-							if (this.source[this.currentPosition + lookAhead] == '\n')
+							if (this.currentPosition + lookAhead == this.eofPosition || this.source[this.currentPosition + lookAhead] == '\n')
 								break;
 							if (this.source[this.currentPosition + lookAhead] == '\'') {
 								this.currentPosition += lookAhead + 1;
@@ -396,13 +383,11 @@ protected int getNextToken0() throws InvalidInputException {
 						if (this.unicodeAsBackSlash) {
 							// consume next character
 							this.unicodeAsBackSlash = false;
-							if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\') && (this.source[this.currentPosition] == 'u')) {
+							if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\' && this.source[this.currentPosition] == 'u') {
 								getNextUnicodeChar();
-							} else {
-								if (this.withoutUnicodePtr != 0) {
-									unicodeStore();
-								}
-							}
+							} else if (this.withoutUnicodePtr != 0) {
+                            	unicodeStore();
+                            }
 						} else {
 							this.currentCharacter = this.source[this.currentPosition++];
 						}
@@ -411,27 +396,23 @@ protected int getNextToken0() throws InvalidInputException {
 						this.unicodeAsBackSlash = false;
 						boolean checkIfUnicode = false;
 						try {
-							checkIfUnicode = ((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-							&& (this.source[this.currentPosition] == 'u');
+							checkIfUnicode = (this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+							&& this.source[this.currentPosition] == 'u';
 						} catch(IndexOutOfBoundsException e) {
 							this.currentPosition--;
 							throw new InvalidInputException(INVALID_CHARACTER_CONSTANT);
 						}
 						if (checkIfUnicode) {
 							getNextUnicodeChar();
-						} else {
-							if (this.withoutUnicodePtr != 0) {
-							    unicodeStore();
-							}
-						}
+						} else if (this.withoutUnicodePtr != 0) {
+                            unicodeStore();
+                        }
 					}
 					if (getNextChar('\''))
 						return TokenNameCharacterLiteral;
 					// relocate if finding another quote fairly close: thus unicode '/u000D' will be fully consumed
 					for (int lookAhead = 0; lookAhead < 20; lookAhead++) {
-						if (this.currentPosition + lookAhead == this.eofPosition)
-							break;
-						if (this.source[this.currentPosition + lookAhead] == '\n')
+						if (this.currentPosition + lookAhead == this.eofPosition || this.source[this.currentPosition + lookAhead] == '\n')
 							break;
 						if (this.source[this.currentPosition + lookAhead] == '\'') {
 							this.currentPosition += lookAhead + 1;
@@ -448,19 +429,17 @@ protected int getNextToken0() throws InvalidInputException {
 						// consume next character
 						this.unicodeAsBackSlash = false;
 						boolean isUnicode = false;
-						if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-							&& (this.source[this.currentPosition] == 'u')) {
+						if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+							&& this.source[this.currentPosition] == 'u') {
 							getNextUnicodeChar();
 							isUnicode = true;
-						} else {
-							if (this.withoutUnicodePtr != 0) {
-							    unicodeStore();
-							}
-						}
+						} else if (this.withoutUnicodePtr != 0) {
+                            unicodeStore();
+                        }
 
 						while (this.currentCharacter != '"') {
 							/**** \r and \n are not valid in string literals ****/
-							if ((this.currentCharacter == '\n') || (this.currentCharacter == '\r')) {
+							if (this.currentCharacter == '\n' || this.currentCharacter == '\r') {
 								if (isUnicode) {
 									int start = this.currentPosition - 5;
 									while(this.source[start] != '\\') {
@@ -478,7 +457,7 @@ protected int getNextToken0() throws InvalidInputException {
 											this.currentPosition = start;
 											break;
 										}
-										if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\') && (this.source[this.currentPosition] == 'u')) {
+										if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\' && this.source[this.currentPosition] == 'u') {
 											isUnicode = true;
 											getNextUnicodeChar();
 										} else {
@@ -507,7 +486,7 @@ protected int getNextToken0() throws InvalidInputException {
 									this.withoutUnicodePtr--;
 									// consume next character
 									this.unicodeAsBackSlash = false;
-									if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\') && (this.source[this.currentPosition] == 'u')) {
+									if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\' && this.source[this.currentPosition] == 'u') {
 										getNextUnicodeChar();
 										isUnicode = true;
 										this.withoutUnicodePtr--;
@@ -529,8 +508,8 @@ protected int getNextToken0() throws InvalidInputException {
 							}
 							// consume next character
 							this.unicodeAsBackSlash = false;
-							if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-								&& (this.source[this.currentPosition] == 'u')) {
+							if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+								&& this.source[this.currentPosition] == 'u') {
 								getNextUnicodeChar();
 								isUnicode = true;
 							} else {
@@ -553,9 +532,7 @@ protected int getNextToken0() throws InvalidInputException {
 						if (e.getMessage().equals(INVALID_ESCAPE)) {
 							// relocate if finding another quote fairly close: thus unicode '/u000D' will be fully consumed
 							for (int lookAhead = 0; lookAhead < 50; lookAhead++) {
-								if (this.currentPosition + lookAhead == this.eofPosition)
-									break;
-								if (this.source[this.currentPosition + lookAhead] == '\n')
+								if (this.currentPosition + lookAhead == this.eofPosition || this.source[this.currentPosition + lookAhead] == '\n')
 									break;
 								if (this.source[this.currentPosition + lookAhead] == '\"') {
 									this.currentPosition += lookAhead + 1;
@@ -573,8 +550,8 @@ protected int getNextToken0() throws InvalidInputException {
 						if ((test = getNextChar('/', '*')) == 0) { //line comment
 							this.lastCommentLinePosition = this.currentPosition;
 							try { //get the next char
-								if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-									&& (this.source[this.currentPosition] == 'u')) {
+								if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+									&& this.source[this.currentPosition] == 'u') {
 									//-------------unicode traitement ------------
 									int c1 = 0, c2 = 0, c3 = 0, c4 = 0;
 									this.currentPosition++;
@@ -590,23 +567,20 @@ protected int getNextToken0() throws InvalidInputException {
 										|| (c4 = ScannerHelper.getHexadecimalValue(this.source[this.currentPosition++])) > 15
 										|| c4 < 0) {
 										throw new InvalidInputException(INVALID_UNICODE_ESCAPE);
-									} else {
-										this.currentCharacter = (char) (((c1 * 16 + c2) * 16 + c3) * 16 + c4);
 									}
+                                    this.currentCharacter = (char) (((c1 * 16 + c2) * 16 + c3) * 16 + c4);
 								}
 
 								//handle the \\u case manually into comment
-								if (this.currentCharacter == '\\') {
-									if (this.source[this.currentPosition] == '\\')
-										this.currentPosition++;
-								} //jump over the \\
+								if (this.currentCharacter == '\\' && this.source[this.currentPosition] == '\\')
+                                	this.currentPosition++; //jump over the \\
 								boolean isUnicode = false;
 								while (this.currentCharacter != '\r' && this.currentCharacter != '\n') {
 									this.lastCommentLinePosition = this.currentPosition;
 									//get the next char
 									isUnicode = false;
-									if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-										&& (this.source[this.currentPosition] == 'u')) {
+									if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+										&& this.source[this.currentPosition] == 'u') {
 										isUnicode = true;
 										//-------------unicode traitement ------------
 										int c1 = 0, c2 = 0, c3 = 0, c4 = 0;
@@ -623,15 +597,12 @@ protected int getNextToken0() throws InvalidInputException {
 											|| (c4 = ScannerHelper.getHexadecimalValue(this.source[this.currentPosition++])) > 15
 											|| c4 < 0) {
 											throw new InvalidInputException(INVALID_UNICODE_ESCAPE);
-										} else {
-											this.currentCharacter = (char) (((c1 * 16 + c2) * 16 + c3) * 16 + c4);
 										}
+                                        this.currentCharacter = (char) (((c1 * 16 + c2) * 16 + c3) * 16 + c4);
 									}
 									//handle the \\u case manually into comment
-									if (this.currentCharacter == '\\') {
-										if (this.source[this.currentPosition] == '\\')
-											this.currentPosition++;
-									} //jump over the \\
+									if (this.currentCharacter == '\\' && this.source[this.currentPosition] == '\\')
+                                    	this.currentPosition++; //jump over the \\
 								}
 								/*
 								 * We need to completely consume the line break
@@ -641,8 +612,8 @@ protected int getNextToken0() throws InvalidInputException {
 								   	if (this.source[this.currentPosition] == '\n') {
 										this.currentPosition++;
 										this.currentCharacter = '\n';
-								   	} else if ((this.source[this.currentPosition] == '\\')
-										&& (this.source[this.currentPosition + 1] == 'u')) {
+								   	} else if (this.source[this.currentPosition] == '\\'
+										&& this.source[this.currentPosition + 1] == 'u') {
 										isUnicode = true;
 										char unicodeChar;
 										int index = this.currentPosition + 1;
@@ -662,9 +633,8 @@ protected int getNextToken0() throws InvalidInputException {
 											|| c4 < 0) {
 											this.currentPosition = index;
 											throw new InvalidInputException(INVALID_UNICODE_ESCAPE);
-										} else {
-											unicodeChar = (char) (((c1 * 16 + c2) * 16 + c3) * 16 + c4);
 										}
+                                        unicodeChar = (char) (((c1 * 16 + c2) * 16 + c3) * 16 + c4);
 										if (unicodeChar == '\n') {
 											this.currentPosition = index;
 											this.currentCharacter = '\n';
@@ -676,16 +646,14 @@ protected int getNextToken0() throws InvalidInputException {
 									throw new InvalidCursorLocation(InvalidCursorLocation.NO_COMPLETION_INSIDE_COMMENT);
 								}
 								if (this.taskTags != null) checkTaskTag(this.startPosition, this.currentPosition);
-								if ((this.currentCharacter == '\r') || (this.currentCharacter == '\n')) {
-									//checkNonExternalizedString();
-									if (this.recordLineSeparator) {
-										if (isUnicode) {
-											pushUnicodeLineSeparator();
-										} else {
-											pushLineSeparator();
-										}
-									}
-								}
+								//checkNonExternalizedString();
+                                if ((this.currentCharacter == '\r' || this.currentCharacter == '\n') && this.recordLineSeparator) {
+                                	if (isUnicode) {
+                                		pushUnicodeLineSeparator();
+                                	} else {
+                                		pushLineSeparator();
+                                	}
+                                }
 								if (this.tokenizeComments) {
 									return TokenNameCOMMENT_LINE;
 								}
@@ -695,9 +663,8 @@ protected int getNextToken0() throws InvalidInputException {
 								if (this.taskTags != null) checkTaskTag(this.startPosition, this.currentPosition);
 								if (this.tokenizeComments) {
 									return TokenNameCOMMENT_LINE;
-								} else {
-									this.currentPosition++;
 								}
+                                this.currentPosition++;
 							}
 							break;
 						}
@@ -708,8 +675,8 @@ protected int getNextToken0() throws InvalidInputException {
 								int previous;
 								// consume next character
 								this.unicodeAsBackSlash = false;
-								if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-									&& (this.source[this.currentPosition] == 'u')) {
+								if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+									&& this.source[this.currentPosition] == 'u') {
 									getNextUnicodeChar();
 									isUnicode = true;
 								} else {
@@ -723,18 +690,14 @@ protected int getNextToken0() throws InvalidInputException {
 									isJavadoc = true;
 									star = true;
 								}
-								if ((this.currentCharacter == '\r') || (this.currentCharacter == '\n')) {
-									//checkNonExternalizedString();
-									if (this.recordLineSeparator) {
-										if (!isUnicode) {
-											pushLineSeparator();
-										}
-									}
-								}
+								//checkNonExternalizedString();
+                                if ((this.currentCharacter == '\r' || this.currentCharacter == '\n') && this.recordLineSeparator && !isUnicode) {
+                                	pushLineSeparator();
+                                }
 								isUnicode = false;
 								previous = this.currentPosition;
-								if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-									&& (this.source[this.currentPosition] == 'u')) {
+								if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+									&& this.source[this.currentPosition] == 'u') {
 									//-------------unicode traitement ------------
 									getNextUnicodeChar();
 									isUnicode = true;
@@ -742,25 +705,19 @@ protected int getNextToken0() throws InvalidInputException {
 									isUnicode = false;
 								}
 								//handle the \\u case manually into comment
-								if (this.currentCharacter == '\\') {
-									if (this.source[this.currentPosition] == '\\')
-										this.currentPosition++;
-								} //jump over the \\
+								if (this.currentCharacter == '\\' && this.source[this.currentPosition] == '\\')
+                                	this.currentPosition++; //jump over the \\
 								// empty comment is not a javadoc /**/
 								if (this.currentCharacter == '/') {
 									isJavadoc = false;
 								}
 								//loop until end of comment */
 								int firstTag = 0;
-								while ((this.currentCharacter != '/') || (!star)) {
-									if ((this.currentCharacter == '\r') || (this.currentCharacter == '\n')) {
-										//checkNonExternalizedString();
-										if (this.recordLineSeparator) {
-											if (!isUnicode) {
-												pushLineSeparator();
-											}
-										}
-									}
+								while (this.currentCharacter != '/' || !star) {
+									//checkNonExternalizedString();
+                                    if ((this.currentCharacter == '\r' || this.currentCharacter == '\n') && this.recordLineSeparator && !isUnicode) {
+                                    	pushLineSeparator();
+                                    }
 									switch (this.currentCharacter) {
 										case '*':
 											star = true;
@@ -775,8 +732,8 @@ protected int getNextToken0() throws InvalidInputException {
 									}
  									//get next char
 									previous = this.currentPosition;
-									if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-										&& (this.source[this.currentPosition] == 'u')) {
+									if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+										&& this.source[this.currentPosition] == 'u') {
 										//-------------unicode traitement ------------
 										getNextUnicodeChar();
 										isUnicode = true;
@@ -784,10 +741,8 @@ protected int getNextToken0() throws InvalidInputException {
 										isUnicode = false;
 									}
 									//handle the \\u case manually into comment
-									if (this.currentCharacter == '\\') {
-										if (this.source[this.currentPosition] == '\\')
-											this.currentPosition++;
-									} //jump over the \\
+									if (this.currentCharacter == '\\' && this.source[this.currentPosition] == '\\')
+                                    	this.currentPosition++; //jump over the \\
 								}
 								int token = isJavadoc ? TokenNameCOMMENT_JAVADOC : TokenNameCOMMENT_BLOCK;
 								recordComment(token);
@@ -825,11 +780,11 @@ protected int getNextToken0() throws InvalidInputException {
 					if (c < ScannerHelper.MAX_OBVIOUS) {
 						if ((ScannerHelper.OBVIOUS_IDENT_CHAR_NATURES[c] & ScannerHelper.C_IDENT_START) != 0) {
 							return scanIdentifierOrKeyword();
-						} else if ((ScannerHelper.OBVIOUS_IDENT_CHAR_NATURES[c] & ScannerHelper.C_DIGIT) != 0) {
-								return scanNumber(false);
-						} else {
-							return TokenNameERROR;
 						}
+                        if ((ScannerHelper.OBVIOUS_IDENT_CHAR_NATURES[c] & ScannerHelper.C_DIGIT) != 0) {
+								return scanNumber(false);
+						}
+                        return TokenNameERROR;
 					}
 					boolean isJavaIdStart;
 					if (c >= HIGH_SURROGATE_MIN_VALUE && c <= HIGH_SURROGATE_MAX_VALUE) {
@@ -863,7 +818,7 @@ protected int getNextToken0() throws InvalidInputException {
 		}
 	} //-----------------end switch while try--------------------
 	catch (IndexOutOfBoundsException e) {
-		if (this.tokenizeWhiteSpace && (whiteStart != this.currentPosition - 1)) {
+		if (this.tokenizeWhiteSpace && whiteStart != this.currentPosition - 1) {
 			// reposition scanner in case we are interested by spaces as tokens
 			this.currentPosition--;
 			this.startPosition = whiteStart;
@@ -925,13 +880,9 @@ protected int scanForTextBlock() throws InvalidInputException {
 				if (this.withoutUnicodePtr != 0) {
 					unicodeStore();
 				}
-			} else {
-				if ((this.currentCharacter == '\r') || (this.currentCharacter == '\n')) {
-					if (this.recordLineSeparator) {
-						pushLineSeparator();
-					}
-				}
-			}
+			} else if ((this.currentCharacter == '\r' || this.currentCharacter == '\n') && this.recordLineSeparator) {
+            	pushLineSeparator();
+            }
 			outer: if (this.currentCharacter == '\\') {
 				switch(this.source[this.currentPosition]) {
 					case 'n' :
@@ -954,8 +905,8 @@ protected int scanForTextBlock() throws InvalidInputException {
 								break;
 							}
 							this.unicodeAsBackSlash = false;
-							if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-									&& (this.source[this.currentPosition] == 'u')) {
+							if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+									&& this.source[this.currentPosition] == 'u') {
 								getNextUnicodeChar();
 								this.withoutUnicodePtr--;
 							}
@@ -984,8 +935,8 @@ protected int scanForTextBlock() throws InvalidInputException {
 			}
 			// consume next character
 			this.unicodeAsBackSlash = false;
-			if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-					&& (this.source[this.currentPosition] == 'u')) {
+			if ((this.currentCharacter = this.source[this.currentPosition++]) == '\\'
+					&& this.source[this.currentPosition] == 'u') {
 				getNextUnicodeChar();
 			} else {
 				if (this.currentCharacter == '"'/* || skipWhitespace*/)
@@ -997,10 +948,10 @@ protected int scanForTextBlock() throws InvalidInputException {
 		}
 		if (lastQuotePos > 0)
 			this.currentPosition = lastQuotePos;
-		this.currentPosition = (lastQuotePos > 0) ? lastQuotePos : this.startPosition + this.rawStart;
+		this.currentPosition = lastQuotePos > 0 ? lastQuotePos : this.startPosition + this.rawStart;
 		throw new InvalidInputException(UNTERMINATED_TEXT_BLOCK);
 	} catch (IndexOutOfBoundsException e) {
-		this.currentPosition = (lastQuotePos > 0) ? lastQuotePos : this.startPosition + this.rawStart;
+		this.currentPosition = lastQuotePos > 0 ? lastQuotePos : this.startPosition + this.rawStart;
 		if(this.startPosition <= this.cursorLocation
 				&& this.cursorLocation < this.currentPosition) {
 				// complete inside a string literal
@@ -1015,7 +966,7 @@ public final void getNextUnicodeChar() throws InvalidInputException {
 	int temp = this.currentPosition; // the \ is already read
 	super.getNextUnicodeChar();
 	if(this.cursorLocation > temp) {
-		this.unicodeCharSize += (this.currentPosition - temp);
+		this.unicodeCharSize += this.currentPosition - temp;
 	}
 	if (temp < this.cursorLocation && this.cursorLocation < this.currentPosition-1){
 		throw new InvalidCursorLocation(InvalidCursorLocation.NO_COMPLETION_INSIDE_UNICODE);

@@ -29,7 +29,6 @@ public class CompletionOnMessageSendName extends MessageSend {
 	public boolean nextIsCast;
 
 	public CompletionOnMessageSendName(char[] selector, int start, int end, boolean nextIsCast) {
-		super();
 		this.selector = selector;
 		this.sourceStart = start;
 		this.sourceEnd = end;

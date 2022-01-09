@@ -123,22 +123,21 @@ public class RangeUtil {
 	public static int[][] computeDietRange(TypeDeclaration[] types) {
 		if(types == null || types.length == 0) {
 			return new int[3][0];
-		} else {
-			RangeResult result = new RangeResult();
-			computeDietRange0(types, result);
-			return result.getRanges();
 		}
+        RangeResult result = new RangeResult();
+        computeDietRange0(types, result);
+        return result.getRanges();
 	}
 
 	private static void computeDietRange0(TypeDeclaration[] types, RangeResult result) {
-		for (int j = 0; j < types.length; j++) {
+		for (TypeDeclaration type : types) {
 			//members
-			TypeDeclaration[] memberTypeDeclarations = types[j].memberTypes;
+			TypeDeclaration[] memberTypeDeclarations = type.memberTypes;
 			if(memberTypeDeclarations != null && memberTypeDeclarations.length > 0) {
-				computeDietRange0(types[j].memberTypes, result);
+				computeDietRange0(type.memberTypes, result);
 			}
 			//methods
-			AbstractMethodDeclaration[] methods = types[j].methods;
+			AbstractMethodDeclaration[] methods = type.methods;
 			if (methods != null) {
 				int length = methods.length;
 				for (int i = 0; i < length; i++) {
@@ -156,7 +155,7 @@ public class RangeUtil {
 			}
 
 			//initializers
-			FieldDeclaration[] fields = types[j].fields;
+			FieldDeclaration[] fields = type.fields;
 			if (fields != null) {
 				int length = fields.length;
 				for (int i = 0; i < length; i++) {

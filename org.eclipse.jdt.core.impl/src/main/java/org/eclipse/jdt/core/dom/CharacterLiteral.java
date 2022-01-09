@@ -97,10 +97,9 @@ public class CharacterLiteral extends Expression {
 		if (property == ESCAPED_VALUE_PROPERTY) {
 			if (get) {
 				return getEscapedValue();
-			} else {
-				setEscapedValue((String) value);
-				return null;
 			}
+            setEscapedValue((String) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
@@ -249,32 +248,31 @@ public class CharacterLiteral extends Expression {
 					break;
 				default : //octal (well-formed: ended by a ' )
 					try {
-						if (ScannerHelper.isDigit((char) nextChar)) {
-							int number = ScannerHelper.getNumericValue((char) nextChar);
-							nextChar = scanner.getNextChar();
-							if (nextChar == -1) {
-								throw new IllegalArgumentException("illegal character literal");//$NON-NLS-1$
-							}
-							if (nextChar != '\'') {
-								if (!ScannerHelper.isDigit((char) nextChar)) {
-									throw new IllegalArgumentException("illegal character literal");//$NON-NLS-1$
-								}
-								number = (number * 8) + ScannerHelper.getNumericValue((char) nextChar);
-								nextChar = scanner.getNextChar();
-								if (nextChar == -1) {
-									throw new IllegalArgumentException("illegal character literal");//$NON-NLS-1$
-								}
-								if (nextChar != '\'') {
-									if (!ScannerHelper.isDigit((char) nextChar)) {
-										throw new IllegalArgumentException("illegal character literal");//$NON-NLS-1$
-									}
-									number = (number * 8) + ScannerHelper.getNumericValue((char) nextChar);
-								}
-							}
-							return (char) number;
-						} else {
+						if (!ScannerHelper.isDigit((char) nextChar)) {
 							throw new IllegalArgumentException("illegal character literal");//$NON-NLS-1$
 						}
+                        int number = ScannerHelper.getNumericValue((char) nextChar);
+                        nextChar = scanner.getNextChar();
+                        if (nextChar == -1) {
+                        	throw new IllegalArgumentException("illegal character literal");//$NON-NLS-1$
+                        }
+                        if (nextChar != '\'') {
+                        	if (!ScannerHelper.isDigit((char) nextChar)) {
+                        		throw new IllegalArgumentException("illegal character literal");//$NON-NLS-1$
+                        	}
+                        	number = number * 8 + ScannerHelper.getNumericValue((char) nextChar);
+                        	nextChar = scanner.getNextChar();
+                        	if (nextChar == -1) {
+                        		throw new IllegalArgumentException("illegal character literal");//$NON-NLS-1$
+                        	}
+                        	if (nextChar != '\'') {
+                        		if (!ScannerHelper.isDigit((char) nextChar)) {
+                        			throw new IllegalArgumentException("illegal character literal");//$NON-NLS-1$
+                        		}
+                        		number = number * 8 + ScannerHelper.getNumericValue((char) nextChar);
+                        	}
+                        }
+                        return (char) number;
 					} catch (InvalidInputException e) {
 						throw new IllegalArgumentException("illegal character literal", e);//$NON-NLS-1$
 					}
@@ -313,8 +311,7 @@ public class CharacterLiteral extends Expression {
 
 	@Override
 	int memSize() {
-		int size = BASE_NODE_SIZE + 1 * 4 + stringSize(this.escapedValue);
-		return size;
+		return BASE_NODE_SIZE + 1 * 4 + stringSize(this.escapedValue);
 	}
 
 	@Override

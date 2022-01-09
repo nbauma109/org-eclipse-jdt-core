@@ -34,7 +34,7 @@ public class StructStat {
 		FileInfo info = new FileInfo();
 		info.setExists(true);
 		info.setLength(st_size);
-		long lastModified = (st_mtime * 1_000);
+		long lastModified = st_mtime * 1_000;
 		if (USE_MILLISECOND_RESOLUTION) {
 			lastModified += st_mtime_msec;
 		}

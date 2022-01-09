@@ -255,23 +255,22 @@ public class ProjectPathVariableManager implements IPathVariableManager, IManage
 			}
 			// we check if the value contains referenced variables with ${VAR}
 			int index = stringValue.indexOf("${"); //$NON-NLS-1$
-			if (index != -1) {
-				int endIndex = PathVariableUtil.getMatchingBrace(stringValue, index);
-				String macro = stringValue.substring(index + 2, endIndex);
-				String resolvedMacro = ""; //$NON-NLS-1$
-				if (!variableStack.contains(macro)) {
-					variableStack.add(macro);
-					resolvedMacro = resolveVariable(macro, variableStack);
-					if (resolvedMacro == null)
-						resolvedMacro = ""; //$NON-NLS-1$
-				}
-				if (stringValue.length() > endIndex)
-					stringValue = stringValue.substring(0, index) + resolvedMacro + stringValue.substring(endIndex + 1);
-				else
-					stringValue = resolvedMacro;
-				value = stringValue;
-			} else
-				break;
+			if (index == -1)
+                break;
+            int endIndex = PathVariableUtil.getMatchingBrace(stringValue, index);
+            String macro = stringValue.substring(index + 2, endIndex);
+            String resolvedMacro = ""; //$NON-NLS-1$
+            if (!variableStack.contains(macro)) {
+            	variableStack.add(macro);
+            	resolvedMacro = resolveVariable(macro, variableStack);
+            	if (resolvedMacro == null)
+            		resolvedMacro = ""; //$NON-NLS-1$
+            }
+            if (stringValue.length() > endIndex)
+            	stringValue = stringValue.substring(0, index) + resolvedMacro + stringValue.substring(endIndex + 1);
+            else
+            	stringValue = resolvedMacro;
+            value = stringValue;
 		}
 		return value;
 	}
@@ -344,9 +343,7 @@ public class ProjectPathVariableManager implements IPathVariableManager, IManage
 				}
 			}
 			boolean variableExists = currentValue != null;
-			if (!variableExists && newValue == null)
-				return;
-			if (variableExists && currentValue.equals(newValue))
+			if (!variableExists && newValue == null || variableExists && currentValue.equals(newValue))
 				return;
 
 			for (Descriptor variableProvider : variableProviders) {

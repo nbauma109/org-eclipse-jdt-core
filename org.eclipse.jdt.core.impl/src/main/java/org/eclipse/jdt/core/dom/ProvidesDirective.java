@@ -111,10 +111,9 @@ public class ProvidesDirective extends ModuleDirective {
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((Name) child);
-				return null;
 			}
+            setName((Name) child);
+            return null;
 		}
 
 		// allow default implementation to flag the error

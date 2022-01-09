@@ -85,6 +85,7 @@ public interface IClassFile extends ITypeRoot {
  * 	Note that if this deprecated method is used, problems will be reported to the given problem requestor
  * 	as well as the problem requestor returned by the working copy owner (if not null).
  */
+@Deprecated
 ICompilationUnit becomeWorkingCopy(IProblemRequestor problemRequestor, WorkingCopyOwner owner, IProgressMonitor monitor) throws JavaModelException;
 /**
  * Returns the bytes contained in this class file.
@@ -129,6 +130,7 @@ IType getType();
  * @since 2.0
  * @deprecated Use {@link ITypeRoot#getWorkingCopy(WorkingCopyOwner, IProgressMonitor)} instead
  */
+@Deprecated
 IJavaElement getWorkingCopy(IProgressMonitor monitor, IBufferFactory factory) throws JavaModelException;
 /**
  * Returns whether this type represents a class. This is not guaranteed to be

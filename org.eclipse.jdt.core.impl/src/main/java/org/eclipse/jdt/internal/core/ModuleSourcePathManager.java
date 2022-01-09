@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.compiler.env.IModulePathEntry;
 
 public class ModuleSourcePathManager {
 
-	private Map<String, IModulePathEntry> knownModules = new HashMap<String, IModulePathEntry>(11);
+	private Map<String, IModulePathEntry> knownModules = new HashMap<>(11);
 
 	private IModulePathEntry getModuleRoot0(String name) {
 		return this.knownModules.get(name);
@@ -41,8 +41,7 @@ public class ModuleSourcePathManager {
 				e.printStackTrace();
 			}
 		}
-		root = this.knownModules.get(name);
-		return root;
+		return this.knownModules.get(name);
 	}
 	public void addEntry(IModuleDescription module, JavaProject project) throws JavaModelException {
 		String moduleName = new String(module.getElementName().toCharArray());
@@ -74,18 +73,15 @@ public class ModuleSourcePathManager {
 		IPrefixMatcherCharArray prefixMatcher = prefixMatch ? CharOperation.equals(name, CharOperation.ALL_PREFIX) ?
 				(x, y) -> true : CharOperation::prefixEquals : CharOperation :: equals;
 		IJavaProject[] projects = JavaModelManager.getJavaModelManager().getJavaModel().getJavaProjects();
-		for (int i = 0; i < projects.length; i++) {
-			IJavaProject project = projects[i];
+		for (IJavaProject project : projects) {
 			if (!project.getProject().isAccessible())
 				continue;
 			if (project instanceof JavaProject) {
 				IModuleDescription module = project.getModuleDescription();
-				if (module != null) {
-					if (prefixMatcher.matches(name, module.getElementName().toCharArray())) {
-						//addEntry(module, (JavaProject) project);
-						requestor.acceptModule(module);
-					}
-				}
+				if (module != null && prefixMatcher.matches(name, module.getElementName().toCharArray())) {
+                	//addEntry(module, (JavaProject) project);
+                	requestor.acceptModule(module);
+                }
 			}
 		}
 	}

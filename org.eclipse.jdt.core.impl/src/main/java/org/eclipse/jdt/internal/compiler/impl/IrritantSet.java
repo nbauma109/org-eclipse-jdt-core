@@ -184,7 +184,7 @@ public class IrritantSet {
 			.set(CompilerOptions.ExplicitlyClosedAutoCloseable);
 		INCOMPLETE_SWITCH.set(CompilerOptions.MissingDefaultCase);
 		String suppressRawWhenUnchecked = System.getProperty("suppressRawWhenUnchecked"); //$NON-NLS-1$
-		if (suppressRawWhenUnchecked != null && "true".equalsIgnoreCase(suppressRawWhenUnchecked)) { //$NON-NLS-1$
+		if ("true".equalsIgnoreCase(suppressRawWhenUnchecked)) { //$NON-NLS-1$
 			UNCHECKED.set(CompilerOptions.RawTypeReference);
 		}
 
@@ -289,7 +289,7 @@ public class IrritantSet {
 	}
 	public IrritantSet set(int singleGroupIrritants) {
 		int group = (singleGroupIrritants & GROUP_MASK) >> GROUP_SHIFT;
-		this.bits[group] |= (singleGroupIrritants & ~GROUP_MASK); // erase the group bits
+		this.bits[group] |= singleGroupIrritants & ~GROUP_MASK; // erase the group bits
 		return this;
 	}
 

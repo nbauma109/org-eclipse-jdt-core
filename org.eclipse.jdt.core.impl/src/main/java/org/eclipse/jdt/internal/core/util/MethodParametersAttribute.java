@@ -25,8 +25,8 @@ import org.eclipse.jdt.core.util.IMethodParametersAttribute;
  */
 public class MethodParametersAttribute extends ClassFileAttribute implements IMethodParametersAttribute {
 
-	private static final char[][] NO_NAMES = new char[0][];
-	private static final short[] NO_ACCES_FLAGS = new short[0];
+	private static final char[][] NO_NAMES = {};
+	private static final short[] NO_ACCES_FLAGS = {};
 
 	private final int numberOfEntries;
 	private final char[][] names;

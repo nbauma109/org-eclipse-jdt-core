@@ -116,6 +116,7 @@ package org.eclipse.jdt.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -218,7 +219,7 @@ import org.osgi.framework.BundleContext;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public final class JavaCore extends Plugin {
 
-	private static final IResource[] NO_GENERATED_RESOURCES = new IResource[0];
+	private static final IResource[] NO_GENERATED_RESOURCES = {};
 
 	private static Plugin JAVA_CORE_PLUGIN = null;
 	/**
@@ -383,12 +384,14 @@ public final class JavaCore extends Plugin {
 	 * @deprecated Discontinued since turning off would violate language specs.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String COMPILER_PB_UNREACHABLE_CODE = PLUGIN_ID + ".compiler.problem.unreachableCode"; //$NON-NLS-1$
+	@Deprecated
+    public static final String COMPILER_PB_UNREACHABLE_CODE = PLUGIN_ID + ".compiler.problem.unreachableCode"; //$NON-NLS-1$
 	/**
 	 * @deprecated Discontinued since turning off would violate language specs.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String COMPILER_PB_INVALID_IMPORT = PLUGIN_ID + ".compiler.problem.invalidImport"; //$NON-NLS-1$
+	@Deprecated
+    public static final String COMPILER_PB_INVALID_IMPORT = PLUGIN_ID + ".compiler.problem.invalidImport"; //$NON-NLS-1$
 	/**
 	 * Compiler option ID: Reporting Attempt to Override Package Visible Method.
 	 * <p>A package visible method, which is any method that is not explicitly
@@ -838,7 +841,8 @@ public final class JavaCore extends Plugin {
 	 * @category CompilerOptionID
 	 * @deprecated - this option has no effect
 	 */
-	public static final String COMPILER_PB_BOOLEAN_METHOD_THROWING_EXCEPTION = PLUGIN_ID + ".compiler.problem.booleanMethodThrowingException"; //$NON-NLS-1$
+	@Deprecated
+    public static final String COMPILER_PB_BOOLEAN_METHOD_THROWING_EXCEPTION = PLUGIN_ID + ".compiler.problem.booleanMethodThrowingException"; //$NON-NLS-1$
 	/**
 	 * Compiler option ID: Reporting Unnecessary Type Check.
 	 * <p>When enabled, the compiler will issue an error or a warning when a cast or an <code>instanceof</code> operation
@@ -992,7 +996,8 @@ public final class JavaCore extends Plugin {
 	 * @since 3.1
 	 * @category DeprecatedOptionID
 	 */
-	public static final String COMPILER_PB_UNSAFE_TYPE_OPERATION = PLUGIN_ID + ".compiler.problem.uncheckedTypeOperation"; //$NON-NLS-1$
+	@Deprecated
+    public static final String COMPILER_PB_UNSAFE_TYPE_OPERATION = PLUGIN_ID + ".compiler.problem.uncheckedTypeOperation"; //$NON-NLS-1$
 	/**
 	 * Compiler option ID: Reporting Unchecked Type Operation.
 	 * <p>When enabled, the compiler will issue an error or a warning whenever an operation involves generic types, and potentially
@@ -1234,7 +1239,8 @@ public final class JavaCore extends Plugin {
 	 * @deprecated Use {@link #COMPILER_PB_NULL_REFERENCE} instead.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String COMPILER_PB_INCONSISTENT_NULL_CHECK = PLUGIN_ID + ".compiler.problem.inconsistentNullCheck"; //$NON-NLS-1$
+	@Deprecated
+    public static final String COMPILER_PB_INCONSISTENT_NULL_CHECK = PLUGIN_ID + ".compiler.problem.inconsistentNullCheck"; //$NON-NLS-1$
 	/**
 	 * Compiler option ID: Reporting Unreferenced Label.
 	 * <p>When enabled, the compiler will issue an error or a warning when encountering a labeled statement which label
@@ -2682,7 +2688,8 @@ public final class JavaCore extends Plugin {
 	 * {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION} instead.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String FORMATTER_NEWLINE_OPENING_BRACE = PLUGIN_ID + ".formatter.newline.openingBrace"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_NEWLINE_OPENING_BRACE = PLUGIN_ID + ".formatter.newline.openingBrace"; //$NON-NLS-1$
 	/**
 	 * @since 2.0
 	 * @deprecated Use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_INSERT_NEW_LINE_BEFORE_CATCH_IN_TRY_STATEMENT},
@@ -2691,55 +2698,64 @@ public final class JavaCore extends Plugin {
 	 *  {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_INSERT_NEW_LINE_BEFORE_WHILE_IN_DO_STATEMENT} instead.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String FORMATTER_NEWLINE_CONTROL = PLUGIN_ID + ".formatter.newline.controlStatement"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_NEWLINE_CONTROL = PLUGIN_ID + ".formatter.newline.controlStatement"; //$NON-NLS-1$
 	/**
 	 * @since 2.0
 	 * @deprecated Use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMPACT_ELSE_IF} instead.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String FORMATTER_NEWLINE_ELSE_IF = PLUGIN_ID + ".formatter.newline.elseIf"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_NEWLINE_ELSE_IF = PLUGIN_ID + ".formatter.newline.elseIf"; //$NON-NLS-1$
 	/**
 	 * @since 2.0
 	 * @deprecated Use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK} instead.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String FORMATTER_NEWLINE_EMPTY_BLOCK = PLUGIN_ID + ".formatter.newline.emptyBlock"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_NEWLINE_EMPTY_BLOCK = PLUGIN_ID + ".formatter.newline.emptyBlock"; //$NON-NLS-1$
 	/**
 	 * @since 2.0
 	 * @deprecated Use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE} instead.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String FORMATTER_CLEAR_BLANK_LINES = PLUGIN_ID + ".formatter.newline.clearAll"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_CLEAR_BLANK_LINES = PLUGIN_ID + ".formatter.newline.clearAll"; //$NON-NLS-1$
 	/**
 	 * @since 2.0
 	 * @deprecated Use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_LINE_SPLIT} instead
 	 * @category DeprecatedOptionID
 	 */
-	public static final String FORMATTER_LINE_SPLIT = PLUGIN_ID + ".formatter.lineSplit"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_LINE_SPLIT = PLUGIN_ID + ".formatter.lineSplit"; //$NON-NLS-1$
 	/**
 	 * @since 2.0
 	 * @deprecated Use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR} instead.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String FORMATTER_COMPACT_ASSIGNMENT = PLUGIN_ID + ".formatter.style.assignment"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_COMPACT_ASSIGNMENT = PLUGIN_ID + ".formatter.style.assignment"; //$NON-NLS-1$
 	/**
 	 * @since 2.0
 	 * @deprecated Use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_TAB_CHAR} instead.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String FORMATTER_TAB_CHAR = PLUGIN_ID + ".formatter.tabulation.char"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_TAB_CHAR = PLUGIN_ID + ".formatter.tabulation.char"; //$NON-NLS-1$
 	/**
 	 * @since 2.0
 	 * @deprecated Use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_TAB_SIZE} instead.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String FORMATTER_TAB_SIZE = PLUGIN_ID + ".formatter.tabulation.size"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_TAB_SIZE = PLUGIN_ID + ".formatter.tabulation.size"; //$NON-NLS-1$
 	/**
 	 * @since 2.1
 	 * @deprecated Use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_CAST} instead.
 	 * @category DeprecatedOptionID
 	 */
-	public static final String FORMATTER_SPACE_CASTEXPRESSION = PLUGIN_ID + ".formatter.space.castexpression"; //$NON-NLS-1$
+	@Deprecated
+    public static final String FORMATTER_SPACE_CASTEXPRESSION = PLUGIN_ID + ".formatter.space.castexpression"; //$NON-NLS-1$
 	/**
 	 * Code assist option ID: Activate Visibility Sensitive Completion.
 	 * <p>When active, completion doesn't show that you can not see
@@ -2789,7 +2805,8 @@ public final class JavaCore extends Plugin {
 	 * @deprecated - this option has no effect
 	 * @category DeprecatedOptionID
 	 */
-	public static final String CODEASSIST_SUBSTRING_MATCH = PLUGIN_ID + ".codeComplete.substringMatch"; //$NON-NLS-1$
+	@Deprecated
+    public static final String CODEASSIST_SUBSTRING_MATCH = PLUGIN_ID + ".codeComplete.substringMatch"; //$NON-NLS-1$
 	/**
 	 * Code assist option ID: Activate Subword Code Completion.
 	 * <p>When enabled, completion shows proposals in which the pattern can
@@ -2992,13 +3009,15 @@ public final class JavaCore extends Plugin {
 	 * @since 2.1
 	 * @category DeprecatedOptionValue
 	 */
-	public static final String DEFAULT_TASK_TAG = "TODO"; //$NON-NLS-1$
+	@Deprecated
+    public static final String DEFAULT_TASK_TAG = "TODO"; //$NON-NLS-1$
 	/**
 	 * @deprecated Use {@link #DEFAULT_TASK_PRIORITIES} instead.
 	 * @since 2.1
 	 * @category DeprecatedOptionValue
 	 */
-	public static final String DEFAULT_TASK_PRIORITY = "NORMAL"; //$NON-NLS-1$
+	@Deprecated
+    public static final String DEFAULT_TASK_PRIORITY = "NORMAL"; //$NON-NLS-1$
 	/**
 	 * Configurable option value: {@value}.
 	 * @since 3.0
@@ -3369,7 +3388,6 @@ public final class JavaCore extends Plugin {
 	 * @since 3.0
 	 */
 	public JavaCore() {
-		super();
 		JAVA_CORE_PLUGIN = this;
 	}
 
@@ -3443,8 +3461,7 @@ public final class JavaCore extends Plugin {
 			IContainer container,
 			int rootPathSegmentCounts,
 			ArrayList collector) {
-		for (int i = 0, max = nonJavaResources.length; i < max; i++) {
-			Object nonJavaResource = nonJavaResources[i];
+		for (Object nonJavaResource : nonJavaResources) {
 			if (nonJavaResource instanceof IFile) {
 				IFile file = (IFile) nonJavaResource;
 				IPath path = file.getFullPath().removeFirstSegments(rootPathSegmentCounts);
@@ -3480,7 +3497,8 @@ public final class JavaCore extends Plugin {
 	 * @since 3.0
 	 * @deprecated use addPreProcessingResourceChangedListener(listener, IResourceChangeEvent.POST_CHANGE) instead
 	 */
-	public static void addPreProcessingResourceChangedListener(IResourceChangeListener listener) {
+	@Deprecated
+    public static void addPreProcessingResourceChangedListener(IResourceChangeListener listener) {
 		addPreProcessingResourceChangedListener(listener, IResourceChangeEvent.POST_CHANGE);
 	}
 
@@ -3818,10 +3836,9 @@ public final class JavaCore extends Plugin {
 		IExtensionPoint extension = Platform.getExtensionRegistry().getExtensionPoint(JavaCore.PLUGIN_ID, JavaModelManager.CPCONTAINER_INITIALIZER_EXTPOINT_ID);
 		if (extension != null) {
 			IExtension[] extensions =  extension.getExtensions();
-			for(int i = 0; i < extensions.length; i++){
-				IConfigurationElement [] configElements = extensions[i].getConfigurationElements();
-				for(int j = 0; j < configElements.length; j++){
-					IConfigurationElement configurationElement = configElements[j];
+			for (IExtension extension2 : extensions) {
+				IConfigurationElement [] configElements = extension2.getConfigurationElements();
+				for (IConfigurationElement configurationElement : configElements) {
 					String initializerID = configurationElement.getAttribute("id"); //$NON-NLS-1$
 					if (initializerID != null && initializerID.equals(containerID)){
 						if (JavaModelManager.CP_RESOLVE_VERBOSE_ADVANCED)
@@ -3920,10 +3937,8 @@ public final class JavaCore extends Plugin {
 			} finally {
 				if (!ok) JavaModelManager.getJavaModelManager().variablePut(variableName, null); // flush cache
 			}
-		} else {
-			if (JavaModelManager.CP_RESOLVE_VERBOSE_ADVANCED || JavaModelManager.CP_RESOLVE_VERBOSE_FAILURE)
-				verbose_no_variable_initializer_found(variableName);
-		}
+		} else if (JavaModelManager.CP_RESOLVE_VERBOSE_ADVANCED || JavaModelManager.CP_RESOLVE_VERBOSE_FAILURE)
+        	verbose_no_variable_initializer_found(variableName);
 		return variablePath;
 	}
 
@@ -3983,10 +3998,9 @@ public final class JavaCore extends Plugin {
 		IExtensionPoint extension = Platform.getExtensionRegistry().getExtensionPoint(JavaCore.PLUGIN_ID, JavaModelManager.CPVARIABLE_INITIALIZER_EXTPOINT_ID);
 		if (extension != null) {
 			IExtension[] extensions =  extension.getExtensions();
-			for(int i = 0; i < extensions.length; i++){
-				IConfigurationElement [] configElements = extensions[i].getConfigurationElements();
-				for(int j = 0; j < configElements.length; j++){
-					IConfigurationElement configElement = configElements[j];
+			for (IExtension extension2 : extensions) {
+				IConfigurationElement [] configElements = extension2.getConfigurationElements();
+				for (IConfigurationElement configElement : configElements) {
 					String varAttribute = configElement.getAttribute("variable"); //$NON-NLS-1$
 					if (variableName.equals(varAttribute)) {
 						String deprecatedAttribute = configElement.getAttribute("deprecated"); //$NON-NLS-1$
@@ -4018,10 +4032,9 @@ public final class JavaCore extends Plugin {
 		IExtensionPoint extension = Platform.getExtensionRegistry().getExtensionPoint(JavaCore.PLUGIN_ID, JavaModelManager.CPVARIABLE_INITIALIZER_EXTPOINT_ID);
 		if (extension != null) {
 			IExtension[] extensions =  extension.getExtensions();
-			for(int i = 0; i < extensions.length; i++){
-				IConfigurationElement [] configElements = extensions[i].getConfigurationElements();
-				for(int j = 0; j < configElements.length; j++){
-					IConfigurationElement configElement = configElements[j];
+			for (IExtension extension2 : extensions) {
+				IConfigurationElement [] configElements = extension2.getConfigurationElements();
+				for (IConfigurationElement configElement : configElements) {
 					try {
 						String varAttribute = configElement.getAttribute("variable"); //$NON-NLS-1$
 						if (variable.equals(varAttribute)) {
@@ -4118,8 +4131,8 @@ public final class JavaCore extends Plugin {
 		}
 		catch (IllegalStateException ise) {
 			// happen when there's no workspace (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=216817)
-			// or when it is shutting down (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=60687)
-			return System.getProperty("file.encoding"); //$NON-NLS-1$
+            // or when it is shutting down (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=60687)
+            return Charset.defaultCharset().displayName();
 		}
 		catch (CoreException ce) {
 			// fails silently and return plugin global encoding if core exception occurs
@@ -4153,9 +4166,7 @@ public final class JavaCore extends Plugin {
 		IJavaElement[] elements = region.getElements();
 		HashMap projectsStates = new HashMap();
 		ArrayList collector = new ArrayList();
-		for (int i = 0, max = elements.length; i < max; i++) {
-			// collect all the java project
-			IJavaElement element = elements[i];
+		for (IJavaElement element : elements) {
 			IJavaProject javaProject = element.getJavaProject();
 			IProject project = javaProject.getProject();
 			State state = null;
@@ -4178,13 +4189,11 @@ public final class JavaCore extends Plugin {
 				}
 				if (roots == null) continue;
 				IRegion region2 = JavaCore.newRegion();
-				for (int j = 0; j < roots.length; j++) {
-					region2.add(roots[j]);
+				for (IPackageFragmentRoot root : roots) {
+					region2.add(root);
 				}
 				IResource[] res = getGeneratedResources(region2, includesNonJavaResources);
-				for (int j = 0, max2 = res.length; j < max2; j++) {
-					collector.add(res[j]);
-				}
+				collector.addAll(Arrays.asList(res));
 				continue;
 			}
 			IPath outputLocation = null;
@@ -4227,8 +4236,8 @@ public final class JavaCore extends Plugin {
 						// ignore
 					}
 					if (compilationUnits == null) continue;
-					for (int j = 0, max2 = compilationUnits.length; j < max2; j++) {
-						getGeneratedResource(compilationUnits[j], container, state, rootPathSegmentCounts, collector);
+					for (ICompilationUnit compilationUnit : compilationUnits) {
+						getGeneratedResource(compilationUnit, container, state, rootPathSegmentCounts, collector);
 					}
 					if (includesNonJavaResources) {
 						// retrieve all non-java resources from the output location using the package fragment path
@@ -4254,8 +4263,8 @@ public final class JavaCore extends Plugin {
 						// ignore
 					}
 					if (children == null) continue;
-					for (int j = 0, max2 = children.length; j < max2; j++) {
-						fragment = (IPackageFragment) children[j];
+					for (IJavaElement child : children) {
+						fragment = (IPackageFragment) child;
 						ICompilationUnit[] units = null;
 						try {
 							units = fragment.getCompilationUnits();
@@ -4263,8 +4272,8 @@ public final class JavaCore extends Plugin {
 							// ignore
 						}
 						if (units == null) continue;
-						for (int n = 0, max3 = units.length; n < max3; n++) {
-							getGeneratedResource(units[n], container, state, rootPathSegmentCounts, collector);
+						for (ICompilationUnit unit2 : units) {
+							getGeneratedResource(unit2, container, state, rootPathSegmentCounts, collector);
 						}
 						if (includesNonJavaResources) {
 							// retrieve all non-java resources from the output location using the package fragment path
@@ -4300,8 +4309,8 @@ public final class JavaCore extends Plugin {
 		char[][] typeNames = state.getDefinedTypeNamesFor(resource.getProjectRelativePath().toString());
 		if (typeNames != null) {
 			IPath path = unit.getPath().removeFirstSegments(rootPathSegmentCounts).removeLastSegments(1);
-			for (int j = 0, max2 = typeNames.length; j < max2; j++) {
-				IPath localPath = path.append(new String(typeNames[j]) + ".class"); //$NON-NLS-1$
+			for (char[] typeName : typeNames) {
+				IPath localPath = path.append(new String(typeName) + ".class"); //$NON-NLS-1$
 				IResource member = container.findMember(localPath);
 				if (member != null && member.exists()) {
 					collector.add(member);
@@ -4496,7 +4505,8 @@ public final class JavaCore extends Plugin {
 	 * @since 2.0
 	 * @deprecated Use {@link #getWorkingCopies(WorkingCopyOwner)} instead
 	 */
-	public static IWorkingCopy[] getSharedWorkingCopies(IBufferFactory factory){
+	@Deprecated
+    public static IWorkingCopy[] getSharedWorkingCopies(IBufferFactory factory){
 
 		// if factory is null, default factory must be used
 		if (factory == null) factory = BufferManager.getDefaultBufferManager().getDefaultBufferFactory();
@@ -4593,8 +4603,8 @@ public final class JavaCore extends Plugin {
 		final IJavaProject[] projects = manager.getJavaModel().getJavaProjects();
 		HashSet visitedPaths = new HashSet();
 		ExternalFoldersManager externalFoldersManager = JavaModelManager.getExternalManager();
-		for (int i = 0, length = projects.length; i < length; i++) {
-			JavaProject javaProject = (JavaProject) projects[i];
+		for (IJavaProject project : projects) {
+			JavaProject javaProject = (JavaProject) project;
 			IClasspathEntry[] classpath;
 			try {
 				classpath = javaProject.getResolvedClasspath();
@@ -4603,8 +4613,7 @@ public final class JavaCore extends Plugin {
 				continue;
 			}
 			if (classpath != null) {
-				for (int j = 0, length2 = classpath.length; j < length2; j++) {
-					IClasspathEntry entry = classpath[j];
+				for (IClasspathEntry entry : classpath) {
 					if (entry.getSourceAttachmentPath() != null) {
 						IPath entryPath = entry.getPath();
 						if (visitedPaths.add(entryPath)) {
@@ -4668,22 +4677,18 @@ public final class JavaCore extends Plugin {
 			// build state version number has changed: touch every projects to force a rebuild
 			if (JavaBuilder.DEBUG)
 				System.out.println("Build state version number has changed"); //$NON-NLS-1$
-			IWorkspaceRunnable runnable = new IWorkspaceRunnable() {
-				@Override
-				public void run(IProgressMonitor progressMonitor2) throws CoreException {
-					for (int i = 0, length = projects.length; i < length; i++) {
-						IJavaProject project = projects[i];
-						try {
-							if (JavaBuilder.DEBUG)
-								System.out.println("Touching " + project.getElementName()); //$NON-NLS-1$
-							new ClasspathValidation((JavaProject) project).validate(); // https://bugs.eclipse.org/bugs/show_bug.cgi?id=287164
-							project.getProject().touch(progressMonitor2);
-						} catch (CoreException e) {
-							// could not touch this project: ignore
-						}
-					}
-				}
-			};
+			IWorkspaceRunnable runnable = progressMonitor2 -> {
+            	for (IJavaProject project : projects) {
+            		try {
+            			if (JavaBuilder.DEBUG)
+            				System.out.println("Touching " + project.getElementName()); //$NON-NLS-1$
+            			new ClasspathValidation((JavaProject) project).validate(); // https://bugs.eclipse.org/bugs/show_bug.cgi?id=287164
+            			project.getProject().touch(progressMonitor2);
+            		} catch (CoreException e) {
+            			// could not touch this project: ignore
+            		}
+            	}
+            };
 			mainMonitor.subTask(Messages.javamodel_building_after_upgrade);
 			try {
 				ResourcesPlugin.getWorkspace().run(runnable, mainMonitor.split(1));
@@ -4777,8 +4782,7 @@ public final class JavaCore extends Plugin {
 				element = member.getCompilationUnit();
 			}
 		}
-		if (element == null) return false;
-		if (marker == null) return false;
+		if (element == null || marker == null) return false;
 
 		String markerHandleId = (String)marker.getAttribute(ATT_HANDLE_ID);
 		if (markerHandleId == null) return false;
@@ -4820,8 +4824,7 @@ public final class JavaCore extends Plugin {
 				element = member.getCompilationUnit();
 			}
 		}
-		if (element == null) return false;
-		if (markerDelta == null) return false;
+		if (element == null || markerDelta == null) return false;
 
 		String markerDeltarHandleId = (String)markerDelta.getAttribute(ATT_HANDLE_ID);
 		if (markerDeltarHandleId == null) return false;
@@ -5003,7 +5006,8 @@ public final class JavaCore extends Plugin {
 
 		if (containerPath == null) {
 			throw new ClasspathEntry.AssertionFailedException("Container path cannot be null"); //$NON-NLS-1$
-		} else if (containerPath.segmentCount() < 1) {
+		}
+        if (containerPath.segmentCount() < 1) {
 			throw new ClasspathEntry.AssertionFailedException("Illegal classpath container path: '" + containerPath.makeRelative().toString() + "', must have at least one segment (containerID+hints)"); //$NON-NLS-1$//$NON-NLS-2$
 		}
 		if (accessRules == null || accessRules.length == 0) {
@@ -5767,7 +5771,8 @@ public final class JavaCore extends Plugin {
 	 *
 	 * @deprecated Use {@link #removeClasspathVariable(String, IProgressMonitor)} instead
 	 */
-	public static void removeClasspathVariable(String variableName) {
+	@Deprecated
+    public static void removeClasspathVariable(String variableName) {
 		removeClasspathVariable(variableName, null);
 	}
 
@@ -6011,7 +6016,8 @@ public final class JavaCore extends Plugin {
 	 *
 	 * @deprecated Use {@link #setClasspathVariable(String, IPath, IProgressMonitor)} instead
 	 */
-	public static void setClasspathVariable(String variableName, IPath path)
+	@Deprecated
+    public static void setClasspathVariable(String variableName, IPath path)
 		throws JavaModelException {
 
 		setClasspathVariable(variableName, path, null);

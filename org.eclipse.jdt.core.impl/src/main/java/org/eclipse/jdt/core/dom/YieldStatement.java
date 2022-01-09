@@ -105,10 +105,9 @@ public class YieldStatement extends Statement {
 		if (property == EXPRESSION_PROPERTY) {
 			if (get) {
 				return getExpression();
-			} else {
-				setExpression((Expression) child);
-				return null;
 			}
+            setExpression((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -139,11 +138,9 @@ public class YieldStatement extends Statement {
 	@Override
 	void accept0(ASTVisitor visitor) {
 		boolean visitChildren = visitor.visit(this);
-		if (visitChildren) {
-			if (this.ast.apiLevel >= AST.JLS13_INTERNAL) {
-				acceptChild(visitor, getExpression());
-			}
-		}
+		if (visitChildren && this.ast.apiLevel >= AST.JLS13_INTERNAL) {
+        	acceptChild(visitor, getExpression());
+        }
 		visitor.endVisit(this);
 	}
 

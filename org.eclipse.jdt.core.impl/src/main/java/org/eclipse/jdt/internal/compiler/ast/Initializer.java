@@ -109,7 +109,6 @@ public class Initializer extends FieldDeclaration {
 				this.block.printBody(indent, output);
 			}
 			printIndent(indent, output).append('}');
-			return output;
 		} else if (this.block != null) {
 			this.block.printStatement(indent, output);
 		} else {
@@ -128,12 +127,10 @@ public class Initializer extends FieldDeclaration {
 			scope.lastVisibleFieldID = this.lastVisibleFieldID;
 			if (isStatic()) {
 				ReferenceBinding declaringType = scope.enclosingSourceType();
-				if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK16) {
-					if (declaringType.isNestedType() && !declaringType.isStatic())
-						scope.problemReporter().innerTypesCannotDeclareStaticInitializers(
-							declaringType,
-							this);
-				}
+				if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK16 && declaringType.isNestedType() && !declaringType.isStatic())
+                	scope.problemReporter().innerTypesCannotDeclareStaticInitializers(
+                		declaringType,
+                		this);
 			}
 			if (this.block != null) this.block.resolve(scope);
 		} finally {
@@ -155,9 +152,7 @@ public class Initializer extends FieldDeclaration {
 
 	@Override
 	public void traverse(ASTVisitor visitor, MethodScope scope) {
-		if (visitor.visit(this, scope)) {
-			if (this.block != null) this.block.traverse(visitor, scope);
-		}
+		if (visitor.visit(this, scope) && this.block != null) this.block.traverse(visitor, scope);
 		visitor.endVisit(this, scope);
 	}
 }

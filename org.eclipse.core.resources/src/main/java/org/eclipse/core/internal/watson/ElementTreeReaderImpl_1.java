@@ -95,10 +95,6 @@ import org.eclipse.core.internal.dtree.DeltaDataTree;
 	@Override
 	public ElementTree readTree(DataInput input, String newProjectName) throws IOException {
 
-		/* The format version number has already been consumed
-		 * by ElementTreeReader#readFrom.
-		 */
-		ElementTree result = new ElementTree(dataTreeReader.readTree(null, input, newProjectName));
-		return result;
+		return new ElementTree(dataTreeReader.readTree(null, input, newProjectName));
 	}
 }

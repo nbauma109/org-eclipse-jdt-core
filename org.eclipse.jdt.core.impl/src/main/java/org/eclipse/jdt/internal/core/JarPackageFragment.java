@@ -112,21 +112,20 @@ private Object[] computeNonJavaResources(ArrayList entryNames) {
 				IPath parentPath = childPath.removeLastSegments(1);
 				while (parentPath.segmentCount() > 0) {
 					ArrayList parentChildren = (ArrayList) childrenMap.get(parentPath);
-					if (parentChildren == null) {
-						Object dir = new JarEntryDirectory(parentPath.lastSegment());
-						jarEntries.put(parentPath, dir);
-						childrenMap.put(parentPath, parentChildren = new ArrayList());
-						parentChildren.add(childPath);
-						if (parentPath.segmentCount() == 1) {
-							topJarEntries.add(dir);
-							break;
-						}
-						childPath = parentPath;
-						parentPath = childPath.removeLastSegments(1);
-					} else {
+					if (parentChildren != null) {
 						parentChildren.add(childPath);
 						break; // all parents are already registered
 					}
+                    Object dir = new JarEntryDirectory(parentPath.lastSegment());
+                    jarEntries.put(parentPath, dir);
+                    childrenMap.put(parentPath, parentChildren = new ArrayList());
+                    parentChildren.add(childPath);
+                    if (parentPath.segmentCount() == 1) {
+                    	topJarEntries.add(dir);
+                    	break;
+                    }
+                    childPath = parentPath;
+                    parentPath = childPath.removeLastSegments(1);
 				}
 			}
 		}
@@ -208,9 +207,8 @@ public Object[] getNonJavaResources() throws JavaModelException {
 	if (isDefaultPackage()) {
 		// We don't want to show non java resources of the default package (see PR #1G58NB8)
 		return JavaElementInfo.NO_NON_JAVA_RESOURCES;
-	} else {
-		return storedNonJavaResources();
 	}
+    return storedNonJavaResources();
 }
 @Override
 protected boolean internalIsValidPackageName() {

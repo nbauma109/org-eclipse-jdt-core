@@ -40,7 +40,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * The empty array singleton instance.
 	 */
 	@SuppressWarnings("rawtypes")
-	private static final Entry[] emptyArray = new Entry[0];
+	private static final Entry[] emptyArray = {};
 
 	/**
 	 * The array of entries. This field is volatile so it can be
@@ -436,7 +436,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 			}
 
 			Map.Entry<?, ?> e = (Map.Entry<?, ?>) obj;
-			return (key == e.getKey()) && (value == e.getValue());
+			return key == e.getKey() && value == e.getValue();
 		}
 	}
 
@@ -482,7 +482,6 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		 */
 		private final class EntrySet extends AbstractSet<Map.Entry<K, V>> {
 			EntrySet() {
-				super();
 			}
 
 			@Override
@@ -522,7 +521,6 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		 */
 		private final class EntryIterator extends SnapshotIterator<Map.Entry<K, V>> {
 			EntryIterator() {
-				super();
 			}
 
 			@Override
@@ -536,7 +534,6 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		 */
 		private final class KeySet extends AbstractSet<K> {
 			KeySet() {
-				super();
 			}
 
 			@Override
@@ -576,7 +573,6 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		 */
 		private final class KeyIterator extends SnapshotIterator<K> {
 			KeyIterator() {
-				super();
 			}
 
 			@Override
@@ -590,7 +586,6 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		 */
 		private final class ValueCollection extends AbstractCollection<V> {
 			ValueCollection() {
-				super();
 			}
 
 			@Override
@@ -630,7 +625,6 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		 */
 		private final class ValueIterator extends SnapshotIterator<V> {
 			ValueIterator() {
-				super();
 			}
 
 			@Override

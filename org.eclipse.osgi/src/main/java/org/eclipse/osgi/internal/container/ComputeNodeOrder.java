@@ -150,7 +150,6 @@ public class ComputeNodeOrder {
 		 * </p>
 		 */
 		public Digraph() {
-			super();
 		}
 
 		/**
@@ -362,8 +361,8 @@ public class ComputeNodeOrder {
 			final int NEXT_ADJACENT = 3;
 			final int AFTER_NEXTED_DFS_VISIT = 4;
 			// use precomputed objects to avoid garbage
-			final Integer NEXT_VERTEX_OBJECT = Integer.valueOf(NEXT_VERTEX);
-			final Integer AFTER_NEXTED_DFS_VISIT_OBJECT = Integer.valueOf(AFTER_NEXTED_DFS_VISIT);
+			final Integer NEXT_VERTEX_OBJECT = NEXT_VERTEX;
+			final Integer AFTER_NEXTED_DFS_VISIT_OBJECT = AFTER_NEXTED_DFS_VISIT;
 			// initialize
 			// all vertex.color initially Vertex.WHITE;
 			// all vertex.predecessor initially null;
@@ -425,7 +424,7 @@ public class ComputeNodeOrder {
 						vertex.color = Vertex.BLACK;
 						time++;
 						vertex.finishTime = time;
-						state = ((Integer) stack.remove(stack.size() - 1)).intValue();
+						state = (Integer) stack.remove(stack.size() - 1);
 						continue nextStateLoop;
 					case AFTER_NEXTED_DFS_VISIT :
 						// on entry, stack contains "vertex" and "allAjacent"

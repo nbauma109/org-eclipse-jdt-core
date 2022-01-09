@@ -44,7 +44,6 @@ public class FilterDescription implements IResourceFilterDescription, Comparable
 	}
 
 	public FilterDescription(IResource resource, int type, FileInfoMatcherDescription matcherDescription) {
-		super();
 		Assert.isNotNull(resource);
 		this.type = type;
 		this.matcherDescription = matcherDescription;
@@ -108,9 +107,7 @@ public class FilterDescription implements IResourceFilterDescription, Comparable
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (obj == null || getClass() != obj.getClass())
 			return false;
 		FilterDescription other = (FilterDescription) obj;
         return id == other.id;

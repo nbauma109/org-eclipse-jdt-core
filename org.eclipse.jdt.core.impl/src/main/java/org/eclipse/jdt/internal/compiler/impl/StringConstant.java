@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.impl;
 
+import java.util.Objects;
+
 public class StringConstant extends Constant {
 
 	private String value;
@@ -48,10 +50,7 @@ public class StringConstant extends Constant {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((this.value == null) ? 0 : this.value.hashCode());
-		return result;
+		return Objects.hash(value);
 	}
 
 	@Override
@@ -59,17 +58,13 @@ public class StringConstant extends Constant {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
 		}
 		StringConstant other = (StringConstant) obj;
 		if (this.value == null) {
 			return other.value == null;
-		} else {
-			return this.value.equals(other.value);
 		}
+        return this.value.equals(other.value);
 	}
 }

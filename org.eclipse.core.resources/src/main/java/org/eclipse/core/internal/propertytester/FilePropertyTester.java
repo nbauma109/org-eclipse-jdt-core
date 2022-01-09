@@ -52,7 +52,7 @@ public class FilePropertyTester extends ResourcePropertyTester {
 
 	@Override
 	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
-		if ((receiver instanceof IFile) && method.equals(CONTENT_TYPE_ID))
+		if (receiver instanceof IFile && method.equals(CONTENT_TYPE_ID))
 			return testContentType((IFile) receiver, toString(expectedValue), isArgumentUsed(args, IS_KIND_OF), isArgumentUsed(args, USE_FILENAME_ONLY));
 		return false;
 	}

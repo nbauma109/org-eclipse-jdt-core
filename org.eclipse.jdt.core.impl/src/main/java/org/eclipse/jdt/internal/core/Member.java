@@ -63,9 +63,7 @@ protected static boolean areSimilarMethods(
  * to the Java Model constant representation (Number or String).
  */
 protected static Object convertConstant(Constant constant) {
-	if (constant == null)
-		return null;
-	if (constant == Constant.NotAConstant) {
+	if (constant == null || constant == Constant.NotAConstant) {
 		return null;
 	}
 	switch (constant.typeID()) {
@@ -104,8 +102,7 @@ public static IMethod[] findMethods(IMethod method, IMethod[] methods) {
 		simpleNames[i] = Signature.getSimpleName(Signature.toString(erasure));
 	}
 	ArrayList list = new ArrayList();
-	for (int i = 0, length = methods.length; i < length; i++) {
-		IMethod existingMethod = methods[i];
+	for (IMethod existingMethod : methods) {
 		if (areSimilarMethods(
 				elementName,
 				parameters,
@@ -118,26 +115,23 @@ public static IMethod[] findMethods(IMethod method, IMethod[] methods) {
 	int size = list.size();
 	if (size == 0) {
 		return null;
-	} else {
-		IMethod[] result = new IMethod[size];
-		list.toArray(result);
-		return result;
 	}
+    IMethod[] result = new IMethod[size];
+    list.toArray(result);
+    return result;
 }
 @Override
 public String[] getCategories() throws JavaModelException {
 	IType type = (IType) getAncestor(IJavaElement.TYPE);
-	if (type == null) return CharOperation.NO_STRINGS;
-	if (type.isBinary()) {
+	if (type == null || type.isBinary()) {
 		return CharOperation.NO_STRINGS;
-	} else {
-		SourceTypeElementInfo info = (SourceTypeElementInfo) ((SourceType) type).getElementInfo();
-		HashMap map = info.getCategories();
-		if (map == null) return CharOperation.NO_STRINGS;
-		String[] categories = (String[]) map.get(this);
-		if (categories == null) return CharOperation.NO_STRINGS;
-		return categories;
 	}
+    SourceTypeElementInfo info = (SourceTypeElementInfo) ((SourceType) type).getElementInfo();
+    HashMap map = info.getCategories();
+    if (map == null) return CharOperation.NO_STRINGS;
+    String[] categories = (String[]) map.get(this);
+    if (categories == null) return CharOperation.NO_STRINGS;
+    return categories;
 }
 /**
  * @see IMember
@@ -181,9 +175,7 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 		case JEM_COUNT:
 			return getHandleUpdatingCountFromMemento(memento, workingCopyOwner);
 		case JEM_LAMBDA_EXPRESSION:
-			if (!memento.hasMoreTokens() || memento.nextToken() != MementoTokenizer.STRING)
-				return this;
-			if (!memento.hasMoreTokens()) return this;
+			if (!memento.hasMoreTokens() || memento.nextToken() != MementoTokenizer.STRING || !memento.hasMoreTokens()) return this;
 			String interphase = memento.nextToken();
 			if (!memento.hasMoreTokens() || memento.nextToken() != MementoTokenizer.COUNT)
 				return this;
@@ -360,11 +352,10 @@ public ISourceRange getNameRange() throws JavaModelException {
 public IType getType(String typeName, int count) {
 	if (isBinary()) {
 		throw new IllegalArgumentException("Not a source member " + toStringWithAncestors()); //$NON-NLS-1$
-	} else {
-		SourceType type = new SourceType(this, typeName);
-		type.occurrenceCount = count;
-		return type;
 	}
+    SourceType type = new SourceType(this, typeName);
+    type.occurrenceCount = count;
+    return type;
 }
 /**
  * @see IMember#getTypeRoot()
@@ -390,7 +381,7 @@ protected boolean isMainMethod(IMethod method) throws JavaModelException {
 		IType declaringType = null;
 		if (Flags.isStatic(flags) &&
 				(Flags.isPublic(flags) ||
-						((declaringType = getDeclaringType()) != null && declaringType.isInterface()))) {
+						(declaringType = getDeclaringType()) != null && declaringType.isInterface())) {
 			String[] paramTypes= method.getParameterTypes();
 			if (paramTypes.length == 1) {
 				String typeSignature=  Signature.toString(paramTypes[0]);
@@ -419,8 +410,7 @@ public String readableName() {
 		buffer.append('.');
 		buffer.append(getElementName());
 		return buffer.toString();
-	} else {
-		return super.readableName();
 	}
+    return super.readableName();
 }
 }

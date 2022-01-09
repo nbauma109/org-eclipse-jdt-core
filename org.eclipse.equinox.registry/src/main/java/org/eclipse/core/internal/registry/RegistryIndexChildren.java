@@ -15,7 +15,7 @@ package org.eclipse.core.internal.registry;
 
 public class RegistryIndexChildren {
 
-	static final int[] EMPTY_ARRAY = new int[0];
+	static final int[] EMPTY_ARRAY = {};
 
 	private int[] children;
 
@@ -80,7 +80,7 @@ public class RegistryIndexChildren {
 
 	public boolean unlinkChildren(int[] IDs) {
 		if (children.length == 0)
-			return (IDs.length == 0);
+			return IDs.length == 0;
 
 		int size = children.length;
 		for (int i = 0; i < IDs.length; i++) {

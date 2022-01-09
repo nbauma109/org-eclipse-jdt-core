@@ -89,7 +89,7 @@ public abstract class Type extends ASTNode {
 	 *    <code>false</code> otherwise
 	 */
 	public final boolean isPrimitiveType() {
-		return (this instanceof PrimitiveType);
+		return this instanceof PrimitiveType;
 	}
 
 	/**
@@ -100,7 +100,7 @@ public abstract class Type extends ASTNode {
 	 *    <code>false</code> otherwise
 	 */
 	public final boolean isSimpleType() {
-		return (this instanceof SimpleType);
+		return this instanceof SimpleType;
 	}
 
 	/**
@@ -111,7 +111,7 @@ public abstract class Type extends ASTNode {
 	 *    <code>false</code> otherwise
 	 */
 	public final boolean isArrayType() {
-		return (this instanceof ArrayType);
+		return this instanceof ArrayType;
 	}
 
 	/**
@@ -123,7 +123,7 @@ public abstract class Type extends ASTNode {
 	 * @since 3.10
 	 */
 	public final boolean isNameQualifiedType() {
-		return (this instanceof NameQualifiedType);
+		return this instanceof NameQualifiedType;
 	}
 
 	/**
@@ -135,7 +135,7 @@ public abstract class Type extends ASTNode {
 	 * @since 3.1
 	 */
 	public final boolean isParameterizedType() {
-		return (this instanceof ParameterizedType);
+		return this instanceof ParameterizedType;
 	}
 
 	/**
@@ -162,7 +162,7 @@ public abstract class Type extends ASTNode {
 	 * @since 3.1
 	 */
 	public final boolean isQualifiedType() {
-		return (this instanceof QualifiedType);
+		return this instanceof QualifiedType;
 	}
 
 	/**
@@ -174,7 +174,7 @@ public abstract class Type extends ASTNode {
 	 * @since 3.7.1
 	 */
 	public final boolean isUnionType() {
-		return (this instanceof UnionType);
+		return this instanceof UnionType;
 	}
 
 	/**
@@ -200,7 +200,7 @@ public abstract class Type extends ASTNode {
 	 * @since 3.10
 	 */
 	public final boolean isIntersectionType() {
-		return (this instanceof IntersectionType);
+		return this instanceof IntersectionType;
 	}
 
 	/**
@@ -216,7 +216,7 @@ public abstract class Type extends ASTNode {
 	 * @since 3.1
 	 */
 	public final boolean isWildcardType() {
-		return (this instanceof WildcardType);
+		return this instanceof WildcardType;
 	}
 
 	/**
@@ -229,7 +229,7 @@ public abstract class Type extends ASTNode {
 	 * @since 3.10
 	 */
 	public boolean isAnnotatable() {
-		return (this instanceof AnnotatableType);
+		return this instanceof AnnotatableType;
 	}
 
 	/**

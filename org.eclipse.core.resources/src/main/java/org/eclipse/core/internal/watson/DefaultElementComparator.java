@@ -28,7 +28,6 @@ public final class DefaultElementComparator implements IElementComparator {
 	 * Force clients to use the singleton
 	 */
 	protected DefaultElementComparator() {
-		super();
 	}
 
 	/**

@@ -28,8 +28,7 @@ public MemberTypeBinding(MemberTypeBinding prototype) {
 
 void checkSyntheticArgsAndFields() {
 	if (!isPrototype()) throw new IllegalStateException();
-	if (isStatic()) return;
-	if (isInterface()) return;
+	if (isStatic() || isInterface()) return;
 	if (!isPrototype()) {
 		((MemberTypeBinding) this.prototype).checkSyntheticArgsAndFields();
 		return;
@@ -80,7 +79,7 @@ public void initializeDeprecatedAnnotationTagBits() {
 			}
 			if (enclosing.isViewedAsDeprecated()) {
 				this.modifiers |= ExtraCompilerModifiers.AccDeprecatedImplicitly;
-				this.tagBits |= (enclosing.tagBits & TagBits.AnnotationTerminallyDeprecated);
+				this.tagBits |= enclosing.tagBits & TagBits.AnnotationTerminallyDeprecated;
 			}
 		}
 	}
@@ -89,9 +88,8 @@ public void initializeDeprecatedAnnotationTagBits() {
 public String toString() {
 	if (this.hasTypeAnnotations()) {
 		return annotatedDebugName();
-    } else {
-    	return "Member type : " + new String(sourceName()) + " " + super.toString(); //$NON-NLS-2$ //$NON-NLS-1$
     }
+    return "Member type : " + new String(sourceName()) + " " + super.toString(); //$NON-NLS-2$ //$NON-NLS-1$
 }
 @Override
 public ModuleBinding module() {

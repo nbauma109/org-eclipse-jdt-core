@@ -99,9 +99,8 @@ public class PackageDeclaration extends ASTNode {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_3_0;
 		}
+        return PROPERTY_DESCRIPTORS_3_0;
 	}
 
 	/**
@@ -154,18 +153,16 @@ public class PackageDeclaration extends ASTNode {
 		if (property == JAVADOC_PROPERTY) {
 			if (get) {
 				return getJavadoc();
-			} else {
-				setJavadoc((Javadoc) child);
-				return null;
 			}
+            setJavadoc((Javadoc) child);
+            return null;
 		}
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((Name) child);
-				return null;
 			}
+            setName((Name) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

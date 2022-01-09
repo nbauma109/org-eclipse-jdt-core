@@ -94,10 +94,8 @@ public class DefaultHandler extends NativeHandler {
 		if (info.getAttribute(EFS.ATTRIBUTE_READ_ONLY)) {
 			if (!file.setReadOnly())
 				return false;
-		} else {
-			if (!file.setWritable(true))
-				return false;
-		}
+		} else if (!file.setWritable(true))
+        	return false;
 		// If setExecutable succeeds, then the whole method succeeds.
 		return file.setExecutable(info.getAttribute(EFS.ATTRIBUTE_EXECUTABLE));
 	}

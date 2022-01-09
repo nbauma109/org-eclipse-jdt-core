@@ -87,7 +87,6 @@ public class ResourceInfo implements IElementTreeData, ICoreConstants, IStringPo
 	 * Default constructor (for easier debugging)
 	 */
 	public ResourceInfo() {
-		super();
 	}
 
 	/**
@@ -251,7 +250,7 @@ public class ResourceInfo implements IElementTreeData, ICoreConstants, IStringPo
 		if (syncInfo == null)
 			return null;
 		b = (byte[]) syncInfo.get(id);
-		return b == null ? null : (makeCopy ? b.clone() : b);
+		return b == null ? null : makeCopy ? b.clone() : b;
 	}
 
 	/**
@@ -276,7 +275,7 @@ public class ResourceInfo implements IElementTreeData, ICoreConstants, IStringPo
 	 */
 	public void incrementCharsetGenerationCount() {
 		//increment high order bits
-		charsetAndContentId = ((charsetAndContentId + LOWER + 1) & UPPER) + (charsetAndContentId & LOWER);
+		charsetAndContentId = (charsetAndContentId + LOWER + 1 & UPPER) + (charsetAndContentId & LOWER);
 	}
 
 	/**
@@ -284,7 +283,7 @@ public class ResourceInfo implements IElementTreeData, ICoreConstants, IStringPo
 	 */
 	public void incrementContentId() {
 		//increment low order bits
-		charsetAndContentId = (charsetAndContentId & UPPER) + ((charsetAndContentId + 1) & LOWER);
+		charsetAndContentId = (charsetAndContentId & UPPER) + (charsetAndContentId + 1 & LOWER);
 	}
 
 	/**
@@ -293,7 +292,7 @@ public class ResourceInfo implements IElementTreeData, ICoreConstants, IStringPo
 	 */
 	public void incrementMarkerGenerationCount() {
 		//increment high order bits
-		markerAndSyncStamp = ((markerAndSyncStamp + LOWER + 1) & UPPER) + (markerAndSyncStamp & LOWER);
+		markerAndSyncStamp = (markerAndSyncStamp + LOWER + 1 & UPPER) + (markerAndSyncStamp & LOWER);
 	}
 
 	/**
@@ -311,7 +310,7 @@ public class ResourceInfo implements IElementTreeData, ICoreConstants, IStringPo
 	 */
 	public void incrementSyncInfoGenerationCount() {
 		//increment low order bits
-		markerAndSyncStamp = (markerAndSyncStamp & UPPER) + ((markerAndSyncStamp + 1) & LOWER);
+		markerAndSyncStamp = (markerAndSyncStamp & UPPER) + (markerAndSyncStamp + 1 & LOWER);
 	}
 
 	/**

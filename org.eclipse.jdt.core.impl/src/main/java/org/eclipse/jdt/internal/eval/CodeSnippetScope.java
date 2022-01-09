@@ -83,8 +83,7 @@ public final boolean canBeSeenByForCodeSnippet(FieldBinding fieldBinding, TypeBi
 		// OR the invocationType is a subclass of the declaringClass
 		//    AND the receiverType is the invocationType or its subclass
 		//    OR the field is a static field accessed directly through a type
-		if (TypeBinding.equalsEquals(invocationType, fieldBinding.declaringClass)) return true;
-		if (invocationType.fPackage == fieldBinding.declaringClass.fPackage) return true;
+		if (TypeBinding.equalsEquals(invocationType, fieldBinding.declaringClass) || invocationType.fPackage == fieldBinding.declaringClass.fPackage) return true;
 		if (fieldBinding.declaringClass.isSuperclassOf(invocationType)) {
 			if (invocationSite.isSuperAccess()) return true;
 			// receiverType can be an array binding in one case... see if you can change it
@@ -122,10 +121,8 @@ public final boolean canBeSeenByForCodeSnippet(FieldBinding fieldBinding, TypeBi
 	}
 
 	// isDefault()
-	if (invocationType.fPackage != fieldBinding.declaringClass.fPackage) return false;
-
 	// receiverType can be an array binding in one case... see if you can change it
-	if (receiverType instanceof ArrayBinding)
+	if (invocationType.fPackage != fieldBinding.declaringClass.fPackage || receiverType instanceof ArrayBinding)
 		return false;
 	ReferenceBinding type = (ReferenceBinding) receiverType;
 	PackageBinding declaringPackage = fieldBinding.declaringClass.fPackage;
@@ -133,9 +130,7 @@ public final boolean canBeSeenByForCodeSnippet(FieldBinding fieldBinding, TypeBi
 	do {
 		if (type.isCapture()) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=285002
 			if (TypeBinding.equalsEquals(originalDeclaringClass, type.erasure().original())) return true;
-		} else {
-			if (TypeBinding.equalsEquals(originalDeclaringClass, type.original())) return true;
-		}
+		} else if (TypeBinding.equalsEquals(originalDeclaringClass, type.original())) return true;
 		if (declaringPackage != type.fPackage) return false;
 	} while ((type = type.superclass()) != null);
 	return false;
@@ -157,8 +152,7 @@ public final boolean canBeSeenByForCodeSnippet(MethodBinding methodBinding, Type
 		// OR the invocationType is a subclass of the declaringClass
 		//    AND the receiverType is the invocationType or its subclass
 		//    OR the method is a static method accessed directly through a type
-		if (TypeBinding.equalsEquals(invocationType, methodBinding.declaringClass)) return true;
-		if (invocationType.fPackage == methodBinding.declaringClass.fPackage) return true;
+		if (TypeBinding.equalsEquals(invocationType, methodBinding.declaringClass) || invocationType.fPackage == methodBinding.declaringClass.fPackage) return true;
 		if (methodBinding.declaringClass.isSuperclassOf(invocationType)) {
 			if (invocationSite.isSuperAccess()) return true;
 			// receiverType can be an array binding in one case... see if you can change it
@@ -196,10 +190,8 @@ public final boolean canBeSeenByForCodeSnippet(MethodBinding methodBinding, Type
 	}
 
 	// isDefault()
-	if (invocationType.fPackage != methodBinding.declaringClass.fPackage) return false;
-
 	// receiverType can be an array binding in one case... see if you can change it
-	if (receiverType instanceof ArrayBinding)
+	if (invocationType.fPackage != methodBinding.declaringClass.fPackage || receiverType instanceof ArrayBinding)
 		return false;
 	ReferenceBinding type = (ReferenceBinding) receiverType;
 	PackageBinding declaringPackage = methodBinding.declaringClass.fPackage;
@@ -207,9 +199,7 @@ public final boolean canBeSeenByForCodeSnippet(MethodBinding methodBinding, Type
 	do {
 		if (type.isCapture()) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=285002
 			if (TypeBinding.equalsEquals(originalDeclaringClass, type.erasure().original())) return true;
-		} else {
-			if (TypeBinding.equalsEquals(originalDeclaringClass, type.original())) return true;
-		}
+		} else if (TypeBinding.equalsEquals(originalDeclaringClass, type.original())) return true;
 		if (declaringPackage != type.fPackage) return false;
 	} while ((type = type.superclass()) != null);
 	return false;
@@ -222,9 +212,7 @@ public final boolean canBeSeenByForCodeSnippet(MethodBinding methodBinding, Type
 */
 
 public final boolean canBeSeenByForCodeSnippet(ReferenceBinding referenceBinding, ReferenceBinding receiverType) {
-	if (referenceBinding.isPublic()) return true;
-
-	if (TypeBinding.equalsEquals(receiverType, referenceBinding)) return true;
+	if (referenceBinding.isPublic() || TypeBinding.equalsEquals(receiverType, referenceBinding)) return true;
 
 	if (referenceBinding.isProtected()) {
 		// answer true if the receiver (or its enclosing type) is the superclass
@@ -260,10 +248,8 @@ public final boolean canBeSeenByForCodeSnippet(ReferenceBinding referenceBinding
 @Override
 public MethodBinding findExactMethod(ReferenceBinding receiverType, char[] selector, TypeBinding[] argumentTypes, InvocationSite invocationSite) {
 	MethodBinding exactMethod = receiverType.getExactMethod(selector, argumentTypes, null);
-	if (exactMethod != null){
-		if (receiverType.isInterface() || canBeSeenByForCodeSnippet(exactMethod, receiverType, invocationSite, this))
-			return exactMethod;
-	}
+	if (exactMethod != null && (receiverType.isInterface() || canBeSeenByForCodeSnippet(exactMethod, receiverType, invocationSite, this)))
+    	return exactMethod;
 	return null;
 }
 // Internal use only
@@ -283,8 +269,7 @@ public FieldBinding findFieldForCodeSnippet(TypeBinding receiverType, char[] fie
 		return null;
 	if (receiverType.isArrayType()) {
 		TypeBinding leafType = receiverType.leafComponentType();
-		if (leafType instanceof ReferenceBinding)
-		if (!leafType.canBeSeenBy(this)) {
+		if (leafType instanceof ReferenceBinding && !leafType.canBeSeenBy(this)) {
 			return new ProblemFieldBinding((ReferenceBinding)leafType, fieldName, ProblemReasons.ReceiverTypeNotVisible);
 		}
 		if (CharOperation.equals(fieldName, TypeConstants.LENGTH))
@@ -300,8 +285,7 @@ public FieldBinding findFieldForCodeSnippet(TypeBinding receiverType, char[] fie
 	if (field != null) {
 		if (canBeSeenByForCodeSnippet(field, currentType, invocationSite, this))
 			return field;
-		else
-			return new ProblemFieldBinding(field /* closest match*/, field.declaringClass, fieldName, ProblemReasons.NotVisible);
+        return new ProblemFieldBinding(field /* closest match*/, field.declaringClass, fieldName, ProblemReasons.NotVisible);
 	}
 
 	// collect all superinterfaces of receiverType until the field is found in a supertype
@@ -325,10 +309,9 @@ public FieldBinding findFieldForCodeSnippet(TypeBinding receiverType, char[] fie
 		if ((field = currentType.getField(fieldName, true /*resolve*/)) != null) {
 			keepLooking = false;
 			if (canBeSeenByForCodeSnippet(field, receiverType, invocationSite, this)) {
-				if (visibleField == null)
-					visibleField = field;
-				else
-					return new ProblemFieldBinding(visibleField, visibleField.declaringClass, fieldName, ProblemReasons.Ambiguous);
+				if (visibleField != null)
+                    return new ProblemFieldBinding(visibleField, visibleField.declaringClass, fieldName, ProblemReasons.Ambiguous);
+                visibleField = field;
 			} else {
 				notVisible = true;
 			}
@@ -346,12 +329,11 @@ public FieldBinding findFieldForCodeSnippet(TypeBinding receiverType, char[] fie
 				if (interfacesSeen.addIfNotIncluded(anInterface) == anInterface) {
 					// if interface as not already been visited
 					if ((field = anInterface.getField(fieldName, true /*resolve*/)) != null) {
-						if (visibleField == null) {
-							visibleField = field;
-						} else {
+						if (visibleField != null) {
 							ambiguous = new ProblemFieldBinding(visibleField, visibleField.declaringClass, fieldName, ProblemReasons.Ambiguous);
 							break done;
 						}
+                        visibleField = field;
 					} else {
 						ReferenceBinding[] itsInterfaces = anInterface.superInterfaces();
 						if (itsInterfaces != Binding.NO_SUPERINTERFACES) {
@@ -390,7 +372,7 @@ public MethodBinding findMethodForArray(ArrayBinding receiverType, char[] select
 	if (methodBinding != null) {
 		// handle the method clone() specially... cannot be protected or throw exceptions
 		if (argumentTypes == Binding.NO_PARAMETERS && CharOperation.equals(selector, TypeConstants.CLONE))
-			return new MethodBinding((methodBinding.modifiers & ~ClassFileConstants.AccProtected) | ClassFileConstants.AccPublic, TypeConstants.CLONE, methodBinding.returnType, argumentTypes, null, object);
+			return new MethodBinding(methodBinding.modifiers & ~ClassFileConstants.AccProtected | ClassFileConstants.AccPublic, TypeConstants.CLONE, methodBinding.returnType, argumentTypes, null, object);
 		if (canBeSeenByForCodeSnippet(methodBinding, receiverType, invocationSite, this))
 			return methodBinding;
 	}
@@ -458,8 +440,7 @@ public Binding getBinding(char[][] compoundName, int mask, InvocationSite invoca
  			if (binding == null) {
 	 			if (currentIndex == length) // must be a type if its the last name, otherwise we have no idea if its a package or type
 					return new ProblemReferenceBinding(CharOperation.subarray(compoundName, 0, currentIndex), null, ProblemReasons.NotFound);
-				else
-					return new ProblemBinding(CharOperation.subarray(compoundName, 0, currentIndex), ProblemReasons.NotFound);
+                return new ProblemBinding(CharOperation.subarray(compoundName, 0, currentIndex), ProblemReasons.NotFound);
  			}
  			if (binding instanceof ReferenceBinding) {
 	 			if (!binding.isValidBinding())
@@ -502,7 +483,7 @@ public Binding getBinding(char[][] compoundName, int mask, InvocationSite invoca
 								binding.problemId());
 	}
 
-	if ((mask & Binding.FIELD) != 0 && (binding instanceof FieldBinding)) { // was looking for a field and found a field
+	if ((mask & Binding.FIELD) != 0 && binding instanceof FieldBinding) { // was looking for a field and found a field
 		FieldBinding field = (FieldBinding) binding;
 		if (!field.isStatic()) {
 			return new ProblemFieldBinding(
@@ -515,7 +496,7 @@ public Binding getBinding(char[][] compoundName, int mask, InvocationSite invoca
 		// so we don't have to call resetEnclosingMethodStaticFlag() in this case
 		return binding;
 	}
-	if ((mask & Binding.TYPE) != 0 && (binding instanceof ReferenceBinding)) { // was looking for a type and found a type
+	if ((mask & Binding.TYPE) != 0 && binding instanceof ReferenceBinding) { // was looking for a type and found a type
 		return binding;
 	}
 
@@ -535,19 +516,17 @@ public Binding getBinding(char[][] compoundName, int mask, InvocationSite invoca
 @Override
 public MethodBinding getConstructor(ReferenceBinding receiverType, TypeBinding[] argumentTypes, InvocationSite invocationSite) {
 	MethodBinding methodBinding = receiverType.getExactConstructor(argumentTypes);
-	if (methodBinding != null) {
-		if (canBeSeenByForCodeSnippet(methodBinding, receiverType, invocationSite, this)) {
-			return methodBinding;
-		}
-	}
+	if (methodBinding != null && canBeSeenByForCodeSnippet(methodBinding, receiverType, invocationSite, this)) {
+    	return methodBinding;
+    }
 	MethodBinding[] methods = receiverType.getMethods(TypeConstants.INIT);
 	if (methods == Binding.NO_METHODS) {
 		return new ProblemMethodBinding(TypeConstants.INIT, argumentTypes, ProblemReasons.NotFound);
 	}
 	MethodBinding[] compatible = new MethodBinding[methods.length];
 	int compatibleIndex = 0;
-	for (int i = 0, length = methods.length; i < length; i++) {
-	    MethodBinding compatibleMethod = computeCompatibleMethod(methods[i], argumentTypes, invocationSite);
+	for (MethodBinding method : methods) {
+	    MethodBinding compatibleMethod = computeCompatibleMethod(method, argumentTypes, invocationSite);
 		if (compatibleMethod != null)
 			compatible[compatibleIndex++] = compatibleMethod;
 	}
@@ -586,8 +565,7 @@ public FieldBinding getFieldForCodeSnippet(TypeBinding receiverType, char[] fiel
 	FieldBinding field = findFieldForCodeSnippet(receiverType, fieldName, invocationSite);
 	if (field == null)
 		return new ProblemFieldBinding(receiverType instanceof ReferenceBinding ? (ReferenceBinding) receiverType : null, fieldName, ProblemReasons.NotFound);
-	else
-		return field;
+    return field;
 }
 /* API
 

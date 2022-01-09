@@ -33,15 +33,15 @@ public interface IIndexConstants {
 	char[] OBJECT = "Object".toCharArray(); //$NON-NLS-1$
 	char[] MODULE_INFO = "module-info".toCharArray(); ////$NON-NLS-1$
 	char[][] COUNTS=
-		new char[][] { new char[] {'/', '0'}, new char[] {'/', '1'}, new char[] {'/', '2'}, new char[] {'/', '3'}, new char[] {'/', '4'},
-			new char[] {'/', '5'}, new char[] {'/', '6'}, new char[] {'/', '7'}, new char[] {'/', '8'}, new char[] {'/', '9'}
-	};
-	char[] DEFAULT_CONSTRUCTOR = new char[]{'/', '#'};
+		{ new char[] {'/', '0'}, new char[] {'/', '1'}, new char[] {'/', '2'}, new char[] {'/', '3'}, new char[] {'/', '4'},
+    	new char[] {'/', '5'}, new char[] {'/', '6'}, new char[] {'/', '7'}, new char[] {'/', '8'}, new char[] {'/', '9'}
+};
+	char[] DEFAULT_CONSTRUCTOR = {'/', '#'};
 	char[] META_INDEX_SIMPLE_TYPE_QUALIFIER_REF = "metaIndexSTQ".toCharArray(); //$NON-NLS-1$
 	char[] META_INDEX_QUALIFIED_TYPE_QUALIFIER_REF = "metaIndexQTQ".toCharArray(); //$NON-NLS-1$
 	char[] META_INDEX_SIMPLE_SUPER_TYPE_QUALIFIER_REF = "metaIndexSSTQ".toCharArray(); //$NON-NLS-1$
 	char[] META_INDEX_QUALIFIED_SUPER_TYPE_QUALIFIER_REF = "metaIndexQSTQ".toCharArray(); //$NON-NLS-1$
-	char[][] META_INDEX_CATEGORIES = new char[][] { META_INDEX_SIMPLE_TYPE_QUALIFIER_REF, META_INDEX_QUALIFIED_TYPE_QUALIFIER_REF,
+	char[][] META_INDEX_CATEGORIES = { META_INDEX_SIMPLE_TYPE_QUALIFIER_REF, META_INDEX_QUALIFIED_TYPE_QUALIFIER_REF,
 			META_INDEX_SIMPLE_SUPER_TYPE_QUALIFIER_REF, META_INDEX_QUALIFIED_SUPER_TYPE_QUALIFIER_REF };
 	char CLASS_SUFFIX = 'C';
 	char INTERFACE_SUFFIX = 'I';
@@ -55,13 +55,13 @@ public interface IIndexConstants {
 	char PARAMETER_SEPARATOR= ',';
 	char SECONDARY_SUFFIX = 'S';
 
-	char[] ONE_STAR = new char[] {'*'};
-	char[][] ONE_STAR_CHAR = new char[][] {ONE_STAR};
+	char[] ONE_STAR = {'*'};
+	char[][] ONE_STAR_CHAR = {ONE_STAR};
 
 	// used as special marker for enclosing type name of local and anonymous classes
 	char ZERO_CHAR = '0';
-	char[] ONE_ZERO = new char[] { ZERO_CHAR };
-	char[][] ONE_ZERO_CHAR = new char[][] {ONE_ZERO};
+	char[] ONE_ZERO = { ZERO_CHAR };
+	char[][] ONE_ZERO_CHAR = {ONE_ZERO};
 
 	int PKG_REF_PATTERN = 0x0001;
 	int PKG_DECL_PATTERN = 0x0002;

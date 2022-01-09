@@ -109,23 +109,21 @@ public class CombinedEventDelta {
 
 	public void rememberExtensionPoint(ExtensionPoint extensionPoint) {
 		String bucketId = extensionPoint.getUniqueIdentifier();
-		Integer extPt = Integer.valueOf(extensionPoint.getObjectId());
+		Integer extPt = extensionPoint.getObjectId();
 		getExtPointsBucket(bucketId).add(extPt);
 		getExtPointsGlobal().add(extPt);
 	}
 
 	public void rememberExtension(ExtensionPoint extensionPoint, int ext) {
 		String bucketId = extensionPoint.getUniqueIdentifier();
-		Integer extension = Integer.valueOf(ext);
+		Integer extension = ext;
 
 		getExtensionsBucket(bucketId).add(extension);
 		getExtensionsGlobal().add(extension);
 	}
 
 	public void rememberExtensions(ExtensionPoint extensionPoint, int[] exts) {
-		if (exts == null)
-			return;
-		if (exts.length == 0)
+		if (exts == null || exts.length == 0)
 			return;
 		for (int ext : exts)
 			rememberExtension(extensionPoint, ext);
@@ -143,7 +141,7 @@ public class CombinedEventDelta {
 		ArrayList<IExtensionPoint> result = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
 			Integer extPt = extensionPoints.get(i);
-			IExtensionPoint extensionPoint = new ExtensionPointHandle(objectManager, extPt.intValue());
+			IExtensionPoint extensionPoint = new ExtensionPointHandle(objectManager, extPt);
 			result.add(extensionPoint);
 		}
 		if (result.size() == 0)
@@ -164,7 +162,7 @@ public class CombinedEventDelta {
 		ArrayList<IExtension> result = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
 			Integer ext = extensions.get(i);
-			IExtension extension = new ExtensionHandle(objectManager, ext.intValue());
+			IExtension extension = new ExtensionHandle(objectManager, ext);
 			result.add(extension);
 		}
 		return result.toArray(new IExtension[result.size()]);

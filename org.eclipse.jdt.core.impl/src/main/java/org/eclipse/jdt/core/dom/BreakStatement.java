@@ -47,7 +47,8 @@ public class BreakStatement extends Statement {
 	 * @deprecated
 	 * @since 3.18
 	 */
-	public static final ChildPropertyDescriptor EXPRESSION_PROPERTY =
+	@Deprecated
+    public static final ChildPropertyDescriptor EXPRESSION_PROPERTY =
 			new ChildPropertyDescriptor(BreakStatement.class, "expression", Expression.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$);
 
 	/**
@@ -98,7 +99,8 @@ public class BreakStatement extends Statement {
 	 * @deprecated
 	 * @since 3.20
 	 */
-	public static List propertyDescriptors(int apiLevel, boolean previewEnabled) {
+	@Deprecated
+    public static List propertyDescriptors(int apiLevel, boolean previewEnabled) {
 		return PROPERTY_DESCRIPTORS;
 	}
 
@@ -135,18 +137,16 @@ public class BreakStatement extends Statement {
 		if (property == LABEL_PROPERTY) {
 			if (get) {
 				return getLabel();
-			} else {
-				setLabel((SimpleName) child);
-				return null;
 			}
+            setLabel((SimpleName) child);
+            return null;
 		}
 		if (property == EXPRESSION_PROPERTY) {
 			if (get) {
 				return getExpression();
-			} else {
-				setExpression((Expression) child);
-				return null;
 			}
+            setExpression((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -220,7 +220,8 @@ public class BreakStatement extends Statement {
 	 * @deprecated
 	 * @since 3.18
 	 */
-	public Expression getExpression() {
+	@Deprecated
+    public Expression getExpression() {
 		// optionalExpression can be null
 		supportedOnlyIn12();
 		return this.optionalExpression;
@@ -242,7 +243,8 @@ public class BreakStatement extends Statement {
 	 * @deprecated
 	 * @since 3.18
 	 */
-	public void setExpression(Expression expression) {
+	@Deprecated
+    public void setExpression(Expression expression) {
 		supportedOnlyIn12();
 		ASTNode oldChild = this.optionalExpression;
 		preReplaceChild(oldChild, expression, EXPRESSION_PROPERTY);
@@ -261,7 +263,8 @@ public class BreakStatement extends Statement {
 	 * @deprecated
 	 * @since 3.18
 	 */
-	public boolean isImplicit() {
+	@Deprecated
+    public boolean isImplicit() {
 		supportedOnlyIn12();
 		return this.isImplicit;
 	}
@@ -276,7 +279,8 @@ public class BreakStatement extends Statement {
 	 * @deprecated
 	 * @since 3.18
 	 */
-	void setImplicit(boolean isImplicit) {
+	@Deprecated
+    void setImplicit(boolean isImplicit) {
 		supportedOnlyIn12();
 		this.isImplicit = isImplicit;
 	}

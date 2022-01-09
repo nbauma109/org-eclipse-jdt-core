@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.core.util.Util;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 @SuppressWarnings("rawtypes")
 class DOMField extends DOMMember implements IDOMField {
 
@@ -187,13 +188,11 @@ protected void appendMemberDeclarationContents(CharArrayBuffer buffer) {
 				.append(getInitializer())
 				.append(this.fDocument, this.fInitializerRange[1] + 1, this.fSourceRange[1] - this.fInitializerRange[1]);
 		}
-	} else {
-		if (this.fInitializerRange[0] < 0) {
-			buffer.append(this.fDocument, this.fNameRange[1] + 1, this.fSourceRange[1] - this.fNameRange[1]);
-		} else {
-			buffer.append(this.fDocument, this.fInitializerRange[1] + 1, this.fSourceRange[1] - this.fInitializerRange[1]);
-		}
-	}
+	} else if (this.fInitializerRange[0] < 0) {
+    	buffer.append(this.fDocument, this.fNameRange[1] + 1, this.fSourceRange[1] - this.fNameRange[1]);
+    } else {
+    	buffer.append(this.fDocument, this.fInitializerRange[1] + 1, this.fSourceRange[1] - this.fInitializerRange[1]);
+    }
 
 }
 /**
@@ -208,7 +207,6 @@ protected void appendMemberDeclarationContents(CharArrayBuffer buffer) {
 protected void appendMemberHeaderFragment(CharArrayBuffer buffer) {
 
 	if (isVariableDeclarator()) {
-		return;
 	} else {
 		super.appendMemberHeaderFragment(buffer);
 	}
@@ -239,22 +237,21 @@ protected void becomeDetailed() throws DOMException {
 			DOMNode first = getFirstFieldDeclaration();
 			DOMNode last = getLastFieldDeclaration();
 			DOMNode node= first;
-			String source= first.getContents();
+			StringBuilder source= new StringBuilder().append(first.getContents());
 			while (node != last) {
 				node= node.fNextNode;
-				source+=node.getContents();
+				source.append(node.getContents());
 			}
 			DOMBuilder builder = new DOMBuilder();
-			IDOMField[] details= builder.createFields(source.toCharArray());
+			IDOMField[] details= builder.createFields(source.toString().toCharArray());
 			if (details.length == 0) {
 				throw new DOMException(Messages.dom_cannotDetail);
-			} else {
-				node= this;
-				for (int i= 0; i < details.length; i++) {
-					node.shareContents((DOMNode)details[i]);
-					node= node.fNextNode;
-				}
 			}
+            node= this;
+            for (IDOMField detail : details) {
+            	node.shareContents((DOMNode)detail);
+            	node= node.fNextNode;
+            }
 		} else {
 			super.becomeDetailed();
 		}
@@ -268,9 +265,8 @@ protected void becomeDetailed() throws DOMException {
 public Object clone() {
 	if (isVariableDeclarator() || hasMultipleVariableDeclarators()) {
 		return getFactory().createField(new String(getSingleVariableDeclaratorContents()));
-	} else {
-		return super.clone();
 	}
+    return super.clone();
 }
 /**
  * Expands all variable declarators in this field declaration into
@@ -281,7 +277,7 @@ protected void expand() {
 		Enumeration siblings= new SiblingEnumeration(getFirstFieldDeclaration());
 		DOMField field= (DOMField)siblings.nextElement();
 		DOMNode next= field.fNextNode;
-		while (siblings.hasMoreElements() && (next instanceof DOMField) && (((DOMField)next).isVariableDeclarator())) {
+		while (siblings.hasMoreElements() && next instanceof DOMField && ((DOMField)next).isVariableDeclarator()) {
 			field.localizeContents();
 			if (field.fParent != null) {
 				field.fParent.fragment();
@@ -299,9 +295,8 @@ protected void expand() {
 protected DOMNode getDetailedNode() {
 	if (isVariableDeclarator() || hasMultipleVariableDeclarators()) {
 		return (DOMNode)getFactory().createField(new String(getSingleVariableDeclaratorContents()));
-	} else {
-		return (DOMNode)getFactory().createField(getContents());
 	}
+    return (DOMNode)getFactory().createField(getContents());
 }
 /**
  * Returns the first field document fragment that defines
@@ -310,9 +305,8 @@ protected DOMNode getDetailedNode() {
 protected DOMField getFirstFieldDeclaration() {
 	if (isVariableDeclarator()) {
 		return ((DOMField)this.fPreviousNode).getFirstFieldDeclaration();
-	} else {
-		return this;
 	}
+    return this;
 }
 /**
  * @see IDOMField#getInitializer()
@@ -320,15 +314,13 @@ protected DOMField getFirstFieldDeclaration() {
 @Override
 public String getInitializer() {
 	becomeDetailed();
-	if (hasInitializer()) {
-		if (this.fInitializer != null) {
-			return this.fInitializer;
-		} else {
-			return new String(this.fDocument, this.fInitializerRange[0], this.fInitializerRange[1] + 1 - this.fInitializerRange[0]);
-		}
-	} else {
+	if (!hasInitializer()) {
 		return null;
 	}
+    if (this.fInitializer != null) {
+    	return this.fInitializer;
+    }
+    return new String(this.fDocument, this.fInitializerRange[0], this.fInitializerRange[1] + 1 - this.fInitializerRange[0]);
 }
 /**
  * @see IDOMNode#getJavaElement
@@ -337,9 +329,8 @@ public String getInitializer() {
 public IJavaElement getJavaElement(IJavaElement parent) throws IllegalArgumentException {
 	if (parent.getElementType() == IJavaElement.TYPE) {
 		return ((IType)parent).getField(getName());
-	} else {
-		throw new IllegalArgumentException(Messages.element_illegalParent);
 	}
+    throw new IllegalArgumentException(Messages.element_illegalParent);
 }
 /**
  * Returns the last field document fragment in this muli-declarator statement.
@@ -347,11 +338,10 @@ public IJavaElement getJavaElement(IJavaElement parent) throws IllegalArgumentEx
 protected DOMField getLastFieldDeclaration() {
 	DOMField field = this;
 	while (field.isVariableDeclarator() || field.hasMultipleVariableDeclarators()) {
-		if (field.fNextNode instanceof DOMField && ((DOMField)field.fNextNode).isVariableDeclarator()) {
-			field= (DOMField)field.fNextNode;
-		} else {
+		if (!(field.fNextNode instanceof DOMField) || !((DOMField)field.fNextNode).isVariableDeclarator()) {
 			break;
 		}
+        field= (DOMField)field.fNextNode;
 	}
 	return field;
 }
@@ -424,9 +414,8 @@ public String getType() {
 protected char[] getTypeContents() {
 	if (isTypeAltered()) {
 		return this.fType.toCharArray();
-	} else {
-		return CharOperation.subarray(this.fDocument, this.fTypeRange[0], this.fTypeRange[1] + 1);
 	}
+    return CharOperation.subarray(this.fDocument, this.fTypeRange[0], this.fTypeRange[1] + 1);
 }
 /**
  * Returns true if this field has an initializer expression,
@@ -440,8 +429,7 @@ protected boolean hasInitializer() {
  * variable declarator, otherwise false;
  */
 protected boolean hasMultipleVariableDeclarators() {
-	return this.fNextNode != null && (this.fNextNode instanceof DOMField) &&
-		((DOMField)this.fNextNode).isVariableDeclarator();
+	return this.fNextNode instanceof DOMField && ((DOMField)this.fNextNode).isVariableDeclarator();
 }
 /**
  * Inserts the given un-parented node as a sibling of this node, immediately before
@@ -602,10 +590,9 @@ protected void setIsVariableDeclarator(boolean isVariableDeclarator) {
 public void setName(String name) throws IllegalArgumentException {
 	if (name == null) {
 		throw new IllegalArgumentException(Messages.element_nullName);
-	} else {
-		super.setName(name);
-		setTypeAltered(true);
 	}
+    super.setName(name);
+    setTypeAltered(true);
 }
 /**
  * @see IDOMField#setType(String)

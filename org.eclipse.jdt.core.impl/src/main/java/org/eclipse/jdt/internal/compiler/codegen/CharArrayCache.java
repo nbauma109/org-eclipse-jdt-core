@@ -36,7 +36,7 @@ public CharArrayCache() {
  */
 public CharArrayCache(int initialCapacity) {
 	this.elementSize = 0;
-	this.threshold = (initialCapacity * 2) / 3; // faster than float operation
+	this.threshold = initialCapacity * 2 / 3; // faster than float operation
 	this.keyTable = new char[initialCapacity][];
 	this.valueTable = new int[initialCapacity];
 }

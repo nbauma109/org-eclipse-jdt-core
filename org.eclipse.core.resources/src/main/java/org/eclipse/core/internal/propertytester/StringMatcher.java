@@ -81,10 +81,8 @@ public class StringMatcher {
 			if (hasWildCard) {
 				if (regExpRegionMatches(text, i, p, 0, plen))
 					return i;
-			} else {
-				if (text.regionMatches(true, i, p, 0, plen))
-					return i;
-			}
+			} else if (text.regionMatches(true, i, p, 0, plen))
+            	return i;
 		}
 		return -1;
 	}
@@ -107,7 +105,7 @@ public class StringMatcher {
 		if (patternLength == 0)
 			return false;
 		int currentTextPosition = 0;
-		if ((end - bound) < 0)
+		if (end - bound < 0)
 			return false;
 		int segmentIndex = 0;
 		String current = segments[segmentIndex];
@@ -120,7 +118,7 @@ public class StringMatcher {
 			segmentIndex++;
 			currentTextPosition = currentTextPosition + currentLength;
 		}
-		if ((segmentCount == 1) && (!hasLeadingStar) && (!hasTrailingStar)) {
+		if (segmentCount == 1 && !hasLeadingStar && !hasTrailingStar) {
 			// only one segment to match, no wild cards specified
 			return currentTextPosition == end;
 		}
@@ -148,12 +146,10 @@ public class StringMatcher {
 	private void parseWildCards() {
 		if (pattern.startsWith("*")) //$NON-NLS-1$
 			hasLeadingStar = true;
-		if (pattern.endsWith("*")) {//$NON-NLS-1$
-			/* make sure it's not an escaped wildcard */
-			if (patternLength > 1 && pattern.charAt(patternLength - 2) != '\\') {
-				hasTrailingStar = true;
-			}
-		}
+		/* make sure it's not an escaped wildcard */
+        if (pattern.endsWith("*") && patternLength > 1 && pattern.charAt(patternLength - 2) != '\\') {
+        	hasTrailingStar = true;
+        }
 
 		ArrayList<String> temp = new ArrayList<>();
 
@@ -168,13 +164,11 @@ public class StringMatcher {
 					} else {
 						char next = pattern.charAt(pos++);
 						/* if it's an escape sequence */
-						if (next == '*' || next == '?' || next == '\\') {
-							buf.append(next);
-						} else {
+						if (next != '*' && next != '?' && next != '\\') {
 							/* not an escape sequence, just insert literally */
 							buf.append(c);
-							buf.append(next);
 						}
+                        buf.append(next);
 					}
 					break;
 				case '*' :
@@ -217,15 +211,9 @@ public class StringMatcher {
 			char pchar = p.charAt(pStart++);
 
 			// process wild cards, skipping single wild cards
-			if (pchar == SINGLE_WILD_CARD)
-				continue;
-			if (pchar == tchar)
-				continue;
-			if (Character.toUpperCase(tchar) == Character.toUpperCase(pchar))
-				continue;
 			// comparing after converting to upper case doesn't handle all cases;
 			// also compare after converting to lower case
-			if (Character.toLowerCase(tchar) == Character.toLowerCase(pchar))
+			if (pchar == SINGLE_WILD_CARD || pchar == tchar || Character.toUpperCase(tchar) == Character.toUpperCase(pchar) || Character.toLowerCase(tchar) == Character.toLowerCase(pchar))
 				continue;
 			return false;
 		}

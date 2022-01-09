@@ -26,7 +26,6 @@ public class ResourceDeltaInfo {
 	protected ResourceComparator comparator;
 
 	public ResourceDeltaInfo(Workspace workspace, Map<IPath, MarkerSet> markerDeltas, ResourceComparator comparator) {
-		super();
 		this.workspace = workspace;
 		this.allMarkerDeltas = markerDeltas;
 		this.comparator = comparator;

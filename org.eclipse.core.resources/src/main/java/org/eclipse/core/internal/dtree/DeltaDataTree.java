@@ -587,7 +587,8 @@ public class DeltaDataTree extends AbstractDataTree {
 			if (node != null) {
 				if (node.hasData()) {
 					return node.getData();
-				} else if (node.isDeleted()) {
+				}
+                if (node.isDeleted()) {
 					break;
 				}
 			}
@@ -691,7 +692,8 @@ public class DeltaDataTree extends AbstractDataTree {
 			if (node != null) {
 				if (node.hasData()) {
 					return DataTreeLookup.newLookup(key, true, node.getData(), tree == this);
-				} else if (node.isDeleted()) {
+				}
+                if (node.isDeleted()) {
 					break;
 				}
 			}
@@ -729,7 +731,8 @@ public class DeltaDataTree extends AbstractDataTree {
 			if (node != null) {
 				if (node.hasData()) {
 					return DataTreeLookup.newLookup(key, true, node.getData(), tree == this);
-				} else if (node.isDeleted()) {
+				}
+                if (node.isDeleted()) {
 					break;
 				}
 			}

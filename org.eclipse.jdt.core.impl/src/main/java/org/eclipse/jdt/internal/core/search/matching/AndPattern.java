@@ -34,10 +34,9 @@ private static int combinedMatchRule(int matchRule, int matchRule2) {
 			compatibility = Math.min(matchRule & MATCH_COMPATIBILITY_MASK, matchRule2 & MATCH_COMPATIBILITY_MASK);
 		}
 	}
-	return (combined & (R_EXACT_MATCH | R_PREFIX_MATCH | R_PATTERN_MATCH | R_REGEXP_MATCH))
-		| (combined & R_CASE_SENSITIVE)
+	return combined & (R_EXACT_MATCH | R_PREFIX_MATCH | R_PATTERN_MATCH | R_REGEXP_MATCH | R_CASE_SENSITIVE)
 		| compatibility
-		| (combined & (R_CAMELCASE_MATCH | R_CAMELCASE_SAME_PART_COUNT_MATCH));
+		| combined & (R_CAMELCASE_MATCH | R_CAMELCASE_SAME_PART_COUNT_MATCH);
 }
 
 public AndPattern(SearchPattern leftPattern, SearchPattern rightPattern) {
@@ -72,7 +71,7 @@ public SearchPattern currentPattern() {
 
 @Override
 protected boolean hasNextQuery() {
-	return this.current < (this.patterns.length-1);
+	return this.current < this.patterns.length-1;
 }
 
 @Override

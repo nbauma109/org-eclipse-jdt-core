@@ -99,8 +99,8 @@ public CompilationUnitScope(CompilationUnitDeclaration unit, CompilerOptions com
 	// client still needs to assign #environment
 }
 void buildFieldsAndMethods() {
-	for (int i = 0, length = this.topLevelTypes.length; i < length; i++)
-		this.topLevelTypes[i].scope.buildFieldsAndMethods();
+	for (SourceTypeBinding topLevelType : this.topLevelTypes)
+        topLevelType.scope.buildFieldsAndMethods();
 }
 void buildTypeBindings(AccessRestriction accessRestriction) {
 	this.topLevelTypes = new SourceTypeBinding[0]; // want it initialized if the package cannot be resolved
@@ -139,7 +139,8 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 			// ensure fPackage is not null
 			this.fPackage = this.environment.defaultPackage;
 			return;
-		} else if (this.referenceContext.isPackageInfo()) {
+		}
+        if (this.referenceContext.isPackageInfo()) {
 			// resolve package annotations now if this is "package-info.java".
 			if (this.referenceContext.types == null || this.referenceContext.types.length == 0) {
 				this.referenceContext.types = new TypeDeclaration[1];
@@ -156,7 +157,7 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 
 	// Skip typeDeclarations which know of previously reported errors
 	TypeDeclaration[] types = this.referenceContext.types;
-	int typeLength = (types == null) ? 0 : types.length;
+	int typeLength = types == null ? 0 : types.length;
 	this.topLevelTypes = new SourceTypeBinding[typeLength];
 	int count = 0;
 	nextType: for (int i = 0; i < typeLength; i++) {
@@ -207,8 +208,7 @@ void checkAndSetImports() {
 	// package resolving may require all modules to be known
 	TypeDeclaration[] types = this.referenceContext.types;
 	if (types != null) {
-		for (int i = 0; i < types.length; i++) {
-			TypeDeclaration typeDecl = types[i];
+		for (TypeDeclaration typeDecl : types) {
 			if (this.fPackage != this.environment.defaultPackage && this.fPackage.getPackage(typeDecl.name, module()) != null) {
 				// if a package exists, it must be a valid package - cannot be a NotFound problem package
 				// this is now a warning since a package does not really 'exist' until it contains a type, see JLS v2, 7.4.3
@@ -231,7 +231,7 @@ void checkAndSetImports() {
 	int numberOfImports = numberOfStatements + 1;
 	for (int i = 0; i < numberOfStatements; i++) {
 		ImportReference importReference = this.referenceContext.imports[i];
-		if (((importReference.bits & ASTNode.OnDemand) != 0) && CharOperation.equals(TypeConstants.JAVA_LANG, importReference.tokens) && !importReference.isStatic()) {
+		if ((importReference.bits & ASTNode.OnDemand) != 0 && CharOperation.equals(TypeConstants.JAVA_LANG, importReference.tokens) && !importReference.isStatic()) {
 			numberOfImports--;
 			break;
 		}
@@ -257,7 +257,7 @@ void checkAndSetImports() {
 				continue nextImport;
 
 			Binding importBinding = findImport(compoundName, compoundName.length);
-			if (!importBinding.isValidBinding() || (importReference.isStatic() && importBinding instanceof PackageBinding))
+			if (!importBinding.isValidBinding() || importReference.isStatic() && importBinding instanceof PackageBinding)
 				continue nextImport;	// we report all problems in faultInImports()
 			resolvedImports[index++] = new ImportBinding(compoundName, true, importBinding, importReference);
 		} else {
@@ -278,8 +278,8 @@ void checkAndSetImports() {
 void checkParameterizedTypes() {
 	if (compilerOptions().sourceLevel < ClassFileConstants.JDK1_5) return;
 
-	for (int i = 0, length = this.topLevelTypes.length; i < length; i++) {
-		ClassScope scope = this.topLevelTypes[i].scope;
+	for (SourceTypeBinding topLevelType : this.topLevelTypes) {
+		ClassScope scope = topLevelType.scope;
 		scope.checkParameterizedTypeBounds();
 		scope.checkParameterizedSuperTypeCollisions();
 	}
@@ -334,41 +334,38 @@ public char[] computeConstantPoolName(LocalTypeBinding localType) {
 					String.valueOf(index+1).toCharArray(),
 					'$');
 			}
-		} else {
-			// local type
-			if (isCompliant15) {
-				candidateName = CharOperation.concat(
-					CharOperation.concat(
-						localType.enclosingType().constantPoolName(),
-						String.valueOf(index+1).toCharArray(),
-						'$'),
-					localType.sourceName);
-			} else {
-				candidateName = CharOperation.concat(
-					outerMostEnclosingType.constantPoolName(),
-					'$',
-					String.valueOf(index+1).toCharArray(),
-					'$',
-					localType.sourceName);
-			}
-		}
-		if (this.constantPoolNameUsage.get(candidateName) != null) {
-			index ++;
-		} else {
+		} else // local type
+        if (isCompliant15) {
+        	candidateName = CharOperation.concat(
+        		CharOperation.concat(
+        			localType.enclosingType().constantPoolName(),
+        			String.valueOf(index+1).toCharArray(),
+        			'$'),
+        		localType.sourceName);
+        } else {
+        	candidateName = CharOperation.concat(
+        		outerMostEnclosingType.constantPoolName(),
+        		'$',
+        		String.valueOf(index+1).toCharArray(),
+        		'$',
+        		localType.sourceName);
+        }
+		if (this.constantPoolNameUsage.get(candidateName) == null) {
 			this.constantPoolNameUsage.put(candidateName, localType);
 			break;
 		}
+        index ++;
 	}
 	return candidateName;
 }
 
 void connectTypeHierarchy() {
-	for (int i = 0, length = this.topLevelTypes.length; i < length; i++)
-		this.topLevelTypes[i].scope.connectTypeHierarchy();
+	for (SourceTypeBinding topLevelType : this.topLevelTypes)
+        topLevelType.scope.connectTypeHierarchy();
 	// Wait for all hierarchy information to be built before
 	// checking on permitted types
-	for (int i = 0, length = this.topLevelTypes.length; i < length; i++)
-		this.topLevelTypes[i].scope.connectImplicitPermittedTypes();
+	for (SourceTypeBinding topLevelType : this.topLevelTypes)
+        topLevelType.scope.connectImplicitPermittedTypes();
 }
 void faultInImports() {
 	if (this.tempImports != null)
@@ -390,8 +387,8 @@ void faultInImports() {
 	for (int i = 0; i < numberOfStatements; i++) {
 		if ((this.referenceContext.imports[i].bits & ASTNode.OnDemand) == 0) {
 			typesBySimpleNames = new HashtableOfType(this.topLevelTypes.length + numberOfStatements);
-			for (int j = 0, length = this.topLevelTypes.length; j < length; j++)
-				typesBySimpleNames.put(this.topLevelTypes[j].sourceName, this.topLevelTypes[j]);
+			for (SourceTypeBinding topLevelType : this.topLevelTypes)
+                typesBySimpleNames.put(topLevelType.sourceName, topLevelType);
 			break;
 		}
 	}
@@ -400,7 +397,7 @@ void faultInImports() {
 	int numberOfImports = numberOfStatements + 1;
 	for (int i = 0; i < numberOfStatements; i++) {
 		ImportReference importReference = this.referenceContext.imports[i];
-		if (((importReference.bits & ASTNode.OnDemand) != 0) && CharOperation.equals(TypeConstants.JAVA_LANG, importReference.tokens) && !importReference.isStatic()) {
+		if ((importReference.bits & ASTNode.OnDemand) != 0 && CharOperation.equals(TypeConstants.JAVA_LANG, importReference.tokens) && !importReference.isStatic()) {
 			numberOfImports--;
 			break;
 		}
@@ -422,12 +419,10 @@ void faultInImports() {
 		// skip duplicates or imports of the current package
 		for (int j = 0; j < this.importPtr; j++) {
 			ImportBinding resolved = this.tempImports[j];
-			if (resolved.onDemand == ((importReference.bits & ASTNode.OnDemand) != 0) && resolved.isStatic() == importReference.isStatic()) {
-				if (CharOperation.equals(compoundName, resolved.compoundName) && CharOperation.equals(importReference.getSimpleName(), resolved.getSimpleName())) {
-					problemReporter().unusedImport(importReference); // since skipped, must be reported now
-					continue nextImport;
-				}
-			}
+			if (resolved.onDemand == ((importReference.bits & ASTNode.OnDemand) != 0) && resolved.isStatic() == importReference.isStatic() && CharOperation.equals(compoundName, resolved.compoundName) && CharOperation.equals(importReference.getSimpleName(), resolved.getSimpleName())) {
+            	problemReporter().unusedImport(importReference); // since skipped, must be reported now
+            	continue nextImport;
+            }
 		}
 		if ((importReference.bits & ASTNode.OnDemand) != 0) {
 			Binding importBinding = findImport(compoundName, compoundName.length);
@@ -456,21 +451,18 @@ void faultInImports() {
 				problemReporter().conflictingPackagesFromModules((SplitPackageBinding) importBinding, module(), importReference.sourceStart, sourceEnd);
 				continue nextImport;
 			}
-			if (!importBinding.isValidBinding()) {
-				if (importBinding.problemId() == ProblemReasons.Ambiguous) {
-					// keep it unless a duplicate can be found below
-				} else {
-					unresolvedFound = true;
-					if (reportUnresolved) {
-						problemReporter().importProblem(importReference, importBinding);
-					}
-					continue nextImport;
-				}
-			}
+			if (!importBinding.isValidBinding() && importBinding.problemId() != ProblemReasons.Ambiguous) {
+            	unresolvedFound = true;
+            	if (reportUnresolved) {
+            		problemReporter().importProblem(importReference, importBinding);
+            	}
+            	continue nextImport;
+            }
 			if (importBinding instanceof PackageBinding) {
 				problemReporter().cannotImportPackage(importReference);
 				continue nextImport;
-			} else if (this.environment.useModuleSystem && importBinding instanceof ReferenceBinding) {
+			}
+            if (this.environment.useModuleSystem && importBinding instanceof ReferenceBinding) {
 				PackageBinding importedPackage = ((ReferenceBinding) importBinding).fPackage;
 				if (importedPackage != null) {
 					if (!importedPackage.isValidBinding()) {
@@ -529,16 +521,15 @@ public void faultInTypes() {
 		this.referenceContext.currentPackage.checkPackageConflict(this);
 	}
 
-	for (int i = 0, length = this.topLevelTypes.length; i < length; i++)
-		this.topLevelTypes[i].faultInTypesForFieldsAndMethods();
+	for (SourceTypeBinding topLevelType : this.topLevelTypes)
+        topLevelType.faultInTypesForFieldsAndMethods();
 }
 // this API is for code assist purpose
 public Binding findImport(char[][] compoundName, boolean findStaticImports, boolean onDemand) {
 	if(onDemand) {
 		return findImport(compoundName, compoundName.length);
-	} else {
-		return findSingleImport(compoundName, Binding.TYPE | Binding.FIELD | Binding.METHOD, findStaticImports);
 	}
+    return findSingleImport(compoundName, Binding.TYPE | Binding.FIELD | Binding.METHOD, findStaticImports);
 }
 private Binding findImport(char[][] compoundName, int length) {
 	recordQualifiedReference(compoundName);
@@ -554,7 +545,8 @@ private Binding findImport(char[][] compoundName, int length) {
 			}
 			if (binding == null) {
 				break foundNothingOrType;
-			} else if (!binding.isValidBinding()) {
+			}
+            if (!binding.isValidBinding()) {
 				if (binding.problemId() == ProblemReasons.Ambiguous && packageBinding instanceof SplitPackageBinding)
 					return packageBinding; // pass the split package to the caller so they can report conflictingPackagesFromModules()
 				binding = null;
@@ -629,7 +621,7 @@ private Binding findSingleStaticImport(char[][] compoundName, int mask) {
 	char[] name = compoundName[compoundName.length - 1];
 	if (binding instanceof PackageBinding) {
 		Binding temp = ((PackageBinding) binding).getTypeOrPackage(name, module(), false);
-		if (temp != null && temp instanceof ReferenceBinding) // must resolve to a member type or field, not a top level type
+		if (temp instanceof ReferenceBinding) // must resolve to a member type or field, not a top level type
 			return new ProblemReferenceBinding(compoundName, (ReferenceBinding) temp, ProblemReasons.InvalidTypeForStaticImport);
 		return binding; // cannot be a package, error is caught in sender
 	}
@@ -830,13 +822,13 @@ void recordTypeReference(TypeBinding type) {
 		this.referencedTypes.add(new ReferenceBindingSetWrapper(actualType));
 }
 void recordTypeReferences(TypeBinding[] types) {
-	if (this.referencedTypes == null) return; // not recording dependencies
-	if (types == null || types.length == 0) return;
+	 // not recording dependencies
+	if (this.referencedTypes == null || types == null || types.length == 0) return;
 
-	for (int i = 0, max = types.length; i < max; i++) {
+	for (TypeBinding type : types) {
 		// No need to record supertypes of method arguments & thrown exceptions, just the compoundName
 		// If a field/method is retrieved from such a type then a separate call does the job
-		ReferenceBinding actualType = typeToRecord(types[i]);
+		ReferenceBinding actualType = typeToRecord(type);
 		if (actualType != null)
 			this.referencedTypes.add(new ReferenceBindingSetWrapper(actualType));
 	}
@@ -876,8 +868,8 @@ public void storeDependencyInfo() {
 			recordSuperTypeReference(superclass);
 		ReferenceBinding[] interfaces = type.superInterfaces();
 		if (interfaces != null)
-			for (int j = 0, length = interfaces.length; j < length; j++)
-				recordSuperTypeReference(interfaces[j]);
+            for (ReferenceBinding element : interfaces)
+                recordSuperTypeReference(element);
 	}
 
 	for (ReferenceBindingSetWrapper wrapper : this.referencedTypes) {
@@ -933,12 +925,12 @@ private ReferenceBinding typeToRecord(TypeBinding type) {
 	return refType;
 }
 public void verifyMethods(MethodVerifier verifier) {
-	for (int i = 0, length = this.topLevelTypes.length; i < length; i++)
-		this.topLevelTypes[i].verifyMethods(verifier);
+	for (SourceTypeBinding topLevelType : this.topLevelTypes)
+        topLevelType.verifyMethods(verifier);
 }
 private void recordImportBinding(ImportBinding bindingToAdd) {
 	if (this.tempImports.length == this.importPtr) {
-		System.arraycopy(this.tempImports, 0, (this.tempImports = new ImportBinding[this.importPtr + 1]), 0, this.importPtr);
+		System.arraycopy(this.tempImports, 0, this.tempImports = new ImportBinding[this.importPtr + 1], 0, this.importPtr);
 	}
 	this.tempImports[this.importPtr++] = bindingToAdd;
 }
@@ -967,7 +959,7 @@ private void checkMoreStaticBindings(
 	} else {
 		checkAndRecordImportBinding(importBinding, typesBySimpleNames, importReference, compoundName);
 	}
-	if (((mask & Binding.METHOD) != 0) && (importBinding.kind() == Binding.METHOD)) {
+	if ((mask & Binding.METHOD) != 0 && importBinding.kind() == Binding.METHOD) {
 		// found method
 		// type is left to be looked for
 		// reset METHOD bit to enable lookup for only type
@@ -993,7 +985,7 @@ private int checkAndRecordImportBinding(
 	ReferenceBinding conflictingType = null;
 	if (importBinding instanceof MethodBinding) {
 		conflictingType = (ReferenceBinding) getType(compoundName, compoundName.length);
-		if (!conflictingType.isValidBinding() || (importReference.isStatic() && !conflictingType.isStatic()))
+		if (!conflictingType.isValidBinding() || importReference.isStatic() && !conflictingType.isStatic())
 			conflictingType = null;
 	}
 	// collisions between an imported static field & a type should be checked according to spec... but currently not by javac
@@ -1016,24 +1008,20 @@ private int checkAndRecordImportBinding(
 					ImportBinding resolved = this.tempImports[j];
 					if (resolved instanceof ImportConflictBinding) {
 						ImportConflictBinding importConflictBinding = (ImportConflictBinding) resolved;
-						if (TypeBinding.equalsEquals(importConflictBinding.conflictingTypeBinding, referenceBinding)) {
-							if (!importReference.isStatic()) {
-								// resolved is implicitly static
-								problemReporter().duplicateImport(importReference);
-								recordImportBinding(new ImportBinding(compoundName, false, importBinding, importReference));
-							}
-						}
-					} else if (resolved.resolvedImport == referenceBinding) {
-						if (importReference.isStatic() != resolved.isStatic()) {
-							recordImportBinding(new ImportBinding(compoundName, false, importBinding, importReference));
-						}
-					}
+						if (TypeBinding.equalsEquals(importConflictBinding.conflictingTypeBinding, referenceBinding) && !importReference.isStatic()) {
+                        	// resolved is implicitly static
+                        	problemReporter().duplicateImport(importReference);
+                        	recordImportBinding(new ImportBinding(compoundName, false, importBinding, importReference));
+                        }
+					} else if (resolved.resolvedImport == referenceBinding && importReference.isStatic() != resolved.isStatic()) {
+                    	recordImportBinding(new ImportBinding(compoundName, false, importBinding, importReference));
+                    }
 				}
 				return -1;
 			}
 			// either the type collides with a top level type or another imported type
-			for (int j = 0, length = this.topLevelTypes.length; j < length; j++) {
-				if (CharOperation.equals(this.topLevelTypes[j].sourceName, existingType.sourceName)) {
+			for (SourceTypeBinding topLevelType : this.topLevelTypes) {
+				if (CharOperation.equals(topLevelType.sourceName, existingType.sourceName)) {
 					problemReporter().conflictingImport(importReference);
 					return -1;
 				}
@@ -1042,13 +1030,11 @@ private int checkAndRecordImportBinding(
 				// 7.5.3 says nothing about collision of single static imports and JDK8 tolerates them, though use is flagged.
 				for (int j = 0; j < this.importPtr; j++) {
 					ImportBinding resolved = this.tempImports[j];
-					if (resolved.isStatic() && resolved.resolvedImport instanceof ReferenceBinding && importBinding != resolved.resolvedImport) {
-						if (CharOperation.equals(compoundName[compoundName.length - 1], resolved.compoundName[resolved.compoundName.length - 1])) {
-							ReferenceBinding type = (ReferenceBinding) resolved.resolvedImport;
-							resolved.resolvedImport = new ProblemReferenceBinding(new char[][] { name }, type, ProblemReasons.Ambiguous);
-							return -1;
-						}
-					}
+					if (resolved.isStatic() && resolved.resolvedImport instanceof ReferenceBinding && importBinding != resolved.resolvedImport && CharOperation.equals(compoundName[compoundName.length - 1], resolved.compoundName[resolved.compoundName.length - 1])) {
+                    	ReferenceBinding type = (ReferenceBinding) resolved.resolvedImport;
+                    	resolved.resolvedImport = new ProblemReferenceBinding(new char[][] { name }, type, ProblemReasons.Ambiguous);
+                    	return -1;
+                    }
 				}
 			}
 			problemReporter().duplicateImport(importReference);
@@ -1059,19 +1045,16 @@ private int checkAndRecordImportBinding(
 		for (int j = 0; j < this.importPtr; j++) {
 			ImportBinding resolved = this.tempImports[j];
 			// find other static fields with the same name
-			if (resolved.isStatic() && resolved.resolvedImport instanceof FieldBinding && importBinding != resolved.resolvedImport) {
-				if (CharOperation.equals(name, resolved.compoundName[resolved.compoundName.length - 1])) {
-					if (compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8) {
-						// 7.5.3 says nothing about collision of single static imports and JDK8 tolerates them, though use is flagged.
-						FieldBinding field = (FieldBinding) resolved.resolvedImport;
-						resolved.resolvedImport = new ProblemFieldBinding(field, field.declaringClass, name, ProblemReasons.Ambiguous);
-						return -1;
-					} else {
-						problemReporter().duplicateImport(importReference);
-						return -1;
-					}
-				}
-			}
+			if (resolved.isStatic() && resolved.resolvedImport instanceof FieldBinding && importBinding != resolved.resolvedImport && CharOperation.equals(name, resolved.compoundName[resolved.compoundName.length - 1])) {
+            	if (compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8) {
+            		// 7.5.3 says nothing about collision of single static imports and JDK8 tolerates them, though use is flagged.
+            		FieldBinding field = (FieldBinding) resolved.resolvedImport;
+            		resolved.resolvedImport = new ProblemFieldBinding(field, field.declaringClass, name, ProblemReasons.Ambiguous);
+            	} else {
+            		problemReporter().duplicateImport(importReference);
+            	}
+                return -1;
+            }
 		}
 	}
 	if (conflictingType == null) {

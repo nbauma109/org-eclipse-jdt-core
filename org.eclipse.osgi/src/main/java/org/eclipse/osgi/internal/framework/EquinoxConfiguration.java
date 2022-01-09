@@ -427,7 +427,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 							try {
 								// try using the System.getenv method if it exists (bug 126921)
 								Method getenv = System.class.getMethod("getenv", String.class); //$NON-NLS-1$
-								prop = (String) getenv.invoke(null, new Object[] {var});
+								prop = (String) getenv.invoke(null, var);
 							} catch (Throwable t) {
 								// do nothing;
 								// on 1.4 VMs this throws an error
@@ -450,12 +450,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 						varStarted = false;
 						var = null;
 					}
-				} else {
-					if (!varStarted)
-						buf.append(tok); // the token is not part of a var
-					else
-						var = tok; // the token is the var key; save the key to process when we find the end token
-				}
+				} else if (!varStarted)
+                	buf.append(tok); // the token is not part of a var
+                else
+                	var = tok; // the token is the var key; save the key to process when we find the end token
 			}
 			if (var != null)
 				// found a case of $var at the end of the path with no trailing $; just append it as is.
@@ -603,7 +601,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		compatibilityBootDelegation = "true".equals(getConfiguration(PROP_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
 		compatibilityLazyTriggerOnFailLoad = "true".equals(getConfiguration(PROP_COMPATIBILITY_START_LAZY_ON_FAIL_CLASSLOAD)); //$NON-NLS-1$
 
-		COPY_NATIVES = Boolean.valueOf(getConfiguration(PROP_COPY_NATIVES)).booleanValue();
+		COPY_NATIVES = Boolean.parseBoolean(getConfiguration(PROP_COPY_NATIVES));
 		String[] libExtensions = ManifestElement.getArrayFromList(getConfiguration(EquinoxConfiguration.PROP_FRAMEWORK_LIBRARY_EXTENSIONS, getConfiguration(org.osgi.framework.Constants.FRAMEWORK_LIBRARY_EXTENSIONS, getOSLibraryExtDefaults())), ","); //$NON-NLS-1$
 		for (int i = 0; i < libExtensions.length; i++)
 			if (libExtensions[i].length() > 0 && libExtensions[i].charAt(0) != '.')
@@ -630,14 +628,14 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 		// A specified osgi.dev property but unspecified osgi.checkConfiguration
 		// property implies osgi.checkConfiguration = true.
-		inCheckConfigurationMode = Boolean.valueOf(getConfiguration(PROP_CHECK_CONFIGURATION, Boolean.toString(devMode)));
+		inCheckConfigurationMode = Boolean.parseBoolean(getConfiguration(PROP_CHECK_CONFIGURATION, Boolean.toString(devMode)));
 		// Must ensure the check configuration property is set if in osgi.dev mode (bug 443340)
 		if (inCheckConfigurationMode && getConfiguration(PROP_CHECK_CONFIGURATION) == null) {
 			setConfiguration(PROP_CHECK_CONFIGURATION, "true"); //$NON-NLS-1$
 		}
 		supportSignedBundles = getSupportSignedBundles(this);
 		CLASS_CERTIFICATE = (supportSignedBundles & SIGNED_CONTENT_VERIFY_CERTIFICATE) != 0 && //
-				Boolean.valueOf(getConfiguration(PROP_CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
+				Boolean.parseBoolean(getConfiguration(PROP_CLASS_CERTIFICATE_SUPPORT, "true")); //$NON-NLS-1$
 		runtimeVerifySignedBundles = (supportSignedBundles & SIGNED_CONTENT_VERIFY_RUNTIME) != 0;
 	}
 
@@ -691,7 +689,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		while (nl.length() > 0) {
 			result.add("nl/" + nl + "/"); //$NON-NLS-1$ //$NON-NLS-2$
 			int i = nl.lastIndexOf('/');
-			nl = (i < 0) ? "" : nl.substring(0, i); //$NON-NLS-1$
+			nl = i < 0 ? "" : nl.substring(0, i); //$NON-NLS-1$
 		}
 		result.add(""); //$NON-NLS-1$
 		return Collections.unmodifiableList(result);
@@ -703,7 +701,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		while (nl.length() > 0) {
 			result.add("nl/" + nl + "/"); //$NON-NLS-1$ //$NON-NLS-2$
 			int i = nl.lastIndexOf('/');
-			nl = (i < 0) ? "" : nl.substring(0, i); //$NON-NLS-1$
+			nl = i < 0 ? "" : nl.substring(0, i); //$NON-NLS-1$
 		}
 		result.add(""); //$NON-NLS-1$
 		return result;
@@ -785,15 +783,11 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		// setup default values for known OSes if nothing was specified
 		if (osName.equals(Constants.OS_WIN32))
 			return Constants.WS_WIN32;
-		if (osName.equals(Constants.OS_LINUX))
-			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_FREEBSD))
+		if (osName.equals(Constants.OS_LINUX) || osName.equals(Constants.OS_FREEBSD))
 			return Constants.WS_GTK;
 		if (osName.equals(Constants.OS_MACOSX))
 			return Constants.WS_COCOA;
-		if (osName.equals(Constants.OS_HPUX))
-			return Constants.WS_MOTIF;
-		if (osName.equals(Constants.OS_AIX))
+		if (osName.equals(Constants.OS_HPUX) || osName.equals(Constants.OS_AIX))
 			return Constants.WS_MOTIF;
 		if (osName.equals(Constants.OS_SOLARIS))
 			return Constants.WS_GTK;
@@ -1157,10 +1151,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			// try up to the first non-number char
 			StringBuilder sb = new StringBuilder(value.length());
 			char[] chars = value.toCharArray();
-			for (int i = 0; i < chars.length; i++) {
-				if (!Character.isDigit(chars[i]))
+			for (char element : chars) {
+				if (!Character.isDigit(element))
 					break;
-				sb.append(chars[i]);
+				sb.append(element);
 			}
 			if (sb.length() > 0)
 				return Integer.parseInt(sb.toString());
@@ -1210,12 +1204,12 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			return defaultLocale;
 		}
 
-		String language = ""; //$NON-NLS-1$
+		String language;
 		String country = ""; //$NON-NLS-1$
 		String variant = ""; //$NON-NLS-1$
 
 		String[] localeParts = str.split("_"); //$NON-NLS-1$
-		if (localeParts.length == 0 || localeParts.length > 3 || (localeParts.length == 1 && localeParts[0].length() == 0)) {
+		if (localeParts.length == 0 || localeParts.length > 3 || localeParts.length == 1 && localeParts[0].length() == 0) {
 			System.err.println(NLS.bind(Msg.error_badNL, str));
 			return defaultLocale;
 		}

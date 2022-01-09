@@ -140,9 +140,11 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	private URLStreamHandler getFrameworkHandler(String protocol) {
 		if (BundleResourceHandler.OSGI_ENTRY_URL_PROTOCOL.equals(protocol)) {
 			return new org.eclipse.osgi.storage.url.bundleentry.Handler(container.getStorage().getModuleContainer(), null);
-		} else if (BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL.equals(protocol)) {
+		}
+        if (BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL.equals(protocol)) {
 			return new org.eclipse.osgi.storage.url.bundleresource.Handler(container.getStorage().getModuleContainer(), null);
-		} else if (PROTOCOL_REFERENCE.equals(protocol)) {
+		}
+        if (PROTOCOL_REFERENCE.equals(protocol)) {
 			return new org.eclipse.osgi.storage.url.reference.Handler(container.getConfiguration().getConfiguration(EquinoxLocations.PROP_INSTALL_AREA));
 		}
 		return null;
@@ -159,7 +161,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 		//first check to see if the handler is in the cache
 		URLStreamHandlerProxy handler = (URLStreamHandlerProxy) proxies.get(protocol);
 		if (handler != null)
-			return (handler);
+			return handler;
 		//look through the service registry for a URLStramHandler registered for this protocol
 		ServiceReference<URLStreamHandlerService>[] serviceReferences = handlerTracker.getServiceReferences();
 		if (serviceReferences == null)
@@ -178,7 +180,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 				if (candidateProtocol.equals(protocol)) {
 					handler = new URLStreamHandlerProxy(protocol, serviceReference, context);
 					proxies.put(protocol, handler);
-					return (handler);
+					return handler;
 				}
 			}
 		}
@@ -195,7 +197,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 
 		try {
 			Method createInternalURLStreamHandlerMethod = factory.getClass().getMethod("createInternalURLStreamHandler", String.class); //$NON-NLS-1$
-			return (URLStreamHandler) createInternalURLStreamHandlerMethod.invoke(factory, new Object[] {protocol});
+			return (URLStreamHandler) createInternalURLStreamHandlerMethod.invoke(factory, protocol);
 		} catch (Exception e) {
 			container.getLogServices().log(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, "findAuthorizedURLStreamHandler-loop", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);

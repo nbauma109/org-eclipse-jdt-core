@@ -43,8 +43,7 @@ public ClassFileWorkingCopy(AbstractClassFile classFile, WorkingCopyOwner owner)
 private static String sourceFileName(AbstractClassFile classFile) {
 	if (classFile instanceof ModularClassFile)
 		return TypeConstants.MODULE_INFO_FILE_NAME_STRING;
-	else
-		return ((BinaryType) ((ClassFile) classFile).getType()).getSourceFileName(null/*no info available*/);
+    return ((BinaryType) ((ClassFile) classFile).getType()).getSourceFileName(null/*no info available*/);
 }
 
 @Override
@@ -56,8 +55,7 @@ public void commitWorkingCopy(boolean force, IProgressMonitor monitor) throws Ja
 public IBuffer getBuffer() throws JavaModelException {
 	if (isWorkingCopy())
 		return super.getBuffer();
-	else
-		return this.classFile.getBuffer();
+    return this.classFile.getBuffer();
 }
 
 @Override

@@ -83,10 +83,10 @@ private ReferenceBinding getMatchingSuper(ReferenceBinding binding) {
 	// matches interfaces
 	ReferenceBinding[] interfaces = binding.superInterfaces();
 	if (interfaces == null) return null;
-	for (int i = 0; i < interfaces.length; i++) {
-		level = resolveLevelForType(this.pattern.declaringSimpleName, this.pattern.declaringQualification, interfaces[i]);
-		if (level != IMPOSSIBLE_MATCH) return interfaces[i];
-		superBinding = getMatchingSuper(interfaces[i]);
+	for (ReferenceBinding element : interfaces) {
+		level = resolveLevelForType(this.pattern.declaringSimpleName, this.pattern.declaringQualification, element);
+		if (level != IMPOSSIBLE_MATCH) return element;
+		superBinding = getMatchingSuper(element);
 		if (superBinding != null) return superBinding;
 	}
 	return null;
@@ -95,8 +95,8 @@ private ReferenceBinding getMatchingSuper(ReferenceBinding binding) {
 private MethodBinding getMethodBinding(ReferenceBinding type, char[] methodName, TypeBinding[] argumentTypes) {
 	MethodBinding[] methods = type.getMethods(methodName);
 	MethodBinding method = null;
-	methodsLoop: for (int i=0, length=methods.length; i<length; i++) {
-		method = methods[i];
+	methodsLoop: for (MethodBinding method2 : methods) {
+		method = method2;
 		TypeBinding[] parameters = method.parameters;
 		if (argumentTypes.length == parameters.length) {
 			for (int j=0,l=parameters.length; j<l; j++) {
@@ -154,14 +154,12 @@ private boolean isTypeInSuperDeclaringTypeNames(char[][] typeName) {
  */
 protected boolean isVirtualInvoke(MethodBinding method, MessageSend messageSend) {
 		return !method.isStatic() && !method.isPrivate() && !messageSend.isSuperAccess()
-			&& !(method.isDefault() && this.pattern.focus != null
-			&& !CharOperation.equals(this.pattern.declaringPackageName, method.declaringClass.qualifiedPackageName()));
+			&& (!method.isDefault() || this.pattern.focus == null || CharOperation.equals(this.pattern.declaringPackageName, method.declaringClass.qualifiedPackageName()));
 }
 protected ReferenceBinding checkMethodRef(MethodBinding method, ReferenceExpression referenceExpression) {
-	boolean result = (!method.isStatic() && !method.isPrivate()
+	boolean result = !method.isStatic() && !method.isPrivate()
 		&&	referenceExpression.isMethodReference()
-		&& !(method.isDefault() && this.pattern.focus != null
-		&& !CharOperation.equals(this.pattern.declaringPackageName, method.declaringClass.qualifiedPackageName())));
+		&& (!method.isDefault() || this.pattern.focus == null || CharOperation.equals(this.pattern.declaringPackageName, method.declaringClass.qualifiedPackageName()));
 	if (result) {
 		Expression lhs = referenceExpression.lhs;
 		if (lhs instanceof NameReference) {
@@ -176,28 +174,25 @@ protected ReferenceBinding checkMethodRef(MethodBinding method, ReferenceExpress
 @Override
 public int match(ASTNode node, MatchingNodeSet nodeSet) {
 	int declarationsLevel = IMPOSSIBLE_MATCH;
-	if (this.pattern.findReferences) {
-		if (node instanceof ImportReference) {
-			// With static import, we can have static method reference in import reference
-			ImportReference importRef = (ImportReference) node;
-			int length = importRef.tokens.length-1;
-			if (importRef.isStatic() && ((importRef.bits & ASTNode.OnDemand) == 0) && matchesName(this.pattern.selector, importRef.tokens[length])) {
-				char[][] compoundName = new char[length][];
-				System.arraycopy(importRef.tokens, 0, compoundName, 0, length);
-				char[] declaringType = CharOperation.concat(this.pattern.declaringQualification, this.pattern.declaringSimpleName, '.');
-				if (matchesName(declaringType, CharOperation.concatWith(compoundName, '.'))) {
-					declarationsLevel = this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
-				}
-			}
-		}
-	}
+	if (this.pattern.findReferences && node instanceof ImportReference) {
+    	// With static import, we can have static method reference in import reference
+    	ImportReference importRef = (ImportReference) node;
+    	int length = importRef.tokens.length-1;
+    	if (importRef.isStatic() && (importRef.bits & ASTNode.OnDemand) == 0 && matchesName(this.pattern.selector, importRef.tokens[length])) {
+    		char[][] compoundName = new char[length][];
+    		System.arraycopy(importRef.tokens, 0, compoundName, 0, length);
+    		char[] declaringType = CharOperation.concat(this.pattern.declaringQualification, this.pattern.declaringSimpleName, '.');
+    		if (matchesName(declaringType, CharOperation.concatWith(compoundName, '.'))) {
+    			declarationsLevel = this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
+    		}
+    	}
+    }
 	return nodeSet.addMatch(node, declarationsLevel);
 }
 
 @Override
 public int match(LambdaExpression node, MatchingNodeSet nodeSet) {
-	if (!this.pattern.findDeclarations) return IMPOSSIBLE_MATCH;
-	if (this.pattern.parameterSimpleNames != null && this.pattern.parameterSimpleNames.length != node.arguments().length) return IMPOSSIBLE_MATCH;
+	if (!this.pattern.findDeclarations || this.pattern.parameterSimpleNames != null && this.pattern.parameterSimpleNames.length != node.arguments().length) return IMPOSSIBLE_MATCH;
 
 	nodeSet.mustResolve = true;
 	return nodeSet.addMatch(node, POSSIBLE_MATCH);
@@ -208,10 +203,8 @@ public int match(LambdaExpression node, MatchingNodeSet nodeSet) {
 //public int match(FieldDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
 @Override
 public int match(MethodDeclaration node, MatchingNodeSet nodeSet) {
-	if (!this.pattern.findDeclarations) return IMPOSSIBLE_MATCH;
-
 	// Verify method name
-	if (!matchesName(this.pattern.selector, node.selector)) return IMPOSSIBLE_MATCH;
+	if (!this.pattern.findDeclarations || !matchesName(this.pattern.selector, node.selector)) return IMPOSSIBLE_MATCH;
 
 	// Verify parameters types
 	boolean resolve = this.pattern.mustResolve;
@@ -223,43 +216,36 @@ public int match(MethodDeclaration node, MatchingNodeSet nodeSet) {
 		for (int i = 0; i < argsLength; i++) {
 			if (args != null && !matchesTypeReference(this.pattern.parameterSimpleNames[i], ((Argument) args[i]).type)) {
 				// Do not return as impossible when source level is at least 1.5
-				if (this.mayBeGeneric) {
-					if (!this.pattern.mustResolve) {
-						// Set resolution flag on node set in case of types was inferred in parameterized types from generic ones...
-					 	// (see  bugs https://bugs.eclipse.org/bugs/show_bug.cgi?id=79990, 96761, 96763)
-						nodeSet.mustResolve = true;
-						resolve = true;
-					}
-					this.methodDeclarationsWithInvalidParam.put(node, null);
-				} else {
+				if (!this.mayBeGeneric) {
 					return IMPOSSIBLE_MATCH;
 				}
+                if (!this.pattern.mustResolve) {
+                	// Set resolution flag on node set in case of types was inferred in parameterized types from generic ones...
+                 	// (see  bugs https://bugs.eclipse.org/bugs/show_bug.cgi?id=79990, 96761, 96763)
+                	nodeSet.mustResolve = true;
+                	resolve = true;
+                }
+                this.methodDeclarationsWithInvalidParam.put(node, null);
 			}
 		}
 	}
 
 	// Verify type arguments (do not reject if pattern has no argument as it can be an erasure match)
-	if (this.pattern.hasMethodArguments()) {
-		if (node.typeParameters == null || node.typeParameters.length != this.pattern.methodArguments.length) return IMPOSSIBLE_MATCH;
-	}
+	if (this.pattern.hasMethodArguments() && (node.typeParameters == null || node.typeParameters.length != this.pattern.methodArguments.length)) return IMPOSSIBLE_MATCH;
 
 	// Method declaration may match pattern
 	return nodeSet.addMatch(node, resolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
 @Override
 public int match(MemberValuePair node, MatchingNodeSet nodeSet) {
-	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
-
-	if (!matchesName(this.pattern.selector, node.name)) return IMPOSSIBLE_MATCH;
+	if (!this.pattern.findReferences || !matchesName(this.pattern.selector, node.name)) return IMPOSSIBLE_MATCH;
 
 	return nodeSet.addMatch(node, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
 @Override
 public int match(MessageSend node, MatchingNodeSet nodeSet) {
-	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
-
-	if (!matchesName(this.pattern.selector, node.selector)) return IMPOSSIBLE_MATCH;
-	if (this.pattern.parameterSimpleNames != null && (!this.pattern.varargs || ((node.bits & ASTNode.InsideJavadoc) != 0))) {
+	if (!this.pattern.findReferences || !matchesName(this.pattern.selector, node.selector)) return IMPOSSIBLE_MATCH;
+	if (this.pattern.parameterSimpleNames != null && (!this.pattern.varargs || (node.bits & ASTNode.InsideJavadoc) != 0)) {
 		int length = this.pattern.parameterSimpleNames.length;
 		ASTNode[] args = node.arguments;
 		int argsLength = args == null ? 0 : args.length;
@@ -271,9 +257,7 @@ public int match(MessageSend node, MatchingNodeSet nodeSet) {
 
 @Override
 public int match(ReferenceExpression node, MatchingNodeSet nodeSet) {
-	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
-	if (!matchesName(this.pattern.selector, node.selector)) return IMPOSSIBLE_MATCH;
-	if (node.selector != null &&  Arrays.equals(node.selector, org.eclipse.jdt.internal.compiler.codegen.ConstantPool.Init))
+	if (!this.pattern.findReferences || !matchesName(this.pattern.selector, node.selector) || node.selector != null &&  Arrays.equals(node.selector, org.eclipse.jdt.internal.compiler.codegen.ConstantPool.Init))
 		return IMPOSSIBLE_MATCH; // :: new
 	nodeSet.mustResolve = true;
 	return nodeSet.addMatch(node, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
@@ -290,7 +274,7 @@ public int match(Annotation node, MatchingNodeSet nodeSet) {
 	for (int i=0; i<length; i++) {
 		pair = node.memberValuePairs()[i];
 		if (matchesName(this.pattern.selector, pair.name)) {
-			ASTNode possibleNode = (node instanceof SingleMemberAnnotation) ? node : pair;
+			ASTNode possibleNode = node instanceof SingleMemberAnnotation ? node : pair;
 			return nodeSet.addMatch(possibleNode, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 		}
 	}
@@ -360,7 +344,7 @@ protected int matchMethod(MethodBinding method, boolean skipImpossibleArg) {
 				if (focusMethodBinding != null) {// textual comparison insufficient
 					TypeBinding[] parameters = focusMethodBinding.parameters;
 					if (parameters.length >= parameterCount) {
-						newLevel = (isBinary ? argType.erasure().isEquivalentTo((parameters[i].erasure())) :argType.isEquivalentTo((parameters[i]))) ?
+						newLevel = (isBinary ? argType.erasure().isEquivalentTo(parameters[i].erasure()) :argType.isEquivalentTo(parameters[i])) ?
 								ACCURATE_MATCH : IMPOSSIBLE_MATCH;
 						foundLevel = true;
 					}
@@ -393,11 +377,9 @@ protected int matchMethod(MethodBinding method, boolean skipImpossibleArg) {
 				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=123836, No point in textually comparing type variables, captures etc with concrete types.
 				if (!checkedFocus)
 					focusMethodBinding = this.matchLocator.getMethodBinding(this.pattern);
-				if (focusMethodBinding != null) {
-					if (matchOverriddenMethod(focusMethodBinding.declaringClass, focusMethodBinding, method)) {
-						return ACCURATE_MATCH;
-					}
-				}
+				if (focusMethodBinding != null && matchOverriddenMethod(focusMethodBinding.declaringClass, focusMethodBinding, method)) {
+                	return ACCURATE_MATCH;
+                }
 			}
 			return IMPOSSIBLE_MATCH;
 		}
@@ -419,9 +401,7 @@ private boolean matchOverriddenMethod(ReferenceBinding type, MethodBinding metho
 				if (methods[i].areParametersEqual(method)) {
 					if (matchMethod == null) {
 						if (methodParametersEqualsPattern(methods[i].original())) return true;
-					} else {
-						if (methods[i].original().areParametersEqual(matchMethod)) return true;
-					}
+					} else if (methods[i].original().areParametersEqual(matchMethod)) return true;
 				}
 			}
 		}
@@ -442,9 +422,7 @@ private boolean matchOverriddenMethod(ReferenceBinding type, MethodBinding metho
 				if (methods[j].areParametersEqual(method)) {
 					if (matchMethod == null) {
 						if (methodParametersEqualsPattern(methods[j].original())) return true;
-					} else {
-						if (methods[j].original().areParametersEqual(matchMethod)) return true;
-					}
+					} else if (methods[j].original().areParametersEqual(matchMethod)) return true;
 				}
 			}
 		}
@@ -463,11 +441,10 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, Bin
  */
 @Override
 protected void matchReportReference(ASTNode reference, IJavaElement element, IJavaElement localElement, IJavaElement[] otherElements, Binding elementBinding, int accuracy, MatchLocator locator) throws CoreException {
-	MethodBinding methodBinding = (reference instanceof MessageSend) ? ((MessageSend)reference).binding: ((elementBinding instanceof MethodBinding) ? (MethodBinding) elementBinding : null);
+	MethodBinding methodBinding = reference instanceof MessageSend ? ((MessageSend)reference).binding: elementBinding instanceof MethodBinding ? (MethodBinding) elementBinding : null;
 	if (this.isDeclarationOfReferencedMethodsPattern) {
-		if (methodBinding == null) return;
 		// need exact match to be able to open on type ref
-		if (accuracy != SearchMatch.A_ACCURATE) return;
+		if (methodBinding == null || accuracy != SearchMatch.A_ACCURATE) return;
 
 		// element that references the method must be included in the enclosing element
 		DeclarationOfReferencedMethodsPattern declPattern = (DeclarationOfReferencedMethodsPattern) this.pattern;
@@ -484,14 +461,12 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
 			IJavaElement focus = this.pattern.focus;
 			// verify closest match if pattern was bound
 			// (see bug 70827)
-			if (focus != null && focus.getElementType() == IJavaElement.METHOD) {
-				if (methodBinding != null && methodBinding.declaringClass != null) {
-					boolean isPrivate = Flags.isPrivate(((IMethod) focus).getFlags());
-					if (isPrivate && !CharOperation.equals(methodBinding.declaringClass.sourceName, focus.getParent().getElementName().toCharArray())) {
-						return; // finally the match was not possible
-					}
-				}
-			}
+			if (focus != null && focus.getElementType() == IJavaElement.METHOD && methodBinding != null && methodBinding.declaringClass != null) {
+            	boolean isPrivate = Flags.isPrivate(((IMethod) focus).getFlags());
+            	if (isPrivate && !CharOperation.equals(methodBinding.declaringClass.sourceName, focus.getParent().getElementName().toCharArray())) {
+            		return; // finally the match was not possible
+            	}
+            }
 			matchReportReference((MessageSend)reference, locator, accuracy, ((MessageSend)reference).binding);
 		} else {
 			if (reference instanceof SingleMemberAnnotation) {
@@ -555,9 +530,9 @@ void matchReportReference(MessageSend messageSend, MatchLocator locator, int acc
 				if ((accuracy & (SUB_INVOCATION_FLAVOR | OVERRIDDEN_METHOD_FLAVOR)) != 0) {
 					// type parameters need to be compared with the class that is really being searched
 					// https://bugs.eclipse.org/375971
-					ReferenceBinding refBinding = getMatchingSuper(((ReferenceBinding)messageSend.actualReceiverType));
+					ReferenceBinding refBinding = getMatchingSuper((ReferenceBinding)messageSend.actualReceiverType);
 					if (refBinding instanceof ParameterizedTypeBinding) {
-						parameterizedBinding = ((ParameterizedTypeBinding)refBinding);
+						parameterizedBinding = (ParameterizedTypeBinding)refBinding;
 					}
 				}
 				if ((accuracy & SUPER_INVOCATION_FLAVOR) == 0) {
@@ -585,7 +560,7 @@ void matchReportReference(MessageSend messageSend, MatchLocator locator, int acc
 
 	// See whether it is necessary to report or not
 	if (this.match.getRule() == 0) return; // impossible match
-	boolean report = (this.isErasureMatch && this.match.isErasure()) || (this.isEquivalentMatch && this.match.isEquivalent()) || this.match.isExact();
+	boolean report = this.isErasureMatch && this.match.isErasure() || this.isEquivalentMatch && this.match.isEquivalent() || this.match.isExact();
 	if (!report) return;
 
 	// Report match
@@ -624,7 +599,7 @@ public SearchMatch newDeclarationMatch(ASTNode reference, IJavaElement element, 
 			// First see if this reference has already been resolved => report match if validated
 			Boolean report = (Boolean) this.methodDeclarationsWithInvalidParam.get(reference);
 			if (report != null) {
-				if (report.booleanValue()) {
+				if (report) {
 					return super.newDeclarationMatch(reference, element, elementBinding, accuracy, length, locator);
 				}
 				return null;
@@ -635,12 +610,10 @@ public SearchMatch newDeclarationMatch(ASTNode reference, IJavaElement element, 
 			}
 			if (isTypeInSuperDeclaringTypeNames(methodBinding.declaringClass.compoundName)) {
 				MethodBinding patternBinding = locator.getMethodBinding(this.pattern);
-				if (patternBinding != null) {
-					if (!matchOverriddenMethod(patternBinding.declaringClass, patternBinding, methodBinding)) {
-						this.methodDeclarationsWithInvalidParam.put(reference, Boolean.FALSE);
-						return null;
-					}
-				}
+				if (patternBinding != null && !matchOverriddenMethod(patternBinding.declaringClass, patternBinding, methodBinding)) {
+                	this.methodDeclarationsWithInvalidParam.put(reference, Boolean.FALSE);
+                	return null;
+                }
 				this.methodDeclarationsWithInvalidParam.put(reference, Boolean.TRUE);
 				return super.newDeclarationMatch(reference, element, elementBinding, accuracy, length, locator);
 			}
@@ -661,7 +634,7 @@ protected void reportDeclaration(MethodBinding methodBinding, MatchLocator locat
 
 	// Report match for binary
 	if (type.isBinary()) {
-		IMethod method = null;
+		IMethod method;
 		TypeBinding[] parameters = methodBinding.original().parameters;
 		int parameterLength = parameters.length;
 		char[][] parameterTypes = new char[parameterLength][];
@@ -751,9 +724,8 @@ public int resolveLevel(Binding binding) {
 		if (method != method.original()) methodLevel = matchMethod(method.original(), skipVerif);
 		if (methodLevel == IMPOSSIBLE_MATCH) {
 			return IMPOSSIBLE_MATCH;
-		} else {
-			method = method.original();
 		}
+        method = method.original();
 	}
 
 	// declaring type
@@ -795,14 +767,14 @@ protected int resolveLevel(MessageSend messageSend) {
 	if (this.pattern.declaringSimpleName == null && this.pattern.declaringQualification == null) return methodLevel; // since any declaring class will do
 
 	int declaringLevel;
-	if (isVirtualInvoke(method, messageSend) && (messageSend.actualReceiverType instanceof ReferenceBinding)) {
+	if (isVirtualInvoke(method, messageSend) && messageSend.actualReceiverType instanceof ReferenceBinding) {
 		ReferenceBinding methodReceiverType = (ReferenceBinding) messageSend.actualReceiverType;
 		declaringLevel = resolveLevelAsSubtype(this.pattern.declaringSimpleName, this.pattern.declaringQualification, methodReceiverType, method.selector, method.parameters, methodReceiverType.qualifiedPackageName(), method.isDefault());
 		if (declaringLevel == IMPOSSIBLE_MATCH) {
 			if (method.declaringClass == null || this.allSuperDeclaringTypeNames == null) {
 				declaringLevel = INACCURATE_MATCH;
 			} else {
-				char[][][] superTypeNames = (method.isDefault() && this.pattern.focus == null) ? this.samePkgSuperDeclaringTypeNames: this.allSuperDeclaringTypeNames;
+				char[][][] superTypeNames = method.isDefault() && this.pattern.focus == null ? this.samePkgSuperDeclaringTypeNames: this.allSuperDeclaringTypeNames;
 				if (superTypeNames != null && resolveLevelAsSuperInvocation(methodReceiverType, method.parameters, superTypeNames, true)) {
 						declaringLevel = methodLevel // since this is an ACCURATE_MATCH so return the possibly weaker match
 							| SUPER_INVOCATION_FLAVOR; // this is an overridden method => add flavor to returned level
@@ -841,7 +813,7 @@ protected int resolveLevel(ReferenceExpression referenceExpression) {
 			if (method.declaringClass == null || this.allSuperDeclaringTypeNames == null) {
 				declaringLevel = INACCURATE_MATCH;
 			} else {
-				char[][][] superTypeNames = (method.isDefault() && this.pattern.focus == null) ? this.samePkgSuperDeclaringTypeNames: this.allSuperDeclaringTypeNames;
+				char[][][] superTypeNames = method.isDefault() && this.pattern.focus == null ? this.samePkgSuperDeclaringTypeNames: this.allSuperDeclaringTypeNames;
 				if (superTypeNames != null && resolveLevelAsSuperInvocation(ref, method.parameters, superTypeNames, true)) {
 						declaringLevel = methodLevel // since this is an ACCURATE_MATCH so return the possibly weaker match
 							| SUPER_INVOCATION_FLAVOR; // TODO: not an invocation really but ref -> add flavor to returned level
@@ -874,7 +846,7 @@ protected int resolveLevelAsSubtype(char[] simplePattern, char[] qualifiedPatter
 			return IMPOSSIBLE_MATCH;
 		}
 		MethodBinding method = argumentTypes == null ? null : getMethodBinding(type, methodName, argumentTypes);
-		if (((method != null && !method.isAbstract()) || !type.isAbstract()) && !type.isInterface()) { // if concrete, then method is overridden
+		if ((method != null && !method.isAbstract() || !type.isAbstract()) && !type.isInterface()) { // if concrete, then method is overridden
 			level |= OVERRIDDEN_METHOD_FLAVOR;
 		}
 		return level;
@@ -905,8 +877,8 @@ protected int resolveLevelAsSubtype(char[] simplePattern, char[] qualifiedPatter
 	// matches interfaces
 	ReferenceBinding[] interfaces = type.superInterfaces();
 	if (interfaces == null) return INACCURATE_MATCH;
-	for (int i = 0; i < interfaces.length; i++) {
-		level = resolveLevelAsSubtype(simplePattern, qualifiedPattern, interfaces[i], methodName, null, packageName, isDefault);
+	for (ReferenceBinding element : interfaces) {
+		level = resolveLevelAsSubtype(simplePattern, qualifiedPattern, element, methodName, null, packageName, isDefault);
 		if (level != IMPOSSIBLE_MATCH) {
 			if (!type.isAbstract() && !type.isInterface()) { // if concrete class, then method is overridden
 				level |= OVERRIDDEN_METHOD_FLAVOR;
@@ -923,13 +895,12 @@ protected int resolveLevelAsSubtype(char[] simplePattern, char[] qualifiedPatter
  */
 private boolean resolveLevelAsSuperInvocation(ReferenceBinding type, TypeBinding[] argumentTypes, char[][][] superTypeNames, boolean methodAlreadyVerified) {
 	char[][] compoundName = type.compoundName;
-	for (int i = 0, max = superTypeNames.length; i < max; i++) {
-		if (CharOperation.equals(superTypeNames[i], compoundName)) {
+	for (char[][] superTypeName : superTypeNames) {
+		if (CharOperation.equals(superTypeName, compoundName)) {
 			// need to verify if the type implements the pattern method
 			if (methodAlreadyVerified) return true; // already verified before enter into this method (see resolveLevel(MessageSend))
 			MethodBinding[] methods = type.getMethods(this.pattern.selector);
-			for (int j=0, length=methods.length; j<length; j++) {
-				MethodBinding method = methods[j];
+			for (MethodBinding method : methods) {
 				TypeBinding[] parameters = method.parameters;
 				if (argumentTypes.length == parameters.length) {
 					boolean found = true;
@@ -955,8 +926,8 @@ private boolean resolveLevelAsSuperInvocation(ReferenceBinding type, TypeBinding
 	if (type.isInterface()) {
 		ReferenceBinding[] interfaces = type.superInterfaces();
 		if (interfaces == null) return false;
-		for (int i = 0; i < interfaces.length; i++) {
-			if (resolveLevelAsSuperInvocation(interfaces[i], argumentTypes, superTypeNames, false)) {
+		for (ReferenceBinding element : interfaces) {
+			if (resolveLevelAsSuperInvocation(element, argumentTypes, superTypeNames, false)) {
 				return true;
 			}
 		}

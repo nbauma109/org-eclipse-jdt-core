@@ -323,8 +323,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
 			// nothing can be done
 			return null;
 		}
-		for (int i = 0, length = projects.length; i < length; i++) {
-			JavaProject project = (JavaProject) projects[i];
+		for (IJavaProject project2 : projects) {
+			JavaProject project = (JavaProject) project2;
 			IClasspathEntry[] classpath;
 			try {
 				if (usePreviousSession) {
@@ -338,8 +338,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 				// continue with next project
 				continue;
 			}
-			for (int j= 0, classpathLength = classpath.length; j < classpathLength; j++) {
-				IClasspathEntry entry = classpath[j];
+			for (IClasspathEntry entry : classpath) {
 				if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
 					IJavaProject key = model.getJavaProject(entry.getPath().segment(0)); // TODO (jerome) reuse handle
 					IJavaProject[] dependents = ri.projectDependencies.get(key);
@@ -378,7 +377,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 				IPath sourceAttachmentPath;
 				if (propertyString != null) {
 					int index= propertyString.lastIndexOf(PackageFragmentRoot.ATTACHMENT_PROPERTY_DELIMITER);
-					sourceAttachmentPath = (index < 0) ?  new Path(propertyString) : new Path(propertyString.substring(0, index));
+					sourceAttachmentPath = index < 0 ?  new Path(propertyString) : new Path(propertyString.substring(0, index));
 				} else {
 					sourceAttachmentPath = entry.getSourceAttachmentPath();
 				}
@@ -523,7 +522,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 				while (size-- > 0) {
 					String key = in.readUTF();
 					long timestamp = in.readLong();
-					timeStamps.put(Path.fromPortableString(key), Long.valueOf(timestamp));
+					timeStamps.put(Path.fromPortableString(key), timestamp);
 				}
 			} catch (IOException e) {
 				if (timestampsFile.exists())
@@ -562,8 +561,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 				return this.javaProjectNamesCache;
 			}
 			HashSet<String> result = new LinkedHashSet<>();
-			for (int i = 0, length = projects.length; i < length; i++) {
-				IJavaProject project = projects[i];
+			for (IJavaProject project : projects) {
 				result.add(project.getElementName());
 			}
 			return this.javaProjectNamesCache = result;
@@ -604,7 +602,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 				if (!toRemove.contains(key)) {
 					out.writeUTF(key.toPortableString());
 					Long timestamp = entry.getValue();
-					out.writeLong(timestamp.longValue());
+					out.writeLong(timestamp);
 				}
 			}
 		} catch (IOException e) {

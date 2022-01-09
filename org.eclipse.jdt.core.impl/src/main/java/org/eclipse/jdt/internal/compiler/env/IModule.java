@@ -19,12 +19,12 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 
 public interface IModule {
 
-	IModuleReference[] NO_MODULE_REFS = new IModuleReference[0];
-	IPackageExport[] NO_EXPORTS = new IPackageExport[0];
-	char[][] NO_USES = new char[0][];
-	IService[] NO_PROVIDES = new IService[0];
-	IModule[] NO_MODULES = new IModule[0];
-	IPackageExport[] NO_OPENS = new IPackageExport[0];
+	IModuleReference[] NO_MODULE_REFS = {};
+	IPackageExport[] NO_EXPORTS = {};
+	char[][] NO_USES = {};
+	IService[] NO_PROVIDES = {};
+	IModule[] NO_MODULES = {};
+	IPackageExport[] NO_OPENS = {};
 
 	String MODULE_INFO = "module-info"; //$NON-NLS-1$
 	String MODULE_INFO_JAVA = "module-info.java"; //$NON-NLS-1$

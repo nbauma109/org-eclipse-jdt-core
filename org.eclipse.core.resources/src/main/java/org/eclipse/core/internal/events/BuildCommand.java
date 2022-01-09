@@ -103,7 +103,7 @@ public class BuildCommand extends ModelObject implements ICommand {
 
 	@Override
 	public Object clone() {
-		BuildCommand result = null;
+		BuildCommand result;
 		result = (BuildCommand) super.clone();
 		if (result == null)
 			return null;
@@ -147,7 +147,7 @@ public class BuildCommand extends ModelObject implements ICommand {
 
 	@SuppressWarnings({"unchecked"})
 	public Map<String, String> getArguments(boolean makeCopy) {
-		return arguments == null ? null : (makeCopy ? (Map<String, String>) arguments.clone() : arguments);
+		return arguments == null ? null : makeCopy ? (Map<String, String>) arguments.clone() : arguments;
 	}
 
 	/**
@@ -210,7 +210,7 @@ public class BuildCommand extends ModelObject implements ICommand {
 				IConfigurationElement[] configs = extension.getConfigurationElements();
 				if (configs.length != 0) {
 					String value = configs[0].getAttribute("supportsConfigurations"); //$NON-NLS-1$
-					supportsConfigurations = (value != null && value.equalsIgnoreCase(Boolean.TRUE.toString()));
+					supportsConfigurations = value != null && value.equalsIgnoreCase(Boolean.TRUE.toString());
 				}
 			}
 			supportsConfigurationsCalculated = true;
@@ -237,12 +237,10 @@ public class BuildCommand extends ModelObject implements ICommand {
 			if (value == null) {
 				builder = null;
 				builders = null;
-			} else {
-				if (value instanceof IncrementalProjectBuilder)
-					builder = (IncrementalProjectBuilder) value;
-				else
-					builders = new HashMap<>((Map<IBuildConfiguration, IncrementalProjectBuilder>) value);
-			}
+			} else if (value instanceof IncrementalProjectBuilder)
+            	builder = (IncrementalProjectBuilder) value;
+            else
+            	builders = new HashMap<>((Map<IBuildConfiguration, IncrementalProjectBuilder>) value);
 		}
 	}
 

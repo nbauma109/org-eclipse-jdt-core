@@ -34,15 +34,13 @@ public class ModuleLocator extends PatternLocator {
 	}
 	@Override
 	public int match(ModuleDeclaration node, MatchingNodeSet nodeSet) {
-		if (!this.pattern.findDeclarations) return IMPOSSIBLE_MATCH;
-		if (!matchesName(this.pattern.name, node.moduleName)) return IMPOSSIBLE_MATCH;
+		if (!this.pattern.findDeclarations || !matchesName(this.pattern.name, node.moduleName)) return IMPOSSIBLE_MATCH;
 		nodeSet.mustResolve = true;
 		return nodeSet.addMatch(node, POSSIBLE_MATCH);
 	}
 	@Override
 	protected int match(ModuleReference node, MatchingNodeSet nodeSet) {
-		if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
-		if (!matchesName(this.pattern.name, node.moduleName)) return IMPOSSIBLE_MATCH;
+		if (!this.pattern.findReferences || !matchesName(this.pattern.name, node.moduleName)) return IMPOSSIBLE_MATCH;
 		if (this.target) {
 			return nodeSet.addMatch(node, ACCURATE_MATCH);
 		}
@@ -84,6 +82,6 @@ public class ModuleLocator extends PatternLocator {
 	public int resolveLevel(Binding binding) {
 		if (binding == null) return INACCURATE_MATCH;
 		if (!(binding instanceof ModuleBinding)) return IMPOSSIBLE_MATCH;
-		return (matchesName(this.pattern.name, binding.readableName())) ? ACCURATE_MATCH : IMPOSSIBLE_MATCH;
+		return matchesName(this.pattern.name, binding.readableName()) ? ACCURATE_MATCH : IMPOSSIBLE_MATCH;
 	}
 }

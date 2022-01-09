@@ -56,7 +56,7 @@ public class JavadocFieldReference extends FieldReference {
 			return null;
 		}
 
-		Binding fieldBinding = (this.receiver != null && this.receiver.isThis())
+		Binding fieldBinding = this.receiver != null && this.receiver.isThis()
 			? scope.classScope().getBinding(this.token, this.bits & RestrictiveFlagMASK, this, true /*resolve*/)
 			: scope.getField(this.actualReceiverType, this.token, this);
 		if (!fieldBinding.isValidBinding()) {
@@ -146,21 +146,17 @@ public class JavadocFieldReference extends FieldReference {
 	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 
-		if (visitor.visit(this, scope)) {
-			if (this.receiver != null) {
-				this.receiver.traverse(visitor, scope);
-			}
-		}
+		if (visitor.visit(this, scope) && this.receiver != null) {
+        	this.receiver.traverse(visitor, scope);
+        }
 		visitor.endVisit(this, scope);
 	}
 	@Override
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
 
-		if (visitor.visit(this, scope)) {
-			if (this.receiver != null) {
-				this.receiver.traverse(visitor, scope);
-			}
-		}
+		if (visitor.visit(this, scope) && this.receiver != null) {
+        	this.receiver.traverse(visitor, scope);
+        }
 		visitor.endVisit(this, scope);
 	}
 }

@@ -70,7 +70,7 @@ public class PermissionInfo {
 		if (type == null) {
 			throw new NullPointerException("type is null");
 		}
-		if ((name == null) && (actions != null)) {
+		if (name == null && actions != null) {
 			throw new IllegalArgumentException("name missing");
 		}
 	}
@@ -119,7 +119,7 @@ public class PermissionInfo {
 
 			/* type is not quoted or encoded */
 			int begin = pos;
-			while (!Character.isWhitespace(encoded[pos]) && (encoded[pos] != ')')) {
+			while (!Character.isWhitespace(encoded[pos]) && encoded[pos] != ')') {
 				pos++;
 			}
 			if (pos == begin || encoded[begin] == '"') {
@@ -178,10 +178,10 @@ public class PermissionInfo {
 			/* the final character must be ')' */
 			char c = encoded[pos];
 			pos++;
-			while ((pos < length) && Character.isWhitespace(encoded[pos])) {
+			while (pos < length && Character.isWhitespace(encoded[pos])) {
 				pos++;
 			}
-			if ((c != ')') || (pos != length)) {
+			if (c != ')' || pos != length) {
 				throw new IllegalArgumentException("expecting close parenthesis");
 			}
 		} catch (ArrayIndexOutOfBoundsException e) {
@@ -231,8 +231,8 @@ public class PermissionInfo {
 	 */
 	public final String getEncoded() {
 		StringBuilder output = new StringBuilder(
-				8 + type.length() + ((((name == null) ? 0 : name.length())
-						+ ((actions == null) ? 0 : actions.length())) << 1));
+				8 + type.length() + ((name == null ? 0 : name.length())
+						+ (actions == null ? 0 : actions.length()) << 1));
 		output.append('(');
 		output.append(type);
 		if (name != null) {
@@ -316,18 +316,16 @@ public class PermissionInfo {
 			return false;
 		}
 		PermissionInfo other = (PermissionInfo) obj;
-		if (!type.equals(other.type) || ((name == null) ^ (other.name == null)) || ((actions == null) ^ (other.actions == null))) {
+		if (!type.equals(other.type) || name == null ^ other.name == null || actions == null ^ other.actions == null) {
 			return false;
 		}
-		if (name != null) {
-			if (actions != null) {
-				return name.equals(other.name) && actions.equals(other.actions);
-			} else {
-				return name.equals(other.name);
-			}
-		} else {
+		if (name == null) {
 			return true;
 		}
+        if (actions != null) {
+        	return name.equals(other.name) && actions.equals(other.actions);
+        }
+        return name.equals(other.name);
 	}
 
 	/**

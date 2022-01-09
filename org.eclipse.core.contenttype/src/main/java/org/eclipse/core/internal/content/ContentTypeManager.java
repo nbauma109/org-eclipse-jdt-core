@@ -124,7 +124,7 @@ public class ContentTypeManager extends ContentTypeMatcher implements IContentTy
 	 */
 	static String getFileExtension(String fileName) {
 		int dotPosition = fileName.lastIndexOf('.');
-		return (dotPosition == -1 || dotPosition == fileName.length() - 1) ? "" : fileName.substring(dotPosition + 1); //$NON-NLS-1$
+		return dotPosition == -1 || dotPosition == fileName.length() - 1 ? "" : fileName.substring(dotPosition + 1); //$NON-NLS-1$
 	}
 
 	protected static ILazySource readBuffer(InputStream contents) {

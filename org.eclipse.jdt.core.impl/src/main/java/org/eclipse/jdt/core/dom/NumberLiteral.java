@@ -94,10 +94,9 @@ public class NumberLiteral extends Expression {
 		if (property == TOKEN_PROPERTY) {
 			if (get) {
 				return getToken();
-			} else {
-				setToken((String) value);
-				return null;
 			}
+            setToken((String) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
@@ -201,8 +200,7 @@ public class NumberLiteral extends Expression {
 
 	@Override
 	int memSize() {
-		int size = BASE_NODE_SIZE + 1 * 4 + stringSize(this.tokenValue);
-		return size;
+		return BASE_NODE_SIZE + 1 * 4 + stringSize(this.tokenValue);
 	}
 
 	@Override

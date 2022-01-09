@@ -25,17 +25,15 @@ public class LambdaFactory {
 	public static LambdaExpression createLambdaExpression(JavaElement parent, org.eclipse.jdt.internal.compiler.ast.LambdaExpression lambdaExpression) {
 		if (isBinaryMember(parent)){
 			return new BinaryLambdaExpression(parent, lambdaExpression);
-		} else {
-			return new LambdaExpression(parent, lambdaExpression);
 		}
+        return new LambdaExpression(parent, lambdaExpression);
 	}
 
 	public static LambdaExpression createLambdaExpression(JavaElement parent, String interphase, int sourceStart, int sourceEnd, int arrowPosition) {
 		if (isBinaryMember(parent)){
 			return new BinaryLambdaExpression(parent, interphase, sourceStart, sourceEnd, arrowPosition);
-		} else {
-			return new LambdaExpression(parent, interphase, sourceStart, sourceEnd, arrowPosition);
 		}
+        return new LambdaExpression(parent, interphase, sourceStart, sourceEnd, arrowPosition);
 	}
 
 	public static LambdaMethod createLambdaMethod(JavaElement parent, org.eclipse.jdt.internal.compiler.ast.LambdaExpression lambdaExpression) {
@@ -72,8 +70,8 @@ public class LambdaFactory {
 	}
 
 	public static LambdaMethod createLambdaMethod(JavaElement parent, String selector, String key, int sourceStart, int sourceEnd, int arrowPosition, String [] parameterTypes, String [] parameterNames, String returnType) {
-		SourceMethodInfo info = null;
-		boolean isBinary = (parent instanceof BinaryLambdaExpression);
+		SourceMethodInfo info;
+		boolean isBinary = parent instanceof BinaryLambdaExpression;
 		info = new SourceMethodInfo();
 		info.setSourceRangeStart(sourceStart);
 		info.setSourceRangeEnd(sourceEnd);

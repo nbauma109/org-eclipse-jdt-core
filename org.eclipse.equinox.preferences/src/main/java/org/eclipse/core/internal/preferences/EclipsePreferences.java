@@ -43,8 +43,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 	public static final String DEFAULT_PREFERENCES_DIRNAME = ".settings"; //$NON-NLS-1$
 	public static final String PREFS_FILE_EXTENSION = "prefs"; //$NON-NLS-1$
-	protected static final IEclipsePreferences[] EMPTY_NODE_ARRAY = new IEclipsePreferences[0];
-	protected static final String[] EMPTY_STRING_ARRAY = new String[0];
+	protected static final IEclipsePreferences[] EMPTY_NODE_ARRAY = {};
+	protected static final String[] EMPTY_STRING_ARRAY = {};
 	private static final String FALSE = "false"; //$NON-NLS-1$
 	private static final String TRUE = "true"; //$NON-NLS-1$
 	protected static final String VERSION_KEY = "eclipse.preferences.version"; //$NON-NLS-1$
@@ -87,7 +87,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected EclipsePreferences(EclipsePreferences parent, String name) {
-		super();
 		this.parent = parent;
 		this.name = name;
 		this.cachedPath = null; // make sure the cached path is cleared after setting the parent
@@ -280,7 +279,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		OutputStream output = null;
 		try {
 			output = new SafeFileOutputStream(new File(location.toOSString()));
-			output.write(removeTimestampFromTable(properties).getBytes(StandardCharsets.UTF_8)); //$NON-NLS-1$
+			output.write(removeTimestampFromTable(properties).getBytes(StandardCharsets.UTF_8));
 			output.flush();
 		} catch (IOException e) {
 			String message = NLS.bind(PrefsMessages.preferences_saveException, location);
@@ -299,13 +298,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	protected static String removeTimestampFromTable(Properties properties) throws IOException {
 		// store the properties in a string and then skip the first line (date/timestamp)
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		try {
+		try (output) {
 			properties.store(output, null);
-		} finally {
-			output.close();
 		}
-		String string = output.toString(StandardCharsets.UTF_8); //$NON-NLS-1$
-		String separator = System.getProperty("line.separator"); //$NON-NLS-1$
+		String string = output.toString(StandardCharsets.UTF_8);
+		String separator = System.lineSeparator();
 		return string.substring(string.indexOf(separator) + separator.length());
 	}
 
@@ -355,15 +352,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		IEclipsePreferences loadLevel = result.getLoadLevel();
 
 		// if this node or a parent node is not the load level then return
-		if (loadLevel == null)
-			return result;
+		
 
 		// if the result node is not a load level, then a child must be
-		if (result != loadLevel)
-			return result;
-
 		// the result node is a load level
-		if (isAlreadyLoaded(result) || result.isLoading())
+		if (loadLevel == null || result != loadLevel || isAlreadyLoaded(result) || result.isLoading())
 			return result;
 		try {
 			result.setLoading(true);
@@ -699,11 +692,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			if (DEBUG_PREFERENCE_GENERAL)
 				PrefsMessages.message("Preference file does not exist: " + location); //$NON-NLS-1$
 			return result;
-		} catch (IOException e) {
-			String message = NLS.bind(PrefsMessages.preferences_loadException, location);
-			log(new Status(IStatus.INFO, PrefsMessages.OWNER_NAME, IStatus.INFO, message, e));
-			throw new BackingStoreException(message, e);
-		} catch (IllegalArgumentException e) {
+		} catch (IOException | IllegalArgumentException e) {
 			String message = NLS.bind(PrefsMessages.preferences_loadException, location);
 			log(new Status(IStatus.INFO, PrefsMessages.OWNER_NAME, IStatus.INFO, message, e));
 			throw new BackingStoreException(message, e);
@@ -1113,12 +1102,10 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 				result = key;
 			else
 				result = path + IPath.SEPARATOR + key;
-		} else {
-			if (pathLength == 0)
-				result = DOUBLE_SLASH + key;
-			else
-				result = path + DOUBLE_SLASH + key;
-		}
+		} else if (pathLength == 0)
+        	result = DOUBLE_SLASH + key;
+        else
+        	result = path + DOUBLE_SLASH + key;
 		return result;
 	}
 

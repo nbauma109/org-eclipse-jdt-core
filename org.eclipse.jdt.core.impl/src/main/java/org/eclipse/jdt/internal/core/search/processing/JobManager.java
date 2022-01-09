@@ -264,7 +264,7 @@ public abstract class JobManager implements Runnable {
 									String indexing = Messages.bind(Messages.jobmanager_filesToIndex, currentJob.getJobFamily(), Integer.toString(awaitingJobsCount));
 									waitMonitor.subTask(indexing);
 									// ratio of the amount of work relative to the total work
-									float ratio = awaitingJobsCount < totalWork ? 1 : ((float) totalWork) / awaitingJobsCount;
+									float ratio = awaitingJobsCount < totalWork ? 1 : (float) totalWork / awaitingJobsCount;
 									if (lastJobsCount > awaitingJobsCount) {
 										totalWorked += (lastJobsCount - awaitingJobsCount) * ratio;
 									} else {

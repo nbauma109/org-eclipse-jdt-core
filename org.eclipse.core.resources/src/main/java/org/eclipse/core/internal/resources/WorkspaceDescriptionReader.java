@@ -35,15 +35,14 @@ import org.xml.sax.SAXException;
  */
 public class WorkspaceDescriptionReader implements IModelObjectConstants {
 	/** constants */
-	protected static final String[] EMPTY_STRING_ARRAY = new String[0];
+	protected static final String[] EMPTY_STRING_ARRAY = {};
 
 	public WorkspaceDescriptionReader() {
-		super();
 	}
 
 	protected String getString(Node target, String tagName) {
 		Node node = searchNode(target, tagName);
-		return node != null ? (node.getFirstChild() == null ? null : node.getFirstChild().getNodeValue()) : null;
+		return node != null ? node.getFirstChild() == null ? null : node.getFirstChild().getNodeValue() : null;
 	}
 
 	protected String[] getStrings(Node target) {

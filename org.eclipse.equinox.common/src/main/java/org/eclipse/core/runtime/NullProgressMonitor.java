@@ -34,7 +34,6 @@ public class NullProgressMonitor implements IProgressMonitor {
 	 * Constructs a new progress monitor.
 	 */
 	public NullProgressMonitor() {
-		super();
 	}
 
 	/**

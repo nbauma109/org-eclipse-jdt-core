@@ -51,14 +51,15 @@ public final class Util {
 	 *            Whether the object being <code>null</code> will not cause a
 	 *            failure.
 	 */
-	public static final void assertInstance(final Object object, final Class<?> c, final boolean allowNull) {
+	public static void assertInstance(final Object object, final Class<?> c, final boolean allowNull) {
 		if (object == null && allowNull) {
 			return;
 		}
 
 		if (object == null || c == null) {
 			throw new NullPointerException();
-		} else if (!c.isInstance(object)) {
+		}
+        if (!c.isInstance(object)) {
 			throw new IllegalArgumentException();
 		}
 	}
@@ -77,8 +78,8 @@ public final class Util {
 	 *         <code>true</code> and <code>right</code> is
 	 *         <code>false</code>
 	 */
-	public static final int compare(final boolean left, final boolean right) {
-		return left == false ? (right == true ? -1 : 0) : (right == true ? 0 : 1);
+	public static int compare(final boolean left, final boolean right) {
+		return !left ? right ? -1 : 0 : right ? 0 : 1;
 	}
 
 	/**
@@ -96,16 +97,17 @@ public final class Util {
 	 *         and <code>right</code> is <code>null</code>. Otherwise, the
 	 *         result of <code>left.compareTo(right)</code>.
 	 */
-	public static final <T extends Comparable<? super T>> int compare(final T left, final T right) {
+	public static <T extends Comparable<? super T>> int compare(final T left, final T right) {
 		if (left == null && right == null) {
 			return 0;
-		} else if (left == null) {
-			return -1;
-		} else if (right == null) {
-			return 1;
-		} else {
-			return left.compareTo(right);
 		}
+        if (left == null) {
+			return -1;
+		}
+        if (right == null) {
+			return 1;
+		}
+        return left.compareTo(right);
 	}
 
 	/**
@@ -119,7 +121,7 @@ public final class Util {
 	 *            The right value to compare.
 	 * @return <code>left - right</code>
 	 */
-	public static final int compare(final int left, final int right) {
+	public static int compare(final int left, final int right) {
 		return left - right;
 	}
 
@@ -142,16 +144,17 @@ public final class Util {
 	 *         result of
 	 *         <code>left.toString().compareTo(right.toString())</code>.
 	 */
-	public static final int compare(final Object left, final Object right) {
+	public static int compare(final Object left, final Object right) {
 		if (left == null && right == null) {
 			return 0;
-		} else if (left == null) {
-			return -1;
-		} else if (right == null) {
-			return 1;
-		} else {
-			return left.toString().compareTo(right.toString());
 		}
+        if (left == null) {
+			return -1;
+		}
+        if (right == null) {
+			return 1;
+		}
+        return left.toString().compareTo(right.toString());
 	}
 
 	/**
@@ -173,7 +176,7 @@ public final class Util {
 	 *            Whether <code>null</code> values should be allowed.
 	 * @return A copy of the map; may be empty, but never <code>null</code>.
 	 */
-	public static final <K, V> Map<K, V> safeCopy(final Map<K, V> map, final Class<K> keyClass,
+	public static <K, V> Map<K, V> safeCopy(final Map<K, V> map, final Class<K> keyClass,
 			final Class<V> valueClass, final boolean allowNullKeys, final boolean allowNullValues) {
 		if (map == null || keyClass == null || valueClass == null) {
 			throw new NullPointerException();
@@ -203,7 +206,7 @@ public final class Util {
 	 * @return A copy of the set; may be empty, but never <code>null</code>.
 	 *         None of its element will be <code>null</code>.
 	 */
-	public static final <T> Set<T> safeCopy(final Set<T> set, final Class<T> c) {
+	public static <T> Set<T> safeCopy(final Set<T> set, final Class<T> c) {
 		return safeCopy(set, c, false);
 	}
 
@@ -221,7 +224,7 @@ public final class Util {
 	 *            Whether null values should be allowed.
 	 * @return A copy of the set; may be empty, but never <code>null</code>.
 	 */
-	public static final <T> Set<T> safeCopy(final Set<T> set, final Class<T> c, final boolean allowNullElements) {
+	public static <T> Set<T> safeCopy(final Set<T> set, final Class<T> c, final boolean allowNullElements) {
 		if (set == null || c == null) {
 			throw new NullPointerException();
 		}
@@ -245,7 +248,7 @@ public final class Util {
 	 * @return The help context ID assigned to the command; may be
 	 *         <code>null</code>.
 	 */
-	public static final String getHelpContextId(Command command) {
+	public static String getHelpContextId(Command command) {
 		Method method = null;
 		try {
 			method = Command.class.getDeclaredMethod("getHelpContextId"); //$NON-NLS-1$

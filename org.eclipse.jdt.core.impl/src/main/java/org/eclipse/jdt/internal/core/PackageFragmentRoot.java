@@ -103,11 +103,9 @@ public void attachSource(IPath sourcePath, IPath rootPath, IProgressMonitor moni
 			if (monitor != null) {
 				monitor.worked(1);
 			}
-			if (storedSourcePath != null) {
-				if (!(storedSourcePath.equals(sourcePath) && (rootPath != null && rootPath.equals(storedRootPath)) || storedRootPath == null)) {
-					rootNeedsToBeClosed= true;
-				}
-			}
+			if (storedSourcePath != null && (!storedSourcePath.equals(sourcePath) || rootPath == null || !rootPath.equals(storedRootPath)) && storedRootPath != null) {
+            	rootNeedsToBeClosed= true;
+            }
 			// check if source path is valid
 			Object target = JavaModel.getTarget(sourcePath, false);
 			if (target == null) {
@@ -127,7 +125,7 @@ public void attachSource(IPath sourcePath, IPath rootPath, IProgressMonitor moni
 			Util.setSourceAttachmentProperty(
 				getPath(),
 				sourcePath
-				+ (rootPath == null ? "" : (ATTACHMENT_PROPERTY_DELIMITER + rootPath.toString()))); //$NON-NLS-1$
+				+ (rootPath == null ? "" : ATTACHMENT_PROPERTY_DELIMITER + rootPath.toString())); //$NON-NLS-1$
 		}
 		if (rootNeedsToBeClosed) {
 			if (oldMapper != null) {
@@ -167,14 +165,12 @@ protected boolean buildStructure(OpenableElementInfo info, IProgressMonitor pm, 
 
 SourceMapper createSourceMapper(IPath sourcePath, IPath rootPath) throws JavaModelException {
 	IClasspathEntry entry = ((JavaProject) getParent()).getClasspathEntryFor(getPath());
-	String encoding = (entry== null) ? null : ((ClasspathEntry) entry).getSourceAttachmentEncoding();
-	SourceMapper mapper = new SourceMapper(
+	String encoding = entry== null ? null : ((ClasspathEntry) entry).getSourceAttachmentEncoding();
+	return new SourceMapper(
 		sourcePath,
 		rootPath == null ? null : rootPath.toOSString(),
 		getJavaProject().getOptions(true),// cannot use workspace options if external jar is 1.5 jar and workspace options are 1.4 options
 		encoding);
-
-	return mapper;
 }
 
 @Override
@@ -261,14 +257,12 @@ protected void computeFolderChildren(IContainer folder, boolean isIncluded, Stri
 			    	case IResource.FOLDER:
 			    		// recurse into sub folders even even parent not included as a sub folder could be included
 			    		// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=65637)
-			    		if (Util.isValidFolderNameForPackage(memberName, sourceLevel, complianceLevel)) {
-			    			// eliminate binary output only if nested inside direct subfolders
-			    			if (javaProject.contains(member)) {
-			    				String[] newNames = Util.arrayConcat(pkgName, manager.intern(memberName));
-			    				boolean isMemberIncluded = !Util.isExcluded(member, inclusionPatterns, exclusionPatterns);
-			    				computeFolderChildren((IFolder) member, isMemberIncluded, newNames, vChildren, inclusionPatterns, exclusionPatterns);
-			    			}
-			    		}
+			    		// eliminate binary output only if nested inside direct subfolders
+                        if (Util.isValidFolderNameForPackage(memberName, sourceLevel, complianceLevel) && javaProject.contains(member)) {
+                        	String[] newNames = Util.arrayConcat(pkgName, manager.intern(memberName));
+                        	boolean isMemberIncluded = !Util.isExcluded(member, inclusionPatterns, exclusionPatterns);
+                        	computeFolderChildren((IFolder) member, isMemberIncluded, newNames, vChildren, inclusionPatterns, exclusionPatterns);
+                        }
 			    		break;
 			    	case IResource.FILE:
 			    		// inclusion filter may only include files, in which case we still want to include the immediate parent package (lazily)
@@ -376,8 +370,8 @@ private IClasspathEntry findSourceAttachmentRecommendation() {
 		// iterate over all projects
 		IJavaModel model = getJavaModel();
 		IJavaProject[] jProjects = model.getJavaProjects();
-		for (int i = 0, max = jProjects.length; i < max; i++){
-			JavaProject jProject = (JavaProject) jProjects[i];
+		for (IJavaProject jProject2 : jProjects) {
+			JavaProject jProject = (JavaProject) jProject2;
 			if (jProject == parentProject) continue; // already done
 			try {
 				entry = jProject.getClasspathEntryFor(rootPath);
@@ -407,9 +401,8 @@ public char[][] fullExclusionPatternChars() {
 		ClasspathEntry entry = (ClasspathEntry) getRawClasspathEntry();
 		if (entry == null) {
 			return null;
-		} else {
-			return entry.fullExclusionPatternChars();
 		}
+        return entry.fullExclusionPatternChars();
 	} catch (JavaModelException e) {
 		return null;
 	}
@@ -424,9 +417,8 @@ public char[][] fullInclusionPatternChars() {
 		ClasspathEntry entry = (ClasspathEntry)getRawClasspathEntry();
 		if (entry == null) {
 			return null;
-		} else {
-			return entry.fullInclusionPatternChars();
 		}
+        return entry.fullInclusionPatternChars();
 	} catch (JavaModelException e) {
 		return null;
 	}
@@ -476,9 +468,8 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 			JavaElement pkg = getPackageFragment(pkgName);
 			if (token == null) {
 				return pkg.getHandleFromMemento(memento, owner);
-			} else {
-				return pkg.getHandleFromMemento(token, memento, owner);
 			}
+            return pkg.getHandleFromMemento(token, memento, owner);
 	}
 	return null;
 }
@@ -662,10 +653,9 @@ public IPath getSourceAttachmentPath() throws JavaModelException {
 		if (index < 0) {
 			// no root path specified
 			return new Path(serverPathString);
-		} else {
-			String serverSourcePathString= serverPathString.substring(0, index);
-			return new Path(serverSourcePathString);
 		}
+        String serverSourcePathString= serverPathString.substring(0, index);
+        return new Path(serverSourcePathString);
 	}
 
 	// 2) look at classpath entry
@@ -880,9 +870,11 @@ protected IStatus validateExistence(IResource underlyingResource) {
 protected void verifyAttachSource(IPath sourcePath) throws JavaModelException {
 	if (!exists()) {
 		throw newNotPresentException();
-	} else if (getKind() != K_BINARY) {
+	}
+    if (getKind() != K_BINARY) {
 		throw new JavaModelException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_ELEMENT_TYPES, this));
-	} else if (sourcePath != null && !sourcePath.isAbsolute()) {
+	}
+    if (sourcePath != null && !sourcePath.isAbsolute()) {
 		throw new JavaModelException(new JavaModelStatus(IJavaModelStatusConstants.RELATIVE_PATH, sourcePath));
 	}
 }
@@ -909,12 +901,12 @@ public IModuleDescription getModuleDescription() {
 private IModuleDescription getSourceModuleDescription() {
 	try {
 		IJavaElement[] pkgs = getChildren();
-		for (int j = 0, length = pkgs.length; j < length; j++) {
+		for (IJavaElement pkg : pkgs) {
 			// only look in the default package
-			if (pkgs[j].getElementName().length() == 0) {
+			if (pkg.getElementName().length() == 0) {
 				OpenableElementInfo info = null;
 				if (getKind() == IPackageFragmentRoot.K_SOURCE) {
-					ICompilationUnit unit = ((PackageFragment) pkgs[j])
+					ICompilationUnit unit = ((PackageFragment) pkg)
 							.getCompilationUnit(TypeConstants.MODULE_INFO_FILE_NAME_STRING);
 					if (unit instanceof CompilationUnit && unit.exists()) {
 						info = (CompilationUnitElementInfo) ((CompilationUnit) unit)
@@ -923,7 +915,7 @@ private IModuleDescription getSourceModuleDescription() {
 							return info.getModule();
 					}
 				} else {
-					IModularClassFile classFile = ((IPackageFragment)pkgs[j]).getModularClassFile();
+					IModularClassFile classFile = ((IPackageFragment)pkg).getModularClassFile();
 					if (classFile.exists()) {
 						return classFile.getModule();
 					}

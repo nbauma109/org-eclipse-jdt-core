@@ -79,12 +79,10 @@ public final class XMLRootElementContentDescriber extends XMLContentDescriber im
 
 	private int checkCriteria(Map<String, Object> properties) throws IOException {
 		Boolean result = (Boolean) properties.get(XMLRootElementContentDescriber2.RESULT);
-		if (!result.booleanValue())
-			return INDETERMINATE;
 		// Check to see if we matched our criteria.
-		if ((dtdToFind != null) && (!dtdToFind.equals(properties.get(XMLRootElementContentDescriber2.DTD))))
+		if (!result.booleanValue() || dtdToFind != null && !dtdToFind.equals(properties.get(XMLRootElementContentDescriber2.DTD)))
 			return INDETERMINATE;
-		if ((elementToFind != null) && (!elementToFind.equals(properties.get(XMLRootElementContentDescriber2.ELEMENT))))
+		if (elementToFind != null && !elementToFind.equals(properties.get(XMLRootElementContentDescriber2.ELEMENT)))
 			return INDETERMINATE;
 		// We must be okay then.
 		return VALID;

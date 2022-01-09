@@ -789,7 +789,7 @@ public class Project extends Container implements IProject {
 		Collection<IBuildConfiguration> configs = new LinkedHashSet<>(refs.length);
 		for (IBuildConfiguration ref : refs) {
 			try {
-				configs.add((((BuildConfiguration) ref).getBuildConfig()));
+				configs.add(((BuildConfiguration) ref).getBuildConfig());
 			} catch (CoreException e) {
 				// The project isn't accessible, or the build configuration doesn't exist
 				// on the project.  If requested return the full set of build references which may
@@ -1067,7 +1067,7 @@ public class Project extends Container implements IProject {
 				startup();
 				//request a refresh if the project is new and has unknown members on disk
 				// or restore of the project is not fully successful
-				if ((!used && unknownChildren) || !minorIssuesDuringRestore) {
+				if (!used && unknownChildren || !minorIssuesDuringRestore) {
 					boolean refreshed = false;
 					if (!used) {
 						refreshed = workspace.getSaveManager().restoreFromRefreshSnapshot(this, Policy.subMonitorFor(monitor, Policy.opWork * 20 / 100));
@@ -1084,13 +1084,11 @@ public class Project extends Container implements IProject {
 							refreshLocal(IResource.DEPTH_INFINITE, Policy.subMonitorFor(monitor, Policy.opWork * 60 / 100));
 						}
 					}
-				} else {
-					// Bug 544975 - When opening a closed project, refresh it in the background
-					if ((updateFlags & IResource.BACKGROUND_REFRESH) != 0) {
-						workspace.refreshManager.refresh(this);
-						monitor.worked(Policy.opWork * 60 / 100);
-					}
-				}
+				} else // Bug 544975 - When opening a closed project, refresh it in the background
+                if ((updateFlags & IResource.BACKGROUND_REFRESH) != 0) {
+                	workspace.refreshManager.refresh(this);
+                	monitor.worked(Policy.opWork * 60 / 100);
+                }
 				//creation of this project may affect overlapping resources
 				workspace.getAliasManager().updateAliases(this, getStore(), IResource.DEPTH_INFINITE, monitor);
 			} catch (OperationCanceledException e) {
@@ -1160,7 +1158,7 @@ public class Project extends Container implements IProject {
 			int numberOfSegments1 = arg1.getProjectRelativePath().segmentCount();
 			if (numberOfSegments0 != numberOfSegments1)
 				return numberOfSegments0 - numberOfSegments1;
-			else if (arg0.equals(arg1))
+            if (arg0.equals(arg1))
 				return 0;
 
 			return -1;
@@ -1254,7 +1252,7 @@ public class Project extends Container implements IProject {
 				//If we're out of sync and !FORCE, then fail.
 				//If the file is missing, we want to write the new description then throw an exception.
 				boolean hadSavedDescription = true;
-				if (((updateFlags & IResource.FORCE) == 0)) {
+				if ((updateFlags & IResource.FORCE) == 0) {
 					hadSavedDescription = getLocalManager().hasSavedDescription(this);
 					if (hadSavedDescription && !getLocalManager().isDescriptionSynchronized(this)) {
 						String message = NLS.bind(Messages.resources_projectDescSync, getName());

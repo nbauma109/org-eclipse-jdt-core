@@ -52,32 +52,32 @@ public abstract class Binding {
 	// In the unlikely event you add a new type binding, remember to update TypeBindingVisitor and Scope.substitute methods.
 
 	// Shared binding collections
-	public static final ModuleBinding[] NO_MODULES = new ModuleBinding[0];
-	public static final PackageBinding[] NO_PACKAGES = new PackageBinding[0];
-	public static final PlainPackageBinding[] NO_PLAIN_PACKAGES = new PlainPackageBinding[0];
-	public static final TypeBinding[] NO_TYPES = new TypeBinding[0];
-	public static final ReferenceBinding[] NO_REFERENCE_TYPES = new ReferenceBinding[0];
-	public static final TypeBinding[] NO_PARAMETERS = new TypeBinding[0];
-	public static final ReferenceBinding[] NO_EXCEPTIONS = new ReferenceBinding[0];
-	public static final ReferenceBinding[] ANY_EXCEPTION = new ReferenceBinding[] { null }; // special handler for all exceptions
-	public static final FieldBinding[] NO_FIELDS = new FieldBinding[0];
-	public static final MethodBinding[] NO_METHODS = new MethodBinding[0];
-	public static final ReferenceBinding[] NO_PERMITTEDTYPES = new ReferenceBinding[0];
-	public static final ReferenceBinding[] NO_SUPERINTERFACES = new ReferenceBinding[0];
-	public static final ReferenceBinding[] NO_MEMBER_TYPES = new ReferenceBinding[0];
-	public static final TypeVariableBinding[] NO_TYPE_VARIABLES = new TypeVariableBinding[0];
-	public static final AnnotationBinding[] NO_ANNOTATIONS = new AnnotationBinding[0];
-	public static final ElementValuePair[] NO_ELEMENT_VALUE_PAIRS = new ElementValuePair[0];
-	public static final char[][] NO_PARAMETER_NAMES = new char[0][];
-	public static final RecordComponentBinding[] NO_COMPONENTS = new RecordComponentBinding[0];
+	public static final ModuleBinding[] NO_MODULES = {};
+	public static final PackageBinding[] NO_PACKAGES = {};
+	public static final PlainPackageBinding[] NO_PLAIN_PACKAGES = {};
+	public static final TypeBinding[] NO_TYPES = {};
+	public static final ReferenceBinding[] NO_REFERENCE_TYPES = {};
+	public static final TypeBinding[] NO_PARAMETERS = {};
+	public static final ReferenceBinding[] NO_EXCEPTIONS = {};
+	public static final ReferenceBinding[] ANY_EXCEPTION = { null }; // special handler for all exceptions
+	public static final FieldBinding[] NO_FIELDS = {};
+	public static final MethodBinding[] NO_METHODS = {};
+	public static final ReferenceBinding[] NO_PERMITTEDTYPES = {};
+	public static final ReferenceBinding[] NO_SUPERINTERFACES = {};
+	public static final ReferenceBinding[] NO_MEMBER_TYPES = {};
+	public static final TypeVariableBinding[] NO_TYPE_VARIABLES = {};
+	public static final AnnotationBinding[] NO_ANNOTATIONS = {};
+	public static final ElementValuePair[] NO_ELEMENT_VALUE_PAIRS = {};
+	public static final char[][] NO_PARAMETER_NAMES = {};
+	public static final RecordComponentBinding[] NO_COMPONENTS = {};
 
-	public static final RecordComponentBinding[] UNINITIALIZED_COMPONENTS = new RecordComponentBinding[0];
-	public static final FieldBinding[] UNINITIALIZED_FIELDS = new FieldBinding[0];
-	public static final MethodBinding[] UNINITIALIZED_METHODS = new MethodBinding[0];
-	public static final ReferenceBinding[] UNINITIALIZED_REFERENCE_TYPES = new ReferenceBinding[0];
+	public static final RecordComponentBinding[] UNINITIALIZED_COMPONENTS = {};
+	public static final FieldBinding[] UNINITIALIZED_FIELDS = {};
+	public static final MethodBinding[] UNINITIALIZED_METHODS = {};
+	public static final ReferenceBinding[] UNINITIALIZED_REFERENCE_TYPES = {};
 
-	static final InferenceVariable[] NO_INFERENCE_VARIABLES = new InferenceVariable[0];
-	static final TypeBound[] NO_TYPE_BOUNDS = new TypeBound[0];
+	static final InferenceVariable[] NO_INFERENCE_VARIABLES = {};
+	static final TypeBound[] NO_TYPE_BOUNDS = {};
 
 	// Nullness defaults:
 	public static final int NO_NULL_DEFAULT = 0;

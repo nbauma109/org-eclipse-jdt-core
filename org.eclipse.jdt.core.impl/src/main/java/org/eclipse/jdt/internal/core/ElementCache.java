@@ -52,10 +52,9 @@ protected boolean close(LRUCacheEntry<K, JavaElementInfo> entry) {
 	try {
 		if (!element.canBeRemovedFromCache()) {
 			return false;
-		} else {
-			element.close();
-			return true;
 		}
+        element.close();
+        return true;
 	} catch (JavaModelException npe) {
 		return false;
 	}

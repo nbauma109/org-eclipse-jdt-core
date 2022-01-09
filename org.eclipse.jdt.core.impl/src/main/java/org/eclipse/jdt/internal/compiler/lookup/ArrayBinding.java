@@ -101,8 +101,7 @@ public List<TypeBinding> collectMissingTypes(List<TypeBinding> missingTypes) {
 @Override
 public void collectSubstitutes(Scope scope, TypeBinding actualType, InferenceContext inferenceContext, int constraint) {
 
-	if ((this.tagBits & TagBits.HasTypeVariable) == 0) return;
-	if (actualType == TypeBinding.NULL || actualType.kind() == POLY_TYPE) return;
+	if ((this.tagBits & TagBits.HasTypeVariable) == 0 || actualType == TypeBinding.NULL || actualType.kind() == POLY_TYPE) return;
 
 	switch(actualType.kind()) {
 		case Binding.ARRAY_TYPE :
@@ -446,8 +445,7 @@ public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNull
 			this.nullTagBitsPerDimension = new long[this.dimensions + 1];
 
 		int dimension = 0;
-		for (int i = 0, length = annotations.length; i < length; i++) {
-			AnnotationBinding annotation = annotations[i];
+		for (AnnotationBinding annotation : annotations) {
 			if (annotation != null) {
 				if (annotation.type.hasNullBit(TypeIds.BitNullableAnnotation)) {
 					nullTagBits  |= TagBits.AnnotationNullable;

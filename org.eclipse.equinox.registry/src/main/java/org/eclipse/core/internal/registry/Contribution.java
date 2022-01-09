@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
 // It is mainly used on removal so we can quickly  find objects to remove.
 // Each contribution is made in the context of a namespace.
 public class Contribution implements KeyedElement {
-	static final int[] EMPTY_CHILDREN = new int[] {0, 0};
+	static final int[] EMPTY_CHILDREN = {0, 0};
 
 	//The registry that owns this object
 	protected ExtensionRegistry registry;
@@ -164,7 +164,7 @@ public class Contribution implements KeyedElement {
 	 * Contribution is empty if it has no children.
 	 */
 	public boolean isEmpty() {
-		return (children[EXTENSION_POINT] == 0 || children[EXTENSION] == 0);
+		return children[EXTENSION_POINT] == 0 || children[EXTENSION] == 0;
 	}
 
 	/**

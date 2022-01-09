@@ -190,7 +190,6 @@ public abstract class Plugin implements BundleActivator {
 	 * @since 3.0
 	 */
 	public Plugin() {
-		super();
 	}
 
 

@@ -26,6 +26,7 @@ package org.eclipse.jdt.core.jdom;
  * org.eclipse.jdt.core.dom package.
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@Deprecated
 public interface IDOMCompilationUnit extends IDOMNode {
 /**
  * Returns the header comment for this compilation unit. The header comment

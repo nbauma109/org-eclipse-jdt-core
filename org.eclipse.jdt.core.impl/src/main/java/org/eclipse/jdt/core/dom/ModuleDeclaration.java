@@ -140,10 +140,9 @@ public class ModuleDeclaration extends ASTNode {
 		if (property == OPEN_PROPERTY) {
 			if (get) {
 				return isOpen();
-			} else {
-				setOpen(value);
-				return false;
 			}
+            setOpen(value);
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
@@ -154,18 +153,16 @@ public class ModuleDeclaration extends ASTNode {
 		if (property == JAVADOC_PROPERTY) {
 			if (get) {
 				return getJavadoc();
-			} else {
-				setJavadoc((Javadoc) child);
-				return null;
 			}
+            setJavadoc((Javadoc) child);
+            return null;
 		}
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((Name) child);
-				return null;
 			}
+            setName((Name) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

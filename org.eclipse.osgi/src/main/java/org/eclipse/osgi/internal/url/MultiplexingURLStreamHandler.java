@@ -100,7 +100,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return (URLConnection) openConnectionMethod.invoke(handler, new Object[] {url});
+				return (URLConnection) openConnectionMethod.invoke(handler, url);
 			} catch (InvocationTargetException e) {
 				if (e.getTargetException() instanceof IOException)
 					throw (IOException) e.getTargetException();
@@ -118,7 +118,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return (URLConnection) openConnectionProxyMethod.invoke(handler, new Object[] {url, proxy});
+				return (URLConnection) openConnectionProxyMethod.invoke(handler, url, proxy);
 			} catch (InvocationTargetException e) {
 				if (e.getTargetException() instanceof IOException)
 					throw (IOException) e.getTargetException();
@@ -136,7 +136,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return ((Boolean) equalsMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
+				return (Boolean) equalsMethod.invoke(handler, url1, url2);
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
@@ -152,7 +152,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return ((Integer) getDefaultPortMethod.invoke(handler, (Object[]) null)).intValue();
+				return (Integer) getDefaultPortMethod.invoke(handler, (Object[]) null);
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
@@ -168,7 +168,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return (InetAddress) getHostAddressMethod.invoke(handler, new Object[] {url});
+				return (InetAddress) getHostAddressMethod.invoke(handler, url);
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
@@ -184,7 +184,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return ((Integer) hashCodeMethod.invoke(handler, new Object[] {url})).intValue();
+				return (Integer) hashCodeMethod.invoke(handler, url);
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
@@ -200,7 +200,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return ((Boolean) hostsEqualMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
+				return (Boolean) hostsEqualMethod.invoke(handler, url1, url2);
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
@@ -235,7 +235,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return ((Boolean) sameFileMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
+				return (Boolean) sameFileMethod.invoke(handler, url1, url2);
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
@@ -270,7 +270,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return (String) toExternalFormMethod.invoke(handler, new Object[] {url});
+				return (String) toExternalFormMethod.invoke(handler, url);
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {

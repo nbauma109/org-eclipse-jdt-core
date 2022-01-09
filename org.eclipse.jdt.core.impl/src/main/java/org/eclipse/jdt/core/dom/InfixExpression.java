@@ -155,8 +155,8 @@ public class InfixExpression extends Expression {
 					CONDITIONAL_OR,
 					CONDITIONAL_AND,
 				};
-			for (int i = 0; i < ops.length; i++) {
-				CODES.put(ops[i].toString(), ops[i]);
+			for (Operator op : ops) {
+				CODES.put(op.toString(), op);
 			}
 		}
 
@@ -282,10 +282,9 @@ public class InfixExpression extends Expression {
 		if (property == OPERATOR_PROPERTY) {
 			if (get) {
 				return getOperator();
-			} else {
-				setOperator((Operator) value);
-				return null;
 			}
+            setOperator((Operator) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
@@ -296,18 +295,16 @@ public class InfixExpression extends Expression {
 		if (property == LEFT_OPERAND_PROPERTY) {
 			if (get) {
 				return getLeftOperand();
-			} else {
-				setLeftOperand((Expression) child);
-				return null;
 			}
+            setLeftOperand((Expression) child);
+            return null;
 		}
 		if (property == RIGHT_OPERAND_PROPERTY) {
 			if (get) {
 				return getRightOperand();
-			} else {
-				setRightOperand((Expression) child);
-				return null;
 			}
+            setRightOperand((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -475,7 +472,7 @@ public class InfixExpression extends Expression {
 	 */
 	public boolean hasExtendedOperands() {
 		return
-			(this.extendedOperands != null) && this.extendedOperands.size() > 0;
+			this.extendedOperands != null && this.extendedOperands.size() > 0;
 	}
 
 	/**

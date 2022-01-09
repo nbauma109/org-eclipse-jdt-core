@@ -136,8 +136,8 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 	public <L extends org.osgi.service.log.Logger> L getLogger(String name, Class<L> loggerType) {
 		if (name == null) {
 			Bundle current = bundle;
-			String bsn = (current == null) ? null : current.getSymbolicName();
-			name = (bsn == null) ? LOG_SERVICE : LOG_SERVICE + "." + bsn; //$NON-NLS-1$
+			String bsn = current == null ? null : current.getSymbolicName();
+			name = bsn == null ? LOG_SERVICE : LOG_SERVICE + "." + bsn; //$NON-NLS-1$
 		}
 		LoggerImpl logger = null;
 		Map<String, LoggerImpl> loggers = null;

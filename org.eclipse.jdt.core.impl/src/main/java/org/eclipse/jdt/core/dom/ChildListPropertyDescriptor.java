@@ -74,7 +74,7 @@ public final class ChildListPropertyDescriptor extends StructuralPropertyDescrip
 	 *
 	 * @return the element type of the property
 	 */
-	public final Class getElementType() {
+	public Class getElementType() {
 		return this.elementType;
 	}
 
@@ -96,7 +96,7 @@ public final class ChildListPropertyDescriptor extends StructuralPropertyDescrip
 	 * @return <code>true</code> if cycles are possible,
 	 * and <code>false</code> if cycles are impossible
 	 */
-	public final boolean cycleRisk() {
+	public boolean cycleRisk() {
 		return this.cycleRisk;
 	}
 }

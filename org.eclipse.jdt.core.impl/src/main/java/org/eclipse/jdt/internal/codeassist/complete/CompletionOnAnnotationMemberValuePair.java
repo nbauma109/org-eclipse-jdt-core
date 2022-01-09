@@ -35,9 +35,8 @@ public class CompletionOnAnnotationMemberValuePair extends NormalAnnotation {
 
 		if (this.resolvedType == null || !this.resolvedType.isValidBinding()) {
 			throw new CompletionNodeFound();
-		} else {
-			throw new CompletionNodeFound(this.completedMemberValuePair, scope);
 		}
+        throw new CompletionNodeFound(this.completedMemberValuePair, scope);
 	}
 
 	@Override

@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.util.IVerificationTypeInfo;
  * Default implementation of IStackMapFrame
  */
 public class StackMapFrame extends ClassFileStruct implements IStackMapFrame {
-	private static final IVerificationTypeInfo[] EMPTY_LOCALS_OR_STACK_ITEMS = new IVerificationTypeInfo[0];
+	private static final IVerificationTypeInfo[] EMPTY_LOCALS_OR_STACK_ITEMS = {};
 
 	private int readOffset;
 	private int frameType;

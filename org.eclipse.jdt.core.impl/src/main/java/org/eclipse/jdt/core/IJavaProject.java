@@ -584,7 +584,8 @@ public interface IJavaProject extends IParent, IJavaElement, IOpenable {
 	 * @see IClasspathContainer
 	 * @deprecated Use {@link IJavaProject#findPackageFragmentRoots(IClasspathEntry)} instead
 	 */
-	IPackageFragmentRoot[] getPackageFragmentRoots(IClasspathEntry entry);
+	@Deprecated
+    IPackageFragmentRoot[] getPackageFragmentRoots(IClasspathEntry entry);
 
 	/**
 	 * Returns all package fragments in all package fragment roots contained

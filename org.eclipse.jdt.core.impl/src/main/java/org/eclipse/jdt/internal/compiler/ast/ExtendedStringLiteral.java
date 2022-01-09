@@ -44,7 +44,7 @@ public class ExtendedStringLiteral extends StringLiteral {
 
 		//update the source
 		int length = this.source.length;
-		System.arraycopy(this.source, 0, (this.source = new char[length + 1]), 0, length);
+		System.arraycopy(this.source, 0, this.source = new char[length + 1], 0, length);
 		this.source[length] = lit.value;
 		//position at the end of all literals
 		this.sourceEnd = lit.sourceEnd;

@@ -89,7 +89,7 @@ public class SortElementsOperation extends JavaModelOperation {
 	boolean checkMalformedNodes(ASTNode node) {
 		Object property = node.getProperty(CONTAINS_MALFORMED_NODES);
 		if (property == null) return false;
-		return ((Boolean) property).booleanValue();
+		return (Boolean) property;
 	}
 
 	protected boolean isMalformed(ASTNode node) {
@@ -266,7 +266,7 @@ public class SortElementsOperation extends JavaModelOperation {
 		});
 
 		final ASTRewrite rewriter= ASTRewrite.create(ast.getAST());
-		final boolean[] hasChanges= new boolean[] {false};
+		final boolean[] hasChanges= {false};
 
 		ast.accept(new ASTVisitor() {
 
@@ -274,8 +274,7 @@ public class SortElementsOperation extends JavaModelOperation {
 				if (elements.size() == 0)
 					return;
 
-				final List myCopy = new ArrayList();
-				myCopy.addAll(elements);
+				final List myCopy = new ArrayList(elements);
 				Collections.sort(myCopy, SortElementsOperation.this.comparator);
 
 				for (int i = 0; i < elements.size(); i++) {
@@ -356,10 +355,7 @@ public class SortElementsOperation extends JavaModelOperation {
 	 */
 	@Override
 	public IJavaModelStatus verify() {
-		if (this.elementsToProcess.length != 1) {
-			return new JavaModelStatus(IJavaModelStatusConstants.NO_ELEMENTS_TO_PROCESS);
-		}
-		if (this.elementsToProcess[0] == null) {
+		if (this.elementsToProcess.length != 1 || this.elementsToProcess[0] == null) {
 			return new JavaModelStatus(IJavaModelStatusConstants.NO_ELEMENTS_TO_PROCESS);
 		}
 		if (!(this.elementsToProcess[0] instanceof ICompilationUnit) || !((ICompilationUnit) this.elementsToProcess[0]).isWorkingCopy()) {
@@ -375,8 +371,7 @@ public class SortElementsOperation extends JavaModelOperation {
 		}
 		TextEdit[] children= parent.getChildren();
 		// First dive down to find the right parent.
-		for (int i= 0; i < children.length; i++) {
-			TextEdit child= children[i];
+		for (TextEdit child : children) {
 			if (covers(child, edit)) {
 				insert(child, edit);
 				return;
@@ -404,10 +399,9 @@ public class SortElementsOperation extends JavaModelOperation {
 		if (otherEdit.getLength() == 0) {
 			int otherOffset= otherEdit.getOffset();
 			return thisOffset <= otherOffset && otherOffset < thisEnd;
-		} else {
-			int otherOffset= otherEdit.getOffset();
-			int otherEnd= otherEdit.getExclusiveEnd();
-			return thisOffset <= otherOffset && otherEnd <= thisEnd;
 		}
+        int otherOffset= otherEdit.getOffset();
+        int otherEnd= otherEdit.getExclusiveEnd();
+        return thisOffset <= otherOffset && otherEnd <= thisEnd;
 	}
 }

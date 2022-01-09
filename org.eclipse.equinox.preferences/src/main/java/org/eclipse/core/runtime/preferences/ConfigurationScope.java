@@ -62,8 +62,8 @@ public final class ConfigurationScope extends AbstractScope {
 	 * Create and return a new configuration scope instance.
 	 * @deprecated use <code>ConfigurationScope.INSTANCE</code> instead
 	 */
-	public ConfigurationScope() {
-		super();
+	@Deprecated
+    public ConfigurationScope() {
 	}
 
 

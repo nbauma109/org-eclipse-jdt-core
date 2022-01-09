@@ -41,7 +41,7 @@ public class TypeReferencePattern extends IntersectingPattern {
 		this(matchRule);
 
 		this.qualification = this.isCaseSensitive ? qualification : CharOperation.toLowerCase(qualification);
-		this.simpleName = (this.isCaseSensitive || this.isCamelCase) ? simpleName : CharOperation.toLowerCase(simpleName);
+		this.simpleName = this.isCaseSensitive || this.isCamelCase ? simpleName : CharOperation.toLowerCase(simpleName);
 
 		if (simpleName == null)
 			this.segments = this.qualification == null ? ONE_STAR_CHAR : CharOperation.splitOn('.', this.qualification);

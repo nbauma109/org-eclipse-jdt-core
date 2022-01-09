@@ -72,9 +72,7 @@ public class MultiRule implements ISchedulingRule {
 			return rule1;
 		if (rule1 == null)
 			return rule2;
-		if (rule2 == null)
-			return rule1;
-		if (rule1.contains(rule2))
+		if (rule2 == null || rule1.contains(rule2))
 			return rule1;
 		if (rule2.contains(rule1))
 			return rule2;

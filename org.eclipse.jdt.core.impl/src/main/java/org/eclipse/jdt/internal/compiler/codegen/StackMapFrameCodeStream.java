@@ -103,22 +103,19 @@ public class StackMapFrameCodeStream extends CodeStream {
 				// Check if the local is definitely assigned
 				boolean isDefinitelyAssigned = isDefinitelyAssigned(scope, initStateIndex, localBinding);
 				if (!isDefinitelyAssigned) {
-					continue;
-				} else {
-					if ((localBinding.initializationCount == 0)
-							|| (localBinding.initializationPCs[((localBinding.initializationCount - 1) << 1)
-									+ 1] != -1)) {
-						/*
-						 * There are two cases: 1) there is no initialization interval opened ==> add an opened interval
-						 * 2) there is already some initialization intervals but the last one is closed ==> add an
-						 * opened interval An opened interval means that the value at
-						 * localBinding.initializationPCs[localBinding.initializationCount - 1][1] is equals to -1.
-						 * initializationPCs is a collection of pairs of int: first value is the startPC and second
-						 * value is the endPC. -1 one for the last value means that the interval is not closed yet.
-						 */
-						localBinding.recordInitializationStartPC(this.position);
-					}
-				}
+				} else if (localBinding.initializationCount == 0
+                		|| localBinding.initializationPCs[(localBinding.initializationCount - 1 << 1)
+                				+ 1] != -1) {
+                	/*
+                	 * There are two cases: 1) there is no initialization interval opened ==> add an opened interval
+                	 * 2) there is already some initialization intervals but the last one is closed ==> add an
+                	 * opened interval An opened interval means that the value at
+                	 * localBinding.initializationPCs[localBinding.initializationCount - 1][1] is equals to -1.
+                	 * initializationPCs is a collection of pairs of int: first value is the startPC and second
+                	 * value is the endPC. -1 one for the last value means that the interval is not closed yet.
+                	 */
+                	localBinding.recordInitializationStartPC(this.position);
+                }
 			}
 		}
 	}
@@ -132,7 +129,7 @@ public class StackMapFrameCodeStream extends CodeStream {
 	}
 
 	public void addFramePosition(int pc) {
-		Integer newEntry = Integer.valueOf(pc);
+		Integer newEntry = pc;
 		FramePosition value;
 		if ((value = (FramePosition) this.framePositions.get(newEntry)) != null) {
 			value.counter++;
@@ -148,7 +145,7 @@ public class StackMapFrameCodeStream extends CodeStream {
 	}
 
 	public void removeFramePosition(int pc) {
-		Integer entry = Integer.valueOf(pc);
+		Integer entry = pc;
 		FramePosition value;
 		if ((value = (FramePosition) this.framePositions.get(entry)) != null) {
 			value.counter--;
@@ -315,7 +312,7 @@ public class StackMapFrameCodeStream extends CodeStream {
 		int[] positions = new int[size];
 		int n = 0;
 		for (Iterator iterator = set.iterator(); iterator.hasNext();) {
-			positions[n++] = ((Integer) iterator.next()).intValue();
+			positions[n++] = (Integer) iterator.next();
 		}
 		Arrays.sort(positions);
 //  System.out.print('[');
@@ -370,7 +367,7 @@ public class StackMapFrameCodeStream extends CodeStream {
 		int length = this.stateIndexes.length;
 		if (length == this.stateIndexesCounter) {
 			// resize
-			System.arraycopy(this.stateIndexes, 0, (this.stateIndexes = new int[length * 2]), 0, length);
+			System.arraycopy(this.stateIndexes, 0, this.stateIndexes = new int[length * 2], 0, length);
 		}
 		this.stateIndexes[this.stateIndexesCounter++] = naturalExitMergeInitStateIndex;
 	}
@@ -511,8 +508,7 @@ public class StackMapFrameCodeStream extends CodeStream {
 	}
 
 	public void resetSecretLocals() {
-		for (int i = 0, max = this.locals.length; i < max; i++) {
-			LocalVariableBinding localVariableBinding = this.locals[i];
+		for (LocalVariableBinding localVariableBinding : this.locals) {
 			if (localVariableBinding != null && localVariableBinding.isSecret()) {
 				// all other locals are reinitialized inside the computation of their resolved positions
 				localVariableBinding.resetInitializations();

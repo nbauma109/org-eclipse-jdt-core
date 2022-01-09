@@ -36,7 +36,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	private static final String ELEMENT_SCOPE = "scope"; //$NON-NLS-1$
 	private static final String ELEMENT_MODIFIER = "modifier"; //$NON-NLS-1$
 	// Store this around for performance
-	private final static IExtension[] EMPTY_EXTENSION_ARRAY = new IExtension[0];
+	private final static IExtension[] EMPTY_EXTENSION_ARRAY = {};
 	private static final Map<String, Object> scopeRegistry = Collections.synchronizedMap(new HashMap<String, Object>());
 	private ListenerList<PreferenceModifyListener> modifyListeners;
 	private final PreferencesService service;
@@ -69,7 +69,6 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	 * Constructor for the class.
 	 */
 	public PreferenceServiceRegistryHelper(PreferencesService service, Object registryObject) {
-		super();
 		this.service = service;
 		this.registry = (IExtensionRegistry) registryObject;
 		initializeScopes();
@@ -118,24 +117,22 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		for (IExtension extension : extensions) {
 			IConfigurationElement[] elements = extension.getConfigurationElements();
 			for (IConfigurationElement element : elements) {
-				if (ELEMENT_INITIALIZER.equals(element.getName())) {
-					if (name.equals(element.getContributor().getName())) {
-						if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
-							IExtension theExtension = element.getDeclaringExtension();
-							String extensionNamespace = theExtension.getContributor().getName();
-							Bundle underlyingBundle = PreferencesOSGiUtils.getDefault().getBundle(extensionNamespace);
-							String ownerName;
-							if (underlyingBundle != null)
-								ownerName = underlyingBundle.getSymbolicName();
-							else
-								ownerName = extensionNamespace;
-							PrefsMessages.message("Running default preference customization as defined by: " + ownerName); //$NON-NLS-1$
-						}
-						runInitializer(element);
-						// don't return yet in case we have multiple initializers registered
-						foundInitializer = true;
-					}
-				}
+				if (ELEMENT_INITIALIZER.equals(element.getName()) && name.equals(element.getContributor().getName())) {
+                	if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
+                		IExtension theExtension = element.getDeclaringExtension();
+                		String extensionNamespace = theExtension.getContributor().getName();
+                		Bundle underlyingBundle = PreferencesOSGiUtils.getDefault().getBundle(extensionNamespace);
+                		String ownerName;
+                		if (underlyingBundle != null)
+                			ownerName = underlyingBundle.getSymbolicName();
+                		else
+                			ownerName = extensionNamespace;
+                		PrefsMessages.message("Running default preference customization as defined by: " + ownerName); //$NON-NLS-1$
+                	}
+                	runInitializer(element);
+                	// don't return yet in case we have multiple initializers registered
+                	foundInitializer = true;
+                }
 			}
 		}
 		if (foundInitializer)
@@ -234,10 +231,8 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		System.arraycopy(extensionsOld, 0, extensions, 0, extensionsOld.length);
 		System.arraycopy(extensionsNew, 0, extensions, extensionsOld.length, extensionsNew.length);
 
-		if (extensions.length == 0) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-				PrefsMessages.message("No extensions for org.eclipse.core.contenttype."); //$NON-NLS-1$
-		}
+		if (extensions.length == 0 && EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+        	PrefsMessages.message("No extensions for org.eclipse.core.contenttype."); //$NON-NLS-1$
 
 		return extensions;
 	}

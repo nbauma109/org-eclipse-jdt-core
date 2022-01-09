@@ -32,7 +32,7 @@ public class ResourceDeltaFactory {
 	/**
 	 * Singleton indicating no delta children
 	 */
-	protected static final ResourceDelta[] NO_CHILDREN = new ResourceDelta[0];
+	protected static final ResourceDelta[] NO_CHILDREN = {};
 
 	/**
 	 * Returns the resource delta representing the changes made between the given old and new trees,
@@ -176,7 +176,7 @@ public class ResourceDeltaFactory {
 	 * it is rooted at a project, and does not contain marker deltas.
 	 */
 	public static IResourceDelta newEmptyDelta(IProject project) {
-		ResourceDelta result = new ResourceDelta(project.getFullPath(), new ResourceDeltaInfo(((Workspace) project.getWorkspace()), null, ResourceComparator.getBuildComparator()));
+		ResourceDelta result = new ResourceDelta(project.getFullPath(), new ResourceDeltaInfo((Workspace) project.getWorkspace(), null, ResourceComparator.getBuildComparator()));
 		result.setStatus(0);
 		result.setChildren(NO_CHILDREN);
 		ResourceInfo info = ((Project) project).getResourceInfo(true, false);

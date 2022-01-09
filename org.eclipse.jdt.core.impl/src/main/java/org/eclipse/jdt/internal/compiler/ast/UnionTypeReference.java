@@ -99,7 +99,7 @@ public class UnionTypeReference extends TypeReference {
 			return null;
 		}
 		// compute lub
-		return (this.resolvedType = scope.lowerUpperBound(allExceptionTypes));
+		return this.resolvedType = scope.lowerUpperBound(allExceptionTypes);
 	}
 
 	@Override

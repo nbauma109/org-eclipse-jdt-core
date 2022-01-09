@@ -72,11 +72,13 @@ class ModuleEntryProcessor {
 		if (mainEntry instanceof ModulePathEntry.Multi) {
 			((ModulePathEntry.Multi) mainEntry).addPatchLocation(sourceLocation);
 			return;
-		} else if (mainEntry instanceof ClasspathJrt) {
+		}
+        if (mainEntry instanceof ClasspathJrt) {
 			combinedLocations = new ClasspathLocation[] { (ClasspathLocation) mainEntry, sourceLocation };
 			moduleEntries.put(patchedModuleName, new ModulePathEntry.Multi(null, patchedModule, combinedLocations));
 			return;
-		} else if (mainEntry instanceof ModulePathEntry) {
+		}
+        if (mainEntry instanceof ModulePathEntry) {
 			ClasspathLocation[] mainLocs = ((ModulePathEntry) mainEntry).locations;
 			combinedLocations = Arrays.copyOf(mainLocs, mainLocs.length+1);
 			combinedLocations[combinedLocations.length-1] = sourceLocation;

@@ -50,7 +50,7 @@ public class CommentRecorderParser extends Parser {
 	public void checkComment() {
 
 		// discard obsolete comments while inside methods or fields initializer (see bug 74369)
-		if (!(this.diet && this.dietInt==0) && this.scanner.commentPtr >= 0) {
+		if ((!this.diet || this.dietInt != 0) && this.scanner.commentPtr >= 0) {
 			flushCommentsDefinedPriorTo(this.endStatementPosition);
 		}
 		boolean deprecated = false;
@@ -62,9 +62,9 @@ public class CommentRecorderParser extends Parser {
 			//look for @deprecated into the first javadoc comment preceeding the declaration
 			int commentSourceStart = this.scanner.commentStarts[lastCommentIndex];
 			// javadoc only (non javadoc comment have negative start and/or end positions.)
-			if ((commentSourceStart < 0) ||
-				(this.modifiersSourceStart != -1 && this.modifiersSourceStart < commentSourceStart) ||
-				(this.scanner.commentStops[lastCommentIndex] < 0))
+			if (commentSourceStart < 0 ||
+				this.modifiersSourceStart != -1 && this.modifiersSourceStart < commentSourceStart ||
+				this.scanner.commentStops[lastCommentIndex] < 0)
 			{
 				continue nextComment;
 			}
@@ -216,20 +216,19 @@ public class CommentRecorderParser extends Parser {
 				// ... but ignore if not suitable ...
 				if (lastComment >= this.scanner.commentStarts.length) {
 					return -1;
-				} else {
-					int start = this.scanner.commentStarts[lastComment];
-					// ... unsuitable if:
-					//     - unknown to the scanner (start == 0)
-					//     - line comment (start < 0)
-					if (start <= 0)
-						return -1;
-					//     - past the current position, or start of previous recovered element
-					int currentStart = this.currentElement.getLastStart();
-					if (currentStart == -1)
-						currentStart = this.scanner.currentPosition;
-					if (start > currentStart)
-						return -1;
 				}
+                int start = this.scanner.commentStarts[lastComment];
+                // ... unsuitable if:
+                //     - unknown to the scanner (start == 0)
+                //     - line comment (start < 0)
+                if (start <= 0)
+                	return -1;
+                //     - past the current position, or start of previous recovered element
+                int currentStart = this.currentElement.getLastStart();
+                if (currentStart == -1)
+                	currentStart = this.scanner.currentPosition;
+                if (start > currentStart)
+                	return -1;
 			}
 		}
 		return lastComment;
@@ -286,7 +285,7 @@ public class CommentRecorderParser extends Parser {
 			if (this.scanner.commentPtr < i) break;
 			// First see if comment hasn't been already stored
 			int scannerStart = this.scanner.commentStarts[i]<0 ? -this.scanner.commentStarts[i] : this.scanner.commentStarts[i];
-			int commentStart = this.commentPtr == -1 ? -1 : (this.commentStarts[this.commentPtr]<0 ? -this.commentStarts[this.commentPtr] : this.commentStarts[this.commentPtr]);
+			int commentStart = this.commentPtr == -1 ? -1 : this.commentStarts[this.commentPtr]<0 ? -this.commentStarts[this.commentPtr] : this.commentStarts[this.commentPtr];
 			if (commentStart == -1 ||  scannerStart > commentStart) {
 				int stackLength = this.commentStarts.length;
 				if (++this.commentPtr >= stackLength) {

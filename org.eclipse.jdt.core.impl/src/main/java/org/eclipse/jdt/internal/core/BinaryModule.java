@@ -92,9 +92,8 @@ public class BinaryModule extends BinaryMember implements AbstractModule {
 			getClassFile().getBuffer();
 
 			return mapper.getSourceRange(this);
-		} else {
-			return SourceMapper.UNKNOWN_RANGE;
 		}
+        return SourceMapper.UNKNOWN_RANGE;
 	}
 	@Override
 	public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelException {
@@ -118,7 +117,7 @@ public class BinaryModule extends BinaryMember implements AbstractModule {
 		}
 		StringBuffer pathBuffer = new StringBuffer(baseLocation.toExternalForm());
 
-		if (!(pathBuffer.charAt(pathBuffer.length() - 1) == '/')) {
+		if (pathBuffer.charAt(pathBuffer.length() - 1) != '/') {
 			pathBuffer.append('/');
 		}
 		pathBuffer.append(getElementName()).append(JavadocConstants.MODULE_FILE_SUFFIX);

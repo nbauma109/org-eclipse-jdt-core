@@ -20,6 +20,7 @@ package org.eclipse.jdt.core.util;
  * @since 2.0
  * @deprecated Use {@link ClassFileBytesDisassembler} instead
  */
+@Deprecated
 public interface IClassFileDisassembler {
 
 	/**

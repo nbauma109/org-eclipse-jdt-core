@@ -57,7 +57,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -433,7 +432,7 @@ public FieldBinding addSyntheticFieldForAssert(BlockScope blockScope) {
 		FieldBinding existingField;
 		if ((existingField = getField(synthField.name, true /*resolve*/)) != null) {
 			TypeDeclaration typeDecl = this.scope.referenceContext;
-			int max = (typeDecl.fields == null) ? 0 : typeDecl.fields.length;
+			int max = typeDecl.fields == null ? 0 : typeDecl.fields.length;
 			for (int i = 0; i < max; i++) {
 				FieldDeclaration fieldDecl = typeDecl.fields[i];
 				if (fieldDecl.binding == existingField) {
@@ -511,12 +510,10 @@ public SyntheticMethodBinding addSyntheticMethod(FieldBinding targetField, boole
 		accessMethod = new SyntheticMethodBinding(targetField, isReadAccess, isSuperAccess, this);
 		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(targetField, accessors = new SyntheticMethodBinding[2]);
 		accessors[isReadAccess ? 0 : 1] = accessMethod;
-	} else {
-		if ((accessMethod = accessors[isReadAccess ? 0 : 1]) == null) {
-			accessMethod = new SyntheticMethodBinding(targetField, isReadAccess, isSuperAccess, this);
-			accessors[isReadAccess ? 0 : 1] = accessMethod;
-		}
-	}
+	} else if ((accessMethod = accessors[isReadAccess ? 0 : 1]) == null) {
+    	accessMethod = new SyntheticMethodBinding(targetField, isReadAccess, isSuperAccess, this);
+    	accessors[isReadAccess ? 0 : 1] = accessMethod;
+    }
 	return accessMethod;
 }
 /* Add a new synthetic method the enum type. Selector can either be 'values' or 'valueOf'.
@@ -535,12 +532,10 @@ public SyntheticMethodBinding addSyntheticEnumMethod(char[] selector) {
 		accessMethod = new SyntheticMethodBinding(this, selector);
 		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(selector, accessors = new SyntheticMethodBinding[2]);
 		accessors[0] = accessMethod;
-	} else {
-		if ((accessMethod = accessors[0]) == null) {
-			accessMethod = new SyntheticMethodBinding(this, selector);
-			accessors[0] = accessMethod;
-		}
-	}
+	} else if ((accessMethod = accessors[0]) == null) {
+    	accessMethod = new SyntheticMethodBinding(this, selector);
+    	accessors[0] = accessMethod;
+    }
 	return accessMethod;
 }
 /*
@@ -558,7 +553,7 @@ public SyntheticFieldBinding addSyntheticFieldForSwitchEnum(char[] fieldName, St
 		synthField = new SyntheticFieldBinding(
 			fieldName,
 			this.scope.createArrayType(TypeBinding.INT,1),
-			(isInterface() ? (ClassFileConstants.AccPublic | ClassFileConstants.AccFinal) : ClassFileConstants.AccPrivate | ClassFileConstants.AccVolatile) | ClassFileConstants.AccStatic | ClassFileConstants.AccSynthetic,
+			(isInterface() ? ClassFileConstants.AccPublic | ClassFileConstants.AccFinal : ClassFileConstants.AccPrivate | ClassFileConstants.AccVolatile) | ClassFileConstants.AccStatic | ClassFileConstants.AccSynthetic,
 			this,
 			Constant.NotAConstant,
 			this.synthetics[SourceTypeBinding.FIELD_EMUL].size());
@@ -610,13 +605,11 @@ public SyntheticMethodBinding addSyntheticMethodForSwitchEnum(TypeBinding enumBi
 		accessMethod = new SyntheticMethodBinding(fieldBinding, this, enumBinding, selector, switchStatement);
 		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(key, accessors = new SyntheticMethodBinding[2]);
 		accessors[0] = accessMethod;
-	} else {
-		if ((accessMethod = accessors[0]) == null) {
-			final SyntheticFieldBinding fieldBinding = addSyntheticFieldForSwitchEnum(selector, key);
-			accessMethod = new SyntheticMethodBinding(fieldBinding, this, enumBinding, selector, switchStatement);
-			accessors[0] = accessMethod;
-		}
-	}
+	} else if ((accessMethod = accessors[0]) == null) {
+    	final SyntheticFieldBinding fieldBinding = addSyntheticFieldForSwitchEnum(selector, key);
+    	accessMethod = new SyntheticMethodBinding(fieldBinding, this, enumBinding, selector, switchStatement);
+    	accessors[0] = accessMethod;
+    }
 	return accessMethod;
 }
 public SyntheticMethodBinding addSyntheticMethodForEnumInitialization(int begin, int end) {
@@ -709,18 +702,16 @@ public SyntheticMethodBinding addSyntheticMethod(MethodBinding targetMethod, boo
 		accessMethod = new SyntheticMethodBinding(targetMethod, isSuperAccess, this);
 		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(targetMethod, accessors = new SyntheticMethodBinding[2]);
 		accessors[isSuperAccess ? 0 : 1] = accessMethod;
-	} else {
-		if ((accessMethod = accessors[isSuperAccess ? 0 : 1]) == null) {
-			accessMethod = new SyntheticMethodBinding(targetMethod, isSuperAccess, this);
-			accessors[isSuperAccess ? 0 : 1] = accessMethod;
-		}
-	}
+	} else if ((accessMethod = accessors[isSuperAccess ? 0 : 1]) == null) {
+    	accessMethod = new SyntheticMethodBinding(targetMethod, isSuperAccess, this);
+    	accessors[isSuperAccess ? 0 : 1] = accessMethod;
+    }
 	if (targetMethod.declaringClass.isStatic()) {
-		if ((targetMethod.isConstructor() && targetMethod.parameters.length >= 0xFE)
+		if (targetMethod.isConstructor() && targetMethod.parameters.length >= 0xFE
 				|| targetMethod.parameters.length >= 0xFF) {
 			this.scope.problemReporter().tooManyParametersForSyntheticMethod(targetMethod.sourceMethod());
 		}
-	} else if ((targetMethod.isConstructor() && targetMethod.parameters.length >= 0xFD)
+	} else if (targetMethod.isConstructor() && targetMethod.parameters.length >= 0xFD
 			|| targetMethod.parameters.length >= 0xFE) {
 		this.scope.problemReporter().tooManyParametersForSyntheticMethod(targetMethod.sourceMethod());
 	}
@@ -739,12 +730,10 @@ public SyntheticMethodBinding addSyntheticArrayMethod(ArrayBinding arrayType, in
 		arrayMethod = new SyntheticMethodBinding(purpose, arrayType, selector, this);
 		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(arrayType, arrayMethods = new SyntheticMethodBinding[2]);
 		arrayMethods[purpose == SyntheticMethodBinding.ArrayConstructor ? 0 : 1] = arrayMethod;
-	} else {
-		if ((arrayMethod = arrayMethods[purpose == SyntheticMethodBinding.ArrayConstructor ? 0 : 1]) == null) {
-			arrayMethod = new SyntheticMethodBinding(purpose, arrayType, selector, this);
-			arrayMethods[purpose == SyntheticMethodBinding.ArrayConstructor ? 0 : 1] = arrayMethod;
-		}
-	}
+	} else if ((arrayMethod = arrayMethods[purpose == SyntheticMethodBinding.ArrayConstructor ? 0 : 1]) == null) {
+    	arrayMethod = new SyntheticMethodBinding(purpose, arrayType, selector, this);
+    	arrayMethods[purpose == SyntheticMethodBinding.ArrayConstructor ? 0 : 1] = arrayMethod;
+    }
 	return arrayMethod;
 }
 public SyntheticMethodBinding addSyntheticFactoryMethod(MethodBinding privateConstructor, MethodBinding publicConstructor, TypeBinding [] enclosingInstances, char[] selector) {
@@ -763,9 +752,9 @@ public SyntheticMethodBinding addSyntheticFactoryMethod(MethodBinding privateCon
  */
 public SyntheticMethodBinding addSyntheticBridgeMethod(MethodBinding inheritedMethodToBridge, MethodBinding targetMethod) {
 	if (!isPrototype()) throw new IllegalStateException();
-	if (isInterface() && this.scope.compilerOptions().sourceLevel <= ClassFileConstants.JDK1_7) return null; // only classes & enums get bridge methods, interfaces too at 1.8+
+	 // only classes & enums get bridge methods, interfaces too at 1.8+
 	// targetMethod may be inherited
-	if (TypeBinding.equalsEquals(inheritedMethodToBridge.returnType.erasure(), targetMethod.returnType.erasure())
+	if (isInterface() && this.scope.compilerOptions().sourceLevel <= ClassFileConstants.JDK1_7 || TypeBinding.equalsEquals(inheritedMethodToBridge.returnType.erasure(), targetMethod.returnType.erasure())
 		&& inheritedMethodToBridge.areParameterErasuresEqual(targetMethod)) {
 			return null; // do not need bridge method
 	}
@@ -795,12 +784,10 @@ public SyntheticMethodBinding addSyntheticBridgeMethod(MethodBinding inheritedMe
 		accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, targetMethod, this);
 		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(inheritedMethodToBridge, accessors = new SyntheticMethodBinding[2]);
 		accessors[1] = accessMethod;
-	} else {
-		if ((accessMethod = accessors[1]) == null) {
-			accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, targetMethod, this);
-			accessors[1] = accessMethod;
-		}
-	}
+	} else if ((accessMethod = accessors[1]) == null) {
+    	accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, targetMethod, this);
+    	accessors[1] = accessMethod;
+    }
 	return accessMethod;
 }
 /*
@@ -810,10 +797,7 @@ public SyntheticMethodBinding addSyntheticBridgeMethod(MethodBinding inheritedMe
  */
 public SyntheticMethodBinding addSyntheticBridgeMethod(MethodBinding inheritedMethodToBridge) {
 	if (!isPrototype()) throw new IllegalStateException();
-	if (this.scope.compilerOptions().complianceLevel <= ClassFileConstants.JDK1_5) {
-		return null;
-	}
-	if (isInterface() && !inheritedMethodToBridge.isDefaultMethod()) return null;
+	if (this.scope.compilerOptions().complianceLevel <= ClassFileConstants.JDK1_5 || isInterface() && !inheritedMethodToBridge.isDefaultMethod()) return null;
 	if (inheritedMethodToBridge.isAbstract() || inheritedMethodToBridge.isFinal() || inheritedMethodToBridge.isStatic()) {
 		return null;
 	}
@@ -843,12 +827,10 @@ public SyntheticMethodBinding addSyntheticBridgeMethod(MethodBinding inheritedMe
 		accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, this);
 		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(inheritedMethodToBridge, accessors = new SyntheticMethodBinding[2]);
 		accessors[1] = accessMethod;
-	} else {
-		if ((accessMethod = accessors[1]) == null) {
-			accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, this);
-			accessors[1] = accessMethod;
-		}
-	}
+	} else if ((accessMethod = accessors[1]) == null) {
+    	accessMethod = new SyntheticMethodBinding(inheritedMethodToBridge, this);
+    	accessors[1] = accessMethod;
+    }
 	return accessMethod;
 }
 /* JLS 14 Record - Preview - begin */
@@ -908,7 +890,7 @@ public List<MethodBinding> checkAndAddSyntheticRecordComponentAccessors(MethodBi
 	// and no accessor should be created (essentially in a recovered code if there are errors) - if there are no
 	// errors then filteredComponents equals components.
 	List<String> filteredComponents = Arrays.stream(this.fields) // initialize with all the record components
-			.filter(f -> f.isRecordComponent())
+			.filter(FieldBinding::isRecordComponent)
 			.map(f -> new String(f.name))
 			.collect(Collectors.toList());
 
@@ -989,11 +971,9 @@ public SyntheticMethodBinding addSyntheticRecordComponentAccessor(RecordComponen
 	if (accessors == null) {
 		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(rcb.name, accessors = new SyntheticMethodBinding[2]);
 		accessors[0] = accessMethod;
-	} else {
-		if ((accessMethod = accessors[0]) == null) {
-			accessors[0] = accessMethod;
-		}
-	}
+	} else if ((accessMethod = accessors[0]) == null) {
+    	accessors[0] = accessMethod;
+    }
 	return accessMethod;
 }
 public SyntheticMethodBinding addSyntheticRecordOverrideMethod(char[] selector, int index) {
@@ -1002,17 +982,15 @@ public SyntheticMethodBinding addSyntheticRecordOverrideMethod(char[] selector, 
 	if (this.synthetics[SourceTypeBinding.METHOD_EMUL] == null)
 		this.synthetics[SourceTypeBinding.METHOD_EMUL] = new HashMap(5);
 
-	SyntheticMethodBinding accessMethod = null;
+	SyntheticMethodBinding accessMethod;
 	SyntheticMethodBinding[] accessors = (SyntheticMethodBinding[]) this.synthetics[SourceTypeBinding.METHOD_EMUL].get(selector);
 	accessMethod = new SyntheticMethodBinding(this, selector, index);
 	if (accessors == null) {
 		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(selector, accessors = new SyntheticMethodBinding[2]);
 		accessors[0] = accessMethod;
-	} else {
-		if ((accessMethod = accessors[0]) == null) {
-			accessors[0] = accessMethod;
-		}
-	}
+	} else if ((accessMethod = accessors[0]) == null) {
+    	accessors[0] = accessMethod;
+    }
 	return accessMethod;
 }
 private void removeSyntheticRecordOverrideMethod(MethodBinding smb) {
@@ -1057,8 +1035,8 @@ public char[] computeUniqueKey(boolean isLeaf) {
 	if (!isPrototype())
 		return this.prototype.computeUniqueKey();
 	char[] uniqueKey = super.computeUniqueKey(isLeaf);
-	if (uniqueKey.length == 2) return uniqueKey; // problem type's unique key is "L;"
-	if (Util.isClassFileName(this.fileName)) return uniqueKey; // no need to insert compilation unit name for a .class file
+	 // problem type's unique key is "L;"
+	if (uniqueKey.length == 2 || Util.isClassFileName(this.fileName)) return uniqueKey; // no need to insert compilation unit name for a .class file
 
 	// insert compilation unit name if the type name is not the main type name
 	int end = CharOperation.lastIndexOf('.', this.fileName);
@@ -1089,7 +1067,6 @@ public char[] computeUniqueKey(boolean isLeaf) {
 			int length = buffer.length();
 			uniqueKey = new char[length];
 			buffer.getChars(0, length, uniqueKey, 0);
-			return uniqueKey;
 		}
 	}
 	return uniqueKey;
@@ -1101,11 +1078,11 @@ private void checkAnnotationsInType() {
 	ReferenceBinding enclosingType = enclosingType();
 	if (enclosingType != null && enclosingType.isViewedAsDeprecated() && !isDeprecated()) {
 		this.modifiers |= ExtraCompilerModifiers.AccDeprecatedImplicitly;
-		this.tagBits |= (enclosingType.tagBits & TagBits.AnnotationTerminallyDeprecated);
+		this.tagBits |= enclosingType.tagBits & TagBits.AnnotationTerminallyDeprecated;
 	}
 
-	for (int i = 0, length = this.memberTypes.length; i < length; i++)
-		((SourceTypeBinding) this.memberTypes[i]).checkAnnotationsInType();
+	for (ReferenceBinding memberType : this.memberTypes)
+        ((SourceTypeBinding) memberType).checkAnnotationsInType();
 }
 
 void faultInTypesForFieldsAndMethods() {
@@ -1135,12 +1112,10 @@ private void checkPermitsInType() {
 //	if (/* this.isRecordDeclaration || */this.isEnum())
 //		return; // handled separately
 	TypeDeclaration typeDecl = this.scope.referenceContext;
-	if (this.isInterface()) {
-		if (isSealed() && isNonSealed()) {
-			this.scope.problemReporter().sealedInterfaceIsSealedAndNonSealed(this, typeDecl);
-			return;
-		}
-	}
+	if (this.isInterface() && isSealed() && isNonSealed()) {
+    	this.scope.problemReporter().sealedInterfaceIsSealedAndNonSealed(this, typeDecl);
+    	return;
+    }
 	boolean hasPermittedTypes = this.permittedTypes != null && this.permittedTypes.length > 0;
 	if (hasPermittedTypes) {
 		if (!this.isSealed())
@@ -1180,16 +1155,14 @@ private void checkPermitsInType() {
 			this.scope.problemReporter().sealedLocalDirectSuperTypeSealed(this, sealedEntry.getKey(), sealedEntry.getValue());
 			return;
 		}
-	} else if (this.isNonSealed()) {
-		if (!foundSealedSuperTypeOrInterface) {
-			if (this.isClass() && !this.isRecord()) // record to give only illegal modifier error.
-				this.scope.problemReporter().sealedDisAllowedNonSealedModifierInClass(this, typeDecl);
-			else if (this.isInterface())
-				this.scope.problemReporter().sealedDisAllowedNonSealedModifierInInterface(this, typeDecl);
-		}
-	}
+	} else if (this.isNonSealed() && !foundSealedSuperTypeOrInterface) {
+    	if (this.isClass() && !this.isRecord()) // record to give only illegal modifier error.
+    		this.scope.problemReporter().sealedDisAllowedNonSealedModifierInClass(this, typeDecl);
+    	else if (this.isInterface())
+    		this.scope.problemReporter().sealedDisAllowedNonSealedModifierInInterface(this, typeDecl);
+    }
 	if (foundSealedSuperTypeOrInterface) {
-		if (!(this.isFinal() || this.isSealed() || this.isNonSealed())) {
+		if (!this.isFinal() && !this.isSealed() && !this.isNonSealed()) {
 			if (this.isClass())
 				this.scope.problemReporter().sealedMissingClassModifier(this, typeDecl, sealedEntry.getValue());
 			else if (this.isInterface())
@@ -1207,8 +1180,8 @@ private void checkPermitsInType() {
 			}
 		}
 	}
-	for (int i = 0, length = this.memberTypes.length; i < length; i++)
-		((SourceTypeBinding) this.memberTypes[i]).checkPermitsInType();
+	for (ReferenceBinding memberType : this.memberTypes)
+        ((SourceTypeBinding) memberType).checkPermitsInType();
 
 	if (this.scope.referenceContext.permittedTypes == null) {
 		// Ignore implicitly permitted case
@@ -1227,7 +1200,6 @@ private void checkPermitsInType() {
 			permSuperType = getActualType(permSuperType);
 			if (!TypeBinding.equalsEquals(this, permSuperType)) {
 				this.scope.problemReporter().sealedNotDirectSuperClass(permittedType, permittedTypeRef, this);
-				continue;
 			}
 		} else if (this.isInterface()) {
 			ReferenceBinding[] permSuperInterfaces = permittedType.superInterfaces();
@@ -1242,12 +1214,10 @@ private void checkPermitsInType() {
 				}
 				if (!foundSuperInterface) {
 					this.scope.problemReporter().sealedNotDirectSuperInterface(permittedType, permittedTypeRef, this);
-					continue;
 				}
 			}
 		}
 	}
-	return;
 }
 
 private void reportSealedSuperTypeDoesNotPermitProblem(TypeReference superTypeRef, TypeBinding superType) {
@@ -1274,22 +1244,18 @@ private void reportSealedSuperTypeDoesNotPermitProblem(TypeReference superTypeRe
 		} else {
 			this.scope.problemReporter().sealedSuperInterfaceDoesNotPermit(this, superTypeRef, superType);
 		}
-	} else {
-		if (superReferenceBinding instanceof SourceTypeBinding && isUnnamedModule) {
-			PackageBinding superTypePackage = superReferenceBinding.getPackage();
-			if (isClass) {
-				this.scope.problemReporter().sealedSuperClassInDifferentPackage(this, superTypeRef, superType, superTypePackage);
-			} else {
-				this.scope.problemReporter().sealedSuperInterfaceInDifferentPackage(this, superTypeRef, superType, superTypePackage);
-			}
-		} else {
-			if (isClass) {
-				this.scope.problemReporter().sealedSuperClassDisallowed(this, superTypeRef, superType);
-			} else {
-				this.scope.problemReporter().sealedSuperInterfaceDisallowed(this, superTypeRef, superType);
-			}
-		}
-	}
+	} else if (superReferenceBinding instanceof SourceTypeBinding && isUnnamedModule) {
+    	PackageBinding superTypePackage = superReferenceBinding.getPackage();
+    	if (isClass) {
+    		this.scope.problemReporter().sealedSuperClassInDifferentPackage(this, superTypeRef, superType, superTypePackage);
+    	} else {
+    		this.scope.problemReporter().sealedSuperInterfaceInDifferentPackage(this, superTypeRef, superType, superTypePackage);
+    	}
+    } else if (isClass) {
+    	this.scope.problemReporter().sealedSuperClassDisallowed(this, superTypeRef, superType);
+    } else {
+    	this.scope.problemReporter().sealedSuperInterfaceDisallowed(this, superTypeRef, superType);
+    }
 }
 
 private ReferenceBinding getActualType(ReferenceBinding ref) {
@@ -1426,7 +1392,7 @@ public RecordComponentBinding[] components() {
 					for (int i = 0, l = smb.parameters.length; i < l; ++i) {
 						smb.parameters[i] = this.components[i].type;
 					}
-					if (this.isVarArgs == true) {
+					if (this.isVarArgs) {
 						smb.modifiers |= ClassFileConstants.AccVarargs;
 					}
 				}
@@ -1516,8 +1482,8 @@ private void internalFaultInTypeForFieldsAndMethods() {
 	fields();
 	methods();
 
-	for (int i = 0, length = this.memberTypes.length; i < length; i++)
-		((SourceTypeBinding) this.memberTypes[i]).internalFaultInTypeForFieldsAndMethods();
+	for (ReferenceBinding memberType : this.memberTypes)
+        ((SourceTypeBinding) memberType).internalFaultInTypeForFieldsAndMethods();
 }
 // NOTE: the type of each field of a source type is resolved when needed
 @Override
@@ -1598,8 +1564,8 @@ public char[] genericSignature() {
 	if (this.typeVariables != Binding.NO_TYPE_VARIABLES) {
 	    sig = new StringBuilder(10);
 	    sig.append('<');
-	    for (int i = 0, length = this.typeVariables.length; i < length; i++)
-	        sig.append(this.typeVariables[i].genericSignature());
+	    for (TypeVariableBinding typeVariable : this.typeVariables)
+            sig.append(typeVariable.genericSignature());
 	    sig.append('>');
 	} else {
 	    // could still need a signature if any of supertypes is parameterized
@@ -1615,8 +1581,8 @@ public char[] genericSignature() {
 		sig.append(this.superclass.genericTypeSignature());
 	else // interface scenario only (as Object cannot be generic) - 65953
 		sig.append(this.scope.getJavaLangObject().genericTypeSignature());
-    for (int i = 0, length = this.superInterfaces.length; i < length; i++)
-        sig.append(this.superInterfaces[i].genericTypeSignature());
+    for (ReferenceBinding element : this.superInterfaces)
+        sig.append(element.genericTypeSignature());
 	return sig.toString().toCharArray();
 }
 
@@ -1735,7 +1701,7 @@ public MethodBinding getExactConstructor(TypeBinding[] argumentTypes) {
 		int len = smbs != null ? smbs.length : 0;
 		if (len > 0) {
 			for (MethodBinding method : smbs) {
-				if ((CharOperation.equals(TypeConstants.INIT, method.selector)))
+				if (CharOperation.equals(TypeConstants.INIT, method.selector))
 					return method;
 			}
 		}
@@ -1865,8 +1831,7 @@ public FieldBinding getField(char[] fieldName, boolean needResolve) {
 				} else {
 					FieldBinding[] newFields = new FieldBinding[newSize];
 					int index = 0;
-					for (int i = 0, length = this.fields.length; i < length; i++) {
-						FieldBinding f = this.fields[i];
+					for (FieldBinding f : this.fields) {
 						if (f == field) continue;
 						newFields[index++] = f;
 					}
@@ -1892,9 +1857,8 @@ public MethodBinding[] getMethods(char[] selector) {
 			MethodBinding[] result;
 			System.arraycopy(this.methods, start, result = new MethodBinding[length], 0, length);
 			return result;
-		} else {
-			return Binding.NO_METHODS;
 		}
+        return Binding.NO_METHODS;
 	}
 	// lazily sort methods
 	if ((this.tagBits & TagBits.AreMethodsSorted) == 0) {
@@ -1984,8 +1948,7 @@ public FieldBinding getSyntheticField(ReferenceBinding targetEnclosingType, bool
  */
 public SyntheticMethodBinding getSyntheticBridgeMethod(MethodBinding inheritedMethodToBridge) {
 	if (!isPrototype()) throw new IllegalStateException();
-	if (this.synthetics == null) return null;
-	if (this.synthetics[SourceTypeBinding.METHOD_EMUL] == null) return null;
+	if (this.synthetics == null || this.synthetics[SourceTypeBinding.METHOD_EMUL] == null) return null;
 	SyntheticMethodBinding[] accessors = (SyntheticMethodBinding[]) this.synthetics[SourceTypeBinding.METHOD_EMUL].get(inheritedMethodToBridge);
 	if (accessors == null) return null;
 	return accessors[1];
@@ -2089,9 +2052,7 @@ public boolean isEquivalentTo(TypeBinding otherType) {
             		if (otherEnclosing == null) return false;
             		if ((otherEnclosing.tagBits & TagBits.HasDirectWildcard) == 0) {
 						if (TypeBinding.notEquals(enclosing, otherEnclosing)) return false;
-            		} else {
-            			if (!enclosing.isEquivalentTo(otherParamType.enclosingType())) return false;
-            		}
+            		} else if (!enclosing.isEquivalentTo(otherParamType.enclosingType())) return false;
             	}
 			}
 			int length = this.typeVariables == null ? 0 : this.typeVariables.length;
@@ -2136,8 +2097,8 @@ public boolean canBeSeenBy(Scope sco) {
 	SourceTypeBinding invocationType = sco.enclosingSourceType();
 	if (TypeBinding.equalsEquals(invocationType, this))
 		return true;
-	return ((this.environment.canTypeBeAccessed(this, sco)) &&
-			super.canBeSeenBy(sco));
+	return this.environment.canTypeBeAccessed(this, sco) &&
+			super.canBeSeenBy(sco);
 }
 @Override
 public ReferenceBinding[] memberTypes() {
@@ -2191,12 +2152,7 @@ private MethodBinding checkAndGetExplicitCanonicalConstructors() {
 	int nRecordComponents = recComps.length;
 	MethodBinding explictCanConstr = null;
 	for (MethodBinding method : this.methods) {
-		if (!method.isConstructor())
-			continue;
-		if (method.isImplicit()) {
-			continue;
-		}
-		if (method.parameters.length != nRecordComponents)
+		if (!method.isConstructor() || method.isImplicit() || method.parameters.length != nRecordComponents)
 			continue;
 		boolean isEC = true;
 		for (int j = 0; j < nRecordComponents; ++j) {
@@ -2311,85 +2267,70 @@ public MethodBinding[] methods() {
 					break nextSibling; // methods with same selector are contiguous
 
 				if (complyTo15OrAbove) {
-					if (method.areParameterErasuresEqual(method2)) {
-						// we now ignore return types in 1.7 when detecting duplicates, just as we did before 1.5
-						// Only in 1.6, we have to make sure even return types are different
-						// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317719
-						if (compliance16 && method.returnType != null && method2.returnType != null) {
-							if (TypeBinding.notEquals(method.returnType.erasure(), method2.returnType.erasure())) {
-								// check to see if the erasure of either method is equal to the other
-								// if not, then change severity to WARNING
-								TypeBinding[] params1 = method.parameters;
-								TypeBinding[] params2 = method2.parameters;
-								int pLength = params1.length;
-								TypeVariableBinding[] vars = method.typeVariables;
-								TypeVariableBinding[] vars2 = method2.typeVariables;
-								boolean equalTypeVars = vars == vars2;
-								MethodBinding subMethod = method2;
-								if (!equalTypeVars) {
-									MethodBinding temp = method.computeSubstitutedMethod(method2, this.scope.environment());
-									if (temp != null) {
-										equalTypeVars = true;
-										subMethod = temp;
-									}
-								}
-								boolean equalParams = method.areParametersEqual(subMethod);
-								if (equalParams && equalTypeVars) {
-									// duplicates regardless of return types
-								} else if (vars != Binding.NO_TYPE_VARIABLES && vars2 != Binding.NO_TYPE_VARIABLES) {
-									// both have type arguments. Erasure of signature of one cannot be equal to signature of other
-									severity = ProblemSeverities.Warning;
-								} else if (pLength > 0) {
-									int index = pLength;
-									// is erasure of signature of m2 same as signature of m1?
-									for (; --index >= 0;) {
-										if (TypeBinding.notEquals(params1[index], params2[index].erasure())) {
-											// If one of them is a raw type
-											if (params1[index] instanceof RawTypeBinding) {
-												if (TypeBinding.notEquals(params2[index].erasure(), params1[index].actualType())) {
-													break;
-												}
-											} else  {
-												break;
-											}
-										}
-										if (TypeBinding.equalsEquals(params1[index], params2[index])) {
-											TypeBinding type = params1[index].leafComponentType();
-											if (type instanceof SourceTypeBinding && type.typeVariables() != Binding.NO_TYPE_VARIABLES) {
-												index = pLength; // handle comparing identical source types like X<T>... its erasure is itself BUT we need to answer false
-												break;
-											}
-										}
-									}
-									if (index >= 0 && index < pLength) {
-										// is erasure of signature of m1 same as signature of m2?
-										for (index = pLength; --index >= 0;)
-											if (TypeBinding.notEquals(params1[index].erasure(), params2[index])) {
-												// If one of them is a raw type
-												if (params2[index] instanceof RawTypeBinding) {
-													if (TypeBinding.notEquals(params1[index].erasure(), params2[index].actualType())) {
-														break;
-													}
-												} else  {
-													break;
-												}
-											}
-
-									}
-									if (index >= 0) {
-										// erasure of neither is equal to signature of other
-										severity = ProblemSeverities.Warning;
-									}
-								} else if (pLength != 0){
-									severity = ProblemSeverities.Warning;
-								} // pLength = 0 automatically makes erasure of arguments one equal to arguments of other.
-							}
-							// else return types also equal. All conditions satisfied
-							// to give error in 1.6 compliance as well.
-						}
-					} else {
+					if (!method.areParameterErasuresEqual(method2)) {
 						continue nextSibling;
 					}
+                    // we now ignore return types in 1.7 when detecting duplicates, just as we did before 1.5
+                    // Only in 1.6, we have to make sure even return types are different
+                    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=317719
+                    if (compliance16 && method.returnType != null && method2.returnType != null && TypeBinding.notEquals(method.returnType.erasure(), method2.returnType.erasure())) {
+                    	// check to see if the erasure of either method is equal to the other
+                    	// if not, then change severity to WARNING
+                    	TypeBinding[] params1 = method.parameters;
+                    	TypeBinding[] params2 = method2.parameters;
+                    	int pLength = params1.length;
+                    	TypeVariableBinding[] vars = method.typeVariables;
+                    	TypeVariableBinding[] vars2 = method2.typeVariables;
+                    	boolean equalTypeVars = vars == vars2;
+                    	MethodBinding subMethod = method2;
+                    	if (!equalTypeVars) {
+                    		MethodBinding temp = method.computeSubstitutedMethod(method2, this.scope.environment());
+                    		if (temp != null) {
+                    			equalTypeVars = true;
+                    			subMethod = temp;
+                    		}
+                    	}
+                    	boolean equalParams = method.areParametersEqual(subMethod);
+                    	if (equalParams && equalTypeVars) {
+                    		// duplicates regardless of return types
+                    	} else if (vars != Binding.NO_TYPE_VARIABLES && vars2 != Binding.NO_TYPE_VARIABLES) {
+                    		// both have type arguments. Erasure of signature of one cannot be equal to signature of other
+                    		severity = ProblemSeverities.Warning;
+                    	} else if (pLength > 0) {
+                    		int index = pLength;
+                    		// is erasure of signature of m2 same as signature of m1?
+                    		for (; --index >= 0;) {
+                    			// If one of them is a raw type
+                                if (TypeBinding.notEquals(params1[index], params2[index].erasure()) && (!(params1[index] instanceof RawTypeBinding) || TypeBinding.notEquals(params2[index].erasure(), params1[index].actualType()))) {
+                                	break;
+                                }
+                    			if (TypeBinding.equalsEquals(params1[index], params2[index])) {
+                    				TypeBinding type = params1[index].leafComponentType();
+                    				if (type instanceof SourceTypeBinding && type.typeVariables() != Binding.NO_TYPE_VARIABLES) {
+                    					index = pLength; // handle comparing identical source types like X<T>... its erasure is itself BUT we need to answer false
+                    					break;
+                    				}
+                    			}
+                    		}
+                    		if (index >= 0 && index < pLength) {
+                    			// is erasure of signature of m1 same as signature of m2?
+                    			for (index = pLength; --index >= 0;)
+                                    // If one of them is a raw type
+                                    if (TypeBinding.notEquals(params1[index].erasure(), params2[index]) && (!(params2[index] instanceof RawTypeBinding) || TypeBinding.notEquals(params1[index].erasure(), params2[index].actualType()))) {
+                                    	break;
+                                    }
+
+                    		}
+                    		if (index >= 0) {
+                    			// erasure of neither is equal to signature of other
+                    			severity = ProblemSeverities.Warning;
+                    		}
+                    	} else if (pLength != 0){
+                    		severity = ProblemSeverities.Warning;
+                    	} // pLength = 0 automatically makes erasure of arguments one equal to arguments of other.
+                    }
+                    // else return types also equal. All conditions satisfied
+                    // to give error in 1.6 compliance as well.
 				} else if (!method.areParametersEqual(method2)) {
 					// prior to 1.5, parameters identical meant a collision case
 					continue nextSibling;
@@ -2588,10 +2529,8 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 		return field;
 
 	long sourceLevel = this.scope.compilerOptions().sourceLevel;
-	if (sourceLevel >= ClassFileConstants.JDK1_5) {
-		if ((field.getAnnotationTagBits() & TagBits.AnnotationDeprecated) != 0)
-			field.modifiers |= ClassFileConstants.AccDeprecated;
-	}
+	if (sourceLevel >= ClassFileConstants.JDK1_5 && (field.getAnnotationTagBits() & TagBits.AnnotationDeprecated) != 0)
+    	field.modifiers |= ClassFileConstants.AccDeprecated;
 	if (isViewedAsDeprecated() && !field.isDeprecated()) {
 		field.modifiers |= ExtraCompilerModifiers.AccDeprecatedImplicitly;
 		field.tagBits |= this.tagBits & TagBits.AnnotationTerminallyDeprecated;
@@ -2640,15 +2579,13 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 			}
 
 			Annotation[] relevantRecordComponentAnnotations = null;
-			if (sourceLevel >= ClassFileConstants.JDK14) {
-				// copy annotations from record component if applicable
-				if (field.isRecordComponent()) {
-					RecordComponentBinding rcb = getRecordComponent(field.name);
-					if (rcb != null)
-						relevantRecordComponentAnnotations = ASTNode.copyRecordComponentAnnotations(initializationScope,
-								field, rcb.sourceRecordComponent().annotations);
-				}
-			}
+			// copy annotations from record component if applicable
+            if (sourceLevel >= ClassFileConstants.JDK14 && field.isRecordComponent()) {
+            	RecordComponentBinding rcb = getRecordComponent(field.name);
+            	if (rcb != null)
+            		relevantRecordComponentAnnotations = ASTNode.copyRecordComponentAnnotations(initializationScope,
+            				field, rcb.sourceRecordComponent().annotations);
+            }
 			if (sourceLevel >= ClassFileConstants.JDK1_8) {
 				Annotation [] annotations = fieldDecl.annotations;
 				if (annotations == null && relevantRecordComponentAnnotations != null) // field represents a record component.
@@ -2730,8 +2667,8 @@ private MethodBinding resolveTypesWithSuspendedTempErrorHandlingPolicy(MethodBin
 	if (typeParameters != null) {
 		methodDecl.scope.connectTypeVariables(typeParameters, true);
 		// Perform deferred bound checks for type variables (only done after type variable hierarchy is connected)
-		for (int i = 0, paramLength = typeParameters.length; i < paramLength; i++)
-			typeParameters[i].checkBounds(methodDecl.scope);
+		for (TypeParameter typeParameter : typeParameters)
+            typeParameter.checkBounds(methodDecl.scope);
 	}
 	TypeReference[] exceptionTypes = methodDecl.thrownExceptions;
 	if (exceptionTypes != null) {
@@ -2747,19 +2684,17 @@ private MethodBinding resolveTypesWithSuspendedTempErrorHandlingPolicy(MethodBin
 				methodDecl.scope.problemReporter().invalidParameterizedExceptionType(resolvedExceptionType, exceptionTypes[i]);
 				continue;
 			}
-			if (resolvedExceptionType.findSuperTypeOriginatingFrom(TypeIds.T_JavaLangThrowable, true) == null) {
-				if (resolvedExceptionType.isValidBinding()) {
-					methodDecl.scope.problemReporter().cannotThrowType(exceptionTypes[i], resolvedExceptionType);
-					continue;
-				}
-			}
+			if (resolvedExceptionType.findSuperTypeOriginatingFrom(TypeIds.T_JavaLangThrowable, true) == null && resolvedExceptionType.isValidBinding()) {
+            	methodDecl.scope.problemReporter().cannotThrowType(exceptionTypes[i], resolvedExceptionType);
+            	continue;
+            }
 			if ((resolvedExceptionType.tagBits & TagBits.HasMissingType) != 0) {
 				method.tagBits |= TagBits.HasMissingType;
 			}
 			if (exceptionTypes[i].hasNullTypeAnnotation(AnnotationPosition.ANY)) {
 				methodDecl.scope.problemReporter().nullAnnotationUnsupportedLocation(exceptionTypes[i]);
 			}
-			method.modifiers |= (resolvedExceptionType.modifiers & ExtraCompilerModifiers.AccGenericSignature);
+			method.modifiers |= resolvedExceptionType.modifiers & ExtraCompilerModifiers.AccGenericSignature;
 			method.thrownExceptions[count++] = resolvedExceptionType;
 		}
 		if (count < size)
@@ -2802,7 +2737,7 @@ private MethodBinding resolveTypesWithSuspendedTempErrorHandlingPolicy(MethodBin
 			} else if (parameterType == TypeBinding.VOID) {
 				if (this.isRecordDeclaration &&
 						methodDecl instanceof ConstructorDeclaration &&
-						((methodDecl.bits & ASTNode.IsImplicit) != 0)) {
+						(methodDecl.bits & ASTNode.IsImplicit) != 0) {
 					// do nothing - already raised for record component.
 				} else
 					methodDecl.scope.problemReporter().argumentTypeCannotBeVoid(methodDecl, arg);
@@ -2832,7 +2767,7 @@ private MethodBinding resolveTypesWithSuspendedTempErrorHandlingPolicy(MethodBin
 			if (!method.isVarargs()) {
 				methodDecl.scope.problemReporter().safeVarargsOnFixedArityMethod(method);
 			} else if (!method.isStatic() && !method.isFinal() && !method.isConstructor()
-					&& !(sourceLevel >= ClassFileConstants.JDK9 && method.isPrivate())) {
+					&& (sourceLevel < ClassFileConstants.JDK9 || !method.isPrivate())) {
 				methodDecl.scope.problemReporter().safeVarargsOnNonFinalInstanceMethod(method);
 			}
 		} else {
@@ -2886,14 +2821,12 @@ private MethodBinding resolveTypesWithSuspendedTempErrorHandlingPolicy(MethodBin
 					methodDecl.scope.detectAPILeaks(returnType, methodType);
 			}
 		}
-	} else {
-		if (sourceLevel >= ClassFileConstants.JDK1_8) {
-			Annotation [] annotations = methodDecl.annotations;
-			if (annotations != null && annotations.length != 0) {
-				ASTNode.copySE8AnnotationsToType(methodDecl.scope, method, methodDecl.annotations, false);
-			}
-		}
-	}
+	} else if (sourceLevel >= ClassFileConstants.JDK1_8) {
+    	Annotation [] annotations = methodDecl.annotations;
+    	if (annotations != null && annotations.length != 0) {
+    		ASTNode.copySE8AnnotationsToType(methodDecl.scope, method, methodDecl.annotations, false);
+    	}
+    }
 	if (foundArgProblem) {
 		methodDecl.binding = null;
 		method.parameters = Binding.NO_PARAMETERS; // see 107004
@@ -2905,22 +2838,18 @@ private MethodBinding resolveTypesWithSuspendedTempErrorHandlingPolicy(MethodBin
 		return null;
 	}
 	CompilerOptions compilerOptions = this.scope.compilerOptions();
-	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
-		if (!method.isConstructor() && method.returnType != null) {
-			long nullTagBits = method.tagBits & TagBits.AnnotationNullMASK;
-			if (nullTagBits != 0) {
-				TypeReference returnTypeRef = ((MethodDeclaration)methodDecl).returnType;
-				if (this.scope.environment().usesNullTypeAnnotations()) {
-					if (!this.scope.validateNullAnnotation(nullTagBits, returnTypeRef, methodDecl.annotations))
-						method.returnType.tagBits &= ~TagBits.AnnotationNullMASK;
-					method.tagBits &= ~TagBits.AnnotationNullMASK;
-				} else {
-					if (!this.scope.validateNullAnnotation(nullTagBits, returnTypeRef, methodDecl.annotations))
-						method.tagBits &= ~TagBits.AnnotationNullMASK;
-				}
-			}
-		}
-	}
+	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled && !method.isConstructor() && method.returnType != null) {
+    	long nullTagBits = method.tagBits & TagBits.AnnotationNullMASK;
+    	if (nullTagBits != 0) {
+    		TypeReference returnTypeRef = ((MethodDeclaration)methodDecl).returnType;
+    		if (this.scope.environment().usesNullTypeAnnotations()) {
+    			if (!this.scope.validateNullAnnotation(nullTagBits, returnTypeRef, methodDecl.annotations))
+    				method.returnType.tagBits &= ~TagBits.AnnotationNullMASK;
+    			method.tagBits &= ~TagBits.AnnotationNullMASK;
+    		} else if (!this.scope.validateNullAnnotation(nullTagBits, returnTypeRef, methodDecl.annotations))
+            	method.tagBits &= ~TagBits.AnnotationNullMASK;
+    	}
+    }
 	if (this.externalAnnotationProvider != null)
 		ExternalAnnotationSuperimposer.annotateMethodBinding(method, arguments, this.externalAnnotationProvider, this.environment);
 	if (compilerOptions.storeAnnotations)
@@ -2933,11 +2862,9 @@ private MethodBinding resolveTypesWithSuspendedTempErrorHandlingPolicy(MethodBin
 }
 
 private void checkAndFlagHeapPollution(MethodBinding method, AbstractMethodDeclaration methodDecl) {
-	if (method.parameters != null && method.parameters.length > 0 && method.isVarargs()) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=337795
-		if (!method.parameters[method.parameters.length - 1].isReifiable()) {
-				methodDecl.scope.problemReporter().possibleHeapPollutionFromVararg(methodDecl.arguments[methodDecl.arguments.length - 1]);
-		}
-	}
+	if (method.parameters != null && method.parameters.length > 0 && method.isVarargs() && !method.parameters[method.parameters.length - 1].isReifiable()) {
+    		methodDecl.scope.problemReporter().possibleHeapPollutionFromVararg(methodDecl.arguments[methodDecl.arguments.length - 1]);
+    }
 }
 private void checkAndFlagHeapPollutionForRecordImplicit(MethodBinding method, TypeDeclaration recordDecl) {
 
@@ -2989,20 +2916,18 @@ public void evaluateNullAnnotations() {
 
 	if ((this.tagBits & TagBits.AnnotationNullMASK) != 0) {
 		Annotation[] annotations = this.scope.referenceContext.annotations;
-		for (int i = 0; i < annotations.length; i++) {
-			ReferenceBinding annotationType = annotations[i].getCompilerAnnotation().getAnnotationType();
-			if (annotationType != null) {
-				if (annotationType.hasNullBit(TypeIds.BitNonNullAnnotation|TypeIds.BitNullableAnnotation)) {
-					this.scope.problemReporter().nullAnnotationUnsupportedLocation(annotations[i]);
-					this.tagBits &= ~TagBits.AnnotationNullMASK;
-				}
-			}
+		for (Annotation annotation : annotations) {
+			ReferenceBinding annotationType = annotation.getCompilerAnnotation().getAnnotationType();
+			if (annotationType != null && annotationType.hasNullBit(TypeIds.BitNonNullAnnotation|TypeIds.BitNullableAnnotation)) {
+            	this.scope.problemReporter().nullAnnotationUnsupportedLocation(annotation);
+            	this.tagBits &= ~TagBits.AnnotationNullMASK;
+            }
 		}
 	}
 
 	boolean isPackageInfo = CharOperation.equals(this.sourceName, TypeConstants.PACKAGE_INFO_NAME);
 	PackageBinding pkg = getPackage();
-	boolean isInDefaultPkg = (pkg.compoundName == CharOperation.NO_CHAR_CHAR);
+	boolean isInDefaultPkg = pkg.compoundName == CharOperation.NO_CHAR_CHAR;
 	if (!isPackageInfo) {
 		boolean isInNullnessAnnotationPackage = this.scope.environment().isNullnessAnnotationPackage(pkg);
 		if (pkg.getDefaultNullness() == NO_NULL_DEFAULT && !isInDefaultPkg && !isInNullnessAnnotationPackage && !(this instanceof NestedTypeBinding)) {
@@ -3032,7 +2957,7 @@ public void evaluateNullAnnotations() {
 				this.scope.problemReporter().nullDefaultAnnotationIsRedundant(typeDecl, typeDecl.annotations, target);
 			}
 		}
-	} else if (isPackageInfo || (isInDefaultPkg && !(this instanceof NestedTypeBinding))) {
+	} else if (isPackageInfo || isInDefaultPkg && !(this instanceof NestedTypeBinding)) {
 		this.scope.problemReporter().missingNonNullByDefaultAnnotation(this.scope.referenceContext);
 		if (!isInDefaultPkg)
 			pkg.setDefaultNullness(NULL_UNSPECIFIED_BY_DEFAULT);
@@ -3045,7 +2970,7 @@ private void maybeMarkTypeParametersNonNull() {
 	// when creating type variables we didn't yet have the defaultNullness, fill it in now:
 		if (this.scope == null || !this.scope.hasDefaultNullnessFor(DefaultLocationTypeParameter, this.sourceStart()))
 		return;
-		AnnotationBinding[] annots = new AnnotationBinding[]{ this.environment.getNonNullAnnotation() };
+		AnnotationBinding[] annots = { this.environment.getNonNullAnnotation() };
 		for (int i = 0; i < this.typeVariables.length; i++) {
 			TypeVariableBinding tvb = this.typeVariables[i];
 			if ((tvb.tagBits & TagBits.AnnotationNullMASK) == 0)
@@ -3079,10 +3004,8 @@ protected boolean hasMethodWithNumArgs(char[] selector, int numArgs) {
 				if (numArgs == 0) {
 					if (method.arguments == null)
 						return true;
-				} else {
-					if (method.arguments != null && method.arguments.length == numArgs)
-						return true;
-				}
+				} else if (method.arguments != null && method.arguments.length == numArgs)
+                	return true;
 			}
 		}
 	}
@@ -3299,22 +3222,17 @@ public SyntheticMethodBinding[] syntheticMethods() {
 	Iterator methodArrayIterator = this.synthetics[SourceTypeBinding.METHOD_EMUL].values().iterator();
 	while (methodArrayIterator.hasNext()) {
 		SyntheticMethodBinding[] methodAccessors = (SyntheticMethodBinding[]) methodArrayIterator.next();
-		for (int i = 0, max = methodAccessors.length; i < max; i++) {
-			if (methodAccessors[i] != null) {
+		for (SyntheticMethodBinding methodAccessor : methodAccessors) {
+			if (methodAccessor != null) {
 				if (index+1 > bindings.length) {
-					System.arraycopy(bindings, 0, (bindings = new SyntheticMethodBinding[index + 1]), 0, index);
+					System.arraycopy(bindings, 0, bindings = new SyntheticMethodBinding[index + 1], 0, index);
 				}
-				bindings[index++] = methodAccessors[i];
+				bindings[index++] = methodAccessor;
 			}
 		}
 	}
 	// sort them in according to their own indexes
-	Arrays.sort(bindings, new Comparator<>() {
-		@Override
-		public int compare(SyntheticMethodBinding o1, SyntheticMethodBinding o2) {
-			return o1.index - o2.index;
-		}
-	});
+	Arrays.sort(bindings, (o1, o2) -> o1.index - o2.index);
 
 
 	return bindings;
@@ -3377,7 +3295,7 @@ public String toString() {
 	else if (isAnnotationType()) buffer.append("@interface "); //$NON-NLS-1$
 	else if (isClass()) buffer.append("class "); //$NON-NLS-1$
 	else buffer.append("interface "); //$NON-NLS-1$
-	buffer.append((this.compoundName != null) ? CharOperation.toString(this.compoundName) : "UNNAMED TYPE"); //$NON-NLS-1$
+	buffer.append(this.compoundName != null ? CharOperation.toString(this.compoundName) : "UNNAMED TYPE"); //$NON-NLS-1$
 
 	if (this.typeVariables == null) {
 		buffer.append("<NULL TYPE VARIABLES>"); //$NON-NLS-1$
@@ -3395,7 +3313,7 @@ public String toString() {
 		buffer.append(">"); //$NON-NLS-1$
 	}
 	buffer.append("\n\textends "); //$NON-NLS-1$
-	buffer.append((this.superclass != null) ? this.superclass.debugName() : "NULL TYPE"); //$NON-NLS-1$
+	buffer.append(this.superclass != null ? this.superclass.debugName() : "NULL TYPE"); //$NON-NLS-1$
 
 	if (this.superInterfaces != null) {
 		if (this.superInterfaces != Binding.NO_SUPERINTERFACES) {
@@ -3403,7 +3321,7 @@ public String toString() {
 			for (int i = 0, length = this.superInterfaces.length; i < length; i++) {
 				if (i  > 0)
 					buffer.append(", "); //$NON-NLS-1$
-				buffer.append((this.superInterfaces[i] != null) ? this.superInterfaces[i].debugName() : "NULL TYPE"); //$NON-NLS-1$
+				buffer.append(this.superInterfaces[i] != null ? this.superInterfaces[i].debugName() : "NULL TYPE"); //$NON-NLS-1$
 			}
 		}
 	} else {
@@ -3418,8 +3336,8 @@ public String toString() {
 	if (this.fields != null) {
 		if (this.fields != Binding.NO_FIELDS) {
 			buffer.append("\n/*   fields   */"); //$NON-NLS-1$
-			for (int i = 0, length = this.fields.length; i < length; i++)
-			    buffer.append('\n').append((this.fields[i] != null) ? this.fields[i].toString() : "NULL FIELD"); //$NON-NLS-1$
+			for (FieldBinding field2 : this.fields)
+                buffer.append('\n').append(field2 != null ? field2.toString() : "NULL FIELD"); //$NON-NLS-1$
 		}
 	} else {
 		buffer.append("NULL FIELDS"); //$NON-NLS-1$
@@ -3428,8 +3346,8 @@ public String toString() {
 	if (this.methods != null) {
 		if (this.methods != Binding.NO_METHODS) {
 			buffer.append("\n/*   methods   */"); //$NON-NLS-1$
-			for (int i = 0, length = this.methods.length; i < length; i++)
-				buffer.append('\n').append((this.methods[i] != null) ? this.methods[i].toString() : "NULL METHOD"); //$NON-NLS-1$
+			for (MethodBinding method2 : this.methods)
+                buffer.append('\n').append(method2 != null ? method2.toString() : "NULL METHOD"); //$NON-NLS-1$
 		}
 	} else {
 		buffer.append("NULL METHODS"); //$NON-NLS-1$
@@ -3438,8 +3356,8 @@ public String toString() {
 	if (this.memberTypes != null) {
 		if (this.memberTypes != Binding.NO_MEMBER_TYPES) {
 			buffer.append("\n/*   members   */"); //$NON-NLS-1$
-			for (int i = 0, length = this.memberTypes.length; i < length; i++)
-				buffer.append('\n').append((this.memberTypes[i] != null) ? this.memberTypes[i].toString() : "NULL TYPE"); //$NON-NLS-1$
+			for (ReferenceBinding memberType : this.memberTypes)
+                buffer.append('\n').append(memberType != null ? memberType.toString() : "NULL TYPE"); //$NON-NLS-1$
 		}
 	} else {
 		buffer.append("NULL MEMBER TYPES"); //$NON-NLS-1$

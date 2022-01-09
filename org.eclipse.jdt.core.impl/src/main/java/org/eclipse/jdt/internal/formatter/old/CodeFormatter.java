@@ -29,6 +29,7 @@ import org.eclipse.text.edits.TextEdit;
  * It will return the formatted string.</ul>
  * @deprecated
 */
+@Deprecated
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class CodeFormatter implements TerminalTokens, org.eclipse.jdt.core.ICodeFormatter {
 
@@ -155,11 +156,10 @@ public class CodeFormatter implements TerminalTokens, org.eclipse.jdt.core.ICode
 					while (currentEdit.getOffset() <= currentPosition) {
 						delta += currentEdit.getText().length() - currentEdit.getLength();
 						editsIndex++;
-						if (editsIndex < textEditSize) {
-							currentEdit = (ReplaceEdit) edits[editsIndex];
-						} else {
+						if (editsIndex >= textEditSize) {
 							break;
 						}
+                        currentEdit = (ReplaceEdit) edits[editsIndex];
 					}
 					positions[i] = currentPosition + delta;
 				}

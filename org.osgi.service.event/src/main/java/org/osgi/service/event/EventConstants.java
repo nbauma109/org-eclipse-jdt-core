@@ -256,5 +256,6 @@ public interface EventConstants {
 	 * 
 	 * @deprecated As of 1.1. Replaced by {@link #EXCEPTION_CLASS}.
 	 */
+    @Deprecated
     String	EXECPTION_CLASS				= "exception.class";
 }

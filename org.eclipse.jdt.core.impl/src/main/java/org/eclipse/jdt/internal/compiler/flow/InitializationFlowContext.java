@@ -85,19 +85,19 @@ public class InitializationFlowContext extends ExceptionHandlingFlowContext {
 			System.arraycopy(
 				this.thrownExceptions,
 				0,
-				(this.thrownExceptions = new TypeBinding[size * 2]),
+				this.thrownExceptions = new TypeBinding[size * 2],
 				0,
 				size);
 			System.arraycopy(
 				this.exceptionThrowers,
 				0,
-				(this.exceptionThrowers = new ASTNode[size * 2]),
+				this.exceptionThrowers = new ASTNode[size * 2],
 				0,
 				size);
 			System.arraycopy(
 				this.exceptionThrowerFlowInfos,
 				0,
-				(this.exceptionThrowerFlowInfos = new FlowInfo[size * 2]),
+				this.exceptionThrowerFlowInfos = new FlowInfo[size * 2],
 				0,
 				size);
 		}

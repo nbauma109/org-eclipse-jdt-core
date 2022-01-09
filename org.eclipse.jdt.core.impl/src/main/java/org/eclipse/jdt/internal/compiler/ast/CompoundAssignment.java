@@ -185,30 +185,24 @@ public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
 			return null;
 		}
 		if (this.operator == PLUS){
-			if(lhsID == T_JavaLangObject && (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7)) {
+			if(lhsID == T_JavaLangObject && scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
 				// <Object> += <String> is illegal (39248) for compliance < 1.7
 				scope.problemReporter().invalidOperator(this, lhsType, expressionType);
 				return null;
-			} else {
-				// <int | boolean> += <String> is illegal
-				if ((lhsType.isNumericType() || lhsID == T_boolean) && !expressionType.isNumericType()){
-					scope.problemReporter().invalidOperator(this, lhsType, expressionType);
-					return null;
-				}
 			}
+            if ((lhsType.isNumericType() || lhsID == T_boolean) && !expressionType.isNumericType()){
+            	scope.problemReporter().invalidOperator(this, lhsType, expressionType);
+            	return null;
+            }
 		}
 		TypeBinding resultType = TypeBinding.wellKnownType(scope, result & 0x0000F);
-		if (checkCastCompatibility()) {
-			if (originalLhsType.id != T_JavaLangString && resultType.id != T_JavaLangString) {
-				if (!checkCastTypesCompatibility(scope, originalLhsType, resultType, null, true)) {
-					scope.problemReporter().invalidOperator(this, originalLhsType, expressionType);
-					return null;
-				}
-			}
-		}
-		this.lhs.computeConversion(scope, TypeBinding.wellKnownType(scope, (result >>> 16) & 0x0000F), originalLhsType);
-		this.expression.computeConversion(scope, TypeBinding.wellKnownType(scope, (result >>> 8) & 0x0000F), originalExpressionType);
-		this.preAssignImplicitConversion =  (unboxedLhs ? BOXING : 0) | (lhsID << 4) | (result & 0x0000F);
+		if (checkCastCompatibility() && originalLhsType.id != T_JavaLangString && resultType.id != T_JavaLangString && !checkCastTypesCompatibility(scope, originalLhsType, resultType, null, true)) {
+        	scope.problemReporter().invalidOperator(this, originalLhsType, expressionType);
+        	return null;
+        }
+		this.lhs.computeConversion(scope, TypeBinding.wellKnownType(scope, result >>> 16 & 0x0000F), originalLhsType);
+		this.expression.computeConversion(scope, TypeBinding.wellKnownType(scope, result >>> 8 & 0x0000F), originalExpressionType);
+		this.preAssignImplicitConversion =  (unboxedLhs ? BOXING : 0) | lhsID << 4 | result & 0x0000F;
 		if (unboxedLhs) scope.problemReporter().autoboxing(this, lhsType, originalLhsType);
 		if (expressionIsCast)
 			CastExpression.checkNeedForArgumentCasts(scope, this.operator, result, this.lhs, originalLhsType.id, false, this.expression, originalExpressionType.id, true);

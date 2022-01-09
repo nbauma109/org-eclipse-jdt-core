@@ -101,9 +101,9 @@ private void buildCUSource(String lineSeparator) {
 
 	// import declarations
 	char[][] imports = this.snippetImports;
-	for (int i = 0; i < imports.length; i++) {
+	for (char[] import1 : imports) {
 		buffer.append("import "); //$NON-NLS-1$
-		buffer.append(imports[i]);
+		buffer.append(import1);
 		buffer.append(';').append(lineSeparator);
 		this.lineNumberOffset++;
 	}
@@ -198,9 +198,7 @@ public CompletionRequestor getCompletionRequestor(final CompletionRequestor orig
 					char[] declaringTypeName = Signature.getSignatureSimpleName(proposal.getDeclarationSignature());
 
 					if (CharOperation.equals(declaringTypePackageName, CodeSnippetToCuMapper.this.snippetPackageName)
-							&& CharOperation.equals(declaringTypeName, CodeSnippetToCuMapper.this.snippetClassName)) return;
-
-					if (CharOperation.equals(declaringTypePackageName, PACKAGE_NAME)
+							&& CharOperation.equals(declaringTypeName, CodeSnippetToCuMapper.this.snippetClassName) || CharOperation.equals(declaringTypePackageName, PACKAGE_NAME)
 							&& CharOperation.equals(declaringTypeName, ROOT_CLASS_NAME)) return;
 					break;
 			}
@@ -273,7 +271,7 @@ public int getEvaluationType(int lineNumber) {
 
 	// check imports
 	char[][] imports = this.snippetImports;
-	if ((currentLine <= lineNumber) && (lineNumber < (currentLine + imports.length))) {
+	if (currentLine <= lineNumber && lineNumber < currentLine + imports.length) {
 		return EvaluationResult.T_IMPORT;
 	}
 	currentLine += imports.length + 1; // + 1 to skip the class declaration line

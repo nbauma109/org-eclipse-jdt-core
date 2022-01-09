@@ -35,7 +35,6 @@ public class SyncInfoReader {
 	protected Synchronizer synchronizer;
 
 	public SyncInfoReader(Workspace workspace, Synchronizer synchronizer) {
-		super();
 		this.workspace = workspace;
 		this.synchronizer = synchronizer;
 	}

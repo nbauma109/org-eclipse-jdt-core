@@ -42,9 +42,9 @@ public class Argument extends LocalDeclaration {
 		this.modifiers = modifiers;
 		this.type = tr;
 		if (tr != null) {
-			this.bits |= (tr.bits & ASTNode.HasTypeAnnotations);
+			this.bits |= tr.bits & ASTNode.HasTypeAnnotations;
 		}
-		this.bits |= (IsLocalDeclarationReachable | IsArgument);
+		this.bits |= IsLocalDeclarationReachable | IsArgument;
 	}
 
 	public Argument(char[] name, long posNom, TypeReference tr, int modifiers, boolean typeElided) {
@@ -54,9 +54,9 @@ public class Argument extends LocalDeclaration {
 		this.modifiers = modifiers;
 		this.type = tr;
 		if (tr != null) {
-			this.bits |= (tr.bits & ASTNode.HasTypeAnnotations);
+			this.bits |= tr.bits & ASTNode.HasTypeAnnotations;
 		}
-		this.bits |= (IsLocalDeclarationReachable | IsArgument | IsTypeElided);
+		this.bits |= IsLocalDeclarationReachable | IsArgument | IsTypeElided;
 	}
 
 	@Override
@@ -98,13 +98,13 @@ public class Argument extends LocalDeclaration {
 
 	private Annotation[] getCorrespondingRecordComponentAnnotationsIfApplicable(AbstractMethodDeclaration methodDecl) {
 		if (methodDecl != null && methodDecl.isConstructor() &&
-				((methodDecl.bits & (ASTNode.IsCanonicalConstructor )) != 0 &&
-				((methodDecl.bits & (ASTNode.IsImplicit)) != 0))) {
+				(methodDecl.bits & ASTNode.IsCanonicalConstructor) != 0 &&
+				(methodDecl.bits & ASTNode.IsImplicit) != 0) {
 			MethodBinding methodBinding = methodDecl.binding;
 			ReferenceBinding referenceBinding = methodBinding== null ? null : methodBinding.declaringClass;
 			if (referenceBinding instanceof SourceTypeBinding) {
 				SourceTypeBinding sourceTypeBinding = (SourceTypeBinding) referenceBinding;
-				assert (sourceTypeBinding.isRecord()); // CHECK: Is this really necessary?
+				assert sourceTypeBinding.isRecord(); // CHECK: Is this really necessary?
 				sourceTypeBinding.components();
 				RecordComponentBinding recordComponentBinding = sourceTypeBinding.getRecordComponent(this.name);
 				if (recordComponentBinding != null) {
@@ -175,7 +175,7 @@ public class Argument extends LocalDeclaration {
 	public boolean hasNullTypeAnnotation(AnnotationPosition position) {
 		// parser associates SE8 annotations to the declaration
 		return TypeReference.containsNullAnnotation(this.annotations) ||
-				(this.type != null && this.type.hasNullTypeAnnotation(position)); // just in case
+				this.type != null && this.type.hasNullTypeAnnotation(position); // just in case
 	}
 
 	@Override

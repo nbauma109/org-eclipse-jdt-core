@@ -38,7 +38,7 @@ public abstract class SystemModule extends Module {
 	private volatile AtomicReference<ContainerEvent> forStop = new AtomicReference<>();
 
 	public SystemModule(ModuleContainer container) {
-		super(Long.valueOf(0), Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), Integer.valueOf(0));
+		super((long) 0, Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), 0);
 	}
 
 	/**
@@ -75,11 +75,9 @@ public abstract class SystemModule extends Module {
 				// need to check valid again in case someone uninstalled the bundle
 				checkValid();
 				ResolutionException e = report.getResolutionException();
-				if (e != null) {
-					if (e.getCause() instanceof BundleException) {
-						throw (BundleException) e.getCause();
-					}
-				}
+				if (e != null && e.getCause() instanceof BundleException) {
+                	throw (BundleException) e.getCause();
+                }
 				if (ACTIVE_SET.contains(getState()))
 					return;
 				if (getState().equals(State.INSTALLED)) {
@@ -169,11 +167,10 @@ public abstract class SystemModule extends Module {
 					return result;
 				}
 				timeLeft = waitForever ? 0 : start + timeout - System.currentTimeMillis();
-				if (waitForever || timeLeft > 0) {
-					stopEvent.wait(timeLeft);
-				} else {
+				if (!waitForever && timeLeft <= 0) {
 					return ContainerEvent.STOPPED_TIMEOUT;
 				}
+                stopEvent.wait(timeLeft);
 			} while (true);
 		}
 	}
@@ -200,35 +197,34 @@ public abstract class SystemModule extends Module {
 		// Need to lock the state change lock with no state to prevent
 		// other threads from starting the framework while we are shutting down
 		try {
-			if (stateChangeLock.tryLock(10, TimeUnit.SECONDS)) {
-				try {
-					try {
-						// Always transient
-						super.stop(StopOptions.TRANSIENT);
-					} catch (BundleException e) {
-						getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.ERROR, this, e);
-						// must continue on
-					}
-					if (holdsTransitionEventLock(ModuleEvent.UPDATED)) {
-						containerEvent = ContainerEvent.STOPPED_UPDATE;
-					} else if (holdsTransitionEventLock(ModuleEvent.UNRESOLVED)) {
-						containerEvent = ContainerEvent.STOPPED_REFRESH;
-					} else {
-						containerEvent = ContainerEvent.STOPPED;
-					}
-					getRevisions().getContainer().adaptor.publishContainerEvent(containerEvent, this, null);
-					getRevisions().getContainer().close();
-				} finally {
-					AtomicReference<ContainerEvent> eventReference = forStop;
-					eventReference.compareAndSet(null, containerEvent);
-					stateChangeLock.unlock();
-					synchronized (eventReference) {
-						eventReference.notifyAll();
-					}
-				}
-			} else {
+			if (!stateChangeLock.tryLock(10, TimeUnit.SECONDS)) {
 				throw new BundleException(Msg.SystemModule_LockError);
 			}
+            try {
+            	try {
+            		// Always transient
+            		super.stop(StopOptions.TRANSIENT);
+            	} catch (BundleException e) {
+            		getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.ERROR, this, e);
+            		// must continue on
+            	}
+            	if (holdsTransitionEventLock(ModuleEvent.UPDATED)) {
+            		containerEvent = ContainerEvent.STOPPED_UPDATE;
+            	} else if (holdsTransitionEventLock(ModuleEvent.UNRESOLVED)) {
+            		containerEvent = ContainerEvent.STOPPED_REFRESH;
+            	} else {
+            		containerEvent = ContainerEvent.STOPPED;
+            	}
+            	getRevisions().getContainer().adaptor.publishContainerEvent(containerEvent, this, null);
+            	getRevisions().getContainer().close();
+            } finally {
+            	AtomicReference<ContainerEvent> eventReference = forStop;
+            	eventReference.compareAndSet(null, containerEvent);
+            	stateChangeLock.unlock();
+            	synchronized (eventReference) {
+            		eventReference.notifyAll();
+            	}
+            }
 		} catch (InterruptedException e) {
 			getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.ERROR, this, e);
 			throw new BundleException(Msg.Module_LockError + this, BundleException.STATECHANGE_ERROR, e);

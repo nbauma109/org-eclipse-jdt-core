@@ -155,7 +155,7 @@ public final class CapabilityPermission extends BasicPermission {
 	 */
 	public CapabilityPermission(String name, String actions) {
 		this(name, parseActions(actions));
-		if ((this.filter != null) && ((action_mask & ACTION_ALL) != ACTION_REQUIRE)) {
+		if (this.filter != null && (action_mask & ACTION_ALL) != ACTION_REQUIRE) {
 			throw new IllegalArgumentException("invalid action string for filter expression");
 		}
 	}
@@ -184,7 +184,7 @@ public final class CapabilityPermission extends BasicPermission {
 		if (providingBundle == null) {
 			throw new IllegalArgumentException("bundle must not be null");
 		}
-		this.attributes = new HashMap<String, Object>(attributes);
+		this.attributes = new HashMap<>(attributes);
 		this.bundle = providingBundle;
 		if ((action_mask & ACTION_ALL) != ACTION_REQUIRE) {
 			throw new IllegalArgumentException("invalid action string");
@@ -210,7 +210,7 @@ public final class CapabilityPermission extends BasicPermission {
 	 * @param mask action mask
 	 */
 	private void setTransients(String name, int mask) {
-		if ((mask == ACTION_NONE) || ((mask & ACTION_ALL) != mask)) {
+		if (mask == ACTION_NONE || (mask & ACTION_ALL) != mask) {
 			throw new IllegalArgumentException("invalid action string");
 		}
 		action_mask = mask;
@@ -242,7 +242,7 @@ public final class CapabilityPermission extends BasicPermission {
 			char c;
 
 			// skip whitespace
-			while ((i != -1) && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
+			while (i != -1 && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
 				i--;
 
 			// check for the known strings
@@ -338,11 +338,8 @@ public final class CapabilityPermission extends BasicPermission {
 			return false;
 		}
 		CapabilityPermission requested = (CapabilityPermission) p;
-		if (bundle != null) {
-			return false;
-		}
 		// if requested permission has a filter, then it is an invalid argument
-		if (requested.filter != null) {
+		if (bundle != null || requested.filter != null) {
 			return false;
 		}
 		return implies0(requested, ACTION_NONE);
@@ -441,8 +438,8 @@ public final class CapabilityPermission extends BasicPermission {
 
 		CapabilityPermission cp = (CapabilityPermission) obj;
 
-		return (action_mask == cp.action_mask) && getName().equals(cp.getName()) && ((attributes == cp.attributes) || ((attributes != null) && (attributes.equals(cp.attributes))))
-				&& ((bundle == cp.bundle) || ((bundle != null) && bundle.equals(cp.bundle)));
+		return action_mask == cp.action_mask && getName().equals(cp.getName()) && (attributes == cp.attributes || attributes != null && attributes.equals(cp.attributes))
+				&& (bundle == cp.bundle || bundle != null && bundle.equals(cp.bundle));
 	}
 
 	/**
@@ -499,27 +496,24 @@ public final class CapabilityPermission extends BasicPermission {
 		if (result != null) {
 			return result;
 		}
-		final Map<String, Object> props = new HashMap<String, Object>(5);
+		final Map<String, Object> props = new HashMap<>(5);
 		props.put("capability.namespace", getName());
 		if (bundle == null) {
 			return properties = props;
 		}
-		AccessController.doPrivileged(new PrivilegedAction<Void>() {
-			@Override
-			public Void run() {
-				props.put("id", Long.valueOf(bundle.getBundleId()));
-				props.put("location", bundle.getLocation());
-				String name = bundle.getSymbolicName();
-				if (name != null) {
-					props.put("name", name);
-				}
-				SignerProperty signer = new SignerProperty(bundle);
-				if (signer.isBundleSigned()) {
-					props.put("signer", signer);
-				}
-				return null;
-			}
-		});
+		AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+        	props.put("id", Long.valueOf(bundle.getBundleId()));
+        	props.put("location", bundle.getLocation());
+        	String name = bundle.getSymbolicName();
+        	if (name != null) {
+        		props.put("name", name);
+        	}
+        	SignerProperty signer = new SignerProperty(bundle);
+        	if (signer.isBundleSigned()) {
+        		props.put("signer", signer);
+        	}
+        	return null;
+        });
 		return properties = new Properties(props, attributes);
 	}
 
@@ -555,7 +549,7 @@ public final class CapabilityPermission extends BasicPermission {
 			if (entries != null) {
 				return entries;
 			}
-			Set<Map.Entry<String, Object>> all = new HashSet<Map.Entry<String, Object>>(attributes.size() + properties.size());
+			Set<Map.Entry<String, Object>> all = new HashSet<>(attributes.size() + properties.size());
 			all.addAll(attributes.entrySet());
 			all.addAll(properties.entrySet());
 			return entries = Collections.unmodifiableSet(all);
@@ -601,7 +595,7 @@ final class CapabilityPermissionCollection extends PermissionCollection {
 	 * Creates an empty CapabilityPermissionCollection object.
 	 */
 	public CapabilityPermissionCollection() {
-		permissions = new HashMap<String, CapabilityPermission>();
+		permissions = new HashMap<>();
 		all_allowed = false;
 	}
 
@@ -636,7 +630,7 @@ final class CapabilityPermissionCollection extends PermissionCollection {
 			if (f != null) {
 				pc = filterPermissions;
 				if (pc == null) {
-					filterPermissions = pc = new HashMap<String, CapabilityPermission>();
+					filterPermissions = pc = new HashMap<>();
 				}
 			} else {
 				pc = permissions;
@@ -653,11 +647,9 @@ final class CapabilityPermissionCollection extends PermissionCollection {
 				pc.put(name, cp);
 			}
 
-			if (!all_allowed) {
-				if (name.equals("*")) {
-					all_allowed = true;
-				}
-			}
+			if (!all_allowed && name.equals("*")) {
+            	all_allowed = true;
+            }
 		}
 	}
 
@@ -752,7 +744,7 @@ final class CapabilityPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		Map<String, CapabilityPermission> pc = filterPermissions;
 		if (pc != null) {
 			all.addAll(pc.values());

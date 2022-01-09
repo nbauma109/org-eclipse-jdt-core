@@ -40,20 +40,16 @@ public class MarkerAnnotation extends Annotation {
 
 	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
-		if (visitor.visit(this, scope)) {
-			if (this.type != null) {
-				this.type.traverse(visitor, scope);
-			}
-		}
+		if (visitor.visit(this, scope) && this.type != null) {
+        	this.type.traverse(visitor, scope);
+        }
 		visitor.endVisit(this, scope);
 	}
 	@Override
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
-		if (visitor.visit(this, scope)) {
-			if (this.type != null) {
-				this.type.traverse(visitor, scope);
-			}
-		}
+		if (visitor.visit(this, scope) && this.type != null) {
+        	this.type.traverse(visitor, scope);
+        }
 		visitor.endVisit(this, scope);
 	}
 }

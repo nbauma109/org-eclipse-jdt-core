@@ -94,7 +94,7 @@ public class CompletionUnitStructureRequestor extends CompilationUnitStructureRe
 	protected SourceField createField(JavaElement parent, FieldInfo fieldInfo) {
 		String fieldName = JavaModelManager.getJavaModelManager().intern(new String(fieldInfo.name));
 		AssistSourceField field = new AssistSourceField(parent, fieldName, this.bindingCache, this.newElements);
-		FieldDeclaration decl = (FieldDeclaration) (fieldInfo.node);
+		FieldDeclaration decl = (FieldDeclaration) fieldInfo.node;
 		if (decl.binding != null) {
 			this.bindingCache.put(field, decl.binding);
 			this.elementCache.put(decl.binding, field);
@@ -112,7 +112,7 @@ public class CompletionUnitStructureRequestor extends CompilationUnitStructureRe
 				return true;
 			}
 		};
-		FieldDeclaration decl = (FieldDeclaration) (compInfo.node);
+		FieldDeclaration decl = (FieldDeclaration) compInfo.node;
 		if (decl.binding != null) {
 			this.bindingCache.put(comp, decl.binding);
 			this.elementCache.put(decl.binding, comp);
@@ -179,12 +179,10 @@ public class CompletionUnitStructureRequestor extends CompilationUnitStructureRe
 			org.eclipse.jdt.internal.compiler.ast.Annotation annotation,
 			AnnotatableInfo parentInfo,
 			JavaElement parentHandle) {
-		if (annotation instanceof CompletionOnMarkerAnnotationName) {
-			if (hasEmptyName(annotation.type, this.assistNode)) {
-				super.acceptAnnotation(annotation, null, parentHandle);
-				return null;
-			}
-		}
+		if (annotation instanceof CompletionOnMarkerAnnotationName && hasEmptyName(annotation.type, this.assistNode)) {
+        	super.acceptAnnotation(annotation, null, parentHandle);
+        	return null;
+        }
 		return super.acceptAnnotation(annotation, parentInfo, parentHandle);
 	}
 
@@ -219,10 +217,8 @@ public class CompletionUnitStructureRequestor extends CompilationUnitStructureRe
 	}
 
 	protected static boolean hasEmptyName(TypeReference reference, ASTNode assistNode) {
-		if (reference == null) return false;
-
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=397070
-		if (reference != assistNode &&
+		if (reference == null || reference != assistNode &&
 				reference.sourceStart <= assistNode.sourceStart && assistNode.sourceEnd <= reference.sourceEnd) return false;
 
 		if (reference instanceof CompletionOnSingleTypeReference ||
@@ -235,18 +231,18 @@ public class CompletionUnitStructureRequestor extends CompilationUnitStructureRe
 			ParameterizedSingleTypeReference parameterizedReference = (ParameterizedSingleTypeReference) reference;
 			TypeReference[] typeArguments = parameterizedReference.typeArguments;
 			if (typeArguments != null) {
-				for (int i = 0; i < typeArguments.length; i++) {
-					if (hasEmptyName(typeArguments[i], assistNode)) return true;
+				for (TypeReference typeArgument : typeArguments) {
+					if (hasEmptyName(typeArgument, assistNode)) return true;
 				}
 			}
 		} else if (reference instanceof ParameterizedQualifiedTypeReference) {
 			ParameterizedQualifiedTypeReference parameterizedReference = (ParameterizedQualifiedTypeReference) reference;
 			TypeReference[][] typeArguments = parameterizedReference.typeArguments;
 			if (typeArguments != null) {
-				for (int i = 0; i < typeArguments.length; i++) {
-					if (typeArguments[i] != null) {
-						for (int j = 0; j < typeArguments[i].length; j++) {
-							if (hasEmptyName(typeArguments[i][j], assistNode)) return true;
+				for (TypeReference[] typeArgument : typeArguments) {
+					if (typeArgument != null) {
+						for (TypeReference element : typeArgument) {
+							if (hasEmptyName(element, assistNode)) return true;
 						}
 					}
 				}

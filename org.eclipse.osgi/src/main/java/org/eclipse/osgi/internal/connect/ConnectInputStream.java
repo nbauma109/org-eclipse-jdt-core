@@ -43,7 +43,8 @@ public class ConnectInputStream extends InputStream implements ContentProvider {
 		throw new IOException();
 	}
 
-	public File getContent() {
+	@Override
+    public File getContent() {
 		return null;
 	}
 

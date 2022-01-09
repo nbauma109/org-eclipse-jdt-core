@@ -94,15 +94,14 @@ public class Folder extends Container implements IFolder {
 			workspace.beginOperation(true);
 			if (force && !Workspace.caseSensitive && localInfo.exists()) {
 				String name = getLocalManager().getLocalName(store);
-				if (name == null || localInfo.getName().equals(name)) {
-					delete(true, null);
-				} else {
+				if (name != null && !localInfo.getName().equals(name)) {
 					// The file system is not case sensitive and a case variant exists at this
 					// location
 					String msg = NLS.bind(Messages.resources_existsLocalDifferentCase,
 							new Path(store.toString()).removeLastSegments(1).append(name).toOSString());
 					throw new ResourceException(IResourceStatus.CASE_VARIANT_EXISTS, getFullPath(), msg, null);
 				}
+                delete(true, null);
 			}
 			internalCreate(updateFlags, local, subMonitor.newChild(98));
 			workspace.getAliasManager().updateAliases(this, getStore(), IResource.DEPTH_ZERO, subMonitor.newChild(1));
@@ -118,7 +117,7 @@ public class Folder extends Container implements IFolder {
 	@Override
 	public void create(boolean force, boolean local, IProgressMonitor monitor) throws CoreException {
 		// funnel all operations to central method
-		create((force ? IResource.FORCE : IResource.NONE), local, monitor);
+		create(force ? IResource.FORCE : IResource.NONE, local, monitor);
 	}
 
 	/**

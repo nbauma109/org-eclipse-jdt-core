@@ -15,7 +15,6 @@
 package org.eclipse.jdt.core.dom;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -42,7 +41,8 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 * @deprecated In the JLS3 API, this property is replaced by {@link #MODIFIERS2_PROPERTY}.
 	 * @since 3.0
 	 */
-	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
+	@Deprecated
+    public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
 		new SimplePropertyDescriptor(SingleVariableDeclaration.class, "modifiers", int.class, MANDATORY); //$NON-NLS-1$
 
 	/**
@@ -88,7 +88,8 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 * @since 3.0
 	 * @deprecated In JLS8 and later, use {@link SingleVariableDeclaration#EXTRA_DIMENSIONS2_PROPERTY} instead.
 	 */
-	public static final SimplePropertyDescriptor EXTRA_DIMENSIONS_PROPERTY =
+	@Deprecated
+    public static final SimplePropertyDescriptor EXTRA_DIMENSIONS_PROPERTY =
 			internalExtraDimensionsPropertyFactory(SingleVariableDeclaration.class);
 
 	/**
@@ -174,11 +175,11 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else if (apiLevel < AST.JLS8_INTERNAL) {
-			return PROPERTY_DESCRIPTORS_3_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_8_0;
 		}
+        if (apiLevel < AST.JLS8_INTERNAL) {
+			return PROPERTY_DESCRIPTORS_3_0;
+		}
+        return PROPERTY_DESCRIPTORS_8_0;
 	}
 
 	/**
@@ -270,18 +271,16 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 		if (property == MODIFIERS_PROPERTY) {
 			if (get) {
 				return getModifiers();
-			} else {
-				setModifiers(value);
-				return 0;
 			}
+            setModifiers(value);
+            return 0;
 		}
 		if (property == EXTRA_DIMENSIONS_PROPERTY) {
 			if (get) {
 				return getExtraDimensions();
-			} else {
-				internalSetExtraDimensions(value);
-				return 0;
 			}
+            internalSetExtraDimensions(value);
+            return 0;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetIntProperty(property, get, value);
@@ -292,10 +291,9 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 		if (property == VARARGS_PROPERTY) {
 			if (get) {
 				return isVarargs();
-			} else {
-				setVarargs(value);
-				return false;
 			}
+            setVarargs(value);
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
@@ -306,26 +304,23 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 		if (property == TYPE_PROPERTY) {
 			if (get) {
 				return getType();
-			} else {
-				setType((Type) child);
-				return null;
 			}
+            setType((Type) child);
+            return null;
 		}
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((SimpleName) child);
-				return null;
 			}
+            setName((SimpleName) child);
+            return null;
 		}
 		if (property == INITIALIZER_PROPERTY) {
 			if (get) {
 				return getInitializer();
-			} else {
-				setInitializer((Expression) child);
-				return null;
 			}
+            setInitializer((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -442,19 +437,17 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 		if (this.modifiers == null) {
 			// JLS2 behavior - bona fide property
 			return this.modifierFlags;
-		} else {
-			// JLS3 behavior - convenient method
-			// performance could be improved by caching computed flags
-			// but this would require tracking changes to this.modifiers
-			int computedModifierFlags = Modifier.NONE;
-			for (Iterator it = modifiers().iterator(); it.hasNext(); ) {
-				Object x = it.next();
-				if (x instanceof Modifier) {
-					computedModifierFlags |= ((Modifier) x).getKeyword().toFlagValue();
-				}
-			}
-			return computedModifierFlags;
 		}
+        // JLS3 behavior - convenient method
+        // performance could be improved by caching computed flags
+        // but this would require tracking changes to this.modifiers
+        int computedModifierFlags = Modifier.NONE;
+        for (Object x : modifiers()) {
+        	if (x instanceof Modifier) {
+        		computedModifierFlags |= ((Modifier) x).getKeyword().toFlagValue();
+        	}
+        }
+        return computedModifierFlags;
 	}
 
 	/**
@@ -472,7 +465,8 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 * @deprecated In the JLS3 API, this method is replaced by
 	 * {@link  #modifiers()} which contains a list of a <code>Modifier</code> nodes.
 	 */
-	public void setModifiers(int modifiers) {
+	@Deprecated
+    public void setModifiers(int modifiers) {
 		internalSetModifiers(modifiers);
 	}
 

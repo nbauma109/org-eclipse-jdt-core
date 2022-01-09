@@ -49,7 +49,7 @@ public class ResourceStatus extends Status implements IResourceStatus {
 	}
 
 	protected static int getSeverity(int code) {
-		return code == 0 ? 0 : 1 << (code % 100 / 33);
+		return code == 0 ? 0 : 1 << code % 100 / 33;
 	}
 
 	// for debug only

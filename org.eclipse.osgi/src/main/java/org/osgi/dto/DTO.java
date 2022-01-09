@@ -253,7 +253,7 @@ public abstract class DTO {
 		result.append(string);
 		while (i < result.length()) { // escape if necessary
 			char c = result.charAt(i);
-			if ((c == '"') || (c == '\\')) {
+			if (c == '"' || c == '\\') {
 				result.insert(i, '\\');
 				i = i + 2;
 				continue;
@@ -282,12 +282,11 @@ public abstract class DTO {
 		if (length <= MAX_LENGTH) {
 			return in;
 		}
-		StringBuilder result = new StringBuilder(MAX_LENGTH)
+		return new StringBuilder(MAX_LENGTH)
 				.append(in, 0, MAX_LENGTH / 2 - 3)
 				.append('.')
 				.append('.')
 				.append('.')
-				.append(in, length - (MAX_LENGTH / 2), length);
-		return result;
+				.append(in, length - MAX_LENGTH / 2, length);
 	}
 }

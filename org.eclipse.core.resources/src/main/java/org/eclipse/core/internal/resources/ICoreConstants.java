@@ -121,8 +121,8 @@ public interface ICoreConstants {
 	int WORKSPACE_TREE_VERSION_2 = 67305986;
 
 	// helper constants for empty structures
-	IBuildConfiguration[] EMPTY_BUILD_CONFIG_ARRAY = new IBuildConfiguration[0];
-	IProject[] EMPTY_PROJECT_ARRAY = new IProject[0];
-	IResource[] EMPTY_RESOURCE_ARRAY = new IResource[0];
-	IFileState[] EMPTY_FILE_STATES = new IFileState[0];
+	IBuildConfiguration[] EMPTY_BUILD_CONFIG_ARRAY = {};
+	IProject[] EMPTY_PROJECT_ARRAY = {};
+	IResource[] EMPTY_RESOURCE_ARRAY = {};
+	IFileState[] EMPTY_FILE_STATES = {};
 }

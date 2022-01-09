@@ -17,7 +17,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,14 +100,11 @@ public class GenericXMLWriter extends PrintWriter {
 			int length = parameters.size();
 			Map.Entry[] entries = new Map.Entry[length];
 			parameters.entrySet().toArray(entries);
-			Arrays.sort(entries, new Comparator() {
-				@Override
-				public int compare(Object o1, Object o2) {
-					Map.Entry entry1 = (Map.Entry) o1;
-					Map.Entry entry2 = (Map.Entry) o2;
-					return ((String) entry1.getKey()).compareTo((String) entry2.getKey());
-				}
-			});
+			Arrays.sort(entries, (o1, o2) -> {
+            	Map.Entry entry1 = o1;
+            	Map.Entry entry2 = o2;
+            	return ((String) entry1.getKey()).compareTo((String) entry2.getKey());
+            });
 			for (int i = 0; i < length; i++) {
 				this.print(' ');
 				this.print(entries[i].getKey());

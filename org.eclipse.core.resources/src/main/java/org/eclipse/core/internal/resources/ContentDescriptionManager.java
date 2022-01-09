@@ -98,7 +98,7 @@ public class ContentDescriptionManager implements IManager, IRegistryChangeListe
 					if (fullFlush)
 						return null;
 					int size = toFlush.size();
-					return (size == 0) ? null : toFlush.toArray(new IPath[size]);
+					return size == 0 ? null : toFlush.toArray(new IPath[size]);
 				} finally {
 					fullFlush = false;
 					toFlush.clear();
@@ -331,9 +331,7 @@ public class ContentDescriptionManager implements IManager, IRegistryChangeListe
 		if (inSync && getCacheState() != ABOUT_TO_FLUSH) {
 			// first look for the flags in the resource info to avoid looking in the cache
 			// don't need to copy the info because the modified bits are not in the deltas
-			if (info == null)
-				return null;
-			if (info.isSet(ICoreConstants.M_NO_CONTENT_DESCRIPTION))
+			if (info == null || info.isSet(ICoreConstants.M_NO_CONTENT_DESCRIPTION))
 				// presumably, this file has no known content type
 				return null;
 			if (info.isSet(ICoreConstants.M_DEFAULT_CONTENT_DESCRIPTION)) {

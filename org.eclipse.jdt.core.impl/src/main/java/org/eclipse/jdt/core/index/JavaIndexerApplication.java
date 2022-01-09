@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
@@ -92,10 +93,7 @@ public class JavaIndexerApplication implements IApplication {
 	}
 
 	private boolean processCommandLine(String[] argsArray) {
-		ArrayList args = new ArrayList();
-		for (int i = 0, max = argsArray.length; i < max; i++) {
-			args.add(argsArray[i]);
-		}
+		new ArrayList(Arrays.asList(argsArray));
 		int index = 0;
 		final int argCount = argsArray.length;
 
@@ -103,17 +101,21 @@ public class JavaIndexerApplication implements IApplication {
 			String currentArg = argsArray[index++];
 			if (PDE_LAUNCH.equals(currentArg)) {
 				continue loop;
-			} else if (ARG_HELP.equals(currentArg)) {
+			}
+            if (ARG_HELP.equals(currentArg)) {
 				displayHelp();
 				return false;
-			} else if (ARG_VERBOSE.equals(currentArg)) {
+			}
+            if (ARG_VERBOSE.equals(currentArg)) {
 				this.verbose = true;
 				continue loop;
-			} else if (ARG_OUTPUT.equals(currentArg)) {
+			}
+            if (ARG_OUTPUT.equals(currentArg)) {
 				if (this.indexFile != null) {
 					displayError(Messages.bind(Messages.CommandLineOnlyOneOutputError));
 					return false;
-				} else if (index == argCount) {
+				}
+                if (index == argCount) {
 					displayError(Messages.bind(Messages.CommandLineOutputTakesArgs));
 					return false;
 				}

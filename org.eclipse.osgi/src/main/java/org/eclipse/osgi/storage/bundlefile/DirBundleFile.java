@@ -105,10 +105,8 @@ public class DirBundleFile extends BundleFile {
 				}
 			}
 			// must do an extra check to make sure file is within the bundle (bug 320546)
-			if (checkInBundle) {
-				if (!canonicalFile.getPath().startsWith(basefile.getPath()))
-					return null;
-			}
+			if (checkInBundle && !canonicalFile.getPath().startsWith(basefile.getPath()))
+            	return null;
 		} catch (IOException e) {
 			return null;
 		}

@@ -37,9 +37,9 @@ public class SingleTypeReference extends TypeReference {
 	public TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation[][] additionalAnnotations, boolean isVarargs) {
 		int totalDimensions = this.dimensions() + additionalDimensions;
 		Annotation [][] allAnnotations = getMergedAnnotationsOnDimensions(additionalDimensions, additionalAnnotations);
-		ArrayTypeReference arrayTypeReference = new ArrayTypeReference(this.token, totalDimensions, allAnnotations, (((long) this.sourceStart) << 32) + this.sourceEnd);
+		ArrayTypeReference arrayTypeReference = new ArrayTypeReference(this.token, totalDimensions, allAnnotations, ((long) this.sourceStart << 32) + this.sourceEnd);
 		arrayTypeReference.annotations = this.annotations;
-		arrayTypeReference.bits |= (this.bits & ASTNode.HasTypeAnnotations);
+		arrayTypeReference.bits |= this.bits & ASTNode.HasTypeAnnotations;
 		if (!isVarargs)
 			arrayTypeReference.extendedDimensions = additionalDimensions;
 		return arrayTypeReference;
@@ -134,25 +134,21 @@ public class SingleTypeReference extends TypeReference {
 
 	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
-		if (visitor.visit(this, scope)) {
-			if (this.annotations != null) {
-				Annotation [] typeAnnotations = this.annotations[0];
-				for (int i = 0, length = typeAnnotations == null ? 0 : typeAnnotations.length; i < length; i++)
-					typeAnnotations[i].traverse(visitor, scope);
-			}
-		}
+		if (visitor.visit(this, scope) && this.annotations != null) {
+        	Annotation [] typeAnnotations = this.annotations[0];
+        	for (int i = 0, length = typeAnnotations == null ? 0 : typeAnnotations.length; i < length; i++)
+        		typeAnnotations[i].traverse(visitor, scope);
+        }
 		visitor.endVisit(this, scope);
 	}
 
 	@Override
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
-		if (visitor.visit(this, scope)) {
-			if (this.annotations != null) {
-				Annotation [] typeAnnotations = this.annotations[0];
-				for (int i = 0, length = typeAnnotations == null ? 0 : typeAnnotations.length; i < length; i++)
-					typeAnnotations[i].traverse(visitor, scope);
-			}
-		}
+		if (visitor.visit(this, scope) && this.annotations != null) {
+        	Annotation [] typeAnnotations = this.annotations[0];
+        	for (int i = 0, length = typeAnnotations == null ? 0 : typeAnnotations.length; i < length; i++)
+        		typeAnnotations[i].traverse(visitor, scope);
+        }
 		visitor.endVisit(this, scope);
 	}
 }

@@ -80,7 +80,7 @@ public class PerformanceStatsProcessor extends Job {
 	 */
 	public static void failed(PerformanceStats stats, String pluginId, long elapsed) {
 		synchronized (instance) {
-			instance.failures.put(stats, Long.valueOf(elapsed));
+			instance.failures.put(stats, elapsed);
 		}
 		instance.schedule(SCHEDULE_DELAY);
 		instance.logFailure(stats, pluginId, elapsed);
@@ -206,7 +206,7 @@ public class PerformanceStatsProcessor extends Job {
 			if (events.length > 0)
 				listener.eventsOccurred(events);
 			for (int j = 0; j < failedEvents.length; j++)
-				listener.eventFailed(failedEvents[j], failedTimes[j].longValue());
+				listener.eventFailed(failedEvents[j], failedTimes[j]);
 		}
 		schedule(SCHEDULE_DELAY);
 		return Status.OK_STATUS;

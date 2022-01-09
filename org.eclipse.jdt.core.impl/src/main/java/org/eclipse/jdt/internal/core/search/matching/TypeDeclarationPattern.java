@@ -161,10 +161,10 @@ public TypeDeclarationPattern(
 			for (int i = 0; i < length; i++)
 				this.enclosingTypeNames[i] = CharOperation.toLowerCase(enclosingTypeNames[i]);
 		}
-		this.simpleName = (this.isCaseSensitive || this.isCamelCase) ? simpleName : CharOperation.toLowerCase(simpleName);
+		this.simpleName = this.isCaseSensitive || this.isCamelCase ? simpleName : CharOperation.toLowerCase(simpleName);
 		this.typeSuffix = typeSuffix;
 
-		this.mustResolve = (this.pkg != null && this.enclosingTypeNames != null) || typeSuffix != TYPE_SUFFIX;
+		this.mustResolve = this.pkg != null && this.enclosingTypeNames != null || typeSuffix != TYPE_SUFFIX;
 	}
 
 public TypeDeclarationPattern(
@@ -242,13 +242,11 @@ public void decodeIndexKey(char[] key) {
 	last -= 2; // position of ending slash
 	if (start == last) {
 		this.enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
-	} else {
-		if (last == (start+1) && key[start] == ZERO_CHAR) {
-			this.enclosingTypeNames = ONE_ZERO_CHAR;
-		} else {
-			this.enclosingTypeNames = CharOperation.splitOn('.', key, start, last);
-		}
-	}
+	} else if (last == start+1 && key[start] == ZERO_CHAR) {
+    	this.enclosingTypeNames = ONE_ZERO_CHAR;
+    } else {
+    	this.enclosingTypeNames = CharOperation.splitOn('.', key, start, last);
+    }
 }
 protected void decodeModifiers() {
 
@@ -282,18 +280,13 @@ public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 	TypeDeclarationPattern pattern = (TypeDeclarationPattern) decodedPattern;
 
 	// check type suffix
-	if (this.typeSuffix != pattern.typeSuffix && this.typeSuffix != TYPE_SUFFIX) {
-		if (!matchDifferentTypeSuffixes(this.typeSuffix, pattern.typeSuffix)) {
-			return false;
-		}
-	}
+	if (this.typeSuffix != pattern.typeSuffix && this.typeSuffix != TYPE_SUFFIX && !matchDifferentTypeSuffixes(this.typeSuffix, pattern.typeSuffix)) {
+    	return false;
+    }
 
 	// check name
-	if (!matchesName(this.simpleName, pattern.simpleName))
-		return false;
-
 	// check package - exact match only
-	if (this.pkg != null && !CharOperation.equals(this.pkg, pattern.pkg, isCaseSensitive()))
+	if (!matchesName(this.simpleName, pattern.simpleName) || this.pkg != null && !CharOperation.equals(this.pkg, pattern.pkg, isCaseSensitive()))
 		return false;
 
 	// check enclosingTypeNames - exact match only

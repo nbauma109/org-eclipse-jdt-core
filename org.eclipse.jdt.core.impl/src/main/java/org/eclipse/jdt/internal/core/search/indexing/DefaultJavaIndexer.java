@@ -57,6 +57,5 @@ public class DefaultJavaIndexer {
 			}
 			index.save();
 		}
-		return;
 	}
 }

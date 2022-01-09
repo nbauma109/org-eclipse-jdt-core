@@ -122,27 +122,15 @@ abstract class TreeLineTracker implements ILineTracker {
 		byte balance;
 
 		@Override
-		public final String toString() {
-			String bal;
-			switch (balance) {
-				case 0:
-					bal= "="; //$NON-NLS-1$
-					break;
-				case 1:
-					bal= "+"; //$NON-NLS-1$
-					break;
-				case 2:
-					bal= "++"; //$NON-NLS-1$
-					break;
-				case -1:
-					bal= "-"; //$NON-NLS-1$
-					break;
-				case -2:
-					bal= "--"; //$NON-NLS-1$
-					break;
-				default:
-					bal= Byte.toString(balance);
-			}
+		public String toString() {
+			String bal = switch (balance) {
+                case 0 -> "="; //$NON-NLS-1$
+                case 1 -> "+"; //$NON-NLS-1$
+                case 2 -> "++"; //$NON-NLS-1$
+                case -1 -> "-"; //$NON-NLS-1$
+                case -2 -> "--"; //$NON-NLS-1$
+                default -> Byte.toString(balance);
+            };
 			return "[" + offset + "+" + pureLength() + "+" + delimiter.length() + "|" + line + "|" + bal + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		}
 
@@ -412,12 +400,10 @@ abstract class TreeLineTracker implements ILineTracker {
 				fRoot= new Node(0, NO_DELIM);
 			else
 				fRoot= child;
-		} else {
-			if (isLeftChild)
-				parent.left= child;
-			else
-				parent.right= child;
-		}
+		} else if (isLeftChild)
+        	parent.left= child;
+        else
+        	parent.right= child;
 		if (child != null)
 			child.parent= parent;
 	}
@@ -459,18 +445,24 @@ abstract class TreeLineTracker implements ILineTracker {
 		Node child= node.left;
 		rotateRight(node);
 		rotateLeft(parent);
-		if (child.balance == 1) {
-			node.balance= 0;
-			parent.balance= -1;
-			child.balance= 0;
-		} else if (child.balance == 0) {
-			node.balance= 0;
-			parent.balance= 0;
-		} else if (child.balance == -1) {
-			node.balance= 1;
-			parent.balance= 0;
-			child.balance= 0;
-		}
+		switch (child.balance) {
+            case 1:
+                node.balance= 0;
+                parent.balance= -1;
+                child.balance= 0;
+                break;
+            case 0:
+                node.balance= 0;
+                parent.balance= 0;
+                break;
+            case -1:
+                node.balance= 1;
+                parent.balance= 0;
+                child.balance= 0;
+                break;
+            default:
+                break;
+        }
 	}
 
 	/**
@@ -484,18 +476,24 @@ abstract class TreeLineTracker implements ILineTracker {
 		Node child= node.right;
 		rotateLeft(node);
 		rotateRight(parent);
-		if (child.balance == -1) {
-			node.balance= 0;
-			parent.balance= 1;
-			child.balance= 0;
-		} else if (child.balance == 0) {
-			node.balance= 0;
-			parent.balance= 0;
-		} else if (child.balance == 1) {
-			node.balance= -1;
-			parent.balance= 0;
-			child.balance= 0;
-		}
+		switch (child.balance) {
+            case -1:
+                node.balance= 0;
+                parent.balance= 1;
+                child.balance= 0;
+                break;
+            case 0:
+                node.balance= 0;
+                parent.balance= 0;
+                break;
+            case 1:
+                node.balance= -1;
+                parent.balance= 0;
+                child.balance= 0;
+                break;
+            default:
+                break;
+        }
 	}
 
 	/**
@@ -951,21 +949,22 @@ abstract class TreeLineTracker implements ILineTracker {
 	 */
 	private boolean rebalanceAfterDeletionLeft(Node node) {
 		Node parent= node.parent;
-		if (node.balance == 1) {
-			singleLeftRotation(node, parent);
-			return false;
-		} else if (node.balance == -1) {
-			rightLeftRotation(node, parent);
-			return false;
-		} else if (node.balance == 0) {
-			rotateLeft(parent);
-			node.balance= -1;
-			parent.balance= 1;
-			return true;
-		} else {
-			if (ASSERT) Assert.isTrue(false);
-			return true;
-		}
+		switch (node.balance) {
+            case 1:
+                singleLeftRotation(node, parent);
+                return false;
+            case -1:
+                rightLeftRotation(node, parent);
+                return false;
+            case 0:
+                rotateLeft(parent);
+                node.balance= -1;
+                parent.balance= 1;
+                return true;
+            default:
+                if (ASSERT) Assert.isTrue(false);
+                return true;
+        }
 	}
 
 	/**
@@ -977,21 +976,22 @@ abstract class TreeLineTracker implements ILineTracker {
 	 */
 	private boolean rebalanceAfterDeletionRight(Node node) {
 		Node parent= node.parent;
-		if (node.balance == -1) {
-			singleRightRotation(node, parent);
-			return false;
-		} else if (node.balance == 1) {
-			leftRightRotation(node, parent);
-			return false;
-		} else if (node.balance == 0) {
-			rotateRight(parent);
-			node.balance= 1;
-			parent.balance= -1;
-			return true;
-		} else {
-			if (ASSERT) Assert.isTrue(false);
-			return true;
-		}
+		switch (node.balance) {
+            case -1:
+                singleRightRotation(node, parent);
+                return false;
+            case 1:
+                leftRightRotation(node, parent);
+                return false;
+            case 0:
+                rotateRight(parent);
+                node.balance= 1;
+                parent.balance= -1;
+                return true;
+            default:
+                if (ASSERT) Assert.isTrue(false);
+                return true;
+        }
 	}
 
 	/**

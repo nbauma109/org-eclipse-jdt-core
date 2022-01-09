@@ -37,7 +37,7 @@ public class CDSHookConfigurator implements HookConfigurator {
 
 	@Override
 	public void addHooks(HookRegistry hookRegistry) {
-		boolean disableCDS = Boolean.valueOf(hookRegistry.getConfiguration().getProperty(DISABLE_CDS));
+		boolean disableCDS = Boolean.parseBoolean(hookRegistry.getConfiguration().getProperty(DISABLE_CDS));
 		if (disableCDS) {
 			return;
 		}
@@ -52,7 +52,7 @@ public class CDSHookConfigurator implements HookConfigurator {
 		try {
 			Class.forName(J9_SHARED_CLASS_HELPER_CLASS);
 		} catch (ClassNotFoundException e) {
-			boolean reportErrors = Boolean.valueOf(hookRegistry.getConfiguration().getProperty(REPORT_ERRORS));
+			boolean reportErrors = Boolean.parseBoolean(hookRegistry.getConfiguration().getProperty(REPORT_ERRORS));
 			// not running on J9
 			if (reportErrors) {
 				EquinoxContainer container = hookRegistry.getContainer();

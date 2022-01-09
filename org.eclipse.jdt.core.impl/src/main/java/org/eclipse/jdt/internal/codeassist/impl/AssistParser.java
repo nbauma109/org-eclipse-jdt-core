@@ -217,26 +217,24 @@ public RecoveredElement buildInitialRecoveryState(){
 	if (this.referenceContext instanceof AbstractMethodDeclaration){
 		element = new RecoveredMethod((AbstractMethodDeclaration) this.referenceContext, null, 0, this);
 		this.lastCheckPoint = ((AbstractMethodDeclaration) this.referenceContext).bodyStart;
-	} else {
-		/* Initializer bodies are parsed in the context of the type declaration, we must thus search it inside */
-		if (this.referenceContext instanceof TypeDeclaration){
-			TypeDeclaration type = (TypeDeclaration) this.referenceContext;
-			FieldDeclaration[] fields = type.fields;
-			int length = fields == null ? 0 : fields.length;
-			for (int i = 0; i < length; i++){
-				FieldDeclaration field = fields[i];
-				if (field != null
-						&& field.getKind() == AbstractVariableDeclaration.INITIALIZER
-						&& field.declarationSourceStart <= this.scanner.initialPosition
-						&& this.scanner.initialPosition <= field.declarationSourceEnd
-						&& this.scanner.eofPosition <= field.declarationSourceEnd+1){
-					element = new RecoveredInitializer(field, null, 1, this);
-					this.lastCheckPoint = field.declarationSourceStart;
-					break;
-				}
-			}
-		}
-	}
+	} else /* Initializer bodies are parsed in the context of the type declaration, we must thus search it inside */
+    if (this.referenceContext instanceof TypeDeclaration){
+    	TypeDeclaration type = (TypeDeclaration) this.referenceContext;
+    	FieldDeclaration[] fields = type.fields;
+    	int length = fields == null ? 0 : fields.length;
+    	for (int i = 0; i < length; i++){
+    		FieldDeclaration field = fields[i];
+    		if (field != null
+    				&& field.getKind() == AbstractVariableDeclaration.INITIALIZER
+    				&& field.declarationSourceStart <= this.scanner.initialPosition
+    				&& this.scanner.initialPosition <= field.declarationSourceEnd
+    				&& this.scanner.eofPosition <= field.declarationSourceEnd+1){
+    			element = new RecoveredInitializer(field, null, 1, this);
+    			this.lastCheckPoint = field.declarationSourceStart;
+    			break;
+    		}
+    	}
+    }
 
 	if (element == null) return element;
 
@@ -345,12 +343,12 @@ public RecoveredElement buildInitialRecoveryState(){
 		}
 		if (this.assistNode != null && node instanceof Statement) {
 			Statement stmt = (Statement) node;
-			if (!(stmt instanceof Expression && ((Expression) stmt).isTrulyExpression()) || ((Expression) stmt).statementExpression()) {
+			if (!(stmt instanceof Expression) || !((Expression) stmt).isTrulyExpression() || ((Expression) stmt).statementExpression()) {
 				if (this.assistNode.sourceStart >= stmt.sourceStart && this.assistNode.sourceEnd <= stmt.sourceEnd) {
 					element.add(stmt, 0);
 					this.lastCheckPoint = stmt.sourceEnd + 1;
 					this.isOrphanCompletionNode = false;
-				} else if ((stmt instanceof ForeachStatement) && ((ForeachStatement) stmt).action == null) {
+				} else if (stmt instanceof ForeachStatement && ((ForeachStatement) stmt).action == null) {
 					element = element.add(stmt, 0);
 					this.lastCheckPoint = stmt.sourceEnd + 1;
 				} else if (stmt.containsPatternVariable()) {
@@ -385,19 +383,17 @@ public RecoveredElement buildInitialRecoveryState(){
 	boolean createLambdaBlock = lastNode instanceof LambdaExpression && ((LambdaExpression) node).body() instanceof Block;
 	for (int j = blockIndex; j <= this.realBlockPtr; j++){
 		if (this.blockStarts[j] >= 0) {
-			if ((this.blockStarts[j] < pos || createLambdaBlock) && (this.blockStarts[j] != lastStart)){ // avoid multiple block if at same position
+			if ((this.blockStarts[j] < pos || createLambdaBlock) && this.blockStarts[j] != lastStart){ // avoid multiple block if at same position
 				block = new Block(0);
 				block.sourceStart = lastStart = this.blockStarts[j];
 				element = element.add(block, 1);
 				createLambdaBlock = false;
 			}
-		} else {
-			if ((this.blockStarts[j] < pos)){ // avoid multiple block if at same position
-				block = new Block(0);
-				block.sourceStart = lastStart = -this.blockStarts[j];
-				element = element.add(block, 1);
-			}
-		}
+		} else if (this.blockStarts[j] < pos){ // avoid multiple block if at same position
+        	block = new Block(0);
+        	block.sourceStart = lastStart = -this.blockStarts[j];
+        	element = element.add(block, 1);
+        }
 	}
 
 	return element;
@@ -536,10 +532,7 @@ protected boolean triggerRecoveryUponLambdaClosure(Statement statement, boolean 
 		LambdaExpression expression = (LambdaExpression) this.elementObjectInfoStack[i];
 		if (expression == null)
 			return false;
-		if (expression.sourceStart >= statementStart && expression.sourceEnd <= statementEnd) {
-			this.elementPtr = i - 1;
-			lambdaClosed = true;
-		} else {
+		if (expression.sourceStart < statementStart || expression.sourceEnd > statementEnd) {
 			if (shouldCommit) {
 				int stackLength = this.stack.length;
 				if (++this.stateStackTop >= stackLength) {
@@ -554,65 +547,65 @@ protected boolean triggerRecoveryUponLambdaClosure(Statement statement, boolean 
 			}
 			return false;
 		}
+        this.elementPtr = i - 1;
+        lambdaClosed = true;
 	}
 
-	if (lambdaClosed && this.currentElement != null && !(this.currentElement instanceof RecoveredField)) {
-		if (!(statement instanceof AbstractVariableDeclaration)) { // added already as part of standard recovery since these contribute a name to the scope prevailing at the cursor.
-			/* See if CompletionParser.attachOrphanCompletionNode has already added bits and pieces of AST to the recovery tree. If so, we want to
-			   replace those fragments with the fuller statement that provides target type for the lambda that got closed just now. There is prior
-			   art/precedent in the Java 7 world to this: Search for recoveredBlock.statements[--recoveredBlock.statementCount] = null;
-			   See also that this concern does not arise in the case of field/local initialization since the initializer is replaced with full tree by consumeExitVariableWithInitialization.
-			*/
-			/*
-			 * All the above comments will not work if the assist node is buried deeper. This happens when there the
-			 * lambda was part of a complex statement, such as it was one of the arguments to a method invocation. In which case,
-			 * we start from the topmost recovery element and look for assist nodes. If the operation is successful, the method
-			 * replaceAssistStatement() returns null. Else, it returns the original statement, thus falling back to replacing the
-			 * last statement in the current recovered element.
-			 */
-			statement = replaceAssistStatement(this.currentElement.topElement(),
-					this.assistNodeParent(), statementStart, statementEnd, statement);
+	if (lambdaClosed && this.currentElement != null && !(this.currentElement instanceof RecoveredField) && !(statement instanceof AbstractVariableDeclaration)) { // added already as part of standard recovery since these contribute a name to the scope prevailing at the cursor.
+    	/* See if CompletionParser.attachOrphanCompletionNode has already added bits and pieces of AST to the recovery tree. If so, we want to
+    	   replace those fragments with the fuller statement that provides target type for the lambda that got closed just now. There is prior
+    	   art/precedent in the Java 7 world to this: Search for recoveredBlock.statements[--recoveredBlock.statementCount] = null;
+    	   See also that this concern does not arise in the case of field/local initialization since the initializer is replaced with full tree by consumeExitVariableWithInitialization.
+    	*/
+    	/*
+    	 * All the above comments will not work if the assist node is buried deeper. This happens when there the
+    	 * lambda was part of a complex statement, such as it was one of the arguments to a method invocation. In which case,
+    	 * we start from the topmost recovery element and look for assist nodes. If the operation is successful, the method
+    	 * replaceAssistStatement() returns null. Else, it returns the original statement, thus falling back to replacing the
+    	 * last statement in the current recovered element.
+    	 */
+    	statement = replaceAssistStatement(this.currentElement.topElement(),
+    			this.assistNodeParent(), statementStart, statementEnd, statement);
 
-			if (statement != null) {
-				RecoveredBlock recoveredBlock = (RecoveredBlock) (this.currentElement instanceof RecoveredBlock ? this.currentElement :
-					(this.currentElement.parent instanceof RecoveredBlock) ? this.currentElement.parent :
-						this.currentElement instanceof RecoveredMethod ? ((RecoveredMethod) this.currentElement).methodBody : null);
-				if (recoveredBlock != null) {
-					RecoveredStatement recoveredStatement = recoveredBlock.statementCount > 0 ? recoveredBlock.statements[recoveredBlock.statementCount - 1] : null;
-					ASTNode parseTree = recoveredStatement != null ? recoveredStatement.updatedStatement(0, new HashSet<TypeDeclaration>()) : null;
-					if (parseTree != null) {
-						detectAssistNodeParent(parseTree);
-						if ((parseTree.sourceStart == 0 || parseTree.sourceEnd == 0) || (parseTree.sourceStart >= statementStart && parseTree.sourceEnd <= statementEnd)) {
-							recoveredBlock.statements[recoveredBlock.statementCount - 1] = new RecoveredStatement(statement, recoveredBlock, 0);
-							statement = null;
-						} else if (recoveredStatement instanceof RecoveredLocalVariable && statement instanceof Expression &&
-								((Expression) statement).isTrulyExpression()) {
-							RecoveredLocalVariable local = (RecoveredLocalVariable) recoveredStatement;
-							if (local.localDeclaration != null && local.localDeclaration.initialization != null) {
-								if ((local.localDeclaration.initialization.sourceStart == 0 || local.localDeclaration.initialization.sourceEnd == 0) ||
-								        (local.localDeclaration.initialization.sourceStart >= statementStart && local.localDeclaration.initialization.sourceEnd <= statementEnd) ){
-									local.localDeclaration.initialization = (Expression) statement;
-									local.localDeclaration.declarationSourceEnd = statement.sourceEnd;
-									local.localDeclaration.declarationEnd = statement.sourceEnd;
-									statement = null;
-								}
-							}
-						}
-					}
-				}
-			}
-			if (statement != null) {
-				while (this.currentElement != null) {
-					ASTNode tree = this.currentElement.parseTree();
-					if (tree.sourceStart < statement.sourceStart) {
-						this.currentElement.add(statement, 0);
-						break;
-					}
-					this.currentElement = this.currentElement.parent;
-				}
-			}
-		}
-	}
+    	if (statement != null) {
+    		RecoveredBlock recoveredBlock = (RecoveredBlock) (this.currentElement instanceof RecoveredBlock ? this.currentElement :
+    			this.currentElement.parent instanceof RecoveredBlock ? this.currentElement.parent :
+    				this.currentElement instanceof RecoveredMethod ? ((RecoveredMethod) this.currentElement).methodBody : null);
+    		if (recoveredBlock != null) {
+    			RecoveredStatement recoveredStatement = recoveredBlock.statementCount > 0 ? recoveredBlock.statements[recoveredBlock.statementCount - 1] : null;
+    			ASTNode parseTree = recoveredStatement != null ? recoveredStatement.updatedStatement(0, new HashSet<TypeDeclaration>()) : null;
+    			if (parseTree != null) {
+    				detectAssistNodeParent(parseTree);
+    				if (parseTree.sourceStart == 0 || parseTree.sourceEnd == 0 || parseTree.sourceStart >= statementStart && parseTree.sourceEnd <= statementEnd) {
+    					recoveredBlock.statements[recoveredBlock.statementCount - 1] = new RecoveredStatement(statement, recoveredBlock, 0);
+    					statement = null;
+    				} else if (recoveredStatement instanceof RecoveredLocalVariable && statement instanceof Expression &&
+    						((Expression) statement).isTrulyExpression()) {
+    					RecoveredLocalVariable local = (RecoveredLocalVariable) recoveredStatement;
+    					if (local.localDeclaration != null && local.localDeclaration.initialization != null) {
+    						if (local.localDeclaration.initialization.sourceStart == 0 || local.localDeclaration.initialization.sourceEnd == 0 ||
+    						        local.localDeclaration.initialization.sourceStart >= statementStart && local.localDeclaration.initialization.sourceEnd <= statementEnd ){
+    							local.localDeclaration.initialization = (Expression) statement;
+    							local.localDeclaration.declarationSourceEnd = statement.sourceEnd;
+    							local.localDeclaration.declarationEnd = statement.sourceEnd;
+    							statement = null;
+    						}
+    					}
+    				}
+    			}
+    		}
+    	}
+    	if (statement != null) {
+    		while (this.currentElement != null) {
+    			ASTNode tree = this.currentElement.parseTree();
+    			if (tree.sourceStart < statement.sourceStart) {
+    				this.currentElement.add(statement, 0);
+    				break;
+    			}
+    			this.currentElement = this.currentElement.parent;
+    		}
+    	}
+    }
 	if (this.snapShotPtr > -1)
 		popSnapShot();
 	return lambdaClosed;
@@ -632,7 +625,7 @@ public Statement replaceAssistStatement(RecoveredElement top, ASTNode assistPare
 			for(int i = 0; i < statements.length; i++) {
 				if (statements[i] == null) break;
 				ASTNode node = statements[i].parseTree();
-				if ((node.sourceStart >= start && node.sourceEnd <= end)) {
+				if (node.sourceStart >= start && node.sourceEnd <= end) {
 					if (!found) {
 						statements[i] = new RecoveredStatement(stmt, blk, 0);
 						found = true;
@@ -876,22 +869,20 @@ protected void consumeOpenBlock() {
 				stackLength);
 	}
 	this.blockStarts[this.realBlockPtr] = this.scanner.startPosition;
-	if (requireExtendedRecovery()) {
-		// This is an epsilon production: We are in the state with kernel item: Block ::= .OpenBlock LBRACE BlockStatementsopt RBRACE
-		if (this.currentToken == TokenNameLBRACE && this.unstackedAct > NUM_RULES) { // wait for chain reductions to finish before commit.
-			stackLength = this.stack.length;
-			if (++this.stateStackTop >= stackLength - 1) {   // Need two slots.
-				System.arraycopy(
-						this.stack, 0,
-						this.stack = new int[stackLength + StackIncrement], 0,
-						stackLength);
-			}
-			this.stack[this.stateStackTop++] = this.unstackedAct; // transition to Block ::= OpenBlock  .LBRACE BlockStatementsopt RBRACE
-			this.stack[this.stateStackTop] = tAction(this.unstackedAct, this.currentToken); // transition to Block ::= OpenBlock LBRACE  .BlockStatementsopt RBRACE
-			commit(true);
-			this.stateStackTop -= 2;
-		}
-	}
+	// This is an epsilon production: We are in the state with kernel item: Block ::= .OpenBlock LBRACE BlockStatementsopt RBRACE
+    if (requireExtendedRecovery() && this.currentToken == TokenNameLBRACE && this.unstackedAct > NUM_RULES) { // wait for chain reductions to finish before commit.
+    	stackLength = this.stack.length;
+    	if (++this.stateStackTop >= stackLength - 1) {   // Need two slots.
+    		System.arraycopy(
+    				this.stack, 0,
+    				this.stack = new int[stackLength + StackIncrement], 0,
+    				stackLength);
+    	}
+    	this.stack[this.stateStackTop++] = this.unstackedAct; // transition to Block ::= OpenBlock  .LBRACE BlockStatementsopt RBRACE
+    	this.stack[this.stateStackTop] = tAction(this.unstackedAct, this.currentToken); // transition to Block ::= OpenBlock LBRACE  .BlockStatementsopt RBRACE
+    	commit(true);
+    	this.stateStackTop -= 2;
+    }
 }
 protected void consumeOpenFakeBlock() {
 	// OpenBlock ::= $empty
@@ -1511,7 +1502,7 @@ protected TypeReference getTypeReference(int dim) {
 }
 protected TypeReference getAssistTypeReferenceForGenericType(int dim, int identifierLength, int numberOfIdentifiers) {
 	/* no need to take action if not inside completed identifiers */
-	if (/*(indexOfAssistIdentifier()) < 0 ||*/ (identifierLength == 1 && numberOfIdentifiers == 1)) {
+	if (/*(indexOfAssistIdentifier()) < 0 ||*/ identifierLength == 1 && numberOfIdentifiers == 1) {
 		int currentTypeArgumentsLength = this.genericsLengthStack[this.genericsLengthPtr--];
 		TypeReference[] typeArguments;
 		if (currentTypeArgumentsLength > -1) {
@@ -1590,13 +1581,13 @@ protected TypeReference getAssistTypeReferenceForGenericType(int dim, int identi
 		System.arraycopy(typeArguments, 0, typeArguments = new TypeReference[realLength][], 0, realLength);
 
 		boolean isParameterized = false;
-		for (int i = 0; i < typeArguments.length; i++) {
-			if(typeArguments[i] != null) {
+		for (TypeReference[] typeArgument : typeArguments) {
+			if(typeArgument != null) {
 				isParameterized = true;
 				break;
 			}
 		}
-		if(isParameterized || (assistTypeArguments != null && assistTypeArguments.length > 0)) {
+		if(isParameterized || assistTypeArguments != null && assistTypeArguments.length > 0) {
 			reference = createParameterizedQualifiedAssistTypeReference(tokens, typeArguments, assistIdentifier(), assistTypeArguments, positions);
 		} else {
 			reference = createQualifiedAssistTypeReference(tokens, assistIdentifier(), positions);
@@ -1688,7 +1679,7 @@ protected char[][] identifierSubSet(int subsetLength){
 	System.arraycopy(
 		this.identifierStack,
 		this.identifierPtr - this.identifierLengthStack[this.identifierLengthPtr] + 1,
-		(subset = new char[subsetLength][]),
+		subset = new char[subsetLength][],
 		0,
 		subsetLength);
 	return subset;
@@ -2010,12 +2001,10 @@ public void parseBlockStatements(
 	int length;
 	if ((length = this.astLengthStack[this.astLengthPtr--]) > 0) {
 		System.arraycopy(this.astStack, (this.astPtr -= length) + 1, initializer.block.statements = new Statement[length], 0, length);
-	} else {
-		// check whether this block at least contains some comment in it
-		if (!containsComment(initializer.block.sourceStart, initializer.block.sourceEnd)) {
-			initializer.block.bits |= ASTNode.UndocumentedEmptyBlock;
-		}
-	}
+	} else // check whether this block at least contains some comment in it
+    if (!containsComment(initializer.block.sourceStart, initializer.block.sourceEnd)) {
+    	initializer.block.bits |= ASTNode.UndocumentedEmptyBlock;
+    }
 
 	// mark initializer with local type if one was found during parsing
 	if ((type.bits & ASTNode.HasLocalType) != 0) {
@@ -2033,9 +2022,7 @@ public void parseBlockStatements(MethodDeclaration md, CompilationUnitDeclaratio
 
 	//convert bugs into parse error
 
-	if (md.isNative())
-		return;
-	if ((md.modifiers & ExtraCompilerModifiers.AccSemicolonBody) != 0)
+	if (md.isNative() || (md.modifiers & ExtraCompilerModifiers.AccSemicolonBody) != 0)
 		return;
 
 	initialize();
@@ -2075,11 +2062,9 @@ public void parseBlockStatements(MethodDeclaration md, CompilationUnitDeclaratio
 			md.statements = new Statement[length],
 			0,
 			length);
-	} else {
-		if (!containsComment(md.bodyStart, md.bodyEnd)) {
-			md.bits |= ASTNode.UndocumentedEmptyBlock;
-		}
-	}
+	} else if (!containsComment(md.bodyStart, md.bodyEnd)) {
+    	md.bits |= ASTNode.UndocumentedEmptyBlock;
+    }
 
 }
 
@@ -2207,8 +2192,7 @@ protected void pushOnElementStack(int kind, int info, Object objectInfo){
 }
 @Override
 public void recoveryExitFromVariable() {
-	if(this.currentElement != null && this.currentElement instanceof RecoveredField
-		&& !(this.currentElement instanceof RecoveredInitializer)) {
+	if(this.currentElement instanceof RecoveredField && !(this.currentElement instanceof RecoveredInitializer)) {
 		RecoveredElement oldElement = this.currentElement;
 		super.recoveryExitFromVariable();
 		if(oldElement != this.currentElement) {
@@ -2241,8 +2225,8 @@ public void recoveryTokenCheck() {
 			if(this.currentElement != oldElement && !isInsideAttributeValue() && !isIndirectlyInsideLambdaExpression()) {
 				if(oldElement instanceof RecoveredInitializer
 					|| oldElement instanceof RecoveredMethod
-					|| (oldElement instanceof RecoveredBlock && oldElement.parent instanceof RecoveredInitializer)
-					|| (oldElement instanceof RecoveredBlock && oldElement.parent instanceof RecoveredMethod)) {
+					|| oldElement instanceof RecoveredBlock && oldElement.parent instanceof RecoveredInitializer
+					|| oldElement instanceof RecoveredBlock && oldElement.parent instanceof RecoveredMethod) {
 					popUntilElement(K_METHOD_DELIMITER);
 					popElement(K_METHOD_DELIMITER);
 				} else if(oldElement instanceof RecoveredType) {
@@ -2320,21 +2304,20 @@ protected int fallBackToSpringForward(Statement unused) {
 		int extendedEnd = this.scanner.source.length;
 		if (this.referenceContext instanceof AbstractMethodDeclaration)
 			extendedEnd = ((AbstractMethodDeclaration) this.referenceContext).bodyEnd; // no use parsing beyond the method's body end
-		if (this.cursorLocation < extendedEnd) {
-			shouldStackAssistNode();
-			// the following is against the new strategy as of https://bugs.eclipse.org/539685
-			// but needed because CompletionParser.consumeToken(token == TokenNameIdentifier) still sets eof to cursorLocation
-			if (this.scanner.eofPosition < extendedEnd)
-				this.scanner.eofPosition = extendedEnd;
-			nextToken = getNextToken();
-			if (automatonWillShift(nextToken, automatonState)) {
-				this.currentToken = nextToken;
-				return RESUME;
-			}
-			this.scanner.ungetToken(nextToken); // spit out what has been bitten more than we can chew.
-		} else {
+		if (this.cursorLocation >= extendedEnd) {
 			return HALT; // don't know how to proceed.
 		}
+        shouldStackAssistNode();
+        // the following is against the new strategy as of https://bugs.eclipse.org/539685
+        // but needed because CompletionParser.consumeToken(token == TokenNameIdentifier) still sets eof to cursorLocation
+        if (this.scanner.eofPosition < extendedEnd)
+        	this.scanner.eofPosition = extendedEnd;
+        nextToken = getNextToken();
+        if (automatonWillShift(nextToken, automatonState)) {
+        	this.currentToken = nextToken;
+        	return RESUME;
+        }
+        this.scanner.ungetToken(nextToken); // spit out what has been bitten more than we can chew.
 	} else {
 		if (this.scanner.currentPosition > this.cursorLocation)
 			shouldStackAssistNode();
@@ -2344,9 +2327,9 @@ protected int fallBackToSpringForward(Statement unused) {
 			ignoreNextClosingBrace(); // having ungotten it, recoveryTokenCheck will see this again.
 	}
 	// OK, next token is no good to resume "in place", attempt some local repair. FIXME: need to make sure we don't get stuck keep reducing empty statements !!
-	for (int i = 0, length = RECOVERY_TOKENS.length; i < length; i++) {
-		if (automatonWillShift(RECOVERY_TOKENS[i], automatonState)) {
-			this.currentToken = RECOVERY_TOKENS[i];
+	for (int element : RECOVERY_TOKENS) {
+		if (automatonWillShift(element, automatonState)) {
+			this.currentToken = element;
 			return RESUME;
 		}
 	}
@@ -2374,20 +2357,19 @@ protected int fallBackToSpringForward(Statement unused) {
 @Override
 protected int resumeAfterRecovery() {
 	if (requireExtendedRecovery()) {
-		if (this.unstackedAct == ERROR_ACTION) {
-			int mode = fallBackToSpringForward(null);
-			if (mode == RESUME && !safeToResume()) {
-				mode = HALT; // emergency halt to prevent infinite recovery attempts
-			}
-			this.resumedAfterRepair = mode == RESUME;
-			if (mode == RESUME || mode == HALT)
-				return mode;
-			// else fall through and RESTART
-		} else {
+		if (this.unstackedAct != ERROR_ACTION) {
 			if (this.currentToken == TokenNameLBRACE)
 				this.ignoreNextOpeningBrace = true;  // already accounted for in recovery token check.
 			return RESUME;
 		}
+        int mode = fallBackToSpringForward(null);
+        if (mode == RESUME && !safeToResume()) {
+        	mode = HALT; // emergency halt to prevent infinite recovery attempts
+        }
+        this.resumedAfterRepair = mode == RESUME;
+        if (mode == RESUME || mode == HALT)
+        	return mode;
+        // else fall through and RESTART
 	}
 
 	// reset internal stacks
@@ -2421,9 +2403,7 @@ protected int resumeAfterRecovery() {
 	/* attempt to move checkpoint location */
 	if (this.unstackedAct != ERROR_ACTION && this.resumedAfterRepair) {
 		this.scanner.ungetToken(this.currentToken);  // effectively move recovery checkpoint *backwards*.
-	} else {
-		if (!moveRecoveryCheckpoint()) return HALT;
-	}
+	} else if (!moveRecoveryCheckpoint()) return HALT;
 	this.resumedAfterRepair = false;
 
 	// only look for headers
@@ -2435,7 +2415,7 @@ protected int resumeAfterRecovery() {
 			){
 			prepareForBlockStatements();
 			goForBlockStatementsOrCatchHeader();
-		} else if((isInsideArrayInitializer()) &&
+		} else if(isInsideArrayInitializer() &&
 				isIndirectlyInsideFieldInitialization() &&
 				this.assistNode == null){
 			prepareForBlockStatements();
@@ -2547,10 +2527,10 @@ protected ASTNode wrapWithExplicitConstructorCallIfNeeded(ASTNode ast) {
 	int selector;
 	if (ast != null && topKnownElementKind(ASSIST_PARSER) == K_SELECTOR && ast instanceof Expression &&
 			((Expression) ast).isTrulyExpression() &&
-			(((selector = topKnownElementInfo(ASSIST_PARSER)) == THIS_CONSTRUCTOR) ||
-			(selector == SUPER_CONSTRUCTOR))) {
+			((selector = topKnownElementInfo(ASSIST_PARSER)) == THIS_CONSTRUCTOR ||
+			selector == SUPER_CONSTRUCTOR)) {
 		ExplicitConstructorCall call = new ExplicitConstructorCall(
-			(selector == THIS_CONSTRUCTOR) ?
+			selector == THIS_CONSTRUCTOR ?
 				ExplicitConstructorCall.This :
 				ExplicitConstructorCall.Super
 		);
@@ -2558,8 +2538,7 @@ protected ASTNode wrapWithExplicitConstructorCallIfNeeded(ASTNode ast) {
 		call.sourceStart = ast.sourceStart;
 		call.sourceEnd = ast.sourceEnd;
 		return call;
-	} else {
-		return ast;
 	}
+    return ast;
 }
 }

@@ -148,7 +148,7 @@ public class BundleLoader extends ModuleLoader {
 	public final static String getResourcePackageName(String name) {
 		if (name != null) {
 			/* check for leading slash*/
-			int begin = ((name.length() > 1) && (name.charAt(0) == '/')) ? 1 : 0;
+			int begin = name.length() > 1 && name.charAt(0) == '/' ? 1 : 0;
 			int end = name.lastIndexOf('/'); /* index of last slash */
 			if (end > begin)
 				return name.substring(begin, end).replace('/', '.');
@@ -203,14 +203,12 @@ public class BundleLoader extends ModuleLoader {
 		if (exports != null) {
 			for (ModuleCapability export : exports) {
 				String name = (String) export.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
-				if (sources.forceSourceCreation(export)) {
-					if (!exportNames.contains(name)) {
-						// must force filtered and reexport sources to be created early
-						// to prevent lazy normal package source creation.
-						// We only do this for the first export of a package name.
-						sources.createPackageSource(export, true);
-					}
-				}
+				if (sources.forceSourceCreation(export) && !exportNames.contains(name)) {
+                	// must force filtered and reexport sources to be created early
+                	// to prevent lazy normal package source creation.
+                	// We only do this for the first export of a package name.
+                	sources.createPackageSource(export, true);
+                }
 				exportNames.add(name);
 			}
 		}
@@ -500,7 +498,7 @@ public class BundleLoader extends ModuleLoader {
 		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
 		if (parentAndGenerateException && parent != null && !bootDelegation
-				&& ((container.getConfiguration().compatibilityBootDelegation) || isRequestFromVM())) {
+				&& (container.getConfiguration().compatibilityBootDelegation || isRequestFromVM())) {
 			// we don't need to continue if a CNFE is thrown here.
 			try {
 				return parent.loadClass(name);
@@ -610,7 +608,7 @@ public class BundleLoader extends ModuleLoader {
 	public URL findResource(String name) {
 		if (debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].findResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
+		if (name.length() > 1 && name.charAt(0) == '/') /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
 		boolean bootDelegation = false;
@@ -621,7 +619,7 @@ public class BundleLoader extends ModuleLoader {
 				// 1) if startsWith "java." delegate to parent and terminate search
 				// we never delegate java resource requests past the parent
 				return parent.getResource(name);
-			else if (container.isBootDelegationPackage(pkgName)) {
+            if (container.isBootDelegationPackage(pkgName)) {
 				// 2) if part of the bootdelegation list then delegate to parent and continue of failure
 				URL result = parent.getResource(name);
 				if (result != null)
@@ -699,7 +697,7 @@ public class BundleLoader extends ModuleLoader {
 		if (debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].findResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		// do not delegate to parent because ClassLoader#getResources already did and it is final!!
-		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
+		if (name.length() > 1 && name.charAt(0) == '/') /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
 		Enumeration<URL> result = Collections.emptyEnumeration();
@@ -711,7 +709,7 @@ public class BundleLoader extends ModuleLoader {
 				// 1) if startsWith "java." delegate to parent and terminate search
 				// we never delegate java resource requests past the parent
 				return parent.getResources(name);
-			else if (container.isBootDelegationPackage(pkgName)) {
+            if (container.isBootDelegationPackage(pkgName)) {
 				// 2) if part of the bootdelegation list then delegate to parent and continue
 				result = compoundEnumerations(result, parent.getResources(name));
 				bootDelegation = true;
@@ -780,14 +778,14 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	private boolean isSubPackage(String parentPackage, String subPackage) {
-		String prefix = (parentPackage.length() == 0 || parentPackage.equals(DEFAULT_PACKAGE)) ? "" : parentPackage + '.'; //$NON-NLS-1$
+		String prefix = parentPackage.length() == 0 || parentPackage.equals(DEFAULT_PACKAGE) ? "" : parentPackage + '.'; //$NON-NLS-1$
 		return subPackage.startsWith(prefix);
 	}
 
 	@Override
 	protected Collection<String> listResources(String path, String filePattern, int options) {
 		String pkgName = getResourcePackageName(path.endsWith("/") ? path : path + '/'); //$NON-NLS-1$
-		if ((path.length() > 1) && (path.charAt(0) == '/')) /* if name has a leading slash */
+		if (path.length() > 1 && path.charAt(0) == '/') /* if name has a leading slash */
 			path = path.substring(1); /* remove leading slash before search */
 		boolean subPackages = (options & BundleWiring.LISTRESOURCES_RECURSE) != 0;
 		List<String> packages = new ArrayList<>();
@@ -799,7 +797,7 @@ public class BundleLoader extends ModuleLoader {
 		}
 		for (PackageSource source : imports) {
 			String id = source.getId();
-			if (id.equals(pkgName) || (subPackages && isSubPackage(pkgName, id)))
+			if (id.equals(pkgName) || subPackages && isSubPackage(pkgName, id))
 				packages.add(id);
 		}
 
@@ -832,10 +830,7 @@ public class BundleLoader extends ModuleLoader {
 			if (externalSource != null && !localSearch) {
 				String packagePath = name.replace('.', '/');
 				Collection<String> externalResources = externalSource.listResources(packagePath, filePattern);
-				for (String resource : externalResources) {
-                    // prevent duplicates; could happen if the package is split or exporter has fragments/multiple jars
-                    result.add(resource);
-				}
+				result.addAll(externalResources);
 			}
 		}
 
@@ -987,17 +982,13 @@ public class BundleLoader extends ModuleLoader {
 		visited.add(this);
 		synchronized (exportedPackages) {
 			for (String exported : exportedPackages) {
-				if (exported.equals(packageName) || (subPackages && isSubPackage(packageName, exported))) {
-					if (!result.contains(exported))
-						result.add(exported);
-				}
+				if ((exported.equals(packageName) || subPackages && isSubPackage(packageName, exported)) && !result.contains(exported))
+                	result.add(exported);
 			}
 		}
 		for (String substituted : wiring.getSubstitutedNames()) {
-			if (substituted.equals(packageName) || (subPackages && isSubPackage(packageName, substituted))) {
-				if (!result.contains(substituted))
-					result.add(substituted);
-			}
+			if ((substituted.equals(packageName) || subPackages && isSubPackage(packageName, substituted)) && !result.contains(substituted))
+            	result.add(substituted);
 		}
 		for (ModuleWire bundleWire : requiredBundleWires) {
 			if (BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
@@ -1055,9 +1046,7 @@ public class BundleLoader extends ModuleLoader {
 				stems = new ArrayList<>(size);
 			} else {
 				stems = new ArrayList<>(size + dynamicImportPackageStems.length);
-				for (String dynamicImportPackageStem : dynamicImportPackageStems) {
-					stems.add(dynamicImportPackageStem);
-				}
+				Collections.addAll(stems, dynamicImportPackageStems);
 			}
 
 			List<String> names;
@@ -1065,9 +1054,7 @@ public class BundleLoader extends ModuleLoader {
 				names = new ArrayList<>(size);
 			} else {
 				names = new ArrayList<>(size + dynamicImportPackages.length);
-				for (String dynamicImportPackage : dynamicImportPackages) {
-					names.add(dynamicImportPackage);
-				}
+				Collections.addAll(names, dynamicImportPackages);
 			}
 
 			for (int i = 0; i < size; i++) {

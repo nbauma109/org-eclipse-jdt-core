@@ -92,8 +92,7 @@ public class DTOBuilder {
 	}
 
 	public static BundleRevisionDTO newBundleRevisionDTO(BundleRevision revision) {
-		BundleRevisionDTO dto = new DTOBuilder().getBundleRevisionDTO(revision);
-		return dto;
+		return new DTOBuilder().getBundleRevisionDTO(revision);
 	}
 
 	private int getResourceId(BundleRevision revision) {
@@ -231,8 +230,7 @@ public class DTOBuilder {
 		if (revision == null) {
 			return null;
 		}
-		BundleWiringDTO dto = new DTOBuilder().getBundleWiringDTO((ModuleWiring) revision.getWiring());
-		return dto;
+		return new DTOBuilder().getBundleWiringDTO((ModuleWiring) revision.getWiring());
 	}
 
 	public static FrameworkWiringDTO newFrameworkWiringDTO(Collection<ModuleWiring> allWirings) {
@@ -376,16 +374,16 @@ public class DTOBuilder {
 		for (String k : keys) {
 			Object v = ref.getProperty(k);
 			if (Constants.SERVICE_ID.equals(k)) {
-				dto.id = ((Long) v).longValue();
+				dto.id = (Long) v;
 			}
 			if (Constants.SERVICE_BUNDLEID.equals(k)) {
-				dto.bundle = ((Long) v).longValue();
+				dto.bundle = (Long) v;
 			}
 			properties.put(k, mapValue(v));
 		}
 		dto.properties = properties;
 		Bundle[] using = ref.getUsingBundles();
-		final int length = (using == null) ? 0 : using.length;
+		final int length = using == null ? 0 : using.length;
 		long[] usingBundles = new long[length];
 		for (int i = 0; i < length; i++) {
 			usingBundles[i] = using[i].getBundleId();
@@ -420,7 +418,7 @@ public class DTOBuilder {
 	}
 
 	private static Object mapValue(Object v) {
-		if ((v == null) || v instanceof Number || v instanceof Boolean || v instanceof Character || v instanceof String || v instanceof DTO) {
+		if (v == null || v instanceof Number || v instanceof Boolean || v instanceof Character || v instanceof String || v instanceof DTO) {
 			return v;
 		}
 		if (v instanceof Map) {
@@ -491,8 +489,7 @@ public class DTOBuilder {
 	 * Assumes the input map is always <String,String>.
 	 */
 	private static Map<String, String> newDirectivesMapDTO(Map<String, String> map) {
-		Map<String, String> dto = new HashMap<>(map);
-		return dto;
+		return new HashMap<>(map);
 	}
 
 	/**

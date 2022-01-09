@@ -139,12 +139,11 @@ public class JavadocMessageSend extends MessageSend {
 				return null;
 			}
 			if (this.binding.declaringClass == null) {
-				if (this.actualReceiverType instanceof ReferenceBinding) {
-					this.binding.declaringClass = (ReferenceBinding) this.actualReceiverType;
-				} else {
+				if (!(this.actualReceiverType instanceof ReferenceBinding)) {
 					scope.problemReporter().javadocErrorNoMethodFor(this, this.actualReceiverType, this.argumentTypes, scope.getDeclarationModifiers());
 					return null;
 				}
+                this.binding.declaringClass = (ReferenceBinding) this.actualReceiverType;
 			}
 			scope.problemReporter().javadocInvalidMethod(this, this.binding, scope.getDeclarationModifiers());
 			// record the closest match, for clients who may still need hint about possible method match
@@ -153,12 +152,13 @@ public class JavadocMessageSend extends MessageSend {
 				if (closestMatch != null) this.binding = closestMatch;
 			}
 			return this.resolvedType = this.binding == null ? null : this.binding.returnType;
-		} else if (hasArgsTypeVar) {
+		}
+        if (hasArgsTypeVar) {
 			MethodBinding problem = new ProblemMethodBinding(this.binding, this.selector, this.argumentTypes, ProblemReasons.NotFound);
 			scope.problemReporter().javadocInvalidMethod(this, problem, scope.getDeclarationModifiers());
 		} else if (this.binding.isVarargs()) {
 			int length = this.argumentTypes.length;
-			if (!(this.binding.parameters.length == length && this.argumentTypes[length-1].isArrayType())) {
+			if (this.binding.parameters.length != length || !this.argumentTypes[length-1].isArrayType()) {
 				MethodBinding problem = new ProblemMethodBinding(this.binding, this.selector, this.argumentTypes, ProblemReasons.NotFound);
 				scope.problemReporter().javadocInvalidMethod(this, problem, scope.getDeclarationModifiers());
 			}

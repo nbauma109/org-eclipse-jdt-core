@@ -103,8 +103,8 @@ public final class ContentType implements IContentType, IContentTypeInfo {
 		contentType.id = uniqueId;
 		contentType.name = name;
 		contentType.priority = priority;
-		if ((fileExtensions != null && fileExtensions.length > 0) || (fileNames != null && fileNames.length > 0)
-				|| (filePatterns != null && filePatterns.length > 0)) {
+		if (fileExtensions != null && fileExtensions.length > 0 || fileNames != null && fileNames.length > 0
+				|| filePatterns != null && filePatterns.length > 0) {
 			contentType.builtInAssociations = true;
 			contentType.fileSpecs = new ArrayList<>(fileExtensions.length + fileNames.length + filePatterns.length);
 			for (String fileName : fileNames)
@@ -137,7 +137,7 @@ public final class ContentType implements IContentType, IContentTypeInfo {
 	}
 
 	private static String getValidationString(byte validation) {
-		return validation == STATUS_VALID ? "VALID" : (validation == STATUS_INVALID ? "INVALID" : "UNKNOWN"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return validation == STATUS_VALID ? "VALID" : validation == STATUS_INVALID ? "INVALID" : "UNKNOWN"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public static void log(String message, Throwable reason) {
@@ -263,7 +263,7 @@ public final class ContentType implements IContentType, IContentTypeInfo {
 		// depth was never computed - do it now
 		if (baseType == null)
 			return depth = 0;
-		return depth = (byte) (baseType == null ? 0 : (1 + baseType.getDepth()));
+		return depth = (byte) (baseType == null ? 0 : 1 + baseType.getDepth());
 	}
 
 	/**
@@ -276,7 +276,7 @@ public final class ContentType implements IContentType, IContentTypeInfo {
 			if (tmpDescriber != null) {
 				if (INHERITED_DESCRIBER == tmpDescriber)
 					return baseType.getDescriber();
-				return (NO_DESCRIBER == tmpDescriber) ? null : (IContentDescriber) tmpDescriber;
+				return NO_DESCRIBER == tmpDescriber ? null : (IContentDescriber) tmpDescriber;
 			}
 			final String describerValue = contentTypeElement != null
 					? contentTypeElement.getAttribute(DESCRIBER_ELEMENT)
@@ -332,7 +332,7 @@ public final class ContentType implements IContentType, IContentTypeInfo {
 		if (fileSpecs.isEmpty())
 			return new String[0];
 		// invert the last two bits so it is easier to compare
-		typeMask ^= (IGNORE_PRE_DEFINED | IGNORE_USER_DEFINED);
+		typeMask ^= IGNORE_PRE_DEFINED | IGNORE_USER_DEFINED;
 		List<String> result = new ArrayList<>(fileSpecs.size());
 		for (FileSpec spec : fileSpecs) {
 			if ((spec.getType() & typeMask) == spec.getType())
@@ -366,7 +366,7 @@ public final class ContentType implements IContentType, IContentTypeInfo {
 	 * Returns the alias target, if one is found, or this object otherwise.
 	 */
 	ContentType getAliasTarget(boolean self) {
-		return (self && target == null) ? this : target;
+		return self && target == null ? this : target;
 	}
 
 	byte getValidation() {
@@ -501,7 +501,7 @@ public final class ContentType implements IContentType, IContentTypeInfo {
 		ArrayList<FileSpec> tmpFileSpecs = (ArrayList<FileSpec>) fileSpecs.clone();
 		for (Iterator<FileSpec> i = tmpFileSpecs.iterator(); i.hasNext();) {
 			FileSpec spec = i.next();
-			if ((spec.getType() == typeMask) && fileSpec.equals(spec.getText())) {
+			if (spec.getType() == typeMask && fileSpec.equals(spec.getText())) {
 				i.remove();
 				catalog.dissociate(this, spec.getText(), spec.getType());
 				// update the list of file specs

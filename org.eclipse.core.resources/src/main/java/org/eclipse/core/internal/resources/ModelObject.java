@@ -17,7 +17,6 @@ public abstract class ModelObject implements Cloneable {
 	protected String name;
 
 	public ModelObject() {
-		super();
 	}
 
 	public ModelObject(String name) {

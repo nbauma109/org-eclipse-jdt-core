@@ -99,7 +99,8 @@ public final class BundleToJarInputStream extends InputStream {
 		return false;
 	}
 
-	public int read() throws IOException {
+	@Override
+    public int read() throws IOException {
 		if (nextEntryInput != null) {
 			int result = nextEntryInput.read();
 			if (result != -1) {
@@ -112,16 +113,15 @@ public final class BundleToJarInputStream extends InputStream {
 			return read();
 		}
 
-		if (entryPaths.hasNext()) {
-			readNext(entryPaths.next());
-
-			if (!entryPaths.hasNext()) {
-				jarOutput.close();
-			}
-		} else {
+		if (!entryPaths.hasNext()) {
 			jarOutput.close();
 			return -1;
 		}
+        readNext(entryPaths.next());
+
+        if (!entryPaths.hasNext()) {
+        	jarOutput.close();
+        }
 
 		return read();
 	}

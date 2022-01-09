@@ -137,7 +137,7 @@ public abstract class Annotation extends Expression implements IExtendedModifier
 	 *    and <code>false</code> otherwise
 	 */
 	public boolean isNormalAnnotation() {
-		return (this instanceof NormalAnnotation);
+		return this instanceof NormalAnnotation;
 	}
 
 	/**
@@ -148,7 +148,7 @@ public abstract class Annotation extends Expression implements IExtendedModifier
 	 *    and <code>false</code> otherwise
 	 */
 	public boolean isMarkerAnnotation() {
-		return (this instanceof MarkerAnnotation);
+		return this instanceof MarkerAnnotation;
 	}
 
 	/**
@@ -159,7 +159,7 @@ public abstract class Annotation extends Expression implements IExtendedModifier
 	 *    and <code>false</code> otherwise
 	 */
 	public boolean isSingleMemberAnnotation() {
-		return (this instanceof SingleMemberAnnotation);
+		return this instanceof SingleMemberAnnotation;
 	}
 
 	@Override

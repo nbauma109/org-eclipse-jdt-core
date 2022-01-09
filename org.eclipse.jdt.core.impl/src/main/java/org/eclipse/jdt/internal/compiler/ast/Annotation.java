@@ -82,7 +82,7 @@ public abstract class Annotation extends Expression {
 					int depth = 0;
 					TypeBinding currentType = type;
 					while (currentType != null) {
-						depth += (currentType.isStatic()) ? 0 : 1;
+						depth += currentType.isStatic() ? 0 : 1;
 						currentType = currentType.enclosingType();
 					}
 					// Work backwards computing whether a INNER_TYPE entry is required for each level
@@ -213,8 +213,8 @@ public abstract class Annotation extends Expression {
 					.append("search location for ") //$NON-NLS-1$
 					.append(this.searchedAnnotation)
 					.append("\ncurrent type_path entries : "); //$NON-NLS-1$
-				for (int i = 0, maxi = this.typePathEntries.size(); i < maxi; i++) {
-					int[] typePathEntry = (int[]) this.typePathEntries.get(i);
+				for (Object element : this.typePathEntries) {
+					int[] typePathEntry = (int[]) element;
 					buffer
 						.append('(')
 						.append(typePathEntry[0])
@@ -242,11 +242,11 @@ public abstract class Annotation extends Expression {
 		return result;
 	}
 
-	final static MemberValuePair[] NoValuePairs = new MemberValuePair[0];
+	final static MemberValuePair[] NoValuePairs = {};
 
-	static final int[] TYPE_PATH_ELEMENT_ARRAY = new int[]{0,0};
-	static final int[] TYPE_PATH_INNER_TYPE = new int[]{1,0};
-	static final int[] TYPE_PATH_ANNOTATION_ON_WILDCARD_BOUND = new int[]{2,0};
+	static final int[] TYPE_PATH_ELEMENT_ARRAY = {0,0};
+	static final int[] TYPE_PATH_INNER_TYPE = {1,0};
+	static final int[] TYPE_PATH_ANNOTATION_ON_WILDCARD_BOUND = {2,0};
 
 	public int declarationSourceEnd;
 	public Binding recipient;
@@ -300,13 +300,13 @@ public abstract class Annotation extends Expression {
 			case 'M' :
 				if (CharOperation.equals(elementName, TypeConstants.UPPER_METHOD))
 					return TagBits.AnnotationForMethod;
-				else if (CharOperation.equals(elementName, TypeConstants.UPPER_MODULE))
+                if (CharOperation.equals(elementName, TypeConstants.UPPER_MODULE))
 					return TagBits.AnnotationForModule;
 				break;
 			case 'P' :
 				if (CharOperation.equals(elementName, TypeConstants.UPPER_PARAMETER))
 					return TagBits.AnnotationForParameter;
-				else if (CharOperation.equals(elementName, TypeConstants.UPPER_PACKAGE))
+                if (CharOperation.equals(elementName, TypeConstants.UPPER_PACKAGE))
 					return TagBits.AnnotationForPackage;
 				break;
 			case 'R' :
@@ -357,8 +357,7 @@ public abstract class Annotation extends Expression {
 						ArrayInitializer initializer = (ArrayInitializer) expr;
 						final Expression[] expressions = initializer.expressions;
 						if (expressions != null) {
-							for (int i = 0, length = expressions.length; i < length; i++) {
-								Expression initExpr = expressions[i];
+							for (Expression initExpr : expressions) {
 								if ((initExpr.bits & Binding.VARIABLE) == Binding.FIELD) {
 									FieldBinding field = ((Reference) initExpr).fieldBinding();
 									if (field != null && field.declaringClass.id == T_JavaLangAnnotationElementType) {
@@ -383,11 +382,9 @@ public abstract class Annotation extends Expression {
 			case TypeIds.T_JdkInternalPreviewFeature :
 				tagBits |= TagBits.AnnotationPreviewFeature;
 				for (MemberValuePair memberValuePair : memberValuePairs()) {
-					if (CharOperation.equals(memberValuePair.name, TypeConstants.ESSENTIAL_API)) {
-						if (memberValuePair.value instanceof TrueLiteral) {
-							tagBits |= TagBits.EssentialAPI;
-						}
-					}
+					if (CharOperation.equals(memberValuePair.name, TypeConstants.ESSENTIAL_API) && memberValuePair.value instanceof TrueLiteral) {
+                    	tagBits |= TagBits.EssentialAPI;
+                    }
 				}
 				break;
 			// marker annotations
@@ -474,18 +471,16 @@ public abstract class Annotation extends Expression {
 	 * <b>pre:</b> null annotation analysis is enabled
 	 */
 	public static int nullLocationBitsFromAnnotationValue(Object value) {
-		if (value instanceof Object[]) {
-			if (((Object[]) value).length == 0) {					// ({})
-				return Binding.NULL_UNSPECIFIED_BY_DEFAULT;
-			} else {												// ({vals...})
-				int bits = 0;
-				for (Object single : (Object[])value)
-					bits |= evaluateDefaultNullnessLocation(single);
-				return bits;
-			}
-		} else {													// (val)
+		if (!(value instanceof Object[])) {													// (val)
 			return evaluateDefaultNullnessLocation(value);
 		}
+        if (((Object[]) value).length == 0) {					// ({})
+        	return Binding.NULL_UNSPECIFIED_BY_DEFAULT;
+        }
+        int bits = 0;
+        for (Object single : (Object[])value)
+        	bits |= evaluateDefaultNullnessLocation(single);
+        return bits;
 	}
 
 	private static int evaluateDefaultNullnessLocation(Object value) {
@@ -533,18 +528,16 @@ public abstract class Annotation extends Expression {
 	}
 
 	public static int nullLocationBitsFromElementTypeAnnotationValue(Object value) {
-		if (value instanceof Object[]) {
-			if (((Object[]) value).length == 0) {					// ({})
-				return Binding.NULL_UNSPECIFIED_BY_DEFAULT;
-			} else {												// ({vals...})
-				int bits = 0;
-				for (Object single : (Object[])value)
-					bits |= evaluateElementTypeNullnessLocation(single);
-				return bits;
-			}
-		} else {													// (val)
+		if (!(value instanceof Object[])) {													// (val)
 			return evaluateElementTypeNullnessLocation(value);
 		}
+        if (((Object[]) value).length == 0) {					// ({})
+        	return Binding.NULL_UNSPECIFIED_BY_DEFAULT;
+        }
+        int bits = 0;
+        for (Object single : (Object[])value)
+        	bits |= evaluateElementTypeNullnessLocation(single);
+        return bits;
 	}
 
 	private static int evaluateElementTypeNullnessLocation(Object value) {
@@ -580,11 +573,11 @@ public abstract class Annotation extends Expression {
 		if ((tagBits & TagBits.AnnotationRuntimeRetention) == TagBits.AnnotationRuntimeRetention) {
 			// TagBits.AnnotationRuntimeRetention combines both TagBits.AnnotationClassRetention & TagBits.AnnotationSourceRetention
 			return new String(UPPER_RUNTIME);
-		} else if ((tagBits & TagBits.AnnotationSourceRetention) != 0) {
-			return new String(UPPER_SOURCE);
-		} else {
-			return new String(TypeConstants.UPPER_CLASS);
 		}
+        if ((tagBits & TagBits.AnnotationSourceRetention) != 0) {
+			return new String(UPPER_SOURCE);
+		}
+        return new String(TypeConstants.UPPER_CLASS);
 	}
 
 	private static long getAnnotationRetention(ReferenceBinding binding) {
@@ -617,8 +610,7 @@ public abstract class Annotation extends Expression {
 	public static void checkContainerAnnotationType(ASTNode culpritNode, BlockScope scope, ReferenceBinding containerAnnotationType, ReferenceBinding repeatableAnnotationType, boolean useSite) {
 		MethodBinding[] annotationMethods = containerAnnotationType.methods();
 		boolean sawValue = false;
-		for (int i = 0, length = annotationMethods.length; i < length; ++i) {
-			MethodBinding method = annotationMethods[i];
+		for (MethodBinding method : annotationMethods) {
 			if (CharOperation.equals(method.selector, TypeConstants.VALUE)) {
 				sawValue = true;
 				if (method.returnType.isArrayType() && method.returnType.dimensions() == 1) {
@@ -627,13 +619,11 @@ public abstract class Annotation extends Expression {
 				}
 				repeatableAnnotationType.tagAsHavingDefectiveContainerType();
 				scope.problemReporter().containerAnnotationTypeHasWrongValueType(culpritNode, containerAnnotationType, repeatableAnnotationType, method.returnType);
-			} else {
-				// Not the value() - must have default (or else isn't suitable as container)
-				if ((method.modifiers & ClassFileConstants.AccAnnotationDefault) == 0) {
-					repeatableAnnotationType.tagAsHavingDefectiveContainerType();
-					scope.problemReporter().containerAnnotationTypeHasNonDefaultMembers(culpritNode, containerAnnotationType, method.selector);
-				}
-			}
+			} else // Not the value() - must have default (or else isn't suitable as container)
+            if ((method.modifiers & ClassFileConstants.AccAnnotationDefault) == 0) {
+            	repeatableAnnotationType.tagAsHavingDefectiveContainerType();
+            	scope.problemReporter().containerAnnotationTypeHasNonDefaultMembers(culpritNode, containerAnnotationType, method.selector);
+            }
 		}
 		if (!sawValue) {
 			repeatableAnnotationType.tagAsHavingDefectiveContainerType();
@@ -693,7 +683,7 @@ public abstract class Annotation extends Expression {
 				}
 				void checkAnnotationType(char[] targetName) {
 					if ((containerAnnotationTypeTargets & TagBits.AnnotationForAnnotationType) != 0 &&
-							((targets & (TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType))) == 0) {
+							(targets & (TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType)) == 0) {
 						add(targetName);
 					}
 				}
@@ -756,11 +746,9 @@ public abstract class Annotation extends Expression {
 		long metaTagBits = annotationBinding.getAnnotationTagBits(); // could be forward reference
 
 		// we need to filter out only "pure" type use and type parameter annotations, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=392119
-		if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0) {
-			if ((metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0) {  // not a hybrid target.
-				return false;
-			}
-		}
+		if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0 && (metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0) {  // not a hybrid target.
+        	return false;
+        }
 
 		if ((metaTagBits & TagBits.AnnotationRetentionMASK) == 0)
 			return true; // by default the retention is CLASS
@@ -775,11 +763,9 @@ public abstract class Annotation extends Expression {
 		}
 		long metaTagBits = annotationBinding.getAnnotationTagBits(); // could be forward reference
 
-		if ((metaTagBits & (TagBits.AnnotationTargetMASK)) != 0) {
-			if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) == 0) {
-				return false;
-			}
-		} // else: no-@Target always applicable
+		if ((metaTagBits & TagBits.AnnotationTargetMASK) != 0 && (metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) == 0) {
+        	return false;
+        } // else: no-@Target always applicable
 
 		if ((metaTagBits & TagBits.AnnotationRetentionMASK) == 0)
 			return true; // by default the retention is CLASS
@@ -794,12 +780,8 @@ public abstract class Annotation extends Expression {
 		}
 		long metaTagBits = annotationBinding.getAnnotationTagBits();
 
-		if ((metaTagBits & (TagBits.AnnotationTargetMASK)) != 0) {
-			if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) == 0) {
-				return false;
-			}
-		} // else: no-@Target always applicable
-		if ((metaTagBits & TagBits.AnnotationRetentionMASK) == 0)
+		 // else: no-@Target always applicable
+		if ((metaTagBits & TagBits.AnnotationTargetMASK) != 0 && (metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) == 0 || (metaTagBits & TagBits.AnnotationRetentionMASK) == 0)
 			return false; // by default the retention is CLASS
 
 		return (metaTagBits & TagBits.AnnotationRetentionMASK) == TagBits.AnnotationRuntimeRetention;
@@ -812,12 +794,7 @@ public abstract class Annotation extends Expression {
 		}
 		long metaTagBits = annotationBinding.getAnnotationTagBits();
 		// we need to filter out only "pure" type use and type parameter annotations, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=392119
-		if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0) {
-			if ((metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0) { // not a hybrid target.
-				return false;
-			}
-		}
-		if ((metaTagBits & TagBits.AnnotationRetentionMASK) == 0)
+		if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0 && (metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0 || (metaTagBits & TagBits.AnnotationRetentionMASK) == 0)
 			return false; // by default the retention is CLASS
 
 		return (metaTagBits & TagBits.AnnotationRetentionMASK) == TagBits.AnnotationRuntimeRetention;
@@ -843,18 +820,18 @@ public abstract class Annotation extends Expression {
 					ArrayInitializer initializer = (ArrayInitializer) value;
 					Expression[] inits = initializer.expressions;
 					if (inits != null) {
-						for (int j = 0, initsLength = inits.length; j < initsLength; j++) {
-							Constant cst = inits[j].constant;
+						for (Expression init2 : inits) {
+							Constant cst = init2.constant;
 							if (cst != Constant.NotAConstant && cst.typeID() == T_JavaLangString) {
 								IrritantSet irritants = CompilerOptions.warningTokenToIrritants(cst.stringValue());
 								if (irritants != null) {
 									if (suppressWarningIrritants == null) {
 										suppressWarningIrritants = new IrritantSet(irritants);
 									} else if (suppressWarningIrritants.set(irritants) == null) {
-											scope.problemReporter().unusedWarningToken(inits[j]);
+											scope.problemReporter().unusedWarningToken(init2);
 									}
 								} else {
-									scope.problemReporter().unhandledWarningToken(inits[j]);
+									scope.problemReporter().unhandledWarningToken(init2);
 								}
 							}
 						}
@@ -1147,13 +1124,11 @@ public abstract class Annotation extends Expression {
 				MemberValuePair pair = pairs[j];
 				if (pair == null) continue nextPair;
 				char[] name = pair.name;
-				if (CharOperation.equals(name, selector)) {
-					if (valueAttribute == null && CharOperation.equals(name, TypeConstants.VALUE)) {
-						valueAttribute = pair;
-						pair.binding = method;
-						pair.resolveTypeExpecting(scope, method.returnType);
-					}
-				}
+				if (CharOperation.equals(name, selector) && valueAttribute == null && CharOperation.equals(name, TypeConstants.VALUE)) {
+                	valueAttribute = pair;
+                	pair.binding = method;
+                	pair.resolveTypeExpecting(scope, method.returnType);
+                }
 			}
 		}
 		// recognize standard annotations ?
@@ -1170,18 +1145,14 @@ public abstract class Annotation extends Expression {
 			case Binding.PACKAGE :
 				if ((metaTagBits & TagBits.AnnotationForPackage) != 0)
 					return AnnotationTargetAllowed.YES;
-				else if (scope.compilerOptions().sourceLevel <= ClassFileConstants.JDK1_6) {
+                if (scope.compilerOptions().sourceLevel <= ClassFileConstants.JDK1_6) {
 					SourceTypeBinding sourceType = (SourceTypeBinding) recipient;
 					if (CharOperation.equals(sourceType.sourceName, TypeConstants.PACKAGE_INFO_NAME))
 						return AnnotationTargetAllowed.YES;
 				}
 				break;
 			case Binding.TYPE_USE :
-				if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
-					// jsr 308
-					return AnnotationTargetAllowed.YES;
-				}
-				if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) {
+				if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0 || scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) {
 					// already reported as syntax error; don't report secondary problems
 					return AnnotationTargetAllowed.YES;
 				}
@@ -1191,11 +1162,8 @@ public abstract class Annotation extends Expression {
 				if (recipient.isAnnotationType()) {
 					if ((metaTagBits & (TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0)
 					return AnnotationTargetAllowed.YES;
-				} else if ((metaTagBits & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0) {
+				} else if ((metaTagBits & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0 || (metaTagBits & TagBits.AnnotationForPackage) != 0 && CharOperation.equals(((ReferenceBinding) recipient).sourceName, TypeConstants.PACKAGE_INFO_NAME)) {
 					return AnnotationTargetAllowed.YES;
-				} else if ((metaTagBits & TagBits.AnnotationForPackage) != 0) {
-					if (CharOperation.equals(((ReferenceBinding) recipient).sourceName, TypeConstants.PACKAGE_INFO_NAME))
-						return AnnotationTargetAllowed.YES;
 				}
 				break;
 			case Binding.METHOD :
@@ -1210,29 +1178,29 @@ public abstract class Annotation extends Expression {
 					MethodDeclaration methodDecl = (MethodDeclaration) sourceType.scope.referenceContext.declarationOf(methodBinding);
 					if (isTypeUseCompatible(methodDecl.returnType, scope)) {
 						return AnnotationTargetAllowed.YES;
-					} else {
-						return AnnotationTargetAllowed.TYPE_ANNOTATION_ON_QUALIFIED_NAME;
 					}
+                    return AnnotationTargetAllowed.TYPE_ANNOTATION_ON_QUALIFIED_NAME;
 				}
 				break;
 			case Binding.FIELD :
 				if ((metaTagBits & TagBits.AnnotationForField) != 0) {
 					return AnnotationTargetAllowed.YES;
-				} else if (((FieldBinding) recipient).isRecordComponent()){
+				}
+                if (((FieldBinding) recipient).isRecordComponent()){
 					long recordComponentMask = TagBits.AnnotationForRecordComponent |
 							TagBits.AnnotationForMethod |
 							TagBits.AnnotationForParameter |
 							TagBits.AnnotationForTypeUse;
 					return (metaTagBits & recordComponentMask) != 0 ? AnnotationTargetAllowed.YES : AnnotationTargetAllowed.NO;
-				} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
+				}
+                if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
 					FieldBinding sourceField = (FieldBinding) recipient;
 					SourceTypeBinding sourceType = (SourceTypeBinding) sourceField.declaringClass;
 					FieldDeclaration fieldDeclaration = sourceType.scope.referenceContext.declarationOf(sourceField);
 					if (isTypeUseCompatible(fieldDeclaration.type, scope)) {
 						return AnnotationTargetAllowed.YES;
-					} else {
-						return AnnotationTargetAllowed.TYPE_ANNOTATION_ON_QUALIFIED_NAME;
 					}
+                    return AnnotationTargetAllowed.TYPE_ANNOTATION_ON_QUALIFIED_NAME;
 				}
 				break;
 			case Binding.RECORD_COMPONENT :
@@ -1254,23 +1222,23 @@ public abstract class Annotation extends Expression {
 				if ((localVariableBinding.tagBits & TagBits.IsArgument) != 0) {
 					if ((metaTagBits & TagBits.AnnotationForParameter) != 0) {
 						return AnnotationTargetAllowed.YES;
-					} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
+					}
+                    if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
 						if (isTypeUseCompatible(localVariableBinding.declaration.type, scope)) {
 							return AnnotationTargetAllowed.YES;
-						} else {
-							return AnnotationTargetAllowed.TYPE_ANNOTATION_ON_QUALIFIED_NAME;
 						}
+                        return AnnotationTargetAllowed.TYPE_ANNOTATION_ON_QUALIFIED_NAME;
 					}
 				} else if ((annotationType.tagBits & TagBits.AnnotationForLocalVariable) != 0) {
 					return AnnotationTargetAllowed.YES;
 				} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
 					if (localVariableBinding.declaration.isTypeNameVar(scope)) {
 						return AnnotationTargetAllowed.NO;
-					} else if (isTypeUseCompatible(localVariableBinding.declaration.type, scope)) {
-						return AnnotationTargetAllowed.YES;
-					} else {
-						return AnnotationTargetAllowed.TYPE_ANNOTATION_ON_QUALIFIED_NAME;
 					}
+                    if (isTypeUseCompatible(localVariableBinding.declaration.type, scope)) {
+						return AnnotationTargetAllowed.YES;
+					}
+                    return AnnotationTargetAllowed.TYPE_ANNOTATION_ON_QUALIFIED_NAME;
 				}
 				break;
 			case Binding.TYPE_PARAMETER : // jsr308
@@ -1280,7 +1248,7 @@ public abstract class Annotation extends Expression {
 				}
 				break;
 			case Binding.MODULE:
-				if ((metaTagBits & (TagBits.AnnotationForModule)) != 0) {
+				if ((metaTagBits & TagBits.AnnotationForModule) != 0) {
 					return AnnotationTargetAllowed.YES;
 				}
 				break;
@@ -1306,20 +1274,18 @@ public abstract class Annotation extends Expression {
 
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391201
 		if ((metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0
-				&& (metaTagBits & (TagBits.AnnotationForTypeUse | TagBits.AnnotationForTypeParameter)) != 0) {
-			if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) {
-				switch (kind) {
-					case Binding.PACKAGE :
-					case Binding.TYPE :
-					case Binding.GENERIC_TYPE :
-					case Binding.METHOD :
-					case Binding.FIELD :
-					case Binding.LOCAL :
-					case Binding.RECORD_COMPONENT :
-						scope.problemReporter().invalidUsageOfTypeAnnotations(annotation);
-				}
-			}
-		}
+        		&& (metaTagBits & (TagBits.AnnotationForTypeUse | TagBits.AnnotationForTypeParameter)) != 0 && scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) {
+        	switch (kind) {
+        		case Binding.PACKAGE :
+        		case Binding.TYPE :
+        		case Binding.GENERIC_TYPE :
+        		case Binding.METHOD :
+        		case Binding.FIELD :
+        		case Binding.LOCAL :
+        		case Binding.RECORD_COMPONENT :
+        			scope.problemReporter().invalidUsageOfTypeAnnotations(annotation);
+        	}
+        }
 		return isAnnotationTargetAllowed(annotation.recipient, scope, annotationType, kind, metaTagBits);
 	}
 
@@ -1360,8 +1326,7 @@ public abstract class Annotation extends Expression {
 		TypeBinding elementsType = array.elementsType();
 		if (! elementsType.isRepeatableAnnotationType()) return; // Can't be a problem, then
 
-		for (int i= 0; i < sourceAnnotations.length; ++i) {
-			Annotation annotation = sourceAnnotations[i];
+		for (Annotation annotation : sourceAnnotations) {
 			if (TypeBinding.equalsEquals(elementsType, annotation.resolvedType)) {
 				scope.problemReporter().repeatableAnnotationWithRepeatingContainer(annotation, repeatedAnnotationType);
 				return; // One is enough for this annotation type
@@ -1381,9 +1346,7 @@ public abstract class Annotation extends Expression {
 
 	// Complain if an attempt to annotate the enclosing type of a static member type is being made.
 	public static void isTypeUseCompatible(TypeReference reference, Scope scope, Annotation[] annotations) {
-		if (annotations == null || reference == null || reference.getAnnotatableLevels() == 1)
-			return;
-		if (scope.environment().globalOptions.sourceLevel < ClassFileConstants.JDK1_8)
+		if (annotations == null || reference == null || reference.getAnnotatableLevels() == 1 || scope.environment().globalOptions.sourceLevel < ClassFileConstants.JDK1_8)
 			return;
 
 		TypeBinding resolvedType = reference.resolvedType == null ? null : reference.resolvedType.leafComponentType();
@@ -1391,8 +1354,7 @@ public abstract class Annotation extends Expression {
 			return;
 
 		nextAnnotation:
-			for (int i = 0, annotationsLength = annotations.length; i < annotationsLength; i++) {
-				Annotation annotation = annotations[i];
+			for (Annotation annotation : annotations) {
 				long metaTagBits = annotation.resolvedType.getAnnotationTagBits();
 				if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0 && (metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0) {
 					ReferenceBinding currentType = (ReferenceBinding) resolvedType;
@@ -1400,12 +1362,11 @@ public abstract class Annotation extends Expression {
 						if (currentType.isStatic()) {
 							QualifiedTypeReference.rejectAnnotationsOnStaticMemberQualififer(scope, currentType, new Annotation [] { annotation });
 							continue nextAnnotation;
-						} else {
-							if (annotation.hasNullBit(TypeIds.BitNonNullAnnotation|TypeIds.BitNullableAnnotation)) {
-								scope.problemReporter().nullAnnotationAtQualifyingType(annotation);
-								continue nextAnnotation;
-							}
 						}
+                        if (annotation.hasNullBit(TypeIds.BitNonNullAnnotation|TypeIds.BitNullableAnnotation)) {
+                        	scope.problemReporter().nullAnnotationAtQualifyingType(annotation);
+                        	continue nextAnnotation;
+                        }
 						currentType = currentType.enclosingType();
 					}
 				}

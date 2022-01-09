@@ -18,7 +18,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -95,8 +94,8 @@ public boolean contains(IResource resource) {
 	} catch (JavaModelException e) {
 		return false;
 	}
-	for (int i = 0, length = projects.length; i < length; i++) {
-		JavaProject project = (JavaProject)projects[i];
+	for (IJavaProject project2 : projects) {
+		JavaProject project = (JavaProject)project2;
 		if (!project.contains(resource)) {
 			return false;
 		}
@@ -373,9 +372,7 @@ public static Object getExternalTarget(IPath path, boolean checkResourceExistenc
 		return linkedFolder;
 	}
 	File externalFile = new File(path.toOSString());
-	if (!checkResourceExistence) {
-		return externalFile;
-	} else if (isExternalFile(path)) {
+	if (!checkResourceExistence || isExternalFile(path)) {
 		return externalFile;
 	}
 	return null;

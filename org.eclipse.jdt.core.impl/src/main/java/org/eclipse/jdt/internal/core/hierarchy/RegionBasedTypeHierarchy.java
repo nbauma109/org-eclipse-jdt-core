@@ -42,8 +42,8 @@ public RegionBasedTypeHierarchy(IRegion region, ICompilationUnit[] workingCopies
 
 	Region newRegion = new Region();
 	IJavaElement[] elements = region.getElements();
-	for (int i = 0, length = elements.length; i < length; i++) {
-		newRegion.add(elements[i]);
+	for (IJavaElement element : elements) {
+		newRegion.add(element);
 
 	}
 	this.region = newRegion;
@@ -57,8 +57,7 @@ public RegionBasedTypeHierarchy(IRegion region, ICompilationUnit[] workingCopies
 protected void initializeRegions() {
 	super.initializeRegions();
 	IJavaElement[] roots = this.region.getElements();
-	for (int i = 0; i < roots.length; i++) {
-		IJavaElement root = roots[i];
+	for (IJavaElement root : roots) {
 		if (root instanceof IOpenable) {
 			this.files.put((IOpenable) root, new ArrayList<IType>());
 		} else {
@@ -88,9 +87,8 @@ protected boolean isAffectedByOpenable(IJavaElementDelta delta, IJavaElement ele
 	// if no focus, hierarchy is affected if the element is part of the region
 	if (this.focusType == null) {
 		return this.region.contains(element);
-	} else {
-		return super.isAffectedByOpenable(delta, element, eventType);
 	}
+    return super.isAffectedByOpenable(delta, element, eventType);
 }
 /**
  * Returns the java project this hierarchy was created in.
@@ -111,11 +109,10 @@ private boolean pruneDeadBranches(IType type) {
 	if (subtypes == null) return true;
 	pruneDeadBranches(subtypes.copy().elements());
 	subtypes = this.typeToSubtypes.get(type);
-	return (subtypes == null || subtypes.size == 0);
+	return subtypes == null || subtypes.size == 0;
 }
 private void pruneDeadBranches(IType[] types) {
-	for (int i = 0, length = types.length; i < length; i++) {
-		IType type = types[i];
+	for (IType type : types) {
 		if (pruneDeadBranches(type) && !this.region.contains(type)) {
 			removeType(type);
 		}
@@ -129,8 +126,8 @@ protected void removeType(IType type) {
 	IType[] subtypes = getSubtypes(type);
 	this.typeToSubtypes.remove(type);
 	if (subtypes != null) {
-		for (int i= 0; i < subtypes.length; i++) {
-			removeType(subtypes[i]);
+		for (IType subtype : subtypes) {
+			removeType(subtype);
 		}
 	}
 	IType superclass = this.classToSuperclass.remove(type);
@@ -140,8 +137,7 @@ protected void removeType(IType type) {
 	}
 	IType[] superinterfaces = this.typeToSuperInterfaces.remove(type);
 	if (superinterfaces != null) {
-		for (int i = 0, length = superinterfaces.length; i < length; i++) {
-			IType superinterface = superinterfaces[i];
+		for (IType superinterface : superinterfaces) {
 			TypeVector types = this.typeToSubtypes.get(superinterface);
 			if (types != null) types.remove(type);
 		}

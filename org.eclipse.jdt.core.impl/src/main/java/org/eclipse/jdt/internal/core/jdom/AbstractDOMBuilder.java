@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.core.util.ReferenceInfoAdapter;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class AbstractDOMBuilder extends ReferenceInfoAdapter implements ILineStartFinder {
 	/**
@@ -55,7 +56,7 @@ public class AbstractDOMBuilder extends ReferenceInfoAdapter implements ILineSta
 	/**
 	 * The source positions of all of the line separators in the document.
 	 */
-	protected int[] fLineStartPositions = new int[] { 0 };
+	protected int[] fLineStartPositions = { 0 };
 
 	/**
 	 * A stack of enclosing scopes used when constructing
@@ -80,7 +81,6 @@ public class AbstractDOMBuilder extends ReferenceInfoAdapter implements ILineSta
  * AbstractDOMBuilder constructor.
  */
 public AbstractDOMBuilder() {
-	super();
 }
 /**
  * Accepts the line separator table and converts it into a line start table.
@@ -99,21 +99,12 @@ public void acceptLineSeparatorPositions(int[] positions) {
 			for (int i = 0; i < length; i++) {
 				int iPlusOne = i + 1;
 				int positionPlusOne = positions[i] + 1;
-				if (positionPlusOne < documentLength) {
-					if (iPlusOne < length) {
-						// more separators
-						this.fLineStartPositions[iPlusOne] = positionPlusOne;
-					} else {
-						// no more separators
-						if (this.fDocument[positionPlusOne] == '\n') {
-							this.fLineStartPositions[iPlusOne] = positionPlusOne + 1;
-						} else {
-							this.fLineStartPositions[iPlusOne] = positionPlusOne;
-						}
-					}
-				} else {
-					this.fLineStartPositions[iPlusOne] = positionPlusOne;
-				}
+				if (positionPlusOne >= documentLength || iPlusOne < length || this.fDocument[positionPlusOne] != '\n') {
+                	// more separators
+                	this.fLineStartPositions[iPlusOne] = positionPlusOne;
+                } else {
+                	this.fLineStartPositions[iPlusOne] = positionPlusOne + 1;
+                }
 			}
 		}
 	}

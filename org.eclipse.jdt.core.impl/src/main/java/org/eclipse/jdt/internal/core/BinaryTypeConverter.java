@@ -77,7 +77,7 @@ public class BinaryTypeConverter extends TypeConverter {
 					name = reader.utf8At(utf8Offset + 3, reader.u2At(utf8Offset + 1));
 					break;
 			}
-			if (name == null || (name.length > 0 && name[0] == '['))
+			if (name == null || name.length > 0 && name[0] == '[')
 				break; // skip over array references
 			this.typeNames.add(CharOperation.splitOn('/', name));
 		}
@@ -87,8 +87,7 @@ public class BinaryTypeConverter extends TypeConverter {
 		ImportReference[] imports = new ImportReference[typeNamesLength];
 		char[][][] set = this.typeNames.set;
 		int index = 0;
-		for (int i = 0, length = set.length; i < length; i++) {
-			char[][] typeName = set[i];
+		for (char[][] typeName : set) {
 			if (typeName != null) {
 				imports[index++] = new ImportReference(typeName, new long[typeName.length]/*dummy positions*/, false/*not on demand*/, 0);
 			}
@@ -187,7 +186,7 @@ public class BinaryTypeConverter extends TypeConverter {
 		String[] argumentNames = method.getParameterNames();
 		int argumentCount = argumentTypeNames == null ? 0 : argumentTypeNames.length;
 		// Ignore synthetic arguments (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212224)
-		int startIndex = (method.isConstructor() && type.isMember() && !Flags.isStatic(type.getFlags())) ? 1 : 0;
+		int startIndex = method.isConstructor() && type.isMember() && !Flags.isStatic(type.getFlags()) ? 1 : 0;
 		argumentCount -= startIndex;
 		methodDeclaration.arguments = new Argument[argumentCount];
 		for (int i = 0; i < argumentCount; i++) {
@@ -336,7 +335,7 @@ public class BinaryTypeConverter extends TypeConverter {
 				if (isAbstract) {
 					hasAbstractMethods = true;
 				}
-				typeDeclaration.methods[neededCount + (count++)] = method;
+				typeDeclaration.methods[neededCount + count++] = method;
 			}
 		}
 		if (count != methodCount) {

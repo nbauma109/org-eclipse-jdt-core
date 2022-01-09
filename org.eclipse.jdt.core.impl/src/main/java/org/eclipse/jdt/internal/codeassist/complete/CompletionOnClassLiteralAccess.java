@@ -60,7 +60,6 @@ public class CompletionOnClassLiteralAccess extends ClassLiteralAccess {
 
 		if (super.resolveType(scope) == null)
 			throw new CompletionNodeFound();
-		else
-			throw new CompletionNodeFound(this, this.targetType, scope);
+        throw new CompletionNodeFound(this, this.targetType, scope);
 	}
 }

@@ -78,7 +78,7 @@ final class PromiseImpl<T> implements Promise<T> {
 	 * Initialize this Promise.
 	 */
 	PromiseImpl() {
-		callbacks = new ConcurrentLinkedQueue<Runnable>();
+		callbacks = new ConcurrentLinkedQueue<>();
 		resolved = new CountDownLatch(1);
 	}
 
@@ -91,7 +91,7 @@ final class PromiseImpl<T> implements Promise<T> {
 	PromiseImpl(T v, Throwable f) {
 		value = v;
 		fail = f;
-		callbacks = new ConcurrentLinkedQueue<Runnable>();
+		callbacks = new ConcurrentLinkedQueue<>();
 		resolved = new CountDownLatch(0);
 	}
 
@@ -144,14 +144,16 @@ final class PromiseImpl<T> implements Promise<T> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean isDone() {
+	@Override
+    public boolean isDone() {
 		return resolved.getCount() == 0;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public T getValue() throws InvocationTargetException, InterruptedException {
+	@Override
+    public T getValue() throws InvocationTargetException, InterruptedException {
 		resolved.await();
 		if (fail == null) {
 			return value;
@@ -162,7 +164,8 @@ final class PromiseImpl<T> implements Promise<T> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Throwable getFailure() throws InterruptedException {
+	@Override
+    public Throwable getFailure() throws InterruptedException {
 		resolved.await();
 		return fail;
 	}
@@ -170,7 +173,8 @@ final class PromiseImpl<T> implements Promise<T> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Promise<T> onResolve(Runnable callback) {
+	@Override
+    public Promise<T> onResolve(Runnable callback) {
 		callbacks.offer(callback);
 		notifyCallbacks(); // call any registered callbacks
 		return this;
@@ -179,16 +183,18 @@ final class PromiseImpl<T> implements Promise<T> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public <R> Promise<R> then(Success<? super T, ? extends R> success, Failure failure) {
-		PromiseImpl<R> chained = new PromiseImpl<R>();
-		onResolve(new Then<R>(chained, success, failure));
+	@Override
+    public <R> Promise<R> then(Success<? super T, ? extends R> success, Failure failure) {
+		PromiseImpl<R> chained = new PromiseImpl<>();
+		onResolve(new Then<>(chained, success, failure));
 		return chained;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public <R> Promise<R> then(Success<? super T, ? extends R> success) {
+	@Override
+    public <R> Promise<R> then(Success<? super T, ? extends R> success) {
 		return then(success, null);
 	}
 
@@ -210,7 +216,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			this.failure = failure;
 		}
 
-		public void run() {
+		@Override
+        public void run() {
 			Throwable f;
 			final boolean interrupted = Thread.interrupted();
 			try {
@@ -248,7 +255,7 @@ final class PromiseImpl<T> implements Promise<T> {
 				chained.resolve(null, null);
 			} else {
 				// resolve chained when returned promise is resolved
-				returned.onResolve(new Chain<R>(chained, returned));
+				returned.onResolve(new Chain<>(chained, returned));
 			}
 		}
 	}
@@ -276,7 +283,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			this.failure = failure;
 		}
 
-		public void run() {
+		@Override
+        public void run() {
 			R value = null;
 			Throwable f;
 			final boolean interrupted = Thread.interrupted();
@@ -318,7 +326,7 @@ final class PromiseImpl<T> implements Promise<T> {
 	 *         resolved.
 	 */
 	Promise<Void> resolveWith(Promise<? extends T> with) {
-		PromiseImpl<Void> chained = new PromiseImpl<Void>();
+		PromiseImpl<Void> chained = new PromiseImpl<>();
 		ResolveWith resolveWith = new ResolveWith(chained);
 		with.then(resolveWith, resolveWith);
 		return chained;
@@ -337,7 +345,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			this.chained = chained;
 		}
 
-		public Promise<Void> call(Promise<T> with) throws Exception {
+		@Override
+        public Promise<Void> call(Promise<T> with) throws Exception {
 			try {
 				resolve(with.getValue(), null);
 			} catch (Throwable e) {
@@ -348,7 +357,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			return null;
 		}
 
-		public void fail(Promise<?> with) throws Exception {
+		@Override
+        public void fail(Promise<?> with) throws Exception {
 			try {
 				resolve(null, with.getFailure());
 			} catch (Throwable e) {
@@ -362,7 +372,8 @@ final class PromiseImpl<T> implements Promise<T> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Promise<T> filter(Predicate<? super T> predicate) {
+	@Override
+    public Promise<T> filter(Predicate<? super T> predicate) {
 		return then(new Filter<T>(predicate));
 	}
 
@@ -378,7 +389,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			this.predicate = requireNonNull(predicate);
 		}
 
-		public Promise<T> call(Promise<T> resolved) throws Exception {
+		@Override
+        public Promise<T> call(Promise<T> resolved) throws Exception {
 			if (predicate.test(resolved.getValue())) {
 				return resolved;
 			}
@@ -389,7 +401,8 @@ final class PromiseImpl<T> implements Promise<T> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public <R> Promise<R> map(Function<? super T, ? extends R> mapper) {
+	@Override
+    public <R> Promise<R> map(Function<? super T, ? extends R> mapper) {
 		return then(new Map<T, R>(mapper));
 	}
 
@@ -405,15 +418,17 @@ final class PromiseImpl<T> implements Promise<T> {
 			this.mapper = requireNonNull(mapper);
 		}
 
-		public Promise<R> call(Promise<T> resolved) throws Exception {
-			return new PromiseImpl<R>(mapper.apply(resolved.getValue()), null);
+		@Override
+        public Promise<R> call(Promise<T> resolved) throws Exception {
+			return new PromiseImpl<>(mapper.apply(resolved.getValue()), null);
 		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public <R> Promise<R> flatMap(Function<? super T, Promise<? extends R>> mapper) {
+	@Override
+    public <R> Promise<R> flatMap(Function<? super T, Promise<? extends R>> mapper) {
 		return then(new FlatMap<T, R>(mapper));
 	}
 
@@ -429,7 +444,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			this.mapper = requireNonNull(mapper);
 		}
 
-		@SuppressWarnings("unchecked")
+		@Override
+        @SuppressWarnings("unchecked")
 		public Promise<R> call(Promise<T> resolved) throws Exception {
 			return (Promise<R>) mapper.apply(resolved.getValue());
 		}
@@ -438,9 +454,10 @@ final class PromiseImpl<T> implements Promise<T> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Promise<T> recover(Function<Promise<?>, ? extends T> recovery) {
-		PromiseImpl<T> chained = new PromiseImpl<T>();
-		Recover<T> recover = new Recover<T>(chained, recovery);
+	@Override
+    public Promise<T> recover(Function<Promise<?>, ? extends T> recovery) {
+		PromiseImpl<T> chained = new PromiseImpl<>();
+		Recover<T> recover = new Recover<>(chained, recovery);
 		then(recover, recover);
 		return chained;
 	}
@@ -459,7 +476,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			this.recovery = requireNonNull(recovery);
 		}
 
-		public Promise<Void> call(Promise<T> resolved) throws Exception {
+		@Override
+        public Promise<Void> call(Promise<T> resolved) throws Exception {
 			T value;
 			try {
 				value = resolved.getValue();
@@ -471,7 +489,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			return null;
 		}
 
-		public void fail(Promise<?> resolved) throws Exception {
+		@Override
+        public void fail(Promise<?> resolved) throws Exception {
 			T recovered;
 			Throwable failure;
 			try {
@@ -492,9 +511,10 @@ final class PromiseImpl<T> implements Promise<T> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Promise<T> recoverWith(Function<Promise<?>, Promise<? extends T>> recovery) {
-		PromiseImpl<T> chained = new PromiseImpl<T>();
-		RecoverWith<T> recoverWith = new RecoverWith<T>(chained, recovery);
+	@Override
+    public Promise<T> recoverWith(Function<Promise<?>, Promise<? extends T>> recovery) {
+		PromiseImpl<T> chained = new PromiseImpl<>();
+		RecoverWith<T> recoverWith = new RecoverWith<>(chained, recovery);
 		then(recoverWith, recoverWith);
 		return chained;
 	}
@@ -513,7 +533,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			this.recovery = requireNonNull(recovery);
 		}
 
-		public Promise<Void> call(Promise<T> resolved) throws Exception {
+		@Override
+        public Promise<Void> call(Promise<T> resolved) throws Exception {
 			T value;
 			try {
 				value = resolved.getValue();
@@ -525,7 +546,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			return null;
 		}
 
-		public void fail(Promise<?> resolved) throws Exception {
+		@Override
+        public void fail(Promise<?> resolved) throws Exception {
 			Promise<? extends T> recovered;
 			Throwable failure;
 			try {
@@ -538,7 +560,7 @@ final class PromiseImpl<T> implements Promise<T> {
 			if (recovered == null) {
 				chained.resolve(null, failure);
 			} else {
-				recovered.onResolve(new Chain<T>(chained, recovered));
+				recovered.onResolve(new Chain<>(chained, recovered));
 			}
 		}
 	}
@@ -546,9 +568,10 @@ final class PromiseImpl<T> implements Promise<T> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Promise<T> fallbackTo(Promise<? extends T> fallback) {
-		PromiseImpl<T> chained = new PromiseImpl<T>();
-		FallbackTo<T> fallbackTo = new FallbackTo<T>(chained, fallback);
+	@Override
+    public Promise<T> fallbackTo(Promise<? extends T> fallback) {
+		PromiseImpl<T> chained = new PromiseImpl<>();
+		FallbackTo<T> fallbackTo = new FallbackTo<>(chained, fallback);
 		then(fallbackTo, fallbackTo);
 		return chained;
 	}
@@ -567,7 +590,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			this.fallback = requireNonNull(fallback);
 		}
 
-		public Promise<Void> call(Promise<T> resolved) throws Exception {
+		@Override
+        public Promise<Void> call(Promise<T> resolved) throws Exception {
 			T value;
 			try {
 				value = resolved.getValue();
@@ -579,7 +603,8 @@ final class PromiseImpl<T> implements Promise<T> {
 			return null;
 		}
 
-		public void fail(Promise<?> resolved) throws Exception {
+		@Override
+        public void fail(Promise<?> resolved) throws Exception {
 			Throwable failure;
 			try {
 				failure = resolved.getFailure();
@@ -587,7 +612,7 @@ final class PromiseImpl<T> implements Promise<T> {
 				chained.resolve(null, e);
 				return;
 			}
-			fallback.onResolve(new Chain<T>(chained, fallback, failure));
+			fallback.onResolve(new Chain<>(chained, fallback, failure));
 		}
 	}
 

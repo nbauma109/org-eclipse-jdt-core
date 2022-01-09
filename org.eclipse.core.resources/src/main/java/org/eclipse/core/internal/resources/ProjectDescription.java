@@ -29,10 +29,10 @@ import org.eclipse.core.runtime.*;
 
 public class ProjectDescription extends ModelObject implements IProjectDescription {
 	// constants
-	private static final IBuildConfiguration[] EMPTY_BUILD_CONFIG_REFERENCE_ARRAY = new IBuildConfiguration[0];
-	private static final ICommand[] EMPTY_COMMAND_ARRAY = new ICommand[0];
-	private static final IProject[] EMPTY_PROJECT_ARRAY = new IProject[0];
-	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+	private static final IBuildConfiguration[] EMPTY_BUILD_CONFIG_REFERENCE_ARRAY = {};
+	private static final ICommand[] EMPTY_COMMAND_ARRAY = {};
+	private static final IProject[] EMPTY_PROJECT_ARRAY = {};
+	private static final String[] EMPTY_STRING_ARRAY = {};
 	private static final String EMPTY_STR = ""; //$NON-NLS-1$
 
 	protected static boolean isReading = false;
@@ -104,7 +104,6 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 	protected URI snapshotLocation = null;
 
 	public ProjectDescription() {
-		super();
 	}
 
 	@Override
@@ -482,9 +481,7 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 		if (m1.size() != m2.size())
 			return true;
 		for (Entry<String, IBuildConfiguration[]> e : m1.entrySet()) {
-			if (!m2.containsKey(e.getKey()))
-				return true;
-			if (!Arrays.equals(e.getValue(), m2.get(e.getKey())))
+			if (!m2.containsKey(e.getKey()) || !Arrays.equals(e.getValue(), m2.get(e.getKey())))
 				return true;
 		}
 		return false;
@@ -515,13 +512,10 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 		} else if (!location.equals(description.location))
 			return true;
 
-		if (!Arrays.equals(dynamicRefs, description.dynamicRefs))
-			return true;
+		
 
 		// Build Configuration state
-		if (!activeConfiguration.equals(description.activeConfiguration))
-			return true;
-		if (!Arrays.equals(configNames, description.configNames))
+		if (!Arrays.equals(dynamicRefs, description.dynamicRefs) || !activeConfiguration.equals(description.activeConfiguration) || !Arrays.equals(configNames, description.configNames))
 			return true;
 		// Configuration level references
         return configRefsHaveChanges(dynamicConfigRefs, description.dynamicConfigRefs);
@@ -533,35 +527,26 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 	 * file (.project).
 	 */
 	public boolean hasPublicChanges(ProjectDescription description) {
-		if (!getName().equals(description.getName()))
-			return true;
-		if (!comment.equals(description.getComment()))
-			return true;
+		
 		//don't bother optimizing if the order has changed
-		if (!Arrays.equals(buildSpec, description.getBuildSpec(false)))
-			return true;
-		if (!Arrays.equals(staticRefs, description.getReferencedProjects(false)))
+		if (!getName().equals(description.getName()) || !comment.equals(description.getComment()) || !Arrays.equals(buildSpec, description.getBuildSpec(false)) || !Arrays.equals(staticRefs, description.getReferencedProjects(false)))
 			return true;
 		if (!Arrays.equals(natures, description.getNatureIds(false)))
 			return true;
 
 		HashMap<IPath, LinkedList<FilterDescription>> otherFilters = description.getFilters();
-		if ((filterDescriptions == null) && (otherFilters != null))
+		if (filterDescriptions == null && otherFilters != null)
 			return otherFilters != null;
-		if ((filterDescriptions != null) && !filterDescriptions.equals(otherFilters))
+		if (filterDescriptions != null && !filterDescriptions.equals(otherFilters))
 			return true;
 
 		HashMap<String, VariableDescription> otherVariables = description.getVariables();
-		if ((variableDescriptions == null) && (otherVariables != null))
-			return true;
-		if ((variableDescriptions != null) && !variableDescriptions.equals(otherVariables))
+		if (variableDescriptions == null && otherVariables != null || variableDescriptions != null && !variableDescriptions.equals(otherVariables))
 			return true;
 
 		final HashMap<IPath, LinkDescription> otherLinks = description.getLinks();
-		if (linkDescriptions != otherLinks) {
-			if (linkDescriptions == null || !linkDescriptions.equals(otherLinks))
-				return true;
-		}
+		if (linkDescriptions != otherLinks && (linkDescriptions == null || !linkDescriptions.equals(otherLinks)))
+        	return true;
 
 		final URI otherSnapshotLoc = description.getSnapshotLocationURI();
 		if (snapshotLocation != otherSnapshotLoc) {
@@ -645,7 +630,7 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 				buildConfigNames.add(n);
 			}
 
-			if (buildConfigNames.size() == 1 && ((buildConfigNames.iterator().next())).equals(IBuildConfiguration.DEFAULT_CONFIG_NAME))
+			if (buildConfigNames.size() == 1 && buildConfigNames.iterator().next().equals(IBuildConfiguration.DEFAULT_CONFIG_NAME))
 				configNames = EMPTY_STRING_ARRAY;
 			else
 				configNames = buildConfigNames.toArray(new String[buildConfigNames.size()]);
@@ -812,19 +797,18 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 			Object oldValue = filterDescriptions.put(path, descriptions);
             //not actually changed anything
             return oldValue == null || !descriptions.equals(oldValue);
-		} else {
-			// removal
-			if (filterDescriptions == null)
-				return false;
-
-			Object oldValue = filterDescriptions.remove(path);
-			if (oldValue == null) {
-				//not actually changed anything
-				return false;
-			}
-			if (filterDescriptions.isEmpty())
-				filterDescriptions = null;
 		}
+        // removal
+        if (filterDescriptions == null)
+        	return false;
+
+        Object oldValue = filterDescriptions.remove(path);
+        if (oldValue == null) {
+        	//not actually changed anything
+        	return false;
+        }
+        if (filterDescriptions.isEmpty())
+        	filterDescriptions = null;
 		return true;
 	}
 

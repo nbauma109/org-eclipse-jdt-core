@@ -88,6 +88,7 @@ public interface PlatformAdmin {
 	 * @return a system resolver
 	 * @deprecated in favour of {@link #createResolver()}.
 	 */
+    @Deprecated
     Resolver getResolver();
 
 	/**

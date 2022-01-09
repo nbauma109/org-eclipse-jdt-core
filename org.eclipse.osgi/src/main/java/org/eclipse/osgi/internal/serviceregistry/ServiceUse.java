@@ -112,7 +112,7 @@ public class ServiceUse<S> {
 	 */
 	/* @GuardedBy("this") */
 	boolean releaseServiceObject(final S service) {
-		if ((service == null) || (service != getCachedService())) {
+		if (service == null || service != getCachedService()) {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
 		return ungetService();

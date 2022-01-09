@@ -167,7 +167,7 @@ public int getLength() {
 	synchronized (this.lock) {
 		if (this.contents == null) return -1;
 		int length = this.gapEnd - this.gapStart;
-		return (this.contents.length - length);
+		return this.contents.length - length;
 	}
 }
 /**
@@ -244,7 +244,7 @@ protected void moveAndResizeGap(int position, int size) {
 		this.gapStart = this.gapEnd = position;
 		return;
 	}
-	content = new char[this.contents.length + (size - oldSize)];
+	content = new char[this.contents.length + size - oldSize];
 	int newGapStart = position;
 	int newGapEnd = newGapStart + size;
 	if (oldSize == 0) {
@@ -354,10 +354,7 @@ public void replace(int position, int length, String text) {
 public void save(IProgressMonitor progress, boolean force) throws JavaModelException {
 
 	// determine if saving is required
-	if (isReadOnly() || this.file == null) {
-		return;
-	}
-	if (!hasUnsavedChanges())
+	if (isReadOnly() || this.file == null || !hasUnsavedChanges())
 		return;
 
 	// use a platform operation to update the resource contents
@@ -417,7 +414,7 @@ public void save(IProgressMonitor progress, boolean force) throws JavaModelExcep
 	}
 
 	// the resource no longer has unsaved changes
-	this.flags &= ~ (F_HAS_UNSAVED_CHANGES);
+	this.flags &= ~ F_HAS_UNSAVED_CHANGES;
 }
 /**
  * @see IBuffer
@@ -429,7 +426,7 @@ public void setContents(char[] newContents) {
 	if (this.contents == null) {
 		synchronized (this.lock) {
 			this.contents = newContents;
-			this.flags &= ~ (F_HAS_UNSAVED_CHANGES);
+			this.flags &= ~ F_HAS_UNSAVED_CHANGES;
 		}
 		return;
 	}
@@ -464,7 +461,7 @@ protected void setReadOnly(boolean readOnly) {
 	if (readOnly) {
 		this.flags |= F_IS_READ_ONLY;
 	} else {
-		this.flags &= ~(F_IS_READ_ONLY);
+		this.flags &= ~F_IS_READ_ONLY;
 	}
 }
 @Override

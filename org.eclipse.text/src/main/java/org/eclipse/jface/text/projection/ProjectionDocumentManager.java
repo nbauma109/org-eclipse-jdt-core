@@ -89,7 +89,7 @@ public class ProjectionDocumentManager implements IDocumentListener, ISlaveDocum
 	 * @return <code>true</code> if the given document is a master document known to this manager
 	 */
 	private boolean hasProjection(IDocument master) {
-		return (fProjectionRegistry.get(master) != null);
+		return fProjectionRegistry.get(master) != null;
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class ProjectionDocumentManager implements IDocumentListener, ISlaveDocum
 
 	@Override
 	public boolean isSlaveDocument(IDocument document) {
-		return (document instanceof ProjectionDocument);
+		return document instanceof ProjectionDocument;
 	}
 
 	@Override

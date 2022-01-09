@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.*;
 import org.eclipse.jdt.internal.compiler.env.IUpdatableModule.UpdateKind;
-import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
@@ -137,12 +136,10 @@ private void computeClasspathLocations(
 	IModule patchedModule = null;
 
 	nextEntry : for (int i = 0, l = classpathEntries.length; i < l; i++) {
-		if (i == 1) {
-			if (patchedModuleName != null) {
-				// TODO(SHMOD) assert that patchModule has been assigned
-				patchedModuleName = null; // expire, applies to the first entry, only
-			}
-		}
+		if (i == 1 && patchedModuleName != null) {
+        	// TODO(SHMOD) assert that patchModule has been assigned
+        	patchedModuleName = null; // expire, applies to the first entry, only
+        }
 		ClasspathEntry entry = (ClasspathEntry) classpathEntries[i];
 		IPath path = entry.getPath();
 		Object target = JavaModel.getTarget(path, true);
@@ -207,13 +204,13 @@ private void computeClasspathLocations(
 				JavaProject prereqJavaProject = (JavaProject) JavaCore.create(prereqProject);
 				IClasspathEntry[] prereqClasspathEntries = prereqJavaProject.getRawClasspath();
 				ArrayList seen = new ArrayList();
-				List<ClasspathLocation> projectLocations = new ArrayList<ClasspathLocation>();
+				List<ClasspathLocation> projectLocations = new ArrayList<>();
 				nextPrereqEntry: for (int j = 0, m = prereqClasspathEntries.length; j < m; j++) {
 					IClasspathEntry prereqEntry = prereqClasspathEntries[j];
 					if (prereqEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 						if ((this.compilationGroup == CompilationGroup.MAIN || entry.isWithoutTestCode()) && prereqEntry.isTest())
 							continue nextPrereqEntry;
-						IPath srcExtAnnotPath = (externalAnnotationPath != null)
+						IPath srcExtAnnotPath = externalAnnotationPath != null
 							? externalAnnotationPath
 							: ClasspathEntry.getExternalAnnotationPath(prereqEntry, javaProject.getProject(), true);
 						Object prereqTarget = JavaModel.getTarget(prereqEntry.getPath(), true);
@@ -225,7 +222,7 @@ private void computeClasspathLocations(
 								IClasspathEntry other = prereqClasspathEntries[k];
 								if (other.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 									IPath otherOutput = other.getOutputLocation();
-									if ((outputLoc == null) ? otherOutput == null : outputLoc.equals(otherOutput)) {
+									if (outputLoc == null ? otherOutput == null : outputLoc.equals(otherOutput)) {
 										srcExtAnnotPath = ClasspathEntry.getExternalAnnotationPath(other, javaProject.getProject(),  true);
 										if (srcExtAnnotPath != null)
 											break; // TODO: merging of several .eea?
@@ -295,16 +292,16 @@ private void computeClasspathLocations(
 					ClasspathLocation bLocation = null;
 					if (resource instanceof IFile) {
 						AccessRuleSet accessRuleSet =
-							(JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true))
-							&& JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true)))
+							JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true))
+							&& JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true))
 								? null
 								: entry.getAccessRuleSet();
 						bLocation = ClasspathLocation.forLibrary((IFile) resource, accessRuleSet,
 								externalAnnotationPath, allLocationsForEEA, isOnModulePath, compliance);
 					} else if (resource instanceof IContainer) {
 						AccessRuleSet accessRuleSet =
-							(JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true))
-							&& JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true)))
+							JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true))
+							&& JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true))
 								? null
 								: entry.getAccessRuleSet();
 						bLocation = ClasspathLocation.forBinaryFolder((IContainer) target, false, accessRuleSet,	// is library folder not output folder
@@ -331,8 +328,8 @@ private void computeClasspathLocations(
 					}
 				} else if (target instanceof File) {
 					AccessRuleSet accessRuleSet =
-						(JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true))
-							&& JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true)))
+						JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true))
+							&& JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true))
 								? null
 								: entry.getAccessRuleSet();
 					String release = JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_RELEASE, false)) ? compliance : null;
@@ -345,7 +342,7 @@ private void computeClasspathLocations(
 					}
 					bLocations.add(bLocation);
 					if (moduleEntries != null) {
-						Set<String> libraryLimitModules = (limitModules == null && projectModule != null) ? ClasspathJrt.NO_LIMIT_MODULES : limitModules;
+						Set<String> libraryLimitModules = limitModules == null && projectModule != null ? ClasspathJrt.NO_LIMIT_MODULES : limitModules;
 						patchedModule = collectModuleEntries(bLocation, path, isOnModulePath,
 											libraryLimitModules, patchedModuleName, patchedModule, moduleEntries);
 					}
@@ -399,8 +396,8 @@ private void computeClasspathLocations(
 			outputFolders.add(md);
 
 			// also tag each source folder whose output folder is an independent folder & is not also a source folder
-			for (int j = 0, m = this.sourceLocations.length; j < m; j++)
-				if (outputPath.equals(this.sourceLocations[j].sourceFolder.getFullPath()))
+			for (ClasspathMultiDirectory sourceLocation : this.sourceLocations)
+                if (outputPath.equals(sourceLocation.sourceFolder.getFullPath()))
 					continue next;
 			md.hasIndependentOutputFolder = true;
 		}
@@ -409,10 +406,10 @@ private void computeClasspathLocations(
 	// combine the output folders with the binary folders & jars... place the output folders before other .class file folders & jars
 	this.binaryLocations = new ClasspathLocation[outputFolders.size() + bLocations.size()];
 	int index = 0;
-	for (int i = 0, l = outputFolders.size(); i < l; i++)
-		this.binaryLocations[index++] = (ClasspathLocation) outputFolders.get(i);
-	for (int i = 0, l = bLocations.size(); i < l; i++)
-		this.binaryLocations[index++] = (ClasspathLocation) bLocations.get(i);
+	for (Object outputFolder : outputFolders)
+        this.binaryLocations[index++] = (ClasspathLocation) outputFolder;
+	for (Object bLocation : bLocations)
+        this.binaryLocations[index++] = (ClasspathLocation) bLocation;
 
 	if (moduleEntries != null && !moduleEntries.isEmpty())
 		this.modulePathEntries = moduleEntries;
@@ -462,11 +459,9 @@ IModule collectModuleEntries(ClasspathLocation bLocation, IPath path, boolean is
 			bLocation.patchModuleName = patchedModuleName;
 			if (limitModules == null || limitModules == ClasspathJrt.NO_LIMIT_MODULES || limitModules.contains(moduleName)) {
 				moduleEntries.put(moduleName, binaryModulePathEntry);
-				if (patchedModuleName != null) {
-					if (moduleName.equals(patchedModuleName))
-						return module;
-					// TODO(SHMOD): report problem: patchedModuleName didn't match a module from this location
-				}
+				if (patchedModuleName != null && moduleName.equals(patchedModuleName))
+                	return module;
+                // TODO(SHMOD): report problem: patchedModuleName didn't match a module from this location
 			}
 		}
 	}
@@ -481,10 +476,10 @@ protected boolean isOnModulePath(ClasspathEntry entry) {
 public void cleanup() {
 	this.initialTypeNames = null;
 	this.additionalUnits = null;
-	for (int i = 0, l = this.sourceLocations.length; i < l; i++)
-		this.sourceLocations[i].cleanup();
-	for (int i = 0, l = this.binaryLocations.length; i < l; i++)
-		this.binaryLocations[i].cleanup();
+	for (ClasspathMultiDirectory sourceLocation : this.sourceLocations)
+        sourceLocation.cleanup();
+	for (ClasspathLocation binaryLocation : this.binaryLocations)
+        binaryLocation.cleanup();
 	// assume modulePathEntries are cleaned-up via the corresponding source/binaryLocations
 }
 
@@ -533,7 +528,7 @@ private NameEnvironmentAnswer findClass(String qualifiedTypeName, char[] typeNam
 	}
 
 	String qBinaryFileName = qualifiedTypeName + SUFFIX_STRING_class;
-	String qPackageName =  (qualifiedTypeName.length() == typeName.length) ? Util.EMPTY_STRING :
+	String qPackageName =  qualifiedTypeName.length() == typeName.length ? Util.EMPTY_STRING :
 		qBinaryFileName.substring(0, qBinaryFileName.length() - typeName.length - 7);
 	char[] binaryFileName = CharOperation.concat(typeName, SUFFIX_class);
 
@@ -560,10 +555,8 @@ private NameEnvironmentAnswer findClass(String qualifiedTypeName, char[] typeNam
 																	this.modulePathEntries != null ? this.modulePathEntries::containsKey : null);
 		if (answer != null) {
 			char[] answerMod = answer.moduleName();
-			if (answerMod != null && this.modulePathEntries != null) {
-				if (!this.modulePathEntries.containsKey(String.valueOf(answerMod)))
-					continue; // assumed to be filtered out by --limit-modules
-			}
+			if (answerMod != null && this.modulePathEntries != null && !this.modulePathEntries.containsKey(String.valueOf(answerMod)))
+            	continue; // assumed to be filtered out by --limit-modules
 			if (!answer.ignoreIfBetter()) {
 				if (answer.isBetter(suggestedAnswer))
 					return answer;
@@ -687,14 +680,14 @@ public boolean isPackage(String qualifiedPackageName, char[] moduleName) {
 		case Any:
 		case Unnamed:
 			// NOTE: the output folders are added at the beginning of the binaryLocations
-			for (int i = 0, l = this.binaryLocations.length; i < l; i++) {
-				if (strategy.matches(this.binaryLocations[i], ClasspathLocation::hasModule))
-					if (this.binaryLocations[i].isPackage(qualifiedPackageName, null))
+			for (ClasspathLocation binaryLocation : this.binaryLocations) {
+				if (strategy.matches(binaryLocation, ClasspathLocation::hasModule))
+					if (binaryLocation.isPackage(qualifiedPackageName, null))
 						return true;
 			}
-			for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
-				if (strategy.matches(this.sourceLocations[i], ClasspathLocation::hasModule))
-					if (this.sourceLocations[i].isPackage(qualifiedPackageName, null))
+			for (ClasspathMultiDirectory sourceLocation : this.sourceLocations) {
+				if (strategy.matches(sourceLocation, ClasspathLocation::hasModule))
+					if (sourceLocation.isPackage(qualifiedPackageName, null))
 						return true;
 			}
 			return false;
@@ -739,25 +732,24 @@ void setNames(String[] typeNames, SourceFile[] additionalFiles) {
 		this.initialTypeNames = null;
 	} else {
 		this.initialTypeNames = new SimpleSet(typeNames.length);
-		for (int i = 0, l = typeNames.length; i < l; i++)
-			this.initialTypeNames.add(typeNames[i]);
+		for (String typeName : typeNames)
+            this.initialTypeNames.add(typeName);
 	}
 	// map the additional source files by qualified type name
 	if (additionalFiles == null) {
 		this.additionalUnits = null;
 	} else {
 		this.additionalUnits = new SimpleLookupTable(additionalFiles.length);
-		for (int i = 0, l = additionalFiles.length; i < l; i++) {
-			SourceFile additionalUnit = additionalFiles[i];
+		for (SourceFile additionalUnit : additionalFiles) {
 			if (additionalUnit != null)
-				this.additionalUnits.put(additionalUnit.initialTypeName, additionalFiles[i]);
+				this.additionalUnits.put(additionalUnit.initialTypeName, additionalUnit);
 		}
 	}
 
-	for (int i = 0, l = this.sourceLocations.length; i < l; i++)
-		this.sourceLocations[i].reset();
-	for (int i = 0, l = this.binaryLocations.length; i < l; i++)
-		this.binaryLocations[i].reset();
+	for (ClasspathMultiDirectory sourceLocation : this.sourceLocations)
+        sourceLocation.reset();
+	for (ClasspathLocation binaryLocation : this.binaryLocations)
+        binaryLocation.reset();
 }
 
 @Override
@@ -766,7 +758,7 @@ public IModule getModule(char[] name) {
 		IModulePathEntry modulePathEntry = this.modulePathEntries.get(String.valueOf(name));
 		if (modulePathEntry instanceof IMultiModuleEntry)
 			return modulePathEntry.getModule(name);
-		else if (modulePathEntry != null)
+        if (modulePathEntry != null)
 			return modulePathEntry.getModule();
 	}
 	return null;
@@ -776,7 +768,7 @@ public IModule getModule(char[] name) {
 public char[][] getAllAutomaticModules() {
 	if (this.modulePathEntries == null)
 		return CharOperation.NO_CHAR_CHAR;
-	Set<char[]> set = this.modulePathEntries.values().stream().filter(m -> m.isAutomaticModule()).map(e -> e.getModule().name())
+	Set<char[]> set = this.modulePathEntries.values().stream().filter(IModulePathEntry::isAutomaticModule).map(e -> e.getModule().name())
 			.collect(Collectors.toSet());
 	return set.toArray(new char[set.size()][]);
 }

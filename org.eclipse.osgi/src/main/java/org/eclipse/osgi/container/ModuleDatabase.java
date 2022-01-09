@@ -993,9 +993,9 @@ public class ModuleDatabase {
 			Integer cur = objectTable.get(object);
 			if (cur != null)
 				throw new IllegalStateException("Object is already in the write table: " + object); //$NON-NLS-1$
-			objectTable.put(object, Integer.valueOf(objectTable.size()));
+			objectTable.put(object, objectTable.size());
 			// return the index of the object just added (i.e. size - 1)
-			return (objectTable.size() - 1);
+			return objectTable.size() - 1;
 		}
 
 		private static void addToReadTable(Object object, int index, List<Object> objectTable) {
@@ -1475,10 +1475,10 @@ public class ModuleDatabase {
 						writeString((String) value, out, objectTable);
 					} else if (value instanceof Long) {
 						out.writeByte(VALUE_LONG);
-						out.writeLong(((Long) value).longValue());
+						out.writeLong((Long) value);
 					} else if (value instanceof Double) {
 						out.writeByte(VALUE_DOUBLE);
-						out.writeDouble(((Double) value).doubleValue());
+						out.writeDouble((Double) value);
 					} else if (value instanceof Version) {
 						out.writeByte(VALUE_VERSION);
 						writeVersion((Version) value, out, objectTable);
@@ -1559,10 +1559,10 @@ public class ModuleDatabase {
 						writeString((String) value, out, objectTable);
 						break;
 					case VALUE_LONG :
-						out.writeLong(((Long) value).longValue());
+						out.writeLong((Long) value);
 						break;
 					case VALUE_DOUBLE :
-						out.writeDouble(((Double) value).doubleValue());
+						out.writeDouble((Double) value);
 						break;
 					case VALUE_VERSION :
 						writeVersion((Version) value, out, objectTable);

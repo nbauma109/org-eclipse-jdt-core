@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
  * The index qualifier query which is used for searching MetaIndex qualifications in IndexManager.
  */
 public final class QualifierQuery {
-	public static final char[] NO_CHARS = new char[0];
+	public static final char[] NO_CHARS = {};
 
 	public enum QueryCategory {
 		SUPER,

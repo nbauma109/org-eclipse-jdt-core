@@ -24,7 +24,6 @@ public class MarkerSnapshotReader {
 	protected Workspace workspace;
 
 	public MarkerSnapshotReader(Workspace workspace) {
-		super();
 		this.workspace = workspace;
 	}
 

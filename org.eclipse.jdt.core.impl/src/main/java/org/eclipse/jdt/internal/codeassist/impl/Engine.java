@@ -160,18 +160,16 @@ public abstract class Engine implements ITypeRequestor {
 				}
 				this.onDemandImportsCache[this.onDemandImportCacheCount++] =
 					importBinding;
-			} else {
-				if(!(importBinding.resolvedImport instanceof MethodBinding) ||
-						importBinding instanceof ImportConflictBinding) {
-					if(this.importsCache == null) {
-						this.importsCache = new char[length - i][][];
-					}
-					this.importsCache[this.importCacheCount++] = new char[][]{
-							importBinding.compoundName[importBinding.compoundName.length - 1],
-							CharOperation.concatWith(importBinding.compoundName, '.')
-						};
-				}
-			}
+			} else if(!(importBinding.resolvedImport instanceof MethodBinding) ||
+            		importBinding instanceof ImportConflictBinding) {
+            	if(this.importsCache == null) {
+            		this.importsCache = new char[length - i][][];
+            	}
+            	this.importsCache[this.importCacheCount++] = new char[][]{
+            			importBinding.compoundName[importBinding.compoundName.length - 1],
+            			CharOperation.concatWith(importBinding.compoundName, '.')
+            		};
+            }
 		}
 
 		this.importCachesInitialized = true;
@@ -253,17 +251,13 @@ public abstract class Engine implements ITypeRequestor {
 						}
 					}
 				}
-			} else {
-				if(enclosingTypeNames == null || enclosingTypeNames.length == 0) {
-					if(CharOperation.equals(packageName, importFlatName)) {
-						if(importBinding.isStatic()) {
-							isFound = (modifiers & ClassFileConstants.AccStatic) != 0;
-						} else {
-							isFound = true;
-						}
-					}
-				}
-			}
+			} else if((enclosingTypeNames == null || enclosingTypeNames.length == 0) && CharOperation.equals(packageName, importFlatName)) {
+            	if(importBinding.isStatic()) {
+            		isFound = (modifiers & ClassFileConstants.AccStatic) != 0;
+            	} else {
+            		isFound = true;
+            	}
+            }
 
 			// find potential conflict with another import
 			if(isFound) {
@@ -338,10 +332,7 @@ public abstract class Engine implements ITypeRequestor {
 			int length = methods.length;
 			for (int i = 0; i < length; i++) {
 				AbstractMethodDeclaration method = methods[i];
-				if (method.bodyStart > position + 1)
-					continue;
-
-				if(method.isDefaultConstructor())
+				if(method.bodyStart > position + 1 || method.isDefaultConstructor())
 					continue;
 
 				if (method.declarationSourceEnd >= position) {
@@ -383,7 +374,7 @@ public abstract class Engine implements ITypeRequestor {
 	}
 
 	public static char[] getSignature(MethodBinding methodBinding) {
-		char[] result = null;
+		char[] result;
 
 		int oldMod = methodBinding.modifiers;
 		//TODO remove the next line when method from binary type will be able to generate generic signature
@@ -401,7 +392,7 @@ public abstract class Engine implements ITypeRequestor {
 	}
 
 	public static char[] getSignature(TypeBinding typeBinding) {
-		char[] result = null;
+		char[] result;
 
 		result = typeBinding.genericTypeSignature();
 

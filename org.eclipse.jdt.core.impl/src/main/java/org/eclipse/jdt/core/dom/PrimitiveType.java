@@ -137,8 +137,8 @@ public class PrimitiveType extends AnnotatableType {
 				DOUBLE,
 				VOID,
 			};
-		for (int i = 0; i < ops.length; i++) {
-			CODES.put(ops[i].toString(), ops[i]);
+		for (Code op : ops) {
+			CODES.put(op.toString(), op);
 		}
 	}
 
@@ -258,10 +258,9 @@ public class PrimitiveType extends AnnotatableType {
 		if (property == PRIMITIVE_TYPE_CODE_PROPERTY) {
 			if (get) {
 				return getPrimitiveTypeCode();
-			} else {
-				setPrimitiveTypeCode((Code) value);
-				return null;
 			}
+            setPrimitiveTypeCode((Code) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
@@ -293,12 +292,10 @@ public class PrimitiveType extends AnnotatableType {
 	@Override
 	void accept0(ASTVisitor visitor) {
 		boolean visitChildren = visitor.visit(this);
-		if (visitChildren) {
-			// visit children in normal left to right reading order
-			if (this.ast.apiLevel >= AST.JLS8_INTERNAL) {
-				acceptChildren(visitor, this.annotations);
-			}
-		}
+		// visit children in normal left to right reading order
+        if (visitChildren && this.ast.apiLevel >= AST.JLS8_INTERNAL) {
+        	acceptChildren(visitor, this.annotations);
+        }
 		visitor.endVisit(this);
 	}
 

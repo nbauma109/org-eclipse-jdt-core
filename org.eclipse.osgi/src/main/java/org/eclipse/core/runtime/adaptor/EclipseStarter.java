@@ -226,8 +226,8 @@ public class EclipseStarter {
 		if (getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION) == null)
 			setProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, "false"); //$NON-NLS-1$
 		Object result = run(args, null);
-		if (result instanceof Integer && !Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue())
-			System.exit(((Integer) result).intValue());
+		if (result instanceof Integer && !Boolean.parseBoolean(getProperty(PROP_NOSHUTDOWN)))
+			System.exit((Integer) result);
 	}
 
 	/**
@@ -250,7 +250,7 @@ public class EclipseStarter {
 		try {
 			startup(args, endSplashHandler);
 			startupFailed = false;
-			if (Boolean.valueOf(getProperty(PROP_IGNOREAPP)).booleanValue() || isForcedRestart())
+			if (Boolean.parseBoolean(getProperty(PROP_IGNOREAPP)) || isForcedRestart())
 				return null;
 			return run(null);
 		} catch (Throwable e) {
@@ -270,7 +270,7 @@ public class EclipseStarter {
 				// it be re-started. We need to check for this and potentially override the exit code.
 				if (isForcedRestart())
 					setProperty(PROP_EXITCODE, "23"); //$NON-NLS-1$
-				if (!Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue())
+				if (!Boolean.parseBoolean(getProperty(PROP_NOSHUTDOWN)))
 					shutdown();
 			} catch (Throwable e) {
 				FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, Msg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
@@ -330,7 +330,7 @@ public class EclipseStarter {
 
 		Bundle[] startBundles = loadBasicBundles();
 
-		if (startBundles == null || ("true".equals(getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false)))) { //$NON-NLS-1$
+		if (startBundles == null || "true".equals(getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false))) { //$NON-NLS-1$
 			waitForShutdown();
 			return context; // cannot continue; loadBasicBundles caused refreshPackages to shutdown the framework
 		}
@@ -474,7 +474,7 @@ public class EclipseStarter {
 				// check that the startlevel allows the bundle to be active (111550)
 				FrameworkStartLevel fwStartLevel = context.getBundle().adapt(FrameworkStartLevel.class);
 				BundleStartLevel bundleStartLevel = bundle.adapt(BundleStartLevel.class);
-				if (fwStartLevel != null && (bundleStartLevel.getStartLevel() <= fwStartLevel.getStartLevel())) {
+				if (fwStartLevel != null && bundleStartLevel.getStartLevel() <= fwStartLevel.getStartLevel()) {
 					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, NLS.bind(Msg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundle), 0, null, null));
 				}
 			}
@@ -547,10 +547,9 @@ public class EclipseStarter {
 		// reconstruct the answer.
 		if (reference) {
 			String result = searchFor(fileLocation.getName(), new File(fileLocation.getParent()).getAbsolutePath());
-			if (result != null)
-				url = createURL(REFERENCE_PROTOCOL, null, FILE_SCHEME + result);
-			else
-				return null;
+			if (result == null)
+                return null;
+            url = createURL(REFERENCE_PROTOCOL, null, FILE_SCHEME + result);
 		}
 
 		// finally we have something worth trying
@@ -708,7 +707,7 @@ public class EclipseStarter {
 			// If this is the last arg or there is a following arg (i.e., arg+1 has a leading -),
 			// simply enable debug.  Otherwise, assume that that the following arg is
 			// actually the filename of an options file.  This will be processed below.
-			if (args[i].equalsIgnoreCase(DEBUG) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
+			if (args[i].equalsIgnoreCase(DEBUG) && (i + 1 == args.length || i + 1 < args.length && args[i + 1].startsWith("-"))) { //$NON-NLS-1$
 				setProperty(PROP_DEBUG, ""); //$NON-NLS-1$
 				debug = true;
 				found = true;
@@ -718,7 +717,7 @@ public class EclipseStarter {
 			// If this is the last arg or there is a following arg (i.e., arg+1 has a leading -),
 			// simply enable development mode.  Otherwise, assume that that the following arg is
 			// actually some additional development time class path entries.  This will be processed below.
-			if (args[i].equalsIgnoreCase(DEV) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
+			if (args[i].equalsIgnoreCase(DEV) && (i + 1 == args.length || i + 1 < args.length && args[i + 1].startsWith("-"))) { //$NON-NLS-1$
 				setProperty(PROP_DEV, ""); //$NON-NLS-1$
 				found = true;
 			}
@@ -742,7 +741,7 @@ public class EclipseStarter {
 			}
 
 			// look for the console with no port.
-			if (args[i].equalsIgnoreCase(CONSOLE) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
+			if (args[i].equalsIgnoreCase(CONSOLE) && (i + 1 == args.length || i + 1 < args.length && args[i + 1].startsWith("-"))) { //$NON-NLS-1$
 				setProperty(PROP_CONSOLE, ""); //$NON-NLS-1$
 				found = true;
 			}
@@ -860,7 +859,6 @@ public class EclipseStarter {
 			} else
 				appArgs[j++] = args[i];
 		}
-		return;
 	}
 
 	/**
@@ -1026,25 +1024,18 @@ public class EclipseStarter {
 		try {
 			if (activationPolicy != null) {
 				ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_ACTIVATIONPOLICY, activationPolicy);
-				if (elements != null && elements.length > 0) {
-					// if the value is "lazy" then it has a lazy activation poliyc
-					if (Constants.ACTIVATION_LAZY.equals(elements[0].getValue()))
-						return true;
-				}
+				// if the value is "lazy" then it has a lazy activation poliyc
+                if (elements != null && elements.length > 0 && Constants.ACTIVATION_LAZY.equals(elements[0].getValue()))
+                	return true;
 			} else {
 				// check for Eclipse specific lazy start headers "Eclipse-LazyStart" and "Eclipse-AutoStart"
 				String eclipseLazyStart = headers.get(EquinoxModuleDataNamespace.LAZYSTART_HEADER);
 				if (eclipseLazyStart == null)
 					eclipseLazyStart = headers.get(EquinoxModuleDataNamespace.AUTOSTART_HEADER);
 				ManifestElement[] elements = ManifestElement.parseHeader(EquinoxModuleDataNamespace.AUTOSTART_HEADER, eclipseLazyStart);
-				if (elements != null && elements.length > 0) {
-					// if the value is true then it is lazy activated
-					if ("true".equals(elements[0].getValue())) //$NON-NLS-1$
-						return true;
-					// otherwise it is only lazy activated if it defines an exceptions directive.
-					else if (elements[0].getDirective("exceptions") != null) //$NON-NLS-1$
-						return true;
-				}
+				// if the value is true then it is lazy activated
+                if (elements != null && elements.length > 0 && ("true".equals(elements[0].getValue()) || elements[0].getDirective("exceptions") != null)) //$NON-NLS-1$
+                	return true;
 			}
 		} catch (BundleException be) {
 			// ignore this
@@ -1079,11 +1070,7 @@ public class EclipseStarter {
 	 * @throws MalformedURLException
 	 */
 	private static URL makeRelative(URL base, URL location) throws MalformedURLException {
-		if (base == null)
-			return location;
-		if (!"file".equals(base.getProtocol())) //$NON-NLS-1$
-			return location;
-		if (!location.getProtocol().equals(REFERENCE_PROTOCOL))
+		if (base == null || !"file".equals(base.getProtocol()) || !location.getProtocol().equals(REFERENCE_PROTOCOL))
 			return location; // we can only make reference urls relative
 		URL nonReferenceLocation = createURL(location.getPath());
 		// if some URL component does not match, return the original location
@@ -1102,9 +1089,7 @@ public class EclipseStarter {
 			urlPath += '/';
 		// couldn't use File to create URL here because it prepends the path with user.dir
 		URL relativeURL = createURL(base.getProtocol(), base.getHost(), base.getPort(), urlPath);
-		// now make it back to a reference URL
-		relativeURL = createURL(REFERENCE_SCHEME + relativeURL.toExternalForm());
-		return relativeURL;
+		return createURL(REFERENCE_SCHEME + relativeURL.toExternalForm());
 	}
 
 	private static URL createURL(String spec) throws MalformedURLException {
@@ -1132,8 +1117,7 @@ public class EclipseStarter {
 	private static File makeRelative(File base, File location) {
 		if (!location.isAbsolute())
 			return location;
-		File relative = new File(new FilePath(base).makeRelative(new FilePath(location)));
-		return relative;
+		return new File(new FilePath(base).makeRelative(new FilePath(location)));
 	}
 
 	private static void setStartLevel(final int value) throws InterruptedException {
@@ -1232,11 +1216,10 @@ public class EclipseStarter {
 			final char versionSep = candidateName.length() > target.length() ? candidateName.charAt(target.length()) : 0;
 			if (candidateName.length() > target.length() && versionSep != '_' && versionSep != '-') {
 				// make sure this is not just a jar with no (_|-)version tacked on the end
-				if (candidateName.length() == 4 + target.length() && candidateName.endsWith(".jar")) //$NON-NLS-1$
-					simpleJar = true;
-				else
-					// name does not match the target properly with an (_|-) version at the end
+				if (candidateName.length() != 4 + target.length() || !candidateName.endsWith(".jar"))
+                    // name does not match the target properly with an (_|-) version at the end
 					continue;
+                simpleJar = true;
 			}
 			// Note: directory with version suffix is always > than directory without version suffix
 			String version = candidateName.length() > target.length() + 1 && (versionSep == '_' || versionSep == '-') ? candidateName.substring(target.length() + 1) : ""; //$NON-NLS-1$
@@ -1367,7 +1350,7 @@ public class EclipseStarter {
 	}
 
 	private static boolean isForcedRestart() {
-		return Boolean.valueOf(getProperty(EquinoxConfiguration.PROP_FORCED_RESTART)).booleanValue();
+		return Boolean.parseBoolean(getProperty(EquinoxConfiguration.PROP_FORCED_RESTART));
 	}
 
 	/*

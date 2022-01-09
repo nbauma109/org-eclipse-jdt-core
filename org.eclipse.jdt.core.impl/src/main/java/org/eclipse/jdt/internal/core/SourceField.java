@@ -89,9 +89,7 @@ public Object getConstant() throws JavaModelException {
 			} else {
 				constant = Long.valueOf(constantSource);
 			}
-		} else if (signature.equals("QString;")) {//$NON-NLS-1$
-			constant = constantSource;
-		} else if (signature.equals("Qjava.lang.String;")) {//$NON-NLS-1$
+		} else if (signature.equals("QString;") || signature.equals("Qjava.lang.String;")) {//$NON-NLS-1$
 			constant = constantSource;
 		}
 	} catch (NumberFormatException e) {

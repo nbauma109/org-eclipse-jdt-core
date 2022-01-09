@@ -42,11 +42,11 @@ import org.eclipse.jdt.internal.compiler.util.Util;
  * Parser specialized for decoding javadoc comments
  */
 public class JavadocParser extends AbstractCommentParser {
-	private static final JavadocSingleNameReference[] NO_SINGLE_NAME_REFERENCE = new JavadocSingleNameReference[0];
-	private static final JavadocSingleTypeReference[] NO_SINGLE_TYPE_REFERENCE = new JavadocSingleTypeReference[0];
-	private static final JavadocQualifiedTypeReference[] NO_QUALIFIED_TYPE_REFERENCE = new JavadocQualifiedTypeReference[0];
-	private static final TypeReference[] NO_TYPE_REFERENCE = new TypeReference[0];
-	private static final Expression[] NO_EXPRESSION = new Expression[0];
+	private static final JavadocSingleNameReference[] NO_SINGLE_NAME_REFERENCE = {};
+	private static final JavadocSingleTypeReference[] NO_SINGLE_TYPE_REFERENCE = {};
+	private static final JavadocQualifiedTypeReference[] NO_QUALIFIED_TYPE_REFERENCE = {};
+	private static final TypeReference[] NO_TYPE_REFERENCE = {};
+	private static final Expression[] NO_EXPRESSION = {};
 
 	// Public fields
 	public Javadoc docComment;
@@ -118,13 +118,7 @@ public class JavadocParser extends AbstractCommentParser {
 		try {
 			this.source = this.sourceParser.scanner.source;
 			this.scanner.setSource(this.source); // updating source in scanner
-			if (this.checkDocComment) {
-				// Initialization
-				this.scanner.lineEnds = this.sourceParser.scanner.lineEnds;
-				this.scanner.linePtr = this.sourceParser.scanner.linePtr;
-				this.lineEnds = this.scanner.lineEnds;
-				commentParse();
-			} else {
+			if (!this.checkDocComment) {
 
 				// Parse comment
 				Scanner sourceScanner = this.sourceParser.scanner;
@@ -155,15 +149,18 @@ public class JavadocParser extends AbstractCommentParser {
 						        continue nextCharacter;
 						    case '@' :
 						    	parseSimpleTag();
-						    	if (this.tagValue == TAG_DEPRECATED_VALUE) {
-						    		if (this.abort) break nextCharacter;
-						    	}
+						    	if (this.tagValue == TAG_DEPRECATED_VALUE && this.abort) break nextCharacter;
 						}
 			        	continue nextLine;
 					}
 				}
 				return this.deprecated;
 			}
+            // Initialization
+            this.scanner.lineEnds = this.sourceParser.scanner.lineEnds;
+            this.scanner.linePtr = this.sourceParser.scanner.linePtr;
+            this.lineEnds = this.scanner.lineEnds;
+            commentParse();
 		} finally {
 			this.source = null; // release source as soon as finished
 			this.scanner.setSource((char[]) null); //release source in scanner
@@ -176,7 +173,7 @@ public class JavadocParser extends AbstractCommentParser {
 		try {
 			TypeReference argTypeRef = (TypeReference) typeRef;
 			if (dim > 0) {
-				long pos = (((long) argTypeRef.sourceStart) << 32) + argTypeRef.sourceEnd;
+				long pos = ((long) argTypeRef.sourceStart << 32) + argTypeRef.sourceEnd;
 				if (typeRef instanceof JavadocSingleTypeReference) {
 					JavadocSingleTypeReference singleRef = (JavadocSingleTypeReference) typeRef;
 					argTypeRef = new JavadocArraySingleTypeReference(singleRef.token, dim, pos);
@@ -256,79 +253,74 @@ public class JavadocParser extends AbstractCommentParser {
 				}
 				isConstructor = CharOperation.equals(this.identifierStack[length-1], name);
 				typeRef = new JavadocImplicitTypeReference(name, this.memberStart);
-			} else {
-				if (typeRef instanceof JavadocSingleTypeReference) {
-					char[] name = ((JavadocSingleTypeReference)typeRef).token;
-					isConstructor = CharOperation.equals(this.identifierStack[length-1], name);
-				} else if (typeRef instanceof JavadocQualifiedTypeReference) {
-					char[][] tokens = ((JavadocQualifiedTypeReference)typeRef).tokens;
-					int last = tokens.length-1;
-					isConstructor = CharOperation.equals(this.identifierStack[length-1], tokens[last]);
-					if (isConstructor) {
-						boolean valid = true;
-						if (valid) {
-							for (int i=0; i<length-1 && valid; i++) {
-								valid = CharOperation.equals(this.identifierStack[i], tokens[i]);
-							}
-						}
-						if (!valid) {
-							if (this.reportProblems) {
-								this.sourceParser.problemReporter().javadocInvalidMemberTypeQualification((int)(this.identifierPositionStack[0]>>>32), (int)this.identifierPositionStack[length-1], -1);
-							}
-							return null;
-						}
-					}
-				} else {
-					throw new InvalidInputException();
-				}
-			}
+			} else if (typeRef instanceof JavadocSingleTypeReference) {
+            	char[] name = ((JavadocSingleTypeReference)typeRef).token;
+            	isConstructor = CharOperation.equals(this.identifierStack[length-1], name);
+            } else if (typeRef instanceof JavadocQualifiedTypeReference) {
+            	char[][] tokens = ((JavadocQualifiedTypeReference)typeRef).tokens;
+            	int last = tokens.length-1;
+            	isConstructor = CharOperation.equals(this.identifierStack[length-1], tokens[last]);
+            	if (isConstructor) {
+            		boolean valid = true;
+            		if (valid) {
+            			for (int i=0; i<length-1 && valid; i++) {
+            				valid = CharOperation.equals(this.identifierStack[i], tokens[i]);
+            			}
+            		}
+            		if (!valid) {
+            			if (this.reportProblems) {
+            				this.sourceParser.problemReporter().javadocInvalidMemberTypeQualification((int)(this.identifierPositionStack[0]>>>32), (int)this.identifierPositionStack[length-1], -1);
+            			}
+            			return null;
+            		}
+            	}
+            } else {
+            	throw new InvalidInputException();
+            }
 			// Create node
 			if (arguments == null) {
-				if (isConstructor) {
-					JavadocAllocationExpression allocation = new JavadocAllocationExpression(this.identifierPositionStack[length-1]);
-					allocation.type = typeRef;
-					allocation.tagValue = this.tagValue;
-					allocation.sourceEnd = this.scanner.getCurrentTokenEndPosition();
-					if (length == 1) {
-						allocation.qualification = new char[][] { this.identifierStack[0] };
-					} else {
-						System.arraycopy(this.identifierStack, 0, allocation.qualification = new char[length][], 0, length);
-						allocation.sourceStart = (int) (this.identifierPositionStack[0] >>> 32);
-					}
-					allocation.memberStart = this.memberStart;
-					return allocation;
-				} else {
+				if (!isConstructor) {
 					JavadocMessageSend msg = new JavadocMessageSend(this.identifierStack[length-1], this.identifierPositionStack[length-1]);
 					msg.receiver = typeRef;
 					msg.tagValue = this.tagValue;
 					msg.sourceEnd = this.scanner.getCurrentTokenEndPosition();
 					return msg;
 				}
-			} else {
-				JavadocArgumentExpression[] expressions = new JavadocArgumentExpression[arguments.size()];
-				arguments.toArray(expressions);
-				if (isConstructor) {
-					JavadocAllocationExpression allocation = new JavadocAllocationExpression(this.identifierPositionStack[length-1]);
-					allocation.arguments = expressions;
-					allocation.type = typeRef;
-					allocation.tagValue = this.tagValue;
-					allocation.sourceEnd = this.scanner.getCurrentTokenEndPosition();
-					if (length == 1) {
-						allocation.qualification = new char[][] { this.identifierStack[0] };
-					} else {
-						System.arraycopy(this.identifierStack, 0, allocation.qualification = new char[length][], 0, length);
-						allocation.sourceStart = (int) (this.identifierPositionStack[0] >>> 32);
-					}
-					allocation.memberStart = this.memberStart;
-					return allocation;
-				} else {
-					JavadocMessageSend msg = new JavadocMessageSend(this.identifierStack[length-1], this.identifierPositionStack[length-1], expressions);
-					msg.receiver = typeRef;
-					msg.tagValue = this.tagValue;
-					msg.sourceEnd = this.scanner.getCurrentTokenEndPosition();
-					return msg;
-				}
+                JavadocAllocationExpression allocation = new JavadocAllocationExpression(this.identifierPositionStack[length-1]);
+                allocation.type = typeRef;
+                allocation.tagValue = this.tagValue;
+                allocation.sourceEnd = this.scanner.getCurrentTokenEndPosition();
+                if (length == 1) {
+                	allocation.qualification = new char[][] { this.identifierStack[0] };
+                } else {
+                	System.arraycopy(this.identifierStack, 0, allocation.qualification = new char[length][], 0, length);
+                	allocation.sourceStart = (int) (this.identifierPositionStack[0] >>> 32);
+                }
+                allocation.memberStart = this.memberStart;
+                return allocation;
 			}
+            JavadocArgumentExpression[] expressions = new JavadocArgumentExpression[arguments.size()];
+            arguments.toArray(expressions);
+            if (!isConstructor) {
+            	JavadocMessageSend msg = new JavadocMessageSend(this.identifierStack[length-1], this.identifierPositionStack[length-1], expressions);
+            	msg.receiver = typeRef;
+            	msg.tagValue = this.tagValue;
+            	msg.sourceEnd = this.scanner.getCurrentTokenEndPosition();
+            	return msg;
+            }
+            JavadocAllocationExpression allocation = new JavadocAllocationExpression(this.identifierPositionStack[length-1]);
+            allocation.arguments = expressions;
+            allocation.type = typeRef;
+            allocation.tagValue = this.tagValue;
+            allocation.sourceEnd = this.scanner.getCurrentTokenEndPosition();
+            if (length == 1) {
+            	allocation.qualification = new char[][] { this.identifierStack[0] };
+            } else {
+            	System.arraycopy(this.identifierStack, 0, allocation.qualification = new char[length][], 0, length);
+            	allocation.sourceStart = (int) (this.identifierPositionStack[0] >>> 32);
+            }
+            allocation.memberStart = this.memberStart;
+            return allocation;
 		}
 		catch (ClassCastException ex) {
 			throw new InvalidInputException();
@@ -367,13 +359,11 @@ public class JavadocParser extends AbstractCommentParser {
 	}
 
 	protected JavadocModuleReference createModuleReference(int moduleRefTokenCount) {
-		JavadocModuleReference moduleRef = null;
 		char[][] tokens = new char[moduleRefTokenCount][];
 		System.arraycopy(this.identifierStack, 0, tokens, 0, moduleRefTokenCount);
 		long[] positions = new long[moduleRefTokenCount];
 		System.arraycopy(this.identifierPositionStack, 0, positions, 0, moduleRefTokenCount);
-		moduleRef = new JavadocModuleReference(tokens, positions, this.tagSourceStart, this.tagSourceEnd);
-		return moduleRef;
+		return new JavadocModuleReference(tokens, positions, this.tagSourceStart, this.tagSourceEnd);
 	}
 
 	@Override
@@ -459,10 +449,7 @@ public class JavadocParser extends AbstractCommentParser {
 			this.index++;
 			while (this.source[this.index] == 'u')
 				this.index++;
-			if (!(((c1 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) > 15 || c1 < 0)
-					|| ((c2 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) > 15 || c2 < 0)
-					|| ((c3 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) > 15 || c3 < 0)
-					|| ((c4 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) > 15 || c4 < 0))) {
+			if ((c1 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) <= 15 && c1 >= 0 && (c2 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) <= 15 && c2 >= 0 && (c3 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) <= 15 && c3 >= 0 && (c4 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) <= 15 && c4 >= 0) {
 				first = (char) (((c1 * 16 + c2) * 16 + c3) * 16 + c4);
 			} else {
 				this.index = pos;
@@ -472,11 +459,11 @@ public class JavadocParser extends AbstractCommentParser {
 		// switch on first tag char
 		switch (first) {
 			case 'd':
-		        if ((readChar() == 'e') &&
-						(readChar() == 'p') && (readChar() == 'r') &&
-						(readChar() == 'e') && (readChar() == 'c') &&
-						(readChar() == 'a') && (readChar() == 't') &&
-						(readChar() == 'e') && (readChar() == 'd')) {
+		        if (readChar() == 'e' &&
+						readChar() == 'p' && readChar() == 'r' &&
+						readChar() == 'e' && readChar() == 'c' &&
+						readChar() == 'a' && readChar() == 't' &&
+						readChar() == 'e' && readChar() == 'd') {
 					// ensure the tag is properly ended: either followed by a space, a tab, line end or asterisk.
 					char c = readChar();
 					if (ScannerHelper.isWhitespace(c) || c == '*') {
@@ -655,7 +642,7 @@ public class JavadocParser extends AbstractCommentParser {
 						case NO_TAG_VALUE:     // Still in main description
 							valid = true;
 							if (this.reportProblems) {
-								recordInheritedPosition((((long) this.tagSourceStart) << 32) + this.tagSourceEnd);
+								recordInheritedPosition(((long) this.tagSourceStart << 32) + this.tagSourceEnd);
 							}
 							if (this.inlineTagStarted) {
 								// parse a 'valid' inheritDoc tag
@@ -764,21 +751,15 @@ public class JavadocParser extends AbstractCommentParser {
 						if (this.inlineTagStarted) {
 							valid = parseReference();
 						}
-					} else {
-						if (this.validValuePositions == -1) {
-							if (this.invalidValuePositions != -1) {
-								if (this.reportProblems) this.sourceParser.problemReporter().javadocUnexpectedTag((int) (this.invalidValuePositions>>>32), (int) this.invalidValuePositions);
-							}
-							if (valid) {
-								this.validValuePositions = (((long) this.tagSourceStart) << 32) + this.tagSourceEnd;
-								this.invalidValuePositions = -1;
-							} else {
-								this.invalidValuePositions = (((long) this.tagSourceStart) << 32) + this.tagSourceEnd;
-							}
-						} else {
-							if (this.reportProblems) this.sourceParser.problemReporter().javadocUnexpectedTag(this.tagSourceStart, this.tagSourceEnd);
-						}
-					}
+					} else if (this.validValuePositions == -1) {
+                    	if (this.invalidValuePositions != -1 && this.reportProblems) this.sourceParser.problemReporter().javadocUnexpectedTag((int) (this.invalidValuePositions>>>32), (int) this.invalidValuePositions);
+                    	if (valid) {
+                    		this.validValuePositions = ((long) this.tagSourceStart << 32) + this.tagSourceEnd;
+                    		this.invalidValuePositions = -1;
+                    	} else {
+                    		this.invalidValuePositions = ((long) this.tagSourceStart << 32) + this.tagSourceEnd;
+                    	}
+                    } else if (this.reportProblems) this.sourceParser.problemReporter().javadocUnexpectedTag(this.tagSourceStart, this.tagSourceEnd);
 				} else if (length == TAG_VERSION_LENGTH && CharOperation.equals(TAG_VERSION, tagName, 0, length)) {
 					this.tagValue = TAG_VERSION_VALUE;
 					this.tagWaitingForDescription = this.tagValue;
@@ -797,7 +778,7 @@ public class JavadocParser extends AbstractCommentParser {
 			}
 			// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=267833
 			// Report a problem if a block tag is being used in the context of an inline tag and vice versa.
-			if ((this.inlineTagStarted ? JAVADOC_TAG_TYPE[this.tagValue] == TAG_TYPE_BLOCK : JAVADOC_TAG_TYPE[this.tagValue] == TAG_TYPE_INLINE)) {
+			if (this.inlineTagStarted ? JAVADOC_TAG_TYPE[this.tagValue] == TAG_TYPE_BLOCK : JAVADOC_TAG_TYPE[this.tagValue] == TAG_TYPE_INLINE) {
 				valid = false;
 				this.tagValue = TAG_OTHERS_VALUE;
 				this.tagWaitingForDescription = NO_TAG_VALUE;
@@ -854,7 +835,7 @@ public class JavadocParser extends AbstractCommentParser {
 						if (this.reportProblems) this.sourceParser.problemReporter().javadocUnexpectedTag(this.tagSourceStart, this.tagSourceEnd);
 						// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=51600
 						// store invalid param references in specific array
-						if (this.invalidParamReferencesPtr == -1l) {
+						if (this.invalidParamReferencesPtr == -1L) {
 							this.invalidParamReferencesStack = new JavadocSingleNameReference[10];
 						}
 						int stackLength = this.invalidParamReferencesStack.length;
@@ -1110,12 +1091,11 @@ public class JavadocParser extends AbstractCommentParser {
 		try {
 			Object typeRef = parseQualifiedName(true);
 			if (this.abort) return false; // May be aborted by specialized parser
-			if (typeRef == null) {
-				if (this.reportProblems)
-					this.sourceParser.problemReporter().javadocMissingUsesClassName(this.tagSourceStart, this.tagSourceEnd, this.sourceParser.modifiers);
-			} else {
+			if (typeRef != null) {
 				return pushUsesReference(typeRef);
 			}
+            if (this.reportProblems)
+            	this.sourceParser.problemReporter().javadocMissingUsesClassName(this.tagSourceStart, this.tagSourceEnd, this.sourceParser.modifiers);
 		} catch (InvalidInputException ex) {
 			if (this.reportProblems) this.sourceParser.problemReporter().javadocInvalidUsesClass(start, getTokenEndPosition());
 		}
@@ -1123,7 +1103,7 @@ public class JavadocParser extends AbstractCommentParser {
 	}
 
 	protected boolean pushUsesReference(Object typeRef) {
-		if (this.usesReferencesPtr == -1l) {
+		if (this.usesReferencesPtr == -1L) {
 			this.usesReferencesStack = new TypeReference[10];
 		}
 		int stackLength = this.usesReferencesStack.length;
@@ -1145,12 +1125,11 @@ public class JavadocParser extends AbstractCommentParser {
 		try {
 			Object typeRef = parseQualifiedName(true);
 			if (this.abort) return false; // May be aborted by specialized parser
-			if (typeRef == null) {
-				if (this.reportProblems)
-					this.sourceParser.problemReporter().javadocMissingProvidesClassName(this.tagSourceStart, this.tagSourceEnd, this.sourceParser.modifiers);
-			} else {
+			if (typeRef != null) {
 				return pushProvidesReference(typeRef);
 			}
+            if (this.reportProblems)
+            	this.sourceParser.problemReporter().javadocMissingProvidesClassName(this.tagSourceStart, this.tagSourceEnd, this.sourceParser.modifiers);
 		} catch (InvalidInputException ex) {
 			if (this.reportProblems) this.sourceParser.problemReporter().javadocInvalidProvidesClass(start, getTokenEndPosition());
 		}
@@ -1158,7 +1137,7 @@ public class JavadocParser extends AbstractCommentParser {
 	}
 
 	protected boolean pushProvidesReference(Object typeRef) {
-		if (this.providesReferencesPtr == -1l) {
+		if (this.providesReferencesPtr == -1L) {
 			this.providesReferencesStack = new TypeReference[10];
 		}
 		int stackLength = this.providesReferencesStack.length;

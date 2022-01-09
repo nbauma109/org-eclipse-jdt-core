@@ -59,7 +59,7 @@ public final class Category extends NamedHandleObject {
 	 * @param categoryListener
 	 *            The listener to be added; must not be <code>null</code>.
 	 */
-	public final void addCategoryListener(
+	public void addCategoryListener(
 			final ICategoryListener categoryListener) {
 		if (categoryListener == null) {
 			throw new NullPointerException();
@@ -86,7 +86,7 @@ public final class Category extends NamedHandleObject {
 	 * @param description
 	 *            The description for this command; may be <code>null</code>.
 	 */
-	public final void define(final String name, final String description) {
+	public void define(final String name, final String description) {
 		if (name == null) {
 			throw new NullPointerException("The name of a command cannot be null"); //$NON-NLS-1$
 		}
@@ -110,7 +110,7 @@ public final class Category extends NamedHandleObject {
 	 *            The event to send to all of the listener; must not be
 	 *            <code>null</code>.
 	 */
-	private final void fireCategoryChanged(final CategoryEvent categoryEvent) {
+	private void fireCategoryChanged(final CategoryEvent categoryEvent) {
 		if (categoryEvent == null) {
 			throw new NullPointerException();
 		}
@@ -130,7 +130,7 @@ public final class Category extends NamedHandleObject {
 	 *            The listener to be removed; must not be <code>null</code>.
 	 *
 	 */
-	public final void removeCategoryListener(
+	public void removeCategoryListener(
 			final ICategoryListener categoryListener) {
 		if (categoryListener == null) {
 			throw new NullPointerException();

@@ -61,8 +61,8 @@ public final class ModuleModifier extends ASTNode {
 					STATIC_KEYWORD,
 					TRANSITIVE_KEYWORD,
 				};
-			for (int i = 0; i < ops.length; i++) {
-				KEYWORDS.put(ops[i].toString(), ops[i]);
+			for (ModuleModifierKeyword op : ops) {
+				KEYWORDS.put(op.toString(), op);
 			}
 		}
 
@@ -287,27 +287,23 @@ public final class ModuleModifier extends ASTNode {
 		postValueChange(KEYWORD_PROPERTY);
 	}
 
-	@Override
-	final int getNodeType0() {
+	@Override int getNodeType0() {
 		return MODULE_MODIFIER;
 	}
 
-	@Override
-	final Object internalGetSetObjectProperty(SimplePropertyDescriptor property, boolean get, Object value) {
+	@Override Object internalGetSetObjectProperty(SimplePropertyDescriptor property, boolean get, Object value) {
 		if (property == KEYWORD_PROPERTY) {
 			if (get) {
 				return getKeyword();
-			} else {
-				setKeyword((ModuleModifierKeyword) value);
-				return null;
 			}
+            setKeyword((ModuleModifierKeyword) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
 	}
 
-	@Override
-	final List internalStructuralPropertiesForType(int apiLevel) {
+	@Override List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
 
@@ -335,8 +331,7 @@ public final class ModuleModifier extends ASTNode {
 		return BASE_NODE_SIZE + 1 * 4;
 	}
 
-	@Override
-	final boolean subtreeMatch0(ASTMatcher matcher, Object other) {
+	@Override boolean subtreeMatch0(ASTMatcher matcher, Object other) {
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}

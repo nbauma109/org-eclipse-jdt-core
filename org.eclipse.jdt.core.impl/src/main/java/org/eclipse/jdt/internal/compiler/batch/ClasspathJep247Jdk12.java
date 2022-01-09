@@ -230,10 +230,7 @@ public class ClasspathJep247Jdk12 extends ClasspathJep247 {
 		return null;
 	}
 	void acceptModule(String name, byte[] content, Map<String, IModule> cache) {
-		if (content == null)
-			return;
-
-		if (cache.containsKey(name))
+		if (content == null || cache.containsKey(name))
 			return;
 
 		ClassFileReader reader = null;

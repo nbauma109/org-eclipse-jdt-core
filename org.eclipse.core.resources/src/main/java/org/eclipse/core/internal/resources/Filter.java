@@ -156,12 +156,10 @@ public class Filter {
 				boolean shouldBeExcluded = false;
 				while (objIt.hasNext()) {
 					Filter filter = objIt.next();
-					if (filter.appliesTo(info)) {
-						if (filter.match(parent, info)) {
-							shouldBeExcluded = true;
-							break;
-						}
-					}
+					if (filter.appliesTo(info) && filter.match(parent, info)) {
+                    	shouldBeExcluded = true;
+                    	break;
+                    }
 				}
 				if (!shouldBeExcluded)
 					result[outputIndex++] = info;

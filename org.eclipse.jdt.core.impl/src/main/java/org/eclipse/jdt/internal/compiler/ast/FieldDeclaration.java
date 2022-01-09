@@ -70,12 +70,10 @@ public FieldDeclaration(	char[] name, int sourceStart, int sourceEnd) {
 }
 
 public FlowInfo analyseCode(MethodScope initializationScope, FlowContext flowContext, FlowInfo flowInfo) {
-	if (this.binding != null && !this.binding.isUsed() && this.binding.isOrEnclosedByPrivateType()) {
-		if (!initializationScope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
-			if (!this.isARecordComponent) // record component used by implicit methods
-				initializationScope.problemReporter().unusedPrivateField(this);
-		}
-	}
+	if (this.binding != null && !this.binding.isUsed() && this.binding.isOrEnclosedByPrivateType() && !initializationScope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
+    	if (!this.isARecordComponent) // record component used by implicit methods
+    		initializationScope.problemReporter().unusedPrivateField(this);
+    }
 	// cannot define static non-constant field inside nested class
 	if (this.binding != null
 			&& this.binding.isValidBinding()
@@ -99,12 +97,10 @@ public FlowInfo analyseCode(MethodScope initializationScope, FlowContext flowCon
 	}
 	if (this.initialization != null && this.binding != null) {
 		CompilerOptions options = initializationScope.compilerOptions();
-		if (options.isAnnotationBasedNullAnalysisEnabled) {
-			if (this.binding.isNonNull() || options.sourceLevel >= ClassFileConstants.JDK1_8) {
-				int nullStatus = this.initialization.nullStatus(flowInfo, flowContext);
-				NullAnnotationMatching.checkAssignment(initializationScope, flowContext, this.binding, flowInfo, nullStatus, this.initialization, this.initialization.resolvedType);
-			}
-		}
+		if (options.isAnnotationBasedNullAnalysisEnabled && (this.binding.isNonNull() || options.sourceLevel >= ClassFileConstants.JDK1_8)) {
+        	int nullStatus = this.initialization.nullStatus(flowInfo, flowContext);
+        	NullAnnotationMatching.checkAssignment(initializationScope, flowContext, this.binding, flowInfo, nullStatus, this.initialization, this.initialization.resolvedType);
+        }
 		this.initialization.checkNPEbyUnboxing(initializationScope, flowContext, flowInfo);
 	}
 	return flowInfo;
@@ -127,7 +123,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 	int pc = codeStream.position;
 	boolean isStatic;
 	if (this.initialization != null
-			&& !((isStatic = this.binding.isStatic()) && this.binding.constant() != Constant.NotAConstant)) {
+			&& (!(isStatic = this.binding.isStatic()) || this.binding.constant() == Constant.NotAConstant)) {
 		// non-static field, need receiver
 		if (!isStatic)
 			codeStream.aload_0();
@@ -157,8 +153,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 }
 public void getAllAnnotationContexts(int targetType, List<AnnotationContext> allAnnotationContexts) {
 	AnnotationCollector collector = new AnnotationCollector(this.type, targetType, allAnnotationContexts);
-	for (int i = 0, max = this.annotations.length; i < max; i++) {
-		Annotation annotation = this.annotations[i];
+	for (Annotation annotation : this.annotations) {
 		annotation.traverse(collector, (BlockScope) null);
 	}
 }
@@ -202,8 +197,7 @@ public void resolve(MethodScope initializationScope) {
 	// existence is not at all the same. See comment for the second one.
 
 	//--------------------------------------------------------
-	if ((this.bits & ASTNode.HasBeenResolved) != 0) return;
-	if (this.binding == null || !this.binding.isValidBinding()) return;
+	if ((this.bits & ASTNode.HasBeenResolved) != 0 || this.binding == null || !this.binding.isValidBinding()) return;
 
 	this.bits |= ASTNode.HasBeenResolved;
 
@@ -220,10 +214,10 @@ public void resolve(MethodScope initializationScope) {
 				// we do the checks below ourselves, using the appropriate conditions for access check of
 				// protected members from superclasses.
 				FieldBinding existingVariable = classScope.findField(declaringType.superclass, this.name, this,  false /*do not resolve hidden field*/, true /* no visibility checks please */);
-				if (existingVariable == null) break checkHidingSuperField; // keep checking outer scenario
-				if (!existingVariable.isValidBinding())  break checkHidingSuperField; // keep checking outer scenario
-				if (existingVariable.original() == this.binding) break checkHidingSuperField; // keep checking outer scenario
-				if (!existingVariable.canBeSeenBy(declaringType, this, initializationScope)) break checkHidingSuperField; // keep checking outer scenario
+				 // keep checking outer scenario
+				 // keep checking outer scenario
+				 // keep checking outer scenario
+				if (existingVariable == null || !existingVariable.isValidBinding() || existingVariable.original() == this.binding || !existingVariable.canBeSeenBy(declaringType, this, initializationScope)) break checkHidingSuperField; // keep checking outer scenario
 				// collision with supertype field
 				initializationScope.problemReporter().fieldHiding(this, existingVariable);
 				break checkHiding; // already found a matching field
@@ -233,13 +227,10 @@ public void resolve(MethodScope initializationScope) {
 			Scope outerScope = classScope.parent;
 			if (outerScope.kind == Scope.COMPILATION_UNIT_SCOPE) break checkHiding;
 			Binding existingVariable = outerScope.getBinding(this.name, Binding.VARIABLE, this, false /*do not resolve hidden field*/);
-			if (existingVariable == null) break checkHiding;
-			if (!existingVariable.isValidBinding()) break checkHiding;
-			if (existingVariable == this.binding) break checkHiding;
+			if (existingVariable == null || !existingVariable.isValidBinding() || existingVariable == this.binding) break checkHiding;
 			if (existingVariable instanceof FieldBinding) {
 				FieldBinding existingField = (FieldBinding) existingVariable;
-				if (existingField.original() == this.binding) break checkHiding;
-				if (!existingField.isStatic() && declaringType.isStatic()) break checkHiding;
+				if (existingField.original() == this.binding || !existingField.isStatic() && declaringType.isStatic()) break checkHiding;
 			}
 			// collision with outer field or local variable
 			initializationScope.problemReporter().fieldHiding(this, existingVariable);
@@ -259,8 +250,8 @@ public void resolve(MethodScope initializationScope) {
 		resolveAnnotations(initializationScope, this.annotations, this.binding);
 		// Check if this declaration should now have the type annotations bit set
 		if (this.annotations != null) {
-			for (int i = 0, max = this.annotations.length; i < max; i++) {
-				TypeBinding resolvedAnnotationType = this.annotations[i].resolvedType;
+			for (Annotation annotation2 : this.annotations) {
+				TypeBinding resolvedAnnotationType = annotation2.resolvedType;
 				if (resolvedAnnotationType != null && (resolvedAnnotationType.getAnnotationTagBits() & TagBits.AnnotationForTypeUse) != 0) {
 					this.bits |= ASTNode.HasTypeAnnotations;
 					break;
@@ -311,12 +302,10 @@ public void resolve(MethodScope initializationScope) {
 							&& (this.initialization.bits & ASTNode.UnnecessaryCast) == 0) {
 						CastExpression.checkNeedForAssignedCast(initializationScope, fieldType, (CastExpression) this.initialization);
 					}
-				} else {
-					if (((fieldType.tagBits | initializationType.tagBits) & TagBits.HasMissingType) == 0) {
-						// if problem already got signaled on either type, do not report secondary problem
-						initializationScope.problemReporter().typeMismatchError(initializationType, fieldType, this.initialization, null);
-					}
-				}
+				} else if (((fieldType.tagBits | initializationType.tagBits) & TagBits.HasMissingType) == 0) {
+                	// if problem already got signaled on either type, do not report secondary problem
+                	initializationScope.problemReporter().typeMismatchError(initializationType, fieldType, this.initialization, null);
+                }
 				if (this.binding.isFinal()){ // cast from constant actual type to variable type
 					this.binding.setConstant(this.initialization.constant.castTo((this.binding.type.id << 4) + this.initialization.constant.typeID()));
 				}
@@ -358,7 +347,7 @@ public void resolveJavadoc(MethodScope initializationScope) {
 			if (classScope != null) {
 				javadocVisibility = Util.computeOuterMostVisibility(classScope.referenceType(), javadocVisibility);
 			}
-			int javadocModifiers = (this.binding.modifiers & ~ExtraCompilerModifiers.AccVisibilityMASK) | javadocVisibility;
+			int javadocModifiers = this.binding.modifiers & ~ExtraCompilerModifiers.AccVisibilityMASK | javadocVisibility;
 			reporter.javadocMissing(this.sourceStart, this.sourceEnd, severity, javadocModifiers);
 		}
 	}

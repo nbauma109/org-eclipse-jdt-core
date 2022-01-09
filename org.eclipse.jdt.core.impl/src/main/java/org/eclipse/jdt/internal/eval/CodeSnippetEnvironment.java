@@ -50,14 +50,12 @@ public NameEnvironmentAnswer findType(char[][] compoundTypeName) {
 		IBinaryType binary = this.context.getRootCodeSnippetBinary();
 		if (binary == null) {
 			return null;
-		} else {
-			return new NameEnvironmentAnswer(binary, null /*no access restriction*/);
 		}
+        return new NameEnvironmentAnswer(binary, null /*no access restriction*/);
 	}
 	VariablesInfo installedVars = this.context.installedVars;
 	ClassFile[] classFiles = installedVars.classFiles;
-	for (int i = 0; i < classFiles.length; i++) {
-		ClassFile classFile = classFiles[i];
+	for (ClassFile classFile : classFiles) {
 		if (CharOperation.equals(compoundTypeName, classFile.getCompoundName())) {
 			ClassFileReader binary = null;
 			try {

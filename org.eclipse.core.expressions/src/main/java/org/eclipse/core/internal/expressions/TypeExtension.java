@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 
 public class TypeExtension {
 
-	private static final TypeExtension[] EMPTY_TYPE_EXTENSION_ARRAY= new TypeExtension[0];
+	private static final TypeExtension[] EMPTY_TYPE_EXTENSION_ARRAY= {};
 
 	/* a special property tester instance that is used to signal that method searching has to continue */
 	/* package */ static final IPropertyTester CONTINUE= new IPropertyTester() {
@@ -85,7 +85,7 @@ public class TypeExtension {
 			IPropertyTester extender= fExtenders[i];
 			if (extender == null || !extender.handles(namespace, method))
 				continue;
-			if (extender.isInstantiated()) {
+			if (extender.isInstantiated() || !extender.isDeclaringPluginActive() && !forcePluginActivation) {
 				// There is no need to check for an active plug-in here. If a plug-in
 				// gets uninstalled we receive an registry event which will flush the whole
 				// type extender cache and will reinstantiate the testers. However Bundle#stop
@@ -93,26 +93,23 @@ public class TypeExtension {
 				// we don't have to support stop in 3.2. If we have to in the future we have to
 				// reactivate the stopped plug-in if we are in forcePluginActivation mode.
 				return extender;
-			} else if (extender.isDeclaringPluginActive() || forcePluginActivation) {
-				try {
-					PropertyTesterDescriptor descriptor= (PropertyTesterDescriptor)extender;
-					IPropertyTester inst= descriptor.instantiate();
-					((PropertyTester)inst).internalInitialize(descriptor);
-					fExtenders[i]= extender= inst;
-					return extender;
-				} catch (CoreException e) {
-					fExtenders[i]= null;
-					throw e;
-				} catch (ClassCastException e) {
-					fExtenders[i]= null;
-					throw new CoreException(new ExpressionStatus(
-						ExpressionStatus.TYPE_EXTENDER_INCORRECT_TYPE,
-						ExpressionMessages.TypeExtender_incorrectType,
-						e));
-				}
-			} else {
-				return extender;
 			}
+            try {
+            	PropertyTesterDescriptor descriptor= (PropertyTesterDescriptor)extender;
+            	IPropertyTester inst= descriptor.instantiate();
+            	((PropertyTester)inst).internalInitialize(descriptor);
+            	fExtenders[i]= extender= inst;
+            	return extender;
+            } catch (CoreException e) {
+            	fExtenders[i]= null;
+            	throw e;
+            } catch (ClassCastException e) {
+            	fExtenders[i]= null;
+            	throw new CoreException(new ExpressionStatus(
+            		ExpressionStatus.TYPE_EXTENDER_INCORRECT_TYPE,
+            		ExpressionMessages.TypeExtender_incorrectType,
+            		e));
+            }
 		}
 
 		// there is no inheritance for static methods

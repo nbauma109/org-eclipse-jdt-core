@@ -347,7 +347,8 @@ public final class MoveSourceEdit extends TextEdit {
 			if (child.covers(edit)) {
 				insert(child, edit, edits);
 				return;
-			} else if (edit.covers(child)) {
+			}
+            if (edit.covers(child)) {
 				parent.removeChild(i - removed++);
 				edit.addChild(child);
 			} else {

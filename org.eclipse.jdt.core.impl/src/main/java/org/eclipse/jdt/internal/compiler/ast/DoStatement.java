@@ -60,10 +60,10 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			false);
 
 	Constant cst = this.condition.constant;
-	boolean isConditionTrue = cst != Constant.NotAConstant && cst.booleanValue() == true;
+	boolean isConditionTrue = cst != Constant.NotAConstant && cst.booleanValue();
 	cst = this.condition.optimizedBooleanConstant();
-	boolean isConditionOptimizedTrue = cst != Constant.NotAConstant && cst.booleanValue() == true;
-	boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && cst.booleanValue() == false;
+	boolean isConditionOptimizedTrue = cst != Constant.NotAConstant && cst.booleanValue();
+	boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && !cst.booleanValue();
 
 	int previousMode = flowInfo.reachMode();
 
@@ -72,7 +72,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	// we need to collect the contribution to nulls of the coming paths through the
 	// loop, be they falling through normally or branched to break, continue labels
 	// or catch blocks
-	if ((this.action != null) && !this.action.isEmptyBlock()) {
+	if (this.action != null && !this.action.isEmptyBlock()) {
 		actionInfo = this.action.
 			analyseCode(currentScope, loopingContext, actionInfo).
 			unconditionalInits();
@@ -101,12 +101,12 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	FlowInfo condInfo =
 		this.condition.analyseCode(
 			currentScope,
-			(condLoopContext =
+			condLoopContext =
 				new LoopingFlowContext(flowContext,	flowInfo, this, null,
-					null, currentScope, true)),
+					null, currentScope, true),
 			(this.action == null
 				? actionInfo
-				: (actionInfo.mergedWith(loopingContext.initsOnContinue))).copy());
+				: actionInfo.mergedWith(loopingContext.initsOnContinue)).copy());
 	/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=367023, we reach the condition at the bottom via two arcs,
 	   one by free fall and another by continuing... Merge initializations propagated through the two pathways,
 	   cf, while and for loops.
@@ -188,7 +188,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 		}
 		// generate condition
 		Constant cst = this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && cst.booleanValue() == false;
+		boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && !cst.booleanValue();
 		if (isConditionOptimizedFalse){
 			this.condition.generateCode(currentScope, codeStream, false);
 		} else {
@@ -263,9 +263,9 @@ public void traverse(ASTVisitor visitor, BlockScope scope) {
 @Override
 public boolean doesNotCompleteNormally() {
 	Constant cst = this.condition.constant;
-	boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+	boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 	cst = this.condition.optimizedBooleanConstant();
-	boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+	boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 
 	if (isConditionTrue || isConditionOptimizedTrue)
 		return this.action == null || !this.action.breaksOut(null);
@@ -282,14 +282,12 @@ public boolean completesByContinue() {
 @Override
 public boolean canCompleteNormally() {
 	Constant cst = this.condition.constant;
-	boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+	boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 	cst = this.condition.optimizedBooleanConstant();
-	boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+	boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 
-	if (!(isConditionTrue || isConditionOptimizedTrue)) {
-		if (this.action == null || this.action.canCompleteNormally())
-			return true;
-		if (this.action != null && this.action.continueCompletes())
+	if (!isConditionTrue && !isConditionOptimizedTrue) {
+		if (this.action == null || this.action.canCompleteNormally() || this.action != null && this.action.continueCompletes())
 			return true;
 	}
     return this.action != null && this.action.breaksOut(null);

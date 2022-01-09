@@ -119,12 +119,12 @@ public final class CommandManagerEvent {
 					"An event must refer to its command manager"); //$NON-NLS-1$
 		}
 
-		if (commandIdChanged && (commandId == null)) {
+		if (commandIdChanged && commandId == null) {
 			throw new NullPointerException(
 					"If the list of defined commands changed, then the added/removed command must be mentioned"); //$NON-NLS-1$
 		}
 
-		if (categoryIdChanged && (categoryId == null)) {
+		if (categoryIdChanged && categoryId == null) {
 			throw new NullPointerException(
 					"If the list of defined categories changed, then the added/removed category must be mentioned"); //$NON-NLS-1$
 		}
@@ -175,7 +175,7 @@ public final class CommandManagerEvent {
 					"An event must refer to its command manager"); //$NON-NLS-1$
 		}
 
-		if (parameterTypeIdChanged && (parameterTypeId == null)) {
+		if (parameterTypeIdChanged && parameterTypeId == null) {
 			throw new NullPointerException(
 					"If the list of defined command parameter types changed, then the added/removed parameter type must be mentioned"); //$NON-NLS-1$
 		}
@@ -200,7 +200,7 @@ public final class CommandManagerEvent {
 	 * @return The category identifier that was added or removed; may be
 	 *         <code>null</code>.
 	 */
-	public final String getCategoryId() {
+	public String getCategoryId() {
 		return categoryId;
 	}
 
@@ -210,7 +210,7 @@ public final class CommandManagerEvent {
 	 * @return The command identifier that was added or removed; may be
 	 *         <code>null</code>.
 	 */
-	public final String getCommandId() {
+	public String getCommandId() {
 		return commandId;
 	}
 
@@ -220,7 +220,7 @@ public final class CommandManagerEvent {
 	 * @return the instance of the interface that changed. Guaranteed not to be
 	 *         <code>null</code>.
 	 */
-	public final CommandManager getCommandManager() {
+	public CommandManager getCommandManager() {
 		return commandManager;
 	}
 
@@ -232,7 +232,7 @@ public final class CommandManagerEvent {
 	 *
 	 * @since 3.2
 	 */
-	public final String getParameterTypeId() {
+	public String getParameterTypeId() {
 		return parameterTypeId;
 	}
 
@@ -242,8 +242,8 @@ public final class CommandManagerEvent {
 	 * @return <code>true</code> if the list of category identifiers has
 	 *         changed; <code>false</code> otherwise.
 	 */
-	public final boolean isCategoryChanged() {
-		return (categoryId != null);
+	public boolean isCategoryChanged() {
+		return categoryId != null;
 	}
 
 	/**
@@ -253,8 +253,8 @@ public final class CommandManagerEvent {
 	 * @return <code>true</code> if the category identifier became defined;
 	 *         <code>false</code> if the category identifier became undefined.
 	 */
-	public final boolean isCategoryDefined() {
-		return (((changedValues & CHANGED_CATEGORY_DEFINED) != 0) && (categoryId != null));
+	public boolean isCategoryDefined() {
+		return (changedValues & CHANGED_CATEGORY_DEFINED) != 0 && categoryId != null;
 	}
 
 	/**
@@ -263,8 +263,8 @@ public final class CommandManagerEvent {
 	 * @return <code>true</code> if the list of command identifiers has
 	 *         changed; <code>false</code> otherwise.
 	 */
-	public final boolean isCommandChanged() {
-		return (commandId != null);
+	public boolean isCommandChanged() {
+		return commandId != null;
 	}
 
 	/**
@@ -274,8 +274,8 @@ public final class CommandManagerEvent {
 	 * @return <code>true</code> if the command identifier became defined;
 	 *         <code>false</code> if the command identifier became undefined.
 	 */
-	public final boolean isCommandDefined() {
-		return (((changedValues & CHANGED_COMMAND_DEFINED) != 0) && (commandId != null));
+	public boolean isCommandDefined() {
+		return (changedValues & CHANGED_COMMAND_DEFINED) != 0 && commandId != null;
 	}
 
 	/**
@@ -287,8 +287,8 @@ public final class CommandManagerEvent {
 	 *
 	 * @since 3.2
 	 */
-	public final boolean isParameterTypeChanged() {
-		return (parameterTypeId != null);
+	public boolean isParameterTypeChanged() {
+		return parameterTypeId != null;
 	}
 
 	/**
@@ -301,7 +301,7 @@ public final class CommandManagerEvent {
 	 *
 	 * @since 3.2
 	 */
-	public final boolean isParameterTypeDefined() {
-		return (((changedValues & CHANGED_PARAMETER_TYPE_DEFINED) != 0) && (parameterTypeId != null));
+	public boolean isParameterTypeDefined() {
+		return (changedValues & CHANGED_PARAMETER_TYPE_DEFINED) != 0 && parameterTypeId != null;
 	}
 }

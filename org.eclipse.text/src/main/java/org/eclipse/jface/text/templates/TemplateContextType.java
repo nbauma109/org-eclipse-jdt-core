@@ -236,17 +236,15 @@ public class TemplateContextType {
 		List<ReplaceEdit> edits= new ArrayList<>(5);
 
 		// iterate over all variables and try to resolve them
-		for (int i= 0; i != variables.length; i++) {
-			TemplateVariable variable= variables[i];
-
+		for (TemplateVariable variable : variables) {
 			if (!variable.isResolved())
 				resolve(variable, context);
 
 			String value= variable.getDefaultValue();
 			int[] offsets= variable.getOffsets();
 			// update buffer to reflect new value
-			for (int k= 0; k != offsets.length; k++)
-				edits.add(new ReplaceEdit(offsets[k], variable.getInitialLength(), value));
+			for (int offset : offsets)
+                edits.add(new ReplaceEdit(offset, variable.getInitialLength(), value));
 
 		}
 
@@ -278,10 +276,10 @@ public class TemplateContextType {
 
 	private static List<RangeMarker> variablesToPositions(TemplateVariable[] variables) {
 		List<RangeMarker> positions= new ArrayList<>(5);
-		for (int i= 0; i != variables.length; i++) {
-			int[] offsets= variables[i].getOffsets();
-			for (int j= 0; j != offsets.length; j++)
-				positions.add(new RangeMarker(offsets[j], 0));
+		for (TemplateVariable variable : variables) {
+			int[] offsets= variable.getOffsets();
+			for (int offset : offsets)
+                positions.add(new RangeMarker(offset, 0));
 		}
 
 		return positions;
@@ -290,9 +288,7 @@ public class TemplateContextType {
 	private static void positionsToVariables(List<RangeMarker> positions, TemplateVariable[] variables) {
 		Iterator<RangeMarker> iterator= positions.iterator();
 
-		for (int i= 0; i != variables.length; i++) {
-			TemplateVariable variable= variables[i];
-
+		for (TemplateVariable variable : variables) {
 			int[] offsets= new int[variable.getOffsets().length];
 			for (int j= 0; j != offsets.length; j++)
 				offsets[j]= iterator.next().getOffset();

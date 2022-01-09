@@ -59,8 +59,8 @@ private void deletePackageFragment(IPackageFragment frag)
 		// Discard non-java resources
 		Object[] nonJavaResources = frag.getNonJavaResources();
 		int actualResourceCount = 0;
-		for (int i = 0, max = nonJavaResources.length; i < max; i++){
-			if (nonJavaResources[i] instanceof IResource) actualResourceCount++;
+		for (Object element : nonJavaResources) {
+			if (element instanceof IResource) actualResourceCount++;
 		}
 		IResource[] actualNonJavaResources = new IResource[actualResourceCount];
 		for (int i = 0, max = nonJavaResources.length, index = 0; i < max; i++){
@@ -76,8 +76,7 @@ private void deletePackageFragment(IPackageFragment frag)
 			throw new JavaModelException(ce);
 		}
 		boolean isEmpty = true;
-		for (int i = 0, length = remainingFiles.length; i < length; i++) {
-			IResource file = remainingFiles[i];
+		for (IResource file : remainingFiles) {
 			if (file instanceof IFile && org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(file.getName())) {
 				deleteResource(file, IResource.FORCE | IResource.KEEP_HISTORY);
 			} else {
@@ -131,15 +130,11 @@ protected void verify(IJavaElement element) throws JavaModelException {
 		error(IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST, element);
 
 	int type = element.getElementType();
-	if (type <= IJavaElement.PACKAGE_FRAGMENT_ROOT || type > IJavaElement.COMPILATION_UNIT)
-		error(IJavaModelStatusConstants.INVALID_ELEMENT_TYPES, element);
-	else if (type == IJavaElement.PACKAGE_FRAGMENT && element instanceof JarPackageFragment)
+	if (type <= IJavaElement.PACKAGE_FRAGMENT_ROOT || type > IJavaElement.COMPILATION_UNIT || type == IJavaElement.PACKAGE_FRAGMENT && element instanceof JarPackageFragment)
 		error(IJavaModelStatusConstants.INVALID_ELEMENT_TYPES, element);
 	IResource resource = ((JavaElement) element).resource();
-	if (resource instanceof IFolder) {
-		if (resource.isLinked()) {
-			error(IJavaModelStatusConstants.INVALID_RESOURCE, element);
-		}
-	}
+	if (resource instanceof IFolder && resource.isLinked()) {
+    	error(IJavaModelStatusConstants.INVALID_RESOURCE, element);
+    }
 }
 }

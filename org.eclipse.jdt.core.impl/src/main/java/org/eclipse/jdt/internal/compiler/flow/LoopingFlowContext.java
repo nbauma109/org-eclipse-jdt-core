@@ -137,17 +137,15 @@ public void complainOnDeferredFinalChecks(BlockScope scope, FlowInfo flowInfo) {
 					(FieldBinding) variable,
 					this.finalAssignments[i]);
 			}
-		} else {
-			if (flowInfo.isPotentiallyAssigned((LocalVariableBinding)variable)) {
-				variable.tagBits &= ~TagBits.IsEffectivelyFinal;
-				if (variable.isFinal()) {
-					complained = true;
-					scope.problemReporter().duplicateInitializationOfFinalLocal(
-						(LocalVariableBinding) variable,
-						this.finalAssignments[i]);
-				}
-			}
-		}
+		} else if (flowInfo.isPotentiallyAssigned((LocalVariableBinding)variable)) {
+        	variable.tagBits &= ~TagBits.IsEffectivelyFinal;
+        	if (variable.isFinal()) {
+        		complained = true;
+        		scope.problemReporter().duplicateInitializationOfFinalLocal(
+        			(LocalVariableBinding) variable,
+        			this.finalAssignments[i]);
+        	}
+        }
 		// any reference reported at this level is removed from the parent context where it
 		// could also be reported again
 		if (complained) {
@@ -184,7 +182,7 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 		for (int i = 0; i < this.nullCount; i++) {
 			LocalVariableBinding local = this.nullLocals[i];
 			ASTNode location = this.nullReferences[i];
-			FlowInfo flowInfo =  (this.nullInfos[i] != null)
+			FlowInfo flowInfo =  this.nullInfos[i] != null
 									? incomingInfo.copy().addNullInfoFrom(this.nullInfos[i])
 									: incomingInfo;
 			// final local variable
@@ -237,7 +235,7 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 						this.nullReferences[i] = null;
 						switch(this.nullCheckTypes[i] & CONTEXT_MASK) {
 							case FlowContext.IN_COMPARISON_NULL:
-								if (((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL) && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+								if ((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 									scope.problemReporter().localVariableNullReference(local, expression);
 									continue;
 								}
@@ -246,7 +244,7 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 								}
 								continue;
 							case FlowContext.IN_COMPARISON_NON_NULL:
-								if (((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL) && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+								if ((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 									scope.problemReporter().localVariableNullReference(local, expression);
 									continue;
 								}
@@ -263,14 +261,14 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 						switch(this.nullCheckTypes[i] & CONTEXT_MASK) {
 							case FlowContext.IN_COMPARISON_NULL:
 								this.nullReferences[i] = null;
-								if (((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL) && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+								if ((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 									scope.problemReporter().localVariablePotentialNullReference(local, expression);
 									continue;
 								}
 								break;
 							case FlowContext.IN_COMPARISON_NON_NULL:
 								this.nullReferences[i] = null;
-								if (((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL) && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+								if ((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 									scope.problemReporter().localVariablePotentialNullReference(local, expression);
 									continue;
 								}
@@ -294,10 +292,7 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 				case EXIT_RESOURCE:
 						FakedTrackingVariable trackingVar = local.closeTracker;
 						if (trackingVar != null) {
-							if (trackingVar.hasDefinitelyNoResource(flowInfo)) {
-								continue; // no resource - no warning.
-							}
-							if (trackingVar.isClosedInFinallyOfEnclosing(scope)) {
+							if (trackingVar.hasDefinitelyNoResource(flowInfo) || trackingVar.isClosedInFinallyOfEnclosing(scope)) {
 								continue;
 							}
 							if (this.parent.recordExitAgainstResource(scope, flowInfo, trackingVar, location)) {
@@ -314,7 +309,7 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 			}
 			// https://bugs.eclipse.org/376263: avoid further deferring if the upstream info
 			// already has definite information (which might get lost for deferred checking).
-			if (!(this.nullCheckTypes[i] == MAY_NULL && upstreamCopy.isDefinitelyNonNull(local))) {
+			if (this.nullCheckTypes[i] != MAY_NULL || !upstreamCopy.isDefinitelyNonNull(local)) {
 				this.parent.recordUsingNullReference(scope, local, location,
 						this.nullCheckTypes[i], flowInfo);
 			}
@@ -326,7 +321,7 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 			ASTNode location = this.nullReferences[i];
 			// final local variable
 			LocalVariableBinding local = this.nullLocals[i];
-			FlowInfo flowInfo =  (this.nullInfos[i] != null)
+			FlowInfo flowInfo =  this.nullInfos[i] != null
 					? incomingInfo.copy().addNullInfoFrom(this.nullInfos[i])
 					: incomingInfo;
 			switch (this.nullCheckTypes[i] & ~HIDE_NULL_COMPARISON_WARNING_MASK) {
@@ -353,7 +348,7 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 						this.nullReferences[i] = null;
 						switch(this.nullCheckTypes[i] & CONTEXT_MASK) {
 							case FlowContext.IN_COMPARISON_NULL:
-								if (((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL) && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+								if ((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 									scope.problemReporter().localVariableNullReference(local, expression);
 									continue;
 								}
@@ -362,7 +357,7 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 								}
 								continue;
 							case FlowContext.IN_COMPARISON_NON_NULL:
-								if (((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL) && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+								if ((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 									scope.problemReporter().localVariableNullReference(local, expression);
 									continue;
 								}
@@ -379,14 +374,14 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 						switch(this.nullCheckTypes[i] & CONTEXT_MASK) {
 							case FlowContext.IN_COMPARISON_NULL:
 								this.nullReferences[i] = null;
-								if (((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL) && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+								if ((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 									scope.problemReporter().localVariablePotentialNullReference(local, expression);
 									continue;
 								}
 								break;
 							case FlowContext.IN_COMPARISON_NON_NULL:
 								this.nullReferences[i] = null;
-								if (((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL) && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+								if ((this.nullCheckTypes[i] & CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK) == CAN_ONLY_NULL && (expression.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 									scope.problemReporter().localVariablePotentialNullReference(local, expression);
 									continue;
 								}
@@ -426,10 +421,7 @@ public void complainOnDeferredNullChecks(BlockScope scope, FlowInfo callerFlowIn
 					if (nullStatus != FlowInfo.NON_NULL) {
 						FakedTrackingVariable closeTracker = local.closeTracker;
 						if (closeTracker != null) {
-							if (closeTracker.hasDefinitelyNoResource(flowInfo)) {
-								continue; // no resource - no warning.
-							}
-							if (closeTracker.isClosedInFinallyOfEnclosing(scope)) {
+							if (closeTracker.hasDefinitelyNoResource(flowInfo) || closeTracker.isClosedInFinallyOfEnclosing(scope)) {
 								continue;
 							}
 							nullStatus = closeTracker.findMostSpecificStatus(flowInfo, scope, null);
@@ -523,10 +515,10 @@ public void recordContinueFrom(FlowContext innerFlowContext, FlowInfo flowInfo) 
 			else if (this.innerFlowContextsCount ==
 					(length = this.innerFlowContexts.length) - 1) {
 				System.arraycopy(this.innerFlowContexts, 0,
-						(this.innerFlowContexts = new LoopingFlowContext[length + 5]),
+						this.innerFlowContexts = new LoopingFlowContext[length + 5],
 						0, length);
 				System.arraycopy(this.innerFlowInfos, 0,
-						(this.innerFlowInfos= new UnconditionalFlowInfo[length + 5]),
+						this.innerFlowInfos= new UnconditionalFlowInfo[length + 5],
 						0, length);
 			}
 			this.innerFlowContexts[this.innerFlowContextsCount] = (LoopingFlowContext) inner;
@@ -557,13 +549,13 @@ public void recordContinueFrom(FlowContext innerFlowContext, FlowInfo flowInfo) 
 				System.arraycopy(
 					this.finalAssignments,
 					0,
-					(this.finalAssignments = new Reference[this.assignCount * 2]),
+					this.finalAssignments = new Reference[this.assignCount * 2],
 					0,
 					this.assignCount);
 			System.arraycopy(
 				this.finalVariables,
 				0,
-				(this.finalVariables = new VariableBinding[this.assignCount * 2]),
+				this.finalVariables = new VariableBinding[this.assignCount * 2],
 				0,
 				this.assignCount);
 		}
@@ -635,7 +627,7 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 		return;
 	}
 	// if reference is being recorded inside an assert, we will not raise redundant null check warnings
-	checkType |= (this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING);
+	checkType |= this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING;
 	int checkTypeWithoutHideNullWarning = checkType & ~FlowContext.HIDE_NULL_COMPARISON_WARNING_MASK;
 	switch (checkTypeWithoutHideNullWarning) {
 		case CAN_ONLY_NULL_NON_NULL | IN_COMPARISON_NULL:
@@ -667,18 +659,16 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 				flowInfo.markAsDefinitelyNonNull(local);
 			} else if (flowInfo.cannotBeDefinitelyNullOrNonNull(local)) {
 				return; // no reason to complain, since there is definitely some uncertainty making the comparison relevant.
-			} else {
-					// note: pot non-null & pot null is already captured by cannotBeDefinitelyNullOrNonNull()
-					if (flowInfo.isPotentiallyNonNull(local)) {
-						// knowing 'local' can be non-null, we're only interested in seeing whether it can *only* be non-null
-						recordNullReference(local, reference, CAN_ONLY_NON_NULL | checkType & (CONTEXT_MASK|HIDE_NULL_COMPARISON_WARNING_MASK), flowInfo);
-					} else if (flowInfo.isPotentiallyNull(local)) {
-						// knowing 'local' can be null, we're only interested in seeing whether it can *only* be null
-						recordNullReference(local, reference, CAN_ONLY_NULL | checkType & (CONTEXT_MASK|HIDE_NULL_COMPARISON_WARNING_MASK), flowInfo);
-					} else {
-						recordNullReference(local, reference, checkType, flowInfo);
-					}
-			}
+			} else // note: pot non-null & pot null is already captured by cannotBeDefinitelyNullOrNonNull()
+            if (flowInfo.isPotentiallyNonNull(local)) {
+            	// knowing 'local' can be non-null, we're only interested in seeing whether it can *only* be non-null
+            	recordNullReference(local, reference, CAN_ONLY_NON_NULL | checkType & (CONTEXT_MASK|HIDE_NULL_COMPARISON_WARNING_MASK), flowInfo);
+            } else if (flowInfo.isPotentiallyNull(local)) {
+            	// knowing 'local' can be null, we're only interested in seeing whether it can *only* be null
+            	recordNullReference(local, reference, CAN_ONLY_NULL | checkType & (CONTEXT_MASK|HIDE_NULL_COMPARISON_WARNING_MASK), flowInfo);
+            } else {
+            	recordNullReference(local, reference, checkType, flowInfo);
+            }
 			return;
 		case CAN_ONLY_NULL | IN_COMPARISON_NULL:
 		case CAN_ONLY_NULL | IN_COMPARISON_NON_NULL:
@@ -695,7 +685,7 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 			if (flowInfo.isDefinitelyNull(local)) {
 				switch(checkTypeWithoutHideNullWarning & CONTEXT_MASK) {
 					case FlowContext.IN_COMPARISON_NULL:
-						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if ((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariableNullReference(local, reference);
 							return;
 						}
@@ -705,7 +695,7 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 						flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 						return;
 					case FlowContext.IN_COMPARISON_NON_NULL:
-						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if ((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariableNullReference(local, reference);
 							return;
 						}
@@ -722,13 +712,13 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 			} else if (flowInfo.isPotentiallyNull(local)) {
 				switch(checkTypeWithoutHideNullWarning & CONTEXT_MASK) {
 					case FlowContext.IN_COMPARISON_NULL:
-						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if ((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariablePotentialNullReference(local, reference);
 							return;
 						}
 						break;
 					case FlowContext.IN_COMPARISON_NON_NULL:
-						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if ((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariablePotentialNullReference(local, reference);
 							return;
 						}
@@ -772,8 +762,8 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 	 */
 	public void simulateThrowAfterLoopBack(FlowInfo flowInfo) {
 		if (this.escapingExceptionCatchSites != null) {
-			for (int i = 0, exceptionCount = this.escapingExceptionCatchSites.size(); i < exceptionCount; i++) {
-				((EscapingExceptionCatchSite) this.escapingExceptionCatchSites.get(i)).simulateThrowAfterLoopBack(flowInfo);
+			for (Object element : this.escapingExceptionCatchSites) {
+				((EscapingExceptionCatchSite) element).simulateThrowAfterLoopBack(flowInfo);
 			}
 			this.escapingExceptionCatchSites = null; // don't care for it anymore.
 		}

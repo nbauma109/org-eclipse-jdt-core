@@ -44,7 +44,7 @@ public class TypedRegion extends Region implements ITypedRegion {
 	public boolean equals(Object o) {
 		if (o instanceof TypedRegion) {
 			TypedRegion r= (TypedRegion) o;
-			return super.equals(r) && ((fType == null && r.getType() == null) || fType.equals(r.getType()));
+			return super.equals(r) && (fType == null && r.getType() == null || fType.equals(r.getType()));
 		}
 		return false;
 	}

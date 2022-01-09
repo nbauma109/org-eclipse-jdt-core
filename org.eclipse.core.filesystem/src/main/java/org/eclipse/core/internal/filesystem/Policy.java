@@ -44,7 +44,7 @@ public class Policy {
 	}
 
 	public static void error(int code, String message, Throwable exception) throws CoreException {
-		int severity = code == 0 ? 0 : 1 << (code % 100 / 33);
+		int severity = code == 0 ? 0 : 1 << code % 100 / 33;
 		throw new CoreException(new Status(severity, PI_FILE_SYSTEM, code, message, exception));
 	}
 

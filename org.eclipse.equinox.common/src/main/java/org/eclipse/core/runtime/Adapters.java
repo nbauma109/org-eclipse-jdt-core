@@ -73,7 +73,7 @@ public class Adapters {
 
 		// If the source object is a platform object then it's already tried calling AdapterManager.getAdapter,
 		// so there's no need to try it again.
-		if ((sourceObject instanceof PlatformObject) && !allowActivation) {
+		if (sourceObject instanceof PlatformObject && !allowActivation) {
 			return null;
 		}
 

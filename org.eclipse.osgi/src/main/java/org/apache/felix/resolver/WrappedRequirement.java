@@ -37,11 +37,7 @@ public class WrappedRequirement implements Requirement
     @Override
     public boolean equals(Object obj)
     {
-        if (obj == null)
-        {
-            return false;
-        }
-        if (getClass() != obj.getClass())
+        if (obj == null || getClass() != obj.getClass())
         {
             return false;
         }
@@ -50,7 +46,7 @@ public class WrappedRequirement implements Requirement
         {
             return false;
         }
-        return m_req == other.m_req || (m_req != null && m_req.equals(other.m_req));
+        return m_req == other.m_req || m_req != null && m_req.equals(other.m_req);
     }
 
     @Override
@@ -58,8 +54,7 @@ public class WrappedRequirement implements Requirement
     {
         int hash = 7;
         hash = 37 * hash + (m_host != null ? m_host.hashCode() : 0);
-        hash = 37 * hash + (m_req != null ? m_req.hashCode() : 0);
-        return hash;
+        return 37 * hash + (m_req != null ? m_req.hashCode() : 0);
     }
 
     public Requirement getDeclaredRequirement()
@@ -67,21 +62,25 @@ public class WrappedRequirement implements Requirement
         return m_req;
     }
 
+    @Override
     public Resource getResource()
     {
         return m_host;
     }
 
+    @Override
     public String getNamespace()
     {
         return m_req.getNamespace();
     }
 
+    @Override
     public Map<String, String> getDirectives()
     {
         return m_req.getDirectives();
     }
 
+    @Override
     public Map<String, Object> getAttributes()
     {
         return m_req.getAttributes();

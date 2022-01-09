@@ -104,12 +104,10 @@ public class AliasManager implements IManager, ILifecycleListener, IResourceChan
 			if (aliasPath != null)
 				if (aliasType == IResource.FILE) {
 					aliases.add(workspace.getRoot().getFile(aliasPath));
-				} else {
-					if (aliasPath.segmentCount() == 1)
-						aliases.add(workspace.getRoot().getProject(aliasPath.lastSegment()));
-					else
-						aliases.add(workspace.getRoot().getFolder(aliasPath));
-				}
+				} else if (aliasPath.segmentCount() == 1)
+                	aliases.add(workspace.getRoot().getProject(aliasPath.lastSegment()));
+                else
+                	aliases.add(workspace.getRoot().getFolder(aliasPath));
 		}
 
 		/**
@@ -236,23 +234,21 @@ public class AliasManager implements IManager, ILifecycleListener, IResourceChan
 					//value is a single resource
 					currentResource = (IResource) value;
 				}
-				if (previousStore != null) {
-					//check for overlap with previous
-					//Note: previous is always shorter due to map sorting rules
-					if (previousStore.isParentOf(currentStore)) {
-						//resources will be null if they were in a list, in which case
-						//they've already been passed to the doit
-						if (previousResource != null) {
-							doit.doit(previousResource.getProject());
-							//null out previous resource so we don't call doit twice with same resource
-							previousResource = null;
-						}
-						if (currentResource != null)
-							doit.doit(currentResource.getProject());
-						//keep iterating with the same previous store because there may be more overlaps
-						continue;
-					}
-				}
+				//check for overlap with previous
+                //Note: previous is always shorter due to map sorting rules
+                if (previousStore != null && previousStore.isParentOf(currentStore)) {
+                	//resources will be null if they were in a list, in which case
+                	//they've already been passed to the doit
+                	if (previousResource != null) {
+                		doit.doit(previousResource.getProject());
+                		//null out previous resource so we don't call doit twice with same resource
+                		previousResource = null;
+                	}
+                	if (currentResource != null)
+                		doit.doit(currentResource.getProject());
+                	//keep iterating with the same previous store because there may be more overlaps
+                	continue;
+                }
 				previousStore = currentStore;
 				previousResource = currentResource;
 			}
@@ -639,11 +635,9 @@ public class AliasManager implements IManager, ILifecycleListener, IResourceChan
 		HashSet<IResource> aliasesCopy = (HashSet<IResource>) aliases.clone();
 		for (IResource alias : aliasesCopy) {
 			monitor.subTask(NLS.bind(Messages.links_updatingDuplicate, alias.getFullPath()));
-			if (alias.getType() == IResource.PROJECT) {
-				if (checkDeletion((Project) alias, location))
-					continue;
-				//project did not require deletion, so fall through below and refresh it
-			}
+			if (alias.getType() == IResource.PROJECT && checkDeletion((Project) alias, location))
+            	continue;
+            //project did not require deletion, so fall through below and refresh it
 			if (!((Resource) alias).isFiltered())
 				localManager.refresh(alias, IResource.DEPTH_INFINITE, false, null);
 		}

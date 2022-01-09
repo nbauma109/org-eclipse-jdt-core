@@ -72,11 +72,7 @@ protected int matchContainer() {
 protected void matchReportReference(ASTNode reference, IJavaElement element, Binding elementBinding, int accuracy, MatchLocator locator) throws CoreException {
 	if (elementBinding instanceof ReferenceBinding) {
 		ReferenceBinding referenceBinding = (ReferenceBinding) elementBinding;
-		if (referenceBinding.isClass() && this.pattern.typeSuffix == IIndexConstants.INTERFACE_SUFFIX) {
-			// do not report class if expected types are only interfaces
-			return;
-		}
-		if (referenceBinding.isInterface() && this.pattern.typeSuffix == IIndexConstants.CLASS_SUFFIX) {
+		if (referenceBinding.isClass() && this.pattern.typeSuffix == IIndexConstants.INTERFACE_SUFFIX || referenceBinding.isInterface() && this.pattern.typeSuffix == IIndexConstants.CLASS_SUFFIX) {
 			// do not report interface if expected types are only classes
 			return;
 		}
@@ -121,8 +117,8 @@ public int resolveLevel(Binding binding) {
 
 	if (this.pattern.superRefKind != SuperTypeReferencePattern.ONLY_SUPER_CLASSES) {
 		ReferenceBinding[] superInterfaces = type.superInterfaces();
-		for (int i = 0, max = superInterfaces.length; i < max; i++) {
-			int newLevel = resolveLevelForType(this.pattern.superSimpleName, this.pattern.superQualification, superInterfaces[i]);
+		for (ReferenceBinding element : superInterfaces) {
+			int newLevel = resolveLevelForType(this.pattern.superSimpleName, this.pattern.superQualification, element);
 			if (newLevel > level) {
 				if (newLevel == ACCURATE_MATCH) return ACCURATE_MATCH;
 				level = newLevel;

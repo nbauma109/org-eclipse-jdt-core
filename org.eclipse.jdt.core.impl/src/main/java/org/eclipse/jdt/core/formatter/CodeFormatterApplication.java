@@ -201,8 +201,7 @@ public class CodeFormatterApplication implements IApplication {
 		if (files == null)
 			return;
 
-		for (int i = 0; i < files.length; i++) {
-			File file = files[i];
+		for (File file : files) {
 			if (file.isDirectory()) {
 				formatDirTree(file, codeFormatter);
 			} else if (Util.isJavaLikeFileName(file.getPath())) {
@@ -227,12 +226,11 @@ public class CodeFormatterApplication implements IApplication {
 			int kind = (file.getName().equals(IModule.MODULE_INFO_JAVA)? CodeFormatter.K_MODULE_INFO
 					: CodeFormatter.K_COMPILATION_UNIT) | CodeFormatter.F_INCLUDE_COMMENTS;
 			TextEdit edit = codeFormatter.format(kind, contents, 0, contents.length(), 0, null);
-			if (edit != null) {
-				edit.apply(doc);
-			} else {
+			if (edit == null) {
 				System.err.println(Messages.bind(Messages.FormatProblem, file.getAbsolutePath()));
 				return;
 			}
+            edit.apply(doc);
 
 			// write the file
 			final BufferedWriter out = new BufferedWriter(new FileWriter(file));
@@ -297,12 +295,7 @@ public class CodeFormatterApplication implements IApplication {
 					}
 					// the current arg should be a file or a directory name
 					File file = new File(currentArg);
-					if (file.exists()) {
-						if (filesToFormat.length == fileCounter) {
-							System.arraycopy(filesToFormat, 0, (filesToFormat = new File[fileCounter * 2]), 0, fileCounter);
-						}
-						filesToFormat[fileCounter++] = file;
-					} else {
+					if (!file.exists()) {
 						String canonicalPath;
 						try {
 							canonicalPath = file.getCanonicalPath();
@@ -315,6 +308,10 @@ public class CodeFormatterApplication implements IApplication {
 						displayHelp(errorMsg);
 						return null;
 					}
+                    if (filesToFormat.length == fileCounter) {
+                    	System.arraycopy(filesToFormat, 0, filesToFormat = new File[fileCounter * 2], 0, fileCounter);
+                    }
+                    filesToFormat[fileCounter++] = file;
 					break;
 				case CONFIG_MODE :
 					this.configName = currentArg;
@@ -345,7 +342,7 @@ public class CodeFormatterApplication implements IApplication {
 			return null;
 		}
 		if (filesToFormat.length != fileCounter) {
-			System.arraycopy(filesToFormat, 0, (filesToFormat = new File[fileCounter]), 0, fileCounter);
+			System.arraycopy(filesToFormat, 0, filesToFormat = new File[fileCounter], 0, fileCounter);
 		}
 		return filesToFormat;
 	}
@@ -414,8 +411,7 @@ public class CodeFormatterApplication implements IApplication {
 		final CodeFormatter codeFormatter = ToolFactory.createCodeFormatter(this.options,
 				ToolFactory.M_FORMAT_EXISTING);
 		// format the list of files and/or directories
-		for (int i = 0, max = filesToFormat.length; i < max; i++) {
-			final File file = filesToFormat[i];
+		for (final File file : filesToFormat) {
 			if (file.isDirectory()) {
 				formatDirTree(file, codeFormatter);
 			} else if (Util.isJavaLikeFileName(file.getPath())) {

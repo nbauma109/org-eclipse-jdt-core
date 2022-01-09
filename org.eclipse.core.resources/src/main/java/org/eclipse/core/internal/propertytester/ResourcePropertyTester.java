@@ -101,19 +101,22 @@ public class ResourcePropertyTester extends PropertyTester {
 		IResource res = (IResource) receiver;
 		if (method.equals(NAME)) {
 			return new StringMatcher(toString(expectedValue)).match(res.getName());
-		} else if (method.equals(PATH)) {
+		}
+        if (method.equals(PATH)) {
 			return new StringMatcher(toString(expectedValue)).match(res.getFullPath().toString());
-		} else if (method.equals(EXTENSION)) {
+		}
+        if (method.equals(EXTENSION)) {
 			return new StringMatcher(toString(expectedValue)).match(res.getFileExtension());
-		} else if (method.equals(READ_ONLY)) {
+		}
+        if (method.equals(READ_ONLY)) {
 			ResourceAttributes attr = res.getResourceAttributes();
 			return (attr != null && attr.isReadOnly()) == toBoolean(expectedValue);
-		} else if (method.equals(PROJECT_NATURE)) {
+		}
+        if (method.equals(PROJECT_NATURE)) {
 			try {
 				IProject proj = res.getProject();
 				return proj != null && proj.isAccessible() && proj.hasNature(toString(expectedValue));
 			} catch (CoreException e) {
-				return false;
 			}
 		} else if (method.equals(PERSISTENT_PROPERTY)) {
 			return testProperty(res, true, args, expectedValue);
@@ -154,21 +157,20 @@ public class ResourcePropertyTester extends PropertyTester {
 		if (resource == null)
 			return false;
 		String propertyName;
-		String expectedVal;
-		switch (args.length) {
-			case 0:
-				propertyName = toString(expectedValue);
-				expectedVal = null;
-				break;
-			case 1:
-				propertyName = toString(args[0]);
-				expectedVal = null;
-				break;
-			default:
-				propertyName = toString(args[0]);
-				expectedVal = toString(args[1]);
-				break;
-		}
+		String expectedVal = switch (args.length) {
+            case 0 -> {
+                propertyName = toString(expectedValue);
+                yield null;
+            }
+            case 1 -> {
+                propertyName = toString(args[0]);
+                yield null;
+            }
+            default -> {
+                propertyName = toString(args[0]);
+                yield toString(args[1]);
+            }
+        };
 		try {
 			QualifiedName key = toQualifedName(propertyName);
 			Object actualVal = persistentFlag ? resource.getPersistentProperty(key) : resource.getSessionProperty(key);
@@ -191,7 +193,7 @@ public class ResourcePropertyTester extends PropertyTester {
 	 */
 	protected boolean toBoolean(Object expectedValue) {
 		if (expectedValue instanceof Boolean) {
-			return ((Boolean) expectedValue).booleanValue();
+			return (Boolean) expectedValue;
 		}
 		return true;
 	}

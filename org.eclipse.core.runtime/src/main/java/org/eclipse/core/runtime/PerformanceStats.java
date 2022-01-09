@@ -60,7 +60,6 @@ public class PerformanceStats {
 		 * Creates a new listener.
 		 */
 		protected PerformanceListener() {
-			super();
 		}
 
 		/**
@@ -459,10 +458,10 @@ public class PerformanceStats {
 				}
 			}
 			if (value == null)
-				value = Long.valueOf(Long.MAX_VALUE);
+				value = Long.MAX_VALUE;
 			thresholdMap.put(eventName, value);
 		}
-		return value.longValue();
+		return value;
 	}
 
 	@Override

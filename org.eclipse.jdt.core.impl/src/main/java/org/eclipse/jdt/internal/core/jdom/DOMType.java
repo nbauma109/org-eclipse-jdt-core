@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.core.util.Messages;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 @SuppressWarnings("rawtypes")
 // TODO (jerome) - add implementation support for 1.5 features
 /* package */ class DOMType extends DOMMember implements IDOMType {
@@ -328,37 +329,31 @@ protected void appendMemberDeclarationContents(CharArrayBuffer  buffer) {
 			} else {
 				buffer.append(this.fDocument, this.fInterfacesRange[1] + 1, this.fOpenBodyRange[0] - this.fInterfacesRange[1] - 1);
 			}
-		} else {
-			if (this.fSuperclassRange[0] < 0) {
-				buffer.append(' ');
-			} else if (this.fImplementsRange[0] > 0) {
-				buffer.append(this.fDocument, this.fSuperclassRange[1] + 1, this.fImplementsRange[0] - this.fSuperclassRange[1] - 1);
-				buffer.append(this.fDocument, this.fInterfacesRange[1] + 1, this.fOpenBodyRange[0] - this.fInterfacesRange[1] - 1);
-			} else {
-				buffer.append(this.fDocument, this.fSuperclassRange[1] + 1, this.fOpenBodyRange[0] - this.fSuperclassRange[1] - 1);
-			}
-		}
-	} else {
-		if (getMask(MASK_TYPE_HAS_INTERFACES)) {
-			if (this.fExtendsRange[0] < 0) {
-				buffer.append(" extends "); //$NON-NLS-1$
-			} else {
-				buffer.append(this.fDocument, this.fExtendsRange[0], this.fExtendsRange[1] + 1 - this.fExtendsRange[0]);
-			}
-			if (this.fInterfaces != null) {
-				buffer.append(this.fInterfaces);
-				buffer.append(' ');
-			} else {
-				buffer.append(this.fDocument, this.fInterfacesRange[0], this.fInterfacesRange[1] + 1 - this.fInterfacesRange[0]);
-			}
-		} else {
-			if (this.fImplementsRange[0] < 0) {
-				buffer.append(' ');
-			} else {
-				buffer.append(this.fDocument, this.fNameRange[1] + 1, this.fOpenBodyRange[0] - this.fNameRange[1] - 1);
-			}
-		}
-	}
+		} else if (this.fSuperclassRange[0] < 0) {
+        	buffer.append(' ');
+        } else if (this.fImplementsRange[0] > 0) {
+        	buffer.append(this.fDocument, this.fSuperclassRange[1] + 1, this.fImplementsRange[0] - this.fSuperclassRange[1] - 1);
+        	buffer.append(this.fDocument, this.fInterfacesRange[1] + 1, this.fOpenBodyRange[0] - this.fInterfacesRange[1] - 1);
+        } else {
+        	buffer.append(this.fDocument, this.fSuperclassRange[1] + 1, this.fOpenBodyRange[0] - this.fSuperclassRange[1] - 1);
+        }
+	} else if (getMask(MASK_TYPE_HAS_INTERFACES)) {
+    	if (this.fExtendsRange[0] < 0) {
+    		buffer.append(" extends "); //$NON-NLS-1$
+    	} else {
+    		buffer.append(this.fDocument, this.fExtendsRange[0], this.fExtendsRange[1] + 1 - this.fExtendsRange[0]);
+    	}
+    	if (this.fInterfaces != null) {
+    		buffer.append(this.fInterfaces);
+    		buffer.append(' ');
+    	} else {
+    		buffer.append(this.fDocument, this.fInterfacesRange[0], this.fInterfacesRange[1] + 1 - this.fInterfacesRange[0]);
+    	}
+    } else if (this.fImplementsRange[0] < 0) {
+    	buffer.append(' ');
+    } else {
+    	buffer.append(this.fDocument, this.fNameRange[1] + 1, this.fOpenBodyRange[0] - this.fNameRange[1] - 1);
+    }
 
 }
 /**
@@ -453,15 +448,13 @@ int getOpenBodyEnd() {
 @Override
 public String getSuperclass() {
 	becomeDetailed();
-	if (getMask(MASK_TYPE_HAS_SUPERCLASS)) {
-		if (this.fSuperclass != null) {
-			return this.fSuperclass;
-		} else {
-			return new String(this.fDocument, this.fSuperclassRange[0], this.fSuperclassRange[1] + 1 - this.fSuperclassRange[0]);
-		}
-	} else {
+	if (!getMask(MASK_TYPE_HAS_SUPERCLASS)) {
 		return null;
 	}
+    if (this.fSuperclass != null) {
+    	return this.fSuperclass;
+    }
+    return new String(this.fDocument, this.fSuperclassRange[0], this.fSuperclassRange[1] + 1 - this.fSuperclassRange[0]);
 }
 /**
  * @see IDOMType#getSuperInterfaces()
@@ -479,9 +472,8 @@ public boolean isAllowableChild(IDOMNode node) {
 		int type= node.getNodeType();
 		return type == IDOMNode.TYPE || type == IDOMNode.FIELD|| type == IDOMNode.METHOD ||
 			type == IDOMNode.INITIALIZER;
-	} else {
-		return false;
 	}
+    return false;
 
 }
 /**

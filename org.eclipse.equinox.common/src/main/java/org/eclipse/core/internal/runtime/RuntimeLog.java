@@ -124,7 +124,7 @@ public final class RuntimeLog {
 	 */
 	public static boolean isEmpty() {
 		synchronized (logListeners) {
-			return (logListeners.isEmpty()) && (logWriter == null);
+			return logListeners.isEmpty() && logWriter == null;
 		}
 	}
 
@@ -134,7 +134,7 @@ public final class RuntimeLog {
 	 */
 	public static boolean hasListeners() {
 		synchronized (logListeners) {
-			return (!logListeners.isEmpty());
+			return !logListeners.isEmpty();
 		}
 	}
 

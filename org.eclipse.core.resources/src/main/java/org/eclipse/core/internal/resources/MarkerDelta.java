@@ -44,7 +44,7 @@ public class MarkerDelta implements IMarkerDelta, IMarkerSetElement {
 	public int getAttribute(String attributeName, int defaultValue) {
 		Object value = info.getAttribute(attributeName);
 		if (value instanceof Integer)
-			return ((Integer) value).intValue();
+			return (Integer) value;
 		return defaultValue;
 	}
 
@@ -60,7 +60,7 @@ public class MarkerDelta implements IMarkerDelta, IMarkerSetElement {
 	public boolean getAttribute(String attributeName, boolean defaultValue) {
 		Object value = info.getAttribute(attributeName);
 		if (value instanceof Boolean)
-			return ((Boolean) value).booleanValue();
+			return (Boolean) value;
 		return defaultValue;
 	}
 

@@ -42,7 +42,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	private final RegistryStrategyOSGI strategy;
 	private final Object token;
 	private final HashMap<String, Long> dynamicAddStateStamps = new HashMap<>();
-	private final long[] currentStateStamp = new long[] {0};
+	private final long[] currentStateStamp = {0};
 
 	public EclipseBundleListener(ExtensionRegistry registry, Object key, RegistryStrategyOSGI strategy) {
 		this.registry = registry;
@@ -191,7 +191,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			// only need to worry about fragments
 			synchronized (currentStateStamp) {
 				// mark this host as processed for the current state stamp.
-				dynamicAddStateStamps.put(Long.toString(bundle.getBundleId()), Long.valueOf(currentStateStamp[0]));
+				dynamicAddStateStamps.put(Long.toString(bundle.getBundleId()), currentStateStamp[0]);
 			}
 			return;
 		}
@@ -241,7 +241,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			}
 			synchronized (currentStateStamp) {
 				// mark this host as processed for the current state stamp.
-				dynamicAddStateStamps.put(hostID, Long.valueOf(currentStateStamp[0]));
+				dynamicAddStateStamps.put(hostID, currentStateStamp[0]);
 			}
 		}
 	}

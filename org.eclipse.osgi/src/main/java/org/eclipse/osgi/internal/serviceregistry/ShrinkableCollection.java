@@ -86,11 +86,9 @@ public class ShrinkableCollection<E> implements Collection<E> {
 					if (f == null) {
 						count++;
 					}
-				} else {
-					if (e.equals(f)) {
-						count++;
-					}
-				}
+				} else if (e.equals(f)) {
+                	count++;
+                }
 			}
 			if (count != 1) {
 				return false;
@@ -140,7 +138,7 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		if (collections.isEmpty()) {
 			return iter;
 		}
-		return new Iterator<E>() {
+		return new Iterator<>() {
 			private E last;
 
 		@Override

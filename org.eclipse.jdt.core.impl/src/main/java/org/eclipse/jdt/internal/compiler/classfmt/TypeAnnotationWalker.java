@@ -27,7 +27,7 @@ public class TypeAnnotationWalker implements ITypeAnnotationWalker {
 
 	// precondition: not-empty typeAnnotations
 	public TypeAnnotationWalker(IBinaryTypeAnnotation[] typeAnnotations) {
-		this(typeAnnotations, -1L >>> (64-typeAnnotations.length)); // initialize so lowest length bits are 1
+		this(typeAnnotations, -1L >>> 64-typeAnnotations.length); // initialize so lowest length bits are 1
 	}
 	TypeAnnotationWalker(IBinaryTypeAnnotation[] typeAnnotations, long matchBits) {
 		this(typeAnnotations, matchBits, 0);

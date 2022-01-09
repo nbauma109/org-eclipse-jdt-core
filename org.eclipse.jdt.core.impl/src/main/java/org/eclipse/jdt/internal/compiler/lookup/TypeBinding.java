@@ -103,7 +103,6 @@ abstract public class TypeBinding extends Binding {
 
 
 public TypeBinding() {
-	super();
 }
 
 public TypeBinding(TypeBinding prototype) {  // faithfully copy most instance state - clone operation should specialize/override suitably.
@@ -333,15 +332,13 @@ public ReferenceBinding findSuperTypeOriginatingFrom(int wellKnownOriginalID, bo
 	ReferenceBinding reference = (ReferenceBinding) this;
 
     // do not allow type variables to match with erasures for free
-    if (reference.id == wellKnownOriginalID || (original().id == wellKnownOriginalID)) return reference;
+    if (reference.id == wellKnownOriginalID || original().id == wellKnownOriginalID) return reference;
 
     ReferenceBinding currentType = reference;
     // iterate superclass to avoid recording interfaces if searched supertype is class
     if (originalIsClass) {
 		while ((currentType = currentType.superclass()) != null) {
-			if (currentType.id == wellKnownOriginalID)
-				return currentType;
-			if (currentType.original().id == wellKnownOriginalID)
+			if (currentType.id == wellKnownOriginalID || currentType.original().id == wellKnownOriginalID)
 				return currentType;
 		}
 		return null;
@@ -370,9 +367,7 @@ public ReferenceBinding findSuperTypeOriginatingFrom(int wellKnownOriginalID, bo
 
 	for (int i = 0; i < nextPosition; i++) {
 		currentType = interfacesToVisit[i];
-		if (currentType.id == wellKnownOriginalID)
-			return currentType;
-		if (currentType.original().id == wellKnownOriginalID)
+		if (currentType.id == wellKnownOriginalID || currentType.original().id == wellKnownOriginalID)
 			return currentType;
 		ReferenceBinding[] itsInterfaces = currentType.superInterfaces();
 		if (itsInterfaces != null && itsInterfaces != Binding.NO_SUPERINTERFACES) {
@@ -435,16 +430,12 @@ public TypeBinding findSuperTypeOriginatingFrom(TypeBinding otherType) {
 		case Binding.INTERSECTION_TYPE:
 		    // do not allow type variables/intersection types to match with erasures for free
 			otherType = otherType.original();
-		    if (equalsEquals(this, otherType))
-		    	return this;
-		    if (equalsEquals(original(), otherType))
+		    if (equalsEquals(this, otherType) || equalsEquals(original(), otherType))
 		    	return this;
 		    ReferenceBinding currentType = (ReferenceBinding)this;
 		    if (!otherType.isInterface()) {
 				while ((currentType = currentType.superclass()) != null) {
-					if (equalsEquals(currentType, otherType))
-						return currentType;
-					if (equalsEquals(currentType.original(), otherType))
+					if (equalsEquals(currentType, otherType) || equalsEquals(currentType.original(), otherType))
 						return currentType;
 				}
 				return null;
@@ -473,9 +464,7 @@ public TypeBinding findSuperTypeOriginatingFrom(TypeBinding otherType) {
 
 			for (int i = 0; i < nextPosition; i++) {
 				currentType = interfacesToVisit[i];
-				if (equalsEquals(currentType, otherType))
-					return currentType;
-				if (equalsEquals(currentType.original(), otherType))
+				if (equalsEquals(currentType, otherType) || equalsEquals(currentType.original(), otherType))
 					return currentType;
 				ReferenceBinding[] itsInterfaces = currentType.superInterfaces();
 				if (itsInterfaces != null && itsInterfaces != Binding.NO_SUPERINTERFACES) {
@@ -494,8 +483,8 @@ public TypeBinding findSuperTypeOriginatingFrom(TypeBinding otherType) {
 		case Binding.INTERSECTION_TYPE18:
 			IntersectionTypeBinding18 itb18 = (IntersectionTypeBinding18) this;
 			ReferenceBinding[] intersectingTypes = itb18.getIntersectingTypes();
-			for (int i = 0, length = intersectingTypes.length; i < length; i++) {
-				TypeBinding superType = intersectingTypes[i].findSuperTypeOriginatingFrom(otherType);
+			for (ReferenceBinding intersectingType : intersectingTypes) {
+				TypeBinding superType = intersectingType.findSuperTypeOriginatingFrom(otherType);
 				if (superType != null)
 					return superType;
 			}
@@ -544,8 +533,7 @@ public TypeBinding getErasureCompatibleType(TypeBinding declaringClass) {
 			if (variable.superclass != null && variable.superclass.findSuperTypeOriginatingFrom(declaringClass) != null) {
 				return variable.superclass.getErasureCompatibleType(declaringClass);
 			}
-			for (int i = 0, otherLength = variable.superInterfaces.length; i < otherLength; i++) {
-				ReferenceBinding superInterface = variable.superInterfaces[i];
+			for (ReferenceBinding superInterface : variable.superInterfaces) {
 				if (superInterface.findSuperTypeOriginatingFrom(declaringClass) != null) {
 					return superInterface.getErasureCompatibleType(declaringClass);
 				}
@@ -559,8 +547,7 @@ public TypeBinding getErasureCompatibleType(TypeBinding declaringClass) {
 			if (intersection.superclass != null && intersection.superclass.findSuperTypeOriginatingFrom(declaringClass) != null) {
 				return intersection.superclass.getErasureCompatibleType(declaringClass);
 			}
-			for (int i = 0, otherLength = intersection.superInterfaces.length; i < otherLength; i++) {
-				ReferenceBinding superInterface = intersection.superInterfaces[i];
+			for (ReferenceBinding superInterface : intersection.superInterfaces) {
 				if (superInterface.findSuperTypeOriginatingFrom(declaringClass) != null) {
 					return superInterface.getErasureCompatibleType(declaringClass);
 				}
@@ -692,10 +679,7 @@ public boolean isBoxingCompatibleWith(TypeBinding right, /*@NonNull */ Scope sco
 	if (right == null)
 		return false;
 
-	if (TypeBinding.equalsEquals(this, right))
-		return true;
-
-	if (this.isCompatibleWith(right, scope))
+	if (TypeBinding.equalsEquals(this, right) || this.isCompatibleWith(right, scope))
 		return true;
 
 	if (this.isBaseType() != right.isBaseType()) {
@@ -813,7 +797,7 @@ public boolean isIntersectionType18() {
  * i.e. {@link #isParameterizedType()} is not equivalent to testing <code>type.kind() == Binding.PARAMETERIZED_TYPE</code>
  */
 public final boolean isParameterizedTypeWithActualArguments() {
-	return (kind() == Binding.PARAMETERIZED_TYPE)
+	return kind() == Binding.PARAMETERIZED_TYPE
 					&& ((ParameterizedTypeBinding) this).arguments != null;
 }
 
@@ -866,24 +850,19 @@ private boolean isProvableDistinctSubType(TypeBinding otherType) {
 		if (isInterface())
 			return false;
 		if (isArrayType()
-				|| ((this instanceof ReferenceBinding) && ((ReferenceBinding) this).isFinal())
-				|| (isTypeVariable() && this.superclass().isFinal())) {
+				|| this instanceof ReferenceBinding && ((ReferenceBinding) this).isFinal()
+				|| isTypeVariable() && this.superclass().isFinal()) {
 			return !isCompatibleWith(otherType);
 		}
-		return false;
-	} else {
-		if (isInterface()) {
-			if (otherType.isArrayType()
-					|| ((otherType instanceof ReferenceBinding) && ((ReferenceBinding) otherType).isFinal())
-					|| (otherType.isTypeVariable() && otherType.superclass().isFinal())) {
-				return !isCompatibleWith(otherType);
-			}
-		} else {
-			if (!isTypeVariable() && !otherType.isTypeVariable()) {
-				return !isCompatibleWith(otherType);
-			}
-		}
-	}
+	} else if (isInterface()) {
+    	if (otherType.isArrayType()
+    			|| otherType instanceof ReferenceBinding && ((ReferenceBinding) otherType).isFinal()
+    			|| otherType.isTypeVariable() && otherType.superclass().isFinal()) {
+    		return !isCompatibleWith(otherType);
+    	}
+    } else if (!isTypeVariable() && !otherType.isTypeVariable()) {
+    	return !isCompatibleWith(otherType);
+    }
 	return false;
 }
 
@@ -924,9 +903,7 @@ public boolean isProvablyDistinct(TypeBinding otherType) {
 		            		if (otherEnclosing == null) return true;
 		            		if ((otherEnclosing.tagBits & TagBits.HasDirectWildcard) == 0) {
 		            			if (enclosing.isProvablyDistinct(otherEnclosing)) return true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=302919
-		            		} else {
-		            			if (!enclosing.isEquivalentTo(otherParamType.enclosingType())) return true;
-		            		}
+		            		} else if (!enclosing.isEquivalentTo(otherParamType.enclosingType())) return true;
 		            	}
 		            }
 		            int length = paramType.arguments == null ? 0 : paramType.arguments.length;
@@ -950,9 +927,7 @@ public boolean isProvablyDistinct(TypeBinding otherType) {
 		            		if (otherEnclosing == null) return true;
 		            		if ((otherEnclosing.tagBits & TagBits.HasDirectWildcard) == 0) {
 								if (notEquals(enclosing, otherEnclosing)) return true;
-		            		} else {
-		            			if (!enclosing.isEquivalentTo(otherType.enclosingType())) return true;
-		            		}
+		            		} else if (!enclosing.isEquivalentTo(otherType.enclosingType())) return true;
 		            	}
 		            }
 		            length = paramType.arguments == null ? 0 : paramType.arguments.length;
@@ -1135,38 +1110,38 @@ private boolean isProvablyDistinctTypeArgument(TypeBinding otherArgument, final 
 		if (lowerBound2 != null) {
 			return false; // Object could always be a candidate
 
-		} else if (upperBound2 != null) {
+		}
+        if (upperBound2 != null) {
 			if (lowerBound1.isTypeVariable() || upperBound2.isTypeVariable()) {
 				return false;
 			}
 			return !lowerBound1.isCompatibleWith(upperBound2);
-		} else {
-			if (lowerBound1.isTypeVariable() || otherArgument.isTypeVariable()) {
-				return false;
-			}
-			return !lowerBound1.isCompatibleWith(otherArgument);
 		}
-	} else if (upperBound1 != null) {
+        if (lowerBound1.isTypeVariable() || otherArgument.isTypeVariable()) {
+        	return false;
+        }
+        return !lowerBound1.isCompatibleWith(otherArgument);
+	}
+    if (upperBound1 != null) {
 		if (lowerBound2 != null) {
 			return !lowerBound2.isCompatibleWith(upperBound1);
-		} else if (upperBound2 != null) {
+		}
+        if (upperBound2 != null) {
 			return upperBound1.isProvableDistinctSubType(upperBound2)
 							&& upperBound2.isProvableDistinctSubType(upperBound1);
-		} else {
-			return otherArgument.isProvableDistinctSubType(upperBound1);
 		}
-	} else {
-		if (lowerBound2 != null) {
-			if (lowerBound2.isTypeVariable() || isTypeVariable()) {
-				return false;
-			}
-			return !lowerBound2.isCompatibleWith(this);
-		} else if (upperBound2 != null) {
-			return isProvableDistinctSubType(upperBound2);
-		} else {
-			return true; // ground types should have been the same
-		}
+        return otherArgument.isProvableDistinctSubType(upperBound1);
 	}
+    if (lowerBound2 != null) {
+    	if (lowerBound2.isTypeVariable() || isTypeVariable()) {
+    		return false;
+    	}
+    	return !lowerBound2.isCompatibleWith(this);
+    }
+    if (upperBound2 != null) {
+    	return isProvableDistinctSubType(upperBound2);
+    }
+    return true; // ground types should have been the same
 }
 
 /**
@@ -1323,8 +1298,8 @@ public boolean isTypeArgumentContainedBy(TypeBinding otherType) {
 				case Wildcard.EXTENDS:
 					if (otherBound instanceof IntersectionTypeBinding18) {
 						TypeBinding [] intersectingTypes = ((IntersectionTypeBinding18) otherBound).intersectingTypes;
-						for (int i = 0, length = intersectingTypes.length; i < length; i++)
-							if (TypeBinding.equalsEquals(intersectingTypes[i], this))
+						for (TypeBinding intersectingType : intersectingTypes)
+                            if (TypeBinding.equalsEquals(intersectingType, this))
 								return true;
 					}
 					if (TypeBinding.equalsEquals(otherBound, this))
@@ -1341,8 +1316,8 @@ public boolean isTypeArgumentContainedBy(TypeBinding otherType) {
 				case Wildcard.SUPER:
 					if (otherBound instanceof IntersectionTypeBinding18) {
 						TypeBinding [] intersectingTypes = ((IntersectionTypeBinding18) otherBound).intersectingTypes;
-						for (int i = 0, length = intersectingTypes.length; i < length; i++)
-							if (TypeBinding.equalsEquals(intersectingTypes[i], this))
+						for (TypeBinding intersectingType : intersectingTypes)
+                            if (TypeBinding.equalsEquals(intersectingType, this))
 								return true;
 					}
 					if (TypeBinding.equalsEquals(otherBound, this))
@@ -1377,10 +1352,8 @@ public boolean isTypeArgumentContainedBy(TypeBinding otherType) {
 					if ((otherEnclosing.tagBits & TagBits.HasDirectWildcard) == 0) {
 						if (TypeBinding.notEquals(enclosing, otherEnclosing))
 							return false;
-					} else {
-						if (!enclosing.isTypeArgumentContainedBy(otherParamType.enclosingType()))
-							return false;
-					}
+					} else if (!enclosing.isTypeArgumentContainedBy(otherParamType.enclosingType()))
+                    	return false;
 				}
 			}
 			int length = paramType.arguments == null ? 0 : paramType.arguments.length;
@@ -1500,11 +1473,7 @@ public boolean needsUncheckedConversion(TypeBinding targetType) {
 	while (compatible.isRawType()) {
 		if (targetType.isBoundParameterizedType())
 			return true;
-		if (compatible.isStatic())
-			break;
-		if ((compatible = compatible.enclosingType()) == null)
-			break;
-		if ((targetType = targetType.enclosingType()) == null)
+		if (compatible.isStatic() || (compatible = compatible.enclosingType()) == null || (targetType = targetType.enclosingType()) == null)
 			break;
 	}
 	return false;
@@ -1514,8 +1483,7 @@ public boolean needsUncheckedConversion(TypeBinding targetType) {
 public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNames) /* e.g.: java.lang.Object @o.e.j.a.NonNull[] */ {
 	if (shortNames)
 		return shortReadableName();
-	else
-		return readableName();
+    return readableName();
 }
 
 /**
@@ -1591,8 +1559,7 @@ public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNull
 		return;
 	this.typeAnnotations = annotations;
 	if (evalNullAnnotations) {
-		for (int i = 0, length = annotations.length; i < length; i++) {
-			AnnotationBinding annotation = annotations[i];
+		for (AnnotationBinding annotation : annotations) {
 			if (annotation != null) {
 				if (annotation.type.hasNullBit(TypeIds.BitNullableAnnotation))
 					this.tagBits |= TagBits.AnnotationNullable | TagBits.HasNullTypeAnnotation;

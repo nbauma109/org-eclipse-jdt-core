@@ -940,23 +940,13 @@ public class DefaultCodeFormatterOptions {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, Integer.toString(this.tab_char == SPACE ? this.indentation_size : this.tab_size)); // reverse values swapping performed by IndentationTabPage
 		options.put(DefaultCodeFormatterConstants.FORMATTER_USE_TABS_ONLY_FOR_LEADING_INDENTATIONS, this.use_tabs_only_for_leading_indentations ?  DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 
-		int textBlockIndentation;
-		switch (this.text_block_indentation) {
-			case Alignment.M_INDENT_PRESERVE:
-				textBlockIndentation = DefaultCodeFormatterConstants.INDENT_PRESERVE;
-				break;
-			case Alignment.M_INDENT_BY_ONE:
-				textBlockIndentation = DefaultCodeFormatterConstants.INDENT_BY_ONE;
-				break;
-			case Alignment.M_INDENT_DEFAULT:
-				textBlockIndentation = DefaultCodeFormatterConstants.INDENT_DEFAULT;
-				break;
-			case Alignment.M_INDENT_ON_COLUMN:
-				textBlockIndentation = DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
-				break;
-			default:
-				throw new IllegalArgumentException("Invalid text block indentation: " + this.text_block_indentation); //$NON-NLS-1$
-		}
+		int textBlockIndentation = switch (this.text_block_indentation) {
+            case Alignment.M_INDENT_PRESERVE -> DefaultCodeFormatterConstants.INDENT_PRESERVE;
+            case Alignment.M_INDENT_BY_ONE -> DefaultCodeFormatterConstants.INDENT_BY_ONE;
+            case Alignment.M_INDENT_DEFAULT -> DefaultCodeFormatterConstants.INDENT_DEFAULT;
+            case Alignment.M_INDENT_ON_COLUMN -> DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+            default -> throw new IllegalArgumentException("Invalid text block indentation: " + this.text_block_indentation); //$NON-NLS-1$
+        };
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, Integer.toString(textBlockIndentation));
 
 		options.put(DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_MULTIPLICATIVE_OPERATOR, this.wrap_before_multiplicative_operator ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
@@ -2497,17 +2487,22 @@ public class DefaultCodeFormatterOptions {
 			this.use_tabs_only_for_leading_indentations = DefaultCodeFormatterConstants.TRUE.equals(useTabsOnlyForLeadingIndentationsOption);
 		}
 		setInt(settings, DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, v -> {
-			if (DefaultCodeFormatterConstants.INDENT_PRESERVE == v) {
-				this.text_block_indentation = Alignment.M_INDENT_PRESERVE;
-			} else if (DefaultCodeFormatterConstants.INDENT_BY_ONE == v) {
-				this.text_block_indentation = Alignment.M_INDENT_BY_ONE;
-			} else if (DefaultCodeFormatterConstants.INDENT_DEFAULT == v) {
-				this.text_block_indentation = Alignment.M_INDENT_DEFAULT;
-			} else if (DefaultCodeFormatterConstants.INDENT_ON_COLUMN == v) {
-				this.text_block_indentation = Alignment.M_INDENT_ON_COLUMN;
-			} else {
-				throw new IllegalArgumentException("invalid text block setting: " + v); //$NON-NLS-1$
-			}
+			switch (v) {
+                case DefaultCodeFormatterConstants.INDENT_PRESERVE:
+                    this.text_block_indentation = Alignment.M_INDENT_PRESERVE;
+                    break;
+                case DefaultCodeFormatterConstants.INDENT_BY_ONE:
+                    this.text_block_indentation = Alignment.M_INDENT_BY_ONE;
+                    break;
+                case DefaultCodeFormatterConstants.INDENT_DEFAULT:
+                    this.text_block_indentation = Alignment.M_INDENT_DEFAULT;
+                    break;
+                case DefaultCodeFormatterConstants.INDENT_ON_COLUMN:
+                    this.text_block_indentation = Alignment.M_INDENT_ON_COLUMN;
+                    break;
+                default:
+                    throw new IllegalArgumentException("invalid text block setting: " + v); //$NON-NLS-1$
+            }
 		});
 		final Object pageWidthOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT);
 		if (pageWidthOption != null) {
@@ -2567,39 +2562,35 @@ public class DefaultCodeFormatterOptions {
 			this.use_tags = DefaultCodeFormatterConstants.TRUE.equals(useTags);
 		}
 		final Object disableTagOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_DISABLING_TAG);
-		if (disableTagOption != null) {
-			if (disableTagOption instanceof String) {
-				String stringValue = (String) disableTagOption;
-				int idx = stringValue.indexOf('\n');
-				if (idx == 0) {
-					this.disabling_tag = null;
-				} else {
-					String tag = idx < 0 ? stringValue.trim() : stringValue.substring(0, idx).trim();
-					if (tag.length() == 0) {
-						this.disabling_tag = null;
-					} else {
-						this.disabling_tag = tag.toCharArray();
-					}
-				}
-			}
-		}
+		if (disableTagOption instanceof String) {
+        	String stringValue = (String) disableTagOption;
+        	int idx = stringValue.indexOf('\n');
+        	if (idx == 0) {
+        		this.disabling_tag = null;
+        	} else {
+        		String tag = idx < 0 ? stringValue.trim() : stringValue.substring(0, idx).trim();
+        		if (tag.length() == 0) {
+        			this.disabling_tag = null;
+        		} else {
+        			this.disabling_tag = tag.toCharArray();
+        		}
+        	}
+        }
 		final Object enableTagOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_ENABLING_TAG);
-		if (enableTagOption != null) {
-			if (enableTagOption instanceof String) {
-				String stringValue = (String) enableTagOption;
-				int idx = stringValue.indexOf('\n');
-				if (idx == 0) {
-					this.enabling_tag = null;
-				} else {
-					String tag = idx < 0 ? stringValue.trim() : stringValue.substring(0, idx).trim();
-					if (tag.length() == 0) {
-						this.enabling_tag = null;
-					} else {
-						this.enabling_tag = tag.toCharArray();
-					}
-				}
-			}
-		}
+		if (enableTagOption instanceof String) {
+        	String stringValue = (String) enableTagOption;
+        	int idx = stringValue.indexOf('\n');
+        	if (idx == 0) {
+        		this.enabling_tag = null;
+        	} else {
+        		String tag = idx < 0 ? stringValue.trim() : stringValue.substring(0, idx).trim();
+        		if (tag.length() == 0) {
+        			this.enabling_tag = null;
+        		} else {
+        			this.enabling_tag = tag.toCharArray();
+        		}
+        	}
+        }
 		final Object wrapWrapOuterExpressionsWhenNestedOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_WRAP_OUTER_EXPRESSIONS_WHEN_NESTED);
 		if (wrapWrapOuterExpressionsWhenNestedOption != null) {
 			this.wrap_outer_expressions_when_nested = DefaultCodeFormatterConstants.TRUE.equals(wrapWrapOuterExpressionsWhenNestedOption);
@@ -2613,7 +2604,6 @@ public class DefaultCodeFormatterOptions {
 			try {
 				return Integer.parseInt((String) value);
 			} catch (NumberFormatException e) {
-				return defaultValue;
 			}
 		}
 		return defaultValue;
@@ -2664,7 +2654,8 @@ public class DefaultCodeFormatterOptions {
 	 * @param settings the given map
 	 * @deprecated
 	 */
-	private void setDeprecatedOptions(Map<String, String> settings) {
+	@Deprecated
+    private void setDeprecatedOptions(Map<String, String> settings) {
 		// backward compatibility code
 		final Object commentClearBlankLinesOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES);
 		if (commentClearBlankLinesOption != null) {
@@ -2715,29 +2706,27 @@ public class DefaultCodeFormatterOptions {
 				if (insertNewLineAfterAnnotationOnLocalVariableOption != null) {
 					this.insert_new_line_after_annotation_on_local_variable = JavaCore.INSERT.equals(insertNewLineAfterAnnotationOnLocalVariableOption);
 				}
-			} else if (insertNewLineAfterAnnotationOnParameterOption == null
-					&& insertNewLineAfterAnnotationOnLocalVariableOption == null) {
-				// if none of the new 3.4 options is used, fall back to the deprecated 3.1 option
-				if (insertNewLineAfterAnnotationOption != null) {
-					boolean insert = JavaCore.INSERT.equals(insertNewLineAfterAnnotationOption);
-					this.insert_new_line_after_annotation_on_type = insert;
-					this.insert_new_line_after_annotation_on_enum_constant = insert;
-					this.insert_new_line_after_annotation_on_field = insert;
-					this.insert_new_line_after_annotation_on_method = insert;
-					this.insert_new_line_after_annotation_on_package = insert;
-					this.insert_new_line_after_annotation_on_parameter = insert;
-					this.insert_new_line_after_annotation_on_local_variable = insert;
-					int alignment = insert ? Alignment.M_FORCE | Alignment.M_ONE_PER_LINE_SPLIT
-							: Alignment.M_NO_ALIGNMENT;
-					this.alignment_for_annotations_on_type = alignment;
-					this.alignment_for_annotations_on_enum_constant = alignment;
-					this.alignment_for_annotations_on_field = alignment;
-					this.alignment_for_annotations_on_method = alignment;
-					this.alignment_for_annotations_on_package = alignment;
-					this.alignment_for_annotations_on_parameter = alignment;
-					this.alignment_for_annotations_on_local_variable = alignment;
-				}
-			}
+			} else // if none of the new 3.4 options is used, fall back to the deprecated 3.1 option
+            if (insertNewLineAfterAnnotationOnParameterOption == null
+            		&& insertNewLineAfterAnnotationOnLocalVariableOption == null && insertNewLineAfterAnnotationOption != null) {
+            	boolean insert = JavaCore.INSERT.equals(insertNewLineAfterAnnotationOption);
+            	this.insert_new_line_after_annotation_on_type = insert;
+            	this.insert_new_line_after_annotation_on_enum_constant = insert;
+            	this.insert_new_line_after_annotation_on_field = insert;
+            	this.insert_new_line_after_annotation_on_method = insert;
+            	this.insert_new_line_after_annotation_on_package = insert;
+            	this.insert_new_line_after_annotation_on_parameter = insert;
+            	this.insert_new_line_after_annotation_on_local_variable = insert;
+            	int alignment = insert ? Alignment.M_FORCE | Alignment.M_ONE_PER_LINE_SPLIT
+            			: Alignment.M_NO_ALIGNMENT;
+            	this.alignment_for_annotations_on_type = alignment;
+            	this.alignment_for_annotations_on_enum_constant = alignment;
+            	this.alignment_for_annotations_on_field = alignment;
+            	this.alignment_for_annotations_on_method = alignment;
+            	this.alignment_for_annotations_on_package = alignment;
+            	this.alignment_for_annotations_on_parameter = alignment;
+            	this.alignment_for_annotations_on_local_variable = alignment;
+            }
 		} else { // otherwise use new 3.7 options if available
 			if (insertNewLineAfterAnnotationOnTypeOption != null) {
 				this.insert_new_line_after_annotation_on_type = JavaCore.INSERT.equals(insertNewLineAfterAnnotationOnTypeOption);

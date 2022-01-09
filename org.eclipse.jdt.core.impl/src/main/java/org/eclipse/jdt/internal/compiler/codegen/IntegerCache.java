@@ -55,7 +55,7 @@ public void clear() {
  */
 public boolean containsKey(int key) {
 	int index = hash(key), length = this.keyTable.length;
-	while ((this.keyTable[index] != 0) || ((this.keyTable[index] == 0) &&(this.valueTable[index] != 0))) {
+	while (this.keyTable[index] != 0 || this.keyTable[index] == 0 &&this.valueTable[index] != 0) {
 		if (this.keyTable[index] == key)
 			return true;
 		if (++index == length) {
@@ -82,7 +82,7 @@ public int hash(int key) {
  */
 public int put(int key, int value) {
 	int index = hash(key), length = this.keyTable.length;
-	while ((this.keyTable[index] != 0) || ((this.keyTable[index] == 0) && (this.valueTable[index] != 0))) {
+	while (this.keyTable[index] != 0 || this.keyTable[index] == 0 && this.valueTable[index] != 0) {
 		if (this.keyTable[index] == key)
 			return this.valueTable[index] = value;
 		if (++index == length) {
@@ -108,7 +108,7 @@ public int put(int key, int value) {
  */
 public int putIfAbsent(int key, int value) {
 	int index = hash(key), length = this.keyTable.length;
-	while ((this.keyTable[index] != 0) || ((this.keyTable[index] == 0) && (this.valueTable[index] != 0))) {
+	while (this.keyTable[index] != 0 || this.keyTable[index] == 0 && this.valueTable[index] != 0) {
 		if (this.keyTable[index] == key)
 			return this.valueTable[index];
 		if (++index == length) {
@@ -134,7 +134,7 @@ private void rehash() {
 	for (int i = this.keyTable.length; --i >= 0;) {
 		int key = this.keyTable[i];
 		int value = this.valueTable[i];
-		if ((key != 0) || ((key == 0) && (value != 0))) {
+		if (key != 0 || key == 0 && value != 0) {
 			newHashtable.put(key, value);
 		}
 	}
@@ -161,7 +161,7 @@ public String toString() {
 	StringBuilder buf = new StringBuilder();
 	buf.append("{"); //$NON-NLS-1$
 	for (int i = 0; i < max; ++i) {
-		if ((this.keyTable[i] != 0) || ((this.keyTable[i] == 0) && (this.valueTable[i] != 0))) {
+		if (this.keyTable[i] != 0 || this.keyTable[i] == 0 && this.valueTable[i] != 0) {
 			buf.append(this.keyTable[i]).append("->").append(this.valueTable[i]); //$NON-NLS-1$
 		}
 		if (i < max) {

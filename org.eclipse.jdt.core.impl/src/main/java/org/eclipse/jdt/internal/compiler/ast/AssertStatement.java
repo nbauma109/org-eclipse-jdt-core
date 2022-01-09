@@ -53,8 +53,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	Constant cst = this.assertExpression.optimizedBooleanConstant();
 	this.assertExpression.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
-	boolean isOptimizedTrueAssertion = cst != Constant.NotAConstant && cst.booleanValue() == true;
-	boolean isOptimizedFalseAssertion = cst != Constant.NotAConstant && cst.booleanValue() == false;
+	boolean isOptimizedTrueAssertion = cst != Constant.NotAConstant && cst.booleanValue();
+	boolean isOptimizedFalseAssertion = cst != Constant.NotAConstant && !cst.booleanValue();
 
 	flowContext.tagBits |= FlowContext.HIDE_NULL_COMPARISON_WARNING;
 	FlowInfo conditionFlowInfo = this.assertExpression.analyseCode(currentScope, flowContext, flowInfo.copy());
@@ -91,19 +91,18 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		return flowInfo; // if assertions are enabled, the following code will be unreachable
 		// change this if we need to carry null analysis results of the assert
 		// expression downstream
-	} else {
-		CompilerOptions compilerOptions = currentScope.compilerOptions();
-		if (!compilerOptions.includeNullInfoFromAsserts) {
-			// keep just the initializations info, don't include assert's null info
-			// merge initialization info's and then add back the null info from flowInfo to
-			// make sure that the empty null info of assertInfo doesnt change flowInfo's null info.
-			return ((flowInfo.nullInfoLessUnconditionalCopy()).mergedWith(assertInfo.nullInfoLessUnconditionalCopy())).addNullInfoFrom(flowInfo);
-		}
-		return flowInfo.mergedWith(assertInfo.nullInfoLessUnconditionalCopy()).
-			addInitializationsFrom(assertWhenTrueInfo.discardInitializationInfo());
-		// keep the merge from the initial code for the definite assignment
-		// analysis, tweak the null part to influence nulls downstream
 	}
+    CompilerOptions compilerOptions = currentScope.compilerOptions();
+    if (!compilerOptions.includeNullInfoFromAsserts) {
+    	// keep just the initializations info, don't include assert's null info
+    	// merge initialization info's and then add back the null info from flowInfo to
+    	// make sure that the empty null info of assertInfo doesnt change flowInfo's null info.
+    	return flowInfo.nullInfoLessUnconditionalCopy().mergedWith(assertInfo.nullInfoLessUnconditionalCopy()).addNullInfoFrom(flowInfo);
+    }
+    return flowInfo.mergedWith(assertInfo.nullInfoLessUnconditionalCopy()).
+    	addInitializationsFrom(assertWhenTrueInfo.discardInitializationInfo());
+    // keep the merge from the initial code for the definite assignment
+    // analysis, tweak the null part to influence nulls downstream
 }
 
 @Override
@@ -119,7 +118,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 		codeStream.ifne(assertionActivationLabel);
 
 		BranchLabel falseLabel;
-		this.assertExpression.generateOptimizedBoolean(currentScope, codeStream, (falseLabel = new BranchLabel(codeStream)), null , true);
+		this.assertExpression.generateOptimizedBoolean(currentScope, codeStream, falseLabel = new BranchLabel(codeStream), null , true);
 		codeStream.newJavaLangAssertionError();
 		codeStream.dup();
 		if (this.exceptionArgument != null) {
@@ -136,12 +135,10 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 		}
 		falseLabel.place();
 		assertionActivationLabel.place();
-	} else {
-		// May loose some local variable initializations : affecting the local variable attributes
-		if (this.preAssertInitStateIndex != -1) {
-			codeStream.removeNotDefinitelyAssignedVariables(currentScope, this.preAssertInitStateIndex);
-		}
-	}
+	} else // May loose some local variable initializations : affecting the local variable attributes
+    if (this.preAssertInitStateIndex != -1) {
+    	codeStream.removeNotDefinitelyAssignedVariables(currentScope, this.preAssertInitStateIndex);
+    }
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 }
 
@@ -200,8 +197,7 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 		// find <clinit> and enable assertion support
 		TypeDeclaration typeDeclaration = outerMostClass.scope.referenceType();
 		AbstractMethodDeclaration[] methods = typeDeclaration.methods;
-		for (int i = 0, max = methods.length; i < max; i++) {
-			AbstractMethodDeclaration method = methods[i];
+		for (AbstractMethodDeclaration method : methods) {
 			if (method.isClinit()) {
 				((Clinit) method).setAssertionSupport(this.assertionSyntheticFieldBinding, currentScope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_5);
 				break;

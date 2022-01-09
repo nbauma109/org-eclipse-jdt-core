@@ -33,7 +33,6 @@ public class SyncInfoWriter {
 	public static final byte QNAME = 2;
 
 	public SyncInfoWriter(Workspace workspace, Synchronizer synchronizer) {
-		super();
 		this.workspace = workspace;
 		this.synchronizer = synchronizer;
 	}

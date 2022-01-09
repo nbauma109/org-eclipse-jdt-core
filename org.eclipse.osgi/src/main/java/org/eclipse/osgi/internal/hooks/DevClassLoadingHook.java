@@ -50,10 +50,9 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 		}
 		// first check that we are in devmode for this sourcedata
 		String[] devClassPaths = !configuration.inDevelopmentMode() ? null : configuration.getDevClassPath(sourceGeneration.getRevision().getSymbolicName());
-		if (devClassPaths == null || devClassPaths.length == 0)
-			return false; // not in dev mode return
+		 // not in dev mode return
 		// check that dev classpath entries have not already been added; we mark this in the first entry below
-		if (cpEntries.size() > 0 && cpEntries.get(0).getUserObject(KEY) != null)
+		if (devClassPaths == null || devClassPaths.length == 0 || cpEntries.size() > 0 && cpEntries.get(0).getUserObject(KEY) != null)
 			return false; // this source has already had its dev classpath entries added.
 
 		// get the specified classpath from the Bundle-ClassPath header to check for dups

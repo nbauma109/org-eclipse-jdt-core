@@ -27,7 +27,7 @@ public class CompletionOnJavadocFieldReference extends JavadocFieldReference imp
 	public int separatorPosition;
 
 	public CompletionOnJavadocFieldReference(Expression receiver, int tag, int position, int separatorPos, char[] name) {
-		super(null, (((long)position)<<32)+position-1);
+		super(null, ((long)position<<32)+position-1);
 		this.receiver = receiver;
 		this.tagSourceStart = position;
 		this.tagSourceEnd = position;
@@ -45,7 +45,7 @@ public class CompletionOnJavadocFieldReference extends JavadocFieldReference imp
 	}
 
 	public CompletionOnJavadocFieldReference(JavadocMessageSend msgSend, int position) {
-		super(msgSend.selector, ((msgSend.nameSourcePosition>>32)<<32)+msgSend.sourceEnd);
+		super(msgSend.selector, (msgSend.nameSourcePosition>>32<<32)+msgSend.sourceEnd);
 		this.receiver = msgSend.receiver;
 		this.separatorPosition = position;
 		this.tagSourceStart = msgSend.tagSourceStart;

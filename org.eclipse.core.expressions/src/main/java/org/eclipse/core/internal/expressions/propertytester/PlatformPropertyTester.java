@@ -47,7 +47,6 @@ public class PlatformPropertyTester extends PropertyTester {
 				if (product != null) {
 					return product.getId().equals(expectedValue);
 				}
-				return false;
 			} else if (PROPERTY_IS_BUNDLE_INSTALLED.equals(property) && args.length >= 1 && args[0] instanceof String) {
 				return Platform.getBundle((String)args[0]) != null;
 			} else if (PROPERTY_BUNDLE_STATE.equals(property)
@@ -56,7 +55,6 @@ public class PlatformPropertyTester extends PropertyTester {
 				if (b != null) {
 					return bundleState(b.getState(), expectedValue);
 				}
-				return false;
 			}
 		}
 		return false;

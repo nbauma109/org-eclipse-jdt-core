@@ -174,7 +174,7 @@ void acceptModule(byte[] content, String name) {
 		if (moduleDecl != null) {
 			HashMap<String, IModule> cache = ModulesCache.get(key);
 			if (cache == null) {
-				ModulesCache.put(key, cache = new HashMap<String, IModule>());
+				ModulesCache.put(key, cache = new HashMap<>());
 			}
 			cache.put(name, moduleDecl);
 		}
@@ -241,8 +241,7 @@ public boolean isPackage(String qualifiedPackageName, String moduleName) {
 
 @Override
 public String toString() {
-	String start = "Classpath jrt file " + this.zipFilename; //$NON-NLS-1$
-	return start;
+	return "Classpath jrt file " + this.zipFilename;
 }
 
 @Override
@@ -287,7 +286,7 @@ protected Collection<String> selectModules(Set<String> keySet, Collection<String
 		result.retainAll(limitModules);
 		rootModules = result;
 	} else {
-		rootModules = JavaProject.internalDefaultRootModules(keySet, s -> s, m -> getModule(m));
+		rootModules = JavaProject.internalDefaultRootModules(keySet, s -> s, this::getModule);
 	}
 	Set<String> allModules = new HashSet<>(rootModules);
 	for (String mod : rootModules)
@@ -303,10 +302,8 @@ protected void addRequired(String mod, Set<String> allModules) {
 	for (IModuleReference requiredRef : iMod.requires()) {
 		String moduleName = String.valueOf(requiredRef.name());
 		IModule reqMod = getModule(moduleName);
-		if (reqMod != null) {
-			if (allModules.add(moduleName))
-				addRequired(moduleName, allModules);
-		}
+		if (reqMod != null && allModules.add(moduleName))
+        	addRequired(moduleName, allModules);
 	}
 }
 @Override

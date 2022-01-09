@@ -140,23 +140,13 @@ public class ResourceChangeDescriptionFactory implements IResourceChangeDescript
 	protected IResource getDestinationResource(IResource source, IPath sourcePrefix, IPath destinationPrefix) {
 		IPath relativePath = source.getFullPath().removeFirstSegments(sourcePrefix.segmentCount());
 		IPath destinationPath = destinationPrefix.append(relativePath);
-		IResource destination;
 		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
-		switch (source.getType()) {
-			case IResource.FILE :
-				destination = wsRoot.getFile(destinationPath);
-				break;
-			case IResource.FOLDER :
-				destination = wsRoot.getFolder(destinationPath);
-				break;
-			case IResource.PROJECT :
-				destination = wsRoot.getProject(destinationPath.segment(0));
-				break;
-			default :
-				// Shouldn't happen
-				destination = null;
-		}
-		return destination;
+		return switch (source.getType()) {
+            case IResource.FILE -> wsRoot.getFile(destinationPath);
+            case IResource.FOLDER -> wsRoot.getFolder(destinationPath);
+            case IResource.PROJECT -> wsRoot.getProject(destinationPath.segment(0));
+            default -> null;
+        };
 	}
 
 	@Override

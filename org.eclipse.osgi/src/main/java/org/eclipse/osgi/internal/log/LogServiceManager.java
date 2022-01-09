@@ -129,8 +129,8 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	@Override
 	public void bundleChanged(BundleEvent event) {
 		Bundle bundle = event.getBundle();
-		String bsn = (bundle == null) ? null : bundle.getSymbolicName();
-		String loggerName = (bsn == null) ? LOGGER_BUNDLE_EVENT : LOGGER_BUNDLE_EVENT + "." + bsn; //$NON-NLS-1$
+		String bsn = bundle == null ? null : bundle.getSymbolicName();
+		String loggerName = bsn == null ? LOGGER_BUNDLE_EVENT : LOGGER_BUNDLE_EVENT + "." + bsn; //$NON-NLS-1$
 		if (logReaderServiceFactory.isLoggable(bundle, loggerName, LogService.LOG_INFO)) {
 			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(loggerName);
 			int eventType = event.getType();
@@ -147,10 +147,10 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 		ServiceReference<?> reference = event.getServiceReference();
 		Bundle bundle = reference.getBundle();
 		int eventType = event.getType();
-		String bsn = (bundle == null) ? null : bundle.getSymbolicName();
-		String loggerName = (bsn == null) ? LOGGER_SERVICE_EVENT : LOGGER_SERVICE_EVENT + "." + bsn; //$NON-NLS-1$
+		String bsn = bundle == null ? null : bundle.getSymbolicName();
+		String loggerName = bsn == null ? LOGGER_SERVICE_EVENT : LOGGER_SERVICE_EVENT + "." + bsn; //$NON-NLS-1$
 		@SuppressWarnings("deprecation")
-		int logType = (eventType == ServiceEvent.MODIFIED) ? LogService.LOG_DEBUG : LogService.LOG_INFO;
+		int logType = eventType == ServiceEvent.MODIFIED ? LogService.LOG_DEBUG : LogService.LOG_INFO;
 		if (logReaderServiceFactory.isLoggable(bundle, loggerName, logType)) {
 			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(loggerName);
 			logger.log(bundle, event, null, logType, getServiceEventTypeName(eventType), reference, null);
@@ -166,20 +166,13 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	public void frameworkEvent(FrameworkEvent event) {
 		Bundle bundle = event.getBundle();
 		int eventType = event.getType();
-		int logType;
-		switch (eventType) {
-			case FrameworkEvent.ERROR :
-				logType = LogService.LOG_ERROR;
-				break;
-			case FrameworkEvent.WARNING :
-				logType = LogService.LOG_WARNING;
-				break;
-			default :
-				logType = LogService.LOG_INFO;
-				break;
-		}
-		String bsn = (bundle == null) ? null : bundle.getSymbolicName();
-		String loggerName = (bsn == null) ? LOGGER_FRAMEWORK_EVENT : LOGGER_FRAMEWORK_EVENT + "." + bsn; //$NON-NLS-1$
+		int logType = switch (eventType) {
+            case FrameworkEvent.ERROR -> LogService.LOG_ERROR;
+            case FrameworkEvent.WARNING -> LogService.LOG_WARNING;
+            default -> LogService.LOG_INFO;
+        };
+		String bsn = bundle == null ? null : bundle.getSymbolicName();
+		String loggerName = bsn == null ? LOGGER_FRAMEWORK_EVENT : LOGGER_FRAMEWORK_EVENT + "." + bsn; //$NON-NLS-1$
 		if (logReaderServiceFactory.isLoggable(bundle, loggerName, logType)) {
 			LoggerImpl logger = (LoggerImpl) systemBundleLog.getLogger(loggerName);
 			logger.log(bundle, event, null, logType, getFrameworkEventTypeName(eventType), null, event.getThrowable());
@@ -193,34 +186,34 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	private static String getBundleEventTypeName(int type) {
 		switch (type) {
 			case BundleEvent.INSTALLED :
-				return ("BundleEvent INSTALLED"); //$NON-NLS-1$
+				return "BundleEvent INSTALLED"; //$NON-NLS-1$
 
 			case BundleEvent.RESOLVED :
-				return ("BundleEvent RESOLVED"); //$NON-NLS-1$
+				return "BundleEvent RESOLVED"; //$NON-NLS-1$
 
 			case BundleEvent.STARTED :
-				return ("BundleEvent STARTED"); //$NON-NLS-1$
+				return "BundleEvent STARTED"; //$NON-NLS-1$
 
 			case BundleEvent.STARTING :
-				return ("BundleEvent STARTING"); //$NON-NLS-1$
+				return "BundleEvent STARTING"; //$NON-NLS-1$
 
 			case BundleEvent.STOPPED :
-				return ("BundleEvent STOPPED"); //$NON-NLS-1$
+				return "BundleEvent STOPPED"; //$NON-NLS-1$
 
 			case BundleEvent.STOPPING :
-				return ("BundleEvent STOPPING"); //$NON-NLS-1$
+				return "BundleEvent STOPPING"; //$NON-NLS-1$
 
 			case BundleEvent.UNINSTALLED :
-				return ("BundleEvent UNINSTALLED"); //$NON-NLS-1$
+				return "BundleEvent UNINSTALLED"; //$NON-NLS-1$
 
 			case BundleEvent.UNRESOLVED :
-				return ("BundleEvent UNRESOLVED"); //$NON-NLS-1$
+				return "BundleEvent UNRESOLVED"; //$NON-NLS-1$
 
 			case BundleEvent.UPDATED :
-				return ("BundleEvent UPDATED"); //$NON-NLS-1$
+				return "BundleEvent UPDATED"; //$NON-NLS-1$
 
 			default :
-				return ("BundleEvent " + Integer.toHexString(type)); //$NON-NLS-1$
+				return "BundleEvent " + Integer.toHexString(type); //$NON-NLS-1$
 		}
 	}
 
@@ -231,16 +224,16 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	private static String getServiceEventTypeName(int type) {
 		switch (type) {
 			case ServiceEvent.REGISTERED :
-				return ("ServiceEvent REGISTERED"); //$NON-NLS-1$
+				return "ServiceEvent REGISTERED"; //$NON-NLS-1$
 
 			case ServiceEvent.MODIFIED :
-				return ("ServiceEvent MODIFIED"); //$NON-NLS-1$
+				return "ServiceEvent MODIFIED"; //$NON-NLS-1$
 
 			case ServiceEvent.UNREGISTERING :
-				return ("ServiceEvent UNREGISTERING"); //$NON-NLS-1$
+				return "ServiceEvent UNREGISTERING"; //$NON-NLS-1$
 
 			default :
-				return ("ServiceEvent " + Integer.toHexString(type)); //$NON-NLS-1$
+				return "ServiceEvent " + Integer.toHexString(type); //$NON-NLS-1$
 		}
 	}
 
@@ -251,25 +244,25 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	private static String getFrameworkEventTypeName(int type) {
 		switch (type) {
 			case FrameworkEvent.ERROR :
-				return ("FrameworkEvent ERROR"); //$NON-NLS-1$
+				return "FrameworkEvent ERROR"; //$NON-NLS-1$
 
 			case FrameworkEvent.INFO :
-				return ("FrameworkEvent INFO"); //$NON-NLS-1$
+				return "FrameworkEvent INFO"; //$NON-NLS-1$
 
 			case FrameworkEvent.PACKAGES_REFRESHED :
-				return ("FrameworkEvent PACKAGES REFRESHED"); //$NON-NLS-1$
+				return "FrameworkEvent PACKAGES REFRESHED"; //$NON-NLS-1$
 
 			case FrameworkEvent.STARTED :
-				return ("FrameworkEvent STARTED"); //$NON-NLS-1$
+				return "FrameworkEvent STARTED"; //$NON-NLS-1$
 
 			case FrameworkEvent.STARTLEVEL_CHANGED :
-				return ("FrameworkEvent STARTLEVEL CHANGED"); //$NON-NLS-1$
+				return "FrameworkEvent STARTLEVEL CHANGED"; //$NON-NLS-1$
 
 			case FrameworkEvent.WARNING :
-				return ("FrameworkEvent WARNING"); //$NON-NLS-1$
+				return "FrameworkEvent WARNING"; //$NON-NLS-1$
 
 			default :
-				return ("FrameworkEvent " + Integer.toHexString(type)); //$NON-NLS-1$
+				return "FrameworkEvent " + Integer.toHexString(type); //$NON-NLS-1$
 		}
 	}
 
@@ -278,7 +271,7 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 		@Override
 		public int compareTo(Bundle o) {
 			long idcomp = getBundleId() - o.getBundleId();
-			return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
+			return idcomp < 0L ? -1 : idcomp > 0L ? 1 : 0;
 		}
 
 		@Override

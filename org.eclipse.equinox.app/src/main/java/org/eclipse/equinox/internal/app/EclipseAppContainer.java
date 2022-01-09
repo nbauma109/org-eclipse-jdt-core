@@ -154,16 +154,16 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 			int cardinality = 0;
 			if (configs.length > 0) {
 				String sVisible = configs[0].getAttribute(PT_APP_VISIBLE);
-				if (sVisible != null && !Boolean.valueOf(sVisible).booleanValue())
-					flags &= ~(EclipseAppDescriptor.FLAG_VISIBLE);
+				if (sVisible != null && !Boolean.parseBoolean(sVisible))
+					flags &= ~EclipseAppDescriptor.FLAG_VISIBLE;
 				String sThread = configs[0].getAttribute(PT_APP_THREAD);
 				if (PT_APP_THREAD_ANY.equals(sThread)) {
 					flags |= EclipseAppDescriptor.FLAG_TYPE_ANY_THREAD;
-					flags &= ~(EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD);
+					flags &= ~EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD;
 				}
 				String sCardinality = configs[0].getAttribute(PT_APP_CARDINALITY);
 				if (sCardinality != null) {
-					flags &= ~(EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL); // clear the global bit
+					flags &= ~EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL; // clear the global bit
 					if (PT_APP_CARDINALITY_SINGLETON_SCOPED.equals(sCardinality))
 						flags |= EclipseAppDescriptor.FLAG_CARD_SINGLETON_SCOPED;
 					else if (PT_APP_CARDINALITY_UNLIMITED.equals(sCardinality))
@@ -260,10 +260,9 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 			missingApp = true;
 			return;
 		}
-		if (defaultDesc != null)
-			defaultDesc.launch(args);
-		else
-			throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, Messages.application_noIdFound);
+		if (defaultDesc == null)
+            throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, Messages.application_noIdFound);
+        defaultDesc.launch(args);
 	}
 
 	/*
@@ -341,32 +340,30 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 				curMissingAppLauncher.launch(appHandle);
 			else
 				appLauncher.launch(appHandle, appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
-		} else {
-			if (isDefault) {
-				DefaultApplicationListener curDefaultApplicationListener = null;
-				MainApplicationLauncher curMissingAppLauncher = null;
-				ApplicationLauncher appLauncher = null;
-				synchronized (this) {
-					appLauncher = (ApplicationLauncher) launcherTracker.getService();
-					if (defaultAppListener == null)
-						defaultAppListener = new DefaultApplicationListener(appHandle);
-					curDefaultApplicationListener = defaultAppListener;
-					if (appLauncher == null) {
-						// we need to wait to allow the ApplicationLauncher to get registered;
-						// save the default app listener to be launched as soon as the ApplicationLauncher is available
-						defaultMainThreadAppHandle = curDefaultApplicationListener;
-						return;
-					}
-					curMissingAppLauncher = missingAppLauncher;
-				}
-				if (curMissingAppLauncher != null)
-					curMissingAppLauncher.launch(curDefaultApplicationListener);
-				else
-					appLauncher.launch(curDefaultApplicationListener, null);
-			} else {
-				AnyThreadAppLauncher.launchEclipseApplication(appHandle);
-			}
-		}
+		} else if (isDefault) {
+        	DefaultApplicationListener curDefaultApplicationListener = null;
+        	MainApplicationLauncher curMissingAppLauncher = null;
+        	ApplicationLauncher appLauncher = null;
+        	synchronized (this) {
+        		appLauncher = (ApplicationLauncher) launcherTracker.getService();
+        		if (defaultAppListener == null)
+        			defaultAppListener = new DefaultApplicationListener(appHandle);
+        		curDefaultApplicationListener = defaultAppListener;
+        		if (appLauncher == null) {
+        			// we need to wait to allow the ApplicationLauncher to get registered;
+        			// save the default app listener to be launched as soon as the ApplicationLauncher is available
+        			defaultMainThreadAppHandle = curDefaultApplicationListener;
+        			return;
+        		}
+        		curMissingAppLauncher = missingAppLauncher;
+        	}
+        	if (curMissingAppLauncher != null)
+        		curMissingAppLauncher.launch(curDefaultApplicationListener);
+        	else
+        		appLauncher.launch(curDefaultApplicationListener, null);
+        } else {
+        	AnyThreadAppLauncher.launchEclipseApplication(appHandle);
+        }
 	}
 
 	@Override
@@ -533,13 +530,11 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 				activeGlobalSingleton = null;
 			else if (activeScopedSingleton == appHandle)
 				activeScopedSingleton = null;
-			else if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getCardinalityType() == EclipseAppDescriptor.FLAG_CARD_LIMITED) {
-				if (activeLimited != null) {
-					ArrayList<EclipseAppHandle> limited = activeLimited.get(appHandle.getApplicationDescriptor().getApplicationId());
-					if (limited != null)
-						limited.remove(appHandle);
-				}
-			}
+            else if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getCardinalityType() == EclipseAppDescriptor.FLAG_CARD_LIMITED && activeLimited != null) {
+            	ArrayList<EclipseAppHandle> limited = activeLimited.get(appHandle.getApplicationDescriptor().getApplicationId());
+            	if (limited != null)
+            		limited.remove(appHandle);
+            }
 			if (activeMain == appHandle)
 				activeMain = null;
 			if (activeHandles.remove(appHandle))

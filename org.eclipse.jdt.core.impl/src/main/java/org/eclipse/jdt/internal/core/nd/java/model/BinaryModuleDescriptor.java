@@ -41,7 +41,6 @@ public class BinaryModuleDescriptor {
 	 *            path within the .jar)
 	 */
 	public BinaryModuleDescriptor(char[] location, char[] moduleName, char[] workspacePath, char[] indexPath) {
-		super();
 		this.location = location;
 		this.moduleName = moduleName;
 		this.indexPath = indexPath;

@@ -89,7 +89,8 @@ public interface ConditionalPermissionInfo {
 	 *             {@link ConditionalPermissionAdmin#newConditionalPermissionUpdate()}
 	 *             instead to manage the Conditional Permissions.
 	 */
-	void delete();
+	@Deprecated
+    void delete();
 
 	/**
 	 * Returns the name of this Conditional Permission Info.

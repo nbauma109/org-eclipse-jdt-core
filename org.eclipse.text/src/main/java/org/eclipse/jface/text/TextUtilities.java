@@ -42,7 +42,7 @@ public class TextUtilities {
 	 * Default line delimiters used by the text functions of this class.
 	 */
 	// Note: nextDelimiter implementation is sensitive to element order
-	public final static String[] DELIMITERS= new String[] { "\n", "\r", "\r\n" }; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+	public final static String[] DELIMITERS= { "\n", "\r", "\r\n" }; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 
 	/**
 	 * Default line delimiters used by these text functions.
@@ -135,10 +135,8 @@ public class TextUtilities {
 		int index= -1;
 
 		for (int i= 0; i < searchStrings.length; i++) {
-			if (text.endsWith(searchStrings[i])) {
-				if (index == -1 || searchStrings[i].length() > searchStrings[index].length())
-					index= i;
-			}
+			if (text.endsWith(searchStrings[i]) && (index == -1 || searchStrings[i].length() > searchStrings[index].length()))
+            	index= i;
 		}
 
 		return index;
@@ -157,10 +155,8 @@ public class TextUtilities {
 		int index= -1;
 
 		for (int i= 0; i < searchStrings.length; i++) {
-			if (text.startsWith(searchStrings[i])) {
-				if (index == -1 || searchStrings[i].length() > searchStrings[index].length())
-					index= i;
-			}
+			if (text.startsWith(searchStrings[i]) && (index == -1 || searchStrings[i].length() > searchStrings[index].length()))
+            	index= i;
 		}
 
 		return index;
@@ -217,11 +213,11 @@ public class TextUtilities {
 
 			// event is right from merged event
 			if (eventOffset > offset + length + delta) {
-				final String string= document.get(offset + length, (eventOffset - delta) - (offset + length));
+				final String string= document.get(offset + length, eventOffset - delta - (offset + length));
 				text.append(string);
 				text.append(eventText);
 
-				length= (eventOffset - delta) + eventLength - offset;
+				length= eventOffset - delta + eventLength - offset;
 
 			// event is left from merged event
 			} else if (eventOffset + eventLength < offset) {
@@ -282,8 +278,8 @@ public class TextUtilities {
 
 			// event is right from merged event
 			if (eventOffset > offset + textLength + delta) {
-				length= (eventOffset - delta) - (offset + textLength) + length + eventLength;
-				textLength= (eventOffset - delta) + eventTextLength - offset;
+				length= eventOffset - delta - (offset + textLength) + length + eventLength;
+				textLength= eventOffset - delta + eventTextLength - offset;
 
 			// event is left from merged event
 			} else if (eventOffset + eventTextLength < offset) {
@@ -612,7 +608,8 @@ public class TextUtilities {
 				}
 				info.delimiter= DELIMITERS[1];
 				break;
-			} else if (ch == '\n') {
+			}
+            if (ch == '\n') {
 				info.delimiterIndex= i;
 				info.delimiter= DELIMITERS[0];
 				break;

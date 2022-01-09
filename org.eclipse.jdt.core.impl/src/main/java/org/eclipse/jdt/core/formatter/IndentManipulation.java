@@ -152,13 +152,12 @@ public final class IndentManipulation {
 			char c = line.charAt(i);
 			if (c == '\t') {
 				spaceEquivs = calculateSpaceEquivalents(tabWidth, spaceEquivs);
-				characters++;
 			} else if (isIndentChar(c)) {
 				spaceEquivs++;
-				characters++;
 			} else {
 				break;
 			}
+            characters++;
 			if (spaceEquivs >= indentWidth) {
 				end += characters;
 				characters = 0;
@@ -171,11 +170,11 @@ public final class IndentManipulation {
 		}
 		if (end == 0) {
 			return Util.EMPTY_STRING;
-		} else if (end == size) {
-			return line;
-		} else {
-			return line.substring(0, end);
 		}
+        if (end == size) {
+			return line;
+		}
+        return line.substring(0, end);
 	}
 
 

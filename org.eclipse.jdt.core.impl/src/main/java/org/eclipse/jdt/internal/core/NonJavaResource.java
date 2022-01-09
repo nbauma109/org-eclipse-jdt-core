@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 
 public class NonJavaResource  extends PlatformObject implements IJarEntryResource {
 
-	private static final IJarEntryResource[] NO_CHILDREN = new IJarEntryResource[0];
+	private static final IJarEntryResource[] NO_CHILDREN = {};
 	protected Object parent;
 	protected IResource resource;
 
@@ -102,11 +102,11 @@ public class NonJavaResource  extends PlatformObject implements IJarEntryResourc
 	public IPackageFragmentRoot getPackageFragmentRoot() {
 		if (this.parent instanceof IPackageFragment) {
 			return (IPackageFragmentRoot) ((IPackageFragment) this.parent).getParent();
-		} else if (this.parent instanceof IPackageFragmentRoot) {
-			return (IPackageFragmentRoot) this.parent;
-		} else {
-			return ((NonJavaResource) this.parent).getPackageFragmentRoot();
 		}
+        if (this.parent instanceof IPackageFragmentRoot) {
+			return (IPackageFragmentRoot) this.parent;
+		}
+        return ((NonJavaResource) this.parent).getPackageFragmentRoot();
 	}
 
 	@Override

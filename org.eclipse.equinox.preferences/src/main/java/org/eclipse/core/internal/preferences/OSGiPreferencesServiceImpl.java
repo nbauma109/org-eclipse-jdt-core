@@ -77,7 +77,7 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 		public Preferences node(String pathName) {
 			pathName = fixPath(pathName);
 
-			if ((pathName.length() > 1 && pathName.endsWith("/")) //$NON-NLS-1$
+			if (pathName.length() > 1 && pathName.endsWith("/") //$NON-NLS-1$
 					|| pathName.indexOf("//") != -1) { //$NON-NLS-1$
 				throw new IllegalArgumentException();
 			}

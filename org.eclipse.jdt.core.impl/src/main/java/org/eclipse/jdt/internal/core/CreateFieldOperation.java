@@ -74,19 +74,18 @@ public String getMainTaskName(){
 }
 private VariableDeclarationFragment getFragment(ASTNode node) {
 	Iterator fragments =  ((FieldDeclaration) node).fragments().iterator();
-	if (this.anchorElement != null) {
-		VariableDeclarationFragment fragment = null;
-		String fragmentName = this.anchorElement.getElementName();
-		while (fragments.hasNext()) {
-			fragment = (VariableDeclarationFragment) fragments.next();
-			if (fragment.getName().getIdentifier().equals(fragmentName)) {
-				return fragment;
-			}
-		}
-		return fragment;
-	} else {
+	if (this.anchorElement == null) {
 		return (VariableDeclarationFragment) fragments.next();
 	}
+    VariableDeclarationFragment fragment = null;
+    String fragmentName = this.anchorElement.getElementName();
+    while (fragments.hasNext()) {
+    	fragment = (VariableDeclarationFragment) fragments.next();
+    	if (fragment.getName().getIdentifier().equals(fragmentName)) {
+    		return fragment;
+    	}
+    }
+    return fragment;
 }
 /**
  * By default the new field is positioned after the last existing field

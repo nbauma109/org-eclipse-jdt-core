@@ -29,7 +29,6 @@ public class VariableDescription implements Comparable<VariableDescription> {
 	}
 
 	public VariableDescription(String name, String value) {
-		super();
 		Assert.isNotNull(name);
 		Assert.isNotNull(value);
 		this.name = name;
@@ -38,10 +37,7 @@ public class VariableDescription implements Comparable<VariableDescription> {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null) {
-			return false;
-		}
-		if (o.getClass() != this.getClass())
+		if (o == null || o.getClass() != this.getClass())
 			return false;
 		VariableDescription other = (VariableDescription) o;
 		return name.equals(other.name) && value == other.value;

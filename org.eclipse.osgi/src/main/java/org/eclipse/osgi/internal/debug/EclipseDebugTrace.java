@@ -270,7 +270,7 @@ class EclipseDebugTrace implements DebugTrace {
 			// the first element in this stack trace is going to be this class, so ignore it
 			// the second element in this stack trace is going to either be the caller or the trace class.  Ignore it only if a traceClass is defined
 			// the rest of the elements should be included in the file array
-			int firstIndex = (traceClass == null) ? 1 : 2;
+			int firstIndex = traceClass == null ? 1 : 2;
 			int endIndex = elements.length - firstIndex;
 			final StackTraceElement[] newElements = new StackTraceElement[endIndex];
 			int i = 0;
@@ -404,59 +404,53 @@ class EclipseDebugTrace implements DebugTrace {
 
 		// 0 file size means there is no size limit
 		boolean isBackupOK = true;
-		if (maxTraceFileSize > 0) {
-			if ((traceFile != null) && traceFile.exists()) {
-				if ((traceFile.length() >> 10) > maxTraceFileSize) { // Use KB as file size unit.
-					final String traceFileName = traceFile.getAbsolutePath();
+		if (maxTraceFileSize > 0 && traceFile != null && traceFile.exists() && traceFile.length() >> 10 > maxTraceFileSize) { // Use KB as file size unit.
+        	final String traceFileName = traceFile.getAbsolutePath();
 
-					// Delete old backup file that will be replaced.
-					String backupFilename = ""; //$NON-NLS-1$
-					if (traceFileName.toLowerCase().endsWith(TRACE_FILE_EXTENSION)) {
-						backupFilename = traceFileName.substring(0, traceFileName.length() - TRACE_FILE_EXTENSION.length()) + BACKUP_MARK + backupTraceFileIndex + TRACE_FILE_EXTENSION;
-					} else {
-						backupFilename = traceFileName + BACKUP_MARK + backupTraceFileIndex;
-					}
-					final File backupFile = new File(backupFilename);
-					if (backupFile.exists()) {
-						if (!backupFile.delete()) {
-							System.err.println("Error when trying to delete old trace file: " + backupFile.getName());//$NON-NLS-1$
-							if (backupFile.renameTo(new File(backupFile.getAbsolutePath() + System.currentTimeMillis()))) {
-								System.err.println("So we rename it to filename: " + backupFile.getName()); //$NON-NLS-1$
-							} else {
-								System.err.println("And we also cannot rename it!"); //$NON-NLS-1$
-								isBackupOK = false;
-							}
-						}
-					}
+        	// Delete old backup file that will be replaced.
+        	String backupFilename = ""; //$NON-NLS-1$
+        	if (traceFileName.toLowerCase().endsWith(TRACE_FILE_EXTENSION)) {
+        		backupFilename = traceFileName.substring(0, traceFileName.length() - TRACE_FILE_EXTENSION.length()) + BACKUP_MARK + backupTraceFileIndex + TRACE_FILE_EXTENSION;
+        	} else {
+        		backupFilename = traceFileName + BACKUP_MARK + backupTraceFileIndex;
+        	}
+        	final File backupFile = new File(backupFilename);
+        	if (backupFile.exists() && !backupFile.delete()) {
+            	System.err.println("Error when trying to delete old trace file: " + backupFile.getName());//$NON-NLS-1$
+            	if (backupFile.renameTo(new File(backupFile.getAbsolutePath() + System.currentTimeMillis()))) {
+            		System.err.println("So we rename it to filename: " + backupFile.getName()); //$NON-NLS-1$
+            	} else {
+            		System.err.println("And we also cannot rename it!"); //$NON-NLS-1$
+            		isBackupOK = false;
+            	}
+            }
 
-					// Rename current log file to backup one.
-					boolean isRenameOK = traceFile.renameTo(backupFile);
-					if (!isRenameOK) {
-						System.err.println("Error when trying to rename trace file to backup one."); //$NON-NLS-1$
-						isBackupOK = false;
-					}
-					/*
-					 * Write a header to new log file stating that this new file is a continuation file.
-					 * This method should already be called with the file lock set so we should be safe
-					 * to update it here.
-					*/
-					Writer traceWriter = null;
-					try {
-						traceWriter = openWriter(traceFile);
-						writeComment(traceWriter, "This is a continuation of trace file " + backupFile.getAbsolutePath()); //$NON-NLS-1$
-						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERSION_COMMENT + EclipseDebugTrace.TRACE_FILE_VERSION);
-						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERBOSE_COMMENT + debugOptions.isVerbose());
-						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_DATE + getFormattedDate(timestamp));
-						traceWriter.flush();
-					} catch (IOException ioEx) {
-						ioEx.printStackTrace();
-					} finally {
-						closeWriter(traceWriter);
-					}
-					backupTraceFileIndex = (++backupTraceFileIndex) % maxTraceFiles;
-				}
-			}
-		}
+        	// Rename current log file to backup one.
+        	boolean isRenameOK = traceFile.renameTo(backupFile);
+        	if (!isRenameOK) {
+        		System.err.println("Error when trying to rename trace file to backup one."); //$NON-NLS-1$
+        		isBackupOK = false;
+        	}
+        	/*
+        	 * Write a header to new log file stating that this new file is a continuation file.
+        	 * This method should already be called with the file lock set so we should be safe
+        	 * to update it here.
+        	*/
+        	Writer traceWriter = null;
+        	try {
+        		traceWriter = openWriter(traceFile);
+        		writeComment(traceWriter, "This is a continuation of trace file " + backupFile.getAbsolutePath()); //$NON-NLS-1$
+        		writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERSION_COMMENT + EclipseDebugTrace.TRACE_FILE_VERSION);
+        		writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERBOSE_COMMENT + debugOptions.isVerbose());
+        		writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_DATE + getFormattedDate(timestamp));
+        		traceWriter.flush();
+        	} catch (IOException ioEx) {
+        		ioEx.printStackTrace();
+        	} finally {
+        		closeWriter(traceWriter);
+        	}
+        	backupTraceFileIndex = ++backupTraceFileIndex % maxTraceFiles;
+        }
 		return isBackupOK;
 	}
 
@@ -553,8 +547,6 @@ class EclipseDebugTrace implements DebugTrace {
 		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(" "); //$NON-NLS-1$
 		if (!debugOptions.isVerbose()) {
-			// format the trace entry for quiet tracing: only the thread name, timestamp, trace message, and exception (if necessary)
-			message.append(encodeText(entry.getMessage()));
 		} else {
 			// format the trace entry for verbose tracing
 			message.append(entry.getBundleSymbolicName());
@@ -577,8 +569,9 @@ class EclipseDebugTrace implements DebugTrace {
 			message.append(" "); //$NON-NLS-1$
 			message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 			message.append(" "); //$NON-NLS-1$
-			message.append(encodeText(entry.getMessage()));
 		}
+        // format the trace entry for quiet tracing: only the thread name, timestamp, trace message, and exception (if necessary)
+        message.append(encodeText(entry.getMessage()));
 		if (entry.getThrowable() != null) {
 			message.append(" "); //$NON-NLS-1$
 			message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
@@ -589,7 +582,7 @@ class EclipseDebugTrace implements DebugTrace {
 		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(EclipseDebugTrace.LINE_SEPARATOR);
 		// write the message
-		if ((traceWriter != null) && (message != null)) {
+		if (traceWriter != null && message != null) {
 			traceWriter.write(message.toString());
 		}
 	}

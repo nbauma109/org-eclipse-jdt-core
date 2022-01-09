@@ -95,7 +95,7 @@ public class ModuleDeclaration extends ASTNode implements ReferenceContext {
 	public void checkAndSetModifiers() {
 		int realModifiers = this.modifiers & ExtraCompilerModifiers.AccJustFlag;
 		int expectedModifiers = ClassFileConstants.ACC_OPEN | ClassFileConstants.ACC_SYNTHETIC;
-		if ((realModifiers & ~(expectedModifiers)) != 0) {
+		if ((realModifiers & ~expectedModifiers) != 0) {
 			this.scope.problemReporter().illegalModifierForModule(this);
 			realModifiers &= expectedModifiers;
 		}
@@ -146,8 +146,8 @@ public class ModuleDeclaration extends ASTNode implements ReferenceContext {
 
 		this.hasResolvedModuleDirectives = true;
 
-		Set<ModuleBinding> requiredModules = new HashSet<ModuleBinding>();
-		Set<ModuleBinding> requiredTransitiveModules = new HashSet<ModuleBinding>();
+		Set<ModuleBinding> requiredModules = new HashSet<>();
+		Set<ModuleBinding> requiredTransitiveModules = new HashSet<>();
 		for(int i = 0; i < this.requiresCount; i++) {
 			RequiresStatement ref = this.requires[i];
 			if (ref != null && ref.resolve(cuScope) != null) {
@@ -248,11 +248,11 @@ public class ModuleDeclaration extends ASTNode implements ReferenceContext {
 		this.hasResolvedTypeDirectives = true;
 		ASTNode.resolveAnnotations(this.scope, this.annotations, this.binding);
 
-		Set<TypeBinding> allTypes = new HashSet<TypeBinding>();
+		Set<TypeBinding> allTypes = new HashSet<>();
 		for(int i = 0; i < this.usesCount; i++) {
 			TypeBinding serviceBinding = this.uses[i].serviceInterface.resolveType(this.scope);
 			if (serviceBinding != null && serviceBinding.isValidBinding()) {
-				if (!(serviceBinding.isClass() || serviceBinding.isInterface() || serviceBinding.isAnnotationType())) {
+				if (!serviceBinding.isClass() && !serviceBinding.isInterface() && !serviceBinding.isAnnotationType()) {
 					cuScope.problemReporter().invalidServiceRef(IProblem.InvalidServiceIntfType, this.uses[i].serviceInterface);
 				}
 				if (!allTypes.add(this.uses[i].serviceInterface.resolvedType)) {
@@ -294,9 +294,7 @@ public class ModuleDeclaration extends ASTNode implements ReferenceContext {
 	private void analyseSomeReferencedPackages(PackageVisibilityStatement[] stats, CompilationUnitScope skope) {
 		for (PackageVisibilityStatement stat : stats) {
 			PlainPackageBinding pb = stat.resolvedPackage;
-			if (pb == null)
-				continue;
-			if (pb.hasCompilationUnit(true))
+			if (pb == null || pb.hasCompilationUnit(true))
 				continue;
 			for (ModuleBinding req : this.binding.getAllRequiredModules()) {
 				for (PlainPackageBinding exported : req.getExports()) {

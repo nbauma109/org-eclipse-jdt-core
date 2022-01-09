@@ -46,8 +46,8 @@ protected void closing(Object info) throws JavaModelException {
 	super.closing(info);
 	SourceMethodElementInfo elementInfo = (SourceMethodElementInfo) info;
 	ITypeParameter[] typeParameters = elementInfo.typeParameters;
-	for (int i = 0, length = typeParameters.length; i < length; i++) {
-		((TypeParameter) typeParameters[i]).close();
+	for (ITypeParameter typeParameter : typeParameters) {
+		((TypeParameter) typeParameter).close();
 	}
 }
 @Override
@@ -88,9 +88,9 @@ protected void getHandleMemento(StringBuffer buff) {
 	char delimiter = getHandleMementoDelimiter();
 	buff.append(delimiter);
 	escapeMementoName(buff, getElementName());
-	for (int i = 0; i < this.parameterTypes.length; i++) {
+	for (String parameterType : this.parameterTypes) {
 		buff.append(delimiter);
-		escapeMementoName(buff, this.parameterTypes[i]);
+		escapeMementoName(buff, parameterType);
 	}
 	if (this.occurrenceCount > 1) {
 		buff.append(JEM_COUNT);
@@ -160,6 +160,7 @@ public ILocalVariable[] getParameters() throws JavaModelException {
  * @since 3.0
  * @deprecated
  */
+@Deprecated
 @Override
 public String[] getTypeParameterSignatures() throws JavaModelException {
 	ITypeParameter[] typeParameters = getTypeParameters();
@@ -218,8 +219,8 @@ public String getSignature() throws JavaModelException {
 @Override
 public int hashCode() {
    int hash = super.hashCode();
-	for (int i = 0, length = this.parameterTypes.length; i < length; i++) {
-	    hash = Util.combineHashCodes(hash, this.parameterTypes[i].hashCode());
+	for (String parameterType : this.parameterTypes) {
+	    hash = Util.combineHashCodes(hash, parameterType.hashCode());
 	}
 	return hash;
 }

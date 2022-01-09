@@ -49,8 +49,7 @@ public class TypePattern extends Pattern {
 	public boolean checkUnsafeCast(Scope scope, TypeBinding castType, TypeBinding expressionType, TypeBinding match, boolean isNarrowing) {
 		if (!castType.isReifiable())
 			return CastExpression.checkUnsafeCast(this, scope, castType, expressionType, match, isNarrowing);
-		else
-			return super.checkUnsafeCast(scope, castType, expressionType, match, isNarrowing);
+        return super.checkUnsafeCast(scope, castType, expressionType, match, isNarrowing);
 	}
 
 	@Override
@@ -59,16 +58,14 @@ public class TypePattern extends Pattern {
 		if (!this.isTotalTypeNode) {
 			// non-total type patterns create a nonnull local:
 			flowInfo.markAsDefinitelyNonNull(this.local.binding);
-		} else {
-			// total type patterns inherit the nullness of the value being switched over, unless ...
-			if (flowContext.associatedNode instanceof SwitchStatement) {
-				SwitchStatement swStmt = (SwitchStatement) flowContext.associatedNode;
-				int nullStatus = swStmt.containsNull
-						? FlowInfo.NON_NULL // ... null is handled in a separate case
-						: swStmt.expression.nullStatus(flowInfo, flowContext);
-				flowInfo.markNullStatus(this.local.binding, nullStatus);
-			}
-		}
+		} else // total type patterns inherit the nullness of the value being switched over, unless ...
+        if (flowContext.associatedNode instanceof SwitchStatement) {
+        	SwitchStatement swStmt = (SwitchStatement) flowContext.associatedNode;
+        	int nullStatus = swStmt.containsNull
+        			? FlowInfo.NON_NULL // ... null is handled in a separate case
+        			: swStmt.expression.nullStatus(flowInfo, flowContext);
+        	flowInfo.markNullStatus(this.local.binding, nullStatus);
+        }
 		return flowInfo;
 	}
 
@@ -97,7 +94,7 @@ public class TypePattern extends Pattern {
 	public boolean isTotalForType(TypeBinding type) {
 		if (type == null || this.resolvedType == null)
 			return false;
-		return (type.erasure().isSubtypeOf(this.resolvedType.erasure(), false));
+		return type.erasure().isSubtypeOf(this.resolvedType.erasure(), false);
 	}
 	@Override
 	public boolean dominates(Pattern p) {
@@ -134,10 +131,8 @@ public class TypePattern extends Pattern {
 
 	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
-		if (visitor.visit(this, scope)) {
-			if (this.local != null)
-				this.local.traverse(visitor, scope);
-		}
+		if (visitor.visit(this, scope) && this.local != null)
+        	this.local.traverse(visitor, scope);
 		visitor.endVisit(this, scope);
 	}
 

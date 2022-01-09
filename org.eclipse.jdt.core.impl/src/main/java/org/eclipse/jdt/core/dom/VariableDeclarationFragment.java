@@ -48,7 +48,8 @@ public class VariableDeclarationFragment extends VariableDeclaration {
 	 * @since 3.0
 	 * @deprecated in JLS8 and later, use {@link VariableDeclarationFragment#EXTRA_DIMENSIONS2_PROPERTY} instead.
 	 */
-	public static final SimplePropertyDescriptor EXTRA_DIMENSIONS_PROPERTY =
+	@Deprecated
+    public static final SimplePropertyDescriptor EXTRA_DIMENSIONS_PROPERTY =
 			internalExtraDimensionsPropertyFactory(VariableDeclarationFragment.class);
 
 	/**
@@ -110,9 +111,8 @@ public class VariableDeclarationFragment extends VariableDeclaration {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel >= AST.JLS8_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_8_0;
-		} else {
-			return PROPERTY_DESCRIPTORS;
 		}
+        return PROPERTY_DESCRIPTORS;
 	}
 
 	/**
@@ -159,10 +159,9 @@ public class VariableDeclarationFragment extends VariableDeclaration {
 		if (property == EXTRA_DIMENSIONS_PROPERTY) {
 			if (get) {
 				return getExtraDimensions();
-			} else {
-				internalSetExtraDimensions(value);
-				return 0;
 			}
+            internalSetExtraDimensions(value);
+            return 0;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetIntProperty(property, get, value);
@@ -173,18 +172,16 @@ public class VariableDeclarationFragment extends VariableDeclaration {
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((SimpleName) child);
-				return null;
 			}
+            setName((SimpleName) child);
+            return null;
 		}
 		if (property == INITIALIZER_PROPERTY) {
 			if (get) {
 				return getInitializer();
-			} else {
-				setInitializer((Expression) child);
-				return null;
 			}
+            setInitializer((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

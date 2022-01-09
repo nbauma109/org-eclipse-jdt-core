@@ -76,7 +76,7 @@ class VariableBinding implements IVariableBinding {
 				if (convertedAnnotationCount == 0) {
 					return this.annotations = AnnotationBinding.NoAnnotations;
 				}
-				System.arraycopy(tempAnnotations, 0, (tempAnnotations = new IAnnotationBinding[convertedAnnotationCount]), 0, convertedAnnotationCount);
+				System.arraycopy(tempAnnotations, 0, tempAnnotations = new IAnnotationBinding[convertedAnnotationCount], 0, convertedAnnotationCount);
 			}
 			return this.annotations = tempAnnotations;
 		}
@@ -112,15 +112,14 @@ class VariableBinding implements IVariableBinding {
 
 	@Override
 	public ITypeBinding getDeclaringClass() {
-		if (isField()) {
-			if (this.declaringClass == null) {
-				FieldBinding fieldBinding = (FieldBinding) this.binding;
-				this.declaringClass = this.resolver.getTypeBinding(fieldBinding.declaringClass);
-			}
-			return this.declaringClass;
-		} else {
+		if (!isField()) {
 			return null;
 		}
+        if (this.declaringClass == null) {
+        	FieldBinding fieldBinding = (FieldBinding) this.binding;
+        	this.declaringClass = this.resolver.getTypeBinding(fieldBinding.declaringClass);
+        }
+        return this.declaringClass;
 	}
 
 	@Override
@@ -216,7 +215,8 @@ class VariableBinding implements IVariableBinding {
 						defaultBindingResolver.getBindingsToNodesMap());
 			}
 			return null;
-		}else if (isRecordComponent()) {
+		}
+        if (isRecordComponent()) {
 			if (this.resolver instanceof DefaultBindingResolver) {
 				DefaultBindingResolver defaultBindingResolver = (DefaultBindingResolver) this.resolver;
 				if (!defaultBindingResolver.fromJavaProject) return null;
@@ -275,18 +275,17 @@ class VariableBinding implements IVariableBinding {
 		final LocalVariableBinding localVariableBinding = (LocalVariableBinding) this.binding;
 		if (declaringMethod == null) {
 			ReferenceContext referenceContext = localVariableBinding.declaringScope.referenceContext();
-			if (referenceContext instanceof TypeDeclaration){
-				// Local variable is declared inside an initializer
-				TypeDeclaration typeDeclaration = (TypeDeclaration) referenceContext;
-				JavaElement typeHandle = null;
-				typeHandle = Util.getUnresolvedJavaElement(
-					typeDeclaration.binding,
-					defaultBindingResolver.workingCopyOwner,
-					defaultBindingResolver.getBindingsToNodesMap());
-				parent = Util.getUnresolvedJavaElement(sourceStart, sourceEnd, typeHandle);
-			} else {
+			if (!(referenceContext instanceof TypeDeclaration)) {
 				return null;
 			}
+            // Local variable is declared inside an initializer
+            TypeDeclaration typeDeclaration = (TypeDeclaration) referenceContext;
+            JavaElement typeHandle;
+            typeHandle = Util.getUnresolvedJavaElement(
+            	typeDeclaration.binding,
+            	defaultBindingResolver.workingCopyOwner,
+            	defaultBindingResolver.getBindingsToNodesMap());
+            parent = Util.getUnresolvedJavaElement(sourceStart, sourceEnd, typeHandle);
 		} else {
 			parent = (JavaElement) declaringMethod.getJavaElement();
 		}
@@ -342,31 +341,25 @@ class VariableBinding implements IVariableBinding {
 			// identical binding - equal (key or no key)
 			return true;
 		}
-		if (other == null) {
-			// other binding missing
-			return false;
-		}
-		if (!(other instanceof VariableBinding)) {
+		if (other == null || !(other instanceof VariableBinding)) {
 			return false;
 		}
 		org.eclipse.jdt.internal.compiler.lookup.VariableBinding otherBinding = ((VariableBinding) other).binding;
 		if (this.binding instanceof FieldBinding) {
 			if (otherBinding instanceof FieldBinding) {
 				return BindingComparator.isEqual((FieldBinding) this.binding, (FieldBinding) otherBinding);
-			} else {
-				return false;
 			}
-		} else {
-			if (BindingComparator.isEqual(this.binding, otherBinding)) {
-				IMethodBinding declaringMethod = getDeclaringMethod();
-				IMethodBinding otherDeclaringMethod = ((VariableBinding) other).getDeclaringMethod();
-				if (declaringMethod == null) {
-                    return otherDeclaringMethod == null;
-                }
-				return declaringMethod.isEqualTo(otherDeclaringMethod);
-			}
-			return false;
+            return false;
 		}
+        if (BindingComparator.isEqual(this.binding, otherBinding)) {
+        	IMethodBinding declaringMethod = getDeclaringMethod();
+        	IMethodBinding otherDeclaringMethod = ((VariableBinding) other).getDeclaringMethod();
+        	if (declaringMethod == null) {
+                return otherDeclaringMethod == null;
+            }
+        	return declaringMethod.isEqualTo(otherDeclaringMethod);
+        }
+        return false;
 	}
 
 	@Override
@@ -389,7 +382,7 @@ class VariableBinding implements IVariableBinding {
 
 	@Override
 	public boolean isEffectivelyFinal() {
-		return (!this.binding.isFinal() && this.binding.isEffectivelyFinal());
+		return !this.binding.isFinal() && this.binding.isEffectivelyFinal();
 	}
 
 	@Override

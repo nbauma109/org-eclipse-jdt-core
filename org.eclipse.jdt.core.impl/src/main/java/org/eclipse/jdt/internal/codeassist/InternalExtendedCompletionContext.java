@@ -72,12 +72,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 
 @SuppressWarnings({"rawtypes"})
 public class InternalExtendedCompletionContext {
-	private static Util.BindingsToNodesMap EmptyNodeMap = new Util.BindingsToNodesMap() {
-		@Override
-		public ASTNode get(Binding binding) {
-			return null;
-		}
-	};
+	private static Util.BindingsToNodesMap EmptyNodeMap = binding -> null;
 
 	private InternalCompletionContext completionContext;
 
@@ -135,7 +130,7 @@ public class InternalExtendedCompletionContext {
 			HashMap<JavaElement, Binding> handleToBinding = new HashMap<>();
 			HashMap<Binding, JavaElement> bindingToHandle = new HashMap<>();
 			HashMap<ASTNode, JavaElement> nodeWithProblemToHandle = new HashMap<>();
-			HashMap<ICompilationUnit, CompilationUnitElementInfo> handleToInfo = new HashMap<ICompilationUnit, CompilationUnitElementInfo>();
+			HashMap<ICompilationUnit, CompilationUnitElementInfo> handleToInfo = new HashMap<>();
 
 			org.eclipse.jdt.core.ICompilationUnit handle = new AssistCompilationUnit(original, this.owner, handleToBinding, handleToInfo);
 			CompilationUnitElementInfo info = new CompilationUnitElementInfo();
@@ -308,10 +303,9 @@ public class InternalExtendedCompletionContext {
 		if (binding != null) {
 			if (this.bindingsToHandles == null) return null;
 			return this.bindingsToHandles.get(binding);
-		} else {
-			if (this.nodesWithProblemsToHandles == null) return null;
-			return this.nodesWithProblemsToHandles.get(node);
 		}
+        if (this.nodesWithProblemsToHandles == null) return null;
+        return this.nodesWithProblemsToHandles.get(node);
 	}
 
 	private TypeBinding getTypeFromSignature(String typeSignature, Scope scope) {
@@ -398,7 +392,7 @@ public class InternalExtendedCompletionContext {
 			next : for (int i = 0; i < size; i++) {
 				try {
 					LocalVariableBinding binding = (LocalVariableBinding) this.visibleLocalVariables.elementAt(i);
-					if (binding.type == null || (assignableTypeBinding != null && !binding.type.isCompatibleWith(assignableTypeBinding))) continue next;
+					if (binding.type == null || assignableTypeBinding != null && !binding.type.isCompatibleWith(assignableTypeBinding)) continue next;
 					JavaElement localVariable = getJavaElement(binding);
 					if (localVariable != null) result[elementCount++] = localVariable;
 				} catch(AbortCompilation e) {
@@ -471,11 +465,7 @@ public class InternalExtendedCompletionContext {
 		next : for (int f = fields.length; --f >= 0;) {
 			FieldBinding field = fields[f];
 
-			if (field.isSynthetic()) continue next;
-
-			if (onlyStaticFields && !field.isStatic()) continue next;
-
-			if (!field.canBeSeenBy(receiverType, invocationSite, scope)) continue next;
+			if (field.isSynthetic() || onlyStaticFields && !field.isStatic() || !field.canBeSeenBy(receiverType, invocationSite, scope)) continue next;
 
 			for (int i = fieldsFound.size; --i >= 0;) {
 				FieldBinding otherField = (FieldBinding) fieldsFound.elementAt(i);
@@ -635,26 +625,15 @@ public class InternalExtendedCompletionContext {
 		next : for (int f = methods.length; --f >= 0;) {
 			MethodBinding method = methods[f];
 
-			if (method.isSynthetic()) continue next;
+			if (method.isSynthetic() || method.isDefaultAbstract() || method.isConstructor()) continue next;
 
-			if (method.isDefaultAbstract())	continue next;
-
-			if (method.isConstructor()) continue next;
-
-			if (onlyStaticMethods && !method.isStatic()) continue next;
-
-			if (!method.canBeSeenBy(receiverType, invocationSite, scope)) continue next;
+			if (onlyStaticMethods && !method.isStatic() || !method.canBeSeenBy(receiverType, invocationSite, scope)) continue next;
 
 			for (int i = methodsFound.size; --i >= 0;) {
 				MethodBinding otherMethod = (MethodBinding) methodsFound.elementAt(i);
-				if (method == otherMethod)
-					continue next;
-
-				if (CharOperation.equals(method.selector, otherMethod.selector, true)) {
-					if (this.lookupEnvironment.methodVerifier().isMethodSubsignature(otherMethod, method)) {
-						continue next;
-					}
-				}
+				if (method == otherMethod || CharOperation.equals(method.selector, otherMethod.selector, true) && this.lookupEnvironment.methodVerifier().isMethodSubsignature(otherMethod, method)) {
+                	continue next;
+                }
 			}
 
 			newMethodsFound.add(method);
@@ -672,20 +651,18 @@ public class InternalExtendedCompletionContext {
 			boolean notInJavadoc,
 			ObjectVector methodsFound) {
 		ReferenceBinding currentType = receiverType;
-		if (notInJavadoc) {
-			if (receiverType.isInterface()) {
-				searchVisibleInterfaceMethods(
-						new ReferenceBinding[]{currentType},
-						receiverType,
-						scope,
-						invocationSite,
-						invocationScope,
-						onlyStaticMethods,
-						methodsFound);
+		if (notInJavadoc && receiverType.isInterface()) {
+        	searchVisibleInterfaceMethods(
+        			new ReferenceBinding[]{currentType},
+        			receiverType,
+        			scope,
+        			invocationSite,
+        			invocationScope,
+        			onlyStaticMethods,
+        			methodsFound);
 
-				currentType = scope.getJavaLangObject();
-			}
-		}
+        	currentType = scope.getJavaLangObject();
+        }
 		boolean hasPotentialDefaultAbstractMethods = true;
 		while (currentType != null) {
 
@@ -765,11 +742,9 @@ public class InternalExtendedCompletionContext {
 						if (local == null)
 							break next;
 
-						if (local.isSecret())
-							continue next;
 						// If the local variable declaration's initialization statement itself has the completion,
 						// then don't propose the local variable
-						if (local.declaration.initialization != null) {
+						if (local.isSecret() || local.declaration.initialization != null) {
 							/*(use this if-else block if it is found that local.declaration.initialization != null is not sufficient to
 							  guarantee that proposal is being asked inside a local variable declaration's initializer)
 							 if(local.declaration.initialization.sourceEnd > 0) {
@@ -849,8 +824,7 @@ public class InternalExtendedCompletionContext {
 
 		// search in static import
 		ImportBinding[] importBindings = scope.compilationUnitScope().imports;
-		for (int i = 0; i < importBindings.length; i++) {
-			ImportBinding importBinding = importBindings[i];
+		for (ImportBinding importBinding : importBindings) {
 			if(importBinding.isValidBinding() && importBinding.isStatic()) {
 				Binding binding = importBinding.resolvedImport;
 				if(binding != null && binding.isValidBinding()) {
@@ -875,30 +849,28 @@ public class InternalExtendedCompletionContext {
 									notInJavadoc,
 									methodsFound);
 						}
-					} else {
-						if ((binding.kind() & Binding.FIELD) != 0) {
-							searchVisibleFields(
-									new FieldBinding[]{(FieldBinding)binding},
-									((FieldBinding)binding).declaringClass,
-									scope,
-									invocationSite,
-									scope,
-									staticsOnly,
-									localsFound,
-									fieldsFound);
-						} else if ((binding.kind() & Binding.METHOD) != 0) {
-							MethodBinding methodBinding = (MethodBinding)binding;
+					} else if ((binding.kind() & Binding.FIELD) != 0) {
+                    	searchVisibleFields(
+                    			new FieldBinding[]{(FieldBinding)binding},
+                    			((FieldBinding)binding).declaringClass,
+                    			scope,
+                    			invocationSite,
+                    			scope,
+                    			staticsOnly,
+                    			localsFound,
+                    			fieldsFound);
+                    } else if ((binding.kind() & Binding.METHOD) != 0) {
+                    	MethodBinding methodBinding = (MethodBinding)binding;
 
-							searchVisibleLocalMethods(
-									methodBinding.declaringClass.getMethods(methodBinding.selector),
-									methodBinding.declaringClass,
-									scope,
-									invocationSite,
-									scope,
-									true,
-									methodsFound);
-						}
-					}
+                    	searchVisibleLocalMethods(
+                    			methodBinding.declaringClass.getMethods(methodBinding.selector),
+                    			methodBinding.declaringClass,
+                    			scope,
+                    			invocationSite,
+                    			scope,
+                    			true,
+                    			methodsFound);
+                    }
 				}
 			}
 		}
@@ -934,9 +906,9 @@ public class InternalExtendedCompletionContext {
 			// the erasure must be used because guessedType can be a RawTypeBinding
 			guessedType = guessedType.erasure();
 			TypeVariableBinding[] typeVars = guessedType.typeVariables();
-			for (int i = 0; i < parameterTypes.length; i++) {
-				for (int j = 0; j < typeVars.length; j++) {
-					if (CharOperation.equals(parameterTypes[i].toCharArray(), typeVars[j].sourceName))
+			for (String parameterType : parameterTypes) {
+				for (TypeVariableBinding typeVar : typeVars) {
+					if (CharOperation.equals(parameterType.toCharArray(), typeVar.sourceName))
 						return false;
 				}
 			}

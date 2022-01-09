@@ -46,7 +46,7 @@ public final class TemplateBuffer {
 	 * @param string the string
 	 * @param variables the variable positions
 	 */
-	public final void setContent(String string, TemplateVariable[] variables) {
+	public void setContent(String string, TemplateVariable[] variables) {
 		Assert.isNotNull(string);
 		Assert.isNotNull(variables);
 
@@ -77,7 +77,7 @@ public final class TemplateBuffer {
 	 *
 	 * @return the string representation of the template buffer
 	 */
-	public final String getString() {
+	public String getString() {
 		return fString;
 	}
 
@@ -87,7 +87,7 @@ public final class TemplateBuffer {
 	 *
 	 * @return the variable positions of the template buffer
 	 */
-	public final TemplateVariable[] getVariables() {
+	public TemplateVariable[] getVariables() {
 		return fVariables;
 	}
 

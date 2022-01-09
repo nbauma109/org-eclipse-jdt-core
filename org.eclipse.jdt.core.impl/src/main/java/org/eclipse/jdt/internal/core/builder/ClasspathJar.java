@@ -226,16 +226,14 @@ public void cleanup() {
 			}
 			this.annotationZipFile = null;
 		}
-	} else {
-		if (this.zipFile != null && org.eclipse.jdt.internal.core.JavaModelManager.ZIP_ACCESS_VERBOSE) {
-			try {
-				this.zipFile.size();
-				System.out.println("(" + Thread.currentThread() + ") [ClasspathJar.cleanup()] ZipFile NOT closed on " + this.zipFilename); //$NON-NLS-1$	//$NON-NLS-2$
-			} catch (IllegalStateException e) {
-				// OK: the file was already closed
-			}
-		}
-	}
+	} else if (this.zipFile != null && org.eclipse.jdt.internal.core.JavaModelManager.ZIP_ACCESS_VERBOSE) {
+    	try {
+    		this.zipFile.size();
+    		System.out.println("(" + Thread.currentThread() + ") [ClasspathJar.cleanup()] ZipFile NOT closed on " + this.zipFilename); //$NON-NLS-1$	//$NON-NLS-2$
+    	} catch (IllegalStateException e) {
+    		// OK: the file was already closed
+    	}
+    }
 	this.module = null; // TODO(SHMOD): is this safe?
 	this.knownPackageNames = null;
 }
@@ -293,10 +291,8 @@ public int hashCode() {
 
 @Override
 public boolean isPackage(String qualifiedPackageName, String moduleName) {
-	if (moduleName != null) {
-		if (this.module == null || !moduleName.equals(String.valueOf(this.module.name())))
-			return false;
-	}
+	if (moduleName != null && (this.module == null || !moduleName.equals(String.valueOf(this.module.name()))))
+    	return false;
 	if (this.knownPackageNames == null)
 		scanContent();
 	return this.knownPackageNames.includes(qualifiedPackageName);
@@ -334,10 +330,8 @@ private boolean scanContent() {
 			}
 			this.zipFile = new ZipFile(this.zipFilename);
 			this.closeZipFileAtEnd = true;
-			this.knownPackageNames = findPackageSet();
-		} else {
-			this.knownPackageNames = findPackageSet();
 		}
+        this.knownPackageNames = findPackageSet();
 		return true;
 	} catch(Exception e) {
 		this.knownPackageNames = new SimpleSet(); // assume for this build the zipFile is empty
@@ -364,7 +358,7 @@ public String debugPathString() {
 	long time = lastModified();
 	if (time == 0)
 		return this.zipFilename;
-	return this.zipFilename + '(' + (new Date(time)) + " : " + time + ')'; //$NON-NLS-1$
+	return this.zipFilename + '(' + new Date(time) + " : " + time + ')'; //$NON-NLS-1$
 }
 
 @Override
@@ -399,8 +393,8 @@ public char[][] listPackages() {
 		return null;
 	char[][] result = new char[this.knownPackageNames.elementSize][];
 	int count = 0;
-	for (int i=0; i<this.knownPackageNames.values.length; i++) {
-		String string = (String) this.knownPackageNames.values[i];
+	for (Object value : this.knownPackageNames.values) {
+		String string = (String) value;
 		if (string != null &&!string.isEmpty()) {
 			result[count++] = string.replace('/', '.').toCharArray();
 		}

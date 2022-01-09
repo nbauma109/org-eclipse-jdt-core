@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.core.hierarchy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -198,16 +197,13 @@ private void buildForProject(JavaProject project, ArrayList potentialSubtypes, o
 			indexes.put(openables[i], index);
 		}
 		subMonitor.split(1);
-		Arrays.sort(openables, new Comparator() {
-			@Override
-			public int compare(Object a, Object b) {
-				int aIndex = indexes.get(a);
-				int bIndex = indexes.get(b);
-				if (aIndex != bIndex)
-					return aIndex - bIndex;
-				return ((Openable) b).getElementName().compareTo(((Openable) a).getElementName());
-			}
-		});
+		Arrays.sort(openables, (a, b) -> {
+        	int aIndex = indexes.get(a);
+        	int bIndex = indexes.get(b);
+        	if (aIndex != bIndex)
+        		return aIndex - bIndex;
+        	return b.getElementName().compareTo(a.getElementName());
+        });
 
 		IType focusType = getType();
 		boolean inProjectOfFocusType = focusType != null && focusType.getJavaProject().equals(project);
@@ -237,18 +233,7 @@ private void buildForProject(JavaProject project, ArrayList potentialSubtypes, o
 			new HierarchyResolver(searchableEnvironment, options, this, new DefaultProblemFactory());
 		if (focusType != null) {
 			Member declaringMember = ((Member)focusType).getOuterMostLocalContext();
-			if (declaringMember == null) {
-				// top level or member type
-				if (!inProjectOfFocusType) {
-					char[] typeQualifiedName = focusType.getTypeQualifiedName('.').toCharArray();
-					PackageFragment fragment = (PackageFragment) focusType.getPackageFragment();
-					String[] packageName = fragment.names;
-					if (searchableEnvironment.findType(typeQualifiedName, Util.toCharArrays(packageName)) == null) {
-						// focus type is not visible in this project: no need to go further
-						return;
-					}
-				}
-			} else {
+			if (declaringMember != null) {
 				// local or anonymous type
 				Openable openable;
 				if (declaringMember.isBinary()) {
@@ -261,6 +246,16 @@ private void buildForProject(JavaProject project, ArrayList potentialSubtypes, o
 				this.hierarchyResolver.resolve(new Openable[] {openable}, localTypes, subMonitor.split(9));
 				return;
 			}
+            // top level or member type
+            if (!inProjectOfFocusType) {
+            	char[] typeQualifiedName = focusType.getTypeQualifiedName('.').toCharArray();
+            	PackageFragment fragment = (PackageFragment) focusType.getPackageFragment();
+            	String[] packageName = fragment.names;
+            	if (searchableEnvironment.findType(typeQualifiedName, Util.toCharArrays(packageName)) == null) {
+            		// focus type is not visible in this project: no need to go further
+            		return;
+            	}
+            }
 		}
 		this.hierarchyResolver.resolve(openables, localTypes, subMonitor.split(9));
 	}
@@ -417,13 +412,12 @@ protected IBinaryType createInfoFromClassFile(Openable classFile, IResource file
 	if (binaryType != null) {
 		this.infoToHandle.put(binaryType, classFile);
 		return binaryType;
-	} else {
-		return super.createInfoFromClassFile(classFile, file);
 	}
+    return super.createInfoFromClassFile(classFile, file);
 }
 @Override
 protected IBinaryType createInfoFromClassFileInJar(Openable classFile) {
-	String filePath = (((ClassFile)classFile).getType().getFullyQualifiedName('$')).replace('.', '/') + SuffixConstants.SUFFIX_STRING_class;
+	String filePath = ((ClassFile)classFile).getType().getFullyQualifiedName('$').replace('.', '/') + SuffixConstants.SUFFIX_STRING_class;
 	IPackageFragmentRoot root = classFile.getPackageFragmentRoot();
 	IPath path = root.getPath();
 	// take the OS path for external jars, and the forward slash path for internal jars
@@ -441,9 +435,8 @@ protected IBinaryType createInfoFromClassFileInJar(Openable classFile) {
 	if (binaryType != null) {
 		this.infoToHandle.put(binaryType, classFile);
 		return binaryType;
-	} else {
-		return super.createInfoFromClassFileInJar(classFile);
 	}
+    return super.createInfoFromClassFileInJar(classFile);
 }
 /**
  * Returns all of the possible subtypes of this type hierarchy.

@@ -63,6 +63,7 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * @see BundleDelta#getType
 	 * @deprecated this type is no longer valid
 	 */
+    @Deprecated
     int LINKAGE_CHANGED = 0x20;
 
 	/**
@@ -71,6 +72,7 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * @see BundleDelta#getType
 	 * @deprecated this type is no longer valid
 	 */
+    @Deprecated
     int OPTIONAL_LINKAGE_CHANGED = 0x40;
 
 	/**

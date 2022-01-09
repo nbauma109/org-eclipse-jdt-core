@@ -144,7 +144,7 @@ public final void addLocalVariable(LocalVariableBinding binding) {
 		System.arraycopy(
 			this.locals,
 			0,
-			(this.locals = new LocalVariableBinding[this.localIndex * 2]),
+			this.locals = new LocalVariableBinding[this.localIndex * 2],
 			0,
 			this.localIndex);
 	this.locals[this.localIndex++] = binding;
@@ -160,7 +160,7 @@ public void addSubscope(Scope childScope) {
 		System.arraycopy(
 			this.subscopes,
 			0,
-			(this.subscopes = new Scope[this.subscopeCount * 2]),
+			this.subscopes = new Scope[this.subscopeCount * 2],
 			0,
 			this.subscopeCount);
 	this.subscopes[this.subscopeCount++] = childScope;
@@ -175,9 +175,7 @@ public final boolean allowBlankFinalFieldAssignment(FieldBinding binding) {
 		return false;
 
 	MethodScope methodScope = methodScope();
-	if (methodScope.isStatic != binding.isStatic())
-		return false;
-	if (methodScope.isLambdaScope())
+	if (methodScope.isStatic != binding.isStatic() || methodScope.isLambdaScope())
 		return false;
 	return methodScope.isInsideInitializer() // inside initializer
 			|| ((AbstractMethodDeclaration) methodScope.referenceContext).isInitializationMethod(); // inside constructor or clinit
@@ -188,13 +186,13 @@ String basicToString(int tab) {
 	for (int i = tab; --i >= 0;)
 		newLine += "\t"; //$NON-NLS-1$
 
-	String s = newLine + "--- Block Scope ---"; //$NON-NLS-1$
+	StringBuilder s = new StringBuilder().append(newLine).append("--- Block Scope ---"); //$NON-NLS-1$
 	newLine += "\t"; //$NON-NLS-1$
-	s += newLine + "locals:"; //$NON-NLS-1$
+	s.append(newLine).append("locals:"); //$NON-NLS-1$
 	for (int i = 0; i < this.localIndex; i++)
-		s += newLine + "\t" + this.locals[i].toString(); //$NON-NLS-1$
-	s += newLine + "startIndex = " + this.startIndex; //$NON-NLS-1$
-	return s;
+		s.append(newLine).append("\t").append(this.locals[i].toString()); //$NON-NLS-1$
+	s.append(newLine).append("startIndex = ").append(this.startIndex); //$NON-NLS-1$
+	return s.toString();
 }
 
 private void checkAndSetModifiersForVariable(LocalVariableBinding varBinding) {
@@ -268,7 +266,7 @@ void computeLocalVariablePositions(int ilocal, int initOffset, CodeStream codeSt
 	// iterate scopes and variables in parallel
 	while (hasMoreVariables || hasMoreScopes) {
 		if (hasMoreScopes
-			&& (!hasMoreVariables || (this.subscopes[iscope].startIndex() <= ilocal))) {
+			&& (!hasMoreVariables || this.subscopes[iscope].startIndex() <= ilocal)) {
 			// consider subscope first
 			if (this.subscopes[iscope] instanceof BlockScope) {
 				BlockScope subscope = (BlockScope) this.subscopes[iscope];
@@ -284,12 +282,12 @@ void computeLocalVariablePositions(int ilocal, int initOffset, CodeStream codeSt
 			LocalVariableBinding local = this.locals[ilocal]; // if no local at all, will be locals[ilocal]==null
 
 			// check if variable is actually used, and may force it to be preserved
-			boolean generateCurrentLocalVar = (local.useFlag > LocalVariableBinding.UNUSED && local.constant() == Constant.NotAConstant);
+			boolean generateCurrentLocalVar = local.useFlag > LocalVariableBinding.UNUSED && local.constant() == Constant.NotAConstant;
 
 			// do not report fake used variable
 			if (local.useFlag == LocalVariableBinding.UNUSED
-				&& (local.declaration != null) // unused (and non secret) local
-				&& ((local.declaration.bits & ASTNode.IsLocalDeclarationReachable) != 0)) { // declaration is reachable
+				&& local.declaration != null // unused (and non secret) local
+				&& (local.declaration.bits & ASTNode.IsLocalDeclarationReachable) != 0) { // declaration is reachable
 
 				if (local.isCatchParameter()) {
 					problemReporter().unusedExceptionParameter(local.declaration); // report unused catch arguments
@@ -300,13 +298,11 @@ void computeLocalVariablePositions(int ilocal, int initOffset, CodeStream codeSt
 			}
 
 			// could be optimized out, but does need to preserve unread variables ?
-			if (!generateCurrentLocalVar) {
-				if (local.declaration != null && compilerOptions().preserveAllLocalVariables) {
-					generateCurrentLocalVar = true; // force it to be preserved in the generated code
-					if (local.useFlag == LocalVariableBinding.UNUSED)
-						local.useFlag = LocalVariableBinding.USED;
-				}
-			}
+			if (!generateCurrentLocalVar && local.declaration != null && compilerOptions().preserveAllLocalVariables) {
+            	generateCurrentLocalVar = true; // force it to be preserved in the generated code
+            	if (local.useFlag == LocalVariableBinding.UNUSED)
+            		local.useFlag = LocalVariableBinding.USED;
+            }
 
 			// allocate variable
 			if (generateCurrentLocalVar) {
@@ -317,7 +313,7 @@ void computeLocalVariablePositions(int ilocal, int initOffset, CodeStream codeSt
 				// assign variable position
 				local.resolvedPosition = this.offset;
 
-				if ((TypeBinding.equalsEquals(local.type, TypeBinding.LONG)) || (TypeBinding.equalsEquals(local.type, TypeBinding.DOUBLE))) {
+				if (TypeBinding.equalsEquals(local.type, TypeBinding.LONG) || TypeBinding.equalsEquals(local.type, TypeBinding.DOUBLE)) {
 					this.offset += 2;
 				} else {
 					this.offset++;
@@ -410,11 +406,9 @@ public final ReferenceBinding findLocalType(char[] name) {
 		if (this.subscopes[i] instanceof ClassScope) {
 			LocalTypeBinding sourceType = (LocalTypeBinding)((ClassScope) this.subscopes[i]).referenceContext.binding;
 			// from 1.4 on, local types should not be accessed across switch case blocks (52221)
-			if (compliance >= ClassFileConstants.JDK1_4 && sourceType.enclosingCase != null) {
-				if (!isInsideCase(sourceType.enclosingCase)) {
-					continue;
-				}
-			}
+			if (compliance >= ClassFileConstants.JDK1_4 && sourceType.enclosingCase != null && !isInsideCase(sourceType.enclosingCase)) {
+            	continue;
+            }
 			if (CharOperation.equals(sourceType.sourceName(), name))
 				return sourceType;
 		}
@@ -441,7 +435,7 @@ public LocalDeclaration[] findLocalVariableDeclarations(int position) {
 	// iterate scopes and variables in parallel
 	while (hasMoreVariables || hasMoreScopes) {
 		if (hasMoreScopes
-			&& (!hasMoreVariables || (this.subscopes[iscope].startIndex() <= ilocal))) {
+			&& (!hasMoreVariables || this.subscopes[iscope].startIndex() <= ilocal)) {
 			// consider subscope first
 			Scope subscope = this.subscopes[iscope];
 			if (subscope.kind == Scope.BLOCK_SCOPE) { // do not dive in nested types
@@ -457,16 +451,15 @@ public LocalDeclaration[] findLocalVariableDeclarations(int position) {
 			if (local != null && (local.modifiers & ExtraCompilerModifiers.AccPatternVariable) == 0) {
 				LocalDeclaration localDecl = local.declaration;
 				if (localDecl != null) {
-					if (localDecl.declarationSourceStart <= position) {
-						if (position <= localDecl.declarationSourceEnd) {
-							if (localDeclarations == null) {
-								localDeclarations = new LocalDeclaration[maxLocals];
-							}
-							localDeclarations[declPtr++] = localDecl;
-						}
-					} else {
+					if (localDecl.declarationSourceStart > position) {
 						return localDeclarations;
 					}
+                    if (position <= localDecl.declarationSourceEnd) {
+                    	if (localDeclarations == null) {
+                    		localDeclarations = new LocalDeclaration[maxLocals];
+                    	}
+                    	localDeclarations[declPtr++] = localDecl;
+                    }
 				}
 			}
 			hasMoreVariables = ++ilocal < maxLocals;
@@ -638,7 +631,8 @@ public Binding getBinding(char[][] compoundName, int mask, InvocationSite invoca
 						referenceBinding,
 						nextName,
 						ProblemReasons.NotFound);
-			} else if ((mask & Binding.VARIABLE) != 0) {
+			}
+            if ((mask & Binding.VARIABLE) != 0) {
 				return new ProblemBinding(
 					CharOperation.subarray(compoundName, 0, currentIndex),
 					referenceBinding,
@@ -667,7 +661,7 @@ public Binding getBinding(char[][] compoundName, int mask, InvocationSite invoca
 			}
 		}
 	}
-	if ((mask & Binding.FIELD) != 0 && (binding instanceof FieldBinding)) {
+	if ((mask & Binding.FIELD) != 0 && binding instanceof FieldBinding) {
 		// was looking for a field and found a field
 		FieldBinding field = (FieldBinding) binding;
 		if (!field.isStatic())
@@ -680,7 +674,7 @@ public Binding getBinding(char[][] compoundName, int mask, InvocationSite invoca
 		// so we don't have to call resetEnclosingMethodStaticFlag() in this case
 		return binding;
 	}
-	if ((mask & Binding.TYPE) != 0 && (binding instanceof ReferenceBinding)) {
+	if ((mask & Binding.TYPE) != 0 && binding instanceof ReferenceBinding) {
 		// was looking for a type and found a type
 		return binding;
 	}
@@ -835,7 +829,7 @@ public VariableBinding[] getEmulationPath(LocalVariableBinding outerLocalVariabl
 	}
 	// use synthetic constructor arguments if possible
 	if (currentMethodScope.isInsideInitializerOrConstructor()
-		&& (sourceType.isNestedType())) {
+		&& sourceType.isNestedType()) {
 		SyntheticArgumentBinding syntheticArg;
 		if ((syntheticArg = ((NestedTypeBinding) sourceType).getSyntheticArgument(outerLocalVariable)) != null) {
 			return new VariableBinding[] { syntheticArg };
@@ -868,23 +862,22 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 
 	// use 'this' if possible
 	if (!currentMethodScope.isStatic && !currentMethodScope.isConstructorCall) {
-		if (TypeBinding.equalsEquals(sourceType, targetEnclosingType) || (!onlyExactMatch && sourceType.findSuperTypeOriginatingFrom(targetEnclosingType) != null)) {
+		if (TypeBinding.equalsEquals(sourceType, targetEnclosingType) || !onlyExactMatch && sourceType.findSuperTypeOriginatingFrom(targetEnclosingType) != null) {
 			return BlockScope.EmulationPathToImplicitThis; // implicit this is good enough
 		}
 	}
 	if (!sourceType.isNestedType() || sourceType.isStatic()) { // no emulation from within non-inner types
 		if (currentMethodScope.isConstructorCall) {
 			return BlockScope.NoEnclosingInstanceInConstructorCall;
-		} else if (currentMethodScope.isStatic){
+		}
+        if (currentMethodScope.isStatic){
 			return BlockScope.NoEnclosingInstanceInStaticContext;
 		}
 		return null;
 	}
-	if (sourceType.isNestedType() && currentMethodScope.isInsideInitializer()) {
-		if (currentMethodScope.isStatic) {
-			return BlockScope.NoEnclosingInstanceInStaticContext;
-		}
-	}
+	if (sourceType.isNestedType() && currentMethodScope.isInsideInitializer() && currentMethodScope.isStatic) {
+    	return BlockScope.NoEnclosingInstanceInStaticContext;
+    }
 	boolean insideConstructor = currentMethodScope.isInsideInitializerOrConstructor();
 	// use synthetic constructor arguments if possible
 	if (insideConstructor) {
@@ -895,7 +888,7 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 			// reject allocation and super constructor call
 			if (denyEnclosingArgInConstructorCall
 					&& !isAnonymousAndHasEnclosing
-					&& (TypeBinding.equalsEquals(sourceType, targetEnclosingType) || (!onlyExactMatch && sourceType.findSuperTypeOriginatingFrom(targetEnclosingType) != null))) {
+					&& (TypeBinding.equalsEquals(sourceType, targetEnclosingType) || !onlyExactMatch && sourceType.findSuperTypeOriginatingFrom(targetEnclosingType) != null)) {
 				return BlockScope.NoEnclosingInstanceInConstructorCall;
 			}
 			return new Object[] { syntheticArg };
@@ -913,10 +906,8 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 			SyntheticArgumentBinding enclosingArgument = nestedEnclosingType.getSyntheticArgument(nestedEnclosingType.enclosingType(), onlyExactMatch, currentMethodScope.isConstructorCall);
 			if (enclosingArgument != null) {
 				FieldBinding syntheticField = sourceType.getSyntheticField(enclosingArgument);
-				if (syntheticField != null) {
-					if (TypeBinding.equalsEquals(syntheticField.type, targetEnclosingType) || (!onlyExactMatch && syntheticField.type.findSuperTypeOriginatingFrom(targetEnclosingType) != null))
-						return new Object[] { syntheticField };
-				}
+				if (syntheticField != null && (TypeBinding.equalsEquals(syntheticField.type, targetEnclosingType) || !onlyExactMatch && syntheticField.type.findSuperTypeOriginatingFrom(targetEnclosingType) != null))
+                	return new Object[] { syntheticField };
 			}
 		}
 	}
@@ -947,7 +938,7 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 
 			//done?
 			if (TypeBinding.equalsEquals(currentType, targetEnclosingType)
-				|| (!onlyExactMatch && currentType.findSuperTypeOriginatingFrom(targetEnclosingType) != null))	break;
+				|| !onlyExactMatch && currentType.findSuperTypeOriginatingFrom(targetEnclosingType) != null)	break;
 
 			if (currentMethodScope != null) {
 				currentMethodScope = currentMethodScope.enclosingMethodScope();
@@ -964,14 +955,14 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 
 			// append inside the path
 			if (count == path.length) {
-				System.arraycopy(path, 0, (path = new Object[count + 1]), 0, count);
+				System.arraycopy(path, 0, path = new Object[count + 1], 0, count);
 			}
 			// private access emulation is necessary since synthetic field is private
 			path[count++] = ((SourceTypeBinding) syntheticField.declaringClass).addSyntheticMethod(syntheticField, true/*read*/, false /*not super access*/);
 			currentType = currentEnclosingType;
 		}
 		if (TypeBinding.equalsEquals(currentType, targetEnclosingType)
-			|| (!onlyExactMatch && currentType.findSuperTypeOriginatingFrom(targetEnclosingType) != null)) {
+			|| !onlyExactMatch && currentType.findSuperTypeOriginatingFrom(targetEnclosingType) != null) {
 			return path;
 		}
 	}
@@ -995,9 +986,9 @@ public final boolean isDuplicateLocalVariable(char[] name) {
 public int maxShiftedOffset() {
 	int max = -1;
 	if (this.shiftScopes != null){
-		for (int i = 0, length = this.shiftScopes.length; i < length; i++){
-			if (this.shiftScopes[i] != null) {
-				int subMaxOffset = this.shiftScopes[i].maxOffset;
+		for (BlockScope shiftScope : this.shiftScopes) {
+			if (shiftScope != null) {
+				int subMaxOffset = shiftScope.maxOffset;
 				if (subMaxOffset > max) max = subMaxOffset;
 			}
 		}
@@ -1015,9 +1006,7 @@ public final boolean needBlankFinalFieldInitializationCheck(FieldBinding binding
 	// loop in enclosing context, until reaching the field declaring context
 	MethodScope methodScope = namedMethodScope();
 	while (methodScope != null) {
-		if (methodScope.isStatic != isStatic)
-			return false;
-		if (!methodScope.isInsideInitializer() // inside initializer
+		if (methodScope.isStatic != isStatic || !methodScope.isInsideInitializer() // inside initializer
 				&& !((AbstractMethodDeclaration) methodScope.referenceContext).isInitializationMethod()) { // inside constructor or clinit
 			return false; // found some non-initializer context
 		}
@@ -1053,11 +1042,9 @@ public void propagateInnerEmulation(ReferenceBinding targetType, boolean isEnclo
 
 	SyntheticArgumentBinding[] syntheticArguments;
 	if ((syntheticArguments = targetType.syntheticOuterLocalVariables()) != null) {
-		for (int i = 0, max = syntheticArguments.length; i < max; i++) {
-			SyntheticArgumentBinding syntheticArg = syntheticArguments[i];
+		for (SyntheticArgumentBinding syntheticArg : syntheticArguments) {
 			// need to filter out the one that could match a supplied enclosing instance
-			if (!(isEnclosingInstanceSupplied
-				&& (TypeBinding.equalsEquals(syntheticArg.type, targetType.enclosingType())))) {
+			if (!isEnclosingInstanceSupplied || !TypeBinding.equalsEquals(syntheticArg.type, targetType.enclosingType())) {
 				emulateOuterAccess(syntheticArg.actualOuterLocalVariable);
 			}
 		}
@@ -1098,11 +1085,11 @@ public String toString() {
 }
 
 public String toString(int tab) {
-	String s = basicToString(tab);
+	StringBuilder s = new StringBuilder().append(basicToString(tab));
 	for (int i = 0; i < this.subscopeCount; i++)
 		if (this.subscopes[i] instanceof BlockScope)
-			s += ((BlockScope) this.subscopes[i]).toString(tab + 1) + "\n"; //$NON-NLS-1$
-	return s;
+			s.append(((BlockScope) this.subscopes[i]).toString(tab + 1)).append("\n"); //$NON-NLS-1$
+	return s.toString();
 }
 
 private List trackingVariables; // can be null if no resources are tracked
@@ -1154,7 +1141,7 @@ public void checkUnclosedCloseables(FlowInfo flowInfo, FlowContext flowContext, 
 	}
 	if (location != null && flowInfo.reachMode() != 0) return;
 
-	FakedTrackingVariable returnVar = (location instanceof ReturnStatement) ?
+	FakedTrackingVariable returnVar = location instanceof ReturnStatement ?
 			FakedTrackingVariable.getCloseTrackingVariable(((ReturnStatement)location).expression, flowInfo, flowContext) : null;
 
 	// iterate variables according to the priorities defined in FakedTrackingVariable.IteratorForReporting.Stage
@@ -1162,11 +1149,7 @@ public void checkUnclosedCloseables(FlowInfo flowInfo, FlowContext flowContext, 
 	while (iterator.hasNext()) {
 		FakedTrackingVariable trackingVar = iterator.next();
 
-		if (returnVar != null && trackingVar.isResourceBeingReturned(returnVar)) {
-			continue;
-		}
-
-		if (location != null && trackingVar.hasDefinitelyNoResource(flowInfo)) {
+		if (returnVar != null && trackingVar.isResourceBeingReturned(returnVar) || location != null && trackingVar.hasDefinitelyNoResource(flowInfo)) {
 			continue; // reporting against a specific location, there is no resource at this flow, don't complain
 		}
 
@@ -1182,20 +1165,15 @@ public void checkUnclosedCloseables(FlowInfo flowInfo, FlowContext flowContext, 
 			reportResourceLeak(trackingVar, location, status);
 			continue;
 		}
-		if (location == null) // at end of block and not definitely unclosed
-		{
-			// problems at specific locations: medium priority
-			if (trackingVar.reportRecordedErrors(this, status, flowInfo.reachMode() != FlowInfo.REACHABLE)) // ... report previously recorded errors
-				continue;
-		}
+		// problems at specific locations: medium priority
+        if (location == null && trackingVar.reportRecordedErrors(this, status, flowInfo.reachMode() != FlowInfo.REACHABLE)) // ... report previously recorded errors
+        	continue;
 		if (status == FlowInfo.POTENTIALLY_NULL) {
 			// potentially unclosed: lower priority
 			reportResourceLeak(trackingVar, location, status);
-		} else if (status == FlowInfo.NON_NULL) {
-			// properly closed but not managed by t-w-r: lowest priority
-			if (environment().globalOptions.complianceLevel >= ClassFileConstants.JDK1_7)
-				trackingVar.reportExplicitClosing(problemReporter());
-		}
+		} else // properly closed but not managed by t-w-r: lowest priority
+        if (status == FlowInfo.NON_NULL && environment().globalOptions.complianceLevel >= ClassFileConstants.JDK1_7)
+        	trackingVar.reportExplicitClosing(problemReporter());
 	}
 	if (location == null) {
 		// when leaving this block dispose off all tracking variables:
@@ -1264,7 +1242,7 @@ public void correlateTrackingVarsIfElse(FlowInfo thenFlowInfo, FlowInfo elseFlow
 					continue; // short cut
 
 				for (int j=i+1; j<trackVarCount; j++) {
-					FakedTrackingVariable var2 = ((FakedTrackingVariable) this.trackingVariables.get(j));
+					FakedTrackingVariable var2 = (FakedTrackingVariable) this.trackingVariables.get(j);
 					if (trackingVar.originalBinding == var2.originalBinding) {
 						// two tracking variables for the same original, merge info from both branches now:
 						boolean var1SeenInThen = thenFlowInfo.hasNullInfoFor(trackingVar.binding);
@@ -1302,8 +1280,8 @@ public void checkAppropriateMethodAgainstSupers(char[] selector, MethodBinding c
 	if (checkAppropriate(compileTimeMethod, otherMethod, site)) {
 		ReferenceBinding[] superInterfaces = enclosingType.superInterfaces();
 		if (superInterfaces != null) {
-			for (int i = 0; i < superInterfaces.length; i++) {
-				otherMethod = getMethod(superInterfaces[i], selector, parameters, site);
+			for (ReferenceBinding element : superInterfaces) {
+				otherMethod = getMethod(element, selector, parameters, site);
 				if (!checkAppropriate(compileTimeMethod, otherMethod, site))
 					break;
 			}

@@ -113,7 +113,7 @@ public FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowConte
 			&& !isCompound
 			&& this.receiver.isThis()
 			&& !(this.receiver instanceof QualifiedThisReference)
-			&& ((this.receiver.bits & ASTNode.ParenthesizedMASK) == 0) // (this).x is forbidden
+			&& (this.receiver.bits & ASTNode.ParenthesizedMASK) == 0 // (this).x is forbidden
 			&& currentScope.allowBlankFinalFieldAssignment(this.binding)
 			&& !currentScope.methodScope().isCompactConstructorScope) {
 			if (flowInfo.isPotentiallyAssigned(this.binding)) {
@@ -124,20 +124,18 @@ public FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowConte
 				flowContext.recordSettingFinal(this.binding, this, flowInfo);
 			}
 			flowInfo.markAsDefinitelyAssigned(this.binding);
-		} else {
-			if (currentScope.methodScope().isCompactConstructorScope)
-				currentScope.problemReporter().recordIllegalExplicitFinalFieldAssignInCompactConstructor(this.binding, this);
-			else
-			// assigning a final field outside an initializer or constructor or wrong reference
-				currentScope.problemReporter().cannotAssignToFinalField(this.binding, this);
-		}
+		} else if (currentScope.methodScope().isCompactConstructorScope)
+        	currentScope.problemReporter().recordIllegalExplicitFinalFieldAssignInCompactConstructor(this.binding, this);
+        else
+        // assigning a final field outside an initializer or constructor or wrong reference
+        	currentScope.problemReporter().cannotAssignToFinalField(this.binding, this);
 	} else if (this.binding.isNonNull() || this.binding.type.isTypeVariable()) {
 		// in a context where it can be assigned?
 		if (   !isCompound
 			&& this.receiver.isThis()
 			&& !(this.receiver instanceof QualifiedThisReference)
 			&& TypeBinding.equalsEquals(this.receiver.resolvedType, this.binding.declaringClass) // inherited fields are not tracked here
-			&& ((this.receiver.bits & ASTNode.ParenthesizedMASK) == 0)) { // (this).x is forbidden
+			&& (this.receiver.bits & ASTNode.ParenthesizedMASK) == 0) { // (this).x is forbidden
 			flowInfo.markAsDefinitelyAssigned(this.binding);
 		}
 	}
@@ -193,7 +191,7 @@ public void computeConversion(Scope scope, TypeBinding runtimeTimeType, TypeBind
 		TypeBinding originalType = originalBinding.type;
 	    // extra cast needed if field type is type variable
 		if (originalType.leafComponentType().isTypeVariable()) {
-	    	TypeBinding targetType = (!compileTimeType.isBaseType() && runtimeTimeType.isBaseType())
+	    	TypeBinding targetType = !compileTimeType.isBaseType() && runtimeTimeType.isBaseType()
 	    		? compileTimeType  // unboxing: checkcast before conversion
 	    		: runtimeTimeType;
 	        this.genericCast = originalBinding.type.genericCast(targetType);
@@ -267,9 +265,9 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 		return;
 	}
 	if (valueRequired
-			|| (!isThisReceiver && currentScope.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4)
-			|| ((this.implicitConversion & TypeIds.UNBOXING) != 0)
-			|| (this.genericCast != null)) {
+			|| !isThisReceiver && currentScope.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4
+			|| (this.implicitConversion & TypeIds.UNBOXING) != 0
+			|| this.genericCast != null) {
 		this.receiver.generateCode(currentScope, codeStream, !isStatic);
 		if ((this.bits & NeedReceiverGenericCast) != 0) {
 			codeStream.checkcast(this.actualReceiverType);
@@ -312,36 +310,32 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 				}
 			}
 		}
-	} else {
-		if (isThisReceiver) {
-			if (isStatic){
-				// if no valueRequired, still need possible side-effects of <clinit> invocation, if field belongs to different class
-				if (TypeBinding.notEquals(this.binding.original().declaringClass, this.actualReceiverType.erasure())) {
-					MethodBinding accessor = this.syntheticAccessors == null ? null : this.syntheticAccessors[FieldReference.READ];
-					if (accessor == null) {
-						TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenBinding, this.actualReceiverType, this.receiver.isImplicitThis());
-						codeStream.fieldAccess(Opcodes.OPC_getstatic, codegenBinding, constantPoolDeclaringClass);
-					} else {
-						codeStream.invoke(Opcodes.OPC_invokestatic, accessor, null /* default declaringClass */);
-					}
-					switch (codegenBinding.type.id) {
-						case T_long :
-						case T_double :
-							codeStream.pop2();
-							break;
-						default :
-							codeStream.pop();
-					}
-				}
-			}
-		} else {
-			this.receiver.generateCode(currentScope, codeStream, !isStatic);
-			if (!isStatic){
-				codeStream.invokeObjectGetClass(); // perform null check
-				codeStream.pop();
-			}
-		}
-	}
+	} else if (isThisReceiver) {
+    	// if no valueRequired, still need possible side-effects of <clinit> invocation, if field belongs to different class
+        if (isStatic && TypeBinding.notEquals(this.binding.original().declaringClass, this.actualReceiverType.erasure())) {
+        	MethodBinding accessor = this.syntheticAccessors == null ? null : this.syntheticAccessors[FieldReference.READ];
+        	if (accessor == null) {
+        		TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenBinding, this.actualReceiverType, this.receiver.isImplicitThis());
+        		codeStream.fieldAccess(Opcodes.OPC_getstatic, codegenBinding, constantPoolDeclaringClass);
+        	} else {
+        		codeStream.invoke(Opcodes.OPC_invokestatic, accessor, null /* default declaringClass */);
+        	}
+        	switch (codegenBinding.type.id) {
+        		case T_long :
+        		case T_double :
+        			codeStream.pop2();
+        			break;
+        		default :
+        			codeStream.pop();
+        	}
+        }
+    } else {
+    	this.receiver.generateCode(currentScope, codeStream, !isStatic);
+    	if (!isStatic){
+    		codeStream.invokeObjectGetClass(); // perform null check
+    		codeStream.pop();
+    	}
+    }
 	codeStream.recordPositionsFrom(pc, this.sourceEnd);
 }
 
@@ -487,23 +481,22 @@ public boolean isEquivalent(Reference reference) {
 			}
 		}
 		return otherToken != null && CharOperation.equals(this.token, otherToken);
-	} else {
-		// search deeper for "this" inside:
-		char[][] thisTokens = getThisFieldTokens(1);
-		if (thisTokens == null) {
-			return false;
-		}
-		// other can be "this.f1.f2", too, or "f1.f2":
-		char[][] otherTokens = null;
-		if (reference instanceof FieldReference) {
-			otherTokens = ((FieldReference) reference).getThisFieldTokens(1);
-		} else if (reference instanceof QualifiedNameReference) {
-			if (((QualifiedNameReference)reference).binding instanceof LocalVariableBinding)
-				return false; // initial variable mismatch: local (from f1.f2) vs. field (from this.f1.f2)
-			otherTokens = ((QualifiedNameReference) reference).tokens;
-		}
-		return CharOperation.equals(thisTokens, otherTokens);
 	}
+    // search deeper for "this" inside:
+    char[][] thisTokens = getThisFieldTokens(1);
+    if (thisTokens == null) {
+    	return false;
+    }
+    // other can be "this.f1.f2", too, or "f1.f2":
+    char[][] otherTokens = null;
+    if (reference instanceof FieldReference) {
+    	otherTokens = ((FieldReference) reference).getThisFieldTokens(1);
+    } else if (reference instanceof QualifiedNameReference) {
+    	if (((QualifiedNameReference)reference).binding instanceof LocalVariableBinding)
+    		return false; // initial variable mismatch: local (from f1.f2) vs. field (from this.f1.f2)
+    	otherTokens = ((QualifiedNameReference) reference).tokens;
+    }
+    return CharOperation.equals(thisTokens, otherTokens);
 }
 
 private char[][] getThisFieldTokens(int nestingCount) {
@@ -553,27 +546,25 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 	FieldBinding codegenBinding = this.binding.original();
 	if (this.binding.isPrivate()) {
 		if (!currentScope.enclosingSourceType().isNestmateOf(codegenBinding.declaringClass) &&
-			(TypeBinding.notEquals(currentScope.enclosingSourceType(), codegenBinding.declaringClass))
+			TypeBinding.notEquals(currentScope.enclosingSourceType(), codegenBinding.declaringClass)
 				&& this.binding.constant(currentScope) == Constant.NotAConstant) {
 			if (this.syntheticAccessors == null)
 				this.syntheticAccessors = new MethodBinding[2];
 			this.syntheticAccessors[isReadAccess ? FieldReference.READ : FieldReference.WRITE] =
 				((SourceTypeBinding) codegenBinding.declaringClass).addSyntheticMethod(codegenBinding, isReadAccess, false /* not super ref in remote type*/);
 			currentScope.problemReporter().needToEmulateFieldAccess(codegenBinding, this, isReadAccess);
-			return;
 		}
 	} else if (this.receiver instanceof QualifiedSuperReference) { // qualified super
 		// qualified super need emulation always
-		SourceTypeBinding destinationType = (SourceTypeBinding) (((QualifiedSuperReference) this.receiver).currentCompatibleType);
+		SourceTypeBinding destinationType = (SourceTypeBinding) ((QualifiedSuperReference) this.receiver).currentCompatibleType;
 		if (this.syntheticAccessors == null)
 			this.syntheticAccessors = new MethodBinding[2];
 		this.syntheticAccessors[isReadAccess ? FieldReference.READ : FieldReference.WRITE] = destinationType.addSyntheticMethod(codegenBinding, isReadAccess, isSuperAccess());
 		currentScope.problemReporter().needToEmulateFieldAccess(codegenBinding, this, isReadAccess);
-		return;
 
 	} else if (this.binding.isProtected()) {
 		SourceTypeBinding enclosingSourceType;
-		if (((this.bits & ASTNode.DepthMASK) != 0)
+		if ((this.bits & ASTNode.DepthMASK) != 0
 			&& this.binding.declaringClass.getPackage()
 				!= (enclosingSourceType = currentScope.enclosingSourceType()).getPackage()) {
 
@@ -584,7 +575,6 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 				this.syntheticAccessors = new MethodBinding[2];
 			this.syntheticAccessors[isReadAccess ? FieldReference.READ : FieldReference.WRITE] = currentCompatibleType.addSyntheticMethod(codegenBinding, isReadAccess, isSuperAccess());
 			currentScope.problemReporter().needToEmulateFieldAccess(codegenBinding, this, isReadAccess);
-			return;
 		}
 	}
 }
@@ -666,12 +656,10 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.constant = Constant.NotAConstant;
 		return null;
 	}
-	if (receiverCast) {
-		 // due to change of declaring class with receiver type, only identity cast should be notified
-		if (TypeBinding.equalsEquals(((CastExpression)this.receiver).expression.resolvedType, this.actualReceiverType)) {
-				scope.problemReporter().unnecessaryCast((CastExpression)this.receiver);
-		}
-	}
+	// due to change of declaring class with receiver type, only identity cast should be notified
+    if (receiverCast && TypeBinding.equalsEquals(((CastExpression)this.receiver).expression.resolvedType, this.actualReceiverType)) {
+    		scope.problemReporter().unnecessaryCast((CastExpression)this.receiver);
+    }
 	// the case receiverType.isArrayType and token = 'length' is handled by the scope API
 	FieldBinding fieldBinding = this.binding = scope.getField(this.actualReceiverType, this.token, this);
 	if (!fieldBinding.isValidBinding()) {
@@ -721,9 +709,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	this.constant = isImplicitThisRcv ? fieldBinding.constant(scope) : Constant.NotAConstant;
 	if (fieldBinding.isStatic()) {
 		// static field accessed through receiver? legal but unoptimal (optional warning)
-		if (!(isImplicitThisRcv
-				|| (this.receiver instanceof NameReference
-					&& (this.receiver.bits & Binding.TYPE) != 0))) {
+		if (!isImplicitThisRcv && (!(this.receiver instanceof NameReference) || (this.receiver.bits & Binding.TYPE) == 0)) {
 			scope.problemReporter().nonStaticAccessToStaticField(this, fieldBinding);
 		}
 		ReferenceBinding declaringClass = this.binding.declaringClass;
@@ -786,12 +772,10 @@ public void traverse(ASTVisitor visitor, BlockScope scope) {
 
 @Override
 public VariableBinding nullAnnotatedVariableBinding(boolean supportTypeAnnotations) {
-	if (this.binding != null) {
-		if (supportTypeAnnotations
-				|| ((this.binding.tagBits & TagBits.AnnotationNullMASK) != 0)) {
-			return this.binding;
-		}
-	}
+	if (this.binding != null && (supportTypeAnnotations
+    		|| (this.binding.tagBits & TagBits.AnnotationNullMASK) != 0)) {
+    	return this.binding;
+    }
 	return null;
 }
 }

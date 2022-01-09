@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 public class SimpleDOMBuilder extends AbstractDOMBuilder implements ISourceElementRequestor {
 
 /**
@@ -56,7 +57,7 @@ public void acceptImport(int declarationStart, int declarationEnd, int nameStart
 }
 @Override
 public void acceptPackage(ImportReference importReference) {
-	int[] sourceRange= new int[] {importReference.declarationSourceStart, importReference.declarationSourceEnd};
+	int[] sourceRange= {importReference.declarationSourceStart, importReference.declarationSourceEnd};
 	char[] name = CharOperation.concatWith(importReference.getImportName(), '.');
 	this.fNode= new DOMPackage(this.fDocument, sourceRange, new String(name));
 	addChild(this.fNode);
@@ -143,7 +144,7 @@ public void enterMethod(MethodInfo methodInfo) {
 public void enterType(TypeInfo typeInfo) {
 	if (this.fBuildingType) {
 		int[] sourceRange = {typeInfo.declarationStart, -1}; // will be fixed in the exit
-		int[] nameRange = new int[] {typeInfo.nameSourceStart, typeInfo.nameSourceEnd};
+		int[] nameRange = {typeInfo.nameSourceStart, typeInfo.nameSourceEnd};
 		this.fNode = new DOMType(this.fDocument, sourceRange, new String(typeInfo.name), nameRange,
 			typeInfo.modifiers, CharOperation.charArrayToStringArray(typeInfo.superinterfaces), TypeDeclaration.kind(typeInfo.modifiers) == TypeDeclaration.CLASS_DECL); // TODO (jerome) should pass in kind
 		addChild(this.fNode);

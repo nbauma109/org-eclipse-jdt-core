@@ -40,22 +40,20 @@ protected int fineGrain() {
 @Override
 public int match(ASTNode node, MatchingNodeSet nodeSet) {
 	int declarationsLevel = IMPOSSIBLE_MATCH;
-	if (this.pattern.findReferences) {
-		if (node instanceof ImportReference) {
-			// With static import, we can have static field reference in import reference
-			ImportReference importRef = (ImportReference) node;
-			int length = importRef.tokens.length-1;
-			if (importRef.isStatic() && ((importRef.bits & ASTNode.OnDemand) == 0) && matchesName(this.pattern.name, importRef.tokens[length])) {
-				char[][] compoundName = new char[length][];
-				System.arraycopy(importRef.tokens, 0, compoundName, 0, length);
-				FieldPattern fieldPattern = (FieldPattern) this.pattern;
-				char[] declaringType = CharOperation.concat(fieldPattern.declaringQualification, fieldPattern.declaringSimpleName, '.');
-				if (matchesName(declaringType, CharOperation.concatWith(compoundName, '.'))) {
-					declarationsLevel = this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
-				}
-			}
-		}
-	}
+	if (this.pattern.findReferences && node instanceof ImportReference) {
+    	// With static import, we can have static field reference in import reference
+    	ImportReference importRef = (ImportReference) node;
+    	int length = importRef.tokens.length-1;
+    	if (importRef.isStatic() && (importRef.bits & ASTNode.OnDemand) == 0 && matchesName(this.pattern.name, importRef.tokens[length])) {
+    		char[][] compoundName = new char[length][];
+    		System.arraycopy(importRef.tokens, 0, compoundName, 0, length);
+    		FieldPattern fieldPattern = (FieldPattern) this.pattern;
+    		char[] declaringType = CharOperation.concat(fieldPattern.declaringQualification, fieldPattern.declaringSimpleName, '.');
+    		if (matchesName(declaringType, CharOperation.concatWith(compoundName, '.'))) {
+    			declarationsLevel = this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
+    		}
+    	}
+    }
 	return nodeSet.addMatch(node, declarationsLevel);
 }
 //public int match(ConstructorDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
@@ -99,8 +97,7 @@ private int matchLocal(LocalVariableBinding field, boolean matchName) {
 	if (field == null) return INACCURATE_MATCH;
 	if (matchName && !matchesName(this.pattern.name, field.readableName())) return IMPOSSIBLE_MATCH;
 	FieldPattern fieldPattern = (FieldPattern)this.pattern;
-	int declaringLevel = resolveLevelForType(fieldPattern.declaringSimpleName, fieldPattern.declaringQualification,field.getEnclosingMethod().declaringClass);
-	return declaringLevel;
+	return resolveLevelForType(fieldPattern.declaringSimpleName, fieldPattern.declaringQualification,field.getEnclosingMethod().declaringClass);
 }
 protected int matchField(FieldBinding field, boolean matchName) {
 	if (field == null) return INACCURATE_MATCH;
@@ -178,17 +175,15 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
 				int otherMax = qNameRef.otherBindings == null ? 0 : qNameRef.otherBindings.length;
 				for (int i = 0; i < otherMax; i++)
 					reportDeclaration(qNameRef.otherBindings[i], locator, declPattern.knownFields);
-			} else if (reference instanceof SingleNameReference ) {
-				if(((SingleNameReference) reference).binding instanceof FieldBinding) {
-					reportDeclaration((FieldBinding)((SingleNameReference) reference).binding, locator, declPattern.knownFields);
-				}
-			}
+			} else if(reference instanceof SingleNameReference && ((SingleNameReference) reference).binding instanceof FieldBinding) {
+            	reportDeclaration((FieldBinding)((SingleNameReference) reference).binding, locator, declPattern.knownFields);
+            }
 		}
 	} else if (reference instanceof ImportReference) {
 		ImportReference importRef = (ImportReference) reference;
 		long[] positions = importRef.sourcePositions;
 		int lastIndex = importRef.tokens.length - 1;
-		int start = (int) ((positions[lastIndex]) >>> 32);
+		int start = (int) (positions[lastIndex] >>> 32);
 		int end = (int) positions[lastIndex];
 		this.match = locator.newFieldReferenceMatch(element, localElement, elementBinding, accuracy, start, end-start+1, importRef);
 		locator.report(this.match);
@@ -324,7 +319,7 @@ public int resolveLevel(ASTNode possiblelMatchingNode) {
 	if (this.pattern.findReferences || this.pattern.fineGrain != 0) {
 		if (possiblelMatchingNode instanceof FieldReference)
 			return matchField(((FieldReference) possiblelMatchingNode).binding, true);
-		else if (possiblelMatchingNode instanceof NameReference)
+        if (possiblelMatchingNode instanceof NameReference)
 			return resolveLevel((NameReference) possiblelMatchingNode);
 	}
 	if (possiblelMatchingNode instanceof FieldDeclaration)
@@ -334,12 +329,10 @@ public int resolveLevel(ASTNode possiblelMatchingNode) {
 @Override
 public int resolveLevel(Binding binding) {
 	if (binding == null) return INACCURATE_MATCH;
-	if( binding instanceof LocalVariableBinding) {
-		// for matching the component in constructor of a record
-		if ( ((LocalVariableBinding)binding).declaringScope.referenceContext() instanceof CompactConstructorDeclaration) {
-			return matchLocal((LocalVariableBinding) binding, true);
-		}
-	}
+	// for matching the component in constructor of a record
+    if ( binding instanceof LocalVariableBinding && ((LocalVariableBinding)binding).declaringScope.referenceContext() instanceof CompactConstructorDeclaration) {
+    	return matchLocal((LocalVariableBinding) binding, true);
+    }
 	if (!(binding instanceof FieldBinding)) return IMPOSSIBLE_MATCH;
 
 	return matchField((FieldBinding) binding, true);

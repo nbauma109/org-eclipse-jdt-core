@@ -59,27 +59,25 @@ public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName,
 	// Get type
 	IType type = getType(modifiers, packageName, simpleTypeName, enclosingTypeNames, path, access);
 	// Accept match if the type has been found
-	if (type != null) {
-		// hierarchy scopes require one more check:
-		if (!(this.scope instanceof HierarchyScope) || ((HierarchyScope)this.scope).enclosesFineGrained(type)) {
+	// hierarchy scopes require one more check:
+    if (type != null && (!(this.scope instanceof HierarchyScope) || ((HierarchyScope)this.scope).enclosesFineGrained(type))) {
 
-			// Create the match
-			final JavaSearchTypeNameMatch match = new JavaSearchTypeNameMatch(type, modifiers);
+    	// Create the match
+    	final JavaSearchTypeNameMatch match = new JavaSearchTypeNameMatch(type, modifiers);
 
-			// Update match accessibility
-			if(access != null) {
-				switch (access.getProblemId()) {
-					case IProblem.ForbiddenReference:
-						match.setAccessibility(IAccessRule.K_NON_ACCESSIBLE);
-						break;
-					case IProblem.DiscouragedReference:
-						match.setAccessibility(IAccessRule.K_DISCOURAGED);
-						break;
-				}
-			}
-			// Accept match
-			this.requestor.acceptTypeNameMatch(match);
-		}
-	}
+    	// Update match accessibility
+    	if(access != null) {
+    		switch (access.getProblemId()) {
+    			case IProblem.ForbiddenReference:
+    				match.setAccessibility(IAccessRule.K_NON_ACCESSIBLE);
+    				break;
+    			case IProblem.DiscouragedReference:
+    				match.setAccessibility(IAccessRule.K_DISCOURAGED);
+    				break;
+    		}
+    	}
+    	// Accept match
+    	this.requestor.acceptTypeNameMatch(match);
+    }
 }
 }

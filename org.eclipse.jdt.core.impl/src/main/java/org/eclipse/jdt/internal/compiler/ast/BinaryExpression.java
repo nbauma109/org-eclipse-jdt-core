@@ -71,19 +71,18 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 								currentScope, flowContext,
 								this.left.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits())
 							.unconditionalInits();
-		} else {
-			flowInfo = this.left.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
-			this.left.checkNPE(currentScope, flowContext, flowInfo);
-			if (((this.bits & OperatorMASK) >> OperatorSHIFT) != AND) {
-				flowContext.expireNullCheckedFieldInfo();
-			}
-			flowInfo = this.right.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
-			this.right.checkNPE(currentScope, flowContext, flowInfo);
-			if (((this.bits & OperatorMASK) >> OperatorSHIFT) != AND) {
-				flowContext.expireNullCheckedFieldInfo();
-			}
-			return flowInfo;
 		}
+        flowInfo = this.left.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
+        this.left.checkNPE(currentScope, flowContext, flowInfo);
+        if ((this.bits & OperatorMASK) >> OperatorSHIFT != AND) {
+        	flowContext.expireNullCheckedFieldInfo();
+        }
+        flowInfo = this.right.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
+        this.right.checkNPE(currentScope, flowContext, flowInfo);
+        if ((this.bits & OperatorMASK) >> OperatorSHIFT != AND) {
+        	flowContext.expireNullCheckedFieldInfo();
+        }
+        return flowInfo;
 	} finally {
 		// account for exception possibly thrown by arithmetics
 		flowContext.recordAbruptExit();
@@ -101,8 +100,8 @@ protected void updateFlowOnBooleanResult(FlowInfo flowInfo, boolean result) {
 
 public void computeConstant(BlockScope scope, int leftId, int rightId) {
 	//compute the constant when valid
-	if ((this.left.constant != Constant.NotAConstant)
-		&& (this.right.constant != Constant.NotAConstant)) {
+	if (this.left.constant != Constant.NotAConstant
+		&& this.right.constant != Constant.NotAConstant) {
 		try {
 			this.constant =
 				Constant.computeConstantOperation(
@@ -304,51 +303,47 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 			switch (this.bits & ASTNode.ReturnTypeIDMASK) {
 				case T_int :
 					// 0 & x
-					if ((this.left.constant != Constant.NotAConstant)
-						&& (this.left.constant.typeID() == TypeIds.T_int)
-						&& (this.left.constant.intValue() == 0)) {
+					if (this.left.constant != Constant.NotAConstant
+						&& this.left.constant.typeID() == TypeIds.T_int
+						&& this.left.constant.intValue() == 0) {
 						this.right.generateCode(currentScope, codeStream, false);
 						if (valueRequired)
 							codeStream.iconst_0();
-					} else {
-						// x & 0
-						if ((this.right.constant != Constant.NotAConstant)
-							&& (this.right.constant.typeID() == TypeIds.T_int)
-							&& (this.right.constant.intValue() == 0)) {
-							this.left.generateCode(currentScope, codeStream, false);
-							if (valueRequired)
-								codeStream.iconst_0();
-						} else {
-							this.left.generateCode(currentScope, codeStream, valueRequired);
-							this.right.generateCode(currentScope, codeStream, valueRequired);
-							if (valueRequired)
-								codeStream.iand();
-						}
-					}
+					} else // x & 0
+                    if (this.right.constant != Constant.NotAConstant
+                    	&& this.right.constant.typeID() == TypeIds.T_int
+                    	&& this.right.constant.intValue() == 0) {
+                    	this.left.generateCode(currentScope, codeStream, false);
+                    	if (valueRequired)
+                    		codeStream.iconst_0();
+                    } else {
+                    	this.left.generateCode(currentScope, codeStream, valueRequired);
+                    	this.right.generateCode(currentScope, codeStream, valueRequired);
+                    	if (valueRequired)
+                    		codeStream.iand();
+                    }
 					break;
 				case T_long :
 					// 0 & x
-					if ((this.left.constant != Constant.NotAConstant)
-						&& (this.left.constant.typeID() == TypeIds.T_long)
-						&& (this.left.constant.longValue() == 0L)) {
+					if (this.left.constant != Constant.NotAConstant
+						&& this.left.constant.typeID() == TypeIds.T_long
+						&& this.left.constant.longValue() == 0L) {
 						this.right.generateCode(currentScope, codeStream, false);
 						if (valueRequired)
 							codeStream.lconst_0();
-					} else {
-						// x & 0
-						if ((this.right.constant != Constant.NotAConstant)
-							&& (this.right.constant.typeID() == TypeIds.T_long)
-							&& (this.right.constant.longValue() == 0L)) {
-							this.left.generateCode(currentScope, codeStream, false);
-							if (valueRequired)
-								codeStream.lconst_0();
-						} else {
-							this.left.generateCode(currentScope, codeStream, valueRequired);
-							this.right.generateCode(currentScope, codeStream, valueRequired);
-							if (valueRequired)
-								codeStream.land();
-						}
-					}
+					} else // x & 0
+                    if (this.right.constant != Constant.NotAConstant
+                    	&& this.right.constant.typeID() == TypeIds.T_long
+                    	&& this.right.constant.longValue() == 0L) {
+                    	this.left.generateCode(currentScope, codeStream, false);
+                    	if (valueRequired)
+                    		codeStream.lconst_0();
+                    } else {
+                    	this.left.generateCode(currentScope, codeStream, valueRequired);
+                    	this.right.generateCode(currentScope, codeStream, valueRequired);
+                    	if (valueRequired)
+                    		codeStream.land();
+                    }
 					break;
 				case T_boolean : // logical and
 					generateLogicalAnd(currentScope, codeStream, valueRequired);
@@ -359,43 +354,39 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 			switch (this.bits & ASTNode.ReturnTypeIDMASK) {
 				case T_int :
 					// 0 | x
-					if ((this.left.constant != Constant.NotAConstant)
-						&& (this.left.constant.typeID() == TypeIds.T_int)
-						&& (this.left.constant.intValue() == 0)) {
+					if (this.left.constant != Constant.NotAConstant
+						&& this.left.constant.typeID() == TypeIds.T_int
+						&& this.left.constant.intValue() == 0) {
 						this.right.generateCode(currentScope, codeStream, valueRequired);
-					} else {
-						// x | 0
-						if ((this.right.constant != Constant.NotAConstant)
-							&& (this.right.constant.typeID() == TypeIds.T_int)
-							&& (this.right.constant.intValue() == 0)) {
-							this.left.generateCode(currentScope, codeStream, valueRequired);
-						} else {
-							this.left.generateCode(currentScope, codeStream, valueRequired);
-							this.right.generateCode(currentScope, codeStream, valueRequired);
-							if (valueRequired)
-								codeStream.ior();
-						}
-					}
+					} else // x | 0
+                    if (this.right.constant != Constant.NotAConstant
+                    	&& this.right.constant.typeID() == TypeIds.T_int
+                    	&& this.right.constant.intValue() == 0) {
+                    	this.left.generateCode(currentScope, codeStream, valueRequired);
+                    } else {
+                    	this.left.generateCode(currentScope, codeStream, valueRequired);
+                    	this.right.generateCode(currentScope, codeStream, valueRequired);
+                    	if (valueRequired)
+                    		codeStream.ior();
+                    }
 					break;
 				case T_long :
 					// 0 | x
-					if ((this.left.constant != Constant.NotAConstant)
-						&& (this.left.constant.typeID() == TypeIds.T_long)
-						&& (this.left.constant.longValue() == 0L)) {
+					if (this.left.constant != Constant.NotAConstant
+						&& this.left.constant.typeID() == TypeIds.T_long
+						&& this.left.constant.longValue() == 0L) {
 						this.right.generateCode(currentScope, codeStream, valueRequired);
-					} else {
-						// x | 0
-						if ((this.right.constant != Constant.NotAConstant)
-							&& (this.right.constant.typeID() == TypeIds.T_long)
-							&& (this.right.constant.longValue() == 0L)) {
-							this.left.generateCode(currentScope, codeStream, valueRequired);
-						} else {
-							this.left.generateCode(currentScope, codeStream, valueRequired);
-							this.right.generateCode(currentScope, codeStream, valueRequired);
-							if (valueRequired)
-								codeStream.lor();
-						}
-					}
+					} else // x | 0
+                    if (this.right.constant != Constant.NotAConstant
+                    	&& this.right.constant.typeID() == TypeIds.T_long
+                    	&& this.right.constant.longValue() == 0L) {
+                    	this.left.generateCode(currentScope, codeStream, valueRequired);
+                    } else {
+                    	this.left.generateCode(currentScope, codeStream, valueRequired);
+                    	this.right.generateCode(currentScope, codeStream, valueRequired);
+                    	if (valueRequired)
+                    		codeStream.lor();
+                    }
 					break;
 				case T_boolean : // logical or
 					generateLogicalOr(currentScope, codeStream, valueRequired);
@@ -406,43 +397,39 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 			switch (this.bits & ASTNode.ReturnTypeIDMASK) {
 				case T_int :
 					// 0 ^ x
-					if ((this.left.constant != Constant.NotAConstant)
-						&& (this.left.constant.typeID() == TypeIds.T_int)
-						&& (this.left.constant.intValue() == 0)) {
+					if (this.left.constant != Constant.NotAConstant
+						&& this.left.constant.typeID() == TypeIds.T_int
+						&& this.left.constant.intValue() == 0) {
 						this.right.generateCode(currentScope, codeStream, valueRequired);
-					} else {
-						// x ^ 0
-						if ((this.right.constant != Constant.NotAConstant)
-							&& (this.right.constant.typeID() == TypeIds.T_int)
-							&& (this.right.constant.intValue() == 0)) {
-							this.left.generateCode(currentScope, codeStream, valueRequired);
-						} else {
-							this.left.generateCode(currentScope, codeStream, valueRequired);
-							this.right.generateCode(currentScope, codeStream, valueRequired);
-							if (valueRequired)
-								codeStream.ixor();
-						}
-					}
+					} else // x ^ 0
+                    if (this.right.constant != Constant.NotAConstant
+                    	&& this.right.constant.typeID() == TypeIds.T_int
+                    	&& this.right.constant.intValue() == 0) {
+                    	this.left.generateCode(currentScope, codeStream, valueRequired);
+                    } else {
+                    	this.left.generateCode(currentScope, codeStream, valueRequired);
+                    	this.right.generateCode(currentScope, codeStream, valueRequired);
+                    	if (valueRequired)
+                    		codeStream.ixor();
+                    }
 					break;
 				case T_long :
 					// 0 ^ x
-					if ((this.left.constant != Constant.NotAConstant)
-						&& (this.left.constant.typeID() == TypeIds.T_long)
-						&& (this.left.constant.longValue() == 0L)) {
+					if (this.left.constant != Constant.NotAConstant
+						&& this.left.constant.typeID() == TypeIds.T_long
+						&& this.left.constant.longValue() == 0L) {
 						this.right.generateCode(currentScope, codeStream, valueRequired);
-					} else {
-						// x ^ 0
-						if ((this.right.constant != Constant.NotAConstant)
-							&& (this.right.constant.typeID() == TypeIds.T_long)
-							&& (this.right.constant.longValue() == 0L)) {
-							this.left.generateCode(currentScope, codeStream, valueRequired);
-						} else {
-							this.left.generateCode(currentScope, codeStream, valueRequired);
-							this.right.generateCode(currentScope, codeStream, valueRequired);
-							if (valueRequired)
-								codeStream.lxor();
-						}
-					}
+					} else // x ^ 0
+                    if (this.right.constant != Constant.NotAConstant
+                    	&& this.right.constant.typeID() == TypeIds.T_long
+                    	&& this.right.constant.longValue() == 0L) {
+                    	this.left.generateCode(currentScope, codeStream, valueRequired);
+                    } else {
+                    	this.left.generateCode(currentScope, codeStream, valueRequired);
+                    	this.right.generateCode(currentScope, codeStream, valueRequired);
+                    	if (valueRequired)
+                    		codeStream.lxor();
+                    }
 					break;
 				case T_boolean :
 					generateLogicalXor(currentScope, 	codeStream, valueRequired);
@@ -500,7 +487,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 				currentScope,
 				codeStream,
 				null,
-				(falseLabel = new BranchLabel(codeStream)),
+				falseLabel = new BranchLabel(codeStream),
 				valueRequired);
 			if (valueRequired) {
 				codeStream.iconst_1();
@@ -523,7 +510,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 				currentScope,
 				codeStream,
 				null,
-				(falseLabel = new BranchLabel(codeStream)),
+				falseLabel = new BranchLabel(codeStream),
 				valueRequired);
 			if (valueRequired) {
 				codeStream.iconst_1();
@@ -546,7 +533,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 				currentScope,
 				codeStream,
 				null,
-				(falseLabel = new BranchLabel(codeStream)),
+				falseLabel = new BranchLabel(codeStream),
 				valueRequired);
 			if (valueRequired) {
 				codeStream.iconst_1();
@@ -569,7 +556,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 				currentScope,
 				codeStream,
 				null,
-				(falseLabel = new BranchLabel(codeStream)),
+				falseLabel = new BranchLabel(codeStream),
 				valueRequired);
 			if (valueRequired) {
 				codeStream.iconst_1();
@@ -599,7 +586,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
  */
 @Override
 public void generateOptimizedBoolean(BlockScope currentScope, CodeStream codeStream, BranchLabel trueLabel, BranchLabel falseLabel, boolean valueRequired) {
-	if ((this.constant != Constant.NotAConstant) && (this.constant.typeID() == TypeIds.T_boolean)) {
+	if (this.constant != Constant.NotAConstant && this.constant.typeID() == TypeIds.T_boolean) {
 		super.generateOptimizedBoolean(
 			currentScope,
 			codeStream,
@@ -682,7 +669,7 @@ public void generateOptimizedGreaterThan(BlockScope currentScope, CodeStream cod
 	// both sides got promoted in the same way
 	if (promotedTypeID == TypeIds.T_int) {
 		// 0 > x
-		if ((this.left.constant != Constant.NotAConstant) && (this.left.constant.intValue() == 0)) {
+		if (this.left.constant != Constant.NotAConstant && this.left.constant.intValue() == 0) {
 			this.right.generateCode(currentScope, codeStream, valueRequired);
 			if (valueRequired) {
 				if (falseLabel == null) {
@@ -690,21 +677,19 @@ public void generateOptimizedGreaterThan(BlockScope currentScope, CodeStream cod
 						// implicitly falling through the FALSE case
 						codeStream.iflt(trueLabel);
 					}
-				} else {
-					if (trueLabel == null) {
-						// implicitly falling through the TRUE case
-						codeStream.ifge(falseLabel);
-					} else {
-						// no implicit fall through TRUE/FALSE --> should never occur
-					}
-				}
+				} else if (trueLabel == null) {
+                	// implicitly falling through the TRUE case
+                	codeStream.ifge(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
 			}
 			// reposition the endPC
 			codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 			return;
 		}
 		// x > 0
-		if ((this.right.constant != Constant.NotAConstant) && (this.right.constant.intValue() == 0)) {
+		if (this.right.constant != Constant.NotAConstant && this.right.constant.intValue() == 0) {
 			this.left.generateCode(currentScope, codeStream, valueRequired);
 			if (valueRequired) {
 				if (falseLabel == null) {
@@ -712,14 +697,12 @@ public void generateOptimizedGreaterThan(BlockScope currentScope, CodeStream cod
 						// implicitly falling through the FALSE case
 						codeStream.ifgt(trueLabel);
 					}
-				} else {
-					if (trueLabel == null) {
-						// implicitly falling through the TRUE case
-						codeStream.ifle(falseLabel);
-					} else {
-						// no implicit fall through TRUE/FALSE --> should never occur
-					}
-				}
+				} else if (trueLabel == null) {
+                	// implicitly falling through the TRUE case
+                	codeStream.ifle(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
 			}
 			// reposition the endPC
 			codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
@@ -751,34 +734,30 @@ public void generateOptimizedGreaterThan(BlockScope currentScope, CodeStream cod
 				}
 				// reposition the endPC
 				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
-				return;
 			}
-		} else {
-			if (trueLabel == null) {
-				// implicit falling through the TRUE case
-				switch (promotedTypeID) {
-					case T_int :
-						codeStream.if_icmple(falseLabel);
-						break;
-					case T_float :
-						codeStream.fcmpl();
-						codeStream.ifle(falseLabel);
-						break;
-					case T_long :
-						codeStream.lcmp();
-						codeStream.ifle(falseLabel);
-						break;
-					case T_double :
-						codeStream.dcmpl();
-						codeStream.ifle(falseLabel);
-				}
-				// reposition the endPC
-				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
-				return;
-			} else {
-				// no implicit fall through TRUE/FALSE --> should never occur
-			}
-		}
+		} else if (trueLabel == null) {
+        	// implicit falling through the TRUE case
+        	switch (promotedTypeID) {
+        		case T_int :
+        			codeStream.if_icmple(falseLabel);
+        			break;
+        		case T_float :
+        			codeStream.fcmpl();
+        			codeStream.ifle(falseLabel);
+        			break;
+        		case T_long :
+        			codeStream.lcmp();
+        			codeStream.ifle(falseLabel);
+        			break;
+        		case T_double :
+        			codeStream.dcmpl();
+        			codeStream.ifle(falseLabel);
+        	}
+        	// reposition the endPC
+        	codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
+        } else {
+        	// no implicit fall through TRUE/FALSE --> should never occur
+        }
 	}
 }
 
@@ -790,7 +769,7 @@ public void generateOptimizedGreaterThanOrEqual(BlockScope currentScope, CodeStr
 	// both sides got promoted in the same way
 	if (promotedTypeID == TypeIds.T_int) {
 		// 0 >= x
-		if ((this.left.constant != Constant.NotAConstant) && (this.left.constant.intValue() == 0)) {
+		if (this.left.constant != Constant.NotAConstant && this.left.constant.intValue() == 0) {
 			this.right.generateCode(currentScope, codeStream, valueRequired);
 			if (valueRequired) {
 				if (falseLabel == null) {
@@ -798,21 +777,19 @@ public void generateOptimizedGreaterThanOrEqual(BlockScope currentScope, CodeStr
 						// implicitly falling through the FALSE case
 						codeStream.ifle(trueLabel);
 					}
-				} else {
-					if (trueLabel == null) {
-						// implicitly falling through the TRUE case
-						codeStream.ifgt(falseLabel);
-					} else {
-						// no implicit fall through TRUE/FALSE --> should never occur
-					}
-				}
+				} else if (trueLabel == null) {
+                	// implicitly falling through the TRUE case
+                	codeStream.ifgt(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
 			}
 			// reposition the endPC
 			codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 			return;
 		}
 		// x >= 0
-		if ((this.right.constant != Constant.NotAConstant) && (this.right.constant.intValue() == 0)) {
+		if (this.right.constant != Constant.NotAConstant && this.right.constant.intValue() == 0) {
 			this.left.generateCode(currentScope, codeStream, valueRequired);
 			if (valueRequired) {
 				if (falseLabel == null) {
@@ -820,14 +797,12 @@ public void generateOptimizedGreaterThanOrEqual(BlockScope currentScope, CodeStr
 						// implicitly falling through the FALSE case
 						codeStream.ifge(trueLabel);
 					}
-				} else {
-					if (trueLabel == null) {
-						// implicitly falling through the TRUE case
-						codeStream.iflt(falseLabel);
-					} else {
-						// no implicit fall through TRUE/FALSE --> should never occur
-					}
-				}
+				} else if (trueLabel == null) {
+                	// implicitly falling through the TRUE case
+                	codeStream.iflt(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
 			}
 			// reposition the endPC
 			codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
@@ -859,34 +834,30 @@ public void generateOptimizedGreaterThanOrEqual(BlockScope currentScope, CodeStr
 				}
 				// reposition the endPC
 				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
-				return;
 			}
-		} else {
-			if (trueLabel == null) {
-				// implicit falling through the TRUE case
-				switch (promotedTypeID) {
-					case T_int :
-						codeStream.if_icmplt(falseLabel);
-						break;
-					case T_float :
-						codeStream.fcmpl();
-						codeStream.iflt(falseLabel);
-						break;
-					case T_long :
-						codeStream.lcmp();
-						codeStream.iflt(falseLabel);
-						break;
-					case T_double :
-						codeStream.dcmpl();
-						codeStream.iflt(falseLabel);
-				}
-				// reposition the endPC
-				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
-				return;
-			} else {
-				// no implicit fall through TRUE/FALSE --> should never occur
-			}
-		}
+		} else if (trueLabel == null) {
+        	// implicit falling through the TRUE case
+        	switch (promotedTypeID) {
+        		case T_int :
+        			codeStream.if_icmplt(falseLabel);
+        			break;
+        		case T_float :
+        			codeStream.fcmpl();
+        			codeStream.iflt(falseLabel);
+        			break;
+        		case T_long :
+        			codeStream.lcmp();
+        			codeStream.iflt(falseLabel);
+        			break;
+        		case T_double :
+        			codeStream.dcmpl();
+        			codeStream.iflt(falseLabel);
+        	}
+        	// reposition the endPC
+        	codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
+        } else {
+        	// no implicit fall through TRUE/FALSE --> should never occur
+        }
 	}
 }
 
@@ -898,7 +869,7 @@ public void generateOptimizedLessThan(BlockScope currentScope, CodeStream codeSt
 	// both sides got promoted in the same way
 	if (promotedTypeID == TypeIds.T_int) {
 		// 0 < x
-		if ((this.left.constant != Constant.NotAConstant) && (this.left.constant.intValue() == 0)) {
+		if (this.left.constant != Constant.NotAConstant && this.left.constant.intValue() == 0) {
 			this.right.generateCode(currentScope, codeStream, valueRequired);
 			if (valueRequired) {
 				if (falseLabel == null) {
@@ -906,20 +877,18 @@ public void generateOptimizedLessThan(BlockScope currentScope, CodeStream codeSt
 						// implicitly falling through the FALSE case
 						codeStream.ifgt(trueLabel);
 					}
-				} else {
-					if (trueLabel == null) {
-						// implicitly falling through the TRUE case
-						codeStream.ifle(falseLabel);
-					} else {
-						// no implicit fall through TRUE/FALSE --> should never occur
-					}
-				}
+				} else if (trueLabel == null) {
+                	// implicitly falling through the TRUE case
+                	codeStream.ifle(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
 			}
 			codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 			return;
 		}
 		// x < 0
-		if ((this.right.constant != Constant.NotAConstant) && (this.right.constant.intValue() == 0)) {
+		if (this.right.constant != Constant.NotAConstant && this.right.constant.intValue() == 0) {
 			this.left.generateCode(currentScope, codeStream, valueRequired);
 			if (valueRequired) {
 				if (falseLabel == null) {
@@ -927,14 +896,12 @@ public void generateOptimizedLessThan(BlockScope currentScope, CodeStream codeSt
 						// implicitly falling through the FALSE case
 						codeStream.iflt(trueLabel);
 					}
-				} else {
-					if (trueLabel == null) {
-						// implicitly falling through the TRUE case
-						codeStream.ifge(falseLabel);
-					} else {
-						// no implicit fall through TRUE/FALSE --> should never occur
-					}
-				}
+				} else if (trueLabel == null) {
+                	// implicitly falling through the TRUE case
+                	codeStream.ifge(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
 			}
 			codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 			return;
@@ -964,33 +931,29 @@ public void generateOptimizedLessThan(BlockScope currentScope, CodeStream codeSt
 						codeStream.iflt(trueLabel);
 				}
 				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
-				return;
 			}
-		} else {
-			if (trueLabel == null) {
-				// implicit falling through the TRUE case
-				switch (promotedTypeID) {
-					case T_int :
-						codeStream.if_icmpge(falseLabel);
-						break;
-					case T_float :
-						codeStream.fcmpg();
-						codeStream.ifge(falseLabel);
-						break;
-					case T_long :
-						codeStream.lcmp();
-						codeStream.ifge(falseLabel);
-						break;
-					case T_double :
-						codeStream.dcmpg();
-						codeStream.ifge(falseLabel);
-				}
-				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
-				return;
-			} else {
-				// no implicit fall through TRUE/FALSE --> should never occur
-			}
-		}
+		} else if (trueLabel == null) {
+        	// implicit falling through the TRUE case
+        	switch (promotedTypeID) {
+        		case T_int :
+        			codeStream.if_icmpge(falseLabel);
+        			break;
+        		case T_float :
+        			codeStream.fcmpg();
+        			codeStream.ifge(falseLabel);
+        			break;
+        		case T_long :
+        			codeStream.lcmp();
+        			codeStream.ifge(falseLabel);
+        			break;
+        		case T_double :
+        			codeStream.dcmpg();
+        			codeStream.ifge(falseLabel);
+        	}
+        	codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
+        } else {
+        	// no implicit fall through TRUE/FALSE --> should never occur
+        }
 	}
 }
 
@@ -1002,7 +965,7 @@ public void generateOptimizedLessThanOrEqual(BlockScope currentScope, CodeStream
 	// both sides got promoted in the same way
 	if (promotedTypeID == TypeIds.T_int) {
 		// 0 <= x
-		if ((this.left.constant != Constant.NotAConstant) && (this.left.constant.intValue() == 0)) {
+		if (this.left.constant != Constant.NotAConstant && this.left.constant.intValue() == 0) {
 			this.right.generateCode(currentScope, codeStream, valueRequired);
 			if (valueRequired) {
 				if (falseLabel == null) {
@@ -1010,21 +973,19 @@ public void generateOptimizedLessThanOrEqual(BlockScope currentScope, CodeStream
 						// implicitly falling through the FALSE case
 						codeStream.ifge(trueLabel);
 					}
-				} else {
-					if (trueLabel == null) {
-						// implicitly falling through the TRUE case
-						codeStream.iflt(falseLabel);
-					} else {
-						// no implicit fall through TRUE/FALSE --> should never occur
-					}
-				}
+				} else if (trueLabel == null) {
+                	// implicitly falling through the TRUE case
+                	codeStream.iflt(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
 			}
 			// reposition the endPC
 			codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 			return;
 		}
 		// x <= 0
-		if ((this.right.constant != Constant.NotAConstant) && (this.right.constant.intValue() == 0)) {
+		if (this.right.constant != Constant.NotAConstant && this.right.constant.intValue() == 0) {
 			this.left.generateCode(currentScope, codeStream, valueRequired);
 			if (valueRequired) {
 				if (falseLabel == null) {
@@ -1032,14 +993,12 @@ public void generateOptimizedLessThanOrEqual(BlockScope currentScope, CodeStream
 						// implicitly falling through the FALSE case
 						codeStream.ifle(trueLabel);
 					}
-				} else {
-					if (trueLabel == null) {
-						// implicitly falling through the TRUE case
-						codeStream.ifgt(falseLabel);
-					} else {
-						// no implicit fall through TRUE/FALSE --> should never occur
-					}
-				}
+				} else if (trueLabel == null) {
+                	// implicitly falling through the TRUE case
+                	codeStream.ifgt(falseLabel);
+                } else {
+                	// no implicit fall through TRUE/FALSE --> should never occur
+                }
 			}
 			// reposition the endPC
 			codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
@@ -1071,34 +1030,30 @@ public void generateOptimizedLessThanOrEqual(BlockScope currentScope, CodeStream
 				}
 				// reposition the endPC
 				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
-				return;
 			}
-		} else {
-			if (trueLabel == null) {
-				// implicit falling through the TRUE case
-				switch (promotedTypeID) {
-					case T_int :
-						codeStream.if_icmpgt(falseLabel);
-						break;
-					case T_float :
-						codeStream.fcmpg();
-						codeStream.ifgt(falseLabel);
-						break;
-					case T_long :
-						codeStream.lcmp();
-						codeStream.ifgt(falseLabel);
-						break;
-					case T_double :
-						codeStream.dcmpg();
-						codeStream.ifgt(falseLabel);
-				}
-				// reposition the endPC
-				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
-				return;
-			} else {
-				// no implicit fall through TRUE/FALSE --> should never occur
-			}
-		}
+		} else if (trueLabel == null) {
+        	// implicit falling through the TRUE case
+        	switch (promotedTypeID) {
+        		case T_int :
+        			codeStream.if_icmpgt(falseLabel);
+        			break;
+        		case T_float :
+        			codeStream.fcmpg();
+        			codeStream.ifgt(falseLabel);
+        			break;
+        		case T_long :
+        			codeStream.lcmp();
+        			codeStream.ifgt(falseLabel);
+        			break;
+        		case T_double :
+        			codeStream.dcmpg();
+        			codeStream.ifgt(falseLabel);
+        	}
+        	// reposition the endPC
+        	codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
+        } else {
+        	// no implicit fall through TRUE/FALSE --> should never occur
+        }
 	}
 }
 
@@ -1109,7 +1064,7 @@ public void generateLogicalAnd(BlockScope currentScope, CodeStream codeStream, b
 	Constant condConst;
 	if ((this.left.implicitConversion & TypeIds.COMPILE_TYPE_MASK) == TypeIds.T_boolean) {
 		if ((condConst = this.left.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// <something equivalent to true> & x
 				this.left.generateCode(currentScope, codeStream, false);
 				this.right.generateCode(currentScope, codeStream, valueRequired);
@@ -1126,7 +1081,7 @@ public void generateLogicalAnd(BlockScope currentScope, CodeStream codeStream, b
 			return;
 		}
 		if ((condConst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// x & <something equivalent to true>
 				this.left.generateCode(currentScope, codeStream, valueRequired);
 				this.right.generateCode(currentScope, codeStream, false);
@@ -1159,7 +1114,7 @@ public void generateLogicalOr(BlockScope currentScope, CodeStream codeStream, bo
 	Constant condConst;
 	if ((this.left.implicitConversion & TypeIds.COMPILE_TYPE_MASK) == TypeIds.T_boolean) {
 		if ((condConst = this.left.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// <something equivalent to true> | x
 				this.left.generateCode(currentScope, codeStream, false);
 				this.right.generateCode(currentScope, codeStream, false);
@@ -1175,7 +1130,7 @@ public void generateLogicalOr(BlockScope currentScope, CodeStream codeStream, bo
 			return;
 		}
 		if ((condConst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// x | <something equivalent to true>
 				this.left.generateCode(currentScope, codeStream, false);
 				this.right.generateCode(currentScope, codeStream, false);
@@ -1207,7 +1162,7 @@ public void generateLogicalXor(BlockScope currentScope,	CodeStream codeStream, b
 	Constant condConst;
 	if ((this.left.implicitConversion & TypeIds.COMPILE_TYPE_MASK) == TypeIds.T_boolean) {
 		if ((condConst = this.left.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// <something equivalent to true> ^ x
 				this.left.generateCode(currentScope, codeStream, false);
 				if (valueRequired) {
@@ -1226,7 +1181,7 @@ public void generateLogicalXor(BlockScope currentScope,	CodeStream codeStream, b
 			return;
 		}
 		if ((condConst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// x ^ <something equivalent to true>
 				this.left.generateCode(currentScope, codeStream, valueRequired);
 				this.right.generateCode(currentScope, codeStream, false);
@@ -1259,7 +1214,7 @@ public void generateOptimizedLogicalAnd(BlockScope currentScope, CodeStream code
 	Constant condConst;
 	if ((this.left.implicitConversion & TypeIds.COMPILE_TYPE_MASK) == TypeIds.T_boolean) {
 		if ((condConst = this.left.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// <something equivalent to true> & x
 				this.left.generateOptimizedBoolean(
 					currentScope,
@@ -1287,18 +1242,16 @@ public void generateOptimizedLogicalAnd(BlockScope currentScope, CodeStream code
 					trueLabel,
 					falseLabel,
 					false);
-				if (valueRequired) {
-					if (falseLabel != null) {
-						// implicit falling through the TRUE case
-						codeStream.goto_(falseLabel);
-					}
-				}
+				if (valueRequired && falseLabel != null) {
+                	// implicit falling through the TRUE case
+                	codeStream.goto_(falseLabel);
+                }
 				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 			}
 			return;
 		}
 		if ((condConst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// x & <something equivalent to true>
 				this.left.generateOptimizedBoolean(
 					currentScope,
@@ -1328,12 +1281,10 @@ public void generateOptimizedLogicalAnd(BlockScope currentScope, CodeStream code
 					trueLabel,
 					falseLabel,
 					false);
-				if (valueRequired) {
-					if (falseLabel != null) {
-						// implicit falling through the TRUE case
-						codeStream.goto_(falseLabel);
-					}
-				}
+				if (valueRequired && falseLabel != null) {
+                	// implicit falling through the TRUE case
+                	codeStream.goto_(falseLabel);
+                }
 				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 			}
 			return;
@@ -1349,14 +1300,12 @@ public void generateOptimizedLogicalAnd(BlockScope currentScope, CodeStream code
 				// implicit falling through the FALSE case
 				codeStream.ifne(trueLabel);
 			}
-		} else {
-			// implicit falling through the TRUE case
-			if (trueLabel == null) {
-				codeStream.ifeq(falseLabel);
-			} else {
-				// no implicit fall through TRUE/FALSE --> should never occur
-			}
-		}
+		} else // implicit falling through the TRUE case
+        if (trueLabel == null) {
+        	codeStream.ifeq(falseLabel);
+        } else {
+        	// no implicit fall through TRUE/FALSE --> should never occur
+        }
 	}
 	codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 }
@@ -1368,7 +1317,7 @@ public void generateOptimizedLogicalOr(BlockScope currentScope, CodeStream codeS
 	Constant condConst;
 	if ((this.left.implicitConversion & TypeIds.COMPILE_TYPE_MASK) == TypeIds.T_boolean) {
 		if ((condConst = this.left.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// <something equivalent to true> | x
 				this.left.generateOptimizedBoolean(
 					currentScope,
@@ -1384,11 +1333,9 @@ public void generateOptimizedLogicalOr(BlockScope currentScope, CodeStream codeS
 					internalFalseLabel,
 					false);
 				internalFalseLabel.place();
-				if (valueRequired) {
-					if (trueLabel != null) {
-						codeStream.goto_(trueLabel);
-					}
-				}
+				if (valueRequired && trueLabel != null) {
+                	codeStream.goto_(trueLabel);
+                }
 				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 			} else {
 				// <something equivalent to false> | x
@@ -1408,7 +1355,7 @@ public void generateOptimizedLogicalOr(BlockScope currentScope, CodeStream codeS
 			return;
 		}
 		if ((condConst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// x | <something equivalent to true>
 				BranchLabel internalFalseLabel = new BranchLabel(codeStream);
 				this.left.generateOptimizedBoolean(
@@ -1424,11 +1371,9 @@ public void generateOptimizedLogicalOr(BlockScope currentScope, CodeStream codeS
 					trueLabel,
 					falseLabel,
 					false);
-				if (valueRequired) {
-					if (trueLabel != null) {
-						codeStream.goto_(trueLabel);
-					}
-				}
+				if (valueRequired && trueLabel != null) {
+                	codeStream.goto_(trueLabel);
+                }
 				codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 			} else {
 				// x | <something equivalent to false>
@@ -1458,14 +1403,12 @@ public void generateOptimizedLogicalOr(BlockScope currentScope, CodeStream codeS
 				// implicit falling through the FALSE case
 				codeStream.ifne(trueLabel);
 			}
-		} else {
-			// implicit falling through the TRUE case
-			if (trueLabel == null) {
-				codeStream.ifeq(falseLabel);
-			} else {
-				// no implicit fall through TRUE/FALSE --> should never occur
-			}
-		}
+		} else // implicit falling through the TRUE case
+        if (trueLabel == null) {
+        	codeStream.ifeq(falseLabel);
+        } else {
+        	// no implicit fall through TRUE/FALSE --> should never occur
+        }
 	}
 	codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 }
@@ -1477,7 +1420,7 @@ public void generateOptimizedLogicalXor(BlockScope currentScope, CodeStream code
 	Constant condConst;
 	if ((this.left.implicitConversion & TypeIds.COMPILE_TYPE_MASK) == TypeIds.T_boolean) {
 		if ((condConst = this.left.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// <something equivalent to true> ^ x
 				this.left.generateOptimizedBoolean(
 					currentScope,
@@ -1509,7 +1452,7 @@ public void generateOptimizedLogicalXor(BlockScope currentScope, CodeStream code
 			return;
 		}
 		if ((condConst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) {
-			if (condConst.booleanValue() == true) {
+			if (condConst.booleanValue()) {
 				// x ^ <something equivalent to true>
 				this.left.generateOptimizedBoolean(
 					currentScope,
@@ -1517,12 +1460,6 @@ public void generateOptimizedLogicalXor(BlockScope currentScope, CodeStream code
 					falseLabel, // negating
 					trueLabel,
 					valueRequired);
-				this.right.generateOptimizedBoolean(
-					currentScope,
-					codeStream,
-					trueLabel,
-					falseLabel,
-					false);
 			} else {
 				// x ^ <something equivalent to false>
 				this.left.generateOptimizedBoolean(
@@ -1531,13 +1468,13 @@ public void generateOptimizedLogicalXor(BlockScope currentScope, CodeStream code
 					trueLabel,
 					falseLabel,
 					valueRequired);
-				this.right.generateOptimizedBoolean(
-					currentScope,
-					codeStream,
-					trueLabel,
-					falseLabel,
-					false);
 			}
+            this.right.generateOptimizedBoolean(
+            	currentScope,
+            	codeStream,
+            	trueLabel,
+            	falseLabel,
+            	false);
 			return;
 		}
 	}
@@ -1551,14 +1488,12 @@ public void generateOptimizedLogicalXor(BlockScope currentScope, CodeStream code
 				// implicit falling through the FALSE case
 				codeStream.ifne(trueLabel);
 			}
-		} else {
-			// implicit falling through the TRUE case
-			if (trueLabel == null) {
-				codeStream.ifeq(falseLabel);
-			} else {
-				// no implicit fall through TRUE/FALSE --> should never occur
-			}
-		}
+		} else // implicit falling through the TRUE case
+        if (trueLabel == null) {
+        	codeStream.ifeq(falseLabel);
+        } else {
+        	// no implicit fall through TRUE/FALSE --> should never occur
+        }
 	}
 	codeStream.recordPositionsFrom(codeStream.position, this.sourceEnd);
 }
@@ -1572,8 +1507,8 @@ public void generateOptimizedStringConcatenation(BlockScope blockScope, CodeStre
 	 * appending of arguments to the existing StringBuffer
 	 */
 
-	if ((((this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT) == OperatorIds.PLUS)
-		&& ((this.bits & ASTNode.ReturnTypeIDMASK) == TypeIds.T_JavaLangString)) {
+	if ((this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT == OperatorIds.PLUS
+		&& (this.bits & ASTNode.ReturnTypeIDMASK) == TypeIds.T_JavaLangString) {
 		if (this.constant != Constant.NotAConstant) {
 			codeStream.generateConstant(this.constant, this.implicitConversion);
 			codeStream.invokeStringConcatenationAppendForType(this.implicitConversion & TypeIds.COMPILE_TYPE_MASK);
@@ -1604,8 +1539,8 @@ public void generateOptimizedStringConcatenationCreation(BlockScope blockScope, 
 	 * string buffer, thus use a lower-level API for code generation involving only the
 	 * appending of arguments to the existing StringBuffer
 	 */
-	if ((((this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT) == OperatorIds.PLUS)
-		&& ((this.bits & ASTNode.ReturnTypeIDMASK) == TypeIds.T_JavaLangString)) {
+	if ((this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT == OperatorIds.PLUS
+		&& (this.bits & ASTNode.ReturnTypeIDMASK) == TypeIds.T_JavaLangString) {
 		if (this.constant != Constant.NotAConstant) {
 			codeStream.newStringContatenation(); // new: java.lang.StringBuffer
 			codeStream.dup();
@@ -1648,7 +1583,7 @@ void nonRecursiveResolveTypeUpwards(BlockScope scope) {
 	boolean leftIsCast, rightIsCast;
 	TypeBinding leftType = this.left.resolvedType;
 
-	if ((rightIsCast = this.right instanceof CastExpression) == true) {
+	if (rightIsCast = this.right instanceof CastExpression) {
 		this.right.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
 	}
 	TypeBinding rightType = this.right.resolveType(scope);
@@ -1684,7 +1619,7 @@ void nonRecursiveResolveTypeUpwards(BlockScope scope) {
 			return;
 		}
 	}
-	if (((this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT) == OperatorIds.PLUS) {
+	if ((this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT == OperatorIds.PLUS) {
 		if (leftTypeID == TypeIds.T_JavaLangString) {
 			this.left.computeConversion(scope, leftType, leftType);
 			if (rightType.isArrayType() && TypeBinding.equalsEquals(((ArrayBinding) rightType).elementsType(), TypeBinding.CHAR)) {
@@ -1709,8 +1644,8 @@ void nonRecursiveResolveTypeUpwards(BlockScope scope) {
 	int operator = (this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT;
 	int operatorSignature = OperatorExpression.OperatorSignatures[operator][(leftTypeID << 4) + rightTypeID];
 
-	this.left.computeConversion(scope, 	TypeBinding.wellKnownType(scope, (operatorSignature >>> 16) & 0x0000F), leftType);
-	this.right.computeConversion(scope, TypeBinding.wellKnownType(scope, (operatorSignature >>> 8) & 0x0000F), rightType);
+	this.left.computeConversion(scope, 	TypeBinding.wellKnownType(scope, operatorSignature >>> 16 & 0x0000F), leftType);
+	this.right.computeConversion(scope, TypeBinding.wellKnownType(scope, operatorSignature >>> 8 & 0x0000F), rightType);
 	this.bits |= operatorSignature & 0xF;
 	switch (operatorSignature & 0xF) { // record the current ReturnTypeID
 		// only switch on possible result type.....
@@ -1745,7 +1680,7 @@ void nonRecursiveResolveTypeUpwards(BlockScope scope) {
 	}
 
 	// check need for operand cast
-	if ((leftIsCast = (this.left instanceof CastExpression)) == true ||
+	if ((leftIsCast = this.left instanceof CastExpression) ||
 			rightIsCast) {
 		CastExpression.checkNeedForArgumentCasts(scope, operator, operatorSignature, this.left, leftTypeID, leftIsCast, this.right, rightTypeID, rightIsCast);
 	}
@@ -1756,50 +1691,35 @@ void nonRecursiveResolveTypeUpwards(BlockScope scope) {
 public void optimizedBooleanConstant(int leftId, int operator, int rightId) {
 	switch (operator) {
 		case AND :
-			if ((leftId != TypeIds.T_boolean) || (rightId != TypeIds.T_boolean))
+			if (leftId != TypeIds.T_boolean || rightId != TypeIds.T_boolean)
 				return;
 			//$FALL-THROUGH$
 		case AND_AND :
 			Constant cst;
 			if ((cst = this.left.optimizedBooleanConstant()) != Constant.NotAConstant) {
-				if (cst.booleanValue() == false) { // left is equivalent to false
-					this.optimizedBooleanConstant = cst; // constant(false)
-					return;
-				} else { //left is equivalent to true
-					if ((cst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) {
-						this.optimizedBooleanConstant = cst;
-						// the conditional result is equivalent to the right conditional value
-					}
-					return;
-				}
-			}
-			if ((cst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) {
-				if (cst.booleanValue() == false) { // right is equivalent to false
+				if (!cst.booleanValue() || (cst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) { // left is equivalent to false
 					this.optimizedBooleanConstant = cst; // constant(false)
 				}
+                return;
 			}
+			if ((cst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant && !cst.booleanValue()) { // right is equivalent to false
+            	this.optimizedBooleanConstant = cst; // constant(false)
+            }
 			return;
 		case OR :
-			if ((leftId != TypeIds.T_boolean) || (rightId != TypeIds.T_boolean))
+			if (leftId != TypeIds.T_boolean || rightId != TypeIds.T_boolean)
 				return;
 			//$FALL-THROUGH$
 		case OR_OR :
 			if ((cst = this.left.optimizedBooleanConstant()) != Constant.NotAConstant) {
-				if (cst.booleanValue() == true) { // left is equivalent to true
-					this.optimizedBooleanConstant = cst; // constant(true)
-					return;
-				} else { //left is equivalent to false
-					if ((cst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) {
-						this.optimizedBooleanConstant = cst;
-					}
-					return;
-				}
-			}
-			if ((cst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) {
-				if (cst.booleanValue() == true) { // right is equivalent to true
+				if (cst.booleanValue() || (cst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant) { // left is equivalent to true
 					this.optimizedBooleanConstant = cst; // constant(true)
 				}
+                return;
 			}
+			if ((cst = this.right.optimizedBooleanConstant()) != Constant.NotAConstant && cst.booleanValue()) { // right is equivalent to true
+            	this.optimizedBooleanConstant = cst; // constant(true)
+            }
 	}
 }
 
@@ -1832,10 +1752,10 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.collectPatternVariablesToScope(null, scope);
 	}
 	boolean leftIsCast, rightIsCast;
-	if ((leftIsCast = this.left instanceof CastExpression) == true) this.left.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
+	if (leftIsCast = this.left instanceof CastExpression) this.left.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
 	TypeBinding leftType = this.left.resolveType(scope);
 
-	if ((rightIsCast = this.right instanceof CastExpression) == true) this.right.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
+	if (rightIsCast = this.right instanceof CastExpression) this.right.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
 	TypeBinding rightType = this.right.resolveType(scope);
 
 	// use the id of the type to navigate into the table
@@ -1869,7 +1789,7 @@ public TypeBinding resolveType(BlockScope scope) {
 			return null;
 		}
 	}
-	if (((this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT) == OperatorIds.PLUS) {
+	if ((this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT == OperatorIds.PLUS) {
 		if (leftTypeID == TypeIds.T_JavaLangString) {
 			this.left.computeConversion(scope, leftType, leftType);
 			if (rightType.isArrayType() && TypeBinding.equalsEquals(((ArrayBinding) rightType).elementsType(), TypeBinding.CHAR)) {
@@ -1894,8 +1814,8 @@ public TypeBinding resolveType(BlockScope scope) {
 	int operator = (this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT;
 	int operatorSignature = OperatorExpression.OperatorSignatures[operator][(leftTypeID << 4) + rightTypeID];
 
-	this.left.computeConversion(scope, TypeBinding.wellKnownType(scope, (operatorSignature >>> 16) & 0x0000F), leftType);
-	this.right.computeConversion(scope, TypeBinding.wellKnownType(scope, (operatorSignature >>> 8) & 0x0000F), rightType);
+	this.left.computeConversion(scope, TypeBinding.wellKnownType(scope, operatorSignature >>> 16 & 0x0000F), leftType);
+	this.right.computeConversion(scope, TypeBinding.wellKnownType(scope, operatorSignature >>> 8 & 0x0000F), rightType);
 	this.bits |= operatorSignature & 0xF;
 	switch (operatorSignature & 0xF) { // record the current ReturnTypeID
 		// only switch on possible result type.....

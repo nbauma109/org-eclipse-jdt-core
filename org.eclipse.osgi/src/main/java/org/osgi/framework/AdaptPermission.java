@@ -157,7 +157,7 @@ public final class AdaptPermission extends BasicPermission {
 	 * @param mask action mask
 	 */
 	AdaptPermission(Filter filter, int mask) {
-		super((filter == null) ? "*" : filter.toString());
+		super(filter == null ? "*" : filter.toString());
 		setTransients(filter, mask);
 		this.bundle = null;
 	}
@@ -170,7 +170,7 @@ public final class AdaptPermission extends BasicPermission {
 	 */
 	private void setTransients(Filter filter, int mask) {
 		this.filter = filter;
-		if ((mask == ACTION_NONE) || ((mask & ACTION_ALL) != mask)) {
+		if (mask == ACTION_NONE || (mask & ACTION_ALL) != mask) {
 			throw new IllegalArgumentException("invalid action string");
 		}
 		this.action_mask = mask;
@@ -201,24 +201,20 @@ public final class AdaptPermission extends BasicPermission {
 			char c;
 
 			// skip whitespace
-			while ((i != -1) && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
+			while (i != -1 && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
 				i--;
 
 			// check for the known strings
 			int matchlen;
 
-			if (i >= 4 && (a[i - 4] == 'a' || a[i - 4] == 'A')
-					&& (a[i - 3] == 'd' || a[i - 3] == 'D')
-					&& (a[i - 2] == 'a' || a[i - 2] == 'A')
-					&& (a[i - 1] == 'p' || a[i - 1] == 'P')
-					&& (a[i] == 't' || a[i] == 'T')) {
-				matchlen = 5;
-				mask |= ACTION_ADAPT;
-
-			} else {
+			if (i < 4 || a[i - 4] != 'a' && a[i - 4] != 'A' || a[i - 3] != 'd' && a[i - 3] != 'D'
+                    || a[i - 2] != 'a' && a[i - 2] != 'A' || a[i - 1] != 'p' && a[i - 1] != 'P'
+                    || a[i] != 't' && a[i] != 'T') {
 				// parse error
 				throw new IllegalArgumentException("invalid actions: " + actions);
 			}
+            matchlen = 5;
+            mask |= ACTION_ADAPT;
 
 			// make sure we didn't just match the tail of a word
 			// like "ackbarfadapt". Also, skip to the comma.
@@ -290,11 +286,8 @@ public final class AdaptPermission extends BasicPermission {
 			return false;
 		}
 		AdaptPermission requested = (AdaptPermission) p;
-		if (bundle != null) {
-			return false;
-		}
 		// if requested permission has a filter, then it is an invalid argument
-		if (requested.filter != null) {
+		if (bundle != null || requested.filter != null) {
 			return false;
 		}
 		return implies0(requested, ACTION_NONE);
@@ -382,7 +375,7 @@ public final class AdaptPermission extends BasicPermission {
 
 		AdaptPermission cp = (AdaptPermission) obj;
 
-		return (action_mask == cp.action_mask) && getName().equals(cp.getName()) && ((bundle == cp.bundle) || ((bundle != null) && bundle.equals(cp.bundle)));
+		return action_mask == cp.action_mask && getName().equals(cp.getName()) && (bundle == cp.bundle || bundle != null && bundle.equals(cp.bundle));
 	}
 
 	/**
@@ -437,25 +430,22 @@ public final class AdaptPermission extends BasicPermission {
 		if (result != null) {
 			return result;
 		}
-		final Map<String, Object> map = new HashMap<String, Object>(5);
+		final Map<String, Object> map = new HashMap<>(5);
 		map.put("adaptClass", getName());
 		if (bundle != null) {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					map.put("id", Long.valueOf(bundle.getBundleId()));
-					map.put("location", bundle.getLocation());
-					String name = bundle.getSymbolicName();
-					if (name != null) {
-						map.put("name", name);
-					}
-					SignerProperty signer = new SignerProperty(bundle);
-					if (signer.isBundleSigned()) {
-						map.put("signer", signer);
-					}
-					return null;
-				}
-			});
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            	map.put("id", Long.valueOf(bundle.getBundleId()));
+            	map.put("location", bundle.getLocation());
+            	String name = bundle.getSymbolicName();
+            	if (name != null) {
+            		map.put("name", name);
+            	}
+            	SignerProperty signer = new SignerProperty(bundle);
+            	if (signer.isBundleSigned()) {
+            		map.put("signer", signer);
+            	}
+            	return null;
+            });
 		}
 		return properties = map;
 	}
@@ -491,7 +481,7 @@ final class AdaptPermissionCollection extends PermissionCollection {
 	 * Create an empty AdaptPermissions object.
 	 */
 	public AdaptPermissionCollection() {
-		permissions = new HashMap<String, AdaptPermission>();
+		permissions = new HashMap<>();
 		all_allowed = false;
 	}
 
@@ -534,11 +524,9 @@ final class AdaptPermissionCollection extends PermissionCollection {
 				pc.put(name, ap);
 			}
 
-			if (!all_allowed) {
-				if (name.equals("*")) {
-					all_allowed = true;
-				}
-			}
+			if (!all_allowed && name.equals("*")) {
+            	all_allowed = true;
+            }
 		}
 	}
 
@@ -597,7 +585,7 @@ final class AdaptPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		return Collections.enumeration(all);
 	}
 

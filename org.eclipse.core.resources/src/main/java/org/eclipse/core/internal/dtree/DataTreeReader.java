@@ -130,7 +130,7 @@ public class DataTreeReader {
 	 */
 	protected int readNumber() throws IOException {
 		byte b = input.readByte();
-		int number = (b & 0xff); // not a no-op! converts unsigned byte to int
+		int number = b & 0xff; // not a no-op! converts unsigned byte to int
 
 		if (number == 0xff) { // magic escape value
 			number = input.readInt();

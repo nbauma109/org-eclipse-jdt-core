@@ -146,7 +146,7 @@ public class DOMASTUtil {
 	}
 
 	public static boolean isPreviewEnabled(int apiLevel, boolean previewEnabled) {
-		return (apiLevel == AST.JLS17 && previewEnabled);
+		return apiLevel == AST.JLS17 && previewEnabled;
 	}
 
 	public static boolean isSwitchExpressionSupported(AST ast) {

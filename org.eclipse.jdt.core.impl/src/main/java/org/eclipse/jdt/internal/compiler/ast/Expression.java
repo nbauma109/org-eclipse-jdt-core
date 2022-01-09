@@ -35,6 +35,7 @@
 package org.eclipse.jdt.internal.compiler.ast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
@@ -79,7 +80,7 @@ public abstract class Expression extends Statement {
 	public int implicitConversion;
 	public TypeBinding resolvedType;
 
-	public static Expression [] NO_EXPRESSIONS = new Expression[0];
+	public static Expression [] NO_EXPRESSIONS = {};
 
 
 public static final boolean isConstantValueRepresentable(Constant constant, int constantTypeID, int targetTypeID) {
@@ -234,7 +235,6 @@ public static final boolean isConstantValueRepresentable(Constant constant, int 
 }
 
 public Expression() {
-	super();
 }
 
 @Override
@@ -317,7 +317,8 @@ public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castTy
 			return true;
 		}
 		return false;
-	} else if (useAutoBoxing
+	}
+    if (useAutoBoxing
 						&& expressionType.isBaseType()
 						&& scope.environment().computeBoxingType(expressionType).isCompatibleWith(castType)) { // boxing - only widening match is allowed
 		tagAsUnnecessaryCast(scope, castType);
@@ -326,8 +327,8 @@ public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castTy
 
 	if (castType.isIntersectionType18()) {
 		ReferenceBinding [] intersectingTypes = castType.getIntersectingTypes();
-		for (int i = 0, length = intersectingTypes.length; i < length; i++) {
-			if (!checkCastTypesCompatibility(scope, intersectingTypes[i], expressionType, expression, useAutoBoxing))
+		for (ReferenceBinding intersectingType : intersectingTypes) {
+			if (!checkCastTypesCompatibility(scope, intersectingType, expressionType, expression, useAutoBoxing))
 				return false;
 		}
 		return true;
@@ -421,8 +422,8 @@ public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castTy
 			return checkCastTypesCompatibility(scope, castType, bound, expression, useAutoBoxing);
 		case Binding.INTERSECTION_TYPE18:
 			ReferenceBinding [] intersectingTypes = expressionType.getIntersectingTypes();
-			for (int i = 0, length = intersectingTypes.length; i < length; i++) {
-				if (checkCastTypesCompatibility(scope, castType, intersectingTypes[i], expression, useAutoBoxing))
+			for (ReferenceBinding intersectingType : intersectingTypes) {
+				if (checkCastTypesCompatibility(scope, castType, intersectingType, expression, useAutoBoxing))
 					return true;
 			}
 			return false;
@@ -471,27 +472,26 @@ public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castTy
 								// ensure there is no collision between both interfaces: i.e. I1 extends List<String>, I2 extends List<Object>
 								if (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
                                     return !interfaceType.hasIncompatibleSuperType((ReferenceBinding) castType);
-								} else return castType.isRawType() || !interfaceType.hasIncompatibleSuperType((ReferenceBinding) castType);
-							} else {
-								// pre1.5 semantics - no covariance allowed (even if 1.5 compliant, but 1.4 source)
-								// look at original methods rather than the parameterized variants at 1.4 to detect
-								// covariance. Otherwise when confronted with one raw type and one parameterized type,
-								// we could mistakenly detect covariance and scream foul. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=332744
-								MethodBinding[] castTypeMethods = getAllOriginalInheritedMethods((ReferenceBinding) castType);
-								MethodBinding[] expressionTypeMethods = getAllOriginalInheritedMethods((ReferenceBinding) expressionType);
-								int exprMethodsLength = expressionTypeMethods.length;
-								for (int i = 0, castMethodsLength = castTypeMethods.length; i < castMethodsLength; i++) {
-									for (int j = 0; j < exprMethodsLength; j++) {
-										if ((TypeBinding.notEquals(castTypeMethods[i].returnType, expressionTypeMethods[j].returnType))
-												&& (CharOperation.equals(castTypeMethods[i].selector, expressionTypeMethods[j].selector))
-												&& castTypeMethods[i].areParametersEqual(expressionTypeMethods[j])) {
-											return false;
-
-										}
-									}
 								}
+                                return castType.isRawType() || !interfaceType.hasIncompatibleSuperType((ReferenceBinding) castType);
 							}
-							return true;
+                            // pre1.5 semantics - no covariance allowed (even if 1.5 compliant, but 1.4 source)
+                            // look at original methods rather than the parameterized variants at 1.4 to detect
+                            // covariance. Otherwise when confronted with one raw type and one parameterized type,
+                            // we could mistakenly detect covariance and scream foul. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=332744
+                            MethodBinding[] castTypeMethods = getAllOriginalInheritedMethods((ReferenceBinding) castType);
+                            MethodBinding[] expressionTypeMethods = getAllOriginalInheritedMethods((ReferenceBinding) expressionType);
+                            int exprMethodsLength = expressionTypeMethods.length;
+                            for (MethodBinding castTypeMethod : castTypeMethods) {
+                            	for (int j = 0; j < exprMethodsLength; j++) {
+                            		if (TypeBinding.notEquals(castTypeMethod.returnType, expressionTypeMethods[j].returnType)
+                            				&& CharOperation.equals(castTypeMethod.selector, expressionTypeMethods[j].selector)
+                            				&& castTypeMethod.areParametersEqual(expressionTypeMethods[j])) {
+                            			return false;
+
+                            		}
+                            	}
+                            }
 						} else {
 							// ( CLASS ) INTERFACE
 							if (castType.id == TypeIds.T_JavaLangObject) { // no runtime error
@@ -513,10 +513,11 @@ public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castTy
 								// ensure there is no collision between both interfaces: i.e. I1 extends List<String>, I2 extends List<Object>
 								if (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
                                     return !((ReferenceBinding) castType).hasIncompatibleSuperType((ReferenceBinding) expressionType);
-								} else return castType.isRawType() || !((ReferenceBinding) castType).hasIncompatibleSuperType((ReferenceBinding) expressionType);
+								}
+                                return castType.isRawType() || !((ReferenceBinding) castType).hasIncompatibleSuperType((ReferenceBinding) expressionType);
 							}
-							return true;
 						}
+                        return true;
 				}
 			} else {
 				switch (castType.kind()) {
@@ -564,23 +565,23 @@ public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castTy
 								// ensure there is no collision between both interfaces: i.e. I1 extends List<String>, I2 extends List<Object>
 								if (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
                                     return !refExprType.hasIncompatibleSuperType((ReferenceBinding) castType);
-								} else return castType.isRawType() || !refExprType.hasIncompatibleSuperType((ReferenceBinding) castType);
+								}
+                                return castType.isRawType() || !refExprType.hasIncompatibleSuperType((ReferenceBinding) castType);
 							}
 							return true;
-						} else {
-							// ( CLASS ) CLASS
-							match = expressionType.findSuperTypeOriginatingFrom(castType);
-							if (match != null) {
-								if (expression != null && castType.id == TypeIds.T_JavaLangString) this.constant = expression.constant; // (String) cst is still a constant
-								return checkUnsafeCast(scope, castType, expressionType, match, false);
-							}
-							match = castType.findSuperTypeOriginatingFrom(expressionType);
-							if (match != null) {
-								tagAsNeedCheckCast();
-								return checkUnsafeCast(scope, castType, expressionType, match, true);
-							}
-							return false;
 						}
+                        // ( CLASS ) CLASS
+                        match = expressionType.findSuperTypeOriginatingFrom(castType);
+                        if (match != null) {
+                        	if (expression != null && castType.id == TypeIds.T_JavaLangString) this.constant = expression.constant; // (String) cst is still a constant
+                        	return checkUnsafeCast(scope, castType, expressionType, match, false);
+                        }
+                        match = castType.findSuperTypeOriginatingFrom(expressionType);
+                        if (match != null) {
+                        	tagAsNeedCheckCast();
+                        	return checkUnsafeCast(scope, castType, expressionType, match, true);
+                        }
+                        return false;
 				}
 			}
 	}
@@ -608,7 +609,8 @@ public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flow
 		// 1. priority: @NonNull
 		if ((this.resolvedType.tagBits & TagBits.AnnotationNonNull) != 0) {
 			return true; // no danger
-		} else if ((this.resolvedType.tagBits & TagBits.AnnotationNullable) != 0) {
+		}
+        if ((this.resolvedType.tagBits & TagBits.AnnotationNullable) != 0) {
 			isNullable = true;
 		}
 	}
@@ -628,7 +630,8 @@ public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flow
 			// from thereon it is set
 		flowContext.markFinallyNullStatus(local, FlowInfo.NON_NULL);
 		return true;
-	} else if (isNullable) {
+	}
+    if (isNullable) {
 		// 3. priority: @Nullable without a local
 		scope.problemReporter().dereferencingNullableExpression(this);
 		return true;
@@ -655,13 +658,11 @@ public boolean checkUnsafeCast(Scope scope, TypeBinding castType, TypeBinding ex
 		if (!isNarrowing) tagAsUnnecessaryCast(scope, castType);
 		return true;
 	}
-	if (match != null && (!castType.isReifiable() || !expressionType.isReifiable())) {
-		if(isNarrowing
-				? match.isProvablyDistinct(expressionType)
-				: castType.isProvablyDistinct(match)) {
-			return false;
-		}
-	}
+	if(match != null && (!castType.isReifiable() || !expressionType.isReifiable()) && (isNarrowing
+    		? match.isProvablyDistinct(expressionType)
+    		: castType.isProvablyDistinct(match))) {
+    	return false;
+    }
 	if (!isNarrowing) tagAsUnnecessaryCast(scope, castType);
 	return true;
 }
@@ -671,9 +672,7 @@ public boolean checkUnsafeCast(Scope scope, TypeBinding castType, TypeBinding ex
  * Also check unsafe type operations.
  */
 public void computeConversion(Scope scope, TypeBinding runtimeType, TypeBinding compileTimeType) {
-	if (runtimeType == null || compileTimeType == null)
-		return;
-	if (this.implicitConversion != 0) return; // already set independently
+	if (runtimeType == null || compileTimeType == null || this.implicitConversion != 0) return; // already set independently
 
 	// it is possible for a Byte to be unboxed to a byte & then converted to an int
 	// but it is not possible for a byte to become Byte & then assigned to an Integer,
@@ -763,15 +762,14 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
  * @param valueRequired boolean
  */
 public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
-	if (this.constant != Constant.NotAConstant) {
-		// generate a constant expression
-		int pc = codeStream.position;
-		codeStream.generateConstant(this.constant, this.implicitConversion);
-		codeStream.recordPositionsFrom(pc, this.sourceStart);
-	} else {
+	if (this.constant == Constant.NotAConstant) {
 		// actual non-constant code generation
 		throw new ShouldNotImplement(Messages.ast_missingCode);
 	}
+    // generate a constant expression
+    int pc = codeStream.position;
+    codeStream.generateConstant(this.constant, this.implicitConversion);
+    codeStream.recordPositionsFrom(pc, this.sourceStart);
 }
 public void addPatternVariables(BlockScope scope, CodeStream codeStream) {
 	// Nothing by default
@@ -824,28 +822,18 @@ public void generateOptimizedBoolean(BlockScope currentScope, CodeStream codeStr
 
 	Constant cst = optimizedBooleanConstant();
 	generateCode(currentScope, codeStream, valueRequired && cst == Constant.NotAConstant);
-	if ((cst != Constant.NotAConstant) && (cst.typeID() == TypeIds.T_boolean)) {
+	if (cst != Constant.NotAConstant && cst.typeID() == TypeIds.T_boolean) {
 		int pc = codeStream.position;
-		if (cst.booleanValue() == true) {
+		if (cst.booleanValue()) {
 			// constant == true
-			if (valueRequired) {
-				if (falseLabel == null) {
-					// implicit falling through the FALSE case
-					if (trueLabel != null) {
-						codeStream.goto_(trueLabel);
-					}
-				}
-			}
-		} else {
-			if (valueRequired) {
-				if (falseLabel != null) {
-					// implicit falling through the TRUE case
-					if (trueLabel == null) {
-						codeStream.goto_(falseLabel);
-					}
-				}
-			}
-		}
+			// implicit falling through the FALSE case
+            if (valueRequired && falseLabel == null && trueLabel != null) {
+            	codeStream.goto_(trueLabel);
+            }
+		} else // implicit falling through the TRUE case
+        if (valueRequired && falseLabel != null && trueLabel == null) {
+        	codeStream.goto_(falseLabel);
+        }
 		codeStream.recordPositionsFrom(pc, this.sourceStart);
 		return;
 	}
@@ -857,14 +845,12 @@ public void generateOptimizedBoolean(BlockScope currentScope, CodeStream codeStr
 				// Implicit falling through the FALSE case
 				codeStream.ifne(trueLabel);
 			}
-		} else {
-			if (trueLabel == null) {
-				// Implicit falling through the TRUE case
-				codeStream.ifeq(falseLabel);
-			} else {
-				// No implicit fall through TRUE/FALSE --> should never occur
-			}
-		}
+		} else if (trueLabel == null) {
+        	// Implicit falling through the TRUE case
+        	codeStream.ifeq(falseLabel);
+        } else {
+        	// No implicit fall through TRUE/FALSE --> should never occur
+        }
 	}
 	codeStream.recordPositionsFrom(position, this.sourceEnd);
 }
@@ -932,12 +918,10 @@ private MethodBinding[] getAllOriginalInheritedMethods(ReferenceBinding binding)
 private void getAllInheritedMethods0(ReferenceBinding binding, ArrayList<MethodBinding> collector) {
 	if (!binding.isInterface()) return;
 	MethodBinding[] methodBindings = binding.methods();
-	for (int i = 0, max = methodBindings.length; i < max; i++) {
-		collector.add(methodBindings[i]);
-	}
+	Collections.addAll(collector, methodBindings);
 	ReferenceBinding[] superInterfaces = binding.superInterfaces();
-	for (int i = 0, max = superInterfaces.length; i < max; i++) {
-		getAllInheritedMethods0(superInterfaces[i], collector);
+	for (ReferenceBinding element : superInterfaces) {
+		getAllInheritedMethods0(element, collector);
 	}
 }
 
@@ -947,18 +931,16 @@ public static Binding getDirectBinding(Expression someExpression) {
 	}
 	if (someExpression instanceof SingleNameReference) {
 		return ((SingleNameReference)someExpression).binding;
-	} else if (someExpression instanceof FieldReference) {
+	}
+    if (someExpression instanceof FieldReference) {
 		FieldReference fieldRef = (FieldReference)someExpression;
 		if (fieldRef.receiver.isThis() && !(fieldRef.receiver instanceof QualifiedThisReference)) {
 			return fieldRef.binding;
 		}
 	} else if (someExpression instanceof Assignment) {
 		Expression lhs = ((Assignment)someExpression).lhs;
-		if ((lhs.bits & ASTNode.IsStrictlyAssigned) != 0) {
+		if ((lhs.bits & ASTNode.IsStrictlyAssigned) != 0 || someExpression instanceof PrefixExpression) {
 			// i = i = ...; // eq to int i = ...;
-			return getDirectBinding (((Assignment)someExpression).lhs);
-		} else if (someExpression instanceof PrefixExpression) {
-			// i = i++; // eq to ++i;
 			return getDirectBinding (((Assignment)someExpression).lhs);
 		}
 	} else if (someExpression instanceof QualifiedNameReference) {
@@ -993,7 +975,7 @@ public boolean isConstantValueOfTypeAssignableToType(TypeBinding constantType, T
 		return true;
 	//No free assignment conversion from anything but to integral ones.
 	if (BaseTypeBinding.isWidening(TypeIds.T_int, constantType.id)
-			&& (BaseTypeBinding.isNarrowing(targetType.id, TypeIds.T_int))) {
+			&& BaseTypeBinding.isNarrowing(targetType.id, TypeIds.T_int)) {
 		//use current explicit conversion in order to get some new value to compare with current one
 		return isConstantValueRepresentable(this.constant, constantType.id, targetType.id);
 	}
@@ -1099,7 +1081,6 @@ public StringBuffer printStatement(int indent, StringBuffer output) {
 public void resolve(BlockScope scope) {
 	// drops the returning expression's type whatever the type is.
 	this.resolveType(scope);
-	return;
 }
 @Override
 public TypeBinding resolveExpressionType(BlockScope scope) {
@@ -1137,12 +1118,11 @@ public TypeBinding resolveTypeExpecting(BlockScope scope, TypeBinding expectedTy
 	if (TypeBinding.equalsEquals(expressionType, expectedType)) return expressionType;
 
 	if (!expressionType.isCompatibleWith(expectedType)) {
-		if (scope.isBoxingCompatibleWith(expressionType, expectedType)) {
-			computeConversion(scope, expectedType, expressionType);
-		} else {
+		if (!scope.isBoxingCompatibleWith(expressionType, expectedType)) {
 			scope.problemReporter().typeMismatchError(expressionType, expectedType, this, null);
 			return null;
 		}
+        computeConversion(scope, expectedType, expressionType);
 	}
 	return expressionType;
 }
@@ -1161,7 +1141,8 @@ public boolean forcedToBeRaw(ReferenceContext referenceContext) {
 		final Binding receiverBinding = ((NameReference) this).binding;
 		if (receiverBinding.isParameter() && (((LocalVariableBinding) receiverBinding).tagBits & TagBits.ForcedToBeRawType) != 0) {
 			return true;  // parameter is forced to be raw since super method uses raw types.
-		} else if (receiverBinding instanceof FieldBinding) {
+		}
+        if (receiverBinding instanceof FieldBinding) {
 			FieldBinding field = (FieldBinding) receiverBinding;
 			if (field.type.isRawType()) {
 				if (referenceContext instanceof AbstractMethodDeclaration) {
@@ -1171,7 +1152,8 @@ public boolean forcedToBeRaw(ReferenceContext referenceContext) {
 							: methodDecl.scope.enclosingReceiverType();
                     // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
                     return TypeBinding.notEquals(field.declaringClass, declaringClass);
-				} else if (referenceContext instanceof TypeDeclaration) {
+				}
+                if (referenceContext instanceof TypeDeclaration) {
 					TypeDeclaration type = (TypeDeclaration) referenceContext;
                     // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
                     return TypeBinding.notEquals(field.declaringClass, type.binding);
@@ -1196,7 +1178,8 @@ public boolean forcedToBeRaw(ReferenceContext referenceContext) {
 						: methodDecl.scope.enclosingReceiverType();
                 // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
                 return TypeBinding.notEquals(field.declaringClass, declaringClass);
-			} else if (referenceContext instanceof TypeDeclaration) {
+			}
+            if (referenceContext instanceof TypeDeclaration) {
 				TypeDeclaration type = (TypeDeclaration) referenceContext;
                 // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
                 return TypeBinding.notEquals(field.declaringClass, type.binding);

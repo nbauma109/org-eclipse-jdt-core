@@ -160,7 +160,7 @@ public final class ParameterizedCommand implements Comparable {
 	private static Collection<?> expandParameters(final int startIndex,
 			final IParameter[] parameters) {
 		final int nextIndex = startIndex + 1;
-		final boolean noMoreParameters = (nextIndex >= parameters.length);
+		final boolean noMoreParameters = nextIndex >= parameters.length;
 
 		final IParameter parameter = parameters[startIndex];
 		final List<Object> parameterizations = new ArrayList<>();
@@ -307,7 +307,7 @@ public final class ParameterizedCommand implements Comparable {
 			ArrayList<Parameterization> parms = new ArrayList<>();
 			for (Entry<?, ?> entry : ((Map<?, ?>) parameters).entrySet()) {
 				String key = (String) entry.getKey();
-				IParameter parameter = null;
+				IParameter parameter;
 				// get the parameter from the command
 				parameter = command.getParameter(key);
 
@@ -590,7 +590,7 @@ public final class ParameterizedCommand implements Comparable {
 	 *         <code>null</code>, but may be empty.
 	 */
 	public Map getParameterMap() {
-		if ((parameterizations == null) || (parameterizations.length == 0)) {
+		if (parameterizations == null || parameterizations.length == 0) {
 			return Collections.EMPTY_MAP;
 		}
 
@@ -678,7 +678,7 @@ public final class ParameterizedCommand implements Comparable {
 	public String serialize() {
 		final String escapedId = escape(getId());
 
-		if ((parameterizations == null) || (parameterizations.length == 0)) {
+		if (parameterizations == null || parameterizations.length == 0) {
 			return escapedId;
 		}
 

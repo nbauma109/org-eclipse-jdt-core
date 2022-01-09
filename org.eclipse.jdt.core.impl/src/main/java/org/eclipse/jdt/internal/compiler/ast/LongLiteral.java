@@ -57,7 +57,7 @@ LongLiteral(char[] token, char[] reducedForm, int start, int end) {
 	this.reducedForm = reducedForm;
 }
 public LongLiteral convertToMinValue() {
-	if (((this.bits & ASTNode.ParenthesizedMASK) >> ASTNode.ParenthesizedSHIFT) != 0) {
+	if ((this.bits & ASTNode.ParenthesizedMASK) >> ASTNode.ParenthesizedSHIFT != 0) {
 		return this;
 	}
 	char[] token = this.reducedForm != null ? this.reducedForm : this.source;
@@ -83,10 +83,10 @@ public void computeConstant() {
 			this.constant = LongConstant.fromValue(0L);
 			return;
 		}
-		if ((token[1] == 'x') || (token[1] == 'X')) {
+		if (token[1] == 'x' || token[1] == 'X') {
 			radix = 16;
 			j = 2;
-		} else if ((token[1] == 'b') || (token[1] == 'B')) {
+		} else if (token[1] == 'b' || token[1] == 'B') {
 			radix = 2;
 			j = 2;
 		} else {
@@ -96,7 +96,7 @@ public void computeConstant() {
 	}
 	switch(radix) {
 		case 2 :
-			if ((length - 2) > 64) { // remove 0b or 0B
+			if (length - 2 > 64) { // remove 0b or 0B
 				return; /*constant stays null*/
 			}
 			computeValue(token, length, radix, j);
@@ -112,8 +112,8 @@ public void computeConstant() {
 			break;
 		case 10 :
 			if (tokenLength > DECIMAL_MAX_VALUE.length
-					|| (tokenLength == DECIMAL_MAX_VALUE.length
-							&& CharOperation.compareTo(token, DECIMAL_MAX_VALUE, 0, length) > 0)) {
+					|| tokenLength == DECIMAL_MAX_VALUE.length
+							&& CharOperation.compareTo(token, DECIMAL_MAX_VALUE, 0, length) > 0) {
 				return; /*constant stays null*/
 			}
 			computeValue(token, length, radix, j);
@@ -139,7 +139,7 @@ private void computeValue(char[] token, int tokenLength, int radix, int j) {
 		if ((digitValue = ScannerHelper.digit(token[j++],radix)) < 0) {
 			return; /*constant stays null*/
 		}
-		computedValue = (computedValue * radix) + digitValue ;
+		computedValue = computedValue * radix + digitValue ;
 	}
 	this.constant = LongConstant.fromValue(computedValue);
 }

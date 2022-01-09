@@ -21,7 +21,7 @@ public class JavadocReturnStatement extends ReturnStatement {
 
 	public JavadocReturnStatement(int s, int e) {
 		super(null, s, e);
-		this.bits |= (ASTNode.InsideJavadoc | ASTNode.Empty);
+		this.bits |= ASTNode.InsideJavadoc | ASTNode.Empty;
 	}
 
 	@Override
@@ -29,10 +29,10 @@ public class JavadocReturnStatement extends ReturnStatement {
 		MethodScope methodScope = scope.methodScope();
 		MethodBinding methodBinding = null;
 		TypeBinding methodType =
-			(methodScope.referenceContext instanceof AbstractMethodDeclaration)
-				? ((methodBinding = ((AbstractMethodDeclaration) methodScope.referenceContext).binding) == null
+			methodScope.referenceContext instanceof AbstractMethodDeclaration
+				? (methodBinding = ((AbstractMethodDeclaration) methodScope.referenceContext).binding) == null
 					? null
-					: methodBinding.returnType)
+					: methodBinding.returnType
 				: TypeBinding.VOID;
 		if (methodType == null || methodType == TypeBinding.VOID) {
 			scope.problemReporter().javadocUnexpectedTag(this.sourceStart, this.sourceEnd);

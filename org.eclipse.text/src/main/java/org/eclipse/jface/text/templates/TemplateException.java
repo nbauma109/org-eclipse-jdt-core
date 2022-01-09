@@ -41,7 +41,6 @@ public class TemplateException extends Exception {
 	 * Creates a new template exception.
 	 */
 	public TemplateException() {
-		super();
 	}
 
 	/**

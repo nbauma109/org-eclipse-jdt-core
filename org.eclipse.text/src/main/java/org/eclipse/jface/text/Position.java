@@ -77,7 +77,7 @@ public class Position {
 	@Override
 	public int hashCode() {
 	 	int deleted= isDeleted ? 0 : 1;
-	 	return (offset << 24) | (length << 16) | deleted;
+	 	return offset << 24 | length << 16 | deleted;
 	 }
 
 	/**
@@ -100,7 +100,7 @@ public class Position {
 	public boolean equals(Object other) {
 		if (other instanceof Position) {
 			Position rp= (Position) other;
-			return (rp.offset == offset) && (rp.length == length);
+			return rp.offset == offset && rp.length == length;
 		}
 		return super.equals(other);
 	}
@@ -135,7 +135,7 @@ public class Position {
 		if (isDeleted)
 			return false;
 
-		return (this.offset <= index) && (index < this.offset + length);
+		return this.offset <= index && index < this.offset + length;
 	}
 
 	/**

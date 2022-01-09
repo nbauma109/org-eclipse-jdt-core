@@ -263,7 +263,7 @@ public class Aligner {
 							this.tm.addNLSAlignIndex(i, maxCommentAlign);
 						}
 					} else if (next.tokenType == TokenNameCOMMENT_LINE && alignLineComments
-							|| (next.tokenType == TokenNameCOMMENT_BLOCK && i == lastIndex)) {
+							|| next.tokenType == TokenNameCOMMENT_BLOCK && i == lastIndex) {
 						next.setAlign(maxCommentAlign);
 					}
 				}

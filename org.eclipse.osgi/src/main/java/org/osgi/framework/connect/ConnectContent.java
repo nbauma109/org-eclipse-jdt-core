@@ -181,20 +181,7 @@ public interface ConnectContent {
 
 			try (InputStream in = getInputStream()) {
 				int length = (int) longLength;
-				if (length > 0) {
-					int bytesread = 0;
-					byte[] result = new byte[length];
-					int readcount = 0;
-					while (bytesread < length) {
-						readcount = in.read(result, bytesread,
-								length - bytesread);
-						bytesread += readcount;
-						if (readcount <= 0) {
-							break;
-						}
-					}
-					return result;
-				} else {
+				if (length <= 0) {
 					ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 					int nRead;
 					byte[] data = new byte[1024];
@@ -204,6 +191,18 @@ public interface ConnectContent {
 					buffer.flush();
 					return buffer.toByteArray();
 				}
+                int bytesread = 0;
+                byte[] result = new byte[length];
+                int readcount = 0;
+                while (bytesread < length) {
+                	readcount = in.read(result, bytesread,
+                			length - bytesread);
+                	bytesread += readcount;
+                	if (readcount <= 0) {
+                		break;
+                	}
+                }
+                return result;
 			}
 		}
 

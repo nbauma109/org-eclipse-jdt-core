@@ -67,7 +67,7 @@ public class Util
             {
                 String type = (String)
                     cap.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);
-                return (type != null) && type.equals(IdentityNamespace.TYPE_FRAGMENT);
+                return type != null && type.equals(IdentityNamespace.TYPE_FRAGMENT);
             }
         }
         return false;
@@ -99,14 +99,14 @@ public class Util
 
     public static List<Requirement> getDynamicRequirements(List<Requirement> reqs)
     {
-        List<Requirement> result = new ArrayList<Requirement>();
+        List<Requirement> result = new ArrayList<>();
         if (reqs != null)
         {
             for (Requirement req : reqs)
             {
                 String resolution = req.getDirectives()
                     .get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
-                if ((resolution != null)
+                if (resolution != null
                     && resolution.equals(PackageNamespace.RESOLUTION_DYNAMIC))
                 {
                     result.add(req);

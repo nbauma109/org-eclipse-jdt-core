@@ -57,9 +57,7 @@ public boolean containsKey(double key) {
 			if (this.keyTable[i] == 0.0) {
 				long value1 = Double.doubleToLongBits(key);
 				long value2 = Double.doubleToLongBits(this.keyTable[i]);
-				if (value1 == -9223372036854775808L && value2 == -9223372036854775808L)
-					return true;
-				if (value1 == 0 && value2 == 0)
+				if (value1 == -9223372036854775808L && value2 == -9223372036854775808L || value1 == 0 && value2 == 0)
 					return true;
 			}
 		}
@@ -83,8 +81,8 @@ public boolean containsKey(double key) {
 public int put(double key, int value) {
 	if (this.elementSize == this.keyTable.length) {
 		// resize
-		System.arraycopy(this.keyTable, 0, (this.keyTable = new double[this.elementSize * 2]), 0, this.elementSize);
-		System.arraycopy(this.valueTable, 0, (this.valueTable = new int[this.elementSize * 2]), 0, this.elementSize);
+		System.arraycopy(this.keyTable, 0, this.keyTable = new double[this.elementSize * 2], 0, this.elementSize);
+		System.arraycopy(this.valueTable, 0, this.valueTable = new int[this.elementSize * 2], 0, this.elementSize);
 	}
 	this.keyTable[this.elementSize] = key;
 	this.valueTable[this.elementSize] = value;
@@ -105,9 +103,7 @@ public int putIfAbsent(double key, int value) {
 			if (this.keyTable[i] == 0.0) {
 				long value1 = Double.doubleToLongBits(key);
 				long value2 = Double.doubleToLongBits(this.keyTable[i]);
-				if (value1 == -9223372036854775808L && value2 == -9223372036854775808L)
-					return this.valueTable[i];
-				if (value1 == 0 && value2 == 0)
+				if (value1 == -9223372036854775808L && value2 == -9223372036854775808L || value1 == 0 && value2 == 0)
 					return this.valueTable[i];
 			}
 		}
@@ -120,8 +116,8 @@ public int putIfAbsent(double key, int value) {
 	}
 	if (this.elementSize == this.keyTable.length) {
 		// resize
-		System.arraycopy(this.keyTable, 0, (this.keyTable = new double[this.elementSize * 2]), 0, this.elementSize);
-		System.arraycopy(this.valueTable, 0, (this.valueTable = new int[this.elementSize * 2]), 0, this.elementSize);
+		System.arraycopy(this.keyTable, 0, this.keyTable = new double[this.elementSize * 2], 0, this.elementSize);
+		System.arraycopy(this.valueTable, 0, this.valueTable = new int[this.elementSize * 2], 0, this.elementSize);
 	}
 	this.keyTable[this.elementSize] = key;
 	this.valueTable[this.elementSize] = value;
@@ -139,7 +135,7 @@ public String toString() {
 	StringBuilder buf = new StringBuilder();
 	buf.append("{"); //$NON-NLS-1$
 	for (int i = 0; i < max; ++i) {
-		if ((this.keyTable[i] != 0) || ((this.keyTable[i] == 0) &&(this.valueTable[i] != 0))) {
+		if (this.keyTable[i] != 0 || this.keyTable[i] == 0 &&this.valueTable[i] != 0) {
 			buf.append(this.keyTable[i]).append("->").append(this.valueTable[i]); //$NON-NLS-1$
 		}
 		if (i < max) {

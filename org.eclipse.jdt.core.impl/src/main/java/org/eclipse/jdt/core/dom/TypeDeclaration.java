@@ -68,7 +68,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * @deprecated In the JLS3 API, this property is replaced by {@link #MODIFIERS2_PROPERTY}.
 	 * @since 3.0
 	 */
-	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
+	@Deprecated
+    public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
 		internalModifiersPropertyFactory(TypeDeclaration.class);
 
 	/**
@@ -97,7 +98,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * @since 3.0
 	 * @deprecated In the JLS3 API, this property is replaced by {@link #SUPERCLASS_TYPE_PROPERTY}.
 	 */
-	public static final ChildPropertyDescriptor SUPERCLASS_PROPERTY =
+	@Deprecated
+    public static final ChildPropertyDescriptor SUPERCLASS_PROPERTY =
 		new ChildPropertyDescriptor(TypeDeclaration.class, "superclass", Name.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -105,7 +107,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * @since 3.0
 	 * @deprecated In the JLS3 API, this property is replaced by {@link #SUPER_INTERFACE_TYPES_PROPERTY}.
 	 */
-	public static final ChildListPropertyDescriptor SUPER_INTERFACES_PROPERTY =
+	@Deprecated
+    public static final ChildListPropertyDescriptor SUPER_INTERFACES_PROPERTY =
 		new ChildListPropertyDescriptor(TypeDeclaration.class, "superInterfaces", Name.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -221,7 +224,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	public static List propertyDescriptors(int apiLevel) {
 		if (DOMASTUtil.isFeatureSupportedinAST(apiLevel, Modifier.SEALED)) {
 			return PROPERTY_DESCRIPTORS_15;
-		} else if (apiLevel == AST.JLS2_INTERNAL) {
+		}
+        if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
 		}
 		return PROPERTY_DESCRIPTORS_3_0;
@@ -322,10 +326,9 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		if (property == MODIFIERS_PROPERTY) {
 			if (get) {
 				return getModifiers();
-			} else {
-				internalSetModifiers(value);
-				return 0;
 			}
+            internalSetModifiers(value);
+            return 0;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetIntProperty(property, get, value);
@@ -336,10 +339,9 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		if (property == INTERFACE_PROPERTY) {
 			if (get) {
 				return isInterface();
-			} else {
-				setInterface(value);
-				return false;
 			}
+            setInterface(value);
+            return false;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
@@ -350,34 +352,30 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		if (property == JAVADOC_PROPERTY) {
 			if (get) {
 				return getJavadoc();
-			} else {
-				setJavadoc((Javadoc) child);
-				return null;
 			}
+            setJavadoc((Javadoc) child);
+            return null;
 		}
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((SimpleName) child);
-				return null;
 			}
+            setName((SimpleName) child);
+            return null;
 		}
 		if (property == SUPERCLASS_PROPERTY) {
 			if (get) {
 				return getSuperclass();
-			} else {
-				setSuperclass((Name) child);
-				return null;
 			}
+            setSuperclass((Name) child);
+            return null;
 		}
 		if (property == SUPERCLASS_TYPE_PROPERTY) {
 			if (get) {
 				return getSuperclassType();
-			} else {
-				setSuperclassType((Type) child);
-				return null;
 			}
+            setSuperclassType((Type) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -565,7 +563,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * {@link #getSuperclassType()}, which returns a <code>Type</code>
 	 * instead of a <code>Name</code>.
 	 */
-	public Name getSuperclass() {
+	@Deprecated
+    public Name getSuperclass() {
 		return internalGetSuperclass();
 	}
 
@@ -621,7 +620,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * {@link #setSuperclassType(Type)}, which expects a
 	 * <code>Type</code> instead of a <code>Name</code>.
 	 */
-	public void setSuperclass(Name superclassName) {
+	@Deprecated
+    public void setSuperclass(Name superclassName) {
 		internalSetSuperclass(superclassName);
 	}
 
@@ -679,7 +679,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * @deprecated In the JLS3 API, this method is replaced by
 	 * {@link #superInterfaceTypes()}.
 	 */
-	public List superInterfaces() {
+	@Deprecated
+    public List superInterfaces() {
 		return internalSuperInterfaces();
 	}
 
@@ -836,7 +837,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	@Override
 	int memSize() {
 		// there are 7 fields that are either int or pointer and one boolean type
-		return super.memSize() + 1 + (7 * 4) ;
+		return super.memSize() + 1 + 7 * 4 ;
 	}
 
 	@Override

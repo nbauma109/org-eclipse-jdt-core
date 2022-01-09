@@ -87,8 +87,8 @@ public int match(Reference node, MatchingNodeSet nodeSet) { // interested in Nam
 			return nodeSet.addMatch(node, POSSIBLE_MATCH); // resolution is needed to find out if it is a type ref
 	} else {
 		char[][] tokens = ((QualifiedNameReference) node).tokens;
-		for (int i = 0, max = tokens.length; i < max; i++)
-			if (matchesName(this.pattern.simpleName, tokens[i]))
+		for (char[] token : tokens)
+            if (matchesName(this.pattern.simpleName, token))
 				return nodeSet.addMatch(node, POSSIBLE_MATCH); // resolution is needed to find out if it is a type ref
 	}
 
@@ -105,8 +105,8 @@ public int match(TypeReference node, MatchingNodeSet nodeSet) {
 			return nodeSet.addMatch(node, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 	} else {
 		char[][] tokens = ((QualifiedTypeReference) node).tokens;
-		for (int i = 0, max = tokens.length; i < max; i++)
-			if (matchesName(this.pattern.simpleName, tokens[i]))
+		for (char[] token : tokens)
+            if (matchesName(this.pattern.simpleName, token))
 				return nodeSet.addMatch(node, POSSIBLE_MATCH); // resolution is needed to find out if it is a type ref
 	}
 
@@ -127,11 +127,9 @@ protected int matchLevel(ImportReference importRef) {
 		if (matchesName(this.pattern.simpleName, tokens[length-1])) {
 			return ACCURATE_MATCH;
 		}
-		if (isStatic && !onDemand && length > 1) {
-			if (matchesName(this.pattern.simpleName, tokens[length-2])) {
-				return ACCURATE_MATCH;
-			}
-		}
+		if (isStatic && !onDemand && length > 1 && matchesName(this.pattern.simpleName, tokens[length-2])) {
+        	return ACCURATE_MATCH;
+        }
 	} else {
 		char[][] tokens = importRef.tokens;
 		char[] qualifiedPattern = this.pattern.simpleName == null
@@ -146,7 +144,7 @@ protected int matchLevel(ImportReference importRef) {
 			}
 			return IMPOSSIBLE_MATCH;
 		}
-		boolean matchFirstChar = !this.isCaseSensitive || (qualifiedPattern[0] == qualifiedTypeName[0]);
+		boolean matchFirstChar = !this.isCaseSensitive || qualifiedPattern[0] == qualifiedTypeName[0];
 		switch (this.matchMode) {
 			case SearchPattern.R_EXACT_MATCH:
 			case SearchPattern.R_PREFIX_MATCH:
@@ -165,11 +163,8 @@ protected int matchLevel(ImportReference importRef) {
 				// TODO (frederic) implement regular expression match
 				break;
 			case SearchPattern.R_CAMELCASE_MATCH:
-				if (matchFirstChar && CharOperation.camelCaseMatch(qualifiedPattern, qualifiedTypeName, false)) {
-					return POSSIBLE_MATCH;
-				}
 				// only test case insensitive as CamelCase already verified prefix case sensitive
-				if (!this.isCaseSensitive && CharOperation.prefixEquals(qualifiedPattern, qualifiedTypeName, false)) {
+				if (matchFirstChar && CharOperation.camelCaseMatch(qualifiedPattern, qualifiedTypeName, false) || !this.isCaseSensitive && CharOperation.prefixEquals(qualifiedPattern, qualifiedTypeName, false)) {
 					return POSSIBLE_MATCH;
 				}
 				break;
@@ -237,7 +232,7 @@ protected void matchReportImportRef(ImportReference importRef, Binding binding, 
 	}
 
 	// Return if fine grain is on and does not concern import reference
-	if ((this.pattern.fineGrain != 0 && (this.pattern.fineGrain & IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE) == 0)) {
+	if (this.pattern.fineGrain != 0 && (this.pattern.fineGrain & IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE) == 0) {
 		return;
 	}
 
@@ -248,7 +243,7 @@ protected void matchReportImportRef(ImportReference importRef, Binding binding, 
 	this.match.setRaw(true);
 	if (this.pattern.hasTypeArguments()) {
 		// binding is raw => only compatible erasure if pattern has type arguments
-		this.match.setRule(this.match.getRule() & (~SearchPattern.R_FULL_MATCH));
+		this.match.setRule(this.match.getRule() & ~SearchPattern.R_FULL_MATCH);
 	}
 
 	// Try to find best selection for match
@@ -258,10 +253,10 @@ protected void matchReportImportRef(ImportReference importRef, Binding binding, 
 		typeBinding = (ReferenceBinding) binding;
 	} else if (binding instanceof FieldBinding) { // may happen for static import
 		typeBinding = ((FieldBinding)binding).declaringClass;
-		lastButOne = importRef.isStatic() && ((importRef.bits & ASTNode.OnDemand) == 0);
+		lastButOne = importRef.isStatic() && (importRef.bits & ASTNode.OnDemand) == 0;
 	} else if (binding instanceof MethodBinding) { // may happen for static import
 		typeBinding = ((MethodBinding)binding).declaringClass;
-		lastButOne = importRef.isStatic() && ((importRef.bits & ASTNode.OnDemand) == 0);
+		lastButOne = importRef.isStatic() && (importRef.bits & ASTNode.OnDemand) == 0;
 	}
 	if (typeBinding != null) {
 		int lastIndex = importRef.tokens.length - 1;
@@ -285,7 +280,7 @@ protected void matchReportImportRef(ImportReference importRef, Binding binding, 
 						index = lastIndex - this.pattern.segmentsSize;
 					}
 					if (index < 0) index = 0;
-					int start = (int) ((positions[index]) >>> 32);
+					int start = (int) (positions[index] >>> 32);
 					int end = (int) positions[lastIndex];
 					// report match
 					this.match.setOffset(start);
@@ -301,21 +296,19 @@ protected void matchReportImportRef(ImportReference importRef, Binding binding, 
 	locator.reportAccurateTypeReference(this.match, importRef, this.pattern.simpleName);
 }
 protected void matchReportReference(ArrayTypeReference arrayRef, IJavaElement element, Binding elementBinding, int accuracy, MatchLocator locator) throws CoreException {
-	if (this.pattern.simpleName == null) {
-		// TODO (frederic) need to add a test for this case while searching generic types...
-		if (locator.encloses(element)) {
-			int offset = arrayRef.sourceStart;
-			int length = arrayRef.sourceEnd-offset+1;
-			if (this.match == null) {
-				this.match = locator.newTypeReferenceMatch(element, elementBinding, accuracy, offset, length, arrayRef);
-			} else {
-				this.match.setOffset(offset);
-				this.match.setLength(length);
-			}
-			locator.report(this.match);
-			return;
-		}
-	}
+	// TODO (frederic) need to add a test for this case while searching generic types...
+    if (this.pattern.simpleName == null && locator.encloses(element)) {
+    	int offset = arrayRef.sourceStart;
+    	int length = arrayRef.sourceEnd-offset+1;
+    	if (this.match == null) {
+    		this.match = locator.newTypeReferenceMatch(element, elementBinding, accuracy, offset, length, arrayRef);
+    	} else {
+    		this.match.setOffset(offset);
+    		this.match.setLength(length);
+    	}
+    	locator.report(this.match);
+    	return;
+    }
 	this.match = locator.newTypeReferenceMatch(element, elementBinding, accuracy, arrayRef);
 	if (arrayRef.resolvedType != null) {
 		matchReportReference(arrayRef, -1, arrayRef.resolvedType.leafComponentType(), locator);
@@ -414,7 +407,7 @@ protected void matchReportReference(QualifiedNameReference qNameRef, IJavaElemen
 						index = lastIndex - this.pattern.segmentsSize;
 					}
 					if (index < 0) index = 0;
-					int start = (int) ((positions[index]) >>> 32);
+					int start = (int) (positions[index] >>> 32);
 					int end = (int) positions[lastIndex];
 					this.match.setOffset(start);
 					this.match.setLength(end-start+1);
@@ -459,7 +452,7 @@ protected void matchReportReference(QualifiedTypeReference qTypeRef, IJavaElemen
 						index = lastIndex - this.pattern.segmentsSize;
 					}
 					if (index < 0) index = 0;
-					int start = (int) ((positions[index]) >>> 32);
+					int start = (int) (positions[index] >>> 32);
 					int end = (int) positions[lastIndex];
 					this.match.setOffset(start);
 					this.match.setLength(end-start+1);
@@ -486,7 +479,7 @@ void matchReportReference(Expression expr, int lastIndex, TypeBinding refBinding
 
 		// See whether it is necessary to report or not
 		if (this.match.getRule() == 0) return; // impossible match
-		boolean report = (this.isErasureMatch && this.match.isErasure()) || (this.isEquivalentMatch && this.match.isEquivalent()) || this.match.isExact();
+		boolean report = this.isErasureMatch && this.match.isErasure() || this.isEquivalentMatch && this.match.isEquivalent() || this.match.isExact();
 		if (!report) return;
 
 		// Make a special report for parameterized types if necessary
@@ -756,8 +749,8 @@ protected int resolveLevel(TypeReference typeRef) {
 
 	if (typeRef instanceof SingleTypeReference) {
 		return resolveLevelForType(typeBinding);
-	} else
-		return resolveLevelForTypeOrQualifyingTypes(typeRef, typeBinding);
+	}
+    return resolveLevelForTypeOrQualifyingTypes(typeRef, typeBinding);
 }
 /* (non-Javadoc)
  * Resolve level for type with a given binding.
@@ -772,16 +765,16 @@ protected int resolveLevelForType(TypeBinding typeBinding) {
 				if (!typeBinding.isClass()) return IMPOSSIBLE_MATCH;
 				break;
 			case CLASS_AND_INTERFACE_SUFFIX:
-				if (!(typeBinding.isClass() || (typeBinding.isInterface() && !typeBinding.isAnnotationType()))) return IMPOSSIBLE_MATCH;
+				if (!typeBinding.isClass() && (!typeBinding.isInterface() || typeBinding.isAnnotationType())) return IMPOSSIBLE_MATCH;
 				break;
 			case CLASS_AND_ENUM_SUFFIX:
-				if (!(typeBinding.isClass() || typeBinding.isEnum())) return IMPOSSIBLE_MATCH;
+				if (!typeBinding.isClass() && !typeBinding.isEnum()) return IMPOSSIBLE_MATCH;
 				break;
 			case INTERFACE_SUFFIX:
 				if (!typeBinding.isInterface() || typeBinding.isAnnotationType()) return IMPOSSIBLE_MATCH;
 				break;
 			case INTERFACE_AND_ANNOTATION_SUFFIX:
-				if (!(typeBinding.isInterface() || typeBinding.isAnnotationType())) return IMPOSSIBLE_MATCH;
+				if (!typeBinding.isInterface() && !typeBinding.isAnnotationType()) return IMPOSSIBLE_MATCH;
 				break;
 			case ENUM_SUFFIX:
 				if (!typeBinding.isEnum()) return IMPOSSIBLE_MATCH;

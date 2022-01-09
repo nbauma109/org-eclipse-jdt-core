@@ -53,7 +53,6 @@ public class LinkDescription implements Comparable<LinkDescription> {
 	}
 
 	public LinkDescription(IResource linkedResource, URI location) {
-		super();
 		Assert.isNotNull(linkedResource);
 		Assert.isNotNull(location);
 		this.type = linkedResource.getType();
@@ -63,10 +62,7 @@ public class LinkDescription implements Comparable<LinkDescription> {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null) {
-			return false;
-		}
-		if (o.getClass() != this.getClass())
+		if (o == null || o.getClass() != this.getClass())
 			return false;
 		LinkDescription other = (LinkDescription) o;
 		return localLocation.equals(other.localLocation) && path.equals(other.path) && type == other.type;

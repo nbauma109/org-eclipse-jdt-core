@@ -86,7 +86,7 @@ public final class HandlerEvent extends AbstractBitSetEvent {
 	 * @return <code>true</code>, iff the enabled property changed.
 	 */
 	public boolean isEnabledChanged() {
-		return ((changedValues & CHANGED_ENABLED) != 0);
+		return (changedValues & CHANGED_ENABLED) != 0;
 	}
 
 	/**
@@ -95,6 +95,6 @@ public final class HandlerEvent extends AbstractBitSetEvent {
 	 * @return <code>true</code>, iff the handled property changed.
 	 */
 	public boolean isHandledChanged() {
-		return ((changedValues & CHANGED_HANDLED) != 0);
+		return (changedValues & CHANGED_HANDLED) != 0;
 	}
 }

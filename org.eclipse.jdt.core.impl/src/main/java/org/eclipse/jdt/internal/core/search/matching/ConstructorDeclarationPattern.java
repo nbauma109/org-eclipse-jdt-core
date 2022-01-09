@@ -31,7 +31,7 @@ public class ConstructorDeclarationPattern extends ConstructorPattern {
 
 public ConstructorDeclarationPattern(char[] declaringPackageName, char[] declaringSimpleName, int matchRule) {
 	this(matchRule);
-	this.declaringSimpleName = (this.isCaseSensitive || this.isCamelCase) ? declaringSimpleName : CharOperation.toLowerCase(declaringSimpleName);
+	this.declaringSimpleName = this.isCaseSensitive || this.isCamelCase ? declaringSimpleName : CharOperation.toLowerCase(declaringSimpleName);
 	this.declaringPackageName = declaringPackageName;
 	this.findDeclarations = true;
 	this.findReferences = false;
@@ -146,10 +146,8 @@ public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 	ConstructorDeclarationPattern pattern = (ConstructorDeclarationPattern) decodedPattern;
 
 	// only top level types
-	if ((pattern.extraFlags & ExtraFlags.IsMemberType) != 0) return false;
-
 	// check package - exact match only
-	if (this.declaringPackageName != null && !CharOperation.equals(this.declaringPackageName, pattern.declaringPackageName, true))
+	if ((pattern.extraFlags & ExtraFlags.IsMemberType) != 0 || this.declaringPackageName != null && !CharOperation.equals(this.declaringPackageName, pattern.declaringPackageName, true))
 		return false;
 
 	return (this.parameterCount == pattern.parameterCount || this.parameterCount == -1 || this.varargs)

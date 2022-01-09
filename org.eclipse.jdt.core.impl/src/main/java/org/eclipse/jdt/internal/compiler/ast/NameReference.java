@@ -111,21 +111,18 @@ public abstract char[][] getName();
      (this.bits & ASTNode.IsCapturedOuterLocal) != 0
 */
 public boolean checkEffectiveFinality(VariableBinding localBinding, Scope scope) {
-	Predicate<VariableBinding> test = (local) -> {
-		return (!localBinding.isFinal() && !localBinding.isEffectivelyFinal());
-	};
+	Predicate<VariableBinding> test = local -> (!localBinding.isFinal() && !localBinding.isEffectivelyFinal());
 	if ((this.bits & ASTNode.IsCapturedOuterLocal) != 0) {
 		if (test.test(localBinding)) {
 			scope.problemReporter().cannotReferToNonEffectivelyFinalOuterLocal(localBinding, this);
 			throw new AbortMethod(scope.referenceCompilationUnit().compilationResult, null);
 		}
 		return true;
-	} else if ((this.bits & ASTNode.IsUsedInPatternGuard) != 0) {
-		if (test.test(localBinding)) {
-			scope.problemReporter().cannotReferToNonFinalLocalInGuard(localBinding, this);
-			throw new AbortMethod(scope.referenceCompilationUnit().compilationResult, null);
-		}
 	}
+    if ((this.bits & ASTNode.IsUsedInPatternGuard) != 0 && test.test(localBinding)) {
+    	scope.problemReporter().cannotReferToNonFinalLocalInGuard(localBinding, this);
+    	throw new AbortMethod(scope.referenceCompilationUnit().compilationResult, null);
+    }
 	return false;
 }
 

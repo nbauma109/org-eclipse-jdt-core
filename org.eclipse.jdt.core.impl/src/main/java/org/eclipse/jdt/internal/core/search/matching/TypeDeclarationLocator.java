@@ -80,16 +80,16 @@ public int resolveLevel(Binding binding) {
 			if (!type.isClass()) return IMPOSSIBLE_MATCH;
 			break;
 		case CLASS_AND_INTERFACE_SUFFIX:
-			if (!(type.isClass() || (type.isInterface() && !type.isAnnotationType()))) return IMPOSSIBLE_MATCH;
+			if (!type.isClass() && (!type.isInterface() || type.isAnnotationType())) return IMPOSSIBLE_MATCH;
 			break;
 		case CLASS_AND_ENUM_SUFFIX:
-			if (!(type.isClass() || type.isEnum())) return IMPOSSIBLE_MATCH;
+			if (!type.isClass() && !type.isEnum()) return IMPOSSIBLE_MATCH;
 			break;
 		case INTERFACE_SUFFIX:
 			if (!type.isInterface() || type.isAnnotationType()) return IMPOSSIBLE_MATCH;
 			break;
 		case INTERFACE_AND_ANNOTATION_SUFFIX:
-			if (!(type.isInterface() || type.isAnnotationType())) return IMPOSSIBLE_MATCH;
+			if (!type.isInterface() && !type.isAnnotationType()) return IMPOSSIBLE_MATCH;
 			break;
 		case ENUM_SUFFIX:
 			if (!type.isEnum()) return IMPOSSIBLE_MATCH;
@@ -107,10 +107,9 @@ public int resolveLevel(Binding binding) {
 	if (this.pattern instanceof QualifiedTypeDeclarationPattern) {
 		QualifiedTypeDeclarationPattern qualifiedPattern = (QualifiedTypeDeclarationPattern) this.pattern;
 		return resolveLevelForType(qualifiedPattern.simpleName, qualifiedPattern.qualification, type);
-	} else {
-		char[] enclosingTypeName = this.pattern.enclosingTypeNames == null ? null : CharOperation.concatWith(this.pattern.enclosingTypeNames, '.');
-		return resolveLevelForType(this.pattern.simpleName, this.pattern.pkg, enclosingTypeName, type);
 	}
+    char[] enclosingTypeName = this.pattern.enclosingTypeNames == null ? null : CharOperation.concatWith(this.pattern.enclosingTypeNames, '.');
+    return resolveLevelForType(this.pattern.simpleName, this.pattern.pkg, enclosingTypeName, type);
 }
 /**
  * Returns whether the given type binding matches the given simple name pattern

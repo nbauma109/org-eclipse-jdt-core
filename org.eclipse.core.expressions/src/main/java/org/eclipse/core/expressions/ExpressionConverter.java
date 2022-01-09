@@ -148,16 +148,16 @@ public final class ExpressionConverter {
 				if (id != null)
 					buf.append(" (id=").append(id).append(')'); //$NON-NLS-1$
 				parent= parent2.getParent();
-			} else if (parent instanceof IExtension) {
-				IExtension parent2= (IExtension) parent;
-				buf.append(" : "); //$NON-NLS-1$
-				buf.append(parent2.getExtensionPointUniqueIdentifier());
-				buf.append(" @ "); //$NON-NLS-1$
-				buf.append(parent2.getContributor().getName());
-				parent= null;
 			} else {
-				parent= null;
-			}
+                if (parent instanceof IExtension) {
+                	IExtension parent2= (IExtension) parent;
+                	buf.append(" : "); //$NON-NLS-1$
+                	buf.append(parent2.getExtensionPointUniqueIdentifier());
+                	buf.append(" @ "); //$NON-NLS-1$
+                	buf.append(parent2.getContributor().getName());
+                }
+                parent= null;
+            }
 		}
 		return buf.toString();
 	}

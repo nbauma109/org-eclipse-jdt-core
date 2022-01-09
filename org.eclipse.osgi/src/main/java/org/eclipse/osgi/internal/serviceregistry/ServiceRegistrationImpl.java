@@ -363,7 +363,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 		Object ranking = props.get(Constants.SERVICE_RANKING);
 		if (ranking instanceof Integer) {
-			serviceranking = ((Integer) ranking).intValue();
+			serviceranking = (Integer) ranking;
 		} else {
 			serviceranking = 0;
 			if (ranking != null) {
@@ -548,7 +548,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				/* if the service factory failed to return an object and
 				 * we created the service use, then remove the
 				 * optimistically added ServiceUse. */
-				if ((serviceObject == null) && added) {
+				if (serviceObject == null && added) {
 					synchronized (servicesInUse) {
 						synchronized (registrationLock) {
 							servicesInUse.remove(this);

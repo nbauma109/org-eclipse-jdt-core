@@ -37,7 +37,6 @@ public final class StringPool {
 	 * Creates a new string pool.
 	 */
 	public StringPool() {
-		super();
 	}
 
 	/**

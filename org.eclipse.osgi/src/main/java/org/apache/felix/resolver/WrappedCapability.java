@@ -38,7 +38,7 @@ public class WrappedCapability implements HostedCapability
             // This is done to work around issues with wrapper resources equality tests.
             // Note this is depends on the implementation details of the ResolveContext to actually
             // check the osgi.content capability.
-            Map<String, Object> augmentedDirs = new HashMap<String, Object>(m_cap.getAttributes());
+            Map<String, Object> augmentedDirs = new HashMap<>(m_cap.getAttributes());
             Object wrapperUrl = augmentedDirs.get("url");
             wrapperUrl = "wrapper:" + wrapperUrl;
             augmentedDirs.put("url", wrapperUrl);
@@ -51,11 +51,7 @@ public class WrappedCapability implements HostedCapability
     @Override
     public boolean equals(Object obj)
     {
-        if (obj == null)
-        {
-            return false;
-        }
-        if (getClass() != obj.getClass())
+        if (obj == null || getClass() != obj.getClass())
         {
             return false;
         }
@@ -64,7 +60,7 @@ public class WrappedCapability implements HostedCapability
         {
             return false;
         }
-        return m_cap == other.m_cap || (m_cap != null && m_cap.equals(other.m_cap));
+        return m_cap == other.m_cap || m_cap != null && m_cap.equals(other.m_cap);
     }
 
     @Override
@@ -72,30 +68,34 @@ public class WrappedCapability implements HostedCapability
     {
         int hash = 7;
         hash = 37 * hash + (m_host != null ? m_host.hashCode() : 0);
-        hash = 37 * hash + (m_cap != null ? m_cap.hashCode() : 0);
-        return hash;
+        return 37 * hash + (m_cap != null ? m_cap.hashCode() : 0);
     }
 
+    @Override
     public Capability getDeclaredCapability()
     {
         return m_cap;
     }
 
+    @Override
     public Resource getResource()
     {
         return m_host;
     }
 
+    @Override
     public String getNamespace()
     {
         return m_cap.getNamespace();
     }
 
+    @Override
     public Map<String, String> getDirectives()
     {
         return m_cap.getDirectives();
     }
 
+    @Override
     public Map<String, Object> getAttributes()
     {
         return m_augmentedAttrs;

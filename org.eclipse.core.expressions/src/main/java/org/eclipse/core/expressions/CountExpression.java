@@ -139,7 +139,7 @@ public class CountExpression extends Expression {
 			return false;
 
 		final CountExpression that= (CountExpression)object;
-		return (this.fMode == that.fMode) && (this.fSize == that.fSize);
+		return this.fMode == that.fMode && this.fSize == that.fSize;
 	}
 
 	@Override

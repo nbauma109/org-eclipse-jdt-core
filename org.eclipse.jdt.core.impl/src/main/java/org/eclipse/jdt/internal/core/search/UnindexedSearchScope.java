@@ -38,13 +38,8 @@ public class UnindexedSearchScope extends AbstractSearchScope {
 	@Override
 	public boolean encloses(String resourcePathString) {
 		int separatorIndex = resourcePathString.indexOf(JAR_FILE_ENTRY_SEPARATOR);
-		if (separatorIndex != -1) {
-			// Files within jar files would have been indexed
-			return false;
-		}
-
 		// Jar files themselves would have been indexed
-		if (isJarFile(resourcePathString)) {
+		if (separatorIndex != -1 || isJarFile(resourcePathString)) {
 			return false;
 		}
 
@@ -56,7 +51,7 @@ public class UnindexedSearchScope extends AbstractSearchScope {
 		if (possibleJarFile == null) {
 			return false;
 		}
-		return (possibleJarFile.endsWith(".jar") || possibleJarFile.endsWith(".JAR")); //$NON-NLS-1$//$NON-NLS-2$
+		return possibleJarFile.endsWith(".jar") || possibleJarFile.endsWith(".JAR"); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	@Override

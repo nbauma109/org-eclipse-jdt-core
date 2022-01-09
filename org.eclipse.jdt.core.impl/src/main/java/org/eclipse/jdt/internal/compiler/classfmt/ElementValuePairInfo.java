@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 
 public class ElementValuePairInfo implements org.eclipse.jdt.internal.compiler.env.IBinaryElementValuePair {
 
-	static final ElementValuePairInfo[] NoMembers = new ElementValuePairInfo[0];
+	static final ElementValuePairInfo[] NoMembers = {};
 
 	private char[] name;
 	private Object value;
@@ -61,18 +61,14 @@ public int hashCode() {
 	final int prime = 31;
 	int result = 1;
 	result = prime * result + CharOperation.hashCode(this.name);
-	result = prime * result + ((this.value == null) ? 0 : this.value.hashCode());
-	return result;
+	return prime * result + (this.value == null ? 0 : this.value.hashCode());
 }
 @Override
 public boolean equals(Object obj) {
 	if (this == obj) {
 		return true;
 	}
-	if (obj == null) {
-		return false;
-	}
-	if (getClass() != obj.getClass()) {
+	if (obj == null || getClass() != obj.getClass()) {
 		return false;
 	}
 	ElementValuePairInfo other = (ElementValuePairInfo) obj;
@@ -81,6 +77,7 @@ public boolean equals(Object obj) {
 	}
 	if (this.value == null) {
         return other.value == null;
-	} else return this.value.equals(other.value);
+	}
+    return this.value.equals(other.value);
 }
 }

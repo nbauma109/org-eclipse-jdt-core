@@ -114,8 +114,8 @@ public class FindSupport {
 			return findOS(b, rest, override, multiple);
 		if (first.equalsIgnoreCase("$ws$")) //$NON-NLS-1$
 			return findWS(b, rest, override, multiple);
-		if (first.equalsIgnoreCase("$files$")) //$NON-NLS-1$
-			return null;
+		if (first.equalsIgnoreCase("$files$")) {
+        }
 
 		return null;
 	}
@@ -202,7 +202,7 @@ public class FindSupport {
 
 	private static URL findNL(Bundle b, IPath path, Map<String, String> override, ArrayList<URL> multiple) {
 		String nl = null;
-		String[] nlVariants = null;
+		String[] nlVariants;
 		if (override != null)
 			try {
 				// check for override

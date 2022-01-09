@@ -124,7 +124,7 @@ public static char[] createDeclarationIndexKey(
 	int typeNameLength = typeName == null ? 0 : typeName.length;
 	int packageNameLength = packageName == null ? 0 : packageName.length;
 	int countCharsLength = countChars.length;
-	int parameterTypesLength = signature == null ? (parameterTypesChars == null ? 0 : parameterTypesChars.length): signature.length;
+	int parameterTypesLength = signature == null ? parameterTypesChars == null ? 0 : parameterTypesChars.length: signature.length;
 	int parameterNamesLength = parameterNamesChars == null ? 0 : parameterNamesChars.length;
 
 	int resultLength = typeNameLength + countCharsLength + 3; // SEPARATOR=1 + TypeModifers=2
@@ -324,7 +324,7 @@ public ConstructorPattern(
     }
 
 	this.declaringQualification = this.isCaseSensitive ? declaringQualification : CharOperation.toLowerCase(declaringQualification);
-	this.declaringSimpleName = (this.isCaseSensitive || this.isCamelCase) ? declaringSimpleName : CharOperation.toLowerCase(declaringSimpleName);
+	this.declaringSimpleName = this.isCaseSensitive || this.isCamelCase ? declaringSimpleName : CharOperation.toLowerCase(declaringSimpleName);
 	if (parameterSimpleNames != null) {
 		this.parameterCount = parameterSimpleNames.length;
 		boolean synthetic = this.parameterCount>0 && declaringQualification != null && CharOperation.equals(CharOperation.concat(parameterQualifications[0], parameterSimpleNames[0], '.'), declaringQualification);
@@ -449,11 +449,9 @@ public ConstructorPattern(
 
 	// Store type signatures and arguments for method
 	this.constructorArguments = arguments;
-	if (arguments  == null || arguments.length == 0) {
-		if (getTypeArguments() != null && getTypeArguments().length > 0) {
-			this.constructorArguments = getTypeArguments()[0];
-		}
-	}
+	if ((arguments  == null || arguments.length == 0) && getTypeArguments() != null && getTypeArguments().length > 0) {
+    	this.constructorArguments = getTypeArguments()[0];
+    }
 	if (hasConstructorArguments())  this.mustResolve = true;
 }
 

@@ -32,7 +32,7 @@ import org.xml.sax.SAXException;
  */
 public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionRegistry {
 
-	protected class ListenerInfo {
+	protected static class ListenerInfo {
 		public String filter;
 		public EventListener listener;
 
@@ -930,21 +930,19 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		final MultiStatus result = new MultiStatus(RegistryMessages.OWNER_NAME, IStatus.OK, RegistryMessages.plugin_eventListenerError, null);
 		for (Object info : listenerInfos) {
 			final ListenerInfo listenerInfo = (ListenerInfo) info;
-			if ((listenerInfo.listener instanceof IRegistryChangeListener) && scheduledDeltas.size() != 0) {
-				if (listenerInfo.filter == null || scheduledDeltas.containsKey(listenerInfo.filter)) {
-					SafeRunner.run(new ISafeRunnable() {
-						@Override
-						public void run() throws Exception {
-							((IRegistryChangeListener) listenerInfo.listener).registryChanged(new RegistryChangeEvent(scheduledDeltas, listenerInfo.filter));
-						}
+			if (listenerInfo.listener instanceof IRegistryChangeListener && scheduledDeltas.size() != 0 && (listenerInfo.filter == null || scheduledDeltas.containsKey(listenerInfo.filter))) {
+            	SafeRunner.run(new ISafeRunnable() {
+            		@Override
+            		public void run() throws Exception {
+            			((IRegistryChangeListener) listenerInfo.listener).registryChanged(new RegistryChangeEvent(scheduledDeltas, listenerInfo.filter));
+            		}
 
-						@Override
-						public void handleException(Throwable exception) {
-							result.add(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, RegistryMessages.plugin_eventListenerError, exception));
-						}
-					});
-				}
-			}
+            		@Override
+            		public void handleException(Throwable exception) {
+            			result.add(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, RegistryMessages.plugin_eventListenerError, exception));
+            		}
+            	});
+            }
 			if (listenerInfo.listener instanceof IRegistryEventListener) {
 				IRegistryEventListener extensionListener = (IRegistryEventListener) listenerInfo.listener;
 				IExtension[] extensions = extendedDelta.getExtensions(listenerInfo.filter);
@@ -1346,7 +1344,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			else
 				namespace = removeExtension(id);
 			Map<Integer, RegistryObject> removed = new HashMap<>(1);
-			removed.put(Integer.valueOf(id), registryObject);
+			removed.put(id, registryObject);
 			// There is some asymmetry between extension and extension point removal. Removing extension point makes
 			// extensions "orphans" but does not remove them. As a result, only extensions needs to be processed.
 			if (!isExtensionPoint)

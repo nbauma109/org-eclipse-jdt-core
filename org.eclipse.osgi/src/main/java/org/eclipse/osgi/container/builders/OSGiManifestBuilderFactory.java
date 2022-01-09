@@ -255,7 +255,7 @@ public final class OSGiManifestBuilderFactory {
 		builder.setTypes(isFragment ? BundleRevision.TYPE_FRAGMENT : 0);
 		String version = manifest.get(Constants.BUNDLE_VERSION);
 		try {
-			builder.setVersion((version != null) ? Version.parseVersion(version) : Version.emptyVersion);
+			builder.setVersion(version != null ? Version.parseVersion(version) : Version.emptyVersion);
 		} catch (IllegalArgumentException ex) {
 			if (manifestVersion >= 2) {
 				String message = NLS.bind(Msg.OSGiManifestBuilderFactory_InvalidManifestError, Constants.BUNDLE_VERSION, version);
@@ -331,7 +331,7 @@ public final class OSGiManifestBuilderFactory {
 			String versionAttr = (String) attributes.remove(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			@SuppressWarnings("deprecation")
 			String specVersionAttr = (String) attributes.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
-			Version version = versionAttr == null ? (specVersionAttr == null ? Version.emptyVersion : Version.parseVersion(specVersionAttr)) : Version.parseVersion(versionAttr);
+			Version version = versionAttr == null ? specVersionAttr == null ? Version.emptyVersion : Version.parseVersion(specVersionAttr) : Version.parseVersion(versionAttr);
 			attributes.put(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
 			if (symbolicName != null) {
 				attributes.put(PackageNamespace.CAPABILITY_BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
@@ -371,7 +371,7 @@ public final class OSGiManifestBuilderFactory {
 			String versionRangeAttr = (String) attributes.remove(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			@SuppressWarnings("deprecation")
 			String specVersionRangeAttr = (String) attributes.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
-			VersionRange versionRange = versionRangeAttr == null ? (specVersionRangeAttr == null ? null : new VersionRange(specVersionRangeAttr)) : new VersionRange(versionRangeAttr);
+			VersionRange versionRange = versionRangeAttr == null ? specVersionRangeAttr == null ? null : new VersionRange(specVersionRangeAttr) : new VersionRange(versionRangeAttr);
 			String bundleVersionRangeAttr = (String) attributes.remove(PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
 			VersionRange bundleVersionRange = bundleVersionRangeAttr == null ? null : new VersionRange(bundleVersionRangeAttr);
 			// the attribute "optional" used to be used in old versions of equinox to specify optional imports
@@ -523,7 +523,7 @@ public final class OSGiManifestBuilderFactory {
 			Map<String, Object> attributes = getAttributes(provideElement);
 			Map<String, String> directives = getDirectives(provideElement);
 			for (String namespace : namespaces) {
-				if (PROHIBITED_CAPABILITIES.contains(namespace) || (checkSystemCapabilities && SYSTEM_CAPABILITIES.contains(namespace))) {
+				if (PROHIBITED_CAPABILITIES.contains(namespace) || checkSystemCapabilities && SYSTEM_CAPABILITIES.contains(namespace)) {
 					throw new BundleException("A bundle is not allowed to define a capability in the " + namespace + " name space.", BundleException.MANIFEST_ERROR); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 
@@ -589,13 +589,11 @@ public final class OSGiManifestBuilderFactory {
 					if (excludeSpec != null) {
 						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
 					}
-				} else {
-					// NOTICE - the exclude list gets converted to an include list when the header is not true
-					if (excludeSpec != null) {
-						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
-						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
-					}
-				}
+				} else // NOTICE - the exclude list gets converted to an include list when the header is not true
+                if (excludeSpec != null) {
+                	attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
+                	attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
+                }
 			}
 		}
 
@@ -681,14 +679,18 @@ public final class OSGiManifestBuilderFactory {
 		String trimmed = value.trim();
 		if (ATTR_TYPE_DOUBLE.equalsIgnoreCase(type)) {
 			return Double.valueOf(trimmed);
-		} else if (ATTR_TYPE_LONG.equalsIgnoreCase(type)) {
+		}
+        if (ATTR_TYPE_LONG.equalsIgnoreCase(type)) {
 			return Long.valueOf(trimmed);
-		} else if (ATTR_TYPE_URI.equalsIgnoreCase(type)) {
+		}
+        if (ATTR_TYPE_URI.equalsIgnoreCase(type)) {
 			// we no longer actually create URIs here; just use the string
 			return trimmed;
-		} else if (ATTR_TYPE_VERSION.equalsIgnoreCase(type)) {
+		}
+        if (ATTR_TYPE_VERSION.equalsIgnoreCase(type)) {
 			return new Version(trimmed);
-		} else if (ATTR_TYPE_SET.equalsIgnoreCase(type)) {
+		}
+        if (ATTR_TYPE_SET.equalsIgnoreCase(type)) {
 			// just use List<String> here so we don't have to deal with String[] in other places
 			return Collections.unmodifiableList(Arrays.asList(ManifestElement.getArrayFromList(trimmed, ","))); //$NON-NLS-1$
 		}
@@ -861,7 +863,7 @@ public final class OSGiManifestBuilderFactory {
 			addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_OSNAME);
 			addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_PROCESSOR);
 			this.highestFloor = (Version) addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_OSVERSION);
-			this.hasLanguage = ((Boolean) addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_LANGUAGE)).booleanValue();
+			this.hasLanguage = (Boolean) addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_LANGUAGE);
 			String selectionFilter = clause.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
 			if (selectionFilter != null) {
 				// do a sanity check to make sure the filter is valid
@@ -923,15 +925,12 @@ public final class OSGiManifestBuilderFactory {
 		@Override
 		public int compareTo(NativeClause other) {
 			if (this.highestFloor != null) {
-				if (other == null) {
-					return -1;
-				}
-				if (other.highestFloor == null) {
+				if (other == null || other.highestFloor == null) {
 					return -1;
 				}
 				int compareVersions = this.highestFloor.compareTo(other.highestFloor);
 				if (compareVersions != 0) {
-					return -(compareVersions);
+					return -compareVersions;
 				}
 			} else if (other.highestFloor != null) {
 				return 1;

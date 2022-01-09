@@ -228,12 +228,11 @@ public class ReferenceMap {
 	 *  @param loadFactor  the load factor for the map
 	 */
 	public ReferenceMap(int referenceType, int capacity, float loadFactor) {
-		super();
 		if (referenceType != HARD && referenceType != SOFT)
 			throw new IllegalArgumentException(" must be HARD or SOFT."); //$NON-NLS-1$
 		if (capacity <= 0)
 			throw new IllegalArgumentException("capacity must be positive"); //$NON-NLS-1$
-		if ((loadFactor <= 0.0f) || (loadFactor >= 1.0f))
+		if (loadFactor <= 0.0f || loadFactor >= 1.0f)
 			throw new IllegalArgumentException("Load factor must be greater than 0 and less than 1."); //$NON-NLS-1$
 
 		this.valueType = referenceType;
@@ -257,19 +256,17 @@ public class ReferenceMap {
 		IEntry previous = null;
 		IEntry entry = table[index];
 		while (entry != null) {
-			if (key == entry.getKey()) {
-				// See bug 205117 - in case an item with the same key value was added
-				// items with NULL value always removed;
-				// items with non-NULL values are removed only on user request
-				if (!cleanup || (entry.getValue() == null)) {
-					if (previous == null)
-						table[index] = entry.getNext();
-					else
-						previous.setNext(entry.getNext());
-					this.size--;
-					return entry.getValue();
-				}
-			}
+			// See bug 205117 - in case an item with the same key value was added
+            // items with NULL value always removed;
+            // items with non-NULL values are removed only on user request
+            if (key == entry.getKey() && (!cleanup || entry.getValue() == null)) {
+            	if (previous == null)
+            		table[index] = entry.getNext();
+            	else
+            		previous.setNext(entry.getNext());
+            	this.size--;
+            	return entry.getValue();
+            }
 			previous = entry;
 			entry = entry.getNext();
 		}
@@ -301,12 +298,12 @@ public class ReferenceMap {
 	private int indexFor(int hash) {
 		// mix the bits to avoid bucket collisions...
 		hash += ~(hash << 15);
-		hash ^= (hash >>> 10);
-		hash += (hash << 3);
-		hash ^= (hash >>> 6);
+		hash ^= hash >>> 10;
+		hash += hash << 3;
+		hash ^= hash >>> 6;
 		hash += ~(hash << 11);
-		hash ^= (hash >>> 16);
-		return hash & (table.length - 1);
+		hash ^= hash >>> 16;
+		return hash & table.length - 1;
 	}
 
 	/**

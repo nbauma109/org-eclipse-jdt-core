@@ -89,8 +89,7 @@ public final class BindingKey {
 		StringBuilder buffer = new StringBuilder();
 		buffer.append(Signature.getTypeErasure(genericTypeKey));
 		buffer.insert(buffer.length()-1, '<');
-		for (int i = 0, length = argumentTypeKeys.length; i < length; i++) {
-			String argumentTypeKey = argumentTypeKeys[i];
+		for (String argumentTypeKey : argumentTypeKeys) {
 			buffer.insert(buffer.length()-1, argumentTypeKey);
 		}
 		buffer.insert(buffer.length()-1, '>');
@@ -171,7 +170,8 @@ public final class BindingKey {
 	 * @deprecated  This method is missing crucial information necessary for proper wildcard binding key creation.
 	 * @see org.eclipse.jdt.core.BindingKey#createWildcardTypeBindingKey(String, char, String, int)
 	 */
-	public static String createWilcardTypeBindingKey(String typeKey, char kind) {
+	@Deprecated
+    public static String createWilcardTypeBindingKey(String typeKey, char kind) {
 		// Note this implementation is supposed to closely follow the behavior in WildcardBinding#computeUniqueKey()
 		// but it doesn't and hence the deprecation. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=234609
 		switch (kind) {

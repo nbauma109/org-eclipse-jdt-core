@@ -72,7 +72,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		SubRoutineStatement sub;
 		if ((sub = traversedContext.subroutine()) != null) {
 			if (subCount == this.subroutines.length) {
-				System.arraycopy(this.subroutines, 0, (this.subroutines = new SubRoutineStatement[subCount*2]), 0, subCount); // grow
+				System.arraycopy(this.subroutines, 0, this.subroutines = new SubRoutineStatement[subCount*2], 0, subCount); // grow
 			}
 			this.subroutines[subCount++] = sub;
 			if (sub.isSubRoutineEscaping()) {
@@ -96,7 +96,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	// resize subroutines
 	if (subCount != this.subroutines.length) {
-		System.arraycopy(this.subroutines, 0, (this.subroutines = new SubRoutineStatement[subCount]), 0, subCount);
+		System.arraycopy(this.subroutines, 0, this.subroutines = new SubRoutineStatement[subCount], 0, subCount);
 	}
 	return FlowInfo.DEAD_END;
 }
@@ -231,20 +231,16 @@ public void resolve(BlockScope skope) {
 
 	}
 	if (this.switchExpression != null || this.isImplicit) {
-		if (this.switchExpression == null && this.isImplicit && !this.expression.statementExpression()) {
-			if (this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK14) {
-				/* JLS 13 14.11.2
-				Switch labeled rules in switch statements differ from those in switch expressions (15.28).
-				In switch statements they must be switch labeled statement expressions, ... */
-				this.scope.problemReporter().invalidExpressionAsStatement(this.expression);
-				return;
-			}
-		}
-	} else {
-		if (this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK14) {
-			this.scope.problemReporter().switchExpressionsYieldOutsideSwitchExpression(this);
-		}
-	}
+		if (this.switchExpression == null && this.isImplicit && !this.expression.statementExpression() && this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK14) {
+        	/* JLS 13 14.11.2
+        	Switch labeled rules in switch statements differ from those in switch expressions (15.28).
+        	In switch statements they must be switch labeled statement expressions, ... */
+        	this.scope.problemReporter().invalidExpressionAsStatement(this.expression);
+        	return;
+        }
+	} else if (this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK14) {
+    	this.scope.problemReporter().switchExpressionsYieldOutsideSwitchExpression(this);
+    }
 	TypeBinding type = this.expression.resolveType(this.scope);
 	if (this.switchExpression != null && type != null)
 		this.switchExpression.originalTypeMap.put(this.expression, type);
@@ -268,10 +264,8 @@ public StringBuffer printStatement(int tab, StringBuffer output) {
 
 @Override
 public void traverse(ASTVisitor visitor, BlockScope blockscope) {
-	if (visitor.visit(this, blockscope)) {
-		if (this.expression != null)
-			this.expression.traverse(visitor, blockscope);
-	}
+	if (visitor.visit(this, blockscope) && this.expression != null)
+    	this.expression.traverse(visitor, blockscope);
 	visitor.endVisit(this, blockscope);
 }
 @Override

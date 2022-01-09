@@ -470,7 +470,8 @@ public interface IClasspathEntry {
 	 *
 	 * @deprecated Use {@link JavaCore#getResolvedClasspathEntry(IClasspathEntry)} instead
 	 */
-	IClasspathEntry getResolvedEntry();
+	@Deprecated
+    IClasspathEntry getResolvedEntry();
 
 	/**
 	 * This is a convience method, that returns <code>true</code> if the extra attributes contain an attribute whose name

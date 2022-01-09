@@ -171,9 +171,9 @@ public class KeyedHashSet {
 			int hashIndex = hash(element);
 			boolean match;
 			if (index < target)
-				match = !(hashIndex > target || hashIndex <= index);
+				match = hashIndex <= target && hashIndex > index;
 			else
-				match = !(hashIndex > target && hashIndex <= index);
+				match = hashIndex <= target || hashIndex > index;
 			if (match) {
 				elements[target] = element;
 				target = index;

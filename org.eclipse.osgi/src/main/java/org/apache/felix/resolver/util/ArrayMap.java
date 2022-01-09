@@ -93,16 +93,18 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
     @Override
     public Collection<V> values() {
         if (values == null) {
-            values = new AbstractCollection<V>() {
+            values = new AbstractCollection<>() {
                 @Override
                 public Iterator<V> iterator() {
-                    return new Iterator<V>() {
+                    return new Iterator<>() {
                         int index = 0;
 
+                        @Override
                         public boolean hasNext() {
                             return index < size;
                         }
 
+                        @Override
                         @SuppressWarnings("unchecked")
                         public V next() {
                             if (index >= size) {
@@ -111,6 +113,7 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
                             return (V) table[(index++ << 1) + 1];
                         }
                         
+                        @Override
                         public void remove() {
                             throw new UnsupportedOperationException();
                         }
@@ -128,17 +131,19 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
 
     @Override
     public Set<Entry<K, V>> entrySet() {
-        return new AbstractSet<Entry<K, V>>() {
+        return new AbstractSet<>() {
             @Override
             public Iterator<Entry<K, V>> iterator() {
-                return new Iterator<Entry<K, V>>() {
-                    FastEntry<K, V> entry = new FastEntry<K, V>();
+                return new Iterator<>() {
+                    FastEntry<K, V> entry = new FastEntry<>();
                     int index = 0;
 
+                    @Override
                     public boolean hasNext() {
                         return index < size;
                     }
 
+                    @Override
                     @SuppressWarnings("unchecked")
                     public FastEntry<K, V> next() {
                         if (index >= size) {
@@ -151,6 +156,7 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
                         return entry;
                     }
 
+                    @Override
                     public void remove() {
                         throw new UnsupportedOperationException();
                     }
@@ -168,15 +174,18 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
         K key;
         V value;
 
+        @Override
         public K getKey() {
             return key;
         }
 
 
+        @Override
         public V getValue() {
             return value;
         }
 
+        @Override
         public V setValue(V value) {
             throw new UnsupportedOperationException();
         }

@@ -55,7 +55,7 @@ public class ChildDocument extends ProjectionDocument {
 		 */
 		@Override
 		public boolean overlapsWith(int regionOffset, int regionLength) {
-			boolean appending= (regionOffset == offset + length) && regionLength == 0;
+			boolean appending= regionOffset == offset + length && regionLength == 0;
 			return appending || super.overlapsWith(regionOffset, regionLength);
 		}
 	}

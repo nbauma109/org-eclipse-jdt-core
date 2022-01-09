@@ -67,7 +67,6 @@ public class FileInfo implements IFileInfo {
 	 * Creates a new file information object with default values.
 	 */
 	public FileInfo() {
-		super();
 	}
 
 	/**
@@ -77,7 +76,6 @@ public class FileInfo implements IFileInfo {
 	 * @param name The name of this file
 	 */
 	public FileInfo(String name) {
-		super();
 		this.name = name;
 	}
 
@@ -124,11 +122,10 @@ public class FileInfo implements IFileInfo {
 	@Override
 	public boolean getAttribute(int attribute) {
 		if (attribute == EFS.ATTRIBUTE_READ_ONLY && isAttributeSuported(EFS.ATTRIBUTE_OWNER_WRITE))
-			return (!isSet(EFS.ATTRIBUTE_OWNER_WRITE)) || isSet(EFS.ATTRIBUTE_IMMUTABLE);
-		else if (attribute == EFS.ATTRIBUTE_EXECUTABLE && isAttributeSuported(EFS.ATTRIBUTE_OWNER_EXECUTE))
+			return !isSet(EFS.ATTRIBUTE_OWNER_WRITE) || isSet(EFS.ATTRIBUTE_IMMUTABLE);
+        if (attribute == EFS.ATTRIBUTE_EXECUTABLE && isAttributeSuported(EFS.ATTRIBUTE_OWNER_EXECUTE))
 			return isSet(EFS.ATTRIBUTE_OWNER_EXECUTE);
-		else
-			return isSet(attribute);
+        return isSet(attribute);
 	}
 
 	@Override
@@ -181,12 +178,10 @@ public class FileInfo implements IFileInfo {
 				set(EFS.ATTRIBUTE_OWNER_EXECUTE);
 			else
 				clear(EFS.ATTRIBUTE_OWNER_EXECUTE | EFS.ATTRIBUTE_GROUP_EXECUTE | EFS.ATTRIBUTE_OTHER_EXECUTE);
-		} else {
-			if (value)
-				set(attribute);
-			else
-				clear(attribute);
-		}
+		} else if (value)
+        	set(attribute);
+        else
+        	clear(attribute);
 	}
 
 	private static boolean isAttributeSuported(int value) {

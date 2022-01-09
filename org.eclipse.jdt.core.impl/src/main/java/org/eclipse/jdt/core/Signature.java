@@ -612,7 +612,7 @@ private static int appendClassTypeSignature(char[] string, int start, boolean fu
 	if (c != C_RESOLVED && c != C_UNRESOLVED) {
 		throw newIllegalArgumentException(string, start);
 	}
-	boolean resolved = (c == C_RESOLVED);
+	boolean resolved = c == C_RESOLVED;
 	boolean removePackageQualifiers = !fullyQualifyTypeNames;
 	if (!resolved) {
 		// keep everything in an unresolved name
@@ -715,7 +715,8 @@ private static int appendIntersectionTypeSignature(char[] string, int start, boo
 			start = appendClassTypeSignature(string, start + 1, fullyQualifyTypeNames, buffer);
 			if (start == string.length - 1) {
 				return start;
-			} else if (start > string.length - 1) {
+			}
+            if (start > string.length - 1) {
 				throw new IllegalArgumentException("Should be at the end"); //$NON-NLS-1$
 			}
 			start++;
@@ -1450,17 +1451,15 @@ private static int encodeTypeSignature(char[] typeName, int start, boolean isRes
 		        pos = encodeArrayDimension(typeName, checkPos, length, buffer);
 			    buffer.append(C_CHAR);
 			    return pos;
-			} else {
-				checkPos = checkName(CAPTURE, typeName, pos, length);
-				if (checkPos > 0) {
-					pos = consumeWhitespace(typeName, checkPos, length);
-					if (typeName[pos] != '?') {
-						break;
-					}
-				} else {
-					break;
-				}
 			}
+            checkPos = checkName(CAPTURE, typeName, pos, length);
+            if (checkPos <= 0) {
+            	break;
+            }
+            pos = consumeWhitespace(typeName, checkPos, length);
+            if (typeName[pos] != '?') {
+            	break;
+            }
 			buffer.append(C_CAPTURE);
 			//$FALL-THROUGH$ for wildcard part of capture typecheckPos
 		case '?':
@@ -1469,14 +1468,12 @@ private static int encodeTypeSignature(char[] typeName, int start, boolean isRes
 			checkPos = checkName(EXTENDS, typeName, pos, length);
 			if (checkPos > 0) {
 				buffer.append(C_EXTENDS);
-				pos = encodeTypeSignature(typeName, checkPos, isResolved, length, buffer);
-				return pos;
+				return encodeTypeSignature(typeName, checkPos, isResolved, length, buffer);
 			}
 			checkPos = checkName(SUPER, typeName, pos, length);
 			if (checkPos > 0) {
 				buffer.append(C_SUPER);
-				pos = encodeTypeSignature(typeName, checkPos, isResolved, length, buffer);
-				return pos;
+				return encodeTypeSignature(typeName, checkPos, isResolved, length, buffer);
 			}
 			buffer.append(C_STAR);
 			return pos;
@@ -1498,37 +1495,34 @@ private static int encodeTypeSignature(char[] typeName, int start, boolean isRes
 				buffer.append(C_GENERIC_START);
 				// Stop gap fix for <>.
 				if ((pos = checkNextChar(typeName, '>', checkPos, length, true)) > 0) {
-					buffer.append(C_GENERIC_END);
 				} else {
 					pos = encodeTypeSignature(typeName, checkPos, isResolved, length, buffer);
 					while ((checkPos = checkNextChar(typeName, ',', pos, length, true)) > 0) {
 						pos = encodeTypeSignature(typeName, checkPos, isResolved, length, buffer);
 					}
 					pos = checkNextChar(typeName, '>', pos, length, false);
-					buffer.append(C_GENERIC_END);
 				}
+                buffer.append(C_GENERIC_END);
 			}
 			checkPos = checkNextChar(typeName, '.', pos, length, true);
-			if (checkPos > 0) {
-				buffer.append(C_DOT);
-				pos = checkPos;
-			} else {
+			if (checkPos <= 0) {
 				break;
 			}
+            buffer.append(C_DOT);
+            pos = checkPos;
 		}
 		buffer.append(C_NAME_END);
 		checkPos = checkNextChar(typeName, '&', pos, length, true);
-		if (checkPos > 0) {
-			if (buffer.charAt(0) != C_UNION) // the constant name is wrong, its value is correct :-X
-				buffer.insert(0, C_UNION);
-			buffer.append(C_COLON);
-			pos = encodeTypeSignature(typeName, checkPos, isResolved, length, buffer);
-			if (pos == length) {
-				break;
-			}
-		} else {
+		if (checkPos <= 0) {
 			break;
 		}
+        if (buffer.charAt(0) != C_UNION) // the constant name is wrong, its value is correct :-X
+        	buffer.insert(0, C_UNION);
+        buffer.append(C_COLON);
+        pos = encodeTypeSignature(typeName, checkPos, isResolved, length, buffer);
+        if (pos == length) {
+        	break;
+        }
 	}
 	if (end > 0) pos = end; // skip array dimension which were preprocessed
     return pos;
@@ -1642,7 +1636,8 @@ public static char[][] getIntersectionTypeBounds(char[] intersectionTypeSignatur
 			char[][] result = new char[size][];
 			args.toArray(result);
 			return result;
-		} else if (intersectionTypeSignature[e + 1] != C_COLON) {
+		}
+        if (intersectionTypeSignature[e + 1] != C_COLON) {
 			throw new IllegalArgumentException("Invalid format"); //$NON-NLS-1$
 		}
 		i = e + 2; // add one to skip C_COLON
@@ -1666,7 +1661,8 @@ private static char[][] getUnionTypeBounds(char[] unionTypeSignature) throws Ill
 			char[][] result = new char[size][];
 			args.toArray(result);
 			return result;
-		} else if (unionTypeSignature[e + 1] != C_COLON) {
+		}
+        if (unionTypeSignature[e + 1] != C_COLON) {
 			throw new IllegalArgumentException("Invalid format"); //$NON-NLS-1$
 		}
 		i = e + 2; // add one to skip C_COLON
@@ -1715,9 +1711,8 @@ public static int getParameterCount(char[] methodSignature) throws IllegalArgume
 		int i = CharOperation.indexOf(C_PARAM_START, methodSignature);
 		if (i < 0) {
 			throw new IllegalArgumentException(String.valueOf(methodSignature));
-		} else {
-			i++;
 		}
+        i++;
 		for (;;) {
 			if (methodSignature[i] == C_PARAM_END) {
 				return count;
@@ -1725,9 +1720,8 @@ public static int getParameterCount(char[] methodSignature) throws IllegalArgume
 			int e= Util.scanTypeSignature(methodSignature, i);
 			if (e < 0) {
 				throw new IllegalArgumentException(String.valueOf(methodSignature));
-			} else {
-				i = e + 1;
 			}
+            i = e + 1;
 			count++;
 		}
 	} catch (ArrayIndexOutOfBoundsException e) {
@@ -1768,9 +1762,8 @@ public static char[][] getParameterTypes(char[] methodSignature) throws IllegalA
 		int i = CharOperation.indexOf(C_PARAM_START, methodSignature);
 		if (i < 0) {
 			throw new IllegalArgumentException(String.valueOf(methodSignature));
-		} else {
-			i++;
 		}
+        i++;
 		int t = 0;
 		for (;;) {
 			if (methodSignature[i] == C_PARAM_END) {
@@ -2238,12 +2231,11 @@ public static char[][] getThrownExceptionTypes(char[] methodSignature) throws Il
 	int i = exceptionStart;
 	ArrayList exceptionList = new ArrayList(1);
 	while (i < length) {
-		if (methodSignature[i] == C_EXCEPTION_START) {
-			exceptionStart++;
-			i++;
-		} else {
+		if (methodSignature[i] != C_EXCEPTION_START) {
 			throw new IllegalArgumentException(String.valueOf(methodSignature));
 		}
+        exceptionStart++;
+        i++;
 		i = Util.scanTypeSignature(methodSignature, i) + 1;
 		exceptionList.add(CharOperation.subarray(methodSignature, exceptionStart,i));
 		exceptionStart = i;
@@ -2464,8 +2456,7 @@ public static String[] getTypeParameterBounds(String formalTypeParameterSignatur
 public static char[][] getTypeParameters(char[] methodOrTypeSignature) throws IllegalArgumentException {
 	try {
 		int length = methodOrTypeSignature.length;
-		if (length == 0) return CharOperation.NO_CHAR_CHAR;
-		if (methodOrTypeSignature[0] != C_GENERIC_START) return CharOperation.NO_CHAR_CHAR;
+		if (length == 0 || methodOrTypeSignature[0] != C_GENERIC_START) return CharOperation.NO_CHAR_CHAR;
 
 		ArrayList paramList = new ArrayList(1);
 		int paramStart = 1, i = 1;  // start after leading '<'

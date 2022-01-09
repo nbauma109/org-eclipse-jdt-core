@@ -102,12 +102,10 @@ class GraphProcessor<T> {
 	}
 
 	public synchronized void processGraphWithParallelJobs() {
-		if (!complete()) {
-			if (!allTriggered()) {
-				Set<T> readyToBuild = computeReadyVertexes();
-				readyToBuild.forEach(this::triggerJob);
-			}
-		}
+		if (!complete() && !allTriggered()) {
+        	Set<T> readyToBuild = computeReadyVertexes();
+        	readyToBuild.forEach(this::triggerJob);
+        }
 	}
 
 	private void triggerJob(T item) {

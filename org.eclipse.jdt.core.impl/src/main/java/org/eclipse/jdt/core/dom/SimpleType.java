@@ -152,10 +152,9 @@ public class SimpleType extends AnnotatableType {
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((Name) child);
-				return null;
 			}
+            setName((Name) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -174,7 +173,7 @@ public class SimpleType extends AnnotatableType {
 			result.annotations().addAll(
 					ASTNode.copySubtrees(target, annotations()));
 		}
-		result.setName((Name) (getName()).clone(target));
+		result.setName((Name) getName().clone(target));
 		return result;
 	}
 

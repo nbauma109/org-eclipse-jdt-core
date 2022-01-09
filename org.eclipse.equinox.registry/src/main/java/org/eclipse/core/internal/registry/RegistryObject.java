@@ -110,7 +110,7 @@ public abstract class RegistryObject implements KeyedElement {
 			throw new IllegalArgumentException("Registry object: extra data offset is out of range"); //$NON-NLS-1$
 
 		extraDataOffset &= ~(OFFSET_MASK | EMPTY_MASK); // clear all offset bits; mark as non-empty
-		extraDataOffset |= (offset & OFFSET_MASK); // set all offset bits
+		extraDataOffset |= offset & OFFSET_MASK; // set all offset bits
 	}
 
 	protected String getLocale() {

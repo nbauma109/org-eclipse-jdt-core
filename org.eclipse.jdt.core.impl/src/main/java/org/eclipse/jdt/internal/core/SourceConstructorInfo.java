@@ -18,7 +18,7 @@ package org.eclipse.jdt.internal.core;
  */
 public class SourceConstructorInfo extends SourceMethodElementInfo {
 
-	private static final char[] RETURN_TYPE_NAME = new char[]{'v', 'o','i', 'd'};
+	private static final char[] RETURN_TYPE_NAME = {'v', 'o','i', 'd'};
 
 	@Override
 	public boolean isAnnotationMethod() {

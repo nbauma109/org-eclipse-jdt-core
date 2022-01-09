@@ -60,7 +60,7 @@ public abstract class Name extends Expression implements IDocElement {
 	 *    <code>false</code> otherwise
 	 */
 	public final boolean isSimpleName() {
-		return (this instanceof SimpleName);
+		return this instanceof SimpleName;
 	}
 
 	/**
@@ -71,7 +71,7 @@ public abstract class Name extends Expression implements IDocElement {
 	 *    <code>false</code> otherwise
 	 */
 	public final boolean isQualifiedName() {
-		return (this instanceof QualifiedName);
+		return this instanceof QualifiedName;
 	}
 
 	/**
@@ -102,11 +102,10 @@ public abstract class Name extends Expression implements IDocElement {
 		if (isSimpleName()) {
 			// avoid creating garbage for common case
 			return ((SimpleName) this).getIdentifier();
-		} else {
-			StringBuffer buffer = new StringBuffer(50);
-			appendName(buffer);
-			return new String(buffer);
 		}
+        StringBuffer buffer = new StringBuffer(50);
+        appendName(buffer);
+        return new String(buffer);
 	}
 
 	/**

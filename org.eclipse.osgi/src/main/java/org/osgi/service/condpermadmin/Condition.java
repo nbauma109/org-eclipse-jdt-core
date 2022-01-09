@@ -135,8 +135,8 @@ final class BooleanCondition implements Condition {
 
 	@Override
 	public boolean isSatisfied(Condition[] conds, Dictionary<Object, Object> context) {
-		for (int i = 0, length = conds.length; i < length; i++) {
-			if (!conds[i].isSatisfied())
+		for (Condition cond : conds) {
+			if (!cond.isSatisfied())
 				return false;
 		}
 		return true;

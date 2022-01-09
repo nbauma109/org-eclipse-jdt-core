@@ -106,10 +106,9 @@ public class TextBlock extends Expression {
 		if (property == ESCAPED_VALUE_PROPERTY) {
 			if (get) {
 				return getEscapedValue();
-			} else {
-				setEscapedValue((String) value);
-				return null;
 			}
+            setEscapedValue((String) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
@@ -236,18 +235,17 @@ public class TextBlock extends Expression {
 		int start = -1;
 		loop: for (int i = 3; i < len; i++) {
 			char c = escaped[i];
-			if (ScannerHelper.isWhitespace(c)) {
-				switch (c) {
-					case 10 : /* \ u000a: LINE FEED               */
-					case 13 : /* \ u000d: CARRIAGE RETURN         */
-						start =  i + 1;
-						break loop;
-					default:
-						break;
-				}
-			} else {
+			if (!ScannerHelper.isWhitespace(c)) {
 				break loop;
 			}
+            switch (c) {
+            	case 10 : /* \ u000a: LINE FEED               */
+            	case 13 : /* \ u000d: CARRIAGE RETURN         */
+            		start =  i + 1;
+            		break loop;
+            	default:
+            		break;
+            }
 		}
 		if (start == -1) {
 			throw new IllegalArgumentException();
@@ -260,8 +258,7 @@ public class TextBlock extends Expression {
 
 	@Override
 	int memSize() {
-		int size = BASE_NODE_SIZE + 1 * 4 + stringSize(this.escapedValue);
-		return size;
+		return BASE_NODE_SIZE + 1 * 4 + stringSize(this.escapedValue);
 	}
 
 	@Override

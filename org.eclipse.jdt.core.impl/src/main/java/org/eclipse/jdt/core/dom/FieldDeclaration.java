@@ -54,7 +54,8 @@ public class FieldDeclaration extends BodyDeclaration {
 	 * @since 3.0
 	 * @deprecated In the JLS3 API, this property is replaced by {@link #MODIFIERS2_PROPERTY}.
 	 */
-	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
+	@Deprecated
+    public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
 		internalModifiersPropertyFactory(FieldDeclaration.class);
 
 	/**
@@ -126,9 +127,8 @@ public class FieldDeclaration extends BodyDeclaration {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else {
-			return PROPERTY_DESCRIPTORS_3_0;
 		}
+        return PROPERTY_DESCRIPTORS_3_0;
 	}
 
 	/**
@@ -173,10 +173,9 @@ public class FieldDeclaration extends BodyDeclaration {
 		if (property == MODIFIERS_PROPERTY) {
 			if (get) {
 				return getModifiers();
-			} else {
-				internalSetModifiers(value);
-				return 0;
 			}
+            internalSetModifiers(value);
+            return 0;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetIntProperty(property, get, value);
@@ -187,18 +186,16 @@ public class FieldDeclaration extends BodyDeclaration {
 		if (property == JAVADOC_PROPERTY) {
 			if (get) {
 				return getJavadoc();
-			} else {
-				setJavadoc((Javadoc) child);
-				return null;
 			}
+            setJavadoc((Javadoc) child);
+            return null;
 		}
 		if (property == TYPE_PROPERTY) {
 			if (get) {
 				return getType();
-			} else {
-				setType((Type) child);
-				return null;
 			}
+            setType((Type) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

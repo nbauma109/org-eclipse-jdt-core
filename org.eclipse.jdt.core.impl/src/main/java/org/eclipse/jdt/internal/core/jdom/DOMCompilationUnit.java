@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.core.util.Util;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 class DOMCompilationUnit extends DOMNode implements IDOMCompilationUnit, SuffixConstants {
 
 	/**
@@ -87,9 +88,8 @@ public String getHeader() {
 public IJavaElement getJavaElement(IJavaElement parent) throws IllegalArgumentException {
 	if (parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 		return ((IPackageFragment)parent).getCompilationUnit(getName());
-	} else {
-		throw new IllegalArgumentException(Messages.element_illegalParent);
 	}
+    throw new IllegalArgumentException(Messages.element_illegalParent);
 }
 /**
  * @see IDOMCompilationUnit#getName()
@@ -117,9 +117,8 @@ public String getName() {
 	}
 	if (topLevelType != null) {
 		return topLevelType.getName() + Util.defaultJavaExtension();
-	} else {
-		return null;
 	}
+    return null;
 }
 /**
  * @see IDOMNode#getNodeType()
@@ -148,9 +147,8 @@ public boolean isAllowableChild(IDOMNode node) {
 	if (node != null) {
 		int type= node.getNodeType();
 		return type == IDOMNode.PACKAGE || type == IDOMNode.IMPORT || type == IDOMNode.TYPE;
-	} else {
-		return false;
 	}
+    return false;
 
 }
 /**

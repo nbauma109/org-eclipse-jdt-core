@@ -212,10 +212,7 @@ public final class URIUtil {
 		if (uri1 == null || uri2 == null)
 			return false;
 
-		if (uri1.equals(uri2))
-			return true;
-
-		if (sameString(uri1.getScheme(), uri2.getScheme()) && sameString(uri1.getSchemeSpecificPart(), uri2.getSchemeSpecificPart()) && sameString(uri1.getFragment(), uri2.getFragment()))
+		if (uri1.equals(uri2) || sameString(uri1.getScheme(), uri2.getScheme()) && sameString(uri1.getSchemeSpecificPart(), uri2.getSchemeSpecificPart()) && sameString(uri1.getFragment(), uri2.getFragment()))
 			return true;
 
 		if (uri1.isAbsolute() != uri2.isAbsolute())
@@ -227,7 +224,7 @@ public final class URIUtil {
 	}
 
 	private static boolean sameString(String s1, String s2) {
-		return (s1 == s2) || s1 != null && s1.equals(s2);
+		return s1 == s2 || s1 != null && s1.equals(s2);
 	}
 
 	/**

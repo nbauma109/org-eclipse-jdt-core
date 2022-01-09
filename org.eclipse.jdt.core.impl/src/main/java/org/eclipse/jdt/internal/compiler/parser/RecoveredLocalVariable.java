@@ -48,15 +48,14 @@ public RecoveredLocalVariable(LocalDeclaration localDeclaration, RecoveredElemen
 @Override
 public RecoveredElement add(Statement stmt, int bracketBalanceValue) {
 
-	if (this.alreadyCompletedLocalInitialization || !(stmt instanceof Expression &&  ((Expression) stmt).isTrulyExpression())) {
+	if (this.alreadyCompletedLocalInitialization || !(stmt instanceof Expression) || !((Expression) stmt).isTrulyExpression()) {
 		return super.add(stmt, bracketBalanceValue);
-	} else {
-		this.alreadyCompletedLocalInitialization = true;
-		this.localDeclaration.initialization = (Expression)stmt;
-		this.localDeclaration.declarationSourceEnd = stmt.sourceEnd;
-		this.localDeclaration.declarationEnd = stmt.sourceEnd;
-		return this;
 	}
+    this.alreadyCompletedLocalInitialization = true;
+    this.localDeclaration.initialization = (Expression)stmt;
+    this.localDeclaration.declarationSourceEnd = stmt.sourceEnd;
+    this.localDeclaration.declarationEnd = stmt.sourceEnd;
+    return this;
 }
 public void attach(RecoveredAnnotation[] annots, int annotCount, int mods, int modsSourceStart) {
 	if (annotCount > 0) {
@@ -65,8 +64,8 @@ public void attach(RecoveredAnnotation[] annots, int annotCount, int mods, int m
 			this.annotations = new RecoveredAnnotation[annotCount];
 			this.annotationCount = 0;
 			next : for (int i = 0; i < annotCount; i++) {
-				for (int j = 0; j < existingAnnotations.length; j++) {
-					if (annots[i].annotation == existingAnnotations[j]) continue next;
+				for (Annotation existingAnnotation : existingAnnotations) {
+					if (annots[i].annotation == existingAnnotation) continue next;
 				}
 				this.annotations[this.annotationCount++] = annots[i];
 			}

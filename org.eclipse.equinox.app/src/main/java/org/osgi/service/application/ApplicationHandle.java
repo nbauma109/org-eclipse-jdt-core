@@ -100,7 +100,7 @@ public abstract class ApplicationHandle {
 	 * @throws NullPointerException if any of the arguments is null.
 	 */
 	protected ApplicationHandle(String instanceId, ApplicationDescriptor descriptor) {
-		if ((null == instanceId) || (null == descriptor)) {
+		if (null == instanceId || null == descriptor) {
 			throw new NullPointerException("Parameters must not be null!");
 		}
 

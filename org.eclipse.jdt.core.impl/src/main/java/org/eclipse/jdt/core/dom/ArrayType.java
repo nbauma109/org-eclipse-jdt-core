@@ -54,7 +54,8 @@ public class ArrayType extends Type {
 	 * @deprecated In the JLS8 API, this property is replaced by {@link #ELEMENT_TYPE_PROPERTY} and {@link #DIMENSIONS_PROPERTY}.
 	 * @since 3.0
 	 */
-	public static final ChildPropertyDescriptor COMPONENT_TYPE_PROPERTY =
+	@Deprecated
+    public static final ChildPropertyDescriptor COMPONENT_TYPE_PROPERTY =
 		new ChildPropertyDescriptor(ArrayType.class, "componentType", Type.class, MANDATORY, CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -193,17 +194,16 @@ public class ArrayType extends Type {
 		if (property == COMPONENT_TYPE_PROPERTY) {
 			if (get) {
 				return getComponentType();
-			} else {
-				setComponentType((Type) child);
-				return null;
 			}
-		} else if (property == ELEMENT_TYPE_PROPERTY) {
+            setComponentType((Type) child);
+            return null;
+		}
+        if (property == ELEMENT_TYPE_PROPERTY) {
 			if (get) {
 				return getElementType();
-			} else {
-				setElementType((Type) child);
-				return null;
 			}
+            setElementType((Type) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
@@ -261,7 +261,8 @@ public class ArrayType extends Type {
 	 * @see #dimensions()
 	 * @deprecated In the JLS8 API, the recursive structure is not valid.
 	 */
-	public Type getComponentType() {
+	@Deprecated
+    public Type getComponentType() {
 		supportedOnlyIn2_3_4();
 		return internalGetType(COMPONENT_TYPE_PROPERTY);
 	}
@@ -295,7 +296,8 @@ public class ArrayType extends Type {
 	 * an AST later than JLS4
 	 * @deprecated In the JLS8 API, the recursive structure is not valid.
 	 */
-	public void setComponentType(Type componentType) {
+	@Deprecated
+    public void setComponentType(Type componentType) {
 		supportedOnlyIn2_3_4();
 		if (componentType == null) {
 			throw new IllegalArgumentException();

@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 /* package */
 class JavaProjectElementInfo extends OpenableElementInfo {
 
-	static final IPackageFragmentRoot[] NO_ROOTS = new IPackageFragmentRoot[0];
+	static final IPackageFragmentRoot[] NO_ROOTS = {};
 
 	static class ProjectCache {
 		ProjectCache(IPackageFragmentRoot[] allPkgFragmentRootsCache, Map<IPackageFragmentRoot, IClasspathEntry> rootToResolvedEntries, Map<IPackageFragmentRoot, HashSetOfArray> pkgFragmentsCaches) {
@@ -164,7 +164,7 @@ class JavaProjectElementInfo extends OpenableElementInfo {
 								System.arraycopy(
 										resources,
 										0,
-										(resources = new IResource[resourcesCounter * 2]),
+										resources = new IResource[resourcesCounter * 2],
 										0,
 										resourcesCounter);
 							}
@@ -174,8 +174,8 @@ class JavaProjectElementInfo extends OpenableElementInfo {
 							resFullPath = res.getFullPath();
 
 							// ignore non-excluded folders on the classpath or that correspond to an output location
-							if ((srcIsProject && !Util.isExcluded(res, inclusionPatterns, exclusionPatterns) && Util.isValidFolderNameForPackage(res.getName(), sourceLevel, complianceLevel))
-									|| (isClasspathResolved && isClasspathEntryOrOutputLocation(resFullPath, res.getLocation(), classpath, projectOutput))) {
+							if (srcIsProject && !Util.isExcluded(res, inclusionPatterns, exclusionPatterns) && Util.isValidFolderNameForPackage(res.getName(), sourceLevel, complianceLevel)
+									|| isClasspathResolved && isClasspathEntryOrOutputLocation(resFullPath, res.getLocation(), classpath, projectOutput)) {
 								break;
 							}
 							// else add non java resource
@@ -184,7 +184,7 @@ class JavaProjectElementInfo extends OpenableElementInfo {
 								System.arraycopy(
 										resources,
 										0,
-										(resources = new IResource[resourcesCounter * 2]),
+										resources = new IResource[resourcesCounter * 2],
 										0,
 										resourcesCounter);
 							}
@@ -196,7 +196,7 @@ class JavaProjectElementInfo extends OpenableElementInfo {
 				System.arraycopy(
 					resources,
 					0,
-					(resources = new IResource[resourcesCounter]),
+					resources = new IResource[resourcesCounter],
 					0,
 					resourcesCounter);
 			}
@@ -281,8 +281,8 @@ class JavaProjectElementInfo extends OpenableElementInfo {
 			// root doesn't exist: ignore
 			return;
 		}
-		for (int j = 0, length = frags.length; j < length; j++) {
-			if (frags[j] instanceof PackageFragment) fragmentsCache.add(((PackageFragment) frags[j]).names);
+		for (IJavaElement frag : frags) {
+			if (frag instanceof PackageFragment) fragmentsCache.add(((PackageFragment) frag).names);
 		}
 	}
 
@@ -291,8 +291,7 @@ class JavaProjectElementInfo extends OpenableElementInfo {
 	 */
 	private boolean isClasspathEntryOrOutputLocation(IPath path, IPath location, IClasspathEntry[] resolvedClasspath, IPath projectOutput) {
 		if (projectOutput.equals(path)) return true;
-		for (int i = 0, length = resolvedClasspath.length; i < length; i++) {
-			IClasspathEntry entry = resolvedClasspath[i];
+		for (IClasspathEntry entry : resolvedClasspath) {
 			IPath entryPath;
 			if ((entryPath = entry.getPath()).equals(path) || entryPath.equals(location)) {
 				return true;
@@ -342,8 +341,8 @@ class JavaProjectElementInfo extends OpenableElementInfo {
 					initializePackageNames(root, fragmentsCache);
 				}
 				Object[][] set = fragmentsCache.set;
-				for (int j = 0, length2 = set.length; j < length2; j++) {
-					String[] pkgName = (String[]) set[j];
+				for (Object[] element : set) {
+					String[] pkgName = (String[]) element;
 					if (pkgName == null)
 						continue;
 					Object existing = allPkgFragmentsCache.get(pkgName);
@@ -352,17 +351,15 @@ class JavaProjectElementInfo extends OpenableElementInfo {
 						// ensure super packages (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=119161)
 						// are also in the map
 						addSuperPackageNames(pkgName, allPkgFragmentsCache);
-					} else {
-						if (existing instanceof PackageFragmentRoot) {
-							allPkgFragmentsCache.put(pkgName, new IPackageFragmentRoot[] {(PackageFragmentRoot) existing, root});
-						} else {
-							IPackageFragmentRoot[] roots = (IPackageFragmentRoot[]) existing;
-							int rootLength = roots.length;
-							System.arraycopy(roots, 0, roots = new IPackageFragmentRoot[rootLength+1], 0, rootLength);
-							roots[rootLength] = root;
-							allPkgFragmentsCache.put(pkgName, roots);
-						}
-					}
+					} else if (existing instanceof PackageFragmentRoot) {
+                    	allPkgFragmentsCache.put(pkgName, new IPackageFragmentRoot[] {(PackageFragmentRoot) existing, root});
+                    } else {
+                    	IPackageFragmentRoot[] roots = (IPackageFragmentRoot[]) existing;
+                    	int rootLength = roots.length;
+                    	System.arraycopy(roots, 0, roots = new IPackageFragmentRoot[rootLength+1], 0, rootLength);
+                    	roots[rootLength] = root;
+                    	allPkgFragmentsCache.put(pkgName, roots);
+                    }
 				}
 			}
 			cache.allPkgFragmentsCache = allPkgFragmentsCache;

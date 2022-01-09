@@ -103,11 +103,9 @@ public class AutomaticModuleNaming {
 		}
 
 		// "The ".jar" suffix is removed"
-		if (removeExtension) {
-			if (name.endsWith(".jar") || name.endsWith(".JAR")) { //$NON-NLS-1$//$NON-NLS-2$
-				end -= 4;
-			}
-		}
+		if (removeExtension && (name.endsWith(".jar") || name.endsWith(".JAR"))) { //$NON-NLS-1$//$NON-NLS-2$
+        	end -= 4;
+        }
 
 		// "If the name matches the regular expression "-(\\d+(\\.|$))" then the module name will be derived from the
 		// subsequence preceding the hyphen of the first occurrence. [...]"
@@ -133,17 +131,15 @@ public class AutomaticModuleNaming {
 		boolean needDot = false;
 		for (int i = start; i < end; i++) {
 			char c = name.charAt(i);
-			if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
+			if (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9') {
 				if (needDot) {
 					sb.append('.');
 					needDot = false;
 				}
 				sb.append(c);
-			} else {
-				if (sb.length() > 0) {
-					needDot = true;
-				}
-			}
+			} else if (sb.length() > 0) {
+            	needDot = true;
+            }
 		}
 		return sb.toString().toCharArray();
 	}

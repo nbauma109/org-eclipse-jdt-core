@@ -60,7 +60,7 @@ public abstract class ImmutableMap implements Cloneable {
 			while ((currentKey = keyTable[index]) != null) {
 				if (currentKey.equals(key))
 					return valueTable[index];
-				index = (index + 1) & lengthMask;
+				index = index + 1 & lengthMask;
 			}
 			return null;
 		}
@@ -82,7 +82,7 @@ public abstract class ImmutableMap implements Cloneable {
 					valueTable[index] = value;
 					return;
 				}
-				index = (index + 1) & lengthMask;
+				index = index + 1 & lengthMask;
 			}
 			keyTable[index] = key;
 			valueTable[index] = value;
@@ -146,7 +146,7 @@ public abstract class ImmutableMap implements Cloneable {
 							result.internalPut(currentKey, valueTable[i]);
 					return result;
 				}
-				index = (index + 1) & lengthMask;
+				index = index + 1 & lengthMask;
 			}
 			return this;
 		}
@@ -220,7 +220,7 @@ public abstract class ImmutableMap implements Cloneable {
 	 */
 	public static final ImmutableMap EMPTY = new EmptyMap();
 
-	protected static final String[] EMPTY_STRING_ARRAY = new String[0];
+	protected static final String[] EMPTY_STRING_ARRAY = {};
 
 	/**
 	 * Returns the value associated with this key in the map, or

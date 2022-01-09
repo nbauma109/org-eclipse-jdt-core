@@ -78,9 +78,9 @@ public class EventAdminLogListener implements SynchronousLogListener {
 			Throwable cause = e.getCause();
 			if (cause instanceof InvocationTargetException) {
 				Throwable t = ((InvocationTargetException) cause).getTargetException();
-				if ((t instanceof RuntimeException))
+				if (t instanceof RuntimeException)
 					throw (RuntimeException) t;
-				if ((t instanceof Error))
+				if (t instanceof Error)
 					throw (Error) t;
 				// unexpected
 				throw new RuntimeException(t);
@@ -92,23 +92,23 @@ public class EventAdminLogListener implements SynchronousLogListener {
 
 	@SuppressWarnings("deprecation")
 	Object convertEvent(LogEntry entry) throws InstantiationException, IllegalAccessException, InvocationTargetException {
-		String topic = TOPIC;
+		StringBuilder topic = new StringBuilder(TOPIC);
 		int level = entry.getLevel();
 		switch (level) {
 			case LogService.LOG_ERROR :
-				topic += TOPIC_SEPARATOR + LOG_ERROR;
+				topic.append(TOPIC_SEPARATOR).append(LOG_ERROR);
 				break;
 			case LogService.LOG_WARNING :
-				topic += TOPIC_SEPARATOR + LOG_WARNING;
+				topic.append(TOPIC_SEPARATOR).append(LOG_WARNING);
 				break;
 			case LogService.LOG_INFO :
-				topic += TOPIC_SEPARATOR + LOG_INFO;
+				topic.append(TOPIC_SEPARATOR).append(LOG_INFO);
 				break;
 			case LogService.LOG_DEBUG :
-				topic += TOPIC_SEPARATOR + LOG_DEBUG;
+				topic.append(TOPIC_SEPARATOR).append(LOG_DEBUG);
 				break;
 			default : // other log levels are represented by LOG_OTHER
-				topic += TOPIC_SEPARATOR + LOG_OTHER;
+				topic.append(TOPIC_SEPARATOR).append(LOG_OTHER);
 		}
 		Hashtable<String, Object> properties = new Hashtable<>();
 		Bundle bundle = entry.getBundle();
@@ -129,18 +129,18 @@ public class EventAdminLogListener implements SynchronousLogListener {
 		if (entry.getMessage() != null)
 			properties.put(MESSAGE, entry.getMessage());
 		properties.put(TIMESTAMP, Long.valueOf(entry.getTime()));
-		return event.newInstance(topic, properties);
+		return event.newInstance(topic.toString(), properties);
 	}
 
 	public static void putServiceReferenceProperties(Hashtable<String, Object> properties, ServiceReference<?> ref) {
 		properties.put(SERVICE, ref);
 		properties.put(SERVICE_ID, ref.getProperty(org.osgi.framework.Constants.SERVICE_ID));
 		Object o = ref.getProperty(org.osgi.framework.Constants.SERVICE_PID);
-		if ((o != null) && (o instanceof String)) {
+		if (o instanceof String) {
 			properties.put(SERVICE_PID, o);
 		}
 		Object o2 = ref.getProperty(org.osgi.framework.Constants.OBJECTCLASS);
-		if ((o2 != null) && (o2 instanceof String[])) {
+		if (o2 instanceof String[]) {
 			properties.put(SERVICE_OBJECTCLASS, o2);
 		}
 	}

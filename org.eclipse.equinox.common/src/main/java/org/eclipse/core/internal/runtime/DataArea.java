@@ -53,7 +53,7 @@ public class DataArea {
 		if (service == null)
 			throw new IllegalStateException(CommonMessages.meta_noDataModeSpecified);
 
-		boolean explicitInitRequired = Boolean.valueOf(Activator.getContext().getProperty(REQUIRES_EXPLICIT_INIT));
+		boolean explicitInitRequired = Boolean.parseBoolean(Activator.getContext().getProperty(REQUIRES_EXPLICIT_INIT));
 		if (explicitInitRequired && !service.isSet()) {
 			// See bug 514333: don't allow clients to initialize instance location if the instance area is not explicitly defined yet
 			throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
@@ -151,12 +151,10 @@ public class DataArea {
 
 	private void initializeLocation() throws CoreException {
 		// check if the location can be created
-		if (location.toFile().exists()) {
-			if (!location.toFile().isDirectory()) {
-				String message = NLS.bind(CommonMessages.meta_notDir, location);
-				throw new CoreException(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME, IRuntimeConstants.FAILED_WRITE_METADATA, message, null));
-			}
-		}
+		if (location.toFile().exists() && !location.toFile().isDirectory()) {
+        	String message = NLS.bind(CommonMessages.meta_notDir, location);
+        	throw new CoreException(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME, IRuntimeConstants.FAILED_WRITE_METADATA, message, null));
+        }
 		//try infer the device if there isn't one (windows)
 		if (location.getDevice() == null)
 			location = new Path(location.toFile().getAbsolutePath());

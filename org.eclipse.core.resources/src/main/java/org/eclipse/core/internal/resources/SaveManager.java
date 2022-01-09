@@ -103,8 +103,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 	protected int operationCount = 0;
 
 	// Count up the time taken for all saves/snaps on markers and sync info
-	protected long persistMarkers = 0l;
-	protected long persistSyncInfo = 0l;
+	protected long persistMarkers = 0L;
+	protected long persistSyncInfo = 0L;
 
 	/**
 	 * In-memory representation of plugins saved state. Maps String (plugin id)-&gt; SavedState.
@@ -149,11 +149,7 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 			return null;
 		SavedState state = savedStates.get(pluginId);
 		if (state != null) {
-			if (isDeltaCleared(pluginId)) {
-				// this plugin was marked not to receive deltas
-				state.forgetTrees();
-				removeClearDeltaMarks(pluginId);
-			} else {
+			if (!isDeltaCleared(pluginId)) {
 				try {
 					// thread safety: (we need to guarantee that the tree is immutable when computing deltas)
 					// so, the tree inside the saved state needs to be immutable
@@ -165,6 +161,9 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 				}
 				return state;
 			}
+            // this plugin was marked not to receive deltas
+            state.forgetTrees();
+            removeClearDeltaMarks(pluginId);
 		}
 		// if the plug-in has a previous save number, we return a state, otherwise we return null
 		if (getSaveNumber(pluginId) > 0)
@@ -419,7 +418,7 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 	 */
 	protected long getDeltaExpiration(String pluginId) {
 		String result = masterTable.getProperty(DELTA_EXPIRATION_PREFIX + pluginId);
-		return (result == null) ? System.currentTimeMillis() : Long.parseLong(result);
+		return result == null ? System.currentTimeMillis() : Long.parseLong(result);
 	}
 
 	protected Properties getMasterTable() {
@@ -428,7 +427,7 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 
 	public int getSaveNumber(String pluginId) {
 		String value = masterTable.getProperty(SAVE_NUMBER_PREFIX + pluginId);
-		return (value == null) ? 0 : Integer.parseInt(value);
+		return value == null ? 0 : Integer.parseInt(value);
 	}
 
 	protected String[] getSaveParticipantPluginIds() {
@@ -1172,8 +1171,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 							//save master table right after saving tree to ensure correct tree number is saved
 							cleanMasterTable();
 							// save all of the markers and all sync info in the workspace
-							persistMarkers = 0l;
-							persistSyncInfo = 0l;
+							persistMarkers = 0L;
+							persistSyncInfo = 0L;
 							visitAndSave(workspace.getRoot());
 							monitor.worked(1);
 							if (Policy.DEBUG_SAVE) {
@@ -1197,8 +1196,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 						case ISaveContext.SNAPSHOT :
 							snapTree(workspace.getElementTree(), Policy.subMonitorFor(monitor, 1));
 							// snapshot the markers and sync info for the workspace
-							persistMarkers = 0l;
-							persistSyncInfo = 0l;
+							persistMarkers = 0L;
+							persistSyncInfo = 0L;
 							visitAndSnap(workspace.getRoot());
 							monitor.worked(1);
 							if (Policy.DEBUG_SAVE) {
@@ -1435,22 +1434,18 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 				snapshotJob.schedule();
 			else
 				snapshotJob.wakeUp();
-		} else {
-			if (hasTreeChanges) {
-				operationCount++;
-				if (snapshotJob.getState() == Job.NONE) {
-					rememberSnapshotRequestor();
-					long interval = workspace.internalGetDescription().getSnapshotInterval();
-					snapshotJob.schedule(Math.max(interval, MIN_SNAPSHOT_DELAY));
-				}
-			} else {
-				//only increment the operation count if we've had a sufficient number of no-ops
-				if (++noopCount > NO_OP_THRESHOLD) {
-					operationCount++;
-					noopCount = 0;
-				}
-			}
-		}
+		} else if (hasTreeChanges) {
+        	operationCount++;
+        	if (snapshotJob.getState() == Job.NONE) {
+        		rememberSnapshotRequestor();
+        		long interval = workspace.internalGetDescription().getSnapshotInterval();
+        		snapshotJob.schedule(Math.max(interval, MIN_SNAPSHOT_DELAY));
+        	}
+        } else //only increment the operation count if we've had a sufficient number of no-ops
+        if (++noopCount > NO_OP_THRESHOLD) {
+        	operationCount++;
+        	noopCount = 0;
+        }
 	}
 
 	/**

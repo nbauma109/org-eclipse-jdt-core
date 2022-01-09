@@ -43,7 +43,6 @@ public abstract class Reference extends Expression  {
  * BaseLevelReference constructor comment.
  */
 public Reference() {
-	super();
 }
 public abstract FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo, Assignment assignment, boolean isCompound);
 
@@ -156,13 +155,13 @@ public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
 		return FlowInfo.NON_NULL;
 	FieldBinding fieldBinding = lastFieldBinding();
 	if (fieldBinding != null) {
-		if (fieldBinding.isFinal() && fieldBinding.constant() != Constant.NotAConstant)
+		if (fieldBinding.isFinal() && fieldBinding.constant() != Constant.NotAConstant || fieldBinding.isNonNull() || flowContext.isNullcheckedFieldAccess(this)) {
 			return FlowInfo.NON_NULL;
-		if (fieldBinding.isNonNull() || flowContext.isNullcheckedFieldAccess(this)) {
-			return FlowInfo.NON_NULL;
-		} else if (fieldBinding.isNullable()) {
+		}
+        if (fieldBinding.isNullable()) {
 			return FlowInfo.POTENTIALLY_NULL;
-		} else if (fieldBinding.type.isFreeTypeVariable()) {
+		}
+        if (fieldBinding.type.isFreeTypeVariable()) {
 			return FlowInfo.FREE_TYPEVARIABLE;
 		}
 	}
@@ -180,39 +179,34 @@ void reportOnlyUselesslyReadPrivateField(BlockScope currentScope, FieldBinding f
 		// access is relevant, turn compound use into real use:
 		fieldBinding.compoundUseFlag = 0;
 		fieldBinding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
-	} else {
-		if (fieldBinding.isUsedOnlyInCompound()) {
-			fieldBinding.compoundUseFlag--; // consume one
-			if (fieldBinding.compoundUseFlag == 0					// report only the last usage
-					&& fieldBinding.isOrEnclosedByPrivateType()
-					&& (this.implicitConversion & TypeIds.UNBOXING) == 0) // don't report if unboxing is involved (might cause NPE)
-			{
-				// compoundAssignment/postIncrement is the only usage of this field
-				currentScope.problemReporter().unusedPrivateField(fieldBinding.sourceField());
-			}
-		}
-	}
+	} else if (fieldBinding.isUsedOnlyInCompound()) {
+    	fieldBinding.compoundUseFlag--; // consume one
+    	if (fieldBinding.compoundUseFlag == 0					// report only the last usage
+    			&& fieldBinding.isOrEnclosedByPrivateType()
+    			&& (this.implicitConversion & TypeIds.UNBOXING) == 0) // don't report if unboxing is involved (might cause NPE)
+    	{
+    		// compoundAssignment/postIncrement is the only usage of this field
+    		currentScope.problemReporter().unusedPrivateField(fieldBinding.sourceField());
+    	}
+    }
 }
 /* report a local/arg that is only read from a 'special operator',
  * i.e., in a postIncrement expression or a compound assignment,
  * where the information is never flowing out off the local/arg. */
 static void reportOnlyUselesslyReadLocal(BlockScope currentScope, LocalVariableBinding localBinding, boolean valueRequired) {
-	if (localBinding.declaration == null)
-		return;  // secret local
-	if ((localBinding.declaration.bits & ASTNode.IsLocalDeclarationReachable) == 0)
-		return;  // declaration is unreachable
-	if (localBinding.useFlag >= LocalVariableBinding.USED)
+	  // secret local
+	  // declaration is unreachable
+	if (localBinding.declaration == null || (localBinding.declaration.bits & ASTNode.IsLocalDeclarationReachable) == 0 || localBinding.useFlag >= LocalVariableBinding.USED)
 		return;  // we're only interested in cases with only compound access (negative count)
 
 	if (valueRequired) {
 		// access is relevant
 		localBinding.useFlag = LocalVariableBinding.USED;
 		return;
-	} else {
-		localBinding.useFlag++;
-		if (localBinding.useFlag != LocalVariableBinding.UNUSED) // have all negative counts been consumed?
-			return; // still waiting to see more usages of this kind
 	}
+    localBinding.useFlag++;
+    if (localBinding.useFlag != LocalVariableBinding.UNUSED) // have all negative counts been consumed?
+    	return; // still waiting to see more usages of this kind
 	// at this point we know we have something to report
 	if (localBinding.declaration instanceof Argument) {
 		// check compiler options to report against unused arguments

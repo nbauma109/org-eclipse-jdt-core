@@ -81,7 +81,7 @@ public abstract class TokenTraverser {
 				this.current.getLineBreaksBefore());
 		this.spaceBefore = this.current.isSpaceBefore();
 		if (this.lineBreaksBefore == 0) {
-			this.spaceBefore = this.spaceBefore || (this.previous != null && this.previous.isSpaceAfter());
+			this.spaceBefore = this.spaceBefore || this.previous != null && this.previous.isSpaceAfter();
 		}
 	}
 
@@ -100,7 +100,7 @@ public abstract class TokenTraverser {
 					this.next != null ? this.next.getLineBreaksBefore() : 0);
 			this.spaceAfter = this.current.isSpaceAfter();
 			if (this.lineBreaksAfter == 0) {
-				this.spaceAfter = this.spaceAfter || (this.next != null && this.next.isSpaceBefore());
+				this.spaceAfter = this.spaceAfter || this.next != null && this.next.isSpaceBefore();
 			}
 
 			if (!this.token(this.current, i))

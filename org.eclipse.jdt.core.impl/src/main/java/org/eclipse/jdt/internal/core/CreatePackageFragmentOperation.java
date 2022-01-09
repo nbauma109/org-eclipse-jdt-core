@@ -147,7 +147,7 @@ public IJavaModelStatus verify() {
 
 	String packageName = this.pkgName == null ? null : Util.concatWith(this.pkgName, '.');
 	IJavaProject project = parentElement.getJavaProject();
-	if (this.pkgName == null || (this.pkgName.length > 0 && JavaConventions.validatePackageName(packageName, project.getOption(JavaCore.COMPILER_SOURCE, true), project.getOption(JavaCore.COMPILER_COMPLIANCE, true)).getSeverity() == IStatus.ERROR)) {
+	if (this.pkgName == null || this.pkgName.length > 0 && JavaConventions.validatePackageName(packageName, project.getOption(JavaCore.COMPILER_SOURCE, true), project.getOption(JavaCore.COMPILER_COMPLIANCE, true)).getSeverity() == IStatus.ERROR) {
 		return new JavaModelStatus(IJavaModelStatusConstants.INVALID_NAME, packageName);
 	}
 	IJavaElement root = getParentElement();

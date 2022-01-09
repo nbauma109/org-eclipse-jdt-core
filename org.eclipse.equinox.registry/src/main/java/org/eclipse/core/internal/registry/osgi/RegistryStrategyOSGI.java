@@ -277,7 +277,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 */
 	@Override
 	public boolean cacheLazyLoading() {
-		return !("true".equalsIgnoreCase(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING))); //$NON-NLS-1$
+		return !"true".equalsIgnoreCase(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING)); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)

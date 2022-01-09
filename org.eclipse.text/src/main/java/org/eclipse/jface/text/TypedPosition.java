@@ -60,12 +60,10 @@ public class TypedPosition extends Position {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof TypedPosition) {
-			if (super.equals(o)) {
-				TypedPosition p= (TypedPosition) o;
-				return (fType == null && p.getType() == null) || fType.equals(p.getType());
-			}
-		}
+		if (o instanceof TypedPosition && super.equals(o)) {
+        	TypedPosition p= (TypedPosition) o;
+        	return fType == null && p.getType() == null || fType.equals(p.getType());
+        }
 		return false;
 	}
 

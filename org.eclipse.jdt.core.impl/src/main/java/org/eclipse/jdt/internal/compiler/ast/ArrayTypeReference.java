@@ -159,11 +159,9 @@ public class ArrayTypeReference extends SingleTypeReference {
 				}
 			}
 			if (this.annotationsOnDimensions != null) {
-				for (int i = 0, max = this.annotationsOnDimensions.length; i < max; i++) {
-					Annotation[] annotations2 = this.annotationsOnDimensions[i];
+				for (Annotation[] annotations2 : this.annotationsOnDimensions) {
 					if (annotations2 != null) {
-						for (int j = 0, max2 = annotations2.length; j < max2; j++) {
-							Annotation annotation = annotations2[j];
+						for (Annotation annotation : annotations2) {
 							annotation.traverse(visitor, scope);
 						}
 					}
@@ -183,11 +181,9 @@ public class ArrayTypeReference extends SingleTypeReference {
 				}
 			}
 			if (this.annotationsOnDimensions != null) {
-				for (int i = 0, max = this.annotationsOnDimensions.length; i < max; i++) {
-					Annotation[] annotations2 = this.annotationsOnDimensions[i];
+				for (Annotation[] annotations2 : this.annotationsOnDimensions) {
 					if (annotations2 != null) {
-						for (int j = 0, max2 = annotations2.length; j < max2; j++) {
-							Annotation annotation = annotations2[j];
+						for (Annotation annotation : annotations2) {
 							annotation.traverse(visitor, scope);
 						}
 					}
@@ -200,10 +196,8 @@ public class ArrayTypeReference extends SingleTypeReference {
 	@Override
 	protected TypeBinding internalResolveType(Scope scope, int location) {
 		TypeBinding internalResolveType = super.internalResolveType(scope, location);
-		internalResolveType = maybeMarkArrayContentsNonNull(scope, internalResolveType, this.sourceStart, this.dimensions,
+		return maybeMarkArrayContentsNonNull(scope, internalResolveType, this.sourceStart, this.dimensions,
 									leafType -> this.leafComponentTypeWithoutDefaultNullness = leafType);
-
-		return internalResolveType;
 	}
 
 	static TypeBinding maybeMarkArrayContentsNonNull(Scope scope, TypeBinding typeBinding, int sourceStart, int dimensions, Consumer<TypeBinding> leafConsumer) {
@@ -289,8 +283,7 @@ public class ArrayTypeReference extends SingleTypeReference {
 				if (this.resolvedType != null && !this.resolvedType.hasNullTypeAnnotations())
 					return false; // shortcut
 				if (this.annotationsOnDimensions != null) {
-					for (int i = 0; i < this.annotationsOnDimensions.length; i++) {
-						Annotation[] innerAnnotations = this.annotationsOnDimensions[i];
+					for (Annotation[] innerAnnotations : this.annotationsOnDimensions) {
 						if (containsNullAnnotation(innerAnnotations))
 							return true;
 					}

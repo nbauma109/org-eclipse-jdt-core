@@ -69,16 +69,14 @@ public TypeBinding checkFieldAccess(BlockScope scope) {
 	FieldBinding fieldBinding = (FieldBinding) this.binding;
 	this.bits &= ~RestrictiveFlagMASK; // clear bits
 	this.bits |= Binding.FIELD;
-	if (!fieldBinding.isStatic()) {
-		// must check for the static status....
-		if (this.evaluationContext.isStatic) {
-			scope.problemReporter().staticFieldAccessToNonStaticVariable(
-				this,
-				fieldBinding);
-			this.constant = Constant.NotAConstant;
-			return null;
-		}
-	}
+	// must check for the static status....
+    if (!fieldBinding.isStatic() && this.evaluationContext.isStatic) {
+    	scope.problemReporter().staticFieldAccessToNonStaticVariable(
+    		this,
+    		fieldBinding);
+    	this.constant = Constant.NotAConstant;
+    	return null;
+    }
 	this.constant = fieldBinding.constant(scope);
 
 	if (isFieldUseDeprecated(fieldBinding, scope, this.bits)) {
@@ -94,7 +92,7 @@ public void generateAssignment(BlockScope currentScope, CodeStream codeStream, A
 		BinaryExpression operation = (BinaryExpression) assignment.expression;
 		int operator = (operation.bits & OperatorMASK) >> OperatorSHIFT;
 		SingleNameReference variableReference;
-		if ((operation.left instanceof SingleNameReference) && ((variableReference = (SingleNameReference) operation.left).binding == this.binding)) {
+		if (operation.left instanceof SingleNameReference && (variableReference = (SingleNameReference) operation.left).binding == this.binding) {
 			// i = i + value, then use the variable on the right hand side, since it has the correct implicit conversion
 			variableReference.generateCompoundAssignment(currentScope, codeStream, this.syntheticAccessors == null ? null : this.syntheticAccessors[WRITE], operation.right, operator, operation.implicitConversion, valueRequired);
 			if (valueRequired) {
@@ -102,12 +100,12 @@ public void generateAssignment(BlockScope currentScope, CodeStream codeStream, A
 			}
 			return;
 		}
-		if ((operation.right instanceof SingleNameReference)
-				&& ((operator == PLUS) || (operator == MULTIPLY)) // only commutative operations
-				&& ((variableReference = (SingleNameReference) operation.right).binding == this.binding)
-				&& (operation.left.constant != Constant.NotAConstant) // exclude non constant expressions, since could have side-effect
-				&& (((operation.left.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4) != T_JavaLangString) // exclude string concatenation which would occur backwards
-				&& (((operation.right.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4) != T_JavaLangString)) { // exclude string concatenation which would occur backwards
+		if (operation.right instanceof SingleNameReference
+				&& (operator == PLUS || operator == MULTIPLY) // only commutative operations
+				&& (variableReference = (SingleNameReference) operation.right).binding == this.binding
+				&& operation.left.constant != Constant.NotAConstant // exclude non constant expressions, since could have side-effect
+				&& (operation.left.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4 != T_JavaLangString // exclude string concatenation which would occur backwards
+				&& (operation.right.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4 != T_JavaLangString) { // exclude string concatenation which would occur backwards
 			// i = value + i, then use the variable on the right hand side, since it has the correct implicit conversion
 			variableReference.generateCompoundAssignment(currentScope, codeStream, this.syntheticAccessors == null ? null : this.syntheticAccessors[WRITE], operation.left, operator, operation.implicitConversion, valueRequired);
 			if (valueRequired) {
@@ -131,9 +129,6 @@ public void generateAssignment(BlockScope currentScope, CodeStream codeStream, A
 				}
 				assignment.expression.generateCode(currentScope, codeStream, true);
 				fieldStore(currentScope, codeStream, codegenField, null, this.actualReceiverType, this.delegateThis == null /*implicit this*/, valueRequired);
-				if (valueRequired) {
-					codeStream.generateImplicitConversion(assignment.implicitConversion);
-				}
 			} else {
 				codeStream.generateEmulationForField(codegenField);
 				if (!codegenField.isStatic()) { // need a receiver?
@@ -149,23 +144,21 @@ public void generateAssignment(BlockScope currentScope, CodeStream codeStream, A
 				}
 				assignment.expression.generateCode(currentScope, codeStream, true);
 				if (valueRequired) {
-					if ((TypeBinding.equalsEquals(codegenField.type, TypeBinding.LONG)) || (TypeBinding.equalsEquals(codegenField.type, TypeBinding.DOUBLE))) {
+					if (TypeBinding.equalsEquals(codegenField.type, TypeBinding.LONG) || TypeBinding.equalsEquals(codegenField.type, TypeBinding.DOUBLE)) {
 						codeStream.dup2_x2();
 					} else {
 						codeStream.dup_x2();
 					}
 				}
 				codeStream.generateEmulatedWriteAccessForField(codegenField);
-				if (valueRequired) {
-					codeStream.generateImplicitConversion(assignment.implicitConversion);
-				}
 			}
+            if (valueRequired) {
+            	codeStream.generateImplicitConversion(assignment.implicitConversion);
+            }
 			return;
 		case Binding.LOCAL : // assigning to a local variable
 			LocalVariableBinding localBinding = (LocalVariableBinding) this.binding;
-			if (localBinding.resolvedPosition != -1) {
-				assignment.expression.generateCode(currentScope, codeStream, true);
-			} else {
+			if (localBinding.resolvedPosition == -1) {
 				if (assignment.expression.constant != Constant.NotAConstant) {
 					// assigning an unused local to a constant value = no actual assignment is necessary
 					if (valueRequired) {
@@ -177,16 +170,15 @@ public void generateAssignment(BlockScope currentScope, CodeStream codeStream, A
 					on if it was actually not necessary, so as to provide the same behavior as JDK1.2beta3.	*/
 					if (valueRequired) {
 						codeStream.generateImplicitConversion(assignment.implicitConversion); // implicit conversion
-					} else {
-						if ((TypeBinding.equalsEquals(localBinding.type, TypeBinding.LONG)) || (TypeBinding.equalsEquals(localBinding.type, TypeBinding.DOUBLE))) {
-							codeStream.pop2();
-						} else {
-							codeStream.pop();
-						}
-					}
+					} else if (TypeBinding.equalsEquals(localBinding.type, TypeBinding.LONG) || TypeBinding.equalsEquals(localBinding.type, TypeBinding.DOUBLE)) {
+                    	codeStream.pop2();
+                    } else {
+                    	codeStream.pop();
+                    }
 				}
 				return;
 			}
+            assignment.expression.generateCode(currentScope, codeStream, true);
 			// normal local assignment (since cannot store in outer local which are final locations)
 			codeStream.store(localBinding, valueRequired);
 			if ((this.bits & FirstAssignmentToLocal) != 0) { // for local variable debug attributes
@@ -300,34 +292,32 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 					codeStream.aconst_null();
 					codeStream.generateEmulatedReadAccessForField(codegenField);
 				}
-			} else {
-				if (codegenField.canBeSeenBy(getReceiverType(currentScope), this, currentScope)) {
-					if ((this.bits & DepthMASK) != 0) {
-						ReferenceBinding targetType = currentScope.enclosingSourceType().enclosingTypeAt((this.bits & DepthMASK) >> DepthSHIFT);
-						Object[] emulationPath = currentScope.getEmulationPath(targetType, true /*only exact match*/, false/*consider enclosing arg*/);
-						codeStream.generateOuterAccess(emulationPath, this, targetType, currentScope);
-					} else {
-						generateReceiver(codeStream);
-					}
-					codeStream.dup();
-					TypeBinding someReceiverType = this.delegateThis != null ? this.delegateThis.type : this.actualReceiverType;
-					TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenField, someReceiverType, true /* implicit this */);
-					codeStream.fieldAccess(Opcodes.OPC_getfield, codegenField, constantPoolDeclaringClass);
-				} else {
-					if ((this.bits & DepthMASK) != 0) {
-						// internal error, per construction we should have found it
-						// not yet supported
-						currentScope.problemReporter().needImplementation(this);
-					}
-					// used to store the value
-					codeStream.generateEmulationForField(codegenField);
-					generateReceiver(codeStream);
+			} else if (codegenField.canBeSeenBy(getReceiverType(currentScope), this, currentScope)) {
+            	if ((this.bits & DepthMASK) != 0) {
+            		ReferenceBinding targetType = currentScope.enclosingSourceType().enclosingTypeAt((this.bits & DepthMASK) >> DepthSHIFT);
+            		Object[] emulationPath = currentScope.getEmulationPath(targetType, true /*only exact match*/, false/*consider enclosing arg*/);
+            		codeStream.generateOuterAccess(emulationPath, this, targetType, currentScope);
+            	} else {
+            		generateReceiver(codeStream);
+            	}
+            	codeStream.dup();
+            	TypeBinding someReceiverType = this.delegateThis != null ? this.delegateThis.type : this.actualReceiverType;
+            	TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenField, someReceiverType, true /* implicit this */);
+            	codeStream.fieldAccess(Opcodes.OPC_getfield, codegenField, constantPoolDeclaringClass);
+            } else {
+            	if ((this.bits & DepthMASK) != 0) {
+            		// internal error, per construction we should have found it
+            		// not yet supported
+            		currentScope.problemReporter().needImplementation(this);
+            	}
+            	// used to store the value
+            	codeStream.generateEmulationForField(codegenField);
+            	generateReceiver(codeStream);
 
-					// used to retrieve the actual value
-					codeStream.dup();
-					codeStream.generateEmulatedReadAccessForField(codegenField);
-				}
-			}
+            	// used to retrieve the actual value
+            	codeStream.dup();
+            	codeStream.generateEmulatedReadAccessForField(codegenField);
+            }
 			break;
 		case Binding.LOCAL : // assigning to a local variable (cannot assign to outer local)
 			LocalVariableBinding localBinding = (LocalVariableBinding) this.binding;
@@ -352,15 +342,16 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 							 */
 							localBinding.useFlag = LocalVariableBinding.USED;
 							throw new AbortMethod(CodeStream.RESTART_CODE_GEN_FOR_UNUSED_LOCALS_MODE, null);
-						} else if (assignConstant == Constant.NotAConstant) {
+						}
+                        if (assignConstant == Constant.NotAConstant) {
 							// we only need to generate the value of the expression's constant if it is not a constant expression
 							expression.generateCode(currentScope, codeStream, false);
 						}
 						return;
 					}
-					if ((assignConstant != Constant.NotAConstant)
-							&& (assignConstant.typeID() != TypeIds.T_float) // only for integral types
-							&& (assignConstant.typeID() != TypeIds.T_double)) { // TODO (philippe) is this test needed ?
+					if (assignConstant != Constant.NotAConstant
+							&& assignConstant.typeID() != TypeIds.T_float // only for integral types
+							&& assignConstant.typeID() != TypeIds.T_double) { // TODO (philippe) is this test needed ?
 						switch (operator) {
 							case PLUS :
 								int increment  = assignConstant.intValue();
@@ -392,7 +383,8 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 							 */
 							localBinding.useFlag = LocalVariableBinding.USED;
 							throw new AbortMethod(CodeStream.RESTART_CODE_GEN_FOR_UNUSED_LOCALS_MODE, null);
-						} else if (assignConstant == Constant.NotAConstant) {
+						}
+                        if (assignConstant == Constant.NotAConstant) {
 							// we only need to generate the value of the expression's constant if it is not a constant expression
 							expression.generateCode(currentScope, codeStream, false);
 						}
@@ -474,15 +466,13 @@ public void generatePostIncrement(BlockScope currentScope, CodeStream codeStream
 			} else {
 				if (codegenField.isStatic()) {
 					codeStream.aconst_null();
-				} else {
-					if ((this.bits & DepthMASK) != 0) {
-						// internal error, per construction we should have found it
-						// not yet supported
-						currentScope.problemReporter().needImplementation(this);
-					} else {
-						generateReceiver(codeStream);
-					}
-				}
+				} else if ((this.bits & DepthMASK) != 0) {
+                	// internal error, per construction we should have found it
+                	// not yet supported
+                	currentScope.problemReporter().needImplementation(this);
+                } else {
+                	generateReceiver(codeStream);
+                }
 				codeStream.generateEmulatedReadAccessForField(codegenField);
 				if (valueRequired) {
 					switch (codegenField.type.id) {
@@ -560,9 +550,8 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 		return;
 	}
 
-	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0) return;
 	//If inlinable field, forget the access emulation, the code gen will directly target it
-	if (this.constant != Constant.NotAConstant)
+	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0 || this.constant != Constant.NotAConstant)
 		return;
 	// if field from parameterized type got found, use the original field at codegen time
 	if (this.binding instanceof ParameterizedFieldBinding) {
@@ -581,42 +570,37 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 public TypeBinding reportError(BlockScope scope) {
 
 	this.constant = Constant.NotAConstant;
-	if (this.binding instanceof ProblemFieldBinding && this.binding.problemId() == NotFound){
-		if (this.evaluationContext.declaringTypeName != null) {
-			this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
-			if (this.delegateThis != null){  // if not found then internal error, field should have been found
-				this.actualReceiverType = this.delegateThis.type;
-				// will not support innerclass emulation inside delegate
-				this.binding = scope.getField(this.delegateThis.type, this.token, this);
-				if (!this.binding.isValidBinding()) {
-					return super.reportError(scope);
-				}
-				return checkFieldAccess(scope);
-			}
-		}
-	}
-	if (this.binding instanceof ProblemBinding && this.binding.problemId() == NotFound){
-		if (this.evaluationContext.declaringTypeName != null) {
-			this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
-			if (this.delegateThis != null){  // if not found then internal error, field should have been found
-				this.actualReceiverType = this.delegateThis.type;
-				// will not support innerclass emulation inside delegate
-				FieldBinding fieldBinding = scope.getField(this.delegateThis.type, this.token, this);
-				if (!fieldBinding.isValidBinding()) {
-					if (fieldBinding.problemId() == NotVisible) {
-						// manage the access to a private field of the enclosing type
-						CodeSnippetScope localScope = new CodeSnippetScope(scope);
-						this.binding = localScope.getFieldForCodeSnippet(this.delegateThis.type, this.token, this);
-						return checkFieldAccess(scope);
-					} else {
-						return super.reportError(scope);
-					}
-				}
-				this.binding = fieldBinding;
-				return checkFieldAccess(scope);
-			}
-		}
-	}
+	if (this.binding instanceof ProblemFieldBinding && this.binding.problemId() == NotFound && this.evaluationContext.declaringTypeName != null) {
+    	this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
+    	if (this.delegateThis != null){  // if not found then internal error, field should have been found
+    		this.actualReceiverType = this.delegateThis.type;
+    		// will not support innerclass emulation inside delegate
+    		this.binding = scope.getField(this.delegateThis.type, this.token, this);
+    		if (!this.binding.isValidBinding()) {
+    			return super.reportError(scope);
+    		}
+    		return checkFieldAccess(scope);
+    	}
+    }
+	if (this.binding instanceof ProblemBinding && this.binding.problemId() == NotFound && this.evaluationContext.declaringTypeName != null) {
+    	this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
+    	if (this.delegateThis != null){  // if not found then internal error, field should have been found
+    		this.actualReceiverType = this.delegateThis.type;
+    		// will not support innerclass emulation inside delegate
+    		FieldBinding fieldBinding = scope.getField(this.delegateThis.type, this.token, this);
+    		if (!fieldBinding.isValidBinding()) {
+    			if (fieldBinding.problemId() == NotVisible) {
+    				// manage the access to a private field of the enclosing type
+    				CodeSnippetScope localScope = new CodeSnippetScope(scope);
+    				this.binding = localScope.getFieldForCodeSnippet(this.delegateThis.type, this.token, this);
+    				return checkFieldAccess(scope);
+    			}
+                return super.reportError(scope);
+    		}
+    		this.binding = fieldBinding;
+    		return checkFieldAccess(scope);
+    	}
+    }
 	return super.reportError(scope);
 }
 }

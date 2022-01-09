@@ -72,7 +72,7 @@ public class GuardedPattern extends Pattern {
 	@Override
 	public boolean isTotalForType(TypeBinding type) {
 		Constant cst = this.condition.optimizedBooleanConstant();
-		return this.primaryPattern.isTotalForType(type) && cst != Constant.NotAConstant && cst.booleanValue() == true;
+		return this.primaryPattern.isTotalForType(type) && cst != Constant.NotAConstant && cst.booleanValue();
 	}
 
 	@Override

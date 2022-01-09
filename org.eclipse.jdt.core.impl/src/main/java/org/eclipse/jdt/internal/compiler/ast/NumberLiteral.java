@@ -58,7 +58,7 @@ public abstract class NumberLiteral extends Literal {
 			switch(currentChar) {
 				case '0' :
 					// this is a prefix '0'
-					if (ignore && !modified && (i < end)) {
+					if (ignore && !modified && i < end) {
 						modified = true;
 					}
 					break;
@@ -79,7 +79,7 @@ public abstract class NumberLiteral extends Literal {
 			char currentChar = token[i];
 			switch(currentChar) {
 				case '0' :
-					if (ignore && (i < end)) {
+					if (ignore && i < end) {
 						// this is a prefix '0'
 						continue loop;
 					}

@@ -67,7 +67,6 @@ public final class ResourceChangeValidator {
 	 * @see #getValidator()
 	 */
 	private ResourceChangeValidator() {
-		super();
 	}
 
 	private IStatus combineResults(IStatus[] result) {

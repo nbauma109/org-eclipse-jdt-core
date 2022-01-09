@@ -90,27 +90,23 @@ public final class TextElement extends ASTNode implements IDocElement {
 		super(ast);
 	}
 
-	@Override
-	final List internalStructuralPropertiesForType(int apiLevel) {
+	@Override List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
 
-	@Override
-	final Object internalGetSetObjectProperty(SimplePropertyDescriptor property, boolean get, Object value) {
+	@Override Object internalGetSetObjectProperty(SimplePropertyDescriptor property, boolean get, Object value) {
 		if (property == TEXT_PROPERTY) {
 			if (get) {
 				return getText();
-			} else {
-				setText((String) value);
-				return null;
 			}
+            setText((String) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
 	}
 
-	@Override
-	final int getNodeType0() {
+	@Override int getNodeType0() {
 		return TEXT_ELEMENT;
 	}
 
@@ -122,8 +118,7 @@ public final class TextElement extends ASTNode implements IDocElement {
 		return result;
 	}
 
-	@Override
-	final boolean subtreeMatch0(ASTMatcher matcher, Object other) {
+	@Override boolean subtreeMatch0(ASTMatcher matcher, Object other) {
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
@@ -157,10 +152,7 @@ public final class TextElement extends ASTNode implements IDocElement {
 	 * or contains a block comment closing delimiter
 	 */
 	public void setText(String text) {
-		if (text == null) {
-			throw new IllegalArgumentException();
-		}
-		if (text.indexOf("*/") > 0) { //$NON-NLS-1$
+		if (text == null || text.indexOf("*/") > 0) { //$NON-NLS-1$
 			throw new IllegalArgumentException();
 		}
 		preValueChange(TEXT_PROPERTY);

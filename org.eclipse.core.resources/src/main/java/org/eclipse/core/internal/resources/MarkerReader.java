@@ -28,7 +28,6 @@ public class MarkerReader {
 	protected Workspace workspace;
 
 	public MarkerReader(Workspace workspace) {
-		super();
 		this.workspace = workspace;
 	}
 

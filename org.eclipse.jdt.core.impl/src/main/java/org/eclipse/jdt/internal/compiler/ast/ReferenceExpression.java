@@ -131,7 +131,6 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 	private Scanner scanner;
 
 	public ReferenceExpression(Scanner scanner) {
-		super();
 		this.original = this;
 		this.scanner = scanner;
 	}
@@ -162,28 +161,26 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		if (isMethodReference() && this.haveReceiver) {
 			if (this.lhs instanceof Invocation)
 				return true;
-			else {
-				return new ASTVisitor() {
-					boolean accessesnonFinalOuterLocals;
+            return new ASTVisitor() {
+            	boolean accessesnonFinalOuterLocals;
 
-					@Override
-					public boolean visit(SingleNameReference name, BlockScope skope) {
-						Binding local = skope.getBinding(name.getName(), ReferenceExpression.this);
-						if (local instanceof LocalVariableBinding) {
-							LocalVariableBinding localBinding = (LocalVariableBinding) local;
-							if (!localBinding.isFinal() && !localBinding.isEffectivelyFinal()) {
-								this.accessesnonFinalOuterLocals = true;
-							}
-						}
-						return false;
-					}
+            	@Override
+            	public boolean visit(SingleNameReference name, BlockScope skope) {
+            		Binding local = skope.getBinding(name.getName(), ReferenceExpression.this);
+            		if (local instanceof LocalVariableBinding) {
+            			LocalVariableBinding localBinding = (LocalVariableBinding) local;
+            			if (!localBinding.isFinal() && !localBinding.isEffectivelyFinal()) {
+            				this.accessesnonFinalOuterLocals = true;
+            			}
+            		}
+            		return false;
+            	}
 
-					public boolean accessesnonFinalOuterLocals() {
-						ReferenceExpression.this.lhs.traverse(this, ReferenceExpression.this.enclosingScope);
-						return this.accessesnonFinalOuterLocals;
-					}
-				}.accessesnonFinalOuterLocals();
-			}
+            	public boolean accessesnonFinalOuterLocals() {
+            		ReferenceExpression.this.lhs.traverse(this, ReferenceExpression.this.enclosingScope);
+            		return this.accessesnonFinalOuterLocals;
+            	}
+            }.accessesnonFinalOuterLocals();
 		}
 		return false;
 	}
@@ -204,7 +201,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		int parameterShift = this.receiverPrecedesParameters ? 1 : 0;
 		Expression [] argv = new SingleNameReference[argc - parameterShift];
 		for (int i = 0, length = argv.length; i < length; i++) {
-			char[] name = CharOperation.append(ImplicitArgName, Integer.toString((i + parameterShift)).toCharArray());
+			char[] name = CharOperation.append(ImplicitArgName, Integer.toString(i + parameterShift).toCharArray());
 			argv[i] = new SingleNameReference(name, 0);
 		}
 		boolean generateSecretReceiverVariable = shouldGenerateSecretReceiverVariable();
@@ -276,27 +273,23 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 
 	private boolean shouldGenerateImplicitLambda(BlockScope currentScope) {
 		// these cases are either too complicated, impossible to handle or result in significant code duplication
-		return (this.binding.isVarargs() ||
-				(isConstructorReference() && this.receiverType.syntheticOuterLocalVariables() != null && this.shouldCaptureInstance) ||
+		return this.binding.isVarargs() ||
+				isConstructorReference() && this.receiverType.syntheticOuterLocalVariables() != null && this.shouldCaptureInstance ||
 				this.requiresBridges() || // bridges.
-				!isDirectCodeGenPossible());
+				!isDirectCodeGenPossible();
 		// To fix: We should opt for direct code generation wherever possible.
 	}
 	private boolean isDirectCodeGenPossible() {
 		if (this.binding != null) {
-			if (isMethodReference() && this.syntheticAccessor == null) {
-				if (TypeBinding.notEquals(this.binding.declaringClass, this.lhs.resolvedType.erasure())) {
-					// reference to a method declared by an inaccessible type accessed via a
-					// subtype - normally a bridge method would be present to facilitate
-					// this access, unless the method is final/static/default, in which case, direct access to
-					// the method is not possible, an implicit lambda is needed
-					if (!this.binding.declaringClass.canBeSeenBy(this.enclosingScope)) {
-						if (this.binding.isDefaultMethod())
-							return false; // workaround for bug in MethodHandle lookup, see https://bugs.openjdk.java.net/browse/JDK-8068253
-						return !(this.binding.isFinal() || this.binding.isStatic());
-					}
-				}
-			}
+			// reference to a method declared by an inaccessible type accessed via a
+            // subtype - normally a bridge method would be present to facilitate
+            // this access, unless the method is final/static/default, in which case, direct access to
+            // the method is not possible, an implicit lambda is needed
+            if (isMethodReference() && this.syntheticAccessor == null && TypeBinding.notEquals(this.binding.declaringClass, this.lhs.resolvedType.erasure()) && !this.binding.declaringClass.canBeSeenBy(this.enclosingScope)) {
+            	if (this.binding.isDefaultMethod())
+            		return false; // workaround for bug in MethodHandle lookup, see https://bugs.openjdk.java.net/browse/JDK-8068253
+            	return !this.binding.isFinal() && !this.binding.isStatic();
+            }
 			TypeBinding[] descriptorParams = this.descriptor.parameters;
 			TypeBinding[] origParams = this.binding.original().parameters;
 			TypeBinding[] origDescParams = this.descriptor.original().parameters;
@@ -305,7 +298,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 				TypeBinding descType = descriptorParams[i + offset];
 				TypeBinding origDescType = origDescParams[i + offset];
 				if (descType.isIntersectionType18() ||
-						(descType.isTypeVariable() && ((TypeVariableBinding) descType).boundsCount() > 1)) {
+						descType.isTypeVariable() && ((TypeVariableBinding) descType).boundsCount() > 1) {
 					return CharOperation.equals(origDescType.signature(), origParams[i].signature());
 				}
 			}
@@ -331,15 +324,9 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		} else if (this.syntheticAccessor != null) {
 			if (this.lhs.isSuper() || isMethodReference())
 				this.binding = this.syntheticAccessor;
-		} else { // cf. MessageSend.generateCode()'s call to CodeStream.getConstantPoolDeclaringClass. We have extracted the relevant portions sans side effect here.
-			if (this.binding != null && isMethodReference()) {
-				if (TypeBinding.notEquals(this.binding.declaringClass, this.lhs.resolvedType.erasure())) {
-					if (!this.binding.declaringClass.canBeSeenBy(currentScope)) {
-						this.binding = new MethodBinding(this.binding.original(), (ReferenceBinding) this.lhs.resolvedType.erasure());
-					}
-				}
-			}
-		}
+		} else if (this.binding != null && isMethodReference() && TypeBinding.notEquals(this.binding.declaringClass, this.lhs.resolvedType.erasure()) && !this.binding.declaringClass.canBeSeenBy(currentScope)) {
+        	this.binding = new MethodBinding(this.binding.original(), (ReferenceBinding) this.lhs.resolvedType.erasure());
+        }
 		int pc = codeStream.position;
 		StringBuilder buffer = new StringBuilder();
 		int argumentsSize = 0;
@@ -369,34 +356,32 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 				buffer.append(this.receiverType.signature());
 			}
 			argumentsSize = 1;
-		} else {
-			if (this.isConstructorReference()) {
-				ReferenceBinding[] enclosingInstances = Binding.UNINITIALIZED_REFERENCE_TYPES;
-				if (this.receiverType.isNestedType()) {
-					ReferenceBinding nestedType = (ReferenceBinding) this.receiverType;
-					if ((enclosingInstances = nestedType.syntheticEnclosingInstanceTypes()) != null) {
-						int length = enclosingInstances.length;
-						argumentsSize = length;
-						for (int i = 0 ; i < length; i++) {
-							ReferenceBinding syntheticArgumentType = enclosingInstances[i];
-							buffer.append(syntheticArgumentType.signature());
-							Object[] emulationPath = currentScope.getEmulationPath(
-									syntheticArgumentType,
-									false /* allow compatible match */,
-									true /* disallow instance reference in explicit constructor call */);
-							codeStream.generateOuterAccess(emulationPath, this, syntheticArgumentType, currentScope);
-						}
-					} else {
-						enclosingInstances = Binding.NO_REFERENCE_TYPES;
-					}
-				}
-				if (this.syntheticAccessor != null) {
-					char [] lambdaName = CharOperation.concat(TypeConstants.ANONYMOUS_METHOD, Integer.toString(this.ordinal).toCharArray());
-					this.binding = sourceType.addSyntheticFactoryMethod(this.binding, this.syntheticAccessor, enclosingInstances, lambdaName);
-					this.syntheticAccessor = null; // add only once
-				}
-			}
-		}
+		} else if (this.isConstructorReference()) {
+        	ReferenceBinding[] enclosingInstances = Binding.UNINITIALIZED_REFERENCE_TYPES;
+        	if (this.receiverType.isNestedType()) {
+        		ReferenceBinding nestedType = (ReferenceBinding) this.receiverType;
+        		if ((enclosingInstances = nestedType.syntheticEnclosingInstanceTypes()) != null) {
+        			int length = enclosingInstances.length;
+        			argumentsSize = length;
+        			for (int i = 0 ; i < length; i++) {
+        				ReferenceBinding syntheticArgumentType = enclosingInstances[i];
+        				buffer.append(syntheticArgumentType.signature());
+        				Object[] emulationPath = currentScope.getEmulationPath(
+        						syntheticArgumentType,
+        						false /* allow compatible match */,
+        						true /* disallow instance reference in explicit constructor call */);
+        				codeStream.generateOuterAccess(emulationPath, this, syntheticArgumentType, currentScope);
+        			}
+        		} else {
+        			enclosingInstances = Binding.NO_REFERENCE_TYPES;
+        		}
+        	}
+        	if (this.syntheticAccessor != null) {
+        		char [] lambdaName = CharOperation.concat(TypeConstants.ANONYMOUS_METHOD, Integer.toString(this.ordinal).toCharArray());
+        		this.binding = sourceType.addSyntheticFactoryMethod(this.binding, this.syntheticAccessor, enclosingInstances, lambdaName);
+        		this.syntheticAccessor = null; // add only once
+        	}
+        }
 		buffer.append(')');
 		buffer.append('L');
 		if (this.resolvedType.isIntersectionType18()) {
@@ -410,7 +395,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		}
 		int invokeDynamicNumber = codeStream.classFile.recordBootstrapMethod(this);
 		codeStream.invokeDynamic(invokeDynamicNumber, argumentsSize, 1, this.descriptor.selector, buffer.toString().toCharArray(),
-				this.isConstructorReference(), (this.lhs instanceof TypeReference? (TypeReference) this.lhs : null), this.typeArguments,
+				this.isConstructorReference(), this.lhs instanceof TypeReference? (TypeReference) this.lhs : null, this.typeArguments,
 				this.resolvedType.id, this.resolvedType);
 		if (!valueRequired)
 			codeStream.pop();
@@ -445,7 +430,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		if (this.isConstructorReference()) {
 			ReferenceBinding allocatedType = codegenBinding.declaringClass;
 			if (codegenBinding.isPrivate() &&
-					TypeBinding.notEquals(enclosingSourceType, (allocatedType = codegenBinding.declaringClass))) {
+					TypeBinding.notEquals(enclosingSourceType, allocatedType = codegenBinding.declaringClass)) {
 				if ((allocatedType.tagBits & TagBits.IsLocalType) != 0) {
 					codegenBinding.tagBits |= TagBits.ClearPrivateModifier;
 				} else {
@@ -475,7 +460,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 				QualifiedSuperReference qualifiedSuperReference = (QualifiedSuperReference) this.lhs;
 				TypeReference qualification = qualifiedSuperReference.qualification;
 				if (!qualification.resolvedType.isInterface()) // we can't drop the bridge in I, it may not even be a source type.
-					destinationType = (SourceTypeBinding) (qualifiedSuperReference.currentCompatibleType);
+					destinationType = (SourceTypeBinding) qualifiedSuperReference.currentCompatibleType;
 			}
 
 			this.syntheticAccessor = destinationType.addSyntheticMethod(codegenBinding, true);
@@ -487,7 +472,6 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 			SourceTypeBinding currentCompatibleType = (SourceTypeBinding) enclosingSourceType.enclosingTypeAt((this.bits & ASTNode.DepthMASK) >> ASTNode.DepthSHIFT);
 			this.syntheticAccessor = currentCompatibleType.addSyntheticMethod(codegenBinding, isSuperAccess());
 			currentScope.problemReporter().needToEmulateMethodAccess(codegenBinding, this);
-			return;
 		}
 	}
 
@@ -537,14 +521,12 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 			}
 		}
 
-		if (currentScope.compilerOptions().analyseResourceLeaks) {
-			if (this.haveReceiver && CharOperation.equals(this.selector, TypeConstants.CLOSE)) {
-				FakedTrackingVariable trackingVariable = FakedTrackingVariable.getCloseTrackingVariable(this.lhs, flowInfo, flowContext);
-				if (trackingVariable != null) { // null happens if target is not a local variable or not an AutoCloseable
-					trackingVariable.markClosedInNestedMethod(); // there is a close()-call, but we don't know if it will be invoked
-				}
-			}
-		}
+		if (currentScope.compilerOptions().analyseResourceLeaks && this.haveReceiver && CharOperation.equals(this.selector, TypeConstants.CLOSE)) {
+        	FakedTrackingVariable trackingVariable = FakedTrackingVariable.getCloseTrackingVariable(this.lhs, flowInfo, flowContext);
+        	if (trackingVariable != null) { // null happens if target is not a local variable or not an AutoCloseable
+        		trackingVariable.markClosedInNestedMethod(); // there is a close()-call, but we don't know if it will be invoked
+        	}
+        }
 		manageSyntheticAccessIfNecessary(currentScope, flowInfo);
 		return flowInfo;
 	}
@@ -644,7 +626,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 	            }
 	        	this.binding = this.exactMethodBinding = scope.getExactConstructor(lhsType, this);
 	        }
-			if (isMethodReference() && this.haveReceiver && (this.original == this)) {
+			if (isMethodReference() && this.haveReceiver && this.original == this) {
 				this.receiverVariable = new LocalVariableBinding(
 						(SecretReceiverVariableName + this.nameSourceStart).toCharArray(), this.lhs.resolvedType,
 						ClassFileConstants.AccDefault, false);
@@ -769,12 +751,10 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
         	if (someMethodDepth > 0) {
         		this.bits |= (someMethodDepth & 0xFF) << ASTNode.DepthSHIFT;
         	}
-        	if (!this.haveReceiver) {
-        		if (!someMethod.isStatic() && !someMethod.isConstructor()) {
-        			scope.problemReporter().methodMustBeAccessedWithInstance(this, someMethod);
-        			return this.resolvedType = null;
-        		}
-        	}
+        	if (!this.haveReceiver && !someMethod.isStatic() && !someMethod.isConstructor()) {
+            	scope.problemReporter().methodMustBeAccessedWithInstance(this, someMethod);
+            	return this.resolvedType = null;
+            }
         } else if (anotherMethod != null && anotherMethod.isValidBinding() && (someMethod == null || !someMethod.isValidBinding() || !someMethod.isStatic())) {
         	this.binding = anotherMethod;
         	this.receiverPrecedesParameters = true; // 0 is receiver, real parameters start at 1
@@ -824,15 +804,15 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
         // OK, we have a compile time declaration, see if it passes muster.
         TypeBinding [] methodExceptions = this.binding.thrownExceptions;
         TypeBinding [] kosherExceptions = this.descriptor.thrownExceptions;
-        next: for (int i = 0, iMax = methodExceptions.length; i < iMax; i++) {
-        	if (methodExceptions[i].isUncheckedException(false)) {
+        next: for (TypeBinding methodException : methodExceptions) {
+        	if (methodException.isUncheckedException(false)) {
         		continue next;
     		}
-        	for (int j = 0, jMax = kosherExceptions.length; j < jMax; j++) {
-        		if (methodExceptions[i].isCompatibleWith(kosherExceptions[j], scope))
+        	for (TypeBinding kosherException : kosherExceptions) {
+        		if (methodException.isCompatibleWith(kosherException, scope))
         			continue next;
         	}
-        	scope.problemReporter().unhandledException(methodExceptions[i], this);
+        	scope.problemReporter().unhandledException(methodException, this);
         }
         checkNullAnnotations(scope);
         this.freeParameters = null; // not used after method lookup
@@ -844,19 +824,17 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
     		TypeBinding returnType = null;
     		if (this.binding.isConstructor()) {
     			returnType = this.receiverType;
-    		} else {
-    			if ((this.bits & ASTNode.Unchecked) != 0 && this.resolvedTypeArguments == null) {
-    				returnType = this.binding.returnType;
-    				if (returnType != null) {
-    					returnType = scope.environment().convertToRawType(returnType.erasure(), true);
-    				}
-    			} else {
-    				returnType = this.binding.returnType;
-    				if (returnType != null) {
-    					returnType = returnType.capture(scope, this.sourceStart, this.sourceEnd);
-    				}
-    			}
-    		}
+    		} else if ((this.bits & ASTNode.Unchecked) != 0 && this.resolvedTypeArguments == null) {
+            	returnType = this.binding.returnType;
+            	if (returnType != null) {
+            		returnType = scope.environment().convertToRawType(returnType.erasure(), true);
+            	}
+            } else {
+            	returnType = this.binding.returnType;
+            	if (returnType != null) {
+            		returnType = returnType.capture(scope, this.sourceStart, this.sourceEnd);
+            	}
+            }
     		if (this.descriptor.returnType.isProperType(true) // otherwise we cannot yet check compatibility
     				&& !returnType.isCompatibleWith(this.descriptor.returnType, scope)
     				&& !isBoxingCompatible(returnType, this.descriptor.returnType, this, scope))
@@ -872,57 +850,55 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 
 	protected void checkNullAnnotations(BlockScope scope) {
 		CompilerOptions compilerOptions = scope.compilerOptions();
-		if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
-        	if (this.expectedType == null || !NullAnnotationMatching.hasContradictions(this.expectedType)) { // otherwise assume it has been reported and we can do nothing here
-        		ImplicitNullAnnotationVerifier.ensureNullnessIsKnown(this.binding, scope);
-	        	// TODO: simplify by using this.freeParameters?
-	        	int len;
-	        	int expectedlen = this.binding.parameters.length;
-	        	int providedLen = this.descriptor.parameters.length;
-	        	if (this.receiverPrecedesParameters) {
-	        		providedLen--; // one parameter is 'consumed' as the receiver
+		if (compilerOptions.isAnnotationBasedNullAnalysisEnabled && (this.expectedType == null || !NullAnnotationMatching.hasContradictions(this.expectedType))) { // otherwise assume it has been reported and we can do nothing here
+        	ImplicitNullAnnotationVerifier.ensureNullnessIsKnown(this.binding, scope);
+        	// TODO: simplify by using this.freeParameters?
+        	int len;
+        	int expectedlen = this.binding.parameters.length;
+        	int providedLen = this.descriptor.parameters.length;
+        	if (this.receiverPrecedesParameters) {
+        		providedLen--; // one parameter is 'consumed' as the receiver
 
-	        		TypeBinding descriptorParameter = this.descriptor.parameters[0];
-	    			if((descriptorParameter.tagBits & TagBits.AnnotationNullable) != 0) { // Note: normal dereferencing of 'unchecked' values is not reported, either
-		    			final TypeBinding receiver = scope.environment().createAnnotatedType(this.binding.declaringClass,
-								new AnnotationBinding[] { scope.environment().getNonNullAnnotation() });
-    					scope.problemReporter().referenceExpressionArgumentNullityMismatch(this, receiver, descriptorParameter, this.descriptor, -1, NullAnnotationMatching.NULL_ANNOTATIONS_MISMATCH);
-	    			}
-	        	}
-	        	boolean isVarArgs = false;
-	        	if (this.binding.isVarargs()) {
-	        		isVarArgs = providedLen != expectedlen || !this.descriptor.parameters[expectedlen - 1].isCompatibleWith(this.binding.parameters[expectedlen - 1]);
-	        		len = providedLen; // binding parameters will be padded from InferenceContext18.getParameter()
-	        	} else {
-	        		len = Math.min(expectedlen, providedLen);
-	        	}
-	    		for (int i = 0; i < len; i++) {
-	    			TypeBinding descriptorParameter = this.descriptor.parameters[i + (this.receiverPrecedesParameters ? 1 : 0)];
-	    			TypeBinding bindingParameter = InferenceContext18.getParameter(this.binding.parameters, i, isVarArgs);
-					TypeBinding bindingParameterToCheck;
-					if (bindingParameter.isPrimitiveType() && !descriptorParameter.isPrimitiveType()) {
-						// replace primitive types by boxed equivalent for checking, e.g. int -> @NonNull Integer
-						bindingParameterToCheck = scope.environment().createAnnotatedType(scope.boxing(bindingParameter),
-								new AnnotationBinding[] { scope.environment().getNonNullAnnotation() });
-					} else {
-						bindingParameterToCheck = bindingParameter;
-					}
-	    			NullAnnotationMatching annotationStatus = NullAnnotationMatching.analyse(bindingParameterToCheck, descriptorParameter, FlowInfo.UNKNOWN);
-	    			if (annotationStatus.isAnyMismatch()) {
-	    				// immediate reporting:
-	    				scope.problemReporter().referenceExpressionArgumentNullityMismatch(this, bindingParameter, descriptorParameter, this.descriptor, i, annotationStatus);
-	    			}
-	    		}
-	    		TypeBinding returnType = this.binding.returnType;
-	    		if(!returnType.isPrimitiveType()) {
-		    		if (this.binding.isConstructor()) {
-		    			returnType = scope.environment().createAnnotatedType(this.receiverType, new AnnotationBinding[]{ scope.environment().getNonNullAnnotation() });
-		    		}
-		    		NullAnnotationMatching annotationStatus = NullAnnotationMatching.analyse(this.descriptor.returnType, returnType, FlowInfo.UNKNOWN);
-		        	if (annotationStatus.isAnyMismatch()) {
-	        			scope.problemReporter().illegalReturnRedefinition(this, this.descriptor, annotationStatus.isUnchecked(), returnType);
-		        	}
-	    		}
+        		TypeBinding descriptorParameter = this.descriptor.parameters[0];
+        		if((descriptorParameter.tagBits & TagBits.AnnotationNullable) != 0) { // Note: normal dereferencing of 'unchecked' values is not reported, either
+        			final TypeBinding receiver = scope.environment().createAnnotatedType(this.binding.declaringClass,
+        					new AnnotationBinding[] { scope.environment().getNonNullAnnotation() });
+        			scope.problemReporter().referenceExpressionArgumentNullityMismatch(this, receiver, descriptorParameter, this.descriptor, -1, NullAnnotationMatching.NULL_ANNOTATIONS_MISMATCH);
+        		}
+        	}
+        	boolean isVarArgs = false;
+        	if (this.binding.isVarargs()) {
+        		isVarArgs = providedLen != expectedlen || !this.descriptor.parameters[expectedlen - 1].isCompatibleWith(this.binding.parameters[expectedlen - 1]);
+        		len = providedLen; // binding parameters will be padded from InferenceContext18.getParameter()
+        	} else {
+        		len = Math.min(expectedlen, providedLen);
+        	}
+        	for (int i = 0; i < len; i++) {
+        		TypeBinding descriptorParameter = this.descriptor.parameters[i + (this.receiverPrecedesParameters ? 1 : 0)];
+        		TypeBinding bindingParameter = InferenceContext18.getParameter(this.binding.parameters, i, isVarArgs);
+        		TypeBinding bindingParameterToCheck;
+        		if (bindingParameter.isPrimitiveType() && !descriptorParameter.isPrimitiveType()) {
+        			// replace primitive types by boxed equivalent for checking, e.g. int -> @NonNull Integer
+        			bindingParameterToCheck = scope.environment().createAnnotatedType(scope.boxing(bindingParameter),
+        					new AnnotationBinding[] { scope.environment().getNonNullAnnotation() });
+        		} else {
+        			bindingParameterToCheck = bindingParameter;
+        		}
+        		NullAnnotationMatching annotationStatus = NullAnnotationMatching.analyse(bindingParameterToCheck, descriptorParameter, FlowInfo.UNKNOWN);
+        		if (annotationStatus.isAnyMismatch()) {
+        			// immediate reporting:
+        			scope.problemReporter().referenceExpressionArgumentNullityMismatch(this, bindingParameter, descriptorParameter, this.descriptor, i, annotationStatus);
+        		}
+        	}
+        	TypeBinding returnType = this.binding.returnType;
+        	if(!returnType.isPrimitiveType()) {
+        		if (this.binding.isConstructor()) {
+        			returnType = scope.environment().createAnnotatedType(this.receiverType, new AnnotationBinding[]{ scope.environment().getNonNullAnnotation() });
+        		}
+        		NullAnnotationMatching annotationStatus = NullAnnotationMatching.analyse(this.descriptor.returnType, returnType, FlowInfo.UNKNOWN);
+            	if (annotationStatus.isAnyMismatch()) {
+        			scope.problemReporter().illegalReturnRedefinition(this, this.descriptor, annotationStatus.isUnchecked(), returnType);
+            	}
         	}
         }
 	}
@@ -975,7 +951,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 			copy.resolveType(this.enclosingScope);
 
 			if (this.copiesPerTargetType == null)
-				this.copiesPerTargetType = new HashMap<TypeBinding, ReferenceExpression>();
+				this.copiesPerTargetType = new HashMap<>();
 			this.copiesPerTargetType.put(targetType, copy);
 
 			return copy;
@@ -986,7 +962,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 
 	public void registerInferenceContext(ParameterizedGenericMethodBinding method, InferenceContext18 context) {
 		if (this.inferenceContexts == null)
-			this.inferenceContexts = new HashMap<ParameterizedGenericMethodBinding, InferenceContext18>();
+			this.inferenceContexts = new HashMap<>();
 		this.inferenceContexts.put(method, context);
 	}
 
@@ -1008,7 +984,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 			if (!this.haveReceiver && this.isMethodReference() && !this.exactMethodBinding.isStatic()) {
 				k++;
 			}
-			return (n == k) ? this : null;
+			return n == k ? this : null;
 		}
 		// descriptors parameters should be free of inference variables.
 		ReferenceExpression copy = cachedResolvedCopy(targetType);
@@ -1066,7 +1042,6 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 
 	@Override
 	public void setActualReceiverType(ReferenceBinding receiverType) {
-		return;
 	}
 
 	@Override
@@ -1076,7 +1051,6 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 
 	@Override
 	public void setFieldIndex(int depth) {
-		return;
 	}
 
 	@Override
@@ -1123,7 +1097,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		// ... the reference is treated as if it were an invocation with argument expressions of types P2..Pn
 		// (the different sets of types are passed from our resolveType to scope.getMethod(..), see someMethod, anotherMethod)
 		Expression[] expressions = new Expression[p.length];
-		long pos = (((long)this.sourceStart)<<32)+this.sourceEnd;
+		long pos = ((long)this.sourceStart<<32)+this.sourceEnd;
 		for (int i = 0; i < p.length; i++) {
 			expressions[i] = new SingleNameReference(("fakeArg"+i).toCharArray(), pos); //$NON-NLS-1$
 			expressions[i].resolvedType = p[i];
@@ -1198,14 +1172,12 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
                    – The method reference expression has some other form and at least one potentially applicable method is not static.
         	*/
 
-        	for (int i = 0, length = this.potentialMethods.length; i < length; i++) {
-        		if (this.potentialMethods[i].isStatic() || this.potentialMethods[i].isConstructor()) {
+        	for (MethodBinding potentialMethod : this.potentialMethods) {
+        		if (potentialMethod.isStatic() || potentialMethod.isConstructor()) {
         			if (!this.haveReceiver) // form ReferenceType ::[TypeArguments] Identifier
         				return true;
-        		} else {
-        			if (this.haveReceiver) // some other form.
-        				return true;
-        		}
+        		} else if (this.haveReceiver) // some other form.
+                	return true;
         	}
 
         	if (this.haveReceiver || parametersLength == 0)
@@ -1223,8 +1195,8 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
               	   OR there is no potentially compatible compile time declaration ...
         		*/
         	}
-        	for (int i = 0, length = this.potentialMethods.length; i < length; i++) {
-			if (!this.potentialMethods[i].isStatic() && !this.potentialMethods[i].isConstructor()) {
+        	for (MethodBinding potentialMethod : this.potentialMethods) {
+			if (!potentialMethod.isStatic() && !potentialMethod.isConstructor()) {
         			return true;
         		}
         	}
@@ -1239,12 +1211,11 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 	MethodBinding getCompileTimeDeclaration(Scope scope, boolean isConstructorRef, TypeBinding[] parameters) {
 		if (this.exactMethodBinding != null)
 			return this.exactMethodBinding;
-		else if (this.receiverType.isArrayType())
+        if (this.receiverType.isArrayType())
 			return scope.findMethodForArray((ArrayBinding) this.receiverType, this.selector, Binding.NO_PARAMETERS, this);
-		else if (isConstructorRef)
+        if (isConstructorRef)
 			return scope.getConstructor((ReferenceBinding) this.receiverType, parameters, this);
-		else
-			return scope.getMethod(this.receiverType, this.selector, parameters, this);
+        return scope.getMethod(this.receiverType, this.selector, parameters, this);
 	}
 
 	@Override
@@ -1252,12 +1223,11 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		ReferenceExpression copy = cachedResolvedCopy(targetType);
 		if (copy == null) {
 			return contextHasSyntaxError(); // in case of syntax error avoid secondary errors
-		} else if (copy.resolvedType != null && copy.resolvedType.isValidBinding() && copy.binding != null && copy.binding.isValidBinding()) {
-			return true;
-		} else {
-			boolean notPertinentToApplicability = targetType instanceof ParameterizedTypeBinding && !isPertinentToApplicability(targetType, null); // not mentioned in JLS (see prior art in LE.internalIsCompatibleWith()
-			return notPertinentToApplicability;
 		}
+        if (copy.resolvedType != null && copy.resolvedType.isValidBinding() && copy.binding != null && copy.binding.isValidBinding()) {
+			return true;
+		}
+        return targetType instanceof ParameterizedTypeBinding && !isPertinentToApplicability(targetType, null);
 	}
 
 	@Override

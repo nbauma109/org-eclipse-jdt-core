@@ -206,7 +206,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 				// this should get us the highest ranked service, if available
 				ServiceReference<URLStreamHandlerService> newReference = urlStreamHandlerServiceTracker.getServiceReference();
 				if (newReference != urlStreamServiceReference && newReference != null) {
-					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
+					setNewHandler(newReference, (Integer) newReference.getProperty(Constants.SERVICE_RANKING));
 				}
 			}
 		} else if (newRank > ranking) {
@@ -235,7 +235,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		if (reference == null)
 			return Integer.MIN_VALUE;
 		Object property = reference.getProperty(Constants.SERVICE_RANKING);
-		return (property instanceof Integer) ? ((Integer) property).intValue() : 0;
+		return property instanceof Integer ? (Integer) property : 0;
 	}
 
 	@Override
@@ -243,7 +243,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		try {
 			Method openConn = realHandlerService.getClass().getMethod("openConnection", URL.class, Proxy.class); //$NON-NLS-1$
 			openConn.setAccessible(true);
-			return (URLConnection) openConn.invoke(realHandlerService, new Object[] {u, p});
+			return (URLConnection) openConn.invoke(realHandlerService, u, p);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IOException)
 				throw (IOException) e.getTargetException();

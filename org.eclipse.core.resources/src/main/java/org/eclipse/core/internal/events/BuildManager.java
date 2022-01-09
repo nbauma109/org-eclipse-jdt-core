@@ -59,7 +59,7 @@ public class BuildManager implements ICoreConstants, IManager, ILifecycleListene
 		 * calls calculator to compute a new delta if there is no matching one in the cache.
 		 */
 		public E computeIfAbsent(IPath project, ElementTree anOldTree, ElementTree aNewTree, Supplier<E> calculator) {
-			if (!(areEqual(this.oldTree, anOldTree) && areEqual(this.newTree, aNewTree))) {
+			if (!areEqual(this.oldTree, anOldTree) || !areEqual(this.newTree, aNewTree)) {
 				this.oldTree = anOldTree;
 				this.newTree = aNewTree;
 				deltas.clear();
@@ -193,7 +193,7 @@ public class BuildManager implements ICoreConstants, IManager, ILifecycleListene
 			}
 
 			// For incremental builds, grab a pointer to the current state before computing the delta
-			currentTree = ((trigger == IncrementalProjectBuilder.FULL_BUILD) || clean) ? null : workspace.getElementTree();
+			currentTree = trigger == IncrementalProjectBuilder.FULL_BUILD || clean ? null : workspace.getElementTree();
 			int depth = -1;
 			ISchedulingRule rule = null;
 			try {
@@ -792,8 +792,7 @@ public class BuildManager implements ICoreConstants, IManager, ILifecycleListene
 				return ResourceDeltaFactory.newEmptyDelta(project);
 			}
 
-			//now check against the cache
-			IResourceDelta resultDelta = deltaCache.computeIfAbsent(project.getFullPath(), currentLastBuiltTree, currentTree, () -> {
+			return deltaCache.computeIfAbsent(project.getFullPath(), currentLastBuiltTree, currentTree, () -> {
 				long startTime = 0L;
 				if (Policy.DEBUG_BUILD_DELTA) {
 					startTime = System.currentTimeMillis();
@@ -807,7 +806,6 @@ public class BuildManager implements ICoreConstants, IManager, ILifecycleListene
 
 				return result;
 			});
-			return resultDelta;
 		} finally {
 			lock.release();
 		}
@@ -851,13 +849,11 @@ public class BuildManager implements ICoreConstants, IManager, ILifecycleListene
 				//invoke the appropriate build method depending on the trigger
 				if (trigger != IncrementalProjectBuilder.CLEAN_BUILD)
 					prereqs = currentBuilder.build(trigger, args, monitor);
-				else {
-					if (currentBuilder instanceof IIncrementalProjectBuilder2) {
-						((IIncrementalProjectBuilder2) currentBuilder).clean(args, monitor);
-					} else {
-						currentBuilder.clean(monitor);
-					}
-				}
+                else if (currentBuilder instanceof IIncrementalProjectBuilder2) {
+                	((IIncrementalProjectBuilder2) currentBuilder).clean(args, monitor);
+                } else {
+                	currentBuilder.clean(monitor);
+                }
 				if (prereqs == null)
 					prereqs = new IProject[0];
 				currentBuilder.setInterestingProjects(prereqs.clone());

@@ -53,7 +53,6 @@ public final class ObjectUndoContext extends UndoContext {
 	 *            the label for the context
 	 */
 	public ObjectUndoContext(Object object, String label) {
-		super();
 		this.object = object;
 		this.label = label;
 	}

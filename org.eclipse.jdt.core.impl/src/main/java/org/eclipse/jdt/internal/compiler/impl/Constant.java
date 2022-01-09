@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.compiler.util.Messages;
 public abstract class Constant implements TypeIds, OperatorIds {
 
 	public static final Constant NotAConstant = DoubleConstant.fromValue(Double.NaN);
-	public static final Constant[] NotAConstantList = new Constant[] {DoubleConstant.fromValue(Double.NaN)};
+	public static final Constant[] NotAConstantList = {DoubleConstant.fromValue(Double.NaN)};
 
 	public boolean booleanValue() {
 		throw new ShouldNotImplement(Messages.bind(Messages.constant_cannotCastedInto, new String[] { typeName(), "boolean" })); //$NON-NLS-1$
@@ -217,16 +217,14 @@ public abstract class Constant implements TypeIds, OperatorIds {
 												{ //positive and negative 0....
 													if (Float.floatToIntBits(f) == 0)
 														return FloatConstant.fromValue(-0.0f);
-													else
-														return FloatConstant.fromValue(0.0f);}
+                                                    return FloatConstant.fromValue(0.0f);}
 												break; //default case
 								case T_double : double d;
 												if ( (d= cst.doubleValue()) == 0.0d)
 												{ //positive and negative 0....
 													if (Double.doubleToLongBits(d) == 0)
 														return DoubleConstant.fromValue(-0.0d);
-													else
-														return DoubleConstant.fromValue(0.0d);}
+                                                    return DoubleConstant.fromValue(0.0d);}
 												break; //default case
 							}
 							return computeConstantOperationMINUS(IntConstant.fromValue(0),T_int,cst,id);
@@ -497,11 +495,10 @@ public abstract class Constant implements TypeIds, OperatorIds {
 			case T_null :
 				if (rightId == T_JavaLangString) {
 					return BooleanConstant.fromValue(false);
-				} else {
-					if (rightId == T_null) {
-						return BooleanConstant.fromValue(true);
-					}
 				}
+                if (rightId == T_null) {
+                	return BooleanConstant.fromValue(true);
+                }
 		}
 		return BooleanConstant.fromValue(false);
 	}

@@ -48,7 +48,6 @@ public class Document extends AbstractDocument {
 	 * Creates a new empty document.
 	 */
 	public Document() {
-		super();
 		setTextStore(new CopyOnWriteTextStore(new GapTextStore()));
 		setLineTracker(new DefaultLineTracker());
 		completeInitialization();
@@ -60,7 +59,6 @@ public class Document extends AbstractDocument {
 	 * @param initialContent the document's initial content
 	 */
 	public Document(String initialContent) {
-		super();
 		setTextStore(new CopyOnWriteTextStore(new GapTextStore()));
 		setLineTracker(new DefaultLineTracker());
 		getStore().set(initialContent);
@@ -70,7 +68,7 @@ public class Document extends AbstractDocument {
 
 	@Override
 	public boolean isLineInformationRepairNeeded(int offset, int length, String text) throws BadLocationException {
-		if ((0 > offset) || (0 > length) || (offset + length > getLength()))
+		if (0 > offset || 0 > length || offset + length > getLength())
 			throw new BadLocationException();
 
 		return isLineInformationRepairNeeded(text) || isLineInformationRepairNeeded(get(offset, length));
@@ -116,7 +114,8 @@ public class Document extends AbstractDocument {
 				return true;
             //$NON-NLS-1$
             return nIndex != -1 && !"\n".equals(defaultLD);
-		} else if (defaultLD.length() == 2)
+		}
+        if (defaultLD.length() == 2)
 			return rIndex == -1 || nIndex - rIndex != 1;
 
 		return false;

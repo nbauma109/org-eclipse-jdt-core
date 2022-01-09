@@ -40,8 +40,6 @@ public class ArrayInitializer extends Expression {
 	 * ArrayInitializer constructor comment.
 	 */
 	public ArrayInitializer() {
-
-		super();
 	}
 
 	@Override
@@ -51,14 +49,14 @@ public class ArrayInitializer extends Expression {
 			CompilerOptions compilerOptions = currentScope.compilerOptions();
 			boolean analyseResources = compilerOptions.analyseResourceLeaks;
 			boolean evalNullTypeAnnotations = currentScope.environment().usesNullTypeAnnotations();
-			for (int i = 0, max = this.expressions.length; i < max; i++) {
-				flowInfo = this.expressions[i].analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
+			for (Expression expression : this.expressions) {
+				flowInfo = expression.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
 
-				if (analyseResources && FakedTrackingVariable.isAnyCloseable(this.expressions[i].resolvedType)) {
-					flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.expressions[i], flowInfo, flowContext, false);
+				if (analyseResources && FakedTrackingVariable.isAnyCloseable(expression.resolvedType)) {
+					flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, expression, flowInfo, flowContext, false);
 				}
 				if (evalNullTypeAnnotations) {
-					checkAgainstNullTypeAnnotation(currentScope, this.binding.elementsType(), this.expressions[i], flowContext, flowInfo);
+					checkAgainstNullTypeAnnotation(currentScope, this.binding.elementsType(), expression, flowContext, flowInfo);
 				}
 			}
 		}
@@ -77,7 +75,7 @@ public class ArrayInitializer extends Expression {
 
 		// Flatten the values and compute the dimensions, by iterating in depth into nested array initializers
 		int pc = codeStream.position;
-		int expressionLength = (this.expressions == null) ? 0: this.expressions.length;
+		int expressionLength = this.expressions == null ? 0: this.expressions.length;
 		codeStream.generateInlinedValue(expressionLength);
 		codeStream.newArray(typeReference, allocationExpression, this.binding);
 		if (this.expressions != null) {
@@ -110,7 +108,7 @@ public class ArrayInitializer extends Expression {
 							}
 							break;
 						case T_boolean :
-							if (expr.constant.booleanValue() != false) {
+							if (expr.constant.booleanValue()) {
 								codeStream.dup();
 								codeStream.generateInlinedValue(i);
 								expr.generateCode(currentScope, codeStream, true);
@@ -184,8 +182,7 @@ public class ArrayInitializer extends Expression {
 			if (this.expressions == null)
 				return this.binding;
 			TypeBinding elementType = this.binding.elementsType();
-			for (int i = 0, length = this.expressions.length; i < length; i++) {
-				Expression expression = this.expressions[i];
+			for (Expression expression : this.expressions) {
 				expression.setExpressionContext(ASSIGNMENT_CONTEXT);
 				expression.setExpectedType(elementType);
 				TypeBinding expressionType = expression instanceof ArrayInitializer
@@ -199,9 +196,7 @@ public class ArrayInitializer extends Expression {
 					scope.compilationUnitScope().recordTypeConversion(elementType, expressionType);
 
 				if (expression.isConstantValueOfTypeAssignableToType(expressionType, elementType)
-						|| expressionType.isCompatibleWith(elementType)) {
-					expression.computeConversion(scope, elementType, expressionType);
-				} else if (isBoxingCompatible(expressionType, elementType, expression, scope)) {
+						|| expressionType.isCompatibleWith(elementType) || isBoxingCompatible(expressionType, elementType, expression, scope)) {
 					expression.computeConversion(scope, elementType, expressionType);
 				} else {
 					scope.problemReporter().typeMismatchError(expressionType, elementType, expression, null);
@@ -217,7 +212,7 @@ public class ArrayInitializer extends Expression {
 			leafElementType = scope.getJavaLangObject();
 		} else {
 			Expression expression = this.expressions[0];
-			while(expression != null && expression instanceof ArrayInitializer) {
+			while(expression instanceof ArrayInitializer) {
 				dim++;
 				Expression[] subExprs = ((ArrayInitializer) expression).expressions;
 				if (subExprs == null){
@@ -248,13 +243,11 @@ public class ArrayInitializer extends Expression {
 	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 
-		if (visitor.visit(this, scope)) {
-			if (this.expressions != null) {
-				int expressionsLength = this.expressions.length;
-				for (int i = 0; i < expressionsLength; i++)
-					this.expressions[i].traverse(visitor, scope);
-			}
-		}
+		if (visitor.visit(this, scope) && this.expressions != null) {
+        	int expressionsLength = this.expressions.length;
+        	for (int i = 0; i < expressionsLength; i++)
+        		this.expressions[i].traverse(visitor, scope);
+        }
 		visitor.endVisit(this, scope);
 	}
 }

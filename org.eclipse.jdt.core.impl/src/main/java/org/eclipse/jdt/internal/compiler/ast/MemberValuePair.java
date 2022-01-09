@@ -110,30 +110,23 @@ public class MemberValuePair extends ASTNode {
 		final TypeBinding leafType = requiredType.leafComponentType();
 		// the next check may need deferring:
 		final boolean[] shouldExit = { false };
-		Runnable check = new Runnable() {
-			@Override
-			public void run() {
-				if (!(MemberValuePair.this.value.isConstantValueOfTypeAssignableToType(valueType, requiredType)
-						|| valueType.isCompatibleWith(requiredType))) {
-					if (!(requiredType.isArrayType()
-							&& requiredType.dimensions() == 1
-							&& (MemberValuePair.this.value.isConstantValueOfTypeAssignableToType(valueType, leafType)
-									|| valueType.isCompatibleWith(leafType)))) {
+		Runnable check = () -> {
+        	if (!MemberValuePair.this.value.isConstantValueOfTypeAssignableToType(valueType, requiredType) && !valueType.isCompatibleWith(requiredType)) {
+        		if (!requiredType.isArrayType() || requiredType.dimensions() != 1 || !MemberValuePair.this.value.isConstantValueOfTypeAssignableToType(valueType, leafType) && !valueType.isCompatibleWith(leafType)) {
 
-						if (leafType.isAnnotationType() && !valueType.isAnnotationType()) {
-							scope.problemReporter().annotationValueMustBeAnnotation(MemberValuePair.this.binding.declaringClass,
-									MemberValuePair.this.name, MemberValuePair.this.value, leafType);
-						} else {
-							scope.problemReporter().typeMismatchError(valueType, requiredType, MemberValuePair.this.value, null);
-						}
-						shouldExit[0] = true; // TODO may allow to proceed to find more errors at once
-					}
-				} else {
-					scope.compilationUnitScope().recordTypeConversion(requiredType.leafComponentType(), valueType.leafComponentType());
-					MemberValuePair.this.value.computeConversion(scope, requiredType, valueType);
-				}
-			}
-		};
+        			if (leafType.isAnnotationType() && !valueType.isAnnotationType()) {
+        				scope.problemReporter().annotationValueMustBeAnnotation(MemberValuePair.this.binding.declaringClass,
+        						MemberValuePair.this.name, MemberValuePair.this.value, leafType);
+        			} else {
+        				scope.problemReporter().typeMismatchError(valueType, requiredType, MemberValuePair.this.value, null);
+        			}
+        			shouldExit[0] = true; // TODO may allow to proceed to find more errors at once
+        		}
+        	} else {
+        		scope.compilationUnitScope().recordTypeConversion(requiredType.leafComponentType(), valueType.leafComponentType());
+        		MemberValuePair.this.value.computeConversion(scope, requiredType, valueType);
+        	}
+        };
 		// ... now or later?
 		if (!scope.deferCheck(check)) {
 			check.run();
@@ -157,11 +150,10 @@ public class MemberValuePair extends ASTNode {
 						ArrayInitializer initializer = (ArrayInitializer) this.value;
 						final Expression[] expressions = initializer.expressions;
 						if (expressions != null) {
-							for (int i =0, max = expressions.length; i < max; i++) {
-								Expression expression = expressions[i];
+							for (Expression expression : expressions) {
 								if (expression.resolvedType == null) continue; // fault-tolerance
 								if (expression.constant == Constant.NotAConstant) {
-									scope.problemReporter().annotationValueMustBeConstant(this.binding.declaringClass, this.name, expressions[i], false);
+									scope.problemReporter().annotationValueMustBeConstant(this.binding.declaringClass, this.name, expression, false);
 								}
 							}
 						}
@@ -178,8 +170,7 @@ public class MemberValuePair extends ASTNode {
 						ArrayInitializer initializer = (ArrayInitializer) this.value;
 						final Expression[] expressions = initializer.expressions;
 						if (expressions != null) {
-							for (int i =0, max = expressions.length; i < max; i++) {
-								Expression currentExpression = expressions[i];
+							for (Expression currentExpression : expressions) {
 								if (!(currentExpression instanceof ClassLiteralAccess)) {
 									scope.problemReporter().annotationValueMustBeClassLiteral(this.binding.declaringClass, this.name, currentExpression);
 								}
@@ -197,8 +188,7 @@ public class MemberValuePair extends ASTNode {
 					ArrayInitializer initializer = (ArrayInitializer) this.value;
 					final Expression[] expressions = initializer.expressions;
 					if (expressions != null) {
-						for (int i =0, max = expressions.length; i < max; i++) {
-							Expression currentExpression = expressions[i];
+						for (Expression currentExpression : expressions) {
 							if (currentExpression instanceof NullLiteral) {
 								scope.problemReporter().annotationValueMustBeConstant(this.binding.declaringClass, this.name, currentExpression, true);
 							} else if (currentExpression instanceof NameReference) {
@@ -238,8 +228,7 @@ public class MemberValuePair extends ASTNode {
 					ArrayInitializer initializer = (ArrayInitializer) this.value;
 					final Expression[] expressions = initializer.expressions;
 					if (expressions != null) {
-						for (int i =0, max = expressions.length; i < max; i++) {
-							Expression currentExpression = expressions[i];
+						for (Expression currentExpression : expressions) {
 							if (currentExpression instanceof NullLiteral || !(currentExpression instanceof Annotation)) {
 								scope.problemReporter().annotationValueMustBeAnnotation(this.binding.declaringClass, this.name, currentExpression, leafType);
 							}
@@ -255,19 +244,15 @@ public class MemberValuePair extends ASTNode {
 
 	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
-		if (visitor.visit(this, scope)) {
-			if (this.value != null) {
-				this.value.traverse(visitor, scope);
-			}
-		}
+		if (visitor.visit(this, scope) && this.value != null) {
+        	this.value.traverse(visitor, scope);
+        }
 		visitor.endVisit(this, scope);
 	}
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
-		if (visitor.visit(this, scope)) {
-			if (this.value != null) {
-				this.value.traverse(visitor, scope);
-			}
-		}
+		if (visitor.visit(this, scope) && this.value != null) {
+        	this.value.traverse(visitor, scope);
+        }
 		visitor.endVisit(this, scope);
 	}
 }

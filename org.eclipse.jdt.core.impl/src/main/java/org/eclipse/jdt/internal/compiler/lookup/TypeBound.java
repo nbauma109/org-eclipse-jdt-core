@@ -75,7 +75,7 @@ public class TypeBound extends ReductionResult {
 	public boolean equals(Object obj) {
 		if (obj instanceof TypeBound) {
 			TypeBound other = (TypeBound) obj;
-			return (this.relation == other.relation) && TypeBinding.equalsEquals(this.left, other.left) && TypeBinding.equalsEquals(this.right, other.right);
+			return this.relation == other.relation && TypeBinding.equalsEquals(this.left, other.left) && TypeBinding.equalsEquals(this.right, other.right);
 		}
 		return false;
 	}

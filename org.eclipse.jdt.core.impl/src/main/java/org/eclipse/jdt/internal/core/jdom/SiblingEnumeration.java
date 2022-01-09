@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.jdom.*;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
+@Deprecated
 @SuppressWarnings("rawtypes")
 /* package */ class SiblingEnumeration implements Enumeration {
 

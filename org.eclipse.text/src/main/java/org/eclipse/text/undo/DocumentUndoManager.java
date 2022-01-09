@@ -564,7 +564,8 @@ public class DocumentUndoManager implements IDocumentUndoManager {
 		protected long getUndoModificationStamp() {
 			if (fStart > -1) {
 				return super.getUndoModificationStamp();
-			} else if (!fChanges.isEmpty()) {
+			}
+            if (!fChanges.isEmpty()) {
 				return fChanges.get(0)
 						.getUndoModificationStamp();
 			}
@@ -576,7 +577,8 @@ public class DocumentUndoManager implements IDocumentUndoManager {
 		protected long getRedoModificationStamp() {
 			if (fStart > -1) {
 				return super.getRedoModificationStamp();
-			} else if (!fChanges.isEmpty()) {
+			}
+            if (!fChanges.isEmpty()) {
 				return fChanges.get(fChanges.size() - 1)
 						.getRedoModificationStamp();
 			}
@@ -634,15 +636,13 @@ public class DocumentUndoManager implements IDocumentUndoManager {
 				if (wasValid != fCurrent.isValid()) {
 					fHistory.operationChanged(op);
 				}
-			} else {
-				// if the change created a new fCurrent that we did not yet add
-				// to the
-				// stack, do so if it's valid and we are not in the middle of a
-				// compound change.
-				if (fCurrent != fLastAddedTextEdit && fCurrent.isValid()) {
-					addToOperationHistory(fCurrent);
-				}
-			}
+			} else // if the change created a new fCurrent that we did not yet add
+            // to the
+            // stack, do so if it's valid and we are not in the middle of a
+            // compound change.
+            if (fCurrent != fLastAddedTextEdit && fCurrent.isValid()) {
+            	addToOperationHistory(fCurrent);
+            }
 		}
 	}
 
@@ -668,11 +668,9 @@ public class DocumentUndoManager implements IDocumentUndoManager {
 						listenToTextChanges(false);
 
 						// in the undo case only, make sure compounds are closed
-						if (type == OperationHistoryEvent.ABOUT_TO_UNDO) {
-							if (fFoldingIntoCompoundChange) {
-								endCompoundChange();
-							}
-						}
+						if (type == OperationHistoryEvent.ABOUT_TO_UNDO && fFoldingIntoCompoundChange) {
+                        	endCompoundChange();
+                        }
 					} else {
 						// the undo or redo has our context, but it is not one
 						// of our edits. We will listen to the changes, but will
@@ -779,7 +777,6 @@ public class DocumentUndoManager implements IDocumentUndoManager {
 	 * @param document the document whose undo history is being managed.
 	 */
 	public DocumentUndoManager(IDocument document) {
-		super();
 		Assert.isNotNull(document);
 		fDocument= document;
 		fHistory= OperationHistoryFactory.getOperationHistory();
@@ -1005,12 +1002,10 @@ public class DocumentUndoManager implements IDocumentUndoManager {
 				fDocumentListener= new DocumentListener();
 				fDocument.addDocumentListener(fDocumentListener);
 			}
-		} else if (!listen) {
-			if (fDocumentListener != null && fDocument != null) {
-				fDocument.removeDocumentListener(fDocumentListener);
-				fDocumentListener= null;
-			}
-		}
+		} else if (!listen && fDocumentListener != null && fDocument != null) {
+        	fDocument.removeDocumentListener(fDocumentListener);
+        	fDocumentListener= null;
+        }
 	}
 
 	private void processChange(int modelStart, int modelEnd,
@@ -1044,11 +1039,11 @@ public class DocumentUndoManager implements IDocumentUndoManager {
 
 		if (modelStart == modelEnd) {
 			// text will be inserted
-			if ((length == 1) || isWhitespaceText(insertedText)) {
+			if (length == 1 || isWhitespaceText(insertedText)) {
 				// by typing or whitespace
 				if (!fInserting
-						|| (modelStart != fCurrent.fStart
-								+ fTextBuffer.length())) {
+						|| modelStart != fCurrent.fStart
+								+ fTextBuffer.length()) {
 					fCurrent.fRedoModificationStamp= beforeChangeModificationStamp;
 					if (fCurrent.attemptCommit()) {
 						fCurrent.fUndoModificationStamp= beforeChangeModificationStamp;
@@ -1077,111 +1072,109 @@ public class DocumentUndoManager implements IDocumentUndoManager {
 				}
 
 			}
-		} else {
-			if (length == 0) {
-				// text will be deleted by backspace or DEL key or empty
-				// clipboard
-				length= replacedText.length();
-				String[] delimiters= fDocument.getLegalLineDelimiters();
+		} else if (length == 0) {
+        	// text will be deleted by backspace or DEL key or empty
+        	// clipboard
+        	length= replacedText.length();
+        	String[] delimiters= fDocument.getLegalLineDelimiters();
 
-				if ((length == 1)
-						|| TextUtilities.equals(delimiters, replacedText) > -1) {
+        	if (length == 1
+        			|| TextUtilities.equals(delimiters, replacedText) > -1) {
 
-					// whereby selection is empty
+        		// whereby selection is empty
 
-					if (fPreviousDelete.fStart == modelStart
-							&& fPreviousDelete.fEnd == modelEnd) {
-						// repeated DEL
+        		if (fPreviousDelete.fStart == modelStart
+        				&& fPreviousDelete.fEnd == modelEnd) {
+        			// repeated DEL
 
-						// correct wrong settings of fCurrent
-						if (fCurrent.fStart == modelEnd
-								&& fCurrent.fEnd == modelStart) {
-							fCurrent.fStart= modelStart;
-							fCurrent.fEnd= modelEnd;
-						}
-						// append to buffer && extend edit range
-						fPreservedTextBuffer.append(replacedText);
-						++fCurrent.fEnd;
+        			// correct wrong settings of fCurrent
+        			if (fCurrent.fStart == modelEnd
+        					&& fCurrent.fEnd == modelStart) {
+        				fCurrent.fStart= modelStart;
+        				fCurrent.fEnd= modelEnd;
+        			}
+        			// append to buffer && extend edit range
+        			fPreservedTextBuffer.append(replacedText);
+        			++fCurrent.fEnd;
 
-					} else if (fPreviousDelete.fStart == modelEnd) {
-						// repeated backspace
+        		} else if (fPreviousDelete.fStart == modelEnd) {
+        			// repeated backspace
 
-						// insert in buffer and extend edit range
-						fPreservedTextBuffer.insert(0, replacedText);
-						fCurrent.fStart= modelStart;
+        			// insert in buffer and extend edit range
+        			fPreservedTextBuffer.insert(0, replacedText);
+        			fCurrent.fStart= modelStart;
 
-					} else {
-						// either DEL or backspace for the first time
+        		} else {
+        			// either DEL or backspace for the first time
 
-						fCurrent.fRedoModificationStamp= beforeChangeModificationStamp;
-						if (fCurrent.attemptCommit()) {
-							fCurrent.fUndoModificationStamp= beforeChangeModificationStamp;
-						}
+        			fCurrent.fRedoModificationStamp= beforeChangeModificationStamp;
+        			if (fCurrent.attemptCommit()) {
+        				fCurrent.fUndoModificationStamp= beforeChangeModificationStamp;
+        			}
 
-						// as we can not decide whether it was DEL or backspace
-						// we initialize for backspace
-						fPreservedTextBuffer.append(replacedText);
-						fCurrent.fStart= modelStart;
-						fCurrent.fEnd= modelEnd;
-					}
+        			// as we can not decide whether it was DEL or backspace
+        			// we initialize for backspace
+        			fPreservedTextBuffer.append(replacedText);
+        			fCurrent.fStart= modelStart;
+        			fCurrent.fEnd= modelEnd;
+        		}
 
-					fPreviousDelete.set(modelStart, modelEnd);
+        		fPreviousDelete.set(modelStart, modelEnd);
 
-				} else if (length > 0) {
-					// whereby selection is not empty
-					fCurrent.fRedoModificationStamp= beforeChangeModificationStamp;
-					if (fCurrent.attemptCommit()) {
-						fCurrent.fUndoModificationStamp= beforeChangeModificationStamp;
-					}
+        	} else if (length > 0) {
+        		// whereby selection is not empty
+        		fCurrent.fRedoModificationStamp= beforeChangeModificationStamp;
+        		if (fCurrent.attemptCommit()) {
+        			fCurrent.fUndoModificationStamp= beforeChangeModificationStamp;
+        		}
 
-					fCurrent.fStart= modelStart;
-					fCurrent.fEnd= modelEnd;
-					fPreservedTextBuffer.append(replacedText);
-				}
-			} else {
-				// text will be replaced
+        		fCurrent.fStart= modelStart;
+        		fCurrent.fEnd= modelEnd;
+        		fPreservedTextBuffer.append(replacedText);
+        	}
+        } else {
+        	// text will be replaced
 
-				if (length == 1) {
-					length= replacedText.length();
-					String[] delimiters= fDocument.getLegalLineDelimiters();
+        	if (length == 1) {
+        		length= replacedText.length();
+        		String[] delimiters= fDocument.getLegalLineDelimiters();
 
-					if ((length == 1)
-							|| TextUtilities.equals(delimiters, replacedText) > -1) {
-						// because of overwrite mode or model manipulation
-						if (!fOverwriting
-								|| (modelStart != fCurrent.fStart
-										+ fTextBuffer.length())) {
-							fCurrent.fRedoModificationStamp= beforeChangeModificationStamp;
-							if (fCurrent.attemptCommit()) {
-								fCurrent.fUndoModificationStamp= beforeChangeModificationStamp;
-							}
+        		if (length == 1
+        				|| TextUtilities.equals(delimiters, replacedText) > -1) {
+        			// because of overwrite mode or model manipulation
+        			if (!fOverwriting
+        					|| modelStart != fCurrent.fStart
+        							+ fTextBuffer.length()) {
+        				fCurrent.fRedoModificationStamp= beforeChangeModificationStamp;
+        				if (fCurrent.attemptCommit()) {
+        					fCurrent.fUndoModificationStamp= beforeChangeModificationStamp;
+        				}
 
-							fOverwriting= true;
-						}
+        				fOverwriting= true;
+        			}
 
-						if (fCurrent.fStart < 0) {
-							fCurrent.fStart= modelStart;
-						}
+        			if (fCurrent.fStart < 0) {
+        				fCurrent.fStart= modelStart;
+        			}
 
-						fCurrent.fEnd= modelEnd;
-						fTextBuffer.append(insertedText);
-						fPreservedTextBuffer.append(replacedText);
-						fCurrent.fRedoModificationStamp= afterChangeModificationStamp;
-						return;
-					}
-				}
-				// because of typing or pasting whereby selection is not empty
-				fCurrent.fRedoModificationStamp= beforeChangeModificationStamp;
-				if (fCurrent.attemptCommit()) {
-					fCurrent.fUndoModificationStamp= beforeChangeModificationStamp;
-				}
+        			fCurrent.fEnd= modelEnd;
+        			fTextBuffer.append(insertedText);
+        			fPreservedTextBuffer.append(replacedText);
+        			fCurrent.fRedoModificationStamp= afterChangeModificationStamp;
+        			return;
+        		}
+        	}
+        	// because of typing or pasting whereby selection is not empty
+        	fCurrent.fRedoModificationStamp= beforeChangeModificationStamp;
+        	if (fCurrent.attemptCommit()) {
+        		fCurrent.fUndoModificationStamp= beforeChangeModificationStamp;
+        	}
 
-				fCurrent.fStart= modelStart;
-				fCurrent.fEnd= modelEnd;
-				fTextBuffer.append(insertedText);
-				fPreservedTextBuffer.append(replacedText);
-			}
-		}
+        	fCurrent.fStart= modelStart;
+        	fCurrent.fEnd= modelEnd;
+        	fTextBuffer.append(insertedText);
+        	fPreservedTextBuffer.append(replacedText);
+        }
 		// in all cases, the redo modification stamp is updated on the open
 		// text edit
 		fCurrent.fRedoModificationStamp= afterChangeModificationStamp;

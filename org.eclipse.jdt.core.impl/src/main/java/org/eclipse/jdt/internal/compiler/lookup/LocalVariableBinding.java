@@ -201,14 +201,12 @@ public class LocalVariableBinding extends VariableBinding {
 		if (sourceType == null)
 			return Binding.NO_ANNOTATIONS;
 
-		if ((this.tagBits & TagBits.AnnotationResolved) == 0) {
-			if (((this.tagBits & TagBits.IsArgument) != 0) && this.declaration != null) {
-				Annotation[] annotationNodes = this.declaration.annotations;
-				if (annotationNodes != null) {
-					ASTNode.resolveAnnotations(this.declaringScope, annotationNodes, this, true);
-				}
-			}
-		}
+		if ((this.tagBits & TagBits.AnnotationResolved) == 0 && (this.tagBits & TagBits.IsArgument) != 0 && this.declaration != null) {
+        	Annotation[] annotationNodes = this.declaration.annotations;
+        	if (annotationNodes != null) {
+        		ASTNode.resolveAnnotations(this.declaringScope, annotationNodes, this, true);
+        	}
+        }
 		return sourceType.retrieveAnnotations(this);
 	}
 
@@ -229,8 +227,8 @@ public class LocalVariableBinding extends VariableBinding {
 
 	public void recordInitializationEndPC(int pc) {
 
-		if (this.initializationPCs[((this.initializationCount - 1) << 1) + 1] == -1)
-			this.initializationPCs[((this.initializationCount - 1) << 1) + 1] = pc;
+		if (this.initializationPCs[(this.initializationCount - 1 << 1) + 1] == -1)
+			this.initializationPCs[(this.initializationCount - 1 << 1) + 1] = pc;
 	}
 
 	public void recordInitializationStartPC(int pc) {
@@ -239,20 +237,20 @@ public class LocalVariableBinding extends VariableBinding {
 			return;
 		}
 		if (this.initializationCount > 0) {
-			int previousEndPC = this.initializationPCs[ ((this.initializationCount - 1) << 1) + 1];
+			int previousEndPC = this.initializationPCs[ (this.initializationCount - 1 << 1) + 1];
 			 // interval still open, keep using it (108180)
 			if (previousEndPC == -1) {
 				return;
 			}
 			// optimize cases where reopening a contiguous interval
 			if (previousEndPC == pc) {
-				this.initializationPCs[ ((this.initializationCount - 1) << 1) + 1] = -1; // reuse previous interval (its range will be augmented)
+				this.initializationPCs[ (this.initializationCount - 1 << 1) + 1] = -1; // reuse previous interval (its range will be augmented)
 				return;
 			}
 		}
 		int index = this.initializationCount << 1;
 		if (index == this.initializationPCs.length) {
-			System.arraycopy(this.initializationPCs, 0, (this.initializationPCs = new int[this.initializationCount << 2]), 0, index);
+			System.arraycopy(this.initializationPCs, 0, this.initializationPCs = new int[this.initializationCount << 2], 0, index);
 		}
 		this.initializationPCs[index] = pc;
 		this.initializationPCs[index + 1] = -1;
@@ -278,41 +276,41 @@ public class LocalVariableBinding extends VariableBinding {
 	@Override
 	public String toString() {
 
-		String s = super.toString();
+		StringBuilder s = new StringBuilder().append(super.toString());
 		switch (this.useFlag){
 			case USED:
-				s += "[pos: " + this.resolvedPosition + "]"; //$NON-NLS-2$ //$NON-NLS-1$
+				s.append("[pos: ").append(this.resolvedPosition).append("]"); //$NON-NLS-2$ //$NON-NLS-1$
 				break;
 			case UNUSED:
-				s += "[pos: unused]"; //$NON-NLS-1$
+				s.append("[pos: unused]"); //$NON-NLS-1$
 				break;
 			case FAKE_USED:
-				s += "[pos: fake_used]"; //$NON-NLS-1$
+				s.append("[pos: fake_used]"); //$NON-NLS-1$
 				break;
 		}
-		s += "[id:" + this.id + "]"; //$NON-NLS-2$ //$NON-NLS-1$
+		s.append("[id:").append(this.id).append("]"); //$NON-NLS-2$ //$NON-NLS-1$
 		if (this.initializationCount > 0) {
-			s += "[pc: "; //$NON-NLS-1$
+			s.append("[pc: "); //$NON-NLS-1$
 			for (int i = 0; i < this.initializationCount; i++) {
 				if (i > 0)
-					s += ", "; //$NON-NLS-1$
-				s += this.initializationPCs[i << 1] + "-" + ((this.initializationPCs[(i << 1) + 1] == -1) ? "?" : String.valueOf(this.initializationPCs[(i<< 1) + 1])); //$NON-NLS-2$ //$NON-NLS-1$
+					s.append(", "); //$NON-NLS-1$
+				s.append(this.initializationPCs[i << 1]).append("-").append(this.initializationPCs[(i << 1) + 1] == -1 ? "?" : String.valueOf(this.initializationPCs[(i<< 1) + 1])); //$NON-NLS-2$ //$NON-NLS-1$
 			}
-			s += "]"; //$NON-NLS-1$
+			s.append("]"); //$NON-NLS-1$
 		}
-		return s;
+		return s.toString();
 	}
 
 	@Override
 	public boolean isParameter() {
-		return ((this.tagBits & TagBits.IsArgument) != 0);
+		return (this.tagBits & TagBits.IsArgument) != 0;
 	}
 
 	public boolean isCatchParameter() {
 		return false;
 	}
 	public boolean isPatternVariable() {
-		return ((this.modifiers & ExtraCompilerModifiers.AccPatternVariable) != 0);
+		return (this.modifiers & ExtraCompilerModifiers.AccPatternVariable) != 0;
 	}
 
 	public MethodBinding getEnclosingMethod() {

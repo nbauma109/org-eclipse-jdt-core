@@ -70,10 +70,8 @@ public abstract class OS {
 				return false;
 			final char lastChar = name.charAt(length - 1);
 			// filenames ending in dot are not valid
-			if (lastChar == '.')
-				return false;
 			// file names ending with whitespace are truncated (bug 118997)
-			if (Character.isWhitespace(lastChar))
+			if (lastChar == '.' || Character.isWhitespace(lastChar))
 				return false;
 			int dot = name.indexOf('.');
 			//on windows, filename suffixes are not relevant to name validity

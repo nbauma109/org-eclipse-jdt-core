@@ -110,7 +110,7 @@ class WorkerPool {
 		try {
 			//need to end rule in graph before ending job so that 2 threads
 			//do not become the owners of the same rule in the graph
-			if ((job.getRule() != null) && !(job instanceof ThreadJob)) {
+			if (job.getRule() != null && !(job instanceof ThreadJob)) {
 				//remove any locks this thread may be owning on that rule
 				manager.getLockManager().removeLockCompletely(Thread.currentThread(), job.getRule());
 			}
@@ -158,7 +158,6 @@ class WorkerPool {
 			if (JobManager.DEBUG)
 				JobManager.debug("worker added to pool: " + worker); //$NON-NLS-1$
 			worker.start();
-			return;
 		}
 	}
 
@@ -245,7 +244,7 @@ class WorkerPool {
 				//if we were already idle, and there are still no new jobs, then
 				// the thread can expire
 				synchronized (this) {
-					if (job == null && (manager.now() - idleStart > BEST_BEFORE) && (numThreads - busyThreads) > MIN_THREADS) {
+					if (job == null && manager.now() - idleStart > BEST_BEFORE && numThreads - busyThreads > MIN_THREADS) {
 						//must remove the worker immediately to prevent all threads from expiring
 						endWorker(worker);
 						decrementBusyThreads();
@@ -259,7 +258,7 @@ class WorkerPool {
 			}
 			if (job != null) {
 				//if this job has a rule, then we are essentially acquiring a lock
-				if ((job.getRule() != null) && !(job instanceof ThreadJob)) {
+				if (job.getRule() != null && !(job instanceof ThreadJob)) {
 					//don't need to re-acquire locks because it was not recorded in the graph
 					//that this thread waited to get this rule
 					manager.getLockManager().addLockThread(Thread.currentThread(), job.getRule());

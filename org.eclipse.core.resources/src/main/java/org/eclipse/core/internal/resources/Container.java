@@ -118,7 +118,7 @@ public abstract class Container extends Resource implements IContainer {
 	public IResource findMember(IPath childPath, boolean phantom) {
 		childPath = getFullPath().append(childPath);
 		ResourceInfo info = workspace.getResourceInfo(childPath, phantom, false);
-		return (info == null) ? null : workspace.newResource(childPath, info.getType());
+		return info == null ? null : workspace.newResource(childPath, info.getType());
 	}
 
 	@Override
@@ -186,7 +186,7 @@ public abstract class Container extends Resource implements IContainer {
 		if (desc == null)
 			return false;
 		LinkedList<FilterDescription> filters = desc.getFilter(getProjectRelativePath());
-        return (filters != null) && (filters.size() > 0);
+        return filters != null && filters.size() > 0;
     }
 
 	@Override

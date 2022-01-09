@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IPath;
  */
 public class NodeIDMap {
 	//using prime table sizes improves our hash function
-	private static final int[] SIZES = new int[] {13, 29, 71, 173, 349, 733, 1511, 3079, 6133, 16381, 32653, 65543, 131111, 262139, 524287, 1051601};
+	private static final int[] SIZES = {13, 29, 71, 173, 349, 733, 1511, 3079, 6133, 16381, 32653, 65543, 131111, 262139, 524287, 1051601};
 	private static final double LOAD_FACTOR = 0.75;
 	//2^32 * golden ratio
 	private static final long LARGE_NUMBER = 2654435761L;
@@ -130,7 +130,7 @@ public class NodeIDMap {
 
 	private int hashFor(long id, int size) {
 		//Knuth's hash function from Art of Computer Programming section 6.4
-		return (int) Math.abs((id * LARGE_NUMBER) % size);
+		return (int) Math.abs(id * LARGE_NUMBER % size);
 	}
 
 	/**

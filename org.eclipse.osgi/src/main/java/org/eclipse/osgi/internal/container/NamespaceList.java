@@ -162,7 +162,7 @@ public class NamespaceList<E> {
 			prepareModification();
 
 			final Iterator<? extends List<E>> outer = namespaceElements.values().iterator();
-			return new Iterator<E>() {
+			return new Iterator<>() {
 				Iterator<E> inner = Collections.emptyIterator();
 				List<E> lastInnerList = null;
 
@@ -175,7 +175,8 @@ public class NamespaceList<E> {
 					return inner.hasNext();
 				}
 
-				public E next() {
+				@Override
+                public E next() {
 					if (!hasNext()) {
 						throw new NoSuchElementException();
 					}
@@ -512,7 +513,7 @@ public class NamespaceList<E> {
 				namespaceElements.values().forEach(lastBuildElements::addAll);
 				lastBuildElements = Collections.unmodifiableList(lastBuildElements);
 
-				int[] start = new int[] { 0 };
+				int[] start = { 0 };
 				namespaceElements.replaceAll((n, es) -> {
 					int from = start[0];
 					int to = start[0] += es.size();

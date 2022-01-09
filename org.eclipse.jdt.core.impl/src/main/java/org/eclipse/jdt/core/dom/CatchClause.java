@@ -111,18 +111,16 @@ public class CatchClause extends ASTNode {
 		if (property == EXCEPTION_PROPERTY) {
 			if (get) {
 				return getException();
-			} else {
-				setException((SingleVariableDeclaration) child);
-				return null;
 			}
+            setException((SingleVariableDeclaration) child);
+            return null;
 		}
 		if (property == BODY_PROPERTY) {
 			if (get) {
 				return getBody();
-			} else {
-				setBody((Block) child);
-				return null;
 			}
+            setBody((Block) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

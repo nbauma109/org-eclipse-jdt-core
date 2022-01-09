@@ -86,10 +86,7 @@ public class CharConstant extends Constant {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
 		}
 		CharConstant other = (CharConstant) obj;

@@ -306,20 +306,18 @@ public final class ModuleRevisionBuilder {
 					try {
 						f = FilterImpl.newInstance(filterSpec);
 						String hostName = f.getPrimaryKeyValue(HostNamespace.HOST_NAMESPACE);
-						if (hostName != null) {
-							if (systemNames.contains(hostName)) {
-								Bundle b = module.getBundle();
-								if (b != null && !b.hasPermission(new AllPermission())) {
-									SecurityException se = new SecurityException(
-											"Must have AllPermission granted to install an extension bundle: " + b); //$NON-NLS-1$
-									// TODO this is such a hack: making the cause a bundle exception so we can throw the right one later
-									BundleException be = new BundleException(se.getMessage(), BundleException.SECURITY_ERROR, se);
-									se.initCause(be);
-									throw se;
-								}
-								module.getContainer().checkAdminPermission(module.getBundle(), AdminPermission.EXTENSIONLIFECYCLE);
-							}
-						}
+						if (hostName != null && systemNames.contains(hostName)) {
+                        	Bundle b = module.getBundle();
+                        	if (b != null && !b.hasPermission(new AllPermission())) {
+                        		SecurityException se = new SecurityException(
+                        				"Must have AllPermission granted to install an extension bundle: " + b); //$NON-NLS-1$
+                        		// TODO this is such a hack: making the cause a bundle exception so we can throw the right one later
+                        		BundleException be = new BundleException(se.getMessage(), BundleException.SECURITY_ERROR, se);
+                        		se.initCause(be);
+                        		throw se;
+                        	}
+                        	module.getContainer().checkAdminPermission(module.getBundle(), AdminPermission.EXTENSIONLIFECYCLE);
+                        }
 					} catch (InvalidSyntaxException e) { // ignore
 					}
 				}
@@ -354,11 +352,9 @@ public final class ModuleRevisionBuilder {
 				Map.Entry<? extends K, ? extends V> entry = map.entrySet().iterator().next();
 				map = Collections.singletonMap(entry.getKey(), entry.getValue());
 			}
-		} else {
-			if (map.getClass() != UNMODIFIABLE_MAP_CLASS) {
-				map = Collections.unmodifiableMap(map);
-			}
-		}
+		} else if (map.getClass() != UNMODIFIABLE_MAP_CLASS) {
+        	map = Collections.unmodifiableMap(map);
+        }
 		return (Map<K, V>) map;
 	}
 

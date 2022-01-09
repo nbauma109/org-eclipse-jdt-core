@@ -262,27 +262,23 @@ public final class TagElement extends ASTNode implements IDocElement {
 		super(ast);
 	}
 
-	@Override
-	final List internalStructuralPropertiesForType(int apiLevel) {
+	@Override List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
 
-	@Override
-	final Object internalGetSetObjectProperty(SimplePropertyDescriptor property, boolean get, Object value) {
+	@Override Object internalGetSetObjectProperty(SimplePropertyDescriptor property, boolean get, Object value) {
 		if (property == TAG_NAME_PROPERTY) {
 			if (get) {
 				return getTagName();
-			} else {
-				setTagName((String) value);
-				return null;
 			}
+            setTagName((String) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
 	}
 
-	@Override
-	final List internalGetChildListProperty(ChildListPropertyDescriptor property) {
+	@Override List internalGetChildListProperty(ChildListPropertyDescriptor property) {
 		if (property == FRAGMENTS_PROPERTY) {
 			return fragments();
 		}
@@ -290,8 +286,7 @@ public final class TagElement extends ASTNode implements IDocElement {
 		return super.internalGetChildListProperty(property);
 	}
 
-	@Override
-	final int getNodeType0() {
+	@Override int getNodeType0() {
 		return TAG_ELEMENT;
 	}
 
@@ -304,8 +299,7 @@ public final class TagElement extends ASTNode implements IDocElement {
 		return result;
 	}
 
-	@Override
-	final boolean subtreeMatch0(ASTMatcher matcher, Object other) {
+	@Override boolean subtreeMatch0(ASTMatcher matcher, Object other) {
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
@@ -417,13 +411,12 @@ public final class TagElement extends ASTNode implements IDocElement {
 	 * ({@link Javadoc}), or is unparented
 	 */
 	public boolean isNested() {
-		return (getParent() instanceof TagElement);
+		return getParent() instanceof TagElement;
 	}
 
 	@Override
 	int memSize() {
-		int size = BASE_NODE_SIZE + 2 * 4 + stringSize(this.optionalTagName);
-		return size;
+		return BASE_NODE_SIZE + 2 * 4 + stringSize(this.optionalTagName);
 	}
 
 	@Override

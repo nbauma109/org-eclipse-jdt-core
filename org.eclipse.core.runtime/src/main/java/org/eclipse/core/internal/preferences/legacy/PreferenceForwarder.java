@@ -34,7 +34,7 @@ import org.osgi.service.prefs.BackingStoreException;
 @Deprecated
 public class PreferenceForwarder extends Preferences implements IEclipsePreferences.IPreferenceChangeListener, IEclipsePreferences.INodeChangeListener {
 
-	private static final byte[] BYTE_ARRAY_DEFAULT_DEFAULT = new byte[0];
+	private static final byte[] BYTE_ARRAY_DEFAULT_DEFAULT = {};
 
 	private IEclipsePreferences pluginRoot = (IEclipsePreferences) PreferencesService.getDefault().getRootNode().node(InstanceScope.SCOPE);
 	private DefaultPreferences defaultsRoot = (DefaultPreferences) PreferencesService.getDefault().getRootNode().node(DefaultScope.SCOPE);
@@ -52,7 +52,6 @@ public class PreferenceForwarder extends Preferences implements IEclipsePreferen
 	}
 
 	public PreferenceForwarder(Object plugin, String pluginID) {
-		super();
 		this.plugin = plugin;
 		this.pluginID = pluginID;
 	}
@@ -165,20 +164,19 @@ public class PreferenceForwarder extends Preferences implements IEclipsePreferen
 		IEclipsePreferences defaults = getDefaultPreferences();
 		if (obj instanceof String)
 			return defaults.get(key, STRING_DEFAULT_DEFAULT);
-		else if (obj instanceof Integer)
+        if (obj instanceof Integer)
 			return Integer.valueOf(defaults.getInt(key, INT_DEFAULT_DEFAULT));
-		else if (obj instanceof Double)
+        if (obj instanceof Double)
 			return Double.valueOf(defaults.getDouble(key, DOUBLE_DEFAULT_DEFAULT));
-		else if (obj instanceof Float)
+        if (obj instanceof Float)
 			return Float.valueOf(defaults.getFloat(key, FLOAT_DEFAULT_DEFAULT));
-		else if (obj instanceof Long)
+        if (obj instanceof Long)
 			return Long.valueOf(defaults.getLong(key, LONG_DEFAULT_DEFAULT));
-		else if (obj instanceof byte[])
+        if (obj instanceof byte[])
 			return defaults.getByteArray(key, BYTE_ARRAY_DEFAULT_DEFAULT);
-		else if (obj instanceof Boolean)
+        if (obj instanceof Boolean)
 			return defaults.getBoolean(key, BOOLEAN_DEFAULT_DEFAULT) ? Boolean.TRUE : Boolean.FALSE;
-		else
-			return null;
+        return null;
 	}
 
 	/**
@@ -329,8 +327,8 @@ public class PreferenceForwarder extends Preferences implements IEclipsePreferen
 		final double doubleValue = getDouble(name);
 		if (value == doubleValue)
 			return;
-		Double oldValue = Double.valueOf(doubleValue);
-		Double newValue = Double.valueOf(value);
+		Double oldValue = doubleValue;
+		Double newValue = value;
 		try {
 			notify = false;
 			if (getDefaultDouble(name) == value)
@@ -423,8 +421,8 @@ public class PreferenceForwarder extends Preferences implements IEclipsePreferen
 		final float floatValue = getFloat(name);
 		if (value == floatValue)
 			return;
-		Float oldValue = Float.valueOf(floatValue);
-		Float newValue = Float.valueOf(value);
+		Float oldValue = floatValue;
+		Float newValue = value;
 		try {
 			notify = false;
 			if (getDefaultFloat(name) == value)
@@ -514,8 +512,8 @@ public class PreferenceForwarder extends Preferences implements IEclipsePreferen
 		final int intValue = getInt(name);
 		if (value == intValue)
 			return;
-		Integer oldValue = Integer.valueOf(intValue);
-		Integer newValue = Integer.valueOf(value);
+		Integer oldValue = intValue;
+		Integer newValue = value;
 		try {
 			notify = false;
 			if (getDefaultInt(name) == value)
@@ -602,8 +600,8 @@ public class PreferenceForwarder extends Preferences implements IEclipsePreferen
 		final long longValue = getLong(name);
 		if (value == longValue)
 			return;
-		Long oldValue = Long.valueOf(longValue);
-		Long newValue = Long.valueOf(value);
+		Long oldValue = longValue;
+		Long newValue = value;
 		try {
 			notify = false;
 			if (getDefaultLong(name) == value)

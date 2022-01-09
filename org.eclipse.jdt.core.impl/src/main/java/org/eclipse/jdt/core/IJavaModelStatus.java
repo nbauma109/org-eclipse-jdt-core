@@ -70,6 +70,7 @@ IPath getPath();
  * @see IJavaModelStatusConstants
  * @deprecated Use {@link IStatus#getMessage()} instead
  */
+@Deprecated
 String getString();
 /**
  * Returns whether this status indicates that a Java model element does not exist.

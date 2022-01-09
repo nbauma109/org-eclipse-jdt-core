@@ -260,13 +260,11 @@ public class WorkspacePreferences extends WorkspaceDescription {
 	}
 
 	private void upgradeVersion(String oldVersion) {
-		if (oldVersion.length() == 0) {
-			//only need to convert the build order if we are not using the default order
-			if (!preferences.getBoolean(ResourcesPlugin.PREF_DEFAULT_BUILD_ORDER)) {
-				String oldOrder = preferences.getString(ResourcesPlugin.PREF_BUILD_ORDER);
-				setBuildOrder(convertStringToStringArray(oldOrder, ":")); //$NON-NLS-1$
-			}
-		}
+		//only need to convert the build order if we are not using the default order
+        if (oldVersion.length() == 0 && !preferences.getBoolean(ResourcesPlugin.PREF_DEFAULT_BUILD_ORDER)) {
+        	String oldOrder = preferences.getString(ResourcesPlugin.PREF_BUILD_ORDER);
+        	setBuildOrder(convertStringToStringArray(oldOrder, ":")); //$NON-NLS-1$
+        }
 		preferences.setValue(ICoreConstants.PREF_VERSION_KEY, ICoreConstants.PREF_VERSION);
 	}
 }

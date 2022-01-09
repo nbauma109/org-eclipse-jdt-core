@@ -16,6 +16,7 @@ package org.eclipse.core.runtime;
 
 import java.util.Optional;
 import org.eclipse.core.internal.runtime.LocalizationUtils;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
 /**
@@ -80,7 +81,7 @@ public class Status implements IStatus {
 
 	/** Constant to avoid generating garbage.
 	 */
-	private static final IStatus[] theEmptyStatusArray = new IStatus[0];
+	private static final IStatus[] theEmptyStatusArray = {};
 
 	private static StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 
@@ -338,9 +339,9 @@ public class Status implements IStatus {
 	private static String identifier(Class<?> caller) {
 		return Optional.ofNullable(caller)//
 				.flatMap(c -> Optional.ofNullable(FrameworkUtil.getBundle(c)))//
-				.map(b -> b.getSymbolicName())//
+				.map(Bundle::getSymbolicName)//
 				.orElseGet(() -> Optional.ofNullable(caller)//
-						.map(c -> c.getName())//
+						.map(Class::getName)//
 						.orElse(unknownId));
 	}
 
@@ -451,20 +452,27 @@ public class Status implements IStatus {
 	public String toString() {
 		StringBuilder buf = new StringBuilder();
 		buf.append("Status "); //$NON-NLS-1$
-		if (severity == OK) {
-			buf.append("OK"); //$NON-NLS-1$
-		} else if (severity == ERROR) {
-			buf.append("ERROR"); //$NON-NLS-1$
-		} else if (severity == WARNING) {
-			buf.append("WARNING"); //$NON-NLS-1$
-		} else if (severity == INFO) {
-			buf.append("INFO"); //$NON-NLS-1$
-		} else if (severity == CANCEL) {
-			buf.append("CANCEL"); //$NON-NLS-1$
-		} else {
-			buf.append("severity="); //$NON-NLS-1$
-			buf.append(severity);
-		}
+		switch (severity) {
+            case OK:
+                buf.append("OK"); //$NON-NLS-1$
+                break;
+            case ERROR:
+                buf.append("ERROR"); //$NON-NLS-1$
+                break;
+            case WARNING:
+                buf.append("WARNING"); //$NON-NLS-1$
+                break;
+            case INFO:
+                buf.append("INFO"); //$NON-NLS-1$
+                break;
+            case CANCEL:
+                buf.append("CANCEL"); //$NON-NLS-1$
+                break;
+            default:
+                buf.append("severity="); //$NON-NLS-1$
+                buf.append(severity);
+                break;
+        }
 		buf.append(": "); //$NON-NLS-1$
 		buf.append(pluginId);
 		buf.append(" code="); //$NON-NLS-1$

@@ -34,26 +34,31 @@ class SimpleHostedCapability implements HostedCapability
         m_cap = cap;
     }
 
+    @Override
     public Resource getResource()
     {
         return m_host;
     }
 
+    @Override
     public Capability getDeclaredCapability()
     {
         return m_cap;
     }
 
+    @Override
     public String getNamespace()
     {
         return m_cap.getNamespace();
     }
 
+    @Override
     public Map<String, String> getDirectives()
     {
         return m_cap.getDirectives();
     }
 
+    @Override
     public Map<String, Object> getAttributes()
     {
         return m_cap.getAttributes();

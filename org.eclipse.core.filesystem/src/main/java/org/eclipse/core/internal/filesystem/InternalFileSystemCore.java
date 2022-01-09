@@ -48,7 +48,6 @@ public class InternalFileSystemCore implements IRegistryChangeListener {
 	 * This class has a singleton instance.
 	 */
 	private InternalFileSystemCore() {
-		super();
 		RegistryFactory.getRegistry().addRegistryChangeListener(this);
 	}
 

@@ -66,8 +66,7 @@ public final class ImportName {
 	@Override
 	public int hashCode() {
 		int result = this.qualifiedName.hashCode();
-		result = 31 * result + (this.isStatic ? 1 : 0);
-		return result;
+		return 31 * result + (this.isStatic ? 1 : 0);
 	}
 
 	@Override

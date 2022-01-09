@@ -19,7 +19,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -204,8 +203,8 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 
 		TypeDeclaration[] memberTypes = type.memberTypes;
 		if (memberTypes != null)
-			for (int i = 0, l = memberTypes.length; i < l; i++)
-				purgeMethodStatements(memberTypes[i]);
+            for (TypeDeclaration memberType : memberTypes)
+                purgeMethodStatements(memberType);
 	}
 
 	@Override
@@ -233,9 +232,7 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 								CharOperation.NO_CHAR_CHAR,
 								true); // not primary.
 
-					} else {
-						if (DEBUG) System.out.println("\tnull/bad binding in lambda"); //$NON-NLS-1$
-					}
+					} else if (DEBUG) System.out.println("\tnull/bad binding in lambda"); //$NON-NLS-1$
 				} else {
 					ReferenceExpression referenceExpression = (ReferenceExpression) expression;
 					if (referenceExpression.isArrayConstructorReference())
@@ -251,9 +248,7 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 							SourceIndexer.this.addMethodReference(binding.selector, binding.parameters.length);
 						else
 							SourceIndexer.this.addConstructorReference(binding.declaringClass.sourceName(), binding.parameters.length);
-					} else {
-						if (DEBUG) System.out.println("\tnull/bad binding in reference expression"); //$NON-NLS-1$
-					}
+					} else if (DEBUG) System.out.println("\tnull/bad binding in reference expression"); //$NON-NLS-1$
 				}
 			}
 		} catch (Exception e) {

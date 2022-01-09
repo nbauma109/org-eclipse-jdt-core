@@ -82,10 +82,10 @@ public class TypeSystem {
 					if (type instanceof UnresolvedReferenceBinding)
 						((UnresolvedReferenceBinding) type).addWrapper(this, environment);
 					if (arguments != null) {
-						for (int i = 0, l = arguments.length; i < l; i++) {
-							if (arguments[i] instanceof UnresolvedReferenceBinding)
-								((UnresolvedReferenceBinding) arguments[i]).addWrapper(this, environment);
-							if (arguments[i].hasNullTypeAnnotations())
+						for (TypeBinding argument : arguments) {
+							if (argument instanceof UnresolvedReferenceBinding)
+								((UnresolvedReferenceBinding) argument).addWrapper(this, environment);
+							if (argument.hasNullTypeAnnotations())
 								this.tagBits |= TagBits.HasNullTypeAnnotation;
 						}
 					}
@@ -113,7 +113,7 @@ public class TypeSystem {
 				PTBKey that = (PTBKey) other;  // homogeneous container.
 				return this.type == that.type && this.enclosingType == that.enclosingType && Util.effectivelyEqual(this.arguments, that.arguments); //$IDENTITY-COMPARISON$
 			}
-			final int hash(TypeBinding b) {
+			int hash(TypeBinding b) {
 				if(b instanceof WildcardBinding || b instanceof TypeVariableBinding || b.getClass() == ParameterizedTypeBinding.class) {
 					return System.identityHashCode(b);
 				}
@@ -153,10 +153,7 @@ public class TypeSystem {
 			ParameterizedTypeBinding [] parameterizedTypeBindings = this.hashedParameterizedTypes.get(key);
 			for (int i = 0, length = parameterizedTypeBindings == null ? 0 : parameterizedTypeBindings.length; i < length; i++) {
 				ParameterizedTypeBinding parameterizedType = parameterizedTypeBindings[i];
-				if (parameterizedType.actualType() != genericTypeToMatch) { //$IDENTITY-COMPARISON$
-					continue;
-				}
-				if (parameterizedType.enclosingType != enclosingTypeToMatch //$IDENTITY-COMPARISON$
+				if (parameterizedType.actualType() != genericTypeToMatch || parameterizedType.enclosingType != enclosingTypeToMatch //$IDENTITY-COMPARISON$
 						|| !Util.effectivelyEqual(parameterizedType.typeArguments(), typeArgumentsToMatch))
 					continue;
 				if (Util.effectivelyEqual(annotations, parameterizedType.getTypeAnnotations()))
@@ -246,17 +243,16 @@ public class TypeSystem {
 	 */
 	public void forceRegisterAsDerived(TypeBinding derived) {
 		int id = derived.id;
-		if (id != TypeIds.NoId && this.types[id] != null) {
-			TypeBinding unannotated = this.types[id][0];
-			if (unannotated == derived) { //$IDENTITY-COMPARISON$
-				// was previously registered as unannotated, replace by a fresh clone to remain unannotated:
-				this.types[id][0] = unannotated = derived.clone(null);
-			}
-			// proceed as normal:
-			cacheDerivedType(unannotated, derived);
-		} else {
+		if (id == TypeIds.NoId || this.types[id] == null) {
 			throw new IllegalStateException("Type was not yet registered as expected: "+derived); //$NON-NLS-1$
 		}
+        TypeBinding unannotated = this.types[id][0];
+        if (unannotated == derived) { //$IDENTITY-COMPARISON$
+        	// was previously registered as unannotated, replace by a fresh clone to remain unannotated:
+        	this.types[id][0] = unannotated = derived.clone(null);
+        }
+        // proceed as normal:
+        cacheDerivedType(unannotated, derived);
 	}
 
 	// Given a type, return all its variously annotated versions.
@@ -395,7 +391,7 @@ public class TypeSystem {
 		}
 		TypeBinding unannotatedBound = bound == null ? null : getUnannotatedType(bound);
 
-		boolean useDerivedTypesOfBound = unannotatedBound instanceof TypeVariableBinding || (unannotatedBound instanceof ParameterizedTypeBinding && !(unannotatedBound instanceof RawTypeBinding));
+		boolean useDerivedTypesOfBound = unannotatedBound instanceof TypeVariableBinding || unannotatedBound instanceof ParameterizedTypeBinding && !(unannotatedBound instanceof RawTypeBinding);
 		TypeBinding[] derivedTypes = this.types[useDerivedTypesOfBound ? unannotatedBound.id :unannotatedGenericType.id];  // by construction, cachedInfo != null now.
 
 		int i, length = derivedTypes.length;

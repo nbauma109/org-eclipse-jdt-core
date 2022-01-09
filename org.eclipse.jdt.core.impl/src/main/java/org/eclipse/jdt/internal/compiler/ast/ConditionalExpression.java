@@ -77,8 +77,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 			FlowInfo flowInfo) {
 		int initialComplaintLevel = (flowInfo.reachMode() & FlowInfo.UNREACHABLE) != 0 ? Statement.COMPLAINED_FAKE_REACHABLE : Statement.NOT_COMPLAINED;
 		Constant cst = this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedTrue = cst != Constant.NotAConstant && cst.booleanValue() == true;
-		boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && cst.booleanValue() == false;
+		boolean isConditionOptimizedTrue = cst != Constant.NotAConstant && cst.booleanValue();
+		boolean isConditionOptimizedFalse = cst != Constant.NotAConstant && !cst.booleanValue();
 
 		int mode = flowInfo.reachMode();
 		flowInfo = this.condition.analyseCode(currentScope, flowContext, flowInfo, cst == Constant.NotAConstant);
@@ -159,12 +159,12 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 			//   -> merging these two branches yields: v is assigned
 			// - the paths towards false are irrelevant since the enclosing if has no else.
 			cst = this.optimizedIfTrueConstant;
-			boolean isValueIfTrueOptimizedTrue = cst != null && cst != Constant.NotAConstant && cst.booleanValue() == true;
-			boolean isValueIfTrueOptimizedFalse = cst != null && cst != Constant.NotAConstant && cst.booleanValue() == false;
+			boolean isValueIfTrueOptimizedTrue = cst != null && cst != Constant.NotAConstant && cst.booleanValue();
+			boolean isValueIfTrueOptimizedFalse = cst != null && cst != Constant.NotAConstant && !cst.booleanValue();
 
 			cst = this.optimizedIfFalseConstant;
-			boolean isValueIfFalseOptimizedTrue = cst != null && cst != Constant.NotAConstant && cst.booleanValue() == true;
-			boolean isValueIfFalseOptimizedFalse = cst != null && cst != Constant.NotAConstant && cst.booleanValue() == false;
+			boolean isValueIfFalseOptimizedTrue = cst != null && cst != Constant.NotAConstant && cst.booleanValue();
+			boolean isValueIfFalseOptimizedFalse = cst != null && cst != Constant.NotAConstant && !cst.booleanValue();
 
 			UnconditionalFlowInfo trueFlowTowardsTrue = trueFlowInfo.initsWhenTrue().unconditionalCopy();
 			UnconditionalFlowInfo falseFlowTowardsTrue = falseFlowInfo.initsWhenTrue().unconditionalCopy();
@@ -257,8 +257,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		if (cst == Constant.NotAConstant) {
 			cst = this.condition.optimizedNullComparisonConstant();
 		}
-		boolean needTruePart = !(cst != Constant.NotAConstant && cst.booleanValue() == false);
-		boolean needFalsePart = !(cst != Constant.NotAConstant && cst.booleanValue() == true);
+		boolean needTruePart = cst == Constant.NotAConstant || cst.booleanValue();
+		boolean needFalsePart = cst == Constant.NotAConstant || !cst.booleanValue();
 
 		endifLabel = new BranchLabel(codeStream);
 
@@ -344,25 +344,23 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 
 		int pc = codeStream.position;
 
-		if ((this.constant != Constant.NotAConstant) && (this.constant.typeID() == T_boolean) // constant
-			|| ((this.valueIfTrue.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4) != T_boolean
-			|| ((this.valueIfFalse.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4) != T_boolean) { // non boolean values
+		if (this.constant != Constant.NotAConstant && this.constant.typeID() == T_boolean // constant
+			|| (this.valueIfTrue.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4 != T_boolean
+			|| (this.valueIfFalse.implicitConversion & IMPLICIT_CONVERSION_MASK) >> 4 != T_boolean) { // non boolean values
 			super.generateOptimizedBoolean(currentScope, codeStream, trueLabel, falseLabel, valueRequired);
 			return;
 		}
 		Constant cst = this.condition.constant;
 		Constant condCst = this.condition.optimizedBooleanConstant();
 		boolean needTruePart =
-			!(((cst != Constant.NotAConstant) && (cst.booleanValue() == false))
-				|| ((condCst != Constant.NotAConstant) && (condCst.booleanValue() == false)));
+			(cst == Constant.NotAConstant || cst.booleanValue()) && (condCst == Constant.NotAConstant || condCst.booleanValue());
 		boolean needFalsePart =
-			!(((cst != Constant.NotAConstant) && (cst.booleanValue() == true))
-				|| ((condCst != Constant.NotAConstant) && (condCst.booleanValue() == true)));
+			(cst == Constant.NotAConstant || !cst.booleanValue()) && (condCst == Constant.NotAConstant || !condCst.booleanValue());
 
 		BranchLabel internalFalseLabel, endifLabel = new BranchLabel(codeStream);
 
 		// Generate code for the condition
-		boolean needConditionValue = (cst == Constant.NotAConstant) && (condCst == Constant.NotAConstant);
+		boolean needConditionValue = cst == Constant.NotAConstant && condCst == Constant.NotAConstant;
 		this.condition.generateOptimizedBoolean(
 				currentScope,
 				codeStream,
@@ -387,19 +385,17 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 						if (trueLabel != null) {
 							// implicit falling through the FALSE case
 							cst = this.optimizedIfTrueConstant;
-							boolean isValueIfTrueOptimizedTrue = cst != null && cst != Constant.NotAConstant && cst.booleanValue() == true;
+							boolean isValueIfTrueOptimizedTrue = cst != null && cst != Constant.NotAConstant && cst.booleanValue();
 							if (isValueIfTrueOptimizedTrue) break JumpEndif; // no need to jump over, since branched to true already
 						}
-					} else {
-						// implicit falling through the TRUE case
-						if (trueLabel == null) {
-							cst = this.optimizedIfTrueConstant;
-							boolean isValueIfTrueOptimizedFalse = cst != null && cst != Constant.NotAConstant && cst.booleanValue() == false;
-							if (isValueIfTrueOptimizedFalse) break JumpEndif; // no need to jump over, since branched to false already
-						} else {
-							// no implicit fall through TRUE/FALSE --> should never occur
-						}
-					}
+					} else // implicit falling through the TRUE case
+                    if (trueLabel == null) {
+                    	cst = this.optimizedIfTrueConstant;
+                    	boolean isValueIfTrueOptimizedFalse = cst != null && cst != Constant.NotAConstant && !cst.booleanValue();
+                    	if (isValueIfTrueOptimizedFalse) break JumpEndif; // no need to jump over, since branched to false already
+                    } else {
+                    	// no implicit fall through TRUE/FALSE --> should never occur
+                    }
 					int position = codeStream.position;
 					codeStream.goto_(endifLabel);
 					codeStream.recordPositionsFrom(position, this.valueIfTrue.sourceEnd);
@@ -523,14 +519,12 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		boolean use15specifics = sourceLevel >= ClassFileConstants.JDK1_5;
 		this.use18specifics = sourceLevel >= ClassFileConstants.JDK1_8;
 
-		if (this.use18specifics) {
-			if (this.expressionContext == ASSIGNMENT_CONTEXT || this.expressionContext == INVOCATION_CONTEXT) {
-				this.valueIfTrue.setExpressionContext(this.expressionContext);
-				this.valueIfTrue.setExpectedType(this.expectedType);
-				this.valueIfFalse.setExpressionContext(this.expressionContext);
-				this.valueIfFalse.setExpectedType(this.expectedType);
-			}
-		}
+		if (this.use18specifics && (this.expressionContext == ASSIGNMENT_CONTEXT || this.expressionContext == INVOCATION_CONTEXT)) {
+        	this.valueIfTrue.setExpressionContext(this.expressionContext);
+        	this.valueIfTrue.setExpectedType(this.expectedType);
+        	this.valueIfFalse.setExpressionContext(this.expressionContext);
+        	this.valueIfFalse.setExpectedType(this.expectedType);
+        }
 
 		collectPatternVariablesToScope(null, scope);
 
@@ -553,9 +547,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 			if (this.originalValueIfFalseType.kind() == Binding.POLY_TYPE)
 				this.originalValueIfFalseType = this.valueIfFalse.resolveType(scope);
 
-			if (this.originalValueIfTrueType == null || !this.originalValueIfTrueType.isValidBinding())
-				return this.resolvedType = null;
-			if (this.originalValueIfFalseType == null || !this.originalValueIfFalseType.isValidBinding())
+			if (this.originalValueIfTrueType == null || !this.originalValueIfTrueType.isValidBinding() || this.originalValueIfFalseType == null || !this.originalValueIfFalseType.isValidBinding())
 				return this.resolvedType = null;
 		}
 		// Propagate the constant value from the valueIfTrue and valueIFFalse expression if it is possible
@@ -638,16 +630,16 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		// Numeric types
 		if (valueIfTrueType.isNumericType() && valueIfFalseType.isNumericType()) {
 			// (Short x Byte) or (Byte x Short)"
-			if ((TypeBinding.equalsEquals(valueIfTrueType, TypeBinding.BYTE) && TypeBinding.equalsEquals(valueIfFalseType, TypeBinding.SHORT))
-				|| (TypeBinding.equalsEquals(valueIfTrueType, TypeBinding.SHORT) && TypeBinding.equalsEquals(valueIfFalseType, TypeBinding.BYTE))) {
+			if (TypeBinding.equalsEquals(valueIfTrueType, TypeBinding.BYTE) && TypeBinding.equalsEquals(valueIfFalseType, TypeBinding.SHORT)
+				|| TypeBinding.equalsEquals(valueIfTrueType, TypeBinding.SHORT) && TypeBinding.equalsEquals(valueIfFalseType, TypeBinding.BYTE)) {
 				this.valueIfTrue.computeConversion(scope, TypeBinding.SHORT, this.originalValueIfTrueType);
 				this.valueIfFalse.computeConversion(scope, TypeBinding.SHORT, this.originalValueIfFalseType);
 				return this.resolvedType = TypeBinding.SHORT;
 			}
 			// <Byte|Short|Char> x constant(Int)  ---> <Byte|Short|Char>   and reciprocally
 			if ((TypeBinding.equalsEquals(valueIfTrueType, TypeBinding.BYTE) || TypeBinding.equalsEquals(valueIfTrueType, TypeBinding.SHORT) || TypeBinding.equalsEquals(valueIfTrueType, TypeBinding.CHAR))
-					&& (TypeBinding.equalsEquals(valueIfFalseType, TypeBinding.INT)
-						&& this.valueIfFalse.isConstantValueOfTypeAssignableToType(valueIfFalseType, valueIfTrueType))) {
+					&& TypeBinding.equalsEquals(valueIfFalseType, TypeBinding.INT)
+						&& this.valueIfFalse.isConstantValueOfTypeAssignableToType(valueIfFalseType, valueIfTrueType)) {
 				this.valueIfTrue.computeConversion(scope, valueIfTrueType, this.originalValueIfTrueType);
 				this.valueIfFalse.computeConversion(scope, valueIfTrueType, this.originalValueIfFalseType);
 				return this.resolvedType = valueIfTrueType;
@@ -655,8 +647,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 			if ((TypeBinding.equalsEquals(valueIfFalseType, TypeBinding.BYTE)
 					|| TypeBinding.equalsEquals(valueIfFalseType, TypeBinding.SHORT)
 					|| TypeBinding.equalsEquals(valueIfFalseType, TypeBinding.CHAR))
-					&& (TypeBinding.equalsEquals(valueIfTrueType, TypeBinding.INT)
-						&& this.valueIfTrue.isConstantValueOfTypeAssignableToType(valueIfTrueType, valueIfFalseType))) {
+					&& TypeBinding.equalsEquals(valueIfTrueType, TypeBinding.INT)
+						&& this.valueIfTrue.isConstantValueOfTypeAssignableToType(valueIfTrueType, valueIfFalseType)) {
 				this.valueIfTrue.computeConversion(scope, valueIfFalseType, this.originalValueIfTrueType);
 				this.valueIfFalse.computeConversion(scope, valueIfFalseType, this.originalValueIfFalseType);
 				return this.resolvedType = valueIfFalseType;
@@ -690,20 +682,18 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		}
 		// Type references (null null is already tested)
 		if (valueIfTrueType.isBaseType() && valueIfTrueType != TypeBinding.NULL) {
-			if (use15specifics) {
-				valueIfTrueType = env.computeBoxingType(valueIfTrueType);
-			} else {
+			if (!use15specifics) {
 				scope.problemReporter().conditionalArgumentsIncompatibleTypes(this, valueIfTrueType, valueIfFalseType);
 				return null;
 			}
+            valueIfTrueType = env.computeBoxingType(valueIfTrueType);
 		}
 		if (valueIfFalseType.isBaseType() && valueIfFalseType != TypeBinding.NULL) {
-			if (use15specifics) {
-				valueIfFalseType = env.computeBoxingType(valueIfFalseType);
-			} else {
+			if (!use15specifics) {
 				scope.problemReporter().conditionalArgumentsIncompatibleTypes(this, valueIfTrueType, valueIfFalseType);
 				return null;
 			}
+            valueIfFalseType = env.computeBoxingType(valueIfFalseType);
 		}
 		if (use15specifics) {
 			// >= 1.5 : LUB(operand types) must exist
@@ -720,18 +710,16 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 				this.valueIfFalse.computeConversion(scope, commonType, this.originalValueIfFalseType);
 				return this.resolvedType = commonType.capture(scope, this.sourceStart, this.sourceEnd);
 			}
-		} else {
-			// < 1.5 : one operand must be convertible to the other
-			if (valueIfFalseType.isCompatibleWith(valueIfTrueType)) {
-				this.valueIfTrue.computeConversion(scope, valueIfTrueType, this.originalValueIfTrueType);
-				this.valueIfFalse.computeConversion(scope, valueIfTrueType, this.originalValueIfFalseType);
-				return this.resolvedType = valueIfTrueType;
-			} else if (valueIfTrueType.isCompatibleWith(valueIfFalseType)) {
-				this.valueIfTrue.computeConversion(scope, valueIfFalseType, this.originalValueIfTrueType);
-				this.valueIfFalse.computeConversion(scope, valueIfFalseType, this.originalValueIfFalseType);
-				return this.resolvedType = valueIfFalseType;
-			}
-		}
+		} else // < 1.5 : one operand must be convertible to the other
+        if (valueIfFalseType.isCompatibleWith(valueIfTrueType)) {
+        	this.valueIfTrue.computeConversion(scope, valueIfTrueType, this.originalValueIfTrueType);
+        	this.valueIfFalse.computeConversion(scope, valueIfTrueType, this.originalValueIfFalseType);
+        	return this.resolvedType = valueIfTrueType;
+        } else if (valueIfTrueType.isCompatibleWith(valueIfFalseType)) {
+        	this.valueIfTrue.computeConversion(scope, valueIfFalseType, this.originalValueIfTrueType);
+        	this.valueIfFalse.computeConversion(scope, valueIfFalseType, this.originalValueIfFalseType);
+        	return this.resolvedType = valueIfFalseType;
+        }
 		scope.problemReporter().conditionalArgumentsIncompatibleTypes(
 			this,
 			valueIfTrueType,
@@ -845,18 +833,15 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		if (this.isPolyExpression)
 			return true;
 
-		if (this.expressionContext != ASSIGNMENT_CONTEXT && this.expressionContext != INVOCATION_CONTEXT)
-			return false;
-
-		if (this.originalValueIfTrueType == null || this.originalValueIfFalseType == null) // resolution error.
+		if (this.expressionContext != ASSIGNMENT_CONTEXT && this.expressionContext != INVOCATION_CONTEXT || this.originalValueIfTrueType == null || this.originalValueIfFalseType == null) // resolution error.
 			return false;
 
 		if (this.valueIfTrue.isPolyExpression() || this.valueIfFalse.isPolyExpression())
 			return true;
 
 		// "... unless both operands produce primitives (or boxed primitives)":
-		if (this.originalValueIfTrueType.isBaseType() || (this.originalValueIfTrueType.id >= TypeIds.T_JavaLangByte && this.originalValueIfTrueType.id <= TypeIds.T_JavaLangBoolean)) {
-			if (this.originalValueIfFalseType.isBaseType() || (this.originalValueIfFalseType.id >= TypeIds.T_JavaLangByte && this.originalValueIfFalseType.id <= TypeIds.T_JavaLangBoolean))
+		if (this.originalValueIfTrueType.isBaseType() || this.originalValueIfTrueType.id >= TypeIds.T_JavaLangByte && this.originalValueIfTrueType.id <= TypeIds.T_JavaLangBoolean) {
+			if (this.originalValueIfFalseType.isBaseType() || this.originalValueIfFalseType.id >= TypeIds.T_JavaLangByte && this.originalValueIfFalseType.id <= TypeIds.T_JavaLangBoolean)
 				return false;
 		}
 

@@ -28,7 +28,6 @@ public abstract class AbstractPreferenceInitializer {
 	 * Default constructor for the class.
 	 */
 	public AbstractPreferenceInitializer() {
-		super();
 	}
 
 	/**

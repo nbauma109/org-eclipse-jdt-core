@@ -41,7 +41,7 @@ public class PreferencesService implements IPreferencesService {
 	private static final String MATCH_TYPE_PREFIX = "prefix"; //$NON-NLS-1$
 
 	// the order of search scopes when people don't have a specific order set
-	private static String[] DEFAULT_DEFAULT_LOOKUP_ORDER = new String[] { //
+	private static String[] DEFAULT_DEFAULT_LOOKUP_ORDER = { //
 	InstanceScope.SCOPE, //
 			ConfigurationScope.SCOPE, //
 			DefaultScope.SCOPE};
@@ -84,7 +84,6 @@ public class PreferencesService implements IPreferencesService {
 	}
 
 	PreferencesService() {
-		super();
 		initializeDefaultScopes();
 	}
 
@@ -125,74 +124,69 @@ public class PreferencesService implements IPreferencesService {
 		IEclipsePreferences modifiedNode = firePreApplyEvent(preferences);
 
 		// create a visitor to apply the given set of preferences
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			@Override
-			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
-				IEclipsePreferences globalNode;
-				if (node.parent() == null)
-					globalNode = root;
-				else
-					globalNode = (IEclipsePreferences) root.node(node.absolutePath());
-				ExportedPreferences epNode = (ExportedPreferences) node;
+		IPreferenceNodeVisitor visitor = node -> {
+        	IEclipsePreferences globalNode;
+        	if (node.parent() == null)
+        		globalNode = root;
+        	else
+        		globalNode = (IEclipsePreferences) root.node(node.absolutePath());
+        	ExportedPreferences epNode = (ExportedPreferences) node;
 
-				// if this node is an export root then we need to remove
-				// it from the global preferences before continuing.
-				boolean removed = false;
-				if (epNode.isExportRoot()) {
-					if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-						PrefsMessages.message("Found export root: " + epNode.absolutePath()); //$NON-NLS-1$
-					// TODO should only have to do this if any of my children have properties to set
-					globalNode.removeNode();
-					removed = true;
-				}
+        	// if this node is an export root then we need to remove
+        	// it from the global preferences before continuing.
+        	boolean removed = false;
+        	if (epNode.isExportRoot()) {
+        		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+        			PrefsMessages.message("Found export root: " + epNode.absolutePath()); //$NON-NLS-1$
+        		// TODO should only have to do this if any of my children have properties to set
+        		globalNode.removeNode();
+        		removed = true;
+        	}
 
-				// iterate over the preferences in this node and set them
-				// in the global space.
-				String[] keys = epNode.properties.keys();
+        	// iterate over the preferences in this node and set them
+        	// in the global space.
+        	String[] keys = epNode.properties.keys();
 
-				// if this node was removed then we need to create a new one
-				if (removed)
-					globalNode = (IEclipsePreferences) root.node(node.absolutePath());
+        	// if this node was removed then we need to create a new one
+        	if (removed)
+        		globalNode = (IEclipsePreferences) root.node(node.absolutePath());
 
-				// the list for properties to remove
-				List<String> propsToRemove = new ArrayList<>();
-				for (String key : globalNode.keys()) {
-					propsToRemove.add(key);
-				}
+        	// the list for properties to remove
+        	List<String> propsToRemove = new ArrayList<>();
+        	Collections.addAll(propsToRemove, globalNode.keys());
 
-				if (keys.length > 0) {
-					String key = null;
-					for (String k : keys) {
-						key = k;
-						// preferences that are not in the applied node
-						// will be removed
-						propsToRemove.remove(key);
-						// intern strings we import because some people
-						// in their property change listeners use identity
-						// instead of equals. See bug 20193 and 20534.
-						key = key.intern();
-						String value = node.get(key, null);
-						if (value != null) {
-							if (EclipsePreferences.DEBUG_PREFERENCE_SET)
-								PrefsMessages.message("Setting: " + globalNode.absolutePath() + '/' + key + '=' + value); //$NON-NLS-1$
-							globalNode.put(key, value);
-						}
-					}
-				}
+        	if (keys.length > 0) {
+        		String key = null;
+        		for (String k : keys) {
+        			key = k;
+        			// preferences that are not in the applied node
+        			// will be removed
+        			propsToRemove.remove(key);
+        			// intern strings we import because some people
+        			// in their property change listeners use identity
+        			// instead of equals. See bug 20193 and 20534.
+        			key = key.intern();
+        			String value = node.get(key, null);
+        			if (value != null) {
+        				if (EclipsePreferences.DEBUG_PREFERENCE_SET)
+        					PrefsMessages.message("Setting: " + globalNode.absolutePath() + '/' + key + '=' + value); //$NON-NLS-1$
+        				globalNode.put(key, value);
+        			}
+        		}
+        	}
 
-				String keyToRemove = null;
-				for (Iterator<String> it = propsToRemove.iterator(); it.hasNext();) {
-					keyToRemove = it.next();
-					keyToRemove = keyToRemove.intern();
-					if (EclipsePreferences.DEBUG_PREFERENCE_SET)
-						PrefsMessages.message("Removing: " + globalNode.absolutePath() + '/' + keyToRemove); //$NON-NLS-1$
-					globalNode.remove(keyToRemove);
-				}
+        	String keyToRemove = null;
+        	for (Iterator<String> it = propsToRemove.iterator(); it.hasNext();) {
+        		keyToRemove = it.next();
+        		keyToRemove = keyToRemove.intern();
+        		if (EclipsePreferences.DEBUG_PREFERENCE_SET)
+        			PrefsMessages.message("Removing: " + globalNode.absolutePath() + '/' + keyToRemove); //$NON-NLS-1$
+        		globalNode.remove(keyToRemove);
+        	}
 
-				// keep visiting children
-				return true;
-			}
-		};
+        	// keep visiting children
+        	return true;
+        };
 
 		try {
 			// start by visiting the root
@@ -217,15 +211,12 @@ public class PreferencesService implements IPreferencesService {
 	}
 
 	private boolean containsKeys(IEclipsePreferences aRoot) throws BackingStoreException {
-		final boolean[] result = new boolean[] {false};
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			@Override
-			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
-				if (node.keys().length != 0)
-					result[0] = true;
-				return !result[0];
-			}
-		};
+		final boolean[] result = {false};
+		IPreferenceNodeVisitor visitor = node -> {
+        	if (node.keys().length != 0)
+        		result[0] = true;
+        	return !result[0];
+        };
 		aRoot.accept(visitor);
 		return result[0];
 	}
@@ -293,48 +284,45 @@ public class PreferencesService implements IPreferencesService {
 		final int baseLength = preferences.absolutePath().length();
 
 		// create a visitor to do the export
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			@Override
-			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
-				// don't store defaults
-				String absolutePath = node.absolutePath();
-				String scope = getScope(absolutePath);
-				if (DefaultScope.SCOPE.equals(scope))
-					return false;
-				String path = absolutePath.length() <= baseLength ? EMPTY_STRING : EclipsePreferences.makeRelative(absolutePath.substring(baseLength));
-				// check the excludes list to see if this node should be considered
-				for (String exclude : excludesList) {
-					String exclusion = EclipsePreferences.makeRelative(exclude);
-					if (path.startsWith(exclusion))
-						return false;
-				}
-				boolean needToAddVersion = InstanceScope.SCOPE.equals(scope);
-				// check the excludes list for each preference
-				String[] keys = node.keys();
-				for (String key : keys) {
-					boolean ignore = false;
-					for (int j = 0; !ignore && j < excludesList.length; j++)
-						if (EclipsePreferences.encodePath(path, key).startsWith(EclipsePreferences.makeRelative(excludesList[j])))
-							ignore = true;
-					if (!ignore) {
-						String value = node.get(key, null);
-						if (value != null) {
-							if (needToAddVersion) {
-								String bundle = getBundleName(absolutePath);
-								if (bundle != null) {
-									String version = getBundleVersion(bundle);
-									if (version != null)
-										result.put(BUNDLE_VERSION_PREFIX + bundle, version);
-								}
-								needToAddVersion = false;
-							}
-							result.put(EclipsePreferences.encodePath(absolutePath, key), value);
-						}
-					}
-				}
-				return true;
-			}
-		};
+		IPreferenceNodeVisitor visitor = node -> {
+        	// don't store defaults
+        	String absolutePath = node.absolutePath();
+        	String scope = getScope(absolutePath);
+        	if (DefaultScope.SCOPE.equals(scope))
+        		return false;
+        	String path = absolutePath.length() <= baseLength ? EMPTY_STRING : EclipsePreferences.makeRelative(absolutePath.substring(baseLength));
+        	// check the excludes list to see if this node should be considered
+        	for (String exclude : excludesList) {
+        		String exclusion = EclipsePreferences.makeRelative(exclude);
+        		if (path.startsWith(exclusion))
+        			return false;
+        	}
+        	boolean needToAddVersion = InstanceScope.SCOPE.equals(scope);
+        	// check the excludes list for each preference
+        	String[] keys = node.keys();
+        	for (String key : keys) {
+        		boolean ignore = false;
+        		for (int j = 0; !ignore && j < excludesList.length; j++)
+        			if (EclipsePreferences.encodePath(path, key).startsWith(EclipsePreferences.makeRelative(excludesList[j])))
+        				ignore = true;
+        		if (!ignore) {
+        			String value = node.get(key, null);
+        			if (value != null) {
+        				if (needToAddVersion) {
+        					String bundle = getBundleName(absolutePath);
+        					if (bundle != null) {
+        						String version = getBundleVersion(bundle);
+        						if (version != null)
+        							result.put(BUNDLE_VERSION_PREFIX + bundle, version);
+        					}
+        					needToAddVersion = false;
+        				}
+        				result.put(EclipsePreferences.encodePath(absolutePath, key), value);
+        			}
+        		}
+        	}
+        	return true;
+        };
 
 		// start by visiting the root that we were passed in
 		preferences.accept(visitor);
@@ -439,7 +427,7 @@ public class PreferencesService implements IPreferencesService {
 	private IEclipsePreferences firePreApplyEvent(IEclipsePreferences tree) {
 		if (registryHelper == null)
 			return tree;
-		final IEclipsePreferences[] result = new IEclipsePreferences[] {tree};
+		final IEclipsePreferences[] result = {tree};
 		ListenerList<PreferenceModifyListener> listeners = ((PreferenceServiceRegistryHelper) registryHelper).getModifyListeners();
 		for (final PreferenceModifyListener listener : listeners) {
 			ISafeRunnable job = new ISafeRunnable() {
@@ -477,7 +465,7 @@ public class PreferencesService implements IPreferencesService {
 	@Override
 	public boolean getBoolean(String qualifier, String key, boolean defaultValue, IScopeContext[] scopes) {
 		String result = get(EclipsePreferences.decodePath(key)[1], null, getNodes(qualifier, key, scopes));
-		return result == null ? defaultValue : Boolean.valueOf(result).booleanValue();
+		return result == null ? defaultValue : Boolean.parseBoolean(result);
 	}
 
 	/*
@@ -504,7 +492,7 @@ public class PreferencesService implements IPreferencesService {
 		Bundle bundle = PreferencesOSGiUtils.getDefault().getBundle(bundleName);
 		if (bundle != null) {
 			Object version = bundle.getHeaders(EMPTY_STRING).get(Constants.BUNDLE_VERSION);
-			if (version != null && version instanceof String)
+			if (version instanceof String)
 				return (String) version;
 		}
 		return null;
@@ -710,16 +698,13 @@ public class PreferencesService implements IPreferencesService {
 		toApply = firePreApplyEvent(toApply);
 
 		// actually apply the settings
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			@Override
-			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
-				String[] keys = node.keys();
-				if (keys.length == 0)
-					return true;
-				copyFromTo(node, getRootNode().node(node.absolutePath()), keys, 0);
-				return true;
-			}
-		};
+		IPreferenceNodeVisitor visitor = node -> {
+        	String[] keys = node.keys();
+        	if (keys.length == 0)
+        		return true;
+        	copyFromTo(node, getRootNode().node(node.absolutePath()), keys, 0);
+        	return true;
+        };
 		toApply.accept(visitor);
 	}
 
@@ -751,10 +736,8 @@ public class PreferencesService implements IPreferencesService {
 			// if the mapping is null then we match everything
 			if (mapping == null) {
 				// if we are the root check to see if the scope exists
-				if (tree.parent() == null && tree.nodeExists(scope)) {
-					if (containsKeys((IEclipsePreferences) tree.node(scope)))
-						return true;
-				}
+				if (tree.parent() == null && tree.nodeExists(scope) && containsKeys((IEclipsePreferences) tree.node(scope)))
+                	return true;
 				// otherwise check to see if we are in the right scope
 				if (scopeMatches(scope, tree) && containsKeys(tree))
 					return true;
@@ -865,14 +848,11 @@ public class PreferencesService implements IPreferencesService {
 		final IEclipsePreferences result = ExportedPreferences.newRoot();
 		if (trees.length == 0)
 			return result;
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			@Override
-			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
-				Preferences destination = result.node(node.absolutePath());
-				copyFromTo(node, destination, null, 0);
-				return true;
-			}
-		};
+		IPreferenceNodeVisitor visitor = node -> {
+        	Preferences destination = result.node(node.absolutePath());
+        	copyFromTo(node, destination, null, 0);
+        	return true;
+        };
 		for (IEclipsePreferences tree : trees) {
 			tree.accept(visitor);
 		}
@@ -892,9 +872,7 @@ public class PreferencesService implements IPreferencesService {
 		Properties properties = new Properties();
 		try {
 			properties.load(input);
-		} catch (IOException e) {
-			throw new CoreException(createStatusError(PrefsMessages.preferences_importProblems, e));
-		} catch (IllegalArgumentException e) {
+		} catch (IOException | IllegalArgumentException e) {
 			throw new CoreException(createStatusError(PrefsMessages.preferences_importProblems, e));
 		} finally {
 			try {
@@ -1069,42 +1047,39 @@ public class PreferencesService implements IPreferencesService {
 			severity = IStatus.ERROR;
 		else
 			severity = IStatus.WARNING;
-		String msg = NLS.bind(PrefsMessages.preferences_incompatible, (new Object[] {pref, bundle, installed}));
+		String msg = NLS.bind(PrefsMessages.preferences_incompatible, new Object[] {pref, bundle, installed});
 		return new Status(severity, PrefsMessages.OWNER_NAME, 1, msg, null);
 	}
 
 	public IStatus validateVersions(IPath path) {
 		final MultiStatus result = new MultiStatus(PrefsMessages.OWNER_NAME, IStatus.INFO, PrefsMessages.preferences_validate, null);
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			@Override
-			public boolean visit(IEclipsePreferences node) {
-				if (!(node instanceof ExportedPreferences))
-					return false;
+		IPreferenceNodeVisitor visitor = node -> {
+        	if (!(node instanceof ExportedPreferences))
+        		return false;
 
-				// calculate the version in the file
-				ExportedPreferences realNode = (ExportedPreferences) node;
-				String version = realNode.getVersion();
-				if (version == null || !PluginVersionIdentifier.validateVersion(version).isOK())
-					return true;
-				PluginVersionIdentifier versionInFile = new PluginVersionIdentifier(version);
+        	// calculate the version in the file
+        	ExportedPreferences realNode = (ExportedPreferences) node;
+        	String version = realNode.getVersion();
+        	if (version == null || !PluginVersionIdentifier.validateVersion(version).isOK())
+        		return true;
+        	PluginVersionIdentifier versionInFile = new PluginVersionIdentifier(version);
 
-				// calculate the version of the installed bundle
-				String bundleName = getBundleName(node.absolutePath());
-				if (bundleName == null)
-					return true;
-				String stringVersion = getBundleVersion(bundleName);
-				if (stringVersion == null || !PluginVersionIdentifier.validateVersion(stringVersion).isOK())
-					return true;
-				PluginVersionIdentifier versionInMemory = new PluginVersionIdentifier(stringVersion);
+        	// calculate the version of the installed bundle
+        	String bundleName = getBundleName(node.absolutePath());
+        	if (bundleName == null)
+        		return true;
+        	String stringVersion = getBundleVersion(bundleName);
+        	if (stringVersion == null || !PluginVersionIdentifier.validateVersion(stringVersion).isOK())
+        		return true;
+        	PluginVersionIdentifier versionInMemory = new PluginVersionIdentifier(stringVersion);
 
-				// verify the versions based on the matching rules
-				IStatus verification = validatePluginVersions(bundleName, versionInFile, versionInMemory);
-				if (verification != null)
-					result.add(verification);
+        	// verify the versions based on the matching rules
+        	IStatus verification = validatePluginVersions(bundleName, versionInFile, versionInMemory);
+        	if (verification != null)
+        		result.add(verification);
 
-				return true;
-			}
-		};
+        	return true;
+        };
 
 		InputStream input = null;
 		try {
@@ -1113,9 +1088,7 @@ public class PreferencesService implements IPreferencesService {
 			prefs.accept(visitor);
 		} catch (FileNotFoundException e) {
 			// ignore...if the file does not exist then all is OK
-		} catch (CoreException e) {
-			result.add(createStatusError(PrefsMessages.preferences_validationException, e));
-		} catch (BackingStoreException e) {
+		} catch (CoreException | BackingStoreException e) {
 			result.add(createStatusError(PrefsMessages.preferences_validationException, e));
 		}
 		return result;

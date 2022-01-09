@@ -46,9 +46,8 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 				String importName = memento.nextToken();
 				JavaElement importDecl = getImport(importName);
 				return importDecl.getHandleFromMemento(memento, workingCopyOwner);
-			} else {
-				return this;
 			}
+            return this;
 	}
 	return null;
 }
@@ -89,8 +88,7 @@ public ISourceRange getSourceRange() throws JavaModelException {
 	IJavaElement[] imports= getChildren();
 	ISourceRange firstRange= ((ISourceReference)imports[0]).getSourceRange();
 	ISourceRange lastRange= ((ISourceReference)imports[imports.length - 1]).getSourceRange();
-	SourceRange range= new SourceRange(firstRange.getOffset(), lastRange.getOffset() + lastRange.getLength() - firstRange.getOffset());
-	return range;
+	return new SourceRange(firstRange.getOffset(), lastRange.getOffset() + lastRange.getLength() - firstRange.getOffset());
 }
 /**
  */

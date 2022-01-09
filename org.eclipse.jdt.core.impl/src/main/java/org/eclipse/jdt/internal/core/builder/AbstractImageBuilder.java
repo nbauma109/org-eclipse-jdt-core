@@ -63,7 +63,7 @@ protected boolean keepStoringProblemMarkers;
 protected Set<SourceFile> filesWithAnnotations = null;
 
 //2000 is best compromise between space used and speed
-public static int MAX_AT_ONCE = Integer.getInteger(JavaModelManager.MAX_COMPILED_UNITS_AT_ONCE, 2000).intValue();
+public static int MAX_AT_ONCE = Integer.getInteger(JavaModelManager.MAX_COMPILED_UNITS_AT_ONCE, 2000);
 public final static String[] JAVA_PROBLEM_MARKER_ATTRIBUTE_NAMES = {
 		IMarker.MESSAGE,
 		IMarker.SEVERITY,
@@ -75,12 +75,12 @@ public final static String[] JAVA_PROBLEM_MARKER_ATTRIBUTE_NAMES = {
 		IJavaModelMarker.CATEGORY_ID,
 	};
 
-public final static Integer S_ERROR = Integer.valueOf(IMarker.SEVERITY_ERROR);
-public final static Integer S_WARNING = Integer.valueOf(IMarker.SEVERITY_WARNING);
-public final static Integer S_INFO = Integer.valueOf(IMarker.SEVERITY_INFO);
-public final static Integer P_HIGH = Integer.valueOf(IMarker.PRIORITY_HIGH);
-public final static Integer P_NORMAL = Integer.valueOf(IMarker.PRIORITY_NORMAL);
-public final static Integer P_LOW = Integer.valueOf(IMarker.PRIORITY_LOW);
+public final static Integer S_ERROR = IMarker.SEVERITY_ERROR;
+public final static Integer S_WARNING = IMarker.SEVERITY_WARNING;
+public final static Integer S_INFO = IMarker.SEVERITY_INFO;
+public final static Integer P_HIGH = IMarker.PRIORITY_HIGH;
+public final static Integer P_NORMAL = IMarker.PRIORITY_NORMAL;
+public final static Integer P_LOW = IMarker.PRIORITY_LOW;
 private CompilationGroup compilationGroup;
 
 protected AbstractImageBuilder(JavaBuilder javaBuilder, boolean buildStarting, State newState, CompilationGroup compilationGroup) {
@@ -99,8 +99,8 @@ protected AbstractImageBuilder(JavaBuilder javaBuilder, boolean buildStarting, S
 		this.problemSourceFiles = new LinkedHashSet(3);
 
 		if (this.javaBuilder.participants != null) {
-			for (int i = 0, l = this.javaBuilder.participants.length; i < l; i++) {
-				if (this.javaBuilder.participants[i].isAnnotationProcessor()) {
+			for (CompilationParticipant participant : this.javaBuilder.participants) {
+				if (participant.isAnnotationProcessor()) {
 					// initialize this set so the builder knows to gather CUs that define Annotation types
 					// each Annotation processor participant is then asked to process these files AFTER
 					// the compile loop. The normal dependency loop will then recompile all affected types
@@ -213,8 +213,7 @@ protected void acceptSecondaryType(ClassFile classFile) {
 	// noop
 }
 protected void addAllSourceFiles(final LinkedHashSet<SourceFile> sourceFiles) throws CoreException {
-	for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
-		final ClasspathMultiDirectory sourceLocation = this.sourceLocations[i];
+	for (final ClasspathMultiDirectory sourceLocation : this.sourceLocations) {
 		final char[][] exclusionPatterns = sourceLocation.exclusionPatterns;
 		final char[][] inclusionPatterns = sourceLocation.inclusionPatterns;
 		final boolean isAlsoProject = sourceLocation.sourceFolder.equals(this.javaBuilder.currentProject);
@@ -222,49 +221,46 @@ protected void addAllSourceFiles(final LinkedHashSet<SourceFile> sourceFiles) th
 		final IContainer outputFolder = sourceLocation.binaryFolder;
 		final boolean isOutputFolder = sourceLocation.sourceFolder.equals(outputFolder);
 		sourceLocation.sourceFolder.accept(
-			new IResourceProxyVisitor() {
-				@Override
-				public boolean visit(IResourceProxy proxy) throws CoreException {
-					switch(proxy.getType()) {
-						case IResource.FILE :
-							if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
-								IResource resource = proxy.requestResource();
-								if (exclusionPatterns != null || inclusionPatterns != null)
-									if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
-										return false;
-								SourceFile unit = new SourceFile((IFile) resource, sourceLocation);
-								sourceFiles.add(unit);
-							}
-							return false;
-						case IResource.FOLDER :
-							IPath folderPath = null;
-							if (isAlsoProject)
-								if (isExcludedFromProject(folderPath = proxy.requestFullPath()))
-									return false;
-							if (exclusionPatterns != null) {
-								if (folderPath == null)
-									folderPath = proxy.requestFullPath();
-								if (Util.isExcluded(folderPath, inclusionPatterns, exclusionPatterns, true)) {
-									// must walk children if inclusionPatterns != null, can skip them if == null
-									// but folder is excluded so do not create it in the output folder
-									return inclusionPatterns != null;
-								}
-							}
-							if (!isOutputFolder) {
-								if (folderPath == null)
-									folderPath = proxy.requestFullPath();
-								String packageName = folderPath.lastSegment();
-								if (packageName.length() > 0) {
-									String sourceLevel = AbstractImageBuilder.this.javaBuilder.javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
-									String complianceLevel = AbstractImageBuilder.this.javaBuilder.javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-									if (JavaConventions.validatePackageName(packageName, sourceLevel, complianceLevel).getSeverity() != IStatus.ERROR)
-										createFolder(folderPath.removeFirstSegments(segmentCount), outputFolder);
-								}
-							}
-					}
-					return true;
-				}
-			},
+			proxy -> {
+            	switch(proxy.getType()) {
+            		case IResource.FILE :
+            			if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
+            				IResource resource = proxy.requestResource();
+            				if (exclusionPatterns != null || inclusionPatterns != null)
+            					if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
+            						return false;
+            				SourceFile unit = new SourceFile((IFile) resource, sourceLocation);
+            				sourceFiles.add(unit);
+            			}
+            			return false;
+            		case IResource.FOLDER :
+            			IPath folderPath = null;
+            			if (isAlsoProject)
+            				if (isExcludedFromProject(folderPath = proxy.requestFullPath()))
+            					return false;
+            			if (exclusionPatterns != null) {
+            				if (folderPath == null)
+            					folderPath = proxy.requestFullPath();
+            				if (Util.isExcluded(folderPath, inclusionPatterns, exclusionPatterns, true)) {
+            					// must walk children if inclusionPatterns != null, can skip them if == null
+            					// but folder is excluded so do not create it in the output folder
+            					return inclusionPatterns != null;
+            				}
+            			}
+            			if (!isOutputFolder) {
+            				if (folderPath == null)
+            					folderPath = proxy.requestFullPath();
+            				String packageName = folderPath.lastSegment();
+            				if (packageName.length() > 0) {
+            					String sourceLevel = AbstractImageBuilder.this.javaBuilder.javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+            					String complianceLevel = AbstractImageBuilder.this.javaBuilder.javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+            					if (JavaConventions.validatePackageName(packageName, sourceLevel, complianceLevel).getSeverity() != IStatus.ERROR)
+            						createFolder(folderPath.removeFirstSegments(segmentCount), outputFolder);
+            				}
+            			}
+            	}
+            	return true;
+            },
 			IResource.NONE
 		);
 		this.notifier.checkCancel();
@@ -368,7 +364,7 @@ protected void compile(SourceFile[] units, SourceFile[] additionalUnits, boolean
 	String[] initialTypeNames = new String[units.length];
 	for (int i = 0, l = units.length; i < l; i++) {
 		char[] moduleName = units[i].getModuleName();
-		initialTypeNames[i] = (moduleName == null)
+		initialTypeNames[i] = moduleName == null
 				? units[i].initialTypeName
 				: new StringBuilder(60).append(moduleName).append(':').append(units[i].initialTypeName).toString();
 	}
@@ -411,10 +407,7 @@ protected void createProblemFor(IResource resource, IMember javaElement, String 
 			try {
 				range = javaElement.getNameRange();
 			} catch (JavaModelException e) {
-				if (e.getJavaModelStatus().getCode() != IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST) {
-					throw e;
-				}
-				if (!CharOperation.equals(javaElement.getElementName().toCharArray(), TypeConstants.PACKAGE_INFO_NAME)) {
+				if (e.getJavaModelStatus().getCode() != IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST || !CharOperation.equals(javaElement.getElementName().toCharArray(), TypeConstants.PACKAGE_INFO_NAME)) {
 					throw e;
 				}
 				// else silently swallow the exception as the synthetic interface type package-info has no
@@ -441,12 +434,10 @@ protected SourceFile findSourceFile(IFile file, boolean mustExist) {
 	ClasspathMultiDirectory md = null;
 	if (this.sourceLocations.length > 0) {
 		IPath sourceFileFullPath = file.getFullPath();
-		for (int j = 0, m = this.sourceLocations.length; j < m; j++) {
-			if (this.sourceLocations[j].sourceFolder.getFullPath().isPrefixOf(sourceFileFullPath)) {
-				md = this.sourceLocations[j];
-				if (md.exclusionPatterns == null && md.inclusionPatterns == null)
-					break;
-				if (!Util.isExcluded(file, md.inclusionPatterns, md.exclusionPatterns))
+		for (ClasspathMultiDirectory sourceLocation : this.sourceLocations) {
+			if (sourceLocation.sourceFolder.getFullPath().isPrefixOf(sourceFileFullPath)) {
+				md = sourceLocation;
+				if (md.exclusionPatterns == null && md.inclusionPatterns == null || !Util.isExcluded(file, md.inclusionPatterns, md.exclusionPatterns))
 					break;
 			}
 		}
@@ -462,8 +453,8 @@ protected void finishedWith(String sourceLocator, CompilationResult result, char
 
 	char[][] simpleRefs = result.simpleNameReferences;
 	// for each duplicate type p1.p2.A, add the type name A (package was already added)
-	next : for (int i = 0, l = duplicateTypeNames.size(); i < l; i++) {
-		char[][] compoundName = (char[][]) duplicateTypeNames.get(i);
+	next : for (Object duplicateTypeName : duplicateTypeNames) {
+		char[][] compoundName = (char[][]) duplicateTypeName;
 		char[] typeName = compoundName[compoundName.length - 1];
 		int sLength = simpleRefs.length;
 		for (int j = 0; j < sLength; j++)
@@ -511,9 +502,8 @@ protected boolean isExcludedFromProject(IPath childPath) throws JavaModelExcepti
 	// answer whether the folder should be ignored when walking the project as a source folder
 	if (childPath.segmentCount() > 2) return false; // is a subfolder of a package
 
-	for (int j = 0, k = this.sourceLocations.length; j < k; j++) {
-		if (childPath.equals(this.sourceLocations[j].binaryFolder.getFullPath())) return true;
-		if (childPath.equals(this.sourceLocations[j].sourceFolder.getFullPath())) return true;
+	for (ClasspathMultiDirectory sourceLocation : this.sourceLocations) {
+		if (childPath.equals(sourceLocation.binaryFolder.getFullPath()) || childPath.equals(sourceLocation.sourceFolder.getFullPath())) return true;
 	}
 	// skip default output folder which may not be used by any source folder
 	return childPath.equals(this.javaBuilder.javaProject.getOutputLocation());
@@ -571,8 +561,8 @@ protected CompilationParticipantResult[] notifyParticipants(SourceFile[] unitsAb
 	// TODO (kent) do we expect to have more than one participant?
 	// and if so should we pass the generated files from the each processor to the others to process?
 	// and what happens if some participants do not expect to be called with only a few files, after seeing 'all' the files?
-	for (int i = 0, l = this.javaBuilder.participants.length; i < l; i++)
-		this.javaBuilder.participants[i].buildStarting(results, this instanceof BatchImageBuilder);
+	for (CompilationParticipant participant : this.javaBuilder.participants)
+        participant.buildStarting(results, this instanceof BatchImageBuilder);
 
 	SimpleSet uniqueFiles = null;
 	CompilationParticipantResult[] toAdd = null;
@@ -633,9 +623,9 @@ protected void processAnnotations(CompilationParticipantResult[] results) {
 		results[i].reset(foundAnnotations && this.filesWithAnnotations.contains(results[i].sourceFile));
 
 	// even if no files have annotations, must still tell every annotation processor in case the file used to have them
-	for (int i = 0, l = this.javaBuilder.participants.length; i < l; i++)
-		if (this.javaBuilder.participants[i].isAnnotationProcessor())
-			this.javaBuilder.participants[i].processAnnotations(results);
+	for (CompilationParticipant participant : this.javaBuilder.participants)
+        if (participant.isAnnotationProcessor())
+			participant.processAnnotations(results);
 	processAnnotationResults(results);
 }
 
@@ -677,14 +667,12 @@ protected void recordParticipantResult(CompilationParticipantResult result) {
  *     carried from the problem to the marker in extra attributes, if present.
  */
 protected void storeProblemsFor(SourceFile sourceFile, CategorizedProblem[] problems) throws CoreException {
-	if (sourceFile == null || problems == null || problems.length == 0) return;
-	 // once a classpath error is found, ignore all other problems for this project so the user can see the main error
+	// once a classpath error is found, ignore all other problems for this project so the user can see the main error
 	// but still try to compile as many source files as possible to help the case when the base libraries are in source
-	if (!this.keepStoringProblemMarkers) return; // only want the one error recorded on this source file
+	if (sourceFile == null || problems == null || problems.length == 0 || !this.keepStoringProblemMarkers) return; // only want the one error recorded on this source file
 
 	HashSet managedMarkerTypes = JavaModelManager.getJavaModelManager().compilationParticipants.managedMarkerTypes();
-	problems: for (int i = 0, l = problems.length; i < l; i++) {
-		CategorizedProblem problem = problems[i];
+	problems: for (CategorizedProblem problem : problems) {
 		int id = problem.getID();
 		// we may use a different resource for certain problems such as IProblem.MissingNonNullByDefaultAnnotationOnPackage
 		// but at the start of the next problem we should reset it to the source file's resource
@@ -722,7 +710,7 @@ protected void storeProblemsFor(SourceFile sourceFile, CategorizedProblem[] prob
 		boolean managedProblem = false;
 		if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(markerType)
 				|| (managedProblem = managedMarkerTypes.contains(markerType))) {
-			if (id == IProblem.MissingNonNullByDefaultAnnotationOnPackage && !(CharOperation.equals(sourceFile.getMainTypeName(), TypeConstants.PACKAGE_INFO_NAME))) {
+			if (id == IProblem.MissingNonNullByDefaultAnnotationOnPackage && !CharOperation.equals(sourceFile.getMainTypeName(), TypeConstants.PACKAGE_INFO_NAME)) {
 				// for this kind of problem, marker needs to be created on the package instead of on the source file
 				// see bug 372012
 				char[] fileName = sourceFile.getFileName();
@@ -800,8 +788,7 @@ protected void storeTasksFor(SourceFile sourceFile, CategorizedProblem[] tasks) 
 	if (sourceFile == null || tasks == null || tasks.length == 0) return;
 
 	IResource resource = sourceFile.resource;
-	for (int i = 0, l = tasks.length; i < l; i++) {
-		CategorizedProblem task = tasks[i];
+	for (CategorizedProblem task : tasks) {
 		if (task.getID() == IProblem.Task) {
 			Integer priority = P_NORMAL;
 			String compilerPriority = task.getArguments()[2];

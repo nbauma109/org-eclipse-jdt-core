@@ -74,8 +74,7 @@ public class AbortCompilation extends RuntimeException {
 		return String.valueOf(buffer);
 	}
 	public void updateContext(InvocationSite invocationSite, CompilationResult unitResult) {
-		if (this.problem == null) return;
-		if (this.problem.getSourceStart() != 0 || this.problem.getSourceEnd() != 0) return;
+		if (this.problem == null || this.problem.getSourceStart() != 0 || this.problem.getSourceEnd() != 0) return;
 		this.problem.setSourceStart(invocationSite.sourceStart());
 		this.problem.setSourceEnd(invocationSite.sourceEnd());
 		int[] lineEnds = unitResult.getLineSeparatorPositions();
@@ -84,8 +83,7 @@ public class AbortCompilation extends RuntimeException {
 	}
 
 	public void updateContext(ASTNode astNode, CompilationResult unitResult) {
-		if (this.problem == null) return;
-		if (this.problem.getSourceStart() != 0 || this.problem.getSourceEnd() != 0) return;
+		if (this.problem == null || this.problem.getSourceStart() != 0 || this.problem.getSourceEnd() != 0) return;
 		this.problem.setSourceStart(astNode.sourceStart());
 		this.problem.setSourceEnd(astNode.sourceEnd());
 		int[] lineEnds = unitResult.getLineSeparatorPositions();

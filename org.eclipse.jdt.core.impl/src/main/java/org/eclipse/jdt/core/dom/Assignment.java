@@ -146,8 +146,8 @@ public class Assignment extends Expression {
 					RIGHT_SHIFT_SIGNED_ASSIGN,
 					RIGHT_SHIFT_UNSIGNED_ASSIGN
 				};
-			for (int i = 0; i < ops.length; i++) {
-				CODES.put(ops[i].toString(), ops[i]);
+			for (Operator op2 : ops) {
+				CODES.put(op2.toString(), op2);
 			}
 		}
 	}
@@ -242,10 +242,9 @@ public class Assignment extends Expression {
 		if (property == OPERATOR_PROPERTY) {
 			if (get) {
 				return getOperator();
-			} else {
-				setOperator((Operator) value);
-				return null;
 			}
+            setOperator((Operator) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
@@ -256,18 +255,16 @@ public class Assignment extends Expression {
 		if (property == LEFT_HAND_SIDE_PROPERTY) {
 			if (get) {
 				return getLeftHandSide();
-			} else {
-				setLeftHandSide((Expression) child);
-				return null;
 			}
+            setLeftHandSide((Expression) child);
+            return null;
 		}
 		if (property == RIGHT_HAND_SIDE_PROPERTY) {
 			if (get) {
 				return getRightHandSide();
-			} else {
-				setRightHandSide((Expression) child);
-				return null;
 			}
+            setRightHandSide((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

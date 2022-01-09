@@ -109,7 +109,7 @@ public class BundleTracker<T> implements BundleTrackerCustomizer<T> {
 	public BundleTracker(BundleContext context, int stateMask, BundleTrackerCustomizer<T> customizer) {
 		this.context = context;
 		this.mask = stateMask;
-		this.customizer = (customizer == null) ? this : customizer;
+		this.customizer = customizer == null ? this : customizer;
 	}
 
 	/**
@@ -191,8 +191,8 @@ public class BundleTracker<T> implements BundleTrackerCustomizer<T> {
 			}
 		}
 		if (bundles != null) {
-			for (int i = 0; i < bundles.length; i++) {
-				outgoing.untrack(bundles[i], null);
+			for (Bundle bundle : bundles) {
+				outgoing.untrack(bundle, null);
 			}
 		}
 	}
@@ -222,9 +222,7 @@ public class BundleTracker<T> implements BundleTrackerCustomizer<T> {
 	 */
 	@Override
 	public T addingBundle(Bundle bundle, BundleEvent event) {
-		@SuppressWarnings("unchecked")
-		T result = (T) bundle;
-		return result;
+		return (T) bundle;
 	}
 
 	/**
@@ -383,7 +381,7 @@ public class BundleTracker<T> implements BundleTrackerCustomizer<T> {
 	 * @since 1.5
 	 */
 	public Map<Bundle, T> getTracked() {
-		Map<Bundle, T> map = new HashMap<Bundle, T>();
+		Map<Bundle, T> map = new HashMap<>();
 		final Tracked t = tracked();
 		if (t == null) { /* if BundleTracker is not open */
 			return map;
@@ -422,7 +420,6 @@ public class BundleTracker<T> implements BundleTrackerCustomizer<T> {
 		 * Tracked constructor.
 		 */
 		Tracked() {
-			super();
 		}
 
 		/**

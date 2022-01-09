@@ -131,12 +131,10 @@ public RecoveredElement add(Statement statement, int bracketBalanceValue) {
 	if (this.parent == null) return this; // ignore
 	if (this instanceof RecoveredType) {
 		TypeDeclaration typeDeclaration = ((RecoveredType) this).typeDeclaration;
-		if (typeDeclaration != null && (typeDeclaration.bits & ASTNode.IsAnonymousType) != 0) {
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=291040, new X(<SelectOnMessageSend:zoo()>) { ???
-			if (statement.sourceStart > typeDeclaration.sourceStart && statement.sourceEnd < typeDeclaration.sourceEnd) {
-				return this;
-			}
-		}
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=291040, new X(<SelectOnMessageSend:zoo()>) { ???
+        if (typeDeclaration != null && (typeDeclaration.bits & ASTNode.IsAnonymousType) != 0 && statement.sourceStart > typeDeclaration.sourceStart && statement.sourceEnd < typeDeclaration.sourceEnd) {
+        	return this;
+        }
 	}
 	this.updateSourceEndIfNecessary(previousAvailableLineEnd(statement.sourceStart - 1));
 	return this.parent.add(statement, bracketBalanceValue);
@@ -162,8 +160,8 @@ protected void addBlockStatement(RecoveredBlock recoveredBlock) {
 	Block block = recoveredBlock.blockDeclaration;
 	if(block.statements != null) {
 		Statement[] statements = block.statements;
-		for (int i = 0; i < statements.length; i++) {
-			recoveredBlock.add(statements[i], 0);
+		for (Statement statement : statements) {
+			recoveredBlock.add(statement, 0);
 		}
 	}
 }
@@ -275,7 +273,7 @@ public int previousAvailableLineEnd(int position){
 
 	char[] source = scanner.source;
 	for (int i = previousLineEnd+1; i < position; i++){
-		if (!(source[i] == ' ' || source[i] == '\t')) return position;
+		if (source[i] != ' ' && source[i] != '\t') return position;
 	}
 	return previousLineEnd;
 }
@@ -344,7 +342,7 @@ public void updateFromParserState(){
  * in which case both the currentElement is exited
  */
 public RecoveredElement updateOnClosingBrace(int braceStart, int braceEnd){
-	if ((--this.bracketBalance <= 0) && (this.parent != null)){
+	if (--this.bracketBalance <= 0 && this.parent != null){
 		this.updateSourceEndIfNecessary(braceStart, braceEnd);
 		return this.parent;
 	}

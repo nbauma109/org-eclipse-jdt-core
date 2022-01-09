@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.compiler.util.Util;
  * @see IStorage
  */
 public class JarEntryFile  extends JarEntryResource {
-	private static final IJarEntryResource[] NO_CHILDREN = new IJarEntryResource[0];
+	private static final IJarEntryResource[] NO_CHILDREN = {};
 	public JarEntryFile(String simpleName) {
 		super(simpleName);
 	}
@@ -55,34 +55,33 @@ public class JarEntryFile  extends JarEntryResource {
 			try {
 				IPath rootPath = root.getPath();
 				Object target = JavaModel.getTarget(rootPath, false);
-				if (target != null && target instanceof File) {
+				if (target instanceof File) {
 					return JRTUtil.getContentFromJrt((File) target, getEntryName(), root.getElementName());
 				}
 			} catch (IOException e) {
 				throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
 			}
 			return null;
-		} else {
-			ZipFile zipFile = null;
-			try {
-				zipFile = getZipFile();
-				if (JavaModelManager.ZIP_ACCESS_VERBOSE) {
-					System.out.println("(" + Thread.currentThread() + ") [JarEntryFile.getContents()] Creating ZipFile on " +zipFile.getName()); //$NON-NLS-1$	//$NON-NLS-2$
-				}
-				String entryName = getEntryName();
-				ZipEntry zipEntry = zipFile.getEntry(entryName);
-				if (zipEntry == null){
-					throw new JavaModelException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_PATH, entryName));
-				}
-				byte[] contents = Util.getZipEntryByteContent(zipEntry, zipFile);
-				return new ByteArrayInputStream(contents);
-			} catch (IOException e){
-				throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
-			} finally {
-				// avoid leaking ZipFiles
-				JavaModelManager.getJavaModelManager().closeZipFile(zipFile);
-			}
 		}
+        ZipFile zipFile = null;
+        try {
+        	zipFile = getZipFile();
+        	if (JavaModelManager.ZIP_ACCESS_VERBOSE) {
+        		System.out.println("(" + Thread.currentThread() + ") [JarEntryFile.getContents()] Creating ZipFile on " +zipFile.getName()); //$NON-NLS-1$	//$NON-NLS-2$
+        	}
+        	String entryName = getEntryName();
+        	ZipEntry zipEntry = zipFile.getEntry(entryName);
+        	if (zipEntry == null){
+        		throw new JavaModelException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_PATH, entryName));
+        	}
+        	byte[] contents = Util.getZipEntryByteContent(zipEntry, zipFile);
+        	return new ByteArrayInputStream(contents);
+        } catch (IOException e){
+        	throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
+        } finally {
+        	// avoid leaking ZipFiles
+        	JavaModelManager.getJavaModelManager().closeZipFile(zipFile);
+        }
 	}
 
 	@Override

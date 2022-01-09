@@ -70,7 +70,6 @@ public class LocalFileSystem extends FileSystem {
 	 * Creates a new local file system.
 	 */
 	public LocalFileSystem() {
-		super();
 		instance = this;
 	}
 
@@ -96,7 +95,7 @@ public class LocalFileSystem extends FileSystem {
 		String arch = System.getProperty("osgi.arch", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		if (os.equals(Constants.OS_WIN32))
 			attributes |= EFS.ATTRIBUTE_ARCHIVE | EFS.ATTRIBUTE_HIDDEN;
-		else if (os.equals(Constants.OS_LINUX) || (os.equals(Constants.OS_SOLARIS) && arch.equals(Constants.ARCH_SPARC)))
+		else if (os.equals(Constants.OS_LINUX) || os.equals(Constants.OS_SOLARIS) && arch.equals(Constants.ARCH_SPARC))
 			attributes |= EFS.ATTRIBUTE_EXECUTABLE | EFS.ATTRIBUTE_SYMLINK | EFS.ATTRIBUTE_LINK_TARGET;
 		else if (os.equals(Constants.OS_MACOSX) || os.equals(Constants.OS_HPUX) || os.equals(Constants.OS_QNX))
 			attributes |= EFS.ATTRIBUTE_EXECUTABLE;

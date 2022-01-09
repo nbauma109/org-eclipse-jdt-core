@@ -152,8 +152,8 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 	public static final char[] INTVALUE_INTEGER_METHOD_SIGNATURE = "()I".toCharArray(); //$NON-NLS-1$
 	public static final char[] INVOKE_METHOD_METHOD_NAME = "invoke".toCharArray(); //$NON-NLS-1$
 	public static final char[] INVOKE_METHOD_METHOD_SIGNATURE = "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;".toCharArray(); //$NON-NLS-1$
-	public static final char[][] JAVA_LANG_REFLECT_ACCESSIBLEOBJECT = new char[][] {TypeConstants.JAVA, TypeConstants.LANG, TypeConstants.REFLECT, "AccessibleObject".toCharArray()}; //$NON-NLS-1$
-	public static final char[][] JAVA_LANG_REFLECT_ARRAY = new char[][] {TypeConstants.JAVA, TypeConstants.LANG, TypeConstants.REFLECT, "Array".toCharArray()}; //$NON-NLS-1$
+	public static final char[][] JAVA_LANG_REFLECT_ACCESSIBLEOBJECT = {TypeConstants.JAVA, TypeConstants.LANG, TypeConstants.REFLECT, "AccessibleObject".toCharArray()}; //$NON-NLS-1$
+	public static final char[][] JAVA_LANG_REFLECT_ARRAY = {TypeConstants.JAVA, TypeConstants.LANG, TypeConstants.REFLECT, "Array".toCharArray()}; //$NON-NLS-1$
 	public static final char[] IllegalArgumentExceptionConstructorSignature = "(Ljava/lang/String;)V".toCharArray(); //$NON-NLS-1$
 	// predefined type constant names
 	public static final char[] JavaIoPrintStreamSignature = "Ljava/io/PrintStream;".toCharArray(); //$NON-NLS-1$
@@ -341,7 +341,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 	 * Return the content of the receiver
 	 */
 	public byte[] dumpBytes() {
-		System.arraycopy(this.poolContent, 0, (this.poolContent = new byte[this.currentOffset]), 0, this.currentOffset);
+		System.arraycopy(this.poolContent, 0, this.poolContent = new byte[this.currentOffset], 0, this.currentOffset);
 		return this.poolContent;
 	}
 	public int literalIndex(byte[] utf8encoding, char[] stringCharArray) {
@@ -356,7 +356,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(Utf8Tag);
@@ -398,7 +398,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(Utf8Tag);
@@ -411,27 +411,25 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			}
 			this.currentOffset += 2;
 			length = 0;
-			for (int i = 0; i < utf8Constant.length; i++) {
-				char current = utf8Constant[i];
-				if ((current >= 0x0001) && (current <= 0x007F)) {
+			for (char current : utf8Constant) {
+				if (current >= 0x0001 && current <= 0x007F) {
 					// we only need one byte: ASCII table
 					writeU1(current);
 					length++;
 				} else {
-					if (current > 0x07FF) {
-						// we need 3 bytes
-						length += 3;
-						writeU1(0xE0 | ((current >> 12) & 0x0F)); // 0xE0 = 1110 0000
-						writeU1(0x80 | ((current >> 6) & 0x3F)); // 0x80 = 1000 0000
-						writeU1(0x80 | (current & 0x3F)); // 0x80 = 1000 0000
-					} else {
-						// we can be 0 or between 0x0080 and 0x07FF
-						// In that case we only need 2 bytes
-						length += 2;
-						writeU1(0xC0 | ((current >> 6) & 0x1F)); // 0xC0 = 1100 0000
-						writeU1(0x80 | (current & 0x3F)); // 0x80 = 1000 0000
-					}
-				}
+                    if (current > 0x07FF) {
+                    	// we need 3 bytes
+                    	length += 3;
+                    	writeU1(0xE0 | current >> 12 & 0x0F); // 0xE0 = 1110 0000
+                    	writeU1(0x80 | current >> 6 & 0x3F); // 0x80 = 1000 0000
+                    } else {
+                    	// we can be 0 or between 0x0080 and 0x07FF
+                    	// In that case we only need 2 bytes
+                    	length += 2;
+                    	writeU1(0xC0 | current >> 6 & 0x1F); // 0xC0 = 1100 0000
+                    }
+                    writeU1(0x80 | current & 0x3F); // 0x80 = 1000 0000
+                }
 			}
 			if (length >= 65535) {
 				this.currentOffset = savedCurrentOffset - 1;
@@ -460,7 +458,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(StringTag);
@@ -505,7 +503,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(DoubleTag);
@@ -552,7 +550,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(FloatTag);
@@ -594,7 +592,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(IntegerTag);
@@ -637,7 +635,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(LongTag);
@@ -675,7 +673,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(StringTag);
@@ -703,7 +701,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(ModuleTag);
@@ -732,7 +730,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(PackageTag);
@@ -760,7 +758,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(ClassTag);
@@ -802,7 +800,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(isInterface ? InterfaceMethodRefTag : MethodRefTag);
@@ -840,7 +838,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(NameAndTypeTag);
@@ -878,7 +876,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 		int length = this.offsets.length;
 		if (length <= index) {
 			// resize
-			System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+			System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 		}
 
 		this.offsets[index] = this.currentOffset;
@@ -896,7 +894,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 		int length = this.offsets.length;
 		if (length <= index) {
 			// resize
-			System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+			System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 		}
 
 		this.offsets[index] = this.currentOffset;
@@ -914,7 +912,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 		int length = this.offsets.length;
 		if (length <= index) {
 			// resize
-			System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+			System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 		}
 		this.offsets[index] = this.currentOffset;
 		writeU1(MethodTypeTag);
@@ -932,7 +930,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 
@@ -972,7 +970,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(FieldRefTag);
@@ -1012,7 +1010,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 			int length = this.offsets.length;
 			if (length <= index) {
 				// resize
-				System.arraycopy(this.offsets, 0, (this.offsets = new int[index * 2]), 0, length);
+				System.arraycopy(this.offsets, 0, this.offsets = new int[index * 2], 0, length);
 			}
 			this.offsets[index] = this.currentOffset;
 			writeU1(StringTag);
@@ -1035,7 +1033,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 				length = this.offsets.length;
 				if (length <= stringIndex) {
 					// resize
-					System.arraycopy(this.offsets, 0, (this.offsets = new int[stringIndex * 2]), 0, length);
+					System.arraycopy(this.offsets, 0, this.offsets = new int[stringIndex * 2], 0, length);
 				}
 				this.offsets[stringIndex] = this.currentOffset;
 				writeU1(Utf8Tag);
@@ -1048,9 +1046,8 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 				}
 				this.currentOffset += 2;
 				length = 0;
-				for (int i = 0; i < stringCharArray.length; i++) {
-					char current = stringCharArray[i];
-					if ((current >= 0x0001) && (current <= 0x007F)) {
+				for (char current : stringCharArray) {
+					if (current >= 0x0001 && current <= 0x007F) {
 						// we only need one byte: ASCII table
 						length++;
 						if (this.currentOffset + 1 >= this.poolContent.length) {
@@ -1058,9 +1055,9 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 							// enough space to write the length
 							resizePoolContents(1);
 						}
-						this.poolContent[this.currentOffset++] = (byte)(current);
-					} else
-						if (current > 0x07FF) {
+						this.poolContent[this.currentOffset++] = (byte)current;
+					} else {
+                        if (current > 0x07FF) {
 							// we need 3 bytes
 							length += 3;
 							if (this.currentOffset + 3 >= this.poolContent.length) {
@@ -1068,9 +1065,8 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 								// enough space to write the length
 								resizePoolContents(3);
 							}
-							this.poolContent[this.currentOffset++] = (byte) (0xE0 | ((current >> 12) & 0x0F)); // 0xE0 = 1110 0000
-							this.poolContent[this.currentOffset++] = (byte) (0x80 | ((current >> 6) & 0x3F)); // 0x80 = 1000 0000
-							this.poolContent[this.currentOffset++] = (byte) (0x80 | (current & 0x3F)); // 0x80 = 1000 0000
+							this.poolContent[this.currentOffset++] = (byte) (0xE0 | current >> 12 & 0x0F); // 0xE0 = 1110 0000
+							this.poolContent[this.currentOffset++] = (byte) (0x80 | current >> 6 & 0x3F); // 0x80 = 1000 0000
 						} else {
 							if (this.currentOffset + 2 >= this.poolContent.length) {
 								// we need to resize the poolContent array because we won't have
@@ -1080,9 +1076,10 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 							// we can be 0 or between 0x0080 and 0x07FF
 							// In that case we only need 2 bytes
 							length += 2;
-							this.poolContent[this.currentOffset++] = (byte) (0xC0 | ((current >> 6) & 0x1F)); // 0xC0 = 1100 0000
-							this.poolContent[this.currentOffset++] = (byte) (0x80 | (current & 0x3F)); // 0x80 = 1000 0000
+							this.poolContent[this.currentOffset++] = (byte) (0xC0 | current >> 6 & 0x1F); // 0xC0 = 1100 0000
 						}
+                        this.poolContent[this.currentOffset++] = (byte) (0x80 | current & 0x3F); // 0x80 = 1000 0000
+                    }
 				}
 				if (length >= 65535) {
 					this.currentOffset = savedCurrentOffset;

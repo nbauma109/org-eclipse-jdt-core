@@ -289,7 +289,6 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 	}
 
 	public Workspace() {
-		super();
 		localMetaArea = new LocalMetaArea();
 		tree = new ElementTree();
 		/* tree should only be modified during operations */
@@ -502,7 +501,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 					allConfigs = ComputeProjectOrder.computeVertexOrder(buildGraph, IBuildConfiguration.class).vertexes;
 				}
 
-				buildParallel &= (buildGraph != null && buildGraph.vertexList.size() > 1);
+				buildParallel &= buildGraph != null && buildGraph.vertexList.size() > 1;
 				if (buildParallel) {
 					relaxed = noEnclosingRule && allRelaxed(allConfigs, trigger);
 					buildParallel &= relaxed;
@@ -906,8 +905,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 		IProject[] result2 = new IProject[bad.size()];
 		bad.toArray(result2);
 		// List<IProject> p
-		List<IProject> p = new LinkedList<>();
-		p.addAll(Arrays.asList(r.projects));
+		List<IProject> p = new LinkedList<>(Arrays.asList(r.projects));
 		for (Iterator<IProject> it = p.listIterator(); it.hasNext();) {
 			IProject project = it.next();
 			if (bad.contains(project)) {
@@ -1094,7 +1092,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 		newInfo.setNodeId(sourceInfo.getNodeId());
 
 		// preserve local sync info but not location info
-		newInfo.setFlags(newInfo.getFlags() | (sourceInfo.getFlags() & M_LOCAL_EXISTS));
+		newInfo.setFlags(newInfo.getFlags() | sourceInfo.getFlags() & M_LOCAL_EXISTS);
 		newInfo.setFileStoreRoot(null);
 
 		// forget content-related caching flags
@@ -1104,7 +1102,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 		if (source.isLinked()) {
 			LinkDescription linkDescription;
 			URI sourceLocationURI = transferVariableDefinition(source, destinationResource, source.getLocationURI());
-			if (((updateFlags & IResource.SHALLOW) != 0) || ((Resource) source).isUnderVirtual()) {
+			if ((updateFlags & IResource.SHALLOW) != 0 || ((Resource) source).isUnderVirtual()) {
 				//for shallow move the destination is a linked resource with the same location
 				newInfo.set(ICoreConstants.M_LINK);
 				linkDescription = new LinkDescription(destinationResource, sourceLocationURI);
@@ -1113,10 +1111,8 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 				newInfo.clear(ICoreConstants.M_LINK);
 				linkDescription = null;
 			}
-			if (moveResources && !movingProject) {
-				if (((Project) source.getProject()).internalGetDescription().setLinkLocation(source.getProjectRelativePath(), null))
-					((Project) source.getProject()).writeDescription(updateFlags);
-			}
+			if (moveResources && !movingProject && ((Project) source.getProject()).internalGetDescription().setLinkLocation(source.getProjectRelativePath(), null))
+            	((Project) source.getProject()).writeDescription(updateFlags);
 			Project project = (Project) destinationResource.getProject();
 			project.internalGetDescription().setLinkLocation(destinationResource.getProjectRelativePath(), linkDescription);
 			project.writeDescription(updateFlags);
@@ -1128,10 +1124,8 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 			Project sourceProject = (Project) source.getProject();
 			LinkedList<FilterDescription> originalDescriptions = sourceProject.internalGetDescription().getFilter(source.getProjectRelativePath());
 			LinkedList<FilterDescription> filterDescriptions = FilterDescription.copy(originalDescriptions, destinationResource);
-			if (moveResources && !movingProject) {
-				if (((Project) source.getProject()).internalGetDescription().setFilters(source.getProjectRelativePath(), null))
-					((Project) source.getProject()).writeDescription(updateFlags);
-			}
+			if (moveResources && !movingProject && ((Project) source.getProject()).internalGetDescription().setFilters(source.getProjectRelativePath(), null))
+            	((Project) source.getProject()).writeDescription(updateFlags);
 			Project project = (Project) destinationResource.getProject();
 			project.internalGetDescription().setFilters(destinationResource.getProjectRelativePath(), filterDescriptions);
 			project.writeDescription(updateFlags);
@@ -1163,7 +1157,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 	public URI transferVariableDefinition(IResource source, IResource dest, URI sourceURI) throws CoreException {
 		IPath srcLoc = source.getLocation();
 		IPath srcRawLoc = source.getRawLocation();
-		if ((srcLoc != null) && (srcRawLoc != null) && !srcLoc.equals(srcRawLoc)) {
+		if (srcLoc != null && srcRawLoc != null && !srcLoc.equals(srcRawLoc)) {
 			// the location is variable relative
 			if (!source.getProject().equals(dest.getProject())) {
 				String variable = srcRawLoc.segment(0);
@@ -1228,10 +1222,8 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 			shouldConvertToRelative = false;
 			// If the variable value is of type ${PARENT-COUNT-VAR},
 			// we can avoid generating an intermediate variable and convert it directly.
-			if (referencedVariables.length == 1) {
-				if (PathVariableUtil.isParentVariable(referencedVariables[0]))
-					shouldConvertToRelative = true;
-			}
+			if (referencedVariables.length == 1 && PathVariableUtil.isParentVariable(referencedVariables[0]))
+            	shouldConvertToRelative = true;
 
 			if (!shouldConvertToRelative) {
 				String[] segments = PathVariableUtil.splitVariablesAndContent(srcValue.toPortableString());
@@ -1349,26 +1341,24 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 			if (!keepSyncInfo)
 				info.setSyncInfo(null);
 			tree.createElement(resource.getFullPath(), info);
-		} else {
-			// if overwrite==true then slam the new info into the tree even if one existed before
-			if (overwrite || (!phantom && original.isSet(M_PHANTOM))) {
-				// copy over the sync info and flags from the old resource info
-				// since we are replacing a phantom with a real resource
-				// DO NOT set the sync info dirty flag because we want to
-				// preserve the old sync info so its not dirty
-				// XXX: must copy over the generic sync info from the old info to the new
-				// XXX: do we really need to clone the sync info here?
-				if (!keepSyncInfo)
-					info.setSyncInfo(original.getSyncInfo(true));
-				// mark the markers bit as dirty so we snapshot an empty marker set for
-				// the new resource
-				info.set(ICoreConstants.M_MARKERS_SNAP_DIRTY);
-				tree.setElementData(resource.getFullPath(), info);
-			} else {
-				String message = NLS.bind(Messages.resources_mustNotExist, resource.getFullPath());
-				throw new ResourceException(IResourceStatus.RESOURCE_EXISTS, resource.getFullPath(), message, null);
-			}
-		}
+		} else // if overwrite==true then slam the new info into the tree even if one existed before
+        if (overwrite || !phantom && original.isSet(M_PHANTOM)) {
+        	// copy over the sync info and flags from the old resource info
+        	// since we are replacing a phantom with a real resource
+        	// DO NOT set the sync info dirty flag because we want to
+        	// preserve the old sync info so its not dirty
+        	// XXX: must copy over the generic sync info from the old info to the new
+        	// XXX: do we really need to clone the sync info here?
+        	if (!keepSyncInfo)
+        		info.setSyncInfo(original.getSyncInfo(true));
+        	// mark the markers bit as dirty so we snapshot an empty marker set for
+        	// the new resource
+        	info.set(ICoreConstants.M_MARKERS_SNAP_DIRTY);
+        	tree.setElementData(resource.getFullPath(), info);
+        } else {
+        	String message = NLS.bind(Messages.resources_mustNotExist, resource.getFullPath());
+        	throw new ResourceException(IResourceStatus.RESOURCE_EXISTS, resource.getFullPath(), message, null);
+        }
 		return info;
 	}
 
@@ -1480,7 +1470,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 			workManager.setBuild(build);
 			// if we are not exiting a top level operation then just decrement the count and return
 			depthOne = workManager.getPreparedOperationDepth() == 1;
-			if (!(notificationManager.shouldNotify() || depthOne)) {
+			if (!notificationManager.shouldNotify() && !depthOne) {
 				notificationManager.requestNotify();
 				return;
 			}
@@ -1756,7 +1746,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 				result = (ResourceInfo) tree.openElementData(path);
 			else
 				result = (ResourceInfo) tree.getElementData(path);
-			if (result != null && (!phantom && result.isSet(M_PHANTOM)))
+			if (result != null && !phantom && result.isSet(M_PHANTOM))
 				return null;
 			return result;
 		} catch (IllegalArgumentException e) {
@@ -1971,7 +1961,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 
 	@Override
 	public IProjectDescription loadProjectDescription(InputStream stream) throws CoreException {
-		IProjectDescription result = null;
+		IProjectDescription result;
 		result = new ProjectDescriptionReader().read(new InputSource(stream));
 		if (result == null) {
 			String message = NLS.bind(Messages.resources_errorReadProject, stream.toString());

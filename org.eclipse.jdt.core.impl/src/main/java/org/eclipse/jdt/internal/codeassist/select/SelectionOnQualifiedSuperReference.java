@@ -58,7 +58,6 @@ public TypeBinding resolveType(BlockScope scope) {
 
 	if (binding == null || !binding.isValidBinding())
 		throw new SelectionNodeFound();
-	else
-		throw new SelectionNodeFound(binding);
+    throw new SelectionNodeFound(binding);
 }
 }

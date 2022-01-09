@@ -74,15 +74,14 @@ public class StackMapFrame {
 	public void addLocal(int resolvedPosition, VerificationTypeInfo info) {
 		if (this.locals == null) {
 			this.locals = new VerificationTypeInfo[resolvedPosition + 1];
-			this.locals[resolvedPosition] = info;
 		} else {
 			final int length = this.locals.length;
 			if (resolvedPosition >= length) {
 				System.arraycopy(this.locals, 0, this.locals = new VerificationTypeInfo[resolvedPosition + 1], 0,
 						length);
 			}
-			this.locals[resolvedPosition] = info;
 		}
+        this.locals[resolvedPosition] = info;
 	}
 
 	public void addStackItem(VerificationTypeInfo info) {
@@ -103,7 +102,7 @@ public class StackMapFrame {
 	}
 
 	public StackMapFrame duplicate() {
-		Map<VerificationTypeInfo, VerificationTypeInfo> cache = new HashMap<VerificationTypeInfo, VerificationTypeInfo>();
+		Map<VerificationTypeInfo, VerificationTypeInfo> cache = new HashMap<>();
 		int length = this.locals.length;
 		StackMapFrame result = new StackMapFrame(length);
 		result.numberOfLocals = -1;
@@ -166,18 +165,17 @@ public class StackMapFrame {
 				result = currentNumberOfLocals; // append if no hole and currentNumberOfLocals <= 3
 				int counter = 0;
 				for (int i = 0; i < currentLocalsLength && counter < currentNumberOfLocals; i++) {
-					if (currentLocals[i] != null) {
-						switch (currentLocals[i].id()) {
-							case TypeIds.T_double:
-							case TypeIds.T_long:
-								i++;
-						}
-						counter++;
-					} else {
+					if (currentLocals[i] == null) {
 						result = Integer.MAX_VALUE;
 						this.numberOfDifferentLocals = result;
 						return result;
 					}
+                    switch (currentLocals[i].id()) {
+                    	case TypeIds.T_double:
+                    	case TypeIds.T_long:
+                    		i++;
+                    }
+                    counter++;
 				}
 			}
 		} else if (currentNumberOfLocals == 0) {
@@ -185,18 +183,17 @@ public class StackMapFrame {
 			int counter = 0;
 			result = -prevNumberOfLocals; // chop frame if no hole and prevNumberOfLocals <= 3
 			for (int i = 0; i < prevLocalsLength && counter < prevNumberOfLocals; i++) {
-				if (prevLocals[i] != null) {
-					switch (prevLocals[i].id()) {
-						case TypeIds.T_double:
-						case TypeIds.T_long:
-							i++;
-					}
-					counter++;
-				} else {
+				if (prevLocals[i] == null) {
 					result = Integer.MAX_VALUE;
 					this.numberOfDifferentLocals = result;
 					return result;
 				}
+                switch (prevLocals[i].id()) {
+                	case TypeIds.T_double:
+                	case TypeIds.T_long:
+                		i++;
+                }
+                counter++;
 			}
 		} else {
 			// need to see if prevLocals matches with currentLocals
@@ -227,29 +224,21 @@ public class StackMapFrame {
 					}
 					// now we need to check if prevLocal matches with currentLocal
 					// the index must be the same
-					if (equals(prevLocal, currentLocal) && indexInPrevLocals == indexInCurrentLocals) {
-						if (result != 0) {
-							result = Integer.MAX_VALUE;
-							this.numberOfDifferentLocals = result;
-							return result;
-						}
-					} else {
-						// locals at the same location are not equals - this has to be a full frame
-						result = Integer.MAX_VALUE;
-						this.numberOfDifferentLocals = result;
-						return result;
-					}
+					if (!equals(prevLocal, currentLocal) || indexInPrevLocals != indexInCurrentLocals || result != 0) {
+                    	result = Integer.MAX_VALUE;
+                    	this.numberOfDifferentLocals = result;
+                    	return result;
+                    }
 					indexInPrevLocals++;
 					continue currentLocalsLoop;
 				}
 				// process remaining current locals
-				if (currentLocal != null) {
-					result++;
-				} else {
+				if (currentLocal == null) {
 					result = Integer.MAX_VALUE;
 					this.numberOfDifferentLocals = result;
 					return result;
 				}
+                result++;
 				indexInCurrentLocals++;
 				break currentLocalsLoop;
 			}
@@ -359,15 +348,14 @@ public class StackMapFrame {
 	public void putLocal(int resolvedPosition, VerificationTypeInfo info) {
 		if (this.locals == null) {
 			this.locals = new VerificationTypeInfo[resolvedPosition + 1];
-			this.locals[resolvedPosition] = info;
 		} else {
 			final int length = this.locals.length;
 			if (resolvedPosition >= length) {
 				System.arraycopy(this.locals, 0, this.locals = new VerificationTypeInfo[resolvedPosition + 1], 0,
 						length);
 			}
-			this.locals[resolvedPosition] = info;
 		}
+        this.locals[resolvedPosition] = info;
 	}
 
 	public void replaceWithElementType() {
@@ -383,9 +371,8 @@ public class StackMapFrame {
 			if (currentLocal == null) {
 				// check the previous slot
 				continue;
-			} else {
-				differentLocalsCount--;
 			}
+            differentLocalsCount--;
 			if (differentLocalsCount == 0) {
 				return i;
 			}

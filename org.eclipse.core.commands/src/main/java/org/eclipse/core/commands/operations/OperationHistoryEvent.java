@@ -183,10 +183,7 @@ public final class OperationHistoryEvent {
 	 */
 	public OperationHistoryEvent(int code, IOperationHistory history,
 			IUndoableOperation operation, IStatus status) {
-		if (history == null) {
-			throw new NullPointerException();
-		}
-		if (operation == null) {
+		if (history == null || operation == null) {
 			throw new NullPointerException();
 		}
 		this.code = code;

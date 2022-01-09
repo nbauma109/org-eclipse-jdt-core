@@ -88,12 +88,12 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 				int newServiceRanking = getRank(reference);
 				if (newServiceRanking > ranking || contentHandlerServiceReference == null)
 					setNewHandler(reference, newServiceRanking);
-				return (reference);
+				return reference;
 			}
 		}
 
 		//we don't want to continue hearing events about a ContentHandler service not registered under our contentType
-		return (null);
+		return null;
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 				// this should get us the highest ranked service, if available
 				ServiceReference<ContentHandler> newReference = contentHandlerServiceTracker.getServiceReference();
 				if (newReference != contentHandlerServiceReference && newReference != null) {
-					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
+					setNewHandler(newReference, (Integer) newReference.getProperty(Constants.SERVICE_RANKING));
 				}
 			}
 		} else if (newrank > ranking) {
@@ -148,10 +148,10 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		if (reference == null)
 			return Integer.MIN_VALUE;
 		Object property = reference.getProperty(Constants.SERVICE_RANKING);
-		return (property instanceof Integer) ? ((Integer) property).intValue() : 0;
+		return property instanceof Integer ? (Integer) property : 0;
 	}
 
-	class DefaultContentHandler extends ContentHandler {
+	static class DefaultContentHandler extends ContentHandler {
 
 		/**
 		 * @see java.net.ContentHandler#getContent(URLConnection)

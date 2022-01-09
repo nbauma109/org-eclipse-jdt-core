@@ -103,23 +103,23 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		boolean hasResourceWrapperType = analyseResources
 				&& this.resolvedType instanceof ReferenceBinding
 				&& this.resolvedType.hasTypeBit(TypeIds.BitWrapperCloseable);
-		for (int i = 0, count = this.arguments.length; i < count; i++) {
+		for (Expression argument : this.arguments) {
 			flowInfo =
-				this.arguments[i]
+				argument
 					.analyseCode(currentScope, flowContext, flowInfo)
 					.unconditionalInits();
 			// if argument is an AutoCloseable insert info that it *may* be closed (by the target method, i.e.)
 			if (analyseResources && !hasResourceWrapperType) { // allocation of wrapped closeables is analyzed specially
-				flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.arguments[i], flowInfo, flowContext, false);
+				flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, argument, flowInfo, flowContext, false);
 			}
-			this.arguments[i].checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
+			argument.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
 		}
 		analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
 	}
 
 	// record some dependency information for exception types
 	ReferenceBinding[] thrownExceptions;
-	if (((thrownExceptions = this.binding.thrownExceptions).length) != 0) {
+	if ((thrownExceptions = this.binding.thrownExceptions).length != 0) {
 		if ((this.bits & ASTNode.Unchecked) != 0 && this.genericTypeArguments == null) {
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=277643, align with javac on JLS 15.12.2.6
 			thrownExceptions = currentScope.environment().convertToRawTypes(this.binding.thrownExceptions, true, true);
@@ -138,8 +138,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	ReferenceBinding declaringClass = this.binding.declaringClass;
 	MethodScope methodScope = currentScope.methodScope();
-	if ((declaringClass.isMemberType() && !declaringClass.isStatic()) ||
-			(declaringClass.isLocalType() && !methodScope.isStatic && methodScope.isLambdaScope())) {
+	if (declaringClass.isMemberType() && !declaringClass.isStatic() ||
+			declaringClass.isLocalType() && !methodScope.isStatic && methodScope.isLambdaScope()) {
 		// allocating a non-static member type without an enclosing instance of parent type
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335845
 		currentScope.tagAsAccessingEnclosingInstanceStateOf(this.binding.declaringClass.enclosingType(), false /* type variable access */);
@@ -156,13 +156,12 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 }
 
 public void checkCapturedLocalInitializationIfNecessary(ReferenceBinding checkedType, BlockScope currentScope, FlowInfo flowInfo) {
-	if (((checkedType.tagBits & ( TagBits.AnonymousTypeMask|TagBits.LocalTypeMask)) == TagBits.LocalTypeMask)
+	if ((checkedType.tagBits & ( TagBits.AnonymousTypeMask|TagBits.LocalTypeMask)) == TagBits.LocalTypeMask
 			&& !currentScope.isDefinedInType(checkedType)) { // only check external allocations
 		NestedTypeBinding nestedType = (NestedTypeBinding) checkedType;
 		SyntheticArgumentBinding[] syntheticArguments = nestedType.syntheticOuterLocalVariables();
 		if (syntheticArguments != null)
-			for (int i = 0, count = syntheticArguments.length; i < count; i++){
-				SyntheticArgumentBinding syntheticArgument = syntheticArguments[i];
+            for (SyntheticArgumentBinding syntheticArgument : syntheticArguments) {
 				LocalVariableBinding targetLocal;
 				if ((targetLocal = syntheticArgument.actualOuterLocalVariable) == null) continue;
 				if (targetLocal.declaration != null && !flowInfo.isDefinitelyAssigned(targetLocal)){
@@ -299,7 +298,7 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 	ReferenceBinding declaringClass;
 	if (codegenBinding.isPrivate() &&
 			!currentScope.enclosingSourceType().isNestmateOf(this.binding.declaringClass) &&
-			TypeBinding.notEquals(currentScope.enclosingSourceType(), (declaringClass = codegenBinding.declaringClass))) {
+			TypeBinding.notEquals(currentScope.enclosingSourceType(), declaringClass = codegenBinding.declaringClass)) {
 
 		// from 1.4 on, local type constructor can lose their private flag to ease emulation
 		if ((declaringClass.tagBits & TagBits.IsLocalType) != 0 && currentScope.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4) {
@@ -362,8 +361,7 @@ public TypeBinding resolveType(BlockScope scope) {
 					if (currentType == null) return currentType;
 					do {
 						// isStatic() is answering true for toplevel types
-						if ((currentType.modifiers & ClassFileConstants.AccStatic) != 0) break checkParameterizedAllocation;
-						if (currentType.isRawType()) break checkParameterizedAllocation;
+						if ((currentType.modifiers & ClassFileConstants.AccStatic) != 0 || currentType.isRawType()) break checkParameterizedAllocation;
 					} while ((currentType = currentType.enclosingType())!= null);
 					ParameterizedQualifiedTypeReference qRef = (ParameterizedQualifiedTypeReference) this.type;
 					for (int i = qRef.typeArguments.length - 2; i >= 0; i--) {
@@ -397,8 +395,8 @@ public TypeBinding resolveType(BlockScope scope) {
 			}
 			if (this.argumentsHaveErrors) {
 				if (this.arguments != null) { // still attempt to resolve arguments
-					for (int i = 0, max = this.arguments.length; i < max; i++) {
-						this.arguments[i].resolveType(scope);
+					for (Expression argument : this.arguments) {
+						argument.resolveType(scope);
 					}
 				}
 				return null;
@@ -592,11 +590,9 @@ public MethodBinding inferConstructorOfElidedParameterizedType(final Scope scope
 	MethodBinding constructor = inferDiamondConstructor(scope, this, this.resolvedType, this.argumentTypes, inferredReturnTypeOut);
 	if (constructor != null) {
 		this.inferredReturnType = inferredReturnTypeOut[0];
-		if (constructor instanceof ParameterizedGenericMethodBinding && scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8) {
-			// force an inference context to be established for nested poly allocations (to be able to transfer b2), but avoid tunneling through overload resolution. We know this is the MSMB.
-			if (this.expressionContext == INVOCATION_CONTEXT && this.typeExpected == null)
-				constructor = ParameterizedGenericMethodBinding.computeCompatibleMethod18(constructor.shallowOriginal(), this.argumentTypes, scope, this);
-		}
+		// force an inference context to be established for nested poly allocations (to be able to transfer b2), but avoid tunneling through overload resolution. We know this is the MSMB.
+        if (constructor instanceof ParameterizedGenericMethodBinding && scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8 && this.expressionContext == INVOCATION_CONTEXT && this.typeExpected == null)
+        	constructor = ParameterizedGenericMethodBinding.computeCompatibleMethod18(constructor.shallowOriginal(), this.argumentTypes, scope, this);
 		if (this.typeExpected != null && this.typeExpected.isProperType(true))
 			registerResult(this.typeExpected, constructor);
 	}
@@ -651,9 +647,8 @@ public TypeBinding[] inferElidedTypes(ParameterizedTypeBinding parameterizedType
 }
 
 public void checkTypeArgumentRedundancy(ParameterizedTypeBinding allocationType, final BlockScope scope) {
-	if ((scope.problemReporter().computeSeverity(IProblem.RedundantSpecificationOfTypeArguments) == ProblemSeverities.Ignore) || scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_7) return;
-	if (allocationType.arguments == null) return;  // raw binding
-	if (this.genericTypeArguments != null) return; // diamond can't occur with explicit type args for constructor
+	  // raw binding
+	if (scope.problemReporter().computeSeverity(IProblem.RedundantSpecificationOfTypeArguments) == ProblemSeverities.Ignore || scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_7 || allocationType.arguments == null || this.genericTypeArguments != null) return; // diamond can't occur with explicit type args for constructor
 	if (this.type == null) return;
 	if (this.argumentTypes == Binding.NO_PARAMETERS && this.typeExpected instanceof ParameterizedTypeBinding) {
 		ParameterizedTypeBinding expected = (ParameterizedTypeBinding) this.typeExpected;
@@ -715,16 +710,16 @@ public void setFieldIndex(int i) {
 public void traverse(ASTVisitor visitor, BlockScope scope) {
 	if (visitor.visit(this, scope)) {
 		if (this.typeArguments != null) {
-			for (int i = 0, typeArgumentsLength = this.typeArguments.length; i < typeArgumentsLength; i++) {
-				this.typeArguments[i].traverse(visitor, scope);
+			for (TypeReference typeArgument : this.typeArguments) {
+				typeArgument.traverse(visitor, scope);
 			}
 		}
 		if (this.type != null) { // enum constant scenario
 			this.type.traverse(visitor, scope);
 		}
 		if (this.arguments != null) {
-			for (int i = 0, argumentsLength = this.arguments.length; i < argumentsLength; i++)
-				this.arguments[i].traverse(visitor, scope);
+			for (Expression argument : this.arguments)
+                argument.traverse(visitor, scope);
 		}
 	}
 	visitor.endVisit(this, scope);
@@ -762,7 +757,7 @@ public TypeBinding invocationTargetType() {
 
 @Override
 public boolean statementExpression() {
-	return ((this.bits & ASTNode.ParenthesizedMASK) == 0);
+	return (this.bits & ASTNode.ParenthesizedMASK) == 0;
 }
 
 //-- interface Invocation: --
@@ -823,14 +818,12 @@ public InferenceContext18 freshInferenceContext(Scope scope) {
 public int nameSourceStart() {
 	if (this.enumConstant != null)
 		return this.enumConstant.sourceStart;
-	else
-		return this.type.sourceStart;
+    return this.type.sourceStart;
 }
 @Override
 public int nameSourceEnd() {
 	if (this.enumConstant != null)
 		return this.enumConstant.sourceEnd;
-	else
-		return this.type.sourceEnd;
+    return this.type.sourceEnd;
 }
 }

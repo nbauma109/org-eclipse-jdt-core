@@ -99,15 +99,14 @@ public class JrtPackageFragmentRoot extends JarPackageFragmentRoot implements IM
 	@Override
 	SourceMapper createSourceMapper(IPath sourcePath, IPath rootPath) throws JavaModelException {
 		IClasspathEntry entry = ((JavaProject) getParent()).getClasspathEntryFor(getPath());
-		String encoding = (entry== null) ? null : ((ClasspathEntry) entry).getSourceAttachmentEncoding();
+		String encoding = entry== null ? null : ((ClasspathEntry) entry).getSourceAttachmentEncoding();
 		IModule mod = getModule();
 		String modName = mod == null ? null : new String(mod.name());
-		SourceMapper mapper = new SourceMapper(
+		return new SourceMapper(
 			sourcePath,
 			rootPath == null ? modName : rootPath.toOSString(),
 			getJavaProject().getOptions(true),// cannot use workspace options if external jar is 1.5 jar and workspace options are 1.4 options
 			encoding);
-		return mapper;
 	}
 	@Override
 	public boolean equals(Object o) {
@@ -135,8 +134,7 @@ public class JrtPackageFragmentRoot extends JarPackageFragmentRoot implements IM
 		int hash = 31;
 		hash = Util.combineHashCodes(hash, this.jarPath.hashCode());
 		hash = Util.combineHashCodes(hash, this.moduleName.hashCode());
-		hash = Util.combineHashCodes(hash, Arrays.hashCode(this.extraAttributes));
-		return hash;
+		return Util.combineHashCodes(hash, Arrays.hashCode(this.extraAttributes));
 	}
 	@Override
 	protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean showResolvedInfo) {

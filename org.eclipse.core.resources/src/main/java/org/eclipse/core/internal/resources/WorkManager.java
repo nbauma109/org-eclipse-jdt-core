@@ -50,7 +50,7 @@ public class WorkManager implements IManager {
 	static class NotifyRule implements ISchedulingRule {
 		@Override
 		public boolean contains(ISchedulingRule rule) {
-			return (rule instanceof IResource) || rule.getClass().equals(NotifyRule.class);
+			return rule instanceof IResource || rule.getClass().equals(NotifyRule.class);
 		}
 
 		@Override

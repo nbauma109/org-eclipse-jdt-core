@@ -27,7 +27,7 @@ public class CompletionOnJavadocParamNameReference extends JavadocSingleNameRefe
 	}
 
 	public CompletionOnJavadocParamNameReference(JavadocSingleNameReference nameRef) {
-		super(nameRef.token, (((long)nameRef.sourceStart)<<32)+nameRef.sourceEnd, nameRef.tagSourceStart, nameRef.tagSourceStart);
+		super(nameRef.token, ((long)nameRef.sourceStart<<32)+nameRef.sourceEnd, nameRef.tagSourceStart, nameRef.tagSourceStart);
 	}
 
 	@Override

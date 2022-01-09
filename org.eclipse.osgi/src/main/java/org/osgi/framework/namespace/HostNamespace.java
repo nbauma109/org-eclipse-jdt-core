@@ -154,7 +154,8 @@ public final class HostNamespace extends AbstractWiringNamespace {
 	 * @see #REQUIREMENT_EXTENSION_DIRECTIVE
 	 * @deprecated As of 1.2.
 	 */
-	public final static String	EXTENSION_BOOTCLASSPATH						= "bootclasspath";
+	@Deprecated
+    public final static String	EXTENSION_BOOTCLASSPATH						= "bootclasspath";
 
 	/**
 	 * The requirement directive used to specify the visibility type for a

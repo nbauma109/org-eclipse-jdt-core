@@ -80,9 +80,7 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 		if (result.declaringExtension instanceof Handle) {
 			result.internalOwnerId = ((Handle) result.declaringExtension).getId();
 		}
-		result.factoryLoader = () -> {
-			return (IAdapterFactory) element.createExecutableExtension("class"); //$NON-NLS-1$
-		};
+		result.factoryLoader = () -> ((IAdapterFactory) element.createExecutableExtension("class"));
 
 		return result;
 	}
@@ -95,7 +93,7 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 		if (!(extension instanceof Handle)) {
 			return false; // should never happen
 		}
-		return (internalOwnerId == ((Handle) extension).getId());
+		return internalOwnerId == ((Handle) extension).getId();
 	}
 
 	String getAdaptableType() {
@@ -117,7 +115,7 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 		if (adapterFactory == null) {
 			adapterFactory = Optional.ofNullable(loadFactory(false));
 		}
-		return adapterFactory.map(f -> f.getAdapterList()).orElse(null);
+		return adapterFactory.map(IAdapterFactory::getAdapterList).orElse(null);
 	}
 
 	@Override

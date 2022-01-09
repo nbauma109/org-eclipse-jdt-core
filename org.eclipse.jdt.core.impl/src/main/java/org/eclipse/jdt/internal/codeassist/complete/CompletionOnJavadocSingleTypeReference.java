@@ -23,7 +23,7 @@ public class CompletionOnJavadocSingleTypeReference extends JavadocSingleTypeRef
 	}
 
 	public CompletionOnJavadocSingleTypeReference(JavadocSingleTypeReference typeRef) {
-		super(typeRef.token, (((long)typeRef.sourceStart)<<32)+typeRef.sourceEnd, typeRef.tagSourceStart, typeRef.tagSourceStart);
+		super(typeRef.token, ((long)typeRef.sourceStart<<32)+typeRef.sourceEnd, typeRef.tagSourceStart, typeRef.tagSourceStart);
 	}
 
 	@Override

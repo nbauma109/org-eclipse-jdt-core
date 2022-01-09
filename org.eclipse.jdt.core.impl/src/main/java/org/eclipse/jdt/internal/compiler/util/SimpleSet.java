@@ -136,11 +136,11 @@ private void rehash() {
 
 @Override
 public String toString() {
-	String s = ""; //$NON-NLS-1$
+	StringBuilder s = new StringBuilder();
 	Object object;
-	for (int i = 0, l = this.values.length; i < l; i++)
-		if ((object = this.values[i]) != null)
-			s += object + "\n"; //$NON-NLS-1$
-	return s;
+	for (Object value : this.values)
+        if ((object = value) != null)
+			s.append(object).append("\n"); //$NON-NLS-1$
+	return s.toString();
 }
 }

@@ -116,7 +116,6 @@ public class ProjectVariableProviderManager {
 
 	public Descriptor findDescriptor(String name) {
 		lazyInitialize();
-		Descriptor result = descriptors.get(name);
-		return result;
+		return descriptors.get(name);
 	}
 }

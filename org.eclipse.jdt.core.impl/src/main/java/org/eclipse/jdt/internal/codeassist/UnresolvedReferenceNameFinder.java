@@ -66,10 +66,8 @@ public class UnresolvedReferenceNameFinder extends ASTVisitor {
 
 	private void acceptName(char[] name) {
 		// the null check is added to fix bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=166570
-		if (name == null) return;
-
-		if (!CharOperation.prefixEquals(this.completionEngine.completionToken, name, false /* ignore case */)
-				&& !(this.completionEngine.options.camelCaseMatch && CharOperation.camelCaseMatch(this.completionEngine.completionToken, name))) return;
+		if (name == null || !CharOperation.prefixEquals(this.completionEngine.completionToken, name, false /* ignore case */)
+				&& (!this.completionEngine.options.camelCaseMatch || !CharOperation.camelCaseMatch(this.completionEngine.completionToken, name))) return;
 
 		if (this.acceptedNames.includes(name)) return;
 
@@ -280,13 +278,7 @@ public class UnresolvedReferenceNameFinder extends ASTVisitor {
 		int i = this.parentsPtr;
 		while (i > -1) {
 			ASTNode parent = this.parents[i];
-			if (parent instanceof AbstractMethodDeclaration) {
-				return parent;
-			} else if (parent instanceof Initializer) {
-				return parent;
-			} else if (parent instanceof FieldDeclaration) {
-				return parent;
-			} else if (parent instanceof TypeDeclaration) {
+			if (parent instanceof AbstractMethodDeclaration || parent instanceof Initializer || parent instanceof FieldDeclaration || parent instanceof TypeDeclaration) {
 				return parent;
 			}
 			i--;
@@ -304,7 +296,7 @@ public class UnresolvedReferenceNameFinder extends ASTVisitor {
 
 	@Override
 	public boolean visit(ConstructorDeclaration constructorDeclaration, ClassScope classScope) {
-		if (((constructorDeclaration.bits & ASTNode.IsDefaultConstructor) == 0) && !constructorDeclaration.isClinit()) {
+		if ((constructorDeclaration.bits & ASTNode.IsDefaultConstructor) == 0 && !constructorDeclaration.isClinit()) {
 			removeLocals(
 					constructorDeclaration.arguments,
 					constructorDeclaration.declarationSourceStart,
@@ -375,7 +367,7 @@ public class UnresolvedReferenceNameFinder extends ASTVisitor {
 
 	@Override
 	public void endVisit(ConstructorDeclaration constructorDeclaration, ClassScope classScope) {
-		if (((constructorDeclaration.bits & ASTNode.IsDefaultConstructor) == 0) && !constructorDeclaration.isClinit()) {
+		if ((constructorDeclaration.bits & ASTNode.IsDefaultConstructor) == 0 && !constructorDeclaration.isClinit()) {
 			endVisitPreserved(constructorDeclaration.bodyStart, constructorDeclaration.bodyEnd);
 		}
 		popParent();
@@ -451,18 +443,17 @@ public class UnresolvedReferenceNameFinder extends ASTVisitor {
 				}
 			}
 
-			if (left != right) {
-				if (midPosition < position) {
-					left = mid + 1;
-				} else {
-					right = mid;
-				}
-			} else {
+			if (left == right) {
 				if (midPosition < position) {
 					return -1;
 				}
 				return mid;
 			}
+            if (midPosition < position) {
+            	left = mid + 1;
+            } else {
+            	right = mid;
+            }
 		}
 	}
 
@@ -535,11 +526,9 @@ public class UnresolvedReferenceNameFinder extends ASTVisitor {
 					int j = indexOfFisrtNameAfter(start);
 					done : while (j != -1) {
 						int nameStart = this.potentialVariableNameStarts[j];
-						if (start <= nameStart && nameStart <= end) {
-							if (CharOperation.equals(this.potentialVariableNames[j], localDeclaration.name, false)) {
-								removeNameAt(j);
-							}
-						}
+						if (start <= nameStart && nameStart <= end && CharOperation.equals(this.potentialVariableNames[j], localDeclaration.name, false)) {
+                        	removeNameAt(j);
+                        }
 
 						if (end < nameStart) break done;
 						j = indexOfNextName(j);
@@ -560,11 +549,9 @@ public class UnresolvedReferenceNameFinder extends ASTVisitor {
 				int j = indexOfFisrtNameAfter(start);
 				done : while (j != -1) {
 					int nameStart = this.potentialVariableNameStarts[j];
-					if (start <= nameStart && nameStart <= end) {
-						if (CharOperation.equals(this.potentialVariableNames[j], fieldDeclarations[i].name, false)) {
-							removeNameAt(j);
-						}
-					}
+					if (start <= nameStart && nameStart <= end && CharOperation.equals(this.potentialVariableNames[j], fieldDeclarations[i].name, false)) {
+                    	removeNameAt(j);
+                    }
 
 					if (end < nameStart) break done;
 					j = indexOfNextName(j);

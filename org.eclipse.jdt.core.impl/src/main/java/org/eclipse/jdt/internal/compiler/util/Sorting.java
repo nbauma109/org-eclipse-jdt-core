@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.compiler.util;
 
 import java.util.Arrays;
-import java.util.Comparator;
 
 import org.eclipse.jdt.internal.compiler.lookup.InferenceVariable;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -56,8 +55,8 @@ public class Sorting {
 		o = sortSuper(superclass, input, output, o);
 
 		ReferenceBinding[] superInterfaces = input[i].superInterfaces();
-		for (int j=0; j<superInterfaces.length; j++) {
-			o = sortSuper(superInterfaces[j], input, output, o);
+		for (ReferenceBinding element : superInterfaces) {
+			o = sortSuper(element, input, output, o);
 		}
 
 		// done with supers, now input[i] can safely be transferred:
@@ -86,7 +85,7 @@ public class Sorting {
 		return o;
 	}
 	public static MethodBinding[] concreteFirst(MethodBinding[] methods, int length) {
-		if (length == 0 || (length > 0 && !methods[0].isAbstract()))
+		if (length == 0 || length > 0 && !methods[0].isAbstract())
 			return methods;
 		MethodBinding[] copy = new MethodBinding[length];
 		int idx = 0;
@@ -99,7 +98,7 @@ public class Sorting {
 		return copy;
 	}
 	public static MethodBinding[] abstractFirst(MethodBinding[] methods, int length) {
-		if (length == 0 || (length > 0 && methods[0].isAbstract()))
+		if (length == 0 || length > 0 && methods[0].isAbstract())
 			return methods;
 		MethodBinding[] copy = new MethodBinding[length];
 		int idx = 0;
@@ -114,11 +113,6 @@ public class Sorting {
 
 	/** Sort inference variables by rank. */
 	public static void sortInferenceVariables(InferenceVariable[] variables) {
-		Arrays.sort(variables, new Comparator<InferenceVariable>() {
-			@Override
-			public int compare(InferenceVariable iv1, InferenceVariable iv2) {
-				return iv1.rank - iv2.rank;
-			}
-		});
+		Arrays.sort(variables, (iv1, iv2) -> iv1.rank - iv2.rank);
 	}
 }

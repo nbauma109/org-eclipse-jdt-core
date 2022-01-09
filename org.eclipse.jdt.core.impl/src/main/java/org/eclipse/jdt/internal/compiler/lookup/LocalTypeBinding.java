@@ -80,7 +80,7 @@ public void addInnerEmulationDependent(BlockScope dependentScope, boolean wasEnc
 		for (int i = 0; i < index; i++)
 			if (this.dependents[i].scope == dependentScope)
 				return; // already stored
-		System.arraycopy(this.dependents, 0, (this.dependents = new InnerEmulationDependency[index + 1]), 0, index);
+		System.arraycopy(this.dependents, 0, this.dependents = new InnerEmulationDependency[index + 1], 0, index);
 	}
 	this.dependents[index] = new InnerEmulationDependency(dependentScope, wasEnclosingInstanceSupplied);
 	//  System.out.println("Adding dependency: "+ new String(scope.enclosingType().readableName()) + " --> " + new String(this.readableName()));
@@ -295,8 +295,8 @@ public char[] signature() {
 public char[] sourceName() {
 	if (isAnonymousType()) {
 		return CharOperation.concat(TypeConstants.ANONYM_PREFIX, anonymousOriginalSuperType().sourceName(), TypeConstants.ANONYM_SUFFIX);
-	} else
-		return this.sourceName;
+	}
+    return this.sourceName;
 }
 
 @Override
@@ -318,8 +318,7 @@ public String toString() {
 public void updateInnerEmulationDependents() {
 	if (!isPrototype()) throw new IllegalStateException();
 	if (this.dependents != null) {
-		for (int i = 0; i < this.dependents.length; i++) {
-			InnerEmulationDependency dependency = this.dependents[i];
+		for (InnerEmulationDependency dependency : this.dependents) {
 			// System.out.println("Updating " + new String(this.readableName()) + " --> " + new String(dependency.scope.enclosingType().readableName()));
 			dependency.scope.propagateInnerEmulation(this, dependency.wasEnclosingInstanceSupplied);
 		}

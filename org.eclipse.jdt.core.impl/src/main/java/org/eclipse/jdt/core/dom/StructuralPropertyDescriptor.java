@@ -93,7 +93,7 @@ public abstract class StructuralPropertyDescriptor {
 	 * <code>false</code> otherwise
 	 */
 	public final boolean isSimpleProperty(){
-		return (this instanceof SimplePropertyDescriptor);
+		return this instanceof SimplePropertyDescriptor;
 	}
 
 	/**
@@ -104,7 +104,7 @@ public abstract class StructuralPropertyDescriptor {
 	 * <code>false</code> otherwise
 	 */
 	public final boolean isChildProperty() {
-		return (this instanceof ChildPropertyDescriptor);
+		return this instanceof ChildPropertyDescriptor;
 	}
 
 	/**
@@ -115,7 +115,7 @@ public abstract class StructuralPropertyDescriptor {
 	 * <code>false</code> otherwise
 	 */
 	public final boolean isChildListProperty() {
-		return (this instanceof ChildListPropertyDescriptor);
+		return this instanceof ChildListPropertyDescriptor;
 	}
 
 	/**

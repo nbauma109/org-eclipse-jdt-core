@@ -32,8 +32,8 @@ import org.osgi.service.permissionadmin.PermissionInfo;
 public final class SecurityRow implements ConditionalPermissionInfo {
 	/* Used to find condition constructors getConditions */
 	static final Class<?>[] conditionMethodArgs = new Class[] {Bundle.class, ConditionInfo.class};
-	static Condition[] ABSTAIN_LIST = new Condition[0];
-	static Condition[] SATISFIED_LIST = new Condition[0];
+	static Condition[] ABSTAIN_LIST = {};
+	static Condition[] SATISFIED_LIST = {};
 	static final Decision DECISION_ABSTAIN = new Decision(SecurityTable.ABSTAIN, null, null, null);
 	static final Decision DECISION_GRANTED = new Decision(SecurityTable.GRANTED, null, null, null);
 	static final Decision DECISION_DENIED = new Decision(SecurityTable.DENIED, null, null, null);
@@ -93,12 +93,11 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			while (startName > 0) {
 				if (chars[startName] == '"') {
 					startName--;
-					if (startName > 0 && chars[startName] == '\\')
-						startName--;
-					else {
+					if (startName <= 0 || chars[startName] != '\\') {
 						startName++;
 						break;
 					}
+                    startName--;
 				}
 				startName--;
 			}
@@ -113,7 +112,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 
 		String decision = encoded.substring(0, start);
 		decision = decision.trim();
-		if (decision.length() == 0 || (!ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision) && !ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision)))
+		if (decision.length() == 0 || !ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision) && !ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision))
 			throw new IllegalArgumentException(encoded);
 
 		List<ConditionInfo> condList = new ArrayList<>();
@@ -250,7 +249,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	/**
 	 * @deprecated
 	 */
-	@Override
+	@Deprecated
+    @Override
 	public void delete() {
 		securityAdmin.delete(this, true);
 	}
@@ -356,10 +356,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			if (!isPostponed(condition)) {
 				// must call isMutable before calling isSatisfied according to the specification.
 				boolean mutable = condition.isMutable();
-				if (condition.isSatisfied()) {
-					if (!mutable)
-						conditions[i] = null; // ignore this condition for future checks
-				} else {
+				if (!condition.isSatisfied()) {
 					if (!mutable)
 						// this will cause the row to always abstain; mark this to be ignored in future checks
 						synchronized (bundleConditionsLock) {
@@ -367,6 +364,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 						}
 					return DECISION_ABSTAIN;
 				}
+                if (!mutable)
+                	conditions[i] = null; // ignore this condition for future checks
 			} else { // postponed case
 				if (postponedPermCheck == null)
 					// perform a permission check now
@@ -396,7 +395,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	}
 
 	private Decision evaluatePermission(BundlePermissions bundlePermissions, Permission permission) {
-		return permissionInfoCollection.implies(bundlePermissions, permission) ? (deny ? DECISION_DENIED : DECISION_GRANTED) : DECISION_ABSTAIN;
+		return permissionInfoCollection.implies(bundlePermissions, permission) ? deny ? DECISION_DENIED : DECISION_GRANTED : DECISION_ABSTAIN;
 	}
 
 	@Override

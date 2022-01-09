@@ -47,7 +47,6 @@ public class ProjectInfo extends ResourceInfo {
 	 * Default constructor (for easier debugging)
 	 */
 	public ProjectInfo() {
-		super();
 	}
 
 	/**

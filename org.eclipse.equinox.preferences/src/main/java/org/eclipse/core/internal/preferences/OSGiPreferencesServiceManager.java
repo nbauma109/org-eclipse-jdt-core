@@ -92,8 +92,7 @@ public class OSGiPreferencesServiceManager implements ServiceFactory<org.osgi.se
 	 * Store preferences per bundle id
 	 */
 	private String getQualifier(Bundle bundle) {
-		String qualifier = "org.eclipse.core.runtime.preferences.OSGiPreferences." + bundle.getBundleId(); //$NON-NLS-1$
-		return qualifier;
+		return "org.eclipse.core.runtime.preferences.OSGiPreferences." + bundle.getBundleId();
 	}
 
 	/**

@@ -118,106 +118,86 @@ public class AssistOptions {
 				this.forceImplicitQualification = false;
 			}
 		}
-		if ((optionValue = optionsMap.get(OPTION_FieldPrefixes)) != null) {
-			if (optionValue instanceof String) {
-				String stringValue = (String) optionValue;
-				if (stringValue.length() > 0){
-					this.fieldPrefixes = splitAndTrimOn(',', stringValue.toCharArray());
-				} else {
-					this.fieldPrefixes = null;
-				}
-			}
-		}
-		if ((optionValue = optionsMap.get(OPTION_StaticFieldPrefixes)) != null) {
-			if (optionValue instanceof String) {
-				String stringValue = (String) optionValue;
-				if (stringValue.length() > 0){
-					this.staticFieldPrefixes = splitAndTrimOn(',', stringValue.toCharArray());
-				} else {
-					this.staticFieldPrefixes = null;
-				}
-			}
-		}
-		if ((optionValue = optionsMap.get(OPTION_StaticFinalFieldPrefixes)) != null) {
-			if (optionValue instanceof String) {
-				String stringValue = (String) optionValue;
-				if (stringValue.length() > 0){
-					this.staticFinalFieldPrefixes = splitAndTrimOn(',', stringValue.toCharArray());
-				} else {
-					this.staticFinalFieldPrefixes = null;
-				}
-			}
-		}
-		if ((optionValue = optionsMap.get(OPTION_LocalPrefixes)) != null) {
-			if (optionValue instanceof String) {
-				String stringValue = (String) optionValue;
-				if (stringValue.length() > 0){
-					this.localPrefixes = splitAndTrimOn(',', stringValue.toCharArray());
-				} else {
-					this.localPrefixes = null;
-				}
-			}
-		}
-		if ((optionValue = optionsMap.get(OPTION_ArgumentPrefixes)) != null) {
-			if (optionValue instanceof String) {
-				String stringValue = (String) optionValue;
-				if (stringValue.length() > 0){
-					this.argumentPrefixes = splitAndTrimOn(',', stringValue.toCharArray());
-				} else {
-					this.argumentPrefixes = null;
-				}
-			}
-		}
-		if ((optionValue = optionsMap.get(OPTION_FieldSuffixes)) != null) {
-			if (optionValue instanceof String) {
-				String stringValue = (String) optionValue;
-				if (stringValue.length() > 0){
-					this.fieldSuffixes = splitAndTrimOn(',', stringValue.toCharArray());
-				} else {
-					this.fieldSuffixes = null;
-				}
-			}
-		}
-		if ((optionValue = optionsMap.get(OPTION_StaticFieldSuffixes)) != null) {
-			if (optionValue instanceof String) {
-				String stringValue = (String) optionValue;
-				if (stringValue.length() > 0){
-					this.staticFieldSuffixes = splitAndTrimOn(',', stringValue.toCharArray());
-				} else {
-					this.staticFieldSuffixes = null;
-				}
-			}
-		}
-		if ((optionValue = optionsMap.get(OPTION_StaticFinalFieldSuffixes)) != null) {
-			if (optionValue instanceof String) {
-				String stringValue = (String) optionValue;
-				if (stringValue.length() > 0){
-					this.staticFinalFieldSuffixes = splitAndTrimOn(',', stringValue.toCharArray());
-				} else {
-					this.staticFinalFieldSuffixes = null;
-				}
-			}
-		}
-		if ((optionValue = optionsMap.get(OPTION_LocalSuffixes)) != null) {
-			if (optionValue instanceof String) {
-				String stringValue = (String) optionValue;
-				if (stringValue.length() > 0){
-					this.localSuffixes = splitAndTrimOn(',', stringValue.toCharArray());
-				} else {
-					this.localSuffixes = null;
-				}
-			}
-		}
-		if ((optionValue = optionsMap.get(OPTION_ArgumentSuffixes)) != null) {
-			if (optionValue instanceof String) {
-				String stringValue = (String) optionValue;
-				if (stringValue.length() > 0){
-					this.argumentSuffixes = splitAndTrimOn(',', stringValue.toCharArray());
-				} else {
-					this.argumentSuffixes = null;
-				}
-			}
-		}
+		if ((optionValue = optionsMap.get(OPTION_FieldPrefixes)) != null && optionValue instanceof String) {
+        	String stringValue = (String) optionValue;
+        	if (stringValue.length() > 0){
+        		this.fieldPrefixes = splitAndTrimOn(',', stringValue.toCharArray());
+        	} else {
+        		this.fieldPrefixes = null;
+        	}
+        }
+		if ((optionValue = optionsMap.get(OPTION_StaticFieldPrefixes)) != null && optionValue instanceof String) {
+        	String stringValue = (String) optionValue;
+        	if (stringValue.length() > 0){
+        		this.staticFieldPrefixes = splitAndTrimOn(',', stringValue.toCharArray());
+        	} else {
+        		this.staticFieldPrefixes = null;
+        	}
+        }
+		if ((optionValue = optionsMap.get(OPTION_StaticFinalFieldPrefixes)) != null && optionValue instanceof String) {
+        	String stringValue = (String) optionValue;
+        	if (stringValue.length() > 0){
+        		this.staticFinalFieldPrefixes = splitAndTrimOn(',', stringValue.toCharArray());
+        	} else {
+        		this.staticFinalFieldPrefixes = null;
+        	}
+        }
+		if ((optionValue = optionsMap.get(OPTION_LocalPrefixes)) != null && optionValue instanceof String) {
+        	String stringValue = (String) optionValue;
+        	if (stringValue.length() > 0){
+        		this.localPrefixes = splitAndTrimOn(',', stringValue.toCharArray());
+        	} else {
+        		this.localPrefixes = null;
+        	}
+        }
+		if ((optionValue = optionsMap.get(OPTION_ArgumentPrefixes)) != null && optionValue instanceof String) {
+        	String stringValue = (String) optionValue;
+        	if (stringValue.length() > 0){
+        		this.argumentPrefixes = splitAndTrimOn(',', stringValue.toCharArray());
+        	} else {
+        		this.argumentPrefixes = null;
+        	}
+        }
+		if ((optionValue = optionsMap.get(OPTION_FieldSuffixes)) != null && optionValue instanceof String) {
+        	String stringValue = (String) optionValue;
+        	if (stringValue.length() > 0){
+        		this.fieldSuffixes = splitAndTrimOn(',', stringValue.toCharArray());
+        	} else {
+        		this.fieldSuffixes = null;
+        	}
+        }
+		if ((optionValue = optionsMap.get(OPTION_StaticFieldSuffixes)) != null && optionValue instanceof String) {
+        	String stringValue = (String) optionValue;
+        	if (stringValue.length() > 0){
+        		this.staticFieldSuffixes = splitAndTrimOn(',', stringValue.toCharArray());
+        	} else {
+        		this.staticFieldSuffixes = null;
+        	}
+        }
+		if ((optionValue = optionsMap.get(OPTION_StaticFinalFieldSuffixes)) != null && optionValue instanceof String) {
+        	String stringValue = (String) optionValue;
+        	if (stringValue.length() > 0){
+        		this.staticFinalFieldSuffixes = splitAndTrimOn(',', stringValue.toCharArray());
+        	} else {
+        		this.staticFinalFieldSuffixes = null;
+        	}
+        }
+		if ((optionValue = optionsMap.get(OPTION_LocalSuffixes)) != null && optionValue instanceof String) {
+        	String stringValue = (String) optionValue;
+        	if (stringValue.length() > 0){
+        		this.localSuffixes = splitAndTrimOn(',', stringValue.toCharArray());
+        	} else {
+        		this.localSuffixes = null;
+        	}
+        }
+		if ((optionValue = optionsMap.get(OPTION_ArgumentSuffixes)) != null && optionValue instanceof String) {
+        	String stringValue = (String) optionValue;
+        	if (stringValue.length() > 0){
+        		this.argumentSuffixes = splitAndTrimOn(',', stringValue.toCharArray());
+        	} else {
+        		this.argumentSuffixes = null;
+        	}
+        }
 		if ((optionValue = optionsMap.get(OPTION_PerformForbiddenReferenceCheck)) != null) {
 			if (ENABLED.equals(optionValue)) {
 				this.checkForbiddenReference = true;

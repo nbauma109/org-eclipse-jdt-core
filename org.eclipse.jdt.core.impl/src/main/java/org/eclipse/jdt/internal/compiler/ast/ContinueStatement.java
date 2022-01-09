@@ -32,7 +32,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	// to each of the traversed try statements, so that execution will terminate properly.
 
 	// lookup the label, this should answer the returnContext
-	FlowContext targetContext = (this.label == null)
+	FlowContext targetContext = this.label == null
 			? flowContext.getTargetContextForDefaultContinue()
 			: flowContext.getTargetContextForContinueLabel(this.label);
 

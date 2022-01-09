@@ -78,7 +78,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	private static final String ADMIN_IMPLIED_ACTIONS = AdminPermission.RESOURCE + ',' + AdminPermission.METADATA + ','
 			+ AdminPermission.CLASS + ',' + AdminPermission.CONTEXT;
-	private static final PermissionInfo[] EMPTY_PERM_INFO = new PermissionInfo[0];
+	private static final PermissionInfo[] EMPTY_PERM_INFO = {};
 	/* @GuardedBy(lock) */
 	private final PermissionAdminTable permAdminTable = new PermissionAdminTable();
 	/* @GuardedBy(lock) */
@@ -239,11 +239,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			if (securityRow.getName().equals(info.getName())) {
 				iRows.remove();
 				synchronized (lock) {
-					if (!update.commit()) {
-						if (firstTry)
-							// try again
-							delete(securityRow, false);
-					}
+					if (!update.commit() && firstTry)
+                    	// try again
+                    	delete(securityRow, false);
 				}
 				break;
 			}
@@ -253,7 +251,8 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
-	@Override
+	@Deprecated
+    @Override
 	public ConditionalPermissionInfo addConditionalPermissionInfo(ConditionInfo[] conds, PermissionInfo[] perms) {
 		return setConditionalPermissionInfo(null, conds, perms, true);
 	}
@@ -285,7 +284,8 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
-	@Override
+	@Deprecated
+    @Override
 	public ConditionalPermissionInfo getConditionalPermissionInfo(String name) {
 		synchronized (lock) {
 			return condAdminTable.getRow(name);
@@ -295,7 +295,8 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
-	@Override
+	@Deprecated
+    @Override
 	public Enumeration<ConditionalPermissionInfo> getConditionalPermissionInfos() {
 		// could implement our own Enumeration, but we don't care about performance
 		// here. Just do something simple:
@@ -310,7 +311,8 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
-	@Override
+	@Deprecated
+    @Override
 	public ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds,
 			PermissionInfo[] perms) {
 		return setConditionalPermissionInfo(name, conds, perms, true);
@@ -339,11 +341,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			rows.set(index, newInfo);
 		}
 		synchronized (lock) {
-			if (!update.commit()) {
-				if (firstTry)
-					// try again
-					setConditionalPermissionInfo(name, conds, perms, false);
-			}
+			if (!update.commit() && firstTry)
+            	// try again
+            	setConditionalPermissionInfo(name, conds, perms, false);
 			return condAdminTable.getRow(index);
 		}
 	}
@@ -420,22 +420,20 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		PermissionInfo[] results = new PermissionInfo[permissionInfos.length];
 		for (int i = 0; i < permissionInfos.length; i++) {
 			results[i] = permissionInfos[i];
-			if (PermissionInfoCollection.FILE_PERMISSION_NAME.equals(permissionInfos[i].getType())) {
-				if (!PermissionInfoCollection.ALL_FILES.equals(permissionInfos[i].getName())) {
-					File file = new File(permissionInfos[i].getName());
-					if (!file.isAbsolute()) { // relative name
-						try {
-							File target = bundle.getDataFile(permissionInfos[i].getName());
-							if (target != null)
-								results[i] = new PermissionInfo(permissionInfos[i].getType(), target.getPath(),
-										permissionInfos[i].getActions());
-						} catch (IllegalStateException e) {
-							// can happen if the bundle has been uninstalled;
-							// we just keep the original permission in this case.
-						}
-					}
-				}
-			}
+			if (PermissionInfoCollection.FILE_PERMISSION_NAME.equals(permissionInfos[i].getType()) && !PermissionInfoCollection.ALL_FILES.equals(permissionInfos[i].getName())) {
+            	File file = new File(permissionInfos[i].getName());
+            	if (!file.isAbsolute()) { // relative name
+            		try {
+            			File target = bundle.getDataFile(permissionInfos[i].getName());
+            			if (target != null)
+            				results[i] = new PermissionInfo(permissionInfos[i].getType(), target.getPath(),
+            						permissionInfos[i].getActions());
+            		} catch (IllegalStateException e) {
+            			// can happen if the bundle has been uninstalled;
+            			// we just keep the original permission in this case.
+            		}
+            	}
+            }
 		}
 		return results;
 	}
@@ -482,7 +480,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 				if (line == null) /* EOF */
 					break;
 				line = line.trim();
-				if ((line.length() == 0) || line.startsWith("#") || line.startsWith("//")) /* comments *///$NON-NLS-1$ //$NON-NLS-2$
+				if (line.length() == 0 || line.startsWith("#") || line.startsWith("//")) /* comments *///$NON-NLS-1$ //$NON-NLS-2$
 					continue;
 
 				try {

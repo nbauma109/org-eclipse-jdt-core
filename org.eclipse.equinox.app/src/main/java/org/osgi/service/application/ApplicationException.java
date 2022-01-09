@@ -102,7 +102,6 @@ public class ApplicationException extends Exception {
 	 * @param errorCode The code of the error 
 	 */
 	public ApplicationException(int errorCode) {
-		super();
 		this.errorCode = errorCode;
 	}
 	

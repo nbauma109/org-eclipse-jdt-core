@@ -18,7 +18,6 @@ class DefaultASTVisitor extends ASTVisitor {
 	 *
 	 */
 	public DefaultASTVisitor() {
-		super();
 	}
 
 	/**

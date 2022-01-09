@@ -119,23 +119,19 @@ protected void attachOrphanCompletionNode(){
 		if (this.currentElement instanceof RecoveredType){
 			RecoveredType recoveredType = (RecoveredType)this.currentElement;
 			/* filter out cases where scanner is still inside type header */
-			if (recoveredType.foundOpeningBrace) {
-				/* generate a pseudo field with a completion on type reference */
-				if (orphan instanceof TypeReference){
-					this.currentElement = this.currentElement.add(new SelectionOnFieldType((TypeReference)orphan), 0);
-					return;
-				}
-			}
+			/* generate a pseudo field with a completion on type reference */
+            if (recoveredType.foundOpeningBrace && orphan instanceof TypeReference){
+            	this.currentElement = this.currentElement.add(new SelectionOnFieldType((TypeReference)orphan), 0);
+            	return;
+            }
 		}
 
 		if (orphan instanceof Expression && ((Expression) orphan).isTrulyExpression()) {
 			buildMoreCompletionContext((Expression)orphan);
-		} else {
-			if (lastIndexOfElement(K_LAMBDA_EXPRESSION_DELIMITER) < 0) { // lambdas are recovered up to the containing expression statement and will carry along the assist node anyways.
-				Statement statement = (Statement) orphan;
-				this.currentElement = this.currentElement.add(statement, 0);
-			}
-		}
+		} else if (lastIndexOfElement(K_LAMBDA_EXPRESSION_DELIMITER) < 0) { // lambdas are recovered up to the containing expression statement and will carry along the assist node anyways.
+        	Statement statement = (Statement) orphan;
+        	this.currentElement = this.currentElement.add(statement, 0);
+        }
 		if (isIndirectlyInsideLambdaExpression()) {
 			if (this.currentToken == TokenNameLBRACE)
 				this.ignoreNextOpeningBrace = true;
@@ -146,34 +142,30 @@ protected void attachOrphanCompletionNode(){
 		}
 	}
 	// if casestatement and not orphan, then add switch statement as assist node parent
-	if (this.expressionPtr > 0 && this.assistNodeParent == null) {
-		if (this.astPtr >= 0) {
-			if (this.astStack[this.astPtr] instanceof CaseStatement) {
-				// add switch statement as assistNodeParent
-				Expression expression = this.expressionStack[this.expressionPtr];
-				SwitchStatement switchStatement = new SwitchStatement();
-				switchStatement.expression = this.expressionStack[this.expressionPtr - 1];
-				if (this.astLengthPtr > -1 && this.astPtr > -1) {
-					int length = this.astLengthStack[this.astLengthPtr];
-					int newAstPtr = this.astPtr - length;
-					ASTNode firstNode = this.astStack[newAstPtr + 1];
-					if (length != 0 && firstNode.sourceStart > switchStatement.expression.sourceEnd) {
-						switchStatement.statements = new Statement[length + 1];
-						System.arraycopy(this.astStack, newAstPtr + 1, switchStatement.statements, 0, length);
-					}
+	if (this.expressionPtr > 0 && this.assistNodeParent == null && this.astPtr >= 0 && this.astStack[this.astPtr] instanceof CaseStatement) {
+    	// add switch statement as assistNodeParent
+    	Expression expression = this.expressionStack[this.expressionPtr];
+    	SwitchStatement switchStatement = new SwitchStatement();
+    	switchStatement.expression = this.expressionStack[this.expressionPtr - 1];
+    	if (this.astLengthPtr > -1 && this.astPtr > -1) {
+    		int length = this.astLengthStack[this.astLengthPtr];
+    		int newAstPtr = this.astPtr - length;
+    		ASTNode firstNode = this.astStack[newAstPtr + 1];
+    		if (length != 0 && firstNode.sourceStart > switchStatement.expression.sourceEnd) {
+    			switchStatement.statements = new Statement[length + 1];
+    			System.arraycopy(this.astStack, newAstPtr + 1, switchStatement.statements, 0, length);
+    		}
 
-				}
-				CaseStatement caseStatement = new CaseStatement(expression, expression.sourceStart,
-						expression.sourceEnd);
-				if (switchStatement.statements == null) {
-					switchStatement.statements = new Statement[] { caseStatement };
-				} else {
-					switchStatement.statements[switchStatement.statements.length - 1] = caseStatement;
-				}
-				this.assistNodeParent = switchStatement;
-			}
-		}
-	}
+    	}
+    	CaseStatement caseStatement = new CaseStatement(expression, expression.sourceStart,
+    			expression.sourceEnd);
+    	if (switchStatement.statements == null) {
+    		switchStatement.statements = new Statement[] { caseStatement };
+    	} else {
+    		switchStatement.statements[switchStatement.statements.length - 1] = caseStatement;
+    	}
+    	this.assistNodeParent = switchStatement;
+    }
 }
 private void buildMoreCompletionContext(Expression expression) {
 	ASTNode parentNode = null;
@@ -200,11 +192,9 @@ private void buildMoreCompletionContext(Expression expression) {
 								length);
 						}
 					}
-					if(this.astPtr >=0) {
-						if( this.astStack[this.astPtr] instanceof TypePattern && expression instanceof NameReference) {
-							expression = new GuardedPattern((Pattern)this.astStack[this.astPtr], expression);
-						}
-					}
+					if( this.astPtr >=0 && this.astStack[this.astPtr] instanceof TypePattern && expression instanceof NameReference) {
+                    	expression = new GuardedPattern((Pattern)this.astStack[this.astPtr], expression);
+                    }
 
 					CaseStatement caseStatement = new CaseStatement(expression, expression.sourceStart, expression.sourceEnd);
 					if(switchStatement.statements == null) {
@@ -226,7 +216,7 @@ private void buildMoreCompletionContext(Expression expression) {
 			case K_CAST_STATEMENT :
 				Expression castType;
 				if(this.expressionPtr > 0
-					&& ((castType = this.expressionStack[this.expressionPtr-1]) instanceof TypeReference)) {
+					&& (castType = this.expressionStack[this.expressionPtr-1]) instanceof TypeReference) {
 					CastExpression cast = new CastExpression(expression, (TypeReference) castType);
 					cast.sourceStart = castType.sourceStart;
 					cast.sourceEnd= expression.sourceEnd;
@@ -251,10 +241,8 @@ private void buildMoreCompletionContext(Expression expression) {
 private boolean checkRecoveredType() {
 	if (this.currentElement instanceof RecoveredType){
 		/* check if current awaiting identifier is the completion identifier */
-		if (this.indexOfAssistIdentifier() < 0) return false;
-
-		if ((this.lastErrorEndPosition >= this.selectionStart)
-			&& (this.lastErrorEndPosition <= this.selectionEnd+1)){
+		if (this.indexOfAssistIdentifier() < 0 || this.lastErrorEndPosition >= this.selectionStart
+			&& this.lastErrorEndPosition <= this.selectionEnd+1){
 			return false;
 		}
 		RecoveredType recoveredType = (RecoveredType)this.currentElement;
@@ -277,16 +265,13 @@ protected void classInstanceCreation(boolean hasClassBody) {
 	// An empty class body produces a 0 on the length stack.....
 
 
-	if ((this.astLengthStack[this.astLengthPtr] == 1)
-		&& (this.astStack[this.astPtr] == null)) {
+	if (this.astLengthStack[this.astLengthPtr] == 1
+		&& this.astStack[this.astPtr] == null) {
 
 
 		int index;
-		if ((index = this.indexOfAssistIdentifier()) < 0) {
-			super.classInstanceCreation(hasClassBody);
-			return;
-		} else if(this.identifierLengthPtr > -1 &&
-					(this.identifierLengthStack[this.identifierLengthPtr] - 1) != index) {
+		if ((index = this.indexOfAssistIdentifier()) < 0 || this.identifierLengthPtr > -1 &&
+					this.identifierLengthStack[this.identifierLengthPtr] - 1 != index) {
 			super.classInstanceCreation(hasClassBody);
 			return;
 		}
@@ -455,7 +440,7 @@ protected void consumeClassInstanceCreationExpressionQualifiedWithTypeArguments(
 
 	QualifiedAllocationExpression alloc;
 	int length;
-	if (((length = this.astLengthStack[this.astLengthPtr]) == 1) && (this.astStack[this.astPtr] == null)) {
+	if ((length = this.astLengthStack[this.astLengthPtr]) == 1 && this.astStack[this.astPtr] == null) {
 
 		if (this.indexOfAssistIdentifier() < 0) {
 			super.consumeClassInstanceCreationExpressionQualifiedWithTypeArguments();
@@ -519,8 +504,8 @@ protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 	// ClassInstanceCreationExpression ::= 'new' TypeArguments ClassType '(' ArgumentListopt ')' ClassBodyopt
 	AllocationExpression alloc;
 	int length;
-	if (((length = this.astLengthStack[this.astLengthPtr]) == 1)
-		&& (this.astStack[this.astPtr] == null)) {
+	if ((length = this.astLengthStack[this.astLengthPtr]) == 1
+		&& this.astStack[this.astPtr] == null) {
 
 		if (this.indexOfAssistIdentifier() < 0) {
 			super.consumeClassInstanceCreationExpressionWithTypeArguments();
@@ -589,7 +574,7 @@ protected void consumeEnterAnonymousClassBody(boolean qualified) {
 
 	TypeDeclaration anonymousType = new TypeDeclaration(this.compilationUnit.compilationResult);
 	anonymousType.name = CharOperation.NO_CHAR;
-	anonymousType.bits |= (ASTNode.IsAnonymousType|ASTNode.IsLocalType);
+	anonymousType.bits |= ASTNode.IsAnonymousType|ASTNode.IsLocalType;
 	QualifiedAllocationExpression alloc = new SelectionOnQualifiedAllocationExpression(anonymousType);
 	markEnclosingMemberWithLocalType();
 	pushOnAstStack(anonymousType);
@@ -671,8 +656,8 @@ protected void consumeExitVariableWithInitialization() {
 	int end =  variable.declarationSourceEnd;
 	// Keep the initialization intact, because that's the only way we are going to know the type
 	if (!variable.type.isTypeNameVar(null)) {
-		if ((this.selectionStart < start) &&  (this.selectionEnd < start) ||
-				(this.selectionStart > end) && (this.selectionEnd > end)) {
+		if (this.selectionStart < start &&  this.selectionEnd < start ||
+				this.selectionStart > end && this.selectionEnd > end) {
 			variable.initialization = null;
 		}
 	}
@@ -847,15 +832,13 @@ protected void consumeInstanceOfExpressionWithName() {
 			// Push only when the selection node is not the expression of this
 			// pattern matching instanceof expression
 			LocalDeclaration patternVariableIntroduced = pattern.getPatternVariableIntroduced();
-			if (patternVariableIntroduced != null) {
-				// filter out patternVariableIntroduced based on current selection if there is an assist node
-				if (this.assistNode == null || (this.selectionStart <= patternVariableIntroduced.sourceStart
-						&& this.selectionEnd >= patternVariableIntroduced.sourceEnd)) {
-					pushOnAstStack(patternVariableIntroduced);
-				}
-			}
-			if ((this.selectionStart >= pattern.sourceStart)
-					&&  (this.selectionEnd <= pattern.sourceEnd)) {
+			// filter out patternVariableIntroduced based on current selection if there is an assist node
+            if (patternVariableIntroduced != null && (this.assistNode == null || this.selectionStart <= patternVariableIntroduced.sourceStart
+            		&& this.selectionEnd >= patternVariableIntroduced.sourceEnd)) {
+            	pushOnAstStack(patternVariableIntroduced);
+            }
+			if (this.selectionStart >= pattern.sourceStart
+					&&  this.selectionEnd <= pattern.sourceEnd) {
 				this.restartRecovery	= true;
 				this.lastIgnoredToken = -1;
 			}
@@ -879,12 +862,10 @@ protected void consumeLambdaExpression() {
 	LambdaExpression expression = (LambdaExpression) this.expressionStack[this.expressionPtr];
 	int arrowEnd = expression.arrowPosition();
 	int arrowStart = arrowEnd - 1;
-	if (this.selectionStart == arrowStart || this.selectionStart == arrowEnd) {
-		if (this.selectionEnd == arrowStart || this.selectionEnd == arrowEnd) {
-			this.expressionStack[this.expressionPtr] = new SelectionOnLambdaExpression(expression);
-		}
-	}
-	if (!(this.selectionStart >= expression.sourceStart && this.selectionEnd <= expression.sourceEnd))
+	if ((this.selectionStart == arrowStart || this.selectionStart == arrowEnd) && (this.selectionEnd == arrowStart || this.selectionEnd == arrowEnd)) {
+    	this.expressionStack[this.expressionPtr] = new SelectionOnLambdaExpression(expression);
+    }
+	if (this.selectionStart < expression.sourceStart || this.selectionEnd > expression.sourceEnd)
 		popElement(K_LAMBDA_EXPRESSION_DELIMITER);
 }
 @Override
@@ -892,11 +873,9 @@ protected void consumeReferenceExpression(ReferenceExpression referenceExpressio
 	int kolonKolonStart = this.colonColonStart;
 	int kolonKolonEnd = kolonKolonStart + 1;
 	this.colonColonStart = -1;
-	if (this.selectionStart == kolonKolonStart || this.selectionStart == kolonKolonEnd) {
-		if (this.selectionEnd == kolonKolonStart || this.selectionEnd == kolonKolonEnd) {
-			referenceExpression = new SelectionOnReferenceExpression(referenceExpression, this.scanner);
-		}
-	}
+	if ((this.selectionStart == kolonKolonStart || this.selectionStart == kolonKolonEnd) && (this.selectionEnd == kolonKolonStart || this.selectionEnd == kolonKolonEnd)) {
+    	referenceExpression = new SelectionOnReferenceExpression(referenceExpression, this.scanner);
+    }
 	super.consumeReferenceExpression(referenceExpression);
 }
 
@@ -907,8 +886,8 @@ protected void consumeLocalVariableDeclarationStatement() {
 	// force to restart in recovery mode if the declaration contains the selection
 	if (!this.diet && this.astStack[this.astPtr] instanceof LocalDeclaration) {
 		LocalDeclaration localDeclaration = (LocalDeclaration) this.astStack[this.astPtr];
-		if ((this.selectionStart >= localDeclaration.sourceStart)
-				&&  (this.selectionEnd <= localDeclaration.sourceEnd)) {
+		if (this.selectionStart >= localDeclaration.sourceStart
+				&&  this.selectionEnd <= localDeclaration.sourceEnd) {
 			this.restartRecovery	= true;
 			this.lastIgnoredToken = -1;
 		}
@@ -926,10 +905,8 @@ protected void consumeBlockStatement() {
 	checkRestartRecovery();
 }
 protected void checkRestartRecovery() {
-	if (this.selectionNodeFoundLevel > 0) {
-		if (--this.selectionNodeFoundLevel == 0)
-			this.restartRecovery = true;
-	}
+	if (this.selectionNodeFoundLevel > 0 && --this.selectionNodeFoundLevel == 0)
+    	this.restartRecovery = true;
 }
 
 @Override
@@ -955,7 +932,7 @@ protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
 		return;
 	}
 
-	MarkerAnnotation markerAnnotation = null;
+	MarkerAnnotation markerAnnotation;
 	int length = this.identifierLengthStack[this.identifierLengthPtr];
 	TypeReference typeReference;
 
@@ -1028,31 +1005,28 @@ protected void consumeMethodInvocationName() {
 
 	char[] selector = this.identifierStack[this.identifierPtr];
 	int accessMode;
-	if(selector == assistIdentifier()) {
-		if(CharOperation.equals(selector, SUPER)) {
-			accessMode = ExplicitConstructorCall.Super;
-		} else if(CharOperation.equals(selector, THIS)) {
-			accessMode = ExplicitConstructorCall.This;
-		} else {
-			super.consumeMethodInvocationName();
-			return;
-		}
-	} else {
+	if(selector != assistIdentifier()) {
 		super.consumeMethodInvocationName();
-		if (requireExtendedRecovery()) {
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430572, compensate for the hacks elsewhere where super/this gets treated as identifier. See getUnspecifiedReference
-			if (this.astPtr >= 0 && this.astStack[this.astPtr] == this.assistNode && this.assistNode instanceof ThisReference) {
-				MessageSend messageSend = (MessageSend) this.expressionStack[this.expressionPtr];
-				if (messageSend.receiver instanceof SingleNameReference) {
-					SingleNameReference snr = (SingleNameReference) messageSend.receiver;
-					if (snr.token == CharOperation.NO_CHAR) { // dummy reference created by getUnspecifiedReference ???
-						messageSend.receiver = (Expression) this.astStack[this.astPtr--];
-					}
-				}
-			}
-		}
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430572, compensate for the hacks elsewhere where super/this gets treated as identifier. See getUnspecifiedReference
+        if (requireExtendedRecovery() && this.astPtr >= 0 && this.astStack[this.astPtr] == this.assistNode && this.assistNode instanceof ThisReference) {
+        	MessageSend messageSend = (MessageSend) this.expressionStack[this.expressionPtr];
+        	if (messageSend.receiver instanceof SingleNameReference) {
+        		SingleNameReference snr = (SingleNameReference) messageSend.receiver;
+        		if (snr.token == CharOperation.NO_CHAR) { // dummy reference created by getUnspecifiedReference ???
+        			messageSend.receiver = (Expression) this.astStack[this.astPtr--];
+        		}
+        	}
+        }
 		return;
 	}
+    if(CharOperation.equals(selector, SUPER)) {
+    	accessMode = ExplicitConstructorCall.Super;
+    } else if(CharOperation.equals(selector, THIS)) {
+    	accessMode = ExplicitConstructorCall.This;
+    } else {
+    	super.consumeMethodInvocationName();
+    	return;
+    }
 
 	final ExplicitConstructorCall constructorCall = new SelectionOnExplicitConstructorCall(accessMode);
 	constructorCall.sourceEnd = this.rParenPos;
@@ -1091,19 +1065,18 @@ protected void consumeMethodInvocationPrimary() {
 
 	char[] selector = this.identifierStack[this.identifierPtr];
 	int accessMode;
-	if(selector == assistIdentifier()) {
-		if(CharOperation.equals(selector, SUPER)) {
-			accessMode = ExplicitConstructorCall.Super;
-		} else if(CharOperation.equals(selector, THIS)) {
-			accessMode = ExplicitConstructorCall.This;
-		} else {
-			super.consumeMethodInvocationPrimary();
-			return;
-		}
-	} else {
+	if(selector != assistIdentifier()) {
 		super.consumeMethodInvocationPrimary();
 		return;
 	}
+    if(CharOperation.equals(selector, SUPER)) {
+    	accessMode = ExplicitConstructorCall.Super;
+    } else if(CharOperation.equals(selector, THIS)) {
+    	accessMode = ExplicitConstructorCall.This;
+    } else {
+    	super.consumeMethodInvocationPrimary();
+    	return;
+    }
 
 	final ExplicitConstructorCall constructorCall = new SelectionOnExplicitConstructorCall(accessMode);
 	constructorCall.sourceEnd = this.rParenPos;
@@ -1146,7 +1119,7 @@ protected void consumeNormalAnnotation(boolean isTypeAnnotation) {
 		return;
 	}
 
-	NormalAnnotation normalAnnotation = null;
+	NormalAnnotation normalAnnotation;
 	int length = this.identifierLengthStack[this.identifierLengthPtr];
 	TypeReference typeReference;
 
@@ -1206,7 +1179,7 @@ protected void consumeSingleMemberAnnotation(boolean isTypeAnnotation) {
 		return;
 	}
 
-	SingleMemberAnnotation singleMemberAnnotation = null;
+	SingleMemberAnnotation singleMemberAnnotation;
 	int length = this.identifierLengthStack[this.identifierLengthPtr];
 	TypeReference typeReference;
 
@@ -1435,12 +1408,11 @@ protected JavadocParser createJavadocParser() {
 protected LocalDeclaration createLocalDeclaration(char[] assistName,int sourceStart,int sourceEnd) {
 	if (this.indexOfAssistIdentifier() < 0) {
 		return super.createLocalDeclaration(assistName, sourceStart, sourceEnd);
-	} else {
-		SelectionOnLocalName local = new SelectionOnLocalName(assistName, sourceStart, sourceEnd);
-		this.assistNode = local;
-		this.lastCheckPoint = sourceEnd + 1;
-		return local;
 	}
+    SelectionOnLocalName local = new SelectionOnLocalName(assistName, sourceStart, sourceEnd);
+    this.assistNode = local;
+    this.lastCheckPoint = sourceEnd + 1;
+    return local;
 }
 @Override
 public NameReference createQualifiedAssistNameReference(char[][] previousIdentifiers, char[] assistName, long[] positions){
@@ -1505,7 +1477,7 @@ protected NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 			// discard 'super' from identifier stacks
 			// There is some voodoo going on here in combination with SelectionScanne#scanIdentifierOrKeyword, do in Rome as Romans do and leave the stacks at the right depth.
 			this.identifierLengthStack[this.identifierLengthPtr] = completionIndex;
-			int ptr = this.identifierPtr -= (length - completionIndex);
+			int ptr = this.identifierPtr -= length - completionIndex;
 			pushOnGenericsLengthStack(0);
 			pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
 			for (int i = 0; i < completionIndex; i++) {
@@ -1707,7 +1679,8 @@ protected int resumeAfterRecovery() {
 }
 
 public void selectionIdentifierCheck(){
-	if (checkRecoveredType()) return;
+	if (checkRecoveredType()) {
+    }
 }
 @Override
 public void setAssistIdentifier(char[] assistIdent){
@@ -1761,18 +1734,18 @@ protected Argument typeElidedArgument() {
 }
 @Override
 public  String toString() {
-	String s = Util.EMPTY_STRING;
-	s = s + "elementKindStack : int[] = {"; //$NON-NLS-1$
+	StringBuilder s = new StringBuilder().append(Util.EMPTY_STRING);
+	s.append("elementKindStack : int[] = {"); //$NON-NLS-1$
 	for (int i = 0; i <= this.elementPtr; i++) {
-		s = s + this.elementKindStack[i] + ","; //$NON-NLS-1$
+		s.append(this.elementKindStack[i]).append(","); //$NON-NLS-1$
 	}
-	s = s + "}\n"; //$NON-NLS-1$
-	s = s + "elementInfoStack : int[] = {"; //$NON-NLS-1$
+	s.append("}\n"); //$NON-NLS-1$
+	s.append("elementInfoStack : int[] = {"); //$NON-NLS-1$
 	for (int i = 0; i <= this.elementPtr; i++) {
-		s = s + this.elementInfoStack[i] + ","; //$NON-NLS-1$
+		s.append(this.elementInfoStack[i]).append(","); //$NON-NLS-1$
 	}
-	s = s + "}\n"; //$NON-NLS-1$
-	return s + super.toString();
+	s.append("}\n"); //$NON-NLS-1$
+	return s.append(super.toString()).toString();
 }
 @Override
 public ModuleReference createAssistModuleReference(int index) {

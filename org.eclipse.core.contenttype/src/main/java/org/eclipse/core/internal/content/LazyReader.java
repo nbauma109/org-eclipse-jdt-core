@@ -44,7 +44,7 @@ public class LazyReader extends Reader implements ILazySource {
 	private int copyFromBuffer(char[] userBuffer, int userOffset, int needed) {
 		int copied = 0;
 		int current = offset / blockCapacity;
-		while ((needed - copied) > 0 && current < blocks.length) {
+		while (needed - copied > 0 && current < blocks.length) {
 			int blockSize = computeBlockSize(current);
 			int offsetInBlock = offset % blockCapacity;
 			int availableInBlock = blockSize - offsetInBlock;
@@ -143,7 +143,7 @@ public class LazyReader extends Reader implements ILazySource {
 	@Override
 	public boolean ready() throws IOException {
 		try {
-			return (bufferSize - offset) > 0 || in.ready();
+			return bufferSize - offset > 0 || in.ready();
 		} catch (IOException ioe) {
 			throw new LowLevelIOException(ioe);
 		}

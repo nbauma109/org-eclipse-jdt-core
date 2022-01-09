@@ -61,8 +61,7 @@ public class PathVariableUtil {
 			if ((Character.isLetter(c) || Character.isDigit(c) || c == '_') && !Character.isWhitespace(c))
 				builder.append(c);
 		}
-		variable = builder.toString();
-		return variable;
+		return builder.toString();
 	}
 
 	public static IPath convertToPathRelativeMacro(IPathVariableManager pathVariableManager, IPath originalPath, IResource resource, boolean force, String variableHint) throws CoreException {
@@ -92,15 +91,9 @@ public class PathVariableUtil {
 		int maxMatchLength = -1;
 		String[] existingVariables = pathVariableManager.getPathVariableNames();
 		for (String variable : existingVariables) {
-			if (skipWorkspace) {
-				// Variables relative to the workspace are not portable, and defeat the purpose of having linked resource locations,
-				// so they should not automatically be created relative to the workspace.
-				if (variable.equals(WorkspaceLocationVariableResolver.NAME))
-					continue;
-			}
-			if (variable.equals(WorkspaceParentLocationVariableResolver.NAME))
-				continue;
-			if (variable.equals(ParentVariableResolver.NAME))
+			// Variables relative to the workspace are not portable, and defeat the purpose of having linked resource locations,
+            // so they should not automatically be created relative to the workspace.
+            if (skipWorkspace && variable.equals(WorkspaceLocationVariableResolver.NAME) || variable.equals(WorkspaceParentLocationVariableResolver.NAME) || variable.equals(ParentVariableResolver.NAME))
 				continue;
 			// find closest path to the original path
 			IPath value = URIUtil.toPath(pathVariableManager.getURIValue(variable));
@@ -124,13 +117,7 @@ public class PathVariableUtil {
 				IPath matchingPath = path.removeLastSegments(j);
 				int minDifference = Integer.MAX_VALUE;
 				for (String variable : existingVariables) {
-					if (skipWorkspace) {
-						if (variable.equals(WorkspaceLocationVariableResolver.NAME))
-							continue;
-					}
-					if (variable.equals(WorkspaceParentLocationVariableResolver.NAME))
-						continue;
-					if (variable.equals(ParentVariableResolver.NAME))
+					if (skipWorkspace && variable.equals(WorkspaceLocationVariableResolver.NAME) || variable.equals(WorkspaceParentLocationVariableResolver.NAME) || variable.equals(ParentVariableResolver.NAME))
 						continue;
 					IPath value = URIUtil.toPath(pathVariableManager.getURIValue(variable));
 					if (value != null) {
@@ -183,25 +170,23 @@ public class PathVariableUtil {
 			return tmp;
 		}
 
-		if (force) {
-			if (devicesAreCompatible(path, value)) {
-				// transform "c:/foo/bar/other_child/file.txt" into "${PARENT-1-BAR_CHILD}/other_child/file.txt"
-				int matchingFirstSegments = path.matchingFirstSegments(value);
-				if (matchingFirstSegments >= 0) {
-					String originalName = buildParentPathVariable(variableHint, valueSegmentCount - matchingFirstSegments, true);
-					IPath tmp = Path.fromOSString(originalName);
-					for (int j = matchingFirstSegments; j < originalPath.segmentCount(); j++) {
-						tmp = tmp.append(originalPath.segment(j));
-					}
-					return tmp;
-				}
-			}
-		}
+		if (force && devicesAreCompatible(path, value)) {
+        	// transform "c:/foo/bar/other_child/file.txt" into "${PARENT-1-BAR_CHILD}/other_child/file.txt"
+        	int matchingFirstSegments = path.matchingFirstSegments(value);
+        	if (matchingFirstSegments >= 0) {
+        		String originalName = buildParentPathVariable(variableHint, valueSegmentCount - matchingFirstSegments, true);
+        		IPath tmp = Path.fromOSString(originalName);
+        		for (int j = matchingFirstSegments; j < originalPath.segmentCount(); j++) {
+        			tmp = tmp.append(originalPath.segment(j));
+        		}
+        		return tmp;
+        	}
+        }
 		return originalPath;
 	}
 
 	private static boolean devicesAreCompatible(IPath path, IPath value) {
-		return (path.getDevice() != null && value.getDevice() != null) ? (path.getDevice().equals(value.getDevice())) : (path.getDevice() == value.getDevice());
+		return path.getDevice() != null && value.getDevice() != null ? path.getDevice().equals(value.getDevice()) : path.getDevice() == value.getDevice();
 	}
 
 	static private IPath convertToProperCase(IPath path) {
@@ -219,8 +204,7 @@ public class PathVariableUtil {
 		String[] items = variableString.split("-"); //$NON-NLS-1$
 		if (items.length == 3) {
 			try {
-				Integer count = Integer.valueOf(items[1]);
-				return count.intValue();
+				return Integer.parseInt(items[1]);
 			} catch (NumberFormatException e) {
 				// nothing
 			}
@@ -252,7 +236,7 @@ public class PathVariableUtil {
 
 	public static String convertFromUserEditableFormatInternal(IPathVariableManager manager, String userFormat, boolean locationFormat) {
 		char pathPrefix = 0;
-		if ((userFormat.length() > 0) && (userFormat.charAt(0) == '/' || userFormat.charAt(0) == '\\'))
+		if (userFormat.length() > 0 && (userFormat.charAt(0) == '/' || userFormat.charAt(0) == '\\'))
 			pathPrefix = userFormat.charAt(0);
 		String[] components = splitPathComponents(userFormat);
 		for (int i = 0; i < components.length; i++) {
@@ -263,11 +247,10 @@ public class PathVariableUtil {
 				components[i] = null;
 				for (int j = i + 1; j < components.length; j++) {
 					if (components[j] != null) {
-						if (isDotDot(components[j])) {
-							parentCount++;
-							components[j] = null;
-						} else
-							break;
+						if (!isDotDot(components[j]))
+                            break;
+                        parentCount++;
+                        components[j] = null;
 					}
 				}
 				if (i == 0) // this means the value is implicitly relative to the project location
@@ -281,7 +264,7 @@ public class PathVariableUtil {
 						String variable = extractVariable(components[j]);
 
 						boolean hasVariableWithMacroSyntax = true;
-						if (variable.length() == 0 && (locationFormat && j == 0)) {
+						if (variable.length() == 0 && locationFormat && j == 0) {
 							variable = components[j];
 							hasVariableWithMacroSyntax = false;
 						}
@@ -420,14 +403,13 @@ public class PathVariableUtil {
 		while (true) {
 			// we check if the value contains referenced variables with ${VAR}
 			int index = value.indexOf("${"); //$NON-NLS-1$
-			if (index != -1) {
-				int endIndex = getMatchingBrace(value, index);
-				if (index > 0)
-					result.add(value.substring(0, index));
-				result.add(value.substring(index, endIndex + 1));
-				value = value.substring(endIndex + 1);
-			} else
-				break;
+			if (index == -1)
+                break;
+            int endIndex = getMatchingBrace(value, index);
+            if (index > 0)
+            	result.add(value.substring(0, index));
+            result.add(value.substring(index, endIndex + 1));
+            value = value.substring(endIndex + 1);
 		}
 		if (value.length() > 0)
 			result.add(value);
@@ -447,12 +429,11 @@ public class PathVariableUtil {
 		LinkedList<String> result = new LinkedList<>();
 		while (true) {
 			int index = value.indexOf("${"); //$NON-NLS-1$
-			if (index != -1) {
-				int endIndex = getMatchingBrace(value, index);
-				result.add(value.substring(index + 2, endIndex));
-				value = value.substring(endIndex + 1);
-			} else
-				break;
+			if (index == -1)
+                break;
+            int endIndex = getMatchingBrace(value, index);
+            result.add(value.substring(index + 2, endIndex));
+            value = value.substring(endIndex + 1);
 		}
 		return result.toArray(new String[0]);
 	}
@@ -485,10 +466,8 @@ public class PathVariableUtil {
 					return i;
 				scope--;
 			}
-			if (c == '$') {
-				if ((i + 1 < value.length()) && (value.charAt(i + 1) == '{'))
-					scope++;
-			}
+			if (c == '$' && i + 1 < value.length() && value.charAt(i + 1) == '{')
+            	scope++;
 		}
 		return value.length();
 	}
@@ -500,6 +479,6 @@ public class PathVariableUtil {
 	 * @return true if the path variable is preferred.
 	 */
 	static public boolean isPreferred(String variableName) {
-		return !(variableName.equals(WorkspaceLocationVariableResolver.NAME) || variableName.equals(WorkspaceParentLocationVariableResolver.NAME) || variableName.equals(ParentVariableResolver.NAME));
+		return !variableName.equals(WorkspaceLocationVariableResolver.NAME) && !variableName.equals(WorkspaceParentLocationVariableResolver.NAME) && !variableName.equals(ParentVariableResolver.NAME);
 	}
 }

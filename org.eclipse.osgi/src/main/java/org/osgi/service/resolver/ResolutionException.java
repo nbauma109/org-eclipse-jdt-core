@@ -54,10 +54,10 @@ public class ResolutionException extends Exception {
 	 */
 	public ResolutionException(String message, Throwable cause, Collection<Requirement> unresolvedRequirements) {
 		super(message, cause);
-		if ((unresolvedRequirements == null) || unresolvedRequirements.isEmpty()) {
+		if (unresolvedRequirements == null || unresolvedRequirements.isEmpty()) {
 			this.unresolvedRequirements = null;
 		} else {
-			this.unresolvedRequirements = Collections.unmodifiableCollection(new ArrayList<Requirement>(unresolvedRequirements));
+			this.unresolvedRequirements = Collections.unmodifiableCollection(new ArrayList<>(unresolvedRequirements));
 		}
 	}
 
@@ -99,6 +99,6 @@ public class ResolutionException extends Exception {
 	 *         requirements information is available.
 	 */
 	public Collection<Requirement> getUnresolvedRequirements() {
-		return (unresolvedRequirements != null) ? unresolvedRequirements : emptyCollection();
+		return unresolvedRequirements != null ? unresolvedRequirements : emptyCollection();
 	}
 }

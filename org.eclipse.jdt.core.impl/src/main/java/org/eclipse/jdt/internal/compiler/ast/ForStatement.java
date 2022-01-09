@@ -81,42 +81,40 @@ public class ForStatement extends Statement {
 
 		// process the initializations
 		if (this.initializations != null) {
-			for (int i = 0, count = this.initializations.length; i < count; i++) {
-				flowInfo = this.initializations[i].analyseCode(this.scope, flowContext, flowInfo);
+			for (Statement initialization : this.initializations) {
+				flowInfo = initialization.analyseCode(this.scope, flowContext, flowInfo);
 			}
 		}
 		this.preCondInitStateIndex =
 			currentScope.methodScope().recordInitializationStates(flowInfo);
 
 		Constant cst = this.condition == null ? null : this.condition.constant;
-		boolean isConditionTrue = cst == null || (cst != Constant.NotAConstant && cst.booleanValue() == true);
-		boolean isConditionFalse = cst != null && (cst != Constant.NotAConstant && cst.booleanValue() == false);
+		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
+		boolean isConditionFalse = cst != null && cst != Constant.NotAConstant && !cst.booleanValue();
 
 		cst = this.condition == null ? null : this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedTrue = cst == null ||  (cst != Constant.NotAConstant && cst.booleanValue() == true);
-		boolean isConditionOptimizedFalse = cst != null && (cst != Constant.NotAConstant && cst.booleanValue() == false);
+		boolean isConditionOptimizedTrue = cst == null ||  cst != Constant.NotAConstant && cst.booleanValue();
+		boolean isConditionOptimizedFalse = cst != null && cst != Constant.NotAConstant && !cst.booleanValue();
 
 		// process the condition
 		LoopingFlowContext condLoopContext = null;
 		FlowInfo condInfo = flowInfo.nullInfoLessUnconditionalCopy();
-		if (this.condition != null) {
-			if (!isConditionTrue) {
-				condInfo =
-					this.condition.analyseCode(
-						this.scope,
-						(condLoopContext =
-							new LoopingFlowContext(flowContext, flowInfo, this, null,
-								null, this.scope, true)),
-						condInfo);
-				this.condition.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
-			}
-		}
+		if (this.condition != null && !isConditionTrue) {
+        	condInfo =
+        		this.condition.analyseCode(
+        			this.scope,
+        			condLoopContext =
+        				new LoopingFlowContext(flowContext, flowInfo, this, null,
+        					null, this.scope, true),
+        			condInfo);
+        	this.condition.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
+        }
 
 		// process the action
 		LoopingFlowContext loopingContext;
 		UnconditionalFlowInfo actionInfo;
 		if (this.action == null
-			|| (this.action.isEmptyBlock() && currentScope.compilerOptions().complianceLevel <= ClassFileConstants.JDK1_3)) {
+			|| this.action.isEmptyBlock() && currentScope.compilerOptions().complianceLevel <= ClassFileConstants.JDK1_3) {
 			if (condLoopContext != null)
 				condLoopContext.complainOnDeferredFinalChecks(this.scope, condInfo);
 			if (isConditionTrue) {
@@ -125,17 +123,16 @@ public class ForStatement extends Statement {
 						condInfo);
 				}
 				return FlowInfo.DEAD_END;
-			} else {
-				if (isConditionFalse){
-					this.continueLabel = null; // for(;false;p());
-				}
-				actionInfo = condInfo.initsWhenTrue().unconditionalCopy();
-				loopingContext =
-					new LoopingFlowContext(flowContext, flowInfo, this,
-						this.breakLabel, this.continueLabel, this.scope, false);
-						// there is no action guarded by a preTest, so we use preTest=false
-						// to avoid pointless burdens of updating FlowContext.conditionalLevel
 			}
+            if (isConditionFalse){
+            	this.continueLabel = null; // for(;false;p());
+            }
+            actionInfo = condInfo.initsWhenTrue().unconditionalCopy();
+            loopingContext =
+            	new LoopingFlowContext(flowContext, flowInfo, this,
+            		this.breakLabel, this.continueLabel, this.scope, false);
+            		// there is no action guarded by a preTest, so we use preTest=false
+            		// to avoid pointless burdens of updating FlowContext.conditionalLevel
 		}
 		else {
 			loopingContext =
@@ -187,8 +184,8 @@ public class ForStatement extends Statement {
 				FlowInfo incrementInfo = actionInfo;
 				this.preIncrementsInitStateIndex =
 					currentScope.methodScope().recordInitializationStates(incrementInfo);
-				for (int i = 0, count = this.increments.length; i < count; i++) {
-					incrementInfo = this.increments[i].
+				for (Statement increment : this.increments) {
+					incrementInfo = increment.
 						analyseCode(this.scope, incrementContext, incrementInfo);
 				}
 				incrementContext.complainOnDeferredFinalChecks(this.scope,
@@ -198,11 +195,9 @@ public class ForStatement extends Statement {
 				addInitializationsFrom(condInfo.initsWhenFalse());
 		} else {
 			exitBranch.addInitializationsFrom(condInfo.initsWhenFalse());
-			if (this.increments != null) {
-				if (initialComplaintLevel == Statement.NOT_COMPLAINED) {
-					currentScope.problemReporter().fakeReachable(this.increments[0]);
-				}
-			}
+			if (this.increments != null && initialComplaintLevel == Statement.NOT_COMPLAINED) {
+            	currentScope.problemReporter().fakeReachable(this.increments[0]);
+            }
 		}
 		// nulls checks
 		if (condLoopContext != null) {
@@ -236,8 +231,7 @@ public class ForStatement extends Statement {
 		// Variables initialized only for the purpose of the for loop can be removed for further flow info
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=359495
 		if (this.initializations != null) {
-			for (int i = 0; i < this.initializations.length; i++) {
-				Statement init = this.initializations[i];
+			for (Statement init : this.initializations) {
 				if (init instanceof LocalDeclaration) {
 					LocalVariableBinding binding = ((LocalDeclaration) init).binding;
 					mergedInfo.resetAssignmentInfo(binding);
@@ -266,15 +260,15 @@ public class ForStatement extends Statement {
 
 		// generate the initializations
 		if (this.initializations != null) {
-			for (int i = 0, max = this.initializations.length; i < max; i++) {
-				this.initializations[i].generateCode(this.scope, codeStream);
+			for (Statement initialization : this.initializations) {
+				initialization.generateCode(this.scope, codeStream);
 			}
 		}
 		if (containsPatternVariable()) {
 			this.condition.addPatternVariables(currentScope, codeStream);
 		}
 		Constant cst = this.condition == null ? null : this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedFalse = cst != null && (cst != Constant.NotAConstant && cst.booleanValue() == false);
+		boolean isConditionOptimizedFalse = cst != null && cst != Constant.NotAConstant && !cst.booleanValue();
 		if (isConditionOptimizedFalse) {
 			this.condition.generateCode(this.scope, codeStream, false);
 			// May loose some local variable initializations : affecting the local variable attributes
@@ -296,15 +290,15 @@ public class ForStatement extends Statement {
 		this.breakLabel.initialize(codeStream);
 		if (this.continueLabel == null) {
 			conditionLabel.place();
-			if ((this.condition != null) && (this.condition.constant == Constant.NotAConstant)) {
+			if (this.condition != null && this.condition.constant == Constant.NotAConstant) {
 				this.condition.generateOptimizedBoolean(this.scope, codeStream, null, this.breakLabel, true);
 			}
 		} else {
 			this.continueLabel.initialize(codeStream);
 			// jump over the actionBlock
-			if ((this.condition != null)
-				&& (this.condition.constant == Constant.NotAConstant)
-				&& !((this.action == null || this.action.isEmptyBlock()) && (this.increments == null))) {
+			if (this.condition != null
+				&& this.condition.constant == Constant.NotAConstant
+				&& (this.action != null && !this.action.isEmptyBlock() || this.increments != null)) {
 				conditionLabel.tagBits |= BranchLabel.USED;
 				int jumpPC = codeStream.position;
 				codeStream.goto_(conditionLabel);
@@ -335,8 +329,8 @@ public class ForStatement extends Statement {
 			this.continueLabel.place();
 			// generate the increments for next iteration
 			if (this.increments != null) {
-				for (int i = 0, max = this.increments.length; i < max; i++) {
-					this.increments[i].generateCode(this.scope, codeStream);
+				for (Statement increment : this.increments) {
+					increment.generateCode(this.scope, codeStream);
 				}
 			}
 			// May loose some local variable initializations : affecting the local variable attributes
@@ -346,18 +340,16 @@ public class ForStatement extends Statement {
 			}
 			// generate the condition
 			conditionLabel.place();
-			if ((this.condition != null) && (this.condition.constant == Constant.NotAConstant)) {
+			if (this.condition != null && this.condition.constant == Constant.NotAConstant) {
 				this.condition.generateOptimizedBoolean(this.scope, codeStream, actionLabel, null, true);
 			} else {
 				codeStream.goto_(actionLabel);
 			}
 
-		} else {
-			// May loose some local variable initializations : affecting the local variable attributes
-			if (this.preCondInitStateIndex != -1) {
-				codeStream.removeNotDefinitelyAssignedVariables(currentScope, this.preCondInitStateIndex);
-			}
-		}
+		} else // May loose some local variable initializations : affecting the local variable attributes
+        if (this.preCondInitStateIndex != -1) {
+        	codeStream.removeNotDefinitelyAssignedVariables(currentScope, this.preCondInitStateIndex);
+        }
 
 
 		// May loose some local variable initializations : affecting the local variable attributes
@@ -419,15 +411,15 @@ public class ForStatement extends Statement {
 		// use the scope that will hold the init declarations
 		this.scope = (this.bits & ASTNode.NeededScope) != 0 ? new BlockScope(upperScope) : upperScope;
 		if (this.initializations != null)
-			for (int i = 0, length = this.initializations.length; i < length; i++)
-				this.initializations[i].resolve(this.scope);
+            for (Statement initialization : this.initializations)
+                initialization.resolve(this.scope);
 		if (this.condition != null) {
 			TypeBinding type = this.condition.resolveTypeExpecting(this.scope, TypeBinding.BOOLEAN);
 			this.condition.computeConversion(this.scope, type, type);
 		}
 		if (this.increments != null)
-			for (int i = 0, length = this.increments.length; i < length; i++) {
-				this.increments[i].resolveWithPatternVariablesInScope(patternVariablesInTrueScope, this.scope);
+            for (Statement increment : this.increments) {
+				increment.resolveWithPatternVariablesInScope(patternVariablesInTrueScope, this.scope);
 			}
 
 		if (this.action != null) {
@@ -472,9 +464,9 @@ public class ForStatement extends Statement {
 	@Override
 	public boolean doesNotCompleteNormally() {
 		Constant cst = this.condition == null ? null : this.condition.constant;
-		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 		cst = this.condition == null ? null : this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+		boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 
 		return (isConditionTrue || isConditionOptimizedTrue) && (this.action == null || !this.action.breaksOut(null));
 	}
@@ -486,11 +478,11 @@ public class ForStatement extends Statement {
 	@Override
 	public boolean canCompleteNormally() {
 		Constant cst = this.condition == null ? null : this.condition.constant;
-		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 		cst = this.condition == null ? null : this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
+		boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue();
 
-		if (!(isConditionTrue || isConditionOptimizedTrue))
+		if (!isConditionTrue && !isConditionOptimizedTrue)
 			return true;
         return this.action != null && this.action.breaksOut(null);
     }

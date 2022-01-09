@@ -83,16 +83,14 @@ public MethodBinding(int modifiers, char[] selector, TypeBinding returnType, Typ
 	this.modifiers = modifiers;
 	this.selector = selector;
 	this.returnType = returnType;
-	this.parameters = (parameters == null || parameters.length == 0) ? Binding.NO_PARAMETERS : parameters;
-	this.thrownExceptions = (thrownExceptions == null || thrownExceptions.length == 0) ? Binding.NO_EXCEPTIONS : thrownExceptions;
+	this.parameters = parameters == null || parameters.length == 0 ? Binding.NO_PARAMETERS : parameters;
+	this.thrownExceptions = thrownExceptions == null || thrownExceptions.length == 0 ? Binding.NO_EXCEPTIONS : thrownExceptions;
 	this.declaringClass = declaringClass;
 
 	// propagate the strictfp & deprecated modifiers
-	if (this.declaringClass != null) {
-		if (this.declaringClass.isStrictfp())
-			if (!(isNative() || isAbstract()))
-				this.modifiers |= ClassFileConstants.AccStrictfp;
-	}
+	if (this.declaringClass != null && this.declaringClass.isStrictfp())
+    	if (!isNative() && !isAbstract())
+    		this.modifiers |= ClassFileConstants.AccStrictfp;
 }
 public MethodBinding(int modifiers, TypeBinding[] parameters, ReferenceBinding[] thrownExceptions, ReferenceBinding declaringClass) {
 	this(modifiers, TypeConstants.INIT, TypeBinding.VOID, parameters, thrownExceptions, declaringClass);
@@ -208,25 +206,24 @@ private TypeBinding makeRawArgument(LookupEnvironment env, TypeVariableBinding v
 		if (upperBound.isTypeVariable())
 			return makeRawArgument(env, (TypeVariableBinding) upperBound);
 		return env.convertToRawType(upperBound, false /*do not force conversion of enclosing types*/);
-	} else {
-		// use an intersection type to retain full bound information if more than 1 bound
-		TypeBinding[] itsSuperinterfaces = var.superInterfaces();
-		int superLength = itsSuperinterfaces.length;
-		TypeBinding rawFirstBound = null;
-		TypeBinding[] rawOtherBounds = null;
-		if (var.boundsCount() == superLength) {
-			rawFirstBound = env.convertToRawType(itsSuperinterfaces[0], false);
-			rawOtherBounds = new TypeBinding[superLength - 1];
-			for (int s = 1; s < superLength; s++)
-				rawOtherBounds[s - 1] = env.convertToRawType(itsSuperinterfaces[s], false);
-		} else {
-			rawFirstBound = env.convertToRawType(var.superclass(), false);
-			rawOtherBounds = new TypeBinding[superLength];
-			for (int s = 0; s < superLength; s++)
-				rawOtherBounds[s] = env.convertToRawType(itsSuperinterfaces[s], false);
-		}
-		return env.createWildcard(null, 0, rawFirstBound, rawOtherBounds, org.eclipse.jdt.internal.compiler.ast.Wildcard.EXTENDS);
 	}
+    // use an intersection type to retain full bound information if more than 1 bound
+    TypeBinding[] itsSuperinterfaces = var.superInterfaces();
+    int superLength = itsSuperinterfaces.length;
+    TypeBinding rawFirstBound = null;
+    TypeBinding[] rawOtherBounds = null;
+    if (var.boundsCount() == superLength) {
+    	rawFirstBound = env.convertToRawType(itsSuperinterfaces[0], false);
+    	rawOtherBounds = new TypeBinding[superLength - 1];
+    	for (int s = 1; s < superLength; s++)
+    		rawOtherBounds[s - 1] = env.convertToRawType(itsSuperinterfaces[s], false);
+    } else {
+    	rawFirstBound = env.convertToRawType(var.superclass(), false);
+    	rawOtherBounds = new TypeBinding[superLength];
+    	for (int s = 0; s < superLength; s++)
+    		rawOtherBounds[s] = env.convertToRawType(itsSuperinterfaces[s], false);
+    }
+    return env.createWildcard(null, 0, rawFirstBound, rawOtherBounds, org.eclipse.jdt.internal.compiler.ast.Wildcard.EXTENDS);
 }
 
 /* Answer true if the receiver is visible to the type provided by the scope.
@@ -296,10 +293,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
         return (invocationSite.isTypeAccess() || invocationSite.receiverIsImplicitThis()) && TypeBinding.equalsEquals(receiverType, this.declaringClass);
     }
 
-	if (isPublic()) return true;
-
-
-	if (TypeBinding.equalsEquals(invocationType, this.declaringClass) && TypeBinding.equalsEquals(invocationType, receiverType)) return true;
+	if (isPublic() || TypeBinding.equalsEquals(invocationType, this.declaringClass) && TypeBinding.equalsEquals(invocationType, receiverType)) return true;
 
 	if (invocationType == null) // static import call
 		return !isPrivate() && scope.getCurrentPackage() == this.declaringClass.fPackage;
@@ -310,8 +304,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 		//    AND the receiverType is the invocationType or its subclass
 		//    OR the method is a static method accessed directly through a type
 		//    OR previous assertions are true for one of the enclosing type
-		if (TypeBinding.equalsEquals(invocationType, this.declaringClass)) return true;
-		if (invocationType.fPackage == this.declaringClass.fPackage) return true;
+		if (TypeBinding.equalsEquals(invocationType, this.declaringClass) || invocationType.fPackage == this.declaringClass.fPackage) return true;
 
 		ReferenceBinding currentType = invocationType;
 		TypeBinding receiverErasure = receiverType.erasure();
@@ -324,11 +317,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 				// receiverType can be an array binding in one case... see if you can change it
 				if (receiverType instanceof ArrayBinding)
 					return false;
-				if (isStatic()) {
-					if (depth > 0) invocationSite.setDepth(depth);
-					return true; // see 1FMEPDL - return invocationSite.isTypeAccess();
-				}
-				if (TypeBinding.equalsEquals(currentType, receiverErasure) || receiverErasure.findSuperTypeOriginatingFrom(currentType) != null) {
+				if (isStatic() || TypeBinding.equalsEquals(currentType, receiverErasure) || receiverErasure.findSuperTypeOriginatingFrom(currentType) != null) {
 					if (depth > 0) invocationSite.setDepth(depth);
 					return true;
 				}
@@ -372,19 +361,15 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 
 	// isDefault()
 	PackageBinding declaringPackage = this.declaringClass.fPackage;
-	if (invocationType.fPackage != declaringPackage) return false;
-
 	// receiverType can be an array binding in one case... see if you can change it
-	if (receiverType instanceof ArrayBinding)
+	if (invocationType.fPackage != declaringPackage || receiverType instanceof ArrayBinding)
 		return false;
 	TypeBinding originalDeclaringClass = this.declaringClass.original();
-	ReferenceBinding currentType = (ReferenceBinding) (receiverType);
+	ReferenceBinding currentType = (ReferenceBinding) receiverType;
 	do {
 		if (currentType.isCapture()) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=285002
 			if (TypeBinding.equalsEquals(originalDeclaringClass, currentType.erasure().original())) return true;
-		} else {
-			if (TypeBinding.equalsEquals(originalDeclaringClass, currentType.original())) return true;
-		}
+		} else if (TypeBinding.equalsEquals(originalDeclaringClass, currentType.original())) return true;
 		PackageBinding currentPackage = currentType.fPackage;
 		// package could be null for wildcards/intersection types, ignore and recurse in superclass
 		if (!currentType.isCapture() && currentPackage != null && currentPackage != declaringPackage) return false;
@@ -395,18 +380,17 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 public List<TypeBinding> collectMissingTypes(List<TypeBinding> missingTypes) {
 	if ((this.tagBits & TagBits.HasMissingType) != 0) {
 		missingTypes = this.returnType.collectMissingTypes(missingTypes);
-		for (int i = 0, max = this.parameters.length; i < max; i++) {
-			missingTypes = this.parameters[i].collectMissingTypes(missingTypes);
+		for (TypeBinding parameter : this.parameters) {
+			missingTypes = parameter.collectMissingTypes(missingTypes);
 		}
-		for (int i = 0, max = this.thrownExceptions.length; i < max; i++) {
-			missingTypes = this.thrownExceptions[i].collectMissingTypes(missingTypes);
+		for (ReferenceBinding thrownException : this.thrownExceptions) {
+			missingTypes = thrownException.collectMissingTypes(missingTypes);
 		}
-		for (int i = 0, max = this.typeVariables.length; i < max; i++) {
-			TypeVariableBinding variable = this.typeVariables[i];
+		for (TypeVariableBinding variable : this.typeVariables) {
 			missingTypes = variable.superclass().collectMissingTypes(missingTypes);
 			ReferenceBinding[] interfaces = variable.superInterfaces();
-			for (int j = 0, length = interfaces.length; j < length; j++) {
-				missingTypes = interfaces[j].collectMissingTypes(missingTypes);
+			for (ReferenceBinding element : interfaces) {
+				missingTypes = element.collectMissingTypes(missingTypes);
 			}
 		}
 	}
@@ -508,10 +492,7 @@ protected void fillInDefaultNonNullness(AbstractMethodDeclaration sourceMethod, 
 	boolean added = false;
 	int length = this.parameterNonNullness.length;
 	for (int i = 0; i < length; i++) {
-		if(!needToApplyParameterNonNullDefault.hasNonNullDefaultForParam(i)) {
-			continue;
-		}
-		if (this.parameters[i].isBaseType())
+		if (!needToApplyParameterNonNullDefault.hasNonNullDefaultForParam(i) || this.parameters[i].isBaseType())
 			continue;
 		if (this.parameterNonNullness[i] == null) {
 			added = true;
@@ -587,9 +568,9 @@ public MethodBinding findOriginalInheritedMethod(MethodBinding inheritedMethod) 
 	if (TypeBinding.notEquals(inheritedOriginal.declaringClass, superType)) {
 		// must find inherited method with the same substituted variables
 		MethodBinding[] superMethods = ((ReferenceBinding) superType).getMethods(inheritedOriginal.selector, inheritedOriginal.parameters.length);
-		for (int m = 0, l = superMethods.length; m < l; m++)
-			if (superMethods[m].original() == inheritedOriginal)
-				return superMethods[m];
+		for (MethodBinding superMethod : superMethods)
+            if (superMethod.original() == inheritedOriginal)
+				return superMethod;
 	}
 	return inheritedOriginal;
 }
@@ -607,14 +588,14 @@ public char[] genericSignature() {
 	StringBuilder sig = new StringBuilder(10);
 	if (this.typeVariables != Binding.NO_TYPE_VARIABLES) {
 		sig.append('<');
-		for (int i = 0, length = this.typeVariables.length; i < length; i++) {
-			sig.append(this.typeVariables[i].genericSignature());
+		for (TypeVariableBinding typeVariable : this.typeVariables) {
+			sig.append(typeVariable.genericSignature());
 		}
 		sig.append('>');
 	}
 	sig.append('(');
-	for (int i = 0, length = this.parameters.length; i < length; i++) {
-		sig.append(this.parameters[i].genericTypeSignature());
+	for (TypeBinding parameter : this.parameters) {
+		sig.append(parameter.genericTypeSignature());
 	}
 	sig.append(')');
 	if (this.returnType != null)
@@ -864,7 +845,7 @@ public final boolean isImplicit() {
  */
 public final boolean isMain() {
 	if (this.selector.length == 4 && CharOperation.equals(this.selector, TypeConstants.MAIN)
-			&& ((this.modifiers & (ClassFileConstants.AccPublic | ClassFileConstants.AccStatic)) != 0)
+			&& (this.modifiers & (ClassFileConstants.AccPublic | ClassFileConstants.AccStatic)) != 0
 			&& TypeBinding.VOID == this.returnType
 			&& this.parameters.length == 1) {
 		TypeBinding paramType = this.parameters[0];
@@ -1087,19 +1068,19 @@ public final char[] signature() /* (ILjava/lang/Thread;)Ljava/lang/Object; */ {
 		// take into account the synthetic argument type signatures as well
 		ReferenceBinding[] syntheticArgumentTypes = this.declaringClass.syntheticEnclosingInstanceTypes();
 		if (syntheticArgumentTypes != null) {
-			for (int i = 0, count = syntheticArgumentTypes.length; i < count; i++) {
-				buffer.append(syntheticArgumentTypes[i].signature());
+			for (ReferenceBinding syntheticArgumentType : syntheticArgumentTypes) {
+				buffer.append(syntheticArgumentType.signature());
 			}
 		}
 
-		if ((this instanceof SyntheticMethodBinding) && (!this.declaringClass.isRecord())) {
+		if (this instanceof SyntheticMethodBinding && !this.declaringClass.isRecord()) {
 			targetParameters = ((SyntheticMethodBinding)this).targetMethod.parameters;
 		}
 	}
 
 	if (targetParameters != Binding.NO_PARAMETERS) {
-		for (int i = 0; i < targetParameters.length; i++) {
-			buffer.append(targetParameters[i].signature());
+		for (TypeBinding targetParameter : targetParameters) {
+			buffer.append(targetParameter.signature());
 		}
 	}
 	if (needSynthetics) {
@@ -1141,8 +1122,7 @@ public char[] signature(ClassFile classFile) {
 				// take into account the synthetic argument type signatures as well
 				ReferenceBinding[] syntheticArgumentTypes = this.declaringClass.syntheticEnclosingInstanceTypes();
 				if (syntheticArgumentTypes != null) {
-					for (int i = 0, count = syntheticArgumentTypes.length; i < count; i++) {
-						ReferenceBinding syntheticArgumentType = syntheticArgumentTypes[i];
+					for (ReferenceBinding syntheticArgumentType : syntheticArgumentTypes) {
 						if ((syntheticArgumentType.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 							Util.recordNestedType(classFile, syntheticArgumentType);
 						}
@@ -1154,8 +1134,7 @@ public char[] signature(ClassFile classFile) {
 			}
 
 			if (targetParameters != Binding.NO_PARAMETERS) {
-				for (int i = 0, max = targetParameters.length; i < max; i++) {
-					TypeBinding targetParameter = targetParameters[i];
+				for (TypeBinding targetParameter : targetParameters) {
 					TypeBinding leafTargetParameterType = targetParameter.leafComponentType();
 					if ((leafTargetParameterType.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 						Util.recordNestedType(classFile, leafTargetParameterType);
@@ -1198,8 +1177,7 @@ public char[] signature(ClassFile classFile) {
 		// take into account the synthetic argument type signatures as well
 		ReferenceBinding[] syntheticArgumentTypes = this.declaringClass.syntheticEnclosingInstanceTypes();
 		if (syntheticArgumentTypes != null) {
-			for (int i = 0, count = syntheticArgumentTypes.length; i < count; i++) {
-				ReferenceBinding syntheticArgumentType = syntheticArgumentTypes[i];
+			for (ReferenceBinding syntheticArgumentType : syntheticArgumentTypes) {
 				if ((syntheticArgumentType.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 					this.tagBits |= TagBits.ContainsNestedTypeReferences;
 					Util.recordNestedType(classFile, syntheticArgumentType);
@@ -1214,8 +1192,7 @@ public char[] signature(ClassFile classFile) {
 	}
 
 	if (targetParameters != Binding.NO_PARAMETERS) {
-		for (int i = 0, max = targetParameters.length; i < max; i++) {
-			TypeBinding targetParameter = targetParameters[i];
+		for (TypeBinding targetParameter : targetParameters) {
 			TypeBinding leafTargetParameterType = targetParameter.leafComponentType();
 			if ((leafTargetParameterType.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 				this.tagBits |= TagBits.ContainsNestedTypeReferences;
@@ -1337,7 +1314,7 @@ public String toString() {
 			for (int i = 0, length = this.thrownExceptions.length; i < length; i++) {
 				if (i  > 0)
 					output.append(", "); //$NON-NLS-1$
-				output.append((this.thrownExceptions[i] != null) ? this.thrownExceptions[i].debugName() : "<no exception type>"); //$NON-NLS-1$
+				output.append(this.thrownExceptions[i] != null ? this.thrownExceptions[i].debugName() : "<no exception type>"); //$NON-NLS-1$
 			}
 		}
 	} else {
@@ -1365,16 +1342,16 @@ static int getNonNullByDefaultValue(AnnotationBinding annotation) {
 			return Annotation.nullLocationBitsFromAnnotationValue(value);
 		}
 		return DefaultLocationsForTrueValue; // custom unconfigurable NNBD
-	} else if (elementValuePairs.length > 0) {
-		// evaluate the contained EnumConstantSignatures:
-		int nullness = 0;
-		for (int i = 0; i < elementValuePairs.length; i++)
-			nullness |= Annotation.nullLocationBitsFromAnnotationValue(elementValuePairs[i].getValue());
-		return nullness;
-	} else {
+	}
+    if (elementValuePairs.length <= 0) {
 		// empty argument: cancel all defaults from enclosing scopes
 		return NULL_UNSPECIFIED_BY_DEFAULT;
 	}
+    // evaluate the contained EnumConstantSignatures:
+    int nullness = 0;
+    for (ElementValuePair elementValuePair : elementValuePairs)
+        nullness |= Annotation.nullLocationBitsFromAnnotationValue(elementValuePair.getValue());
+    return nullness;
 }
 
 
@@ -1448,7 +1425,7 @@ public boolean isVoidMethod() {
 }
 public boolean doesParameterLengthMatch(int suggestedParameterLength) {
 	int len = this.parameters.length;
-	return len <= suggestedParameterLength || (isVarargs() && len == suggestedParameterLength + 1);
+	return len <= suggestedParameterLength || isVarargs() && len == suggestedParameterLength + 1;
 }
 public void updateTypeVariableBinding(TypeVariableBinding previousBinding, TypeVariableBinding updatedBinding) {
 	TypeVariableBinding[] bindings = this.typeVariables;

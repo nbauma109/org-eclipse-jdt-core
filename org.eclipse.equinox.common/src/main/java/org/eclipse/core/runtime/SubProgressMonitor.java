@@ -125,7 +125,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	 */
 	public SubProgressMonitor(IProgressMonitor monitor, int ticks, int style) {
 		super(monitor);
-		this.parentTicks = (ticks > 0) ? ticks : 0;
+		this.parentTicks = ticks > 0 ? ticks : 0;
 		this.style = style;
 	}
 
@@ -176,7 +176,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 			return;
 		}
 
-		double realWork = (work > 0.0d) ? scale * work : 0.0d;
+		double realWork = work > 0.0d ? scale * work : 0.0d;
 		super.internalWorked(realWork);
 		sentToParent += realWork;
 		if (sentToParent >= parentTicks) {

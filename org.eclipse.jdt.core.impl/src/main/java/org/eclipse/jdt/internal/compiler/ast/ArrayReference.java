@@ -76,9 +76,8 @@ public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flow
 	if ((this.resolvedType.tagBits & TagBits.AnnotationNullable) != 0) {
 		scope.problemReporter().arrayReferencePotentialNullReference(this);
 		return true;
-	} else {
-		return super.checkNPE(scope, flowContext, flowInfo, ttlForFieldCheck);
 	}
+    return super.checkNPE(scope, flowContext, flowInfo, ttlForFieldCheck);
 }
 
 @Override
@@ -213,7 +212,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.receiver.computeConversion(scope, arrayType, arrayType);
 		if (arrayType.isArrayType()) {
 			TypeBinding elementType = ((ArrayBinding) arrayType).elementsType();
-			this.resolvedType = ((this.bits & ASTNode.IsStrictlyAssigned) == 0) ? elementType.capture(scope, this.sourceStart, this.sourceEnd) : elementType;
+			this.resolvedType = (this.bits & ASTNode.IsStrictlyAssigned) == 0 ? elementType.capture(scope, this.sourceStart, this.sourceEnd) : elementType;
 		} else {
 			scope.problemReporter().referenceMustBeArrayTypeAt(arrayType, this);
 		}

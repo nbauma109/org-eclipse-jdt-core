@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.core.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +28,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
 import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
@@ -89,20 +87,15 @@ public class ModuleUtil {
 		CompilerOptions compilerOptions = new CompilerOptions(projectOptions);
 		compilerOptions.performMethodsFullRecovery = true;
 		compilerOptions.performStatementsRecovery = true;
-		ICompilerRequestor requestor = new ICompilerRequestor() {
-			@Override
-			public void acceptResult(CompilationResult result) {
-				// Nothing to do here
-			}
-		};
-		Compiler newCompiler = new Compiler(
+		ICompilerRequestor requestor = result -> {
+        	// Nothing to do here
+        };
+		return new Compiler(
 			environment,
 			DefaultErrorHandlingPolicies.proceedWithAllProblems(),
 			compilerOptions,
 			requestor,
 			ProblemFactory.getProblemFactory(Locale.getDefault()));
-
-		return newCompiler;
 	}
 	public static String[] getReferencedModules(IJavaProject project) throws CoreException {
 
@@ -141,12 +134,7 @@ public class ModuleUtil {
 		compiler.compile(sources);
 		String[] mods = environment.getModules();
 		Collections.addAll(required, mods);
-		Collections.sort(required, new Comparator<String>() {
-			@Override
-			public int compare(String o1, String o2) {
-				return o1.compareTo(o2);
-			}
-		});
+		Collections.sort(required);
 		return required.toArray(new String[required.size()]);
 	}
 }

@@ -38,7 +38,7 @@ public abstract class EventManager {
 	 * An empty array that can be returned from a call to
 	 * {@link #getListeners()} when {@link #listenerList} is <code>null</code>.
 	 */
-	private static final Object[] EMPTY_ARRAY = new Object[0];
+	private static final Object[] EMPTY_ARRAY = {};
 
 	/**
 	 * A collection of objects listening to changes to this manager. This

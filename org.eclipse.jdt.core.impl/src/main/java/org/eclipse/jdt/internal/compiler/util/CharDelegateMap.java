@@ -68,15 +68,14 @@ public class CharDelegateMap<P> implements CharArrayMapper<P> {
 
 	@Override
 	public P put(char[] key, P value) {
-		if (this.smallDelegate != null) {
-			P v = this.smallDelegate.put(key, value);
-			if (this.smallDelegate.size() > SMAL_BIG_THRESHOLD) {
-				toBigMap();
-			}
-			return v;
-		} else {
+		if (this.smallDelegate == null) {
 			return this.bigDelegate.put(key, value);
 		}
+        P v = this.smallDelegate.put(key, value);
+        if (this.smallDelegate.size() > SMAL_BIG_THRESHOLD) {
+        	toBigMap();
+        }
+        return v;
 	}
 
 	private void toBigMap() {

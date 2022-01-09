@@ -53,6 +53,6 @@ public abstract class AbstractHandleObjectEvent extends AbstractBitSetEvent {
 	 * @return <code>true</code>, iff the defined property changed.
 	 */
 	public final boolean isDefinedChanged() {
-		return ((changedValues & CHANGED_DEFINED) != 0);
+		return (changedValues & CHANGED_DEFINED) != 0;
 	}
 }

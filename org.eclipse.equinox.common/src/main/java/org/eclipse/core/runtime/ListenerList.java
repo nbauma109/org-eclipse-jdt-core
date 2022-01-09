@@ -60,7 +60,7 @@ public class ListenerList<E> implements Iterable<E> {
 	/**
 	 * The empty array singleton instance.
 	 */
-	private static final Object[] EmptyArray = new Object[0];
+	private static final Object[] EmptyArray = {};
 
 	/**
 	 * Mode constant (value 0) indicating that listeners should be considered
@@ -186,9 +186,7 @@ public class ListenerList<E> implements Iterable<E> {
 			if (i >= listeners.length) {
 				throw new NoSuchElementException();
 			}
-			@SuppressWarnings("unchecked") // (E) is safe, because #add(E) only accepts Es
-			E next = (E) listeners[i++];
-			return next;
+			return (E) listeners[i++];
 		}
 
 		@Override

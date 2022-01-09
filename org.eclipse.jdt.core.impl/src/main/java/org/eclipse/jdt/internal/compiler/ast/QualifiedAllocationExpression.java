@@ -100,18 +100,15 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 		// analyse the enclosing instance
 		if (this.enclosingInstance != null) {
 			flowInfo = this.enclosingInstance.analyseCode(currentScope, flowContext, flowInfo);
-		} else {
-			if (this.binding != null && this.binding.declaringClass != null) {
-				ReferenceBinding superclass = this.binding.declaringClass.superclass();
-				if (superclass != null && superclass.isMemberType() && !superclass.isStatic()) {
-					// creating an anonymous type of a non-static member type without an enclosing instance of parent type
-					currentScope.tagAsAccessingEnclosingInstanceStateOf(superclass.enclosingType(), false /* type variable access */);
-					// Reviewed for https://bugs.eclipse.org/bugs/show_bug.cgi?id=378674 :
-					// The corresponding problem (when called from static) is not produced until during code generation
-				}
-			}
-
-		}
+		} else if (this.binding != null && this.binding.declaringClass != null) {
+        	ReferenceBinding superclass = this.binding.declaringClass.superclass();
+        	if (superclass != null && superclass.isMemberType() && !superclass.isStatic()) {
+        		// creating an anonymous type of a non-static member type without an enclosing instance of parent type
+        		currentScope.tagAsAccessingEnclosingInstanceStateOf(superclass.enclosingType(), false /* type variable access */);
+        		// Reviewed for https://bugs.eclipse.org/bugs/show_bug.cgi?id=378674 :
+        		// The corresponding problem (when called from static) is not produced until during code generation
+        	}
+        }
 
 		// check captured variables are initialized in current context (26134)
 		checkCapturedLocalInitializationIfNecessary(
@@ -127,13 +124,13 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 			boolean hasResourceWrapperType = analyseResources
 						&& this.resolvedType instanceof ReferenceBinding
 						&& this.resolvedType.hasTypeBit(TypeIds.BitWrapperCloseable);
-			for (int i = 0, count = this.arguments.length; i < count; i++) {
-				flowInfo = this.arguments[i].analyseCode(currentScope, flowContext, flowInfo);
+			for (Expression argument : this.arguments) {
+				flowInfo = argument.analyseCode(currentScope, flowContext, flowInfo);
 				if (analyseResources && !hasResourceWrapperType) { // allocation of wrapped closeables is analyzed specially
 					// if argument is an AutoCloseable insert info that it *may* be closed (by the target method, i.e.)
-					flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.arguments[i], flowInfo, flowContext, false);
+					flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, argument, flowInfo, flowContext, false);
 				}
-				this.arguments[i].checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
+				argument.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
 			}
 			analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
 		}
@@ -145,7 +142,7 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 
 		// record some dependency information for exception types
 		ReferenceBinding[] thrownExceptions;
-		if (((thrownExceptions = this.binding.thrownExceptions).length) != 0) {
+		if ((thrownExceptions = this.binding.thrownExceptions).length != 0) {
 			if ((this.bits & ASTNode.Unchecked) != 0 && this.genericTypeArguments == null) {
 				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=277643, align with javac on JLS 15.12.2.6
 				thrownExceptions = currentScope.environment().convertToRawTypes(this.binding.thrownExceptions, true, true);
@@ -369,33 +366,30 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 						CastExpression.checkNeedForEnclosingInstanceCast(scope, this.enclosingInstance, enclosingInstanceType, receiverType);
 					}
 				}
-			} else {
-				if (this.type == null) {
-					// initialization of an enum constant
-					receiverType = scope.enclosingSourceType();
-				} else {
-					receiverType = this.type.resolveType(scope, true /* check bounds*/);
-					checkIllegalNullAnnotation(scope, receiverType);
-					checkParameterizedAllocation: {
-						if (receiverType == null || !receiverType.isValidBinding()) break checkParameterizedAllocation;
-						if (this.type instanceof ParameterizedQualifiedTypeReference) { // disallow new X<String>.Y<Integer>()
-							ReferenceBinding currentType = (ReferenceBinding)receiverType;
-							do {
-								// isStatic() is answering true for toplevel types
-								if ((currentType.modifiers & ClassFileConstants.AccStatic) != 0) break checkParameterizedAllocation;
-								if (currentType.isRawType()) break checkParameterizedAllocation;
-							} while ((currentType = currentType.enclosingType())!= null);
-							ParameterizedQualifiedTypeReference qRef = (ParameterizedQualifiedTypeReference) this.type;
-							for (int i = qRef.typeArguments.length - 2; i >= 0; i--) {
-								if (qRef.typeArguments[i] != null) {
-									scope.problemReporter().illegalQualifiedParameterizedTypeAllocation(this.type, receiverType);
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
+			} else if (this.type == null) {
+            	// initialization of an enum constant
+            	receiverType = scope.enclosingSourceType();
+            } else {
+            	receiverType = this.type.resolveType(scope, true /* check bounds*/);
+            	checkIllegalNullAnnotation(scope, receiverType);
+            	checkParameterizedAllocation: {
+            		if (receiverType == null || !receiverType.isValidBinding()) break checkParameterizedAllocation;
+            		if (this.type instanceof ParameterizedQualifiedTypeReference) { // disallow new X<String>.Y<Integer>()
+            			ReferenceBinding currentType = (ReferenceBinding)receiverType;
+            			do {
+            				// isStatic() is answering true for toplevel types
+            				if ((currentType.modifiers & ClassFileConstants.AccStatic) != 0 || currentType.isRawType()) break checkParameterizedAllocation;
+            			} while ((currentType = currentType.enclosingType())!= null);
+            			ParameterizedQualifiedTypeReference qRef = (ParameterizedQualifiedTypeReference) this.type;
+            			for (int i = qRef.typeArguments.length - 2; i >= 0; i--) {
+            				if (qRef.typeArguments[i] != null) {
+            					scope.problemReporter().illegalQualifiedParameterizedTypeAllocation(this.type, receiverType);
+            					break;
+            				}
+            			}
+            		}
+            	}
+            }
 			if (receiverType == null || !receiverType.isValidBinding()) {
 				hasError = true;
 			}
@@ -420,8 +414,8 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 				}
 				if (this.argumentsHaveErrors) {
 					if (this.arguments != null) { // still attempt to resolve arguments
-						for (int i = 0, max = this.arguments.length; i < max; i++) {
-							this.arguments[i].resolveType(scope);
+						for (Expression argument : this.arguments) {
+							argument.resolveType(scope);
 						}
 					}
 					return null;
@@ -498,29 +492,26 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 					return this.resolvedType = receiverType;
 				}
 			} else {
-				if (isDiamond) {
-					if (sourceLevel < ClassFileConstants.JDK9) {
-						scope.problemReporter().diamondNotWithAnoymousClasses(this.type);
-						return null;
-					}
-				}
+				if (isDiamond && sourceLevel < ClassFileConstants.JDK9) {
+                	scope.problemReporter().diamondNotWithAnoymousClasses(this.type);
+                	return null;
+                }
 				ReferenceBinding superType = (ReferenceBinding) receiverType;
 				if (superType.isTypeVariable()) {
 					superType = new ProblemReferenceBinding(new char[][]{superType.sourceName()}, superType, ProblemReasons.IllegalSuperTypeVariable);
 					scope.problemReporter().invalidType(this, superType);
 					return null;
-				} else if (this.type != null && superType.isEnum()) { // tolerate enum constant body
+				}
+                if (this.type != null && superType.isEnum()) { // tolerate enum constant body
 					scope.problemReporter().cannotInstantiate(this.type, superType);
 					return this.resolvedType = superType;
 				}
 				this.resolvedType = receiverType;
 			}
-		} else {
-			if (this.enclosingInstance != null) {
-				enclosingInstanceType = this.enclosingInstance.resolvedType;
-				this.resolvedType = receiverType = this.type.resolvedType;
-			}
-		}
+		} else if (this.enclosingInstance != null) {
+        	enclosingInstanceType = this.enclosingInstance.resolvedType;
+        	this.resolvedType = receiverType = this.type.resolvedType;
+        }
 		MethodBinding constructorBinding = null;
 		if (isDiamond) {
 			this.binding = constructorBinding = inferConstructorOfElidedParameterizedType(scope);
@@ -541,42 +532,26 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 				if (!validate((ParameterizedTypeBinding) receiverType, scope)) {
 					return this.resolvedType;
 				}
-			} else {
-				// 15.9.3 - If the compile-time declaration is applicable by variable arity invocation...
-				if (this.binding.isVarargs()) {
-					TypeBinding lastArg = this.binding.parameters[this.binding.parameters.length - 1].leafComponentType();
-					if (!lastArg.erasure().canBeSeenBy(scope)) {
-						scope.problemReporter().invalidType(this, new ProblemReferenceBinding(new char[][] {lastArg.readableName()}, (ReferenceBinding)lastArg, ProblemReasons.NotVisible));
-						return this.resolvedType = null;
-					}
-				}
-			}
+			} else // 15.9.3 - If the compile-time declaration is applicable by variable arity invocation...
+            if (this.binding.isVarargs()) {
+            	TypeBinding lastArg = this.binding.parameters[this.binding.parameters.length - 1].leafComponentType();
+            	if (!lastArg.erasure().canBeSeenBy(scope)) {
+            		scope.problemReporter().invalidType(this, new ProblemReferenceBinding(new char[][] {lastArg.readableName()}, (ReferenceBinding)lastArg, ProblemReasons.NotVisible));
+            		return this.resolvedType = null;
+            	}
+            }
 			this.binding = resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
-		} else {
-			if (this.anonymousType != null) {
-				constructorBinding = getAnonymousConstructorBinding((ReferenceBinding) receiverType, scope);
-				if (constructorBinding == null)
-					return null;
-				this.resolvedType = this.anonymousType.binding;
-			} else {
-				this.binding = constructorBinding = findConstructorBinding(scope, this, (ReferenceBinding) receiverType, this.argumentTypes);
-			}
-		}
+		} else if (this.anonymousType != null) {
+        	constructorBinding = getAnonymousConstructorBinding((ReferenceBinding) receiverType, scope);
+        	if (constructorBinding == null)
+        		return null;
+        	this.resolvedType = this.anonymousType.binding;
+        } else {
+        	this.binding = constructorBinding = findConstructorBinding(scope, this, (ReferenceBinding) receiverType, this.argumentTypes);
+        }
 		ReferenceBinding receiver = (ReferenceBinding) receiverType;
 		ReferenceBinding superType = receiver.isInterface() ? scope.getJavaLangObject() : receiver;
-		if (constructorBinding.isValidBinding()) {
-			if (isMethodUseDeprecated(constructorBinding, scope, true, this)) {
-				scope.problemReporter().deprecatedMethod(constructorBinding, this);
-			}
-			if (checkInvocationArguments(scope, null, superType, constructorBinding, this.arguments,
-					this.argumentTypes, this.argsContainCast, this)) {
-				this.bits |= ASTNode.Unchecked;
-			}
-			if (this.typeArguments != null && constructorBinding.original().typeVariables == Binding.NO_TYPE_VARIABLES) {
-				scope.problemReporter().unnecessaryTypeArgumentsForMethodInvocation(constructorBinding,
-						this.genericTypeArguments, this.typeArguments);
-			}
-		} else {
+		if (!constructorBinding.isValidBinding()) {
 			if (constructorBinding.declaringClass == null) {
 				constructorBinding.declaringClass = superType;
 			}
@@ -587,6 +562,17 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 			scope.problemReporter().invalidConstructor(this, constructorBinding);
 			return this.resolvedType;
 		}
+        if (isMethodUseDeprecated(constructorBinding, scope, true, this)) {
+        	scope.problemReporter().deprecatedMethod(constructorBinding, this);
+        }
+        if (checkInvocationArguments(scope, null, superType, constructorBinding, this.arguments,
+        		this.argumentTypes, this.argsContainCast, this)) {
+        	this.bits |= ASTNode.Unchecked;
+        }
+        if (this.typeArguments != null && constructorBinding.original().typeVariables == Binding.NO_TYPE_VARIABLES) {
+        	scope.problemReporter().unnecessaryTypeArgumentsForMethodInvocation(constructorBinding,
+        			this.genericTypeArguments, this.typeArguments);
+        }
 		if ((constructorBinding.tagBits & TagBits.HasMissingType) != 0) {
 			scope.problemReporter().missingTypeInConstructor(this, constructorBinding);
 		}
@@ -595,7 +581,8 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 			if (targetEnclosing == null) {
 				scope.problemReporter().unnecessaryEnclosingInstanceSpecification(this.enclosingInstance, receiver);
 				return this.resolvedType;
-			} else if (!enclosingInstanceType.isCompatibleWith(targetEnclosing) && !scope.isBoxingCompatibleWith(enclosingInstanceType, targetEnclosing)) {
+			}
+            if (!enclosingInstanceType.isCompatibleWith(targetEnclosing) && !scope.isBoxingCompatibleWith(enclosingInstanceType, targetEnclosing)) {
 				scope.problemReporter().typeMismatchError(enclosingInstanceType, targetEnclosing, this.enclosingInstance, null);
 				return this.resolvedType;
 			}
@@ -605,18 +592,17 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 				(this.anonymousType == null || sourceLevel >= ClassFileConstants.JDK9)) {
 			checkTypeArgumentRedundancy((ParameterizedTypeBinding) receiverType, scope);
 		}
-		if (this.anonymousType != null) {
-			// anonymous type scenario
-			// Update the anonymous inner class : superclass, interface
-			LookupEnvironment environment=scope.environment();
-			if (environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
-				ImplicitNullAnnotationVerifier.ensureNullnessIsKnown(constructorBinding, scope);
-			}
-			this.binding = this.anonymousType.createDefaultConstructorWithBinding(constructorBinding, (this.bits & ASTNode.Unchecked) != 0 && this.genericTypeArguments == null);
-			return this.resolvedType;
-		} else {
+		if (this.anonymousType == null) {
 			return this.resolvedType = receiverType;
 		}
+        // anonymous type scenario
+        // Update the anonymous inner class : superclass, interface
+        LookupEnvironment environment=scope.environment();
+        if (environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
+        	ImplicitNullAnnotationVerifier.ensureNullnessIsKnown(constructorBinding, scope);
+        }
+        this.binding = this.anonymousType.createDefaultConstructorWithBinding(constructorBinding, (this.bits & ASTNode.Unchecked) != 0 && this.genericTypeArguments == null);
+        return this.resolvedType;
 	}
 
 	private boolean validate(final ParameterizedTypeBinding allocationType, final Scope scope) {
@@ -678,8 +664,8 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 			if (this.enclosingInstance != null)
 				this.enclosingInstance.traverse(visitor, scope);
 			if (this.typeArguments != null) {
-				for (int i = 0, typeArgumentsLength = this.typeArguments.length; i < typeArgumentsLength; i++) {
-					this.typeArguments[i].traverse(visitor, scope);
+				for (TypeReference typeArgument : this.typeArguments) {
+					typeArgument.traverse(visitor, scope);
 				}
 			}
 			if (this.type != null) // case of enum constant

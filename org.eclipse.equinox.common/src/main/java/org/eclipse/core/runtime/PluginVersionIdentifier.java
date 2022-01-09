@@ -120,7 +120,7 @@ public final class PluginVersionIdentifier {
 	 */
 	public PluginVersionIdentifier(String versionId) {
 		Object[] parts = parseVersion(versionId);
-		version = new Version(((Integer) parts[0]).intValue(), ((Integer) parts[1]).intValue(), ((Integer) parts[2]).intValue(), (String) parts[3]);
+		version = new Version((Integer) parts[0], (Integer) parts[1], (Integer) parts[2], (String) parts[3]);
 	}
 
 	/**
@@ -303,13 +303,11 @@ public final class PluginVersionIdentifier {
 	public boolean isGreaterOrEqualTo(PluginVersionIdentifier id) {
 		if (id == null)
 			return false;
-		if (getMajorComponent() > id.getMajorComponent())
+		if (getMajorComponent() > id.getMajorComponent() || getMajorComponent() == id.getMajorComponent() && getMinorComponent() > id.getMinorComponent())
 			return true;
-		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() > id.getMinorComponent()))
+		if (getMajorComponent() == id.getMajorComponent() && getMinorComponent() == id.getMinorComponent() && getServiceComponent() > id.getServiceComponent())
 			return true;
-		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent()) && (getServiceComponent() > id.getServiceComponent()))
-			return true;
-        return (getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent()) && (getServiceComponent() == id.getServiceComponent()) && (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0);
+        return getMajorComponent() == id.getMajorComponent() && getMinorComponent() == id.getMinorComponent() && getServiceComponent() == id.getServiceComponent() && getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0;
     }
 
 	/**
@@ -332,9 +330,7 @@ public final class PluginVersionIdentifier {
 	 *    <code>false</code> otherwise
 	 */
 	public boolean isCompatibleWith(PluginVersionIdentifier id) {
-		if (id == null)
-			return false;
-		if (getMajorComponent() != id.getMajorComponent())
+		if (id == null || getMajorComponent() != id.getMajorComponent())
 			return false;
 		if (getMinorComponent() > id.getMinorComponent())
 			return true;
@@ -365,11 +361,7 @@ public final class PluginVersionIdentifier {
 	 *    <code>false</code> otherwise
 	 */
 	public boolean isEquivalentTo(PluginVersionIdentifier id) {
-		if (id == null)
-			return false;
-		if (getMajorComponent() != id.getMajorComponent())
-			return false;
-		if (getMinorComponent() != id.getMinorComponent())
+		if (id == null || getMajorComponent() != id.getMajorComponent() || getMinorComponent() != id.getMinorComponent())
 			return false;
 		if (getServiceComponent() > id.getServiceComponent())
 			return true;
@@ -394,7 +386,7 @@ public final class PluginVersionIdentifier {
 	public boolean isPerfect(PluginVersionIdentifier id) {
 		if (id == null)
 			return false;
-        return (getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent()) && (getServiceComponent() == id.getServiceComponent()) && (getQualifierComponent().equals(id.getQualifierComponent()));
+        return getMajorComponent() == id.getMajorComponent() && getMinorComponent() == id.getMinorComponent() && getServiceComponent() == id.getServiceComponent() && getQualifierComponent().equals(id.getQualifierComponent());
     }
 
 	/**

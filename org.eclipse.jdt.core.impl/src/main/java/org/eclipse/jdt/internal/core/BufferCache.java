@@ -47,15 +47,14 @@ public class BufferCache<K> extends OverflowingLRUCache<K, IBuffer> {
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=39311
 		if (!((Openable)buffer.getOwner()).canBufferBeRemovedFromCache(buffer)) {
 			return false;
-		} else {
-			List<IBuffer> buffers = this.buffersToClose.get();
-			if (buffers == null) {
-				buffers = new ArrayList<>();
-				this.buffersToClose.set(buffers);
-			}
-			buffers.add(buffer);
-			return true;
 		}
+        List<IBuffer> buffers = this.buffersToClose.get();
+        if (buffers == null) {
+        	buffers = new ArrayList<>();
+        	this.buffersToClose.set(buffers);
+        }
+        buffers.add(buffer);
+        return true;
 	}
 
 	void closeBuffers() {
@@ -63,8 +62,8 @@ public class BufferCache<K> extends OverflowingLRUCache<K, IBuffer> {
 		if (buffers == null)
 			return;
 		this.buffersToClose.remove();
-		for (int i = 0, length = buffers.size(); i < length; i++) {
-			buffers.get(i).close();
+		for (IBuffer buffer : buffers) {
+			buffer.close();
 		}
 	}
 

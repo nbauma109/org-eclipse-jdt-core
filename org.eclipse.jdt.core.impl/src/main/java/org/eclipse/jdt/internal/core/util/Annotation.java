@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.util.IConstantPoolEntry;
  */
 public class Annotation extends ClassFileStruct implements IAnnotation {
 
-	private static final IAnnotationComponent[] NO_ENTRIES = new IAnnotationComponent[0];
+	private static final IAnnotationComponent[] NO_ENTRIES = {};
 
 	private int typeIndex;
 	private char[] typeName;
@@ -48,15 +48,14 @@ public class Annotation extends ClassFileStruct implements IAnnotation {
 
 		final int index = u2At(classFileBytes, 0, offset);
 		this.typeIndex = index;
-		if (index != 0) {
-			IConstantPoolEntry constantPoolEntry = constantPool.decodeEntry(index);
-			if (constantPoolEntry.getKind() != IConstantPoolConstant.CONSTANT_Utf8) {
-				throw new ClassFormatException(ClassFormatException.INVALID_CONSTANT_POOL_ENTRY);
-			}
-			this.typeName = constantPoolEntry.getUtf8Value();
-		} else {
+		if (index == 0) {
 			throw new ClassFormatException(ClassFormatException.INVALID_CONSTANT_POOL_ENTRY);
 		}
+        IConstantPoolEntry constantPoolEntry = constantPool.decodeEntry(index);
+        if (constantPoolEntry.getKind() != IConstantPoolConstant.CONSTANT_Utf8) {
+        	throw new ClassFormatException(ClassFormatException.INVALID_CONSTANT_POOL_ENTRY);
+        }
+        this.typeName = constantPoolEntry.getUtf8Value();
 		final int length = u2At(classFileBytes, 2, offset);
 		this.componentsNumber = length;
 		this.readOffset = 4;

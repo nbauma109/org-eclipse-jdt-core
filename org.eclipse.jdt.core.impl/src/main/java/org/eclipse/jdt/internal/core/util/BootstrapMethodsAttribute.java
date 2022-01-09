@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.util.IConstantPool;
  * Default implementation of IBootstrapMethodsAttribute.
  */
 public class BootstrapMethodsAttribute extends ClassFileAttribute implements IBootstrapMethodsAttribute {
-	private static final IBootstrapMethodsEntry[] NO_ENTRIES = new IBootstrapMethodsEntry[0];
+	private static final IBootstrapMethodsEntry[] NO_ENTRIES = {};
 
 	private IBootstrapMethodsEntry[] entries;
 	private int numberOfBootstrapMethods;

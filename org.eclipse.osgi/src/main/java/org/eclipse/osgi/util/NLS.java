@@ -59,7 +59,7 @@ import org.eclipse.osgi.internal.util.SupplementDebug;
  */
 public abstract class NLS {
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
+	private static final Object[] EMPTY_ARGS = {};
 	private static final String EXTENSION = ".properties"; //$NON-NLS-1$
 	private static String[] nlSuffixes;
 	private static final String PROP_WARNINGS = "osgi.nls.warnings"; //$NON-NLS-1$
@@ -83,7 +83,6 @@ public abstract class NLS {
 	 * Creates a new NLS instance.
 	 */
 	protected NLS() {
-		super();
 	}
 
 	/**
@@ -165,7 +164,7 @@ public abstract class NLS {
 
 		int length = message.length();
 		//estimate correct size of string buffer to avoid growth
-		int bufLen = length + (args.length * 5);
+		int bufLen = length + args.length * 5;
 		if (argZero != null)
 			bufLen += argZero.length() - 3;
 		if (argOne != null)
@@ -276,10 +275,8 @@ public abstract class NLS {
 		final int numFields = fieldArray.length;
 		for (int i = 0; i < numFields; i++) {
 			Field field = fieldArray[i];
-			if ((field.getModifiers() & MOD_MASK) != MOD_EXPECTED)
-				continue;
 			//if the field has a a value assigned, there is nothing to do
-			if (fieldMap.get(field.getName()) == ASSIGNED)
+			if ((field.getModifiers() & MOD_MASK) != MOD_EXPECTED || fieldMap.get(field.getName()) == ASSIGNED)
 				continue;
 			try {
 				// Set a value for this empty field. We should never get an exception here because
@@ -362,21 +359,16 @@ public abstract class NLS {
 			frameworkLog.log(new FrameworkLogEntry("org.eclipse.osgi", severity, 1, message, 0, e, null)); //$NON-NLS-1$
 			return;
 		}
-		String statusMsg;
-		switch (severity) {
-			case SEVERITY_ERROR :
-				statusMsg = "Error: "; //$NON-NLS-1$
-				break;
-			case SEVERITY_WARNING :
-				// intentionally fall through:
-			default :
-				statusMsg = "Warning: "; //$NON-NLS-1$
-		}
+		StringBuilder statusMsg = new StringBuilder().append(switch (severity) {
+            case SEVERITY_ERROR -> "Error: "; //$NON-NLS-1$
+            case SEVERITY_WARNING -> "Warning: "; //$NON-NLS-1$
+            default -> "Warning: "; //$NON-NLS-1$
+        });
 		if (message != null)
-			statusMsg += message;
+			statusMsg.append(message);
 		if (e != null)
-			statusMsg += ": " + e.getMessage(); //$NON-NLS-1$
-		System.err.println(statusMsg);
+			statusMsg.append(": ").append(e.getMessage()); //$NON-NLS-1$
+		System.err.println(statusMsg.toString());
 		if (e != null)
 			e.printStackTrace();
 	}
@@ -396,7 +388,6 @@ public abstract class NLS {
 		private final boolean isAccessible;
 
 		public MessagesProperties(Map<Object, Object> fieldMap, String bundleName, boolean isAccessible) {
-			super();
 			this.fields = fieldMap;
 			this.bundleName = bundleName;
 			this.isAccessible = isAccessible;

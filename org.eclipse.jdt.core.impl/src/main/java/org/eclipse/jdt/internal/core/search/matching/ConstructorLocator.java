@@ -42,10 +42,7 @@ protected int fineGrain() {
 }
 @Override
 public int match(ASTNode node, MatchingNodeSet nodeSet) { // interested in ExplicitConstructorCall
-	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
-	if (!(node instanceof ExplicitConstructorCall)) return IMPOSSIBLE_MATCH;
-
-	if (!matchParametersCount(node, ((ExplicitConstructorCall) node).arguments)) return IMPOSSIBLE_MATCH;
+	if (!this.pattern.findReferences || !(node instanceof ExplicitConstructorCall) || !matchParametersCount(node, ((ExplicitConstructorCall) node).arguments)) return IMPOSSIBLE_MATCH;
 
 	return nodeSet.addMatch(node, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
@@ -59,30 +56,23 @@ public int match(ConstructorDeclaration node, MatchingNodeSet nodeSet) {
 }
 @Override
 public int match(Expression node, MatchingNodeSet nodeSet) { // interested in AllocationExpression
-	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
-	if (!(node instanceof AllocationExpression)) return IMPOSSIBLE_MATCH;
+	if (!this.pattern.findReferences || !(node instanceof AllocationExpression)) return IMPOSSIBLE_MATCH;
 
 	// constructor name is simple type name
 	AllocationExpression allocation = (AllocationExpression) node;
 	char[][] typeName = allocation.type.getTypeName();
-	if (this.pattern.declaringSimpleName != null && !matchesName(this.pattern.declaringSimpleName, typeName[typeName.length-1]))
-		return IMPOSSIBLE_MATCH;
-
-	if (!matchParametersCount(node, allocation.arguments)) return IMPOSSIBLE_MATCH;
+	if (this.pattern.declaringSimpleName != null && !matchesName(this.pattern.declaringSimpleName, typeName[typeName.length-1]) || !matchParametersCount(node, allocation.arguments)) return IMPOSSIBLE_MATCH;
 
 	return nodeSet.addMatch(node, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
 @Override
 public int match(FieldDeclaration field, MatchingNodeSet nodeSet) {
-	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
 	// look only for enum constant
-	if (field.type != null || !(field.initialization instanceof AllocationExpression)) return IMPOSSIBLE_MATCH;
+	if (!this.pattern.findReferences || field.type != null || !(field.initialization instanceof AllocationExpression)) return IMPOSSIBLE_MATCH;
 
 	AllocationExpression allocation = (AllocationExpression) field.initialization;
-	if (field.binding != null && field.binding.declaringClass != null) {
-		if (this.pattern.declaringSimpleName != null && !matchesName(this.pattern.declaringSimpleName, field.binding.declaringClass.sourceName()))
-			return IMPOSSIBLE_MATCH;
-	}
+	if (field.binding != null && field.binding.declaringClass != null && this.pattern.declaringSimpleName != null && !matchesName(this.pattern.declaringSimpleName, field.binding.declaringClass.sourceName()))
+    	return IMPOSSIBLE_MATCH;
 
 	if (!matchParametersCount(field, allocation.arguments)) return IMPOSSIBLE_MATCH;
 
@@ -95,8 +85,7 @@ public int match(FieldDeclaration field, MatchingNodeSet nodeSet) {
  */
 @Override
 public int match(MessageSend msgSend, MatchingNodeSet nodeSet)  {
-	if ((msgSend.bits & ASTNode.InsideJavadoc) == 0) return IMPOSSIBLE_MATCH;
-	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
+	if ((msgSend.bits & ASTNode.InsideJavadoc) == 0 || !this.pattern.findReferences) return IMPOSSIBLE_MATCH;
 	if (this.pattern.declaringSimpleName == null || CharOperation.equals(msgSend.selector, this.pattern.declaringSimpleName)) {
 		return nodeSet.addMatch(msgSend, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 	}
@@ -111,9 +100,7 @@ public int match(ReferenceExpression node, MatchingNodeSet nodeSet) {
 //public int match(Reference node, MatchingNodeSet nodeSet) - SKIP IT
 @Override
 public int match(TypeDeclaration node, MatchingNodeSet nodeSet) {
-	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
-
-	if (this.pattern.fineGrain != 0 &&
+	if (!this.pattern.findReferences || this.pattern.fineGrain != 0 &&
 			(this.pattern.fineGrain & ~IJavaSearchConstants.METHOD_REFERENCE_EXPRESSION) == 0 )
 		return IMPOSSIBLE_MATCH;
 
@@ -188,14 +175,12 @@ protected int matchLevelForDeclarations(ConstructorDeclaration constructor) {
 	}
 
 	// Verify type arguments (do not reject if pattern has no argument as it can be an erasure match)
-	if (this.pattern.hasConstructorArguments()) {
-		if (constructor.typeParameters == null || constructor.typeParameters.length != this.pattern.constructorArguments.length) return IMPOSSIBLE_MATCH;
-	}
+	if (this.pattern.hasConstructorArguments() && (constructor.typeParameters == null || constructor.typeParameters.length != this.pattern.constructorArguments.length)) return IMPOSSIBLE_MATCH;
 
 	return this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
 }
 boolean matchParametersCount(ASTNode node, Expression[] args) {
-	if (this.pattern.parameterSimpleNames != null && (!this.pattern.varargs || ((node.bits & ASTNode.InsideJavadoc) != 0))) {
+	if (this.pattern.parameterSimpleNames != null && (!this.pattern.varargs || (node.bits & ASTNode.InsideJavadoc) != 0)) {
 		int length = this.pattern.parameterCount;
 		if (length < 0) length = this.pattern.parameterSimpleNames.length;
 		int argsLength = args == null ? 0 : args.length;
@@ -237,13 +222,13 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, Bin
 			if (!this.pattern.hasTypeArguments() && this.pattern.hasConstructorArguments() || parameterizedBinding.isParameterizedWithOwnVariables()) {
 				// special case for constructor pattern which defines arguments but no type
 				// in this case, we only use refined accuracy for constructor
-			} else if (this.pattern.hasTypeArguments() && !this.pattern.hasConstructorArguments()) {
-				// special case for constructor pattern which defines no constructor arguments but has type ones
+			} else {
+                if (this.pattern.hasTypeArguments() && !this.pattern.hasConstructorArguments()) {
+                }
+                // special case for constructor pattern which defines no constructor arguments but has type ones
 				// in this case, we do not use refined accuracy
 				updateMatch(parameterizedBinding, this.pattern.getTypeArguments(), this.pattern.hasTypeParameters(), 0, locator);
-			} else {
-				updateMatch(parameterizedBinding, this.pattern.getTypeArguments(), this.pattern.hasTypeParameters(), 0, locator);
-			}
+            }
 		} else if (this.pattern.hasTypeArguments()) {
 			this.match.setRule(SearchPattern.R_ERASURE_MATCH);
 		}
@@ -272,7 +257,7 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, Bin
 
 	// See whether it is necessary to report or not
 	if (this.match.getRule() == 0) return; // impossible match
-	boolean report = (this.isErasureMatch && this.match.isErasure()) || (this.isEquivalentMatch && this.match.isEquivalent()) || this.match.isExact();
+	boolean report = this.isErasureMatch && this.match.isErasure() || this.isEquivalentMatch && this.match.isEquivalent() || this.match.isExact();
 	if (!report) return;
 
 	// Report match
@@ -297,8 +282,7 @@ public SearchMatch newDeclarationMatch(ASTNode reference, IJavaElement element, 
 			TypeDeclaration type = (TypeDeclaration) reference;
 			AbstractMethodDeclaration[] methods = type.methods;
 			if (methods != null) {
-				for (int i = 0, max = methods.length; i < max; i++) {
-					AbstractMethodDeclaration method = methods[i];
+				for (AbstractMethodDeclaration method : methods) {
 					boolean synthetic = method.isDefaultConstructor() && method.sourceStart < type.bodyStart;
 					this.match = locator.newMethodReferenceMatch(element, binding, accuracy, offset, length, method.isConstructor(), synthetic, method);
 				}
@@ -352,8 +336,7 @@ protected int resolveLevel(AllocationExpression allocation) {
 }
 protected int resolveLevel(FieldDeclaration field) {
 	// only accept enum constants
-	if (field.type != null || field.binding == null) return IMPOSSIBLE_MATCH;
-	if (this.pattern.declaringSimpleName != null && !matchesName(this.pattern.declaringSimpleName, field.binding.type.sourceName()))
+	if (field.type != null || field.binding == null || this.pattern.declaringSimpleName != null && !matchesName(this.pattern.declaringSimpleName, field.binding.type.sourceName()))
 		return IMPOSSIBLE_MATCH;
 	if (!(field.initialization instanceof AllocationExpression) || field.initialization.resolvedType.isLocalType()) return IMPOSSIBLE_MATCH;
 
@@ -366,11 +349,9 @@ public int resolveLevel(Binding binding) {
 
 	MethodBinding constructor = (MethodBinding) binding;
 	int level= matchConstructor(constructor);
-	if (level== IMPOSSIBLE_MATCH) {
-		if (constructor != constructor.original()) {
-			level= matchConstructor(constructor.original());
-		}
-	}
+	if (level== IMPOSSIBLE_MATCH && constructor != constructor.original()) {
+    	level= matchConstructor(constructor.original());
+    }
 	return level;
 }
 protected int resolveLevel(ConstructorDeclaration constructor, boolean checkDeclarations) {
@@ -379,8 +360,8 @@ protected int resolveLevel(ConstructorDeclaration constructor, boolean checkDecl
 		ExplicitConstructorCall constructorCall = constructor.constructorCall;
 		if (constructorCall != null && constructorCall.accessMode == ExplicitConstructorCall.ImplicitSuper) {
 			// eliminate explicit super call as it will be treated with matchLevel(ExplicitConstructorCall, boolean)
-			int callCount = (constructorCall.arguments == null) ? 0 : constructorCall.arguments.length;
-			int patternCount = (this.pattern.parameterSimpleNames == null) ? 0 : this.pattern.parameterSimpleNames.length;
+			int callCount = constructorCall.arguments == null ? 0 : constructorCall.arguments.length;
+			int patternCount = this.pattern.parameterSimpleNames == null ? 0 : this.pattern.parameterSimpleNames.length;
 			if (patternCount != callCount) {
 				referencesLevel = IMPOSSIBLE_MATCH;
 			} else {
@@ -398,8 +379,7 @@ protected int resolveLevel(TypeDeclaration type) {
 	// find default constructor
 	AbstractMethodDeclaration[] methods = type.methods;
 	if (methods != null) {
-		for (int i = 0, length = methods.length; i < length; i++) {
-			AbstractMethodDeclaration method = methods[i];
+		for (AbstractMethodDeclaration method : methods) {
 			if (method.isDefaultConstructor() && method.sourceStart < type.bodyStart) // if synthetic
 				return resolveLevel((ConstructorDeclaration) method, false);
 		}

@@ -124,12 +124,11 @@ public class AnnotationModel implements IAnnotationModel, IAnnotationModelExtens
 		private boolean isWithinRegion(int start, int length) {
 			if (fCanStartBefore && fCanEndAfter)
 				return fRegion.overlapsWith(start, length);
-			else if (fCanStartBefore)
+            if (fCanStartBefore)
 				return fRegion.includes(start + length - (length > 0 ? 1 : 0));
-			else if (fCanEndAfter)
+            if (fCanEndAfter)
 				return fRegion.includes(start);
-			else
-				return fRegion.includes(start) && fRegion.includes(start + length - (length > 0 ? 1 : 0));
+            return fRegion.includes(start) && fRegion.includes(start + length - (length > 0 ? 1 : 0));
 		}
 	}
 
@@ -220,11 +219,12 @@ public class AnnotationModel implements IAnnotationModel, IAnnotationModelExtens
 			if (fCurrent.hasNext()) {
 				fCurrentElement= fCurrent.next();
 				return true;
-			} else if (fSuperIterator.hasNext()) {
+			}
+            if (fSuperIterator.hasNext()) {
 				fCurrent= fSuperIterator.next();
 				return hasNext();
-			} else
-				return false;
+			}
+            return false;
 		}
 
 		@Override
@@ -821,7 +821,7 @@ public class AnnotationModel implements IAnnotationModel, IAnnotationModelExtens
 	protected void removeAnnotation(Annotation annotation, boolean fireModelChanged) {
 		if (fAnnotations.containsKey(annotation)) {
 
-			Position p= null;
+			Position p;
 			p= fAnnotations.get(annotation);
 			if (fDocument != null) {
 				removePosition(fDocument, p);

@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.core;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -56,12 +57,12 @@ public class PackageFragment extends Openable implements IPackageFragment, Suffi
 	/**
 	 * Constant empty list of class files
 	 */
-	protected static final IClassFile[] NO_CLASSFILES = new IClassFile[] {};
-	protected static final IOrdinaryClassFile[] NO_ORDINARY_CLASSFILES = new IOrdinaryClassFile[] {};
+	protected static final IClassFile[] NO_CLASSFILES = {};
+	protected static final IOrdinaryClassFile[] NO_ORDINARY_CLASSFILES = {};
 	/**
 	 * Constant empty list of compilation units
 	 */
-	protected static final ICompilationUnit[] NO_COMPILATION_UNITS = new ICompilationUnit[] {};
+	protected static final ICompilationUnit[] NO_COMPILATION_UNITS = {};
 
 	public String[] names;
 
@@ -112,10 +113,7 @@ protected boolean buildStructure(OpenableElementInfo info, IProgressMonitor pm, 
 	if (kind == IPackageFragmentRoot.K_SOURCE) {
 		// add primary compilation units
 		ICompilationUnit[] primaryCompilationUnits = getCompilationUnits(DefaultWorkingCopyOwner.PRIMARY);
-		for (int i = 0, length = primaryCompilationUnits.length; i < length; i++) {
-			ICompilationUnit primary = primaryCompilationUnits[i];
-			vChildren.add(primary);
-		}
+		vChildren.addAll(Arrays.asList(primaryCompilationUnits));
 	}
 
 	if (!vChildren.isEmpty()) {
@@ -143,8 +141,8 @@ public void copy(IJavaElement container, IJavaElement sibling, String rename, bo
 	if (container == null) {
 		throw new IllegalArgumentException(Messages.operation_nullContainer);
 	}
-	IJavaElement[] elements= new IJavaElement[] {this};
-	IJavaElement[] containers= new IJavaElement[] {container};
+	IJavaElement[] elements= {this};
+	IJavaElement[] containers= {container};
 	IJavaElement[] siblings= null;
 	if (sibling != null) {
 		siblings= new IJavaElement[] {sibling};
@@ -176,7 +174,7 @@ protected Object createElementInfo() {
  */
 @Override
 public void delete(boolean force, IProgressMonitor monitor) throws JavaModelException {
-	IJavaElement[] elements = new IJavaElement[] {this};
+	IJavaElement[] elements = {this};
 	getJavaModel().delete(elements, force, monitor);
 }
 @Override
@@ -382,9 +380,8 @@ public Object[] getNonJavaResources() throws JavaModelException {
 	if (isDefaultPackage()) {
 		// We don't want to show non java resources of the default package (see PR #1G58NB8)
 		return JavaElementInfo.NO_NON_JAVA_RESOURCES;
-	} else {
-		return ((PackageFragmentInfo) getElementInfo()).getNonJavaResources(resource(), getPackageFragmentRoot());
 	}
+    return ((PackageFragmentInfo) getElementInfo()).getNonJavaResources(resource(), getPackageFragmentRoot());
 }
 /**
  * @see IJavaElement#getPath()
@@ -394,14 +391,12 @@ public IPath getPath() {
 	PackageFragmentRoot root = getPackageFragmentRoot();
 	if (root.isArchive()) {
 		return root.getPath();
-	} else {
-		IPath path = root.getPath();
-		for (int i = 0, length = this.names.length; i < length; i++) {
-			String name = this.names[i];
-			path = path.append(name);
-		}
-		return path;
 	}
+    IPath path = root.getPath();
+    for (String name : this.names) {
+    	path = path.append(name);
+    }
+    return path;
 }
 /**
  * @see JavaElement#resource()
@@ -411,12 +406,11 @@ public IResource resource(PackageFragmentRoot root) {
 	int length = this.names.length;
 	if (length == 0) {
 		return root.resource(root);
-	} else {
-		IPath path = new Path(this.names[0]);
-		for (int i = 1; i < length; i++)
-			path = path.append(this.names[i]);
-		return ((IContainer)root.resource(root)).getFolder(path);
 	}
+    IPath path = new Path(this.names[0]);
+    for (int i = 1; i < length; i++)
+    	path = path.append(this.names[i]);
+    return ((IContainer)root.resource(root)).getFolder(path);
 }
 /**
  * @see IJavaElement#getUnderlyingResource()
@@ -430,26 +424,25 @@ public IResource getUnderlyingResource() throws JavaModelException {
 	}
 	// the underlying resource may be a folder or a project (in the case that the project folder
 	// is atually the package fragment root)
-	if (rootResource.getType() == IResource.FOLDER || rootResource.getType() == IResource.PROJECT) {
-		IContainer folder = (IContainer) rootResource;
-		String[] segs = this.names;
-		for (int i = 0; i < segs.length; ++i) {
-			IResource child = folder.findMember(segs[i]);
-			if (child == null || child.getType() != IResource.FOLDER) {
-				throw newNotPresentException();
-			}
-			folder = (IFolder) child;
-		}
-		return folder;
-	} else {
+	if (rootResource.getType() != IResource.FOLDER && rootResource.getType() != IResource.PROJECT) {
 		return rootResource;
 	}
+    IContainer folder = (IContainer) rootResource;
+    String[] segs = this.names;
+    for (String seg : segs) {
+    	IResource child = folder.findMember(seg);
+    	if (child == null || child.getType() != IResource.FOLDER) {
+    		throw newNotPresentException();
+    	}
+    	folder = (IFolder) child;
+    }
+    return folder;
 }
 @Override
 public int hashCode() {
 	int hash = this.getParent().hashCode();
-	for (int i = 0, length = this.names.length; i < length; i++)
-		hash = Util.combineHashCodes(this.names[i].hashCode(), hash);
+	for (String name : this.names)
+        hash = Util.combineHashCodes(name.hashCode(), hash);
 	return hash;
 }
 /**
@@ -466,8 +459,8 @@ public boolean hasChildren() throws JavaModelException {
 public boolean hasSubpackages() throws JavaModelException {
 	IJavaElement[] packages= ((IPackageFragmentRoot)getParent()).getChildren();
 	int namesLength = this.names.length;
-	nextPackage: for (int i= 0, length = packages.length; i < length; i++) {
-		String[] otherNames = ((PackageFragment) packages[i]).names;
+	nextPackage: for (IJavaElement package1 : packages) {
+		String[] otherNames = ((PackageFragment) package1).names;
 		if (otherNames.length <= namesLength) continue nextPackage;
 		for (int j = 0; j < namesLength; j++)
 			if (!this.names[j].equals(otherNames[j]))
@@ -483,8 +476,8 @@ protected boolean internalIsValidPackageName() {
 	IJavaProject javaProject = JavaCore.create(resource().getProject());
 	String sourceLevel = javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
 	String complianceLevel = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-	for (int i = 0, length = this.names.length; i < length; i++) {
-		if (!Util.isValidFolderNameForPackage(this.names[i], sourceLevel, complianceLevel))
+	for (String name : this.names) {
+		if (!Util.isValidFolderNameForPackage(name, sourceLevel, complianceLevel))
 			return false;
 	}
 	return true;
@@ -507,8 +500,8 @@ public void move(IJavaElement container, IJavaElement sibling, String rename, bo
 	if (container == null) {
 		throw new IllegalArgumentException(Messages.operation_nullContainer);
 	}
-	IJavaElement[] elements= new IJavaElement[] {this};
-	IJavaElement[] containers= new IJavaElement[] {container};
+	IJavaElement[] elements= {this};
+	IJavaElement[] containers= {container};
 	IJavaElement[] siblings= null;
 	if (sibling != null) {
 		siblings= new IJavaElement[] {sibling};
@@ -527,9 +520,9 @@ public void rename(String newName, boolean force, IProgressMonitor monitor) thro
 	if (newName == null) {
 		throw new IllegalArgumentException(Messages.element_nullName);
 	}
-	IJavaElement[] elements= new IJavaElement[] {this};
-	IJavaElement[] dests= new IJavaElement[] {getParent()};
-	String[] renamings= new String[] {newName};
+	IJavaElement[] elements= {this};
+	IJavaElement[] dests= {getParent()};
+	String[] renamings= {newName};
 	getJavaModel().rename(elements, dests, renamings, force, monitor);
 }
 /**
@@ -554,11 +547,9 @@ protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean s
 	}
 	if (info == null) {
 		buffer.append(" (not open)"); //$NON-NLS-1$
-	} else {
-		if (tab > 0) {
-			buffer.append(" (...)"); //$NON-NLS-1$
-		}
-	}
+	} else if (tab > 0) {
+    	buffer.append(" (...)"); //$NON-NLS-1$
+    }
 }
 
 @Override
@@ -577,7 +568,7 @@ public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelExcep
 	}
 	StringBuffer pathBuffer = new StringBuffer(baseLocation.toExternalForm());
 
-	if (!(pathBuffer.charAt(pathBuffer.length() - 1) == '/')) {
+	if (pathBuffer.charAt(pathBuffer.length() - 1) != '/') {
 		pathBuffer.append('/');
 	}
 	String packPath= getElementName().replace('.', '/');
@@ -588,7 +579,7 @@ public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelExcep
 	if (monitor != null && monitor.isCanceled()) throw new OperationCanceledException();
 	if (contents == null) return null;
 
-	contents = (new JavadocContents(contents)).getPackageDoc();
+	contents = new JavadocContents(contents).getPackageDoc();
 	if (contents == null) contents = ""; //$NON-NLS-1$
 	synchronized (projectInfo.javadocCache) {
 		projectInfo.javadocCache.put(this, contents);
@@ -599,11 +590,8 @@ public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelExcep
 @Override
 protected IStatus validateExistence(IResource underlyingResource) {
 	// check that the name of the package is valid (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=108456)
-	if (!isValidPackageName())
-		return newDoesNotExistStatus();
-
 	// check whether this pkg can be opened
-	if (underlyingResource != null && !resourceExists(underlyingResource))
+	if (!isValidPackageName() || underlyingResource != null && !resourceExists(underlyingResource))
 		return newDoesNotExistStatus();
 
 	// check that it is not excluded (https://bugs.eclipse.org/bugs/show_bug.cgi?id=138577)

@@ -415,14 +415,11 @@ public static int mergeNullStatus(int nullStatus1, int nullStatus2) {
 	if (canBeNull) {
 		if (canBeNonNull)
 			return POTENTIALLY_NULL;
-		else
-			return NULL;
-	} else {
-		if (canBeNonNull)
-			return NON_NULL;
-		else
-			return UNKNOWN;
+        return NULL;
 	}
+    if (canBeNonNull)
+    	return NON_NULL;
+    return UNKNOWN;
 }
 
 /**

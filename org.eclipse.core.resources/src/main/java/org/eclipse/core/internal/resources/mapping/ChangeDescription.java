@@ -57,8 +57,7 @@ public class ChangeDescription {
 	}
 
 	public IResource[] getRootResources() {
-		Set<IResource> result = new HashSet<>();
-		result.addAll(addedRoots);
+		Set<IResource> result = new HashSet<>(addedRoots);
 		result.addAll(changedFiles);
 		result.addAll(closedProjects);
 		result.addAll(copiedRoots);

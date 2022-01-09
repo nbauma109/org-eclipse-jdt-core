@@ -74,7 +74,8 @@ public interface IType extends IMember, IAnnotatable {
 	 * @since 2.0
 	 * @deprecated Use {@link #codeComplete(char[],int,int,char[][],char[][],int[],boolean,CompletionRequestor)} instead.
 	 */
-	void codeComplete(
+	@Deprecated
+    void codeComplete(
 		char[] snippet,
 		int insertion,
 		int position,
@@ -119,7 +120,8 @@ public interface IType extends IMember, IAnnotatable {
 	 * @since 3.0
 	 * @deprecated Use {@link #codeComplete(char[],int,int,char[][],char[][],int[],boolean,CompletionRequestor,WorkingCopyOwner)} instead.
 	 */
-	void codeComplete(
+	@Deprecated
+    void codeComplete(
 		char[] snippet,
 		int insertion,
 		int position,
@@ -1092,7 +1094,8 @@ public interface IType extends IMember, IAnnotatable {
 	 * @since 2.0
 	 * @deprecated Use {@link #newSupertypeHierarchy(ICompilationUnit[], IProgressMonitor)} instead
 	 */
-	ITypeHierarchy newSupertypeHierarchy(IWorkingCopy[] workingCopies, IProgressMonitor monitor)
+	@Deprecated
+    ITypeHierarchy newSupertypeHierarchy(IWorkingCopy[] workingCopies, IProgressMonitor monitor)
 		throws JavaModelException;
 
 	/**
@@ -1204,7 +1207,8 @@ public interface IType extends IMember, IAnnotatable {
 	 * @since 2.0
 	 * @deprecated Use {@link #newTypeHierarchy(ICompilationUnit[], IProgressMonitor)} instead
 	 */
-	ITypeHierarchy newTypeHierarchy(IWorkingCopy[] workingCopies, IProgressMonitor monitor) throws JavaModelException;
+	@Deprecated
+    ITypeHierarchy newTypeHierarchy(IWorkingCopy[] workingCopies, IProgressMonitor monitor) throws JavaModelException;
 
 	/**
 	 * Creates and returns a type hierarchy for this type containing

@@ -46,8 +46,7 @@ public class CaptureBinding18 extends CaptureBinding {
 		int numReferenceInterfaces = 0;
 		if (!isConsistentIntersection(upperBounds))
 			return false;
-		for (int i = 0; i < upperBounds.length; i++) {
-			TypeBinding aBound = upperBounds[i];
+		for (TypeBinding aBound : upperBounds) {
 			if (aBound instanceof ReferenceBinding) {
 				if (this.superclass == null && aBound.isClass())
 					this.superclass = (ReferenceBinding) aBound;
@@ -59,8 +58,7 @@ public class CaptureBinding18 extends CaptureBinding {
 		}
 		this.superInterfaces = new ReferenceBinding[numReferenceInterfaces];
 		int idx = 0;
-		for (int i = 0; i < upperBounds.length; i++) {
-			TypeBinding aBound = upperBounds[i];
+		for (TypeBinding aBound : upperBounds) {
 			if (aBound.isInterface())
 				this.superInterfaces[idx++] = (ReferenceBinding) aBound;
 		}
@@ -93,10 +91,8 @@ public class CaptureBinding18 extends CaptureBinding {
 			boolean multipleErasures = false;
 			for (int i = 0; i < this.upperBounds.length; i++) {
 				erasures[i] = (ReferenceBinding) this.upperBounds[i].erasure(); // FIXME cast?
-				if (i > 0) {
-					if (TypeBinding.notEquals(erasures[0], erasures[i]))
-						multipleErasures = true;
-				}
+				if (i > 0 && TypeBinding.notEquals(erasures[0], erasures[i]))
+                	multipleErasures = true;
 			}
 			if (!multipleErasures)
 				return erasures[0];
@@ -117,8 +113,7 @@ public class CaptureBinding18 extends CaptureBinding {
 		if (otherType == null) return false;
 		if (this.upperBounds != null) {
 			// from CaptureBinding:
-			for (int i = 0; i < this.upperBounds.length; i++) {
-				TypeBinding aBound = this.upperBounds[i];
+			for (TypeBinding aBound : this.upperBounds) {
 				// capture of ? extends X[]
 				if (aBound != null && aBound.isArrayType()) {
 					if (!aBound.isCompatibleWith(otherType))
@@ -137,9 +132,7 @@ public class CaptureBinding18 extends CaptureBinding {
 
 	@Override
 	public boolean isCompatibleWith(TypeBinding otherType, Scope captureScope) {
-		if (TypeBinding.equalsEquals(this, otherType))
-			return true;
-		if (this.inRecursiveFunction)
+		if (TypeBinding.equalsEquals(this, otherType) || this.inRecursiveFunction)
 			return true;
 		this.inRecursiveFunction = true;
 		try {
@@ -182,8 +175,8 @@ public class CaptureBinding18 extends CaptureBinding {
 	@Override
 	public TypeBinding findSuperTypeOriginatingFrom(TypeBinding otherType) {
 		if (this.upperBounds != null && this.upperBounds.length > 1) {
-			for (int i = 0; i < this.upperBounds.length; i++) {
-				TypeBinding candidate = this.upperBounds[i].findSuperTypeOriginatingFrom(otherType);
+			for (TypeBinding upperBound : this.upperBounds) {
+				TypeBinding candidate = upperBound.findSuperTypeOriginatingFrom(otherType);
 				if (candidate != null)
 					return candidate;
 				// TODO: maybe we should double check about multiple candidates here,
@@ -251,7 +244,7 @@ public class CaptureBinding18 extends CaptureBinding {
 				Substitution substitution = new Substitution() {
 					@Override
 					public TypeBinding substitute(TypeVariableBinding typeVariable) {
-						return  (typeVariable == CaptureBinding18.this) ? newCapture : typeVariable; //$IDENTITY-COMPARISON$
+						return  typeVariable == CaptureBinding18.this ? newCapture : typeVariable; //$IDENTITY-COMPARISON$
 					}
 					@Override
 					public boolean isRawSubstitution() {
@@ -286,8 +279,8 @@ public class CaptureBinding18 extends CaptureBinding {
 			if (this.lowerBound != null && !this.lowerBound.isProperType(admitCapture18))
 				return false;
 			if (this.upperBounds != null) {
-				for (int i = 0; i < this.upperBounds.length; i++) {
-					if (!this.upperBounds[i].isProperType(admitCapture18))
+				for (TypeBinding upperBound : this.upperBounds) {
+					if (!upperBound.isProperType(admitCapture18))
 						return false;
 				}
 			}
@@ -302,26 +295,25 @@ public class CaptureBinding18 extends CaptureBinding {
 	@Override
 	public char[] readableName() {
 		if (this.lowerBound == null && this.firstBound != null) {
-			if (this.prototype.recursionLevel < 2) {
-				try {
-					this.prototype.recursionLevel ++;
-					if (this.upperBounds != null && this.upperBounds.length > 1) {
-						StringBuilder sb = new StringBuilder();
-						sb.append(this.upperBounds[0].readableName());
-						for (int i = 1; i < this.upperBounds.length; i++)
-							sb.append('&').append(this.upperBounds[i].readableName());
-						int len = sb.length();
-						char[] name = new char[len];
-						sb.getChars(0, len, name, 0);
-						return name;
-					}
-					return this.firstBound.readableName();
-				} finally {
-					this.prototype.recursionLevel--;
-				}
-			} else {
+			if (this.prototype.recursionLevel >= 2) {
 				return this.originalName;
 			}
+            try {
+            	this.prototype.recursionLevel ++;
+            	if (this.upperBounds != null && this.upperBounds.length > 1) {
+            		StringBuilder sb = new StringBuilder();
+            		sb.append(this.upperBounds[0].readableName());
+            		for (int i = 1; i < this.upperBounds.length; i++)
+            			sb.append('&').append(this.upperBounds[i].readableName());
+            		int len = sb.length();
+            		char[] name = new char[len];
+            		sb.getChars(0, len, name, 0);
+            		return name;
+            	}
+            	return this.firstBound.readableName();
+            } finally {
+            	this.prototype.recursionLevel--;
+            }
 		}
 		return super.readableName();
 	}
@@ -329,26 +321,25 @@ public class CaptureBinding18 extends CaptureBinding {
 	@Override
 	public char[] shortReadableName() {
 		if (this.lowerBound == null && this.firstBound != null) {
-			if (this.prototype.recursionLevel < 2) {
-				try {
-					this.prototype.recursionLevel++;
-					if (this.upperBounds != null && this.upperBounds.length > 1) {
-						StringBuilder sb = new StringBuilder();
-						sb.append(this.upperBounds[0].shortReadableName());
-						for (int i = 1; i < this.upperBounds.length; i++)
-							sb.append('&').append(this.upperBounds[i].shortReadableName());
-						int len = sb.length();
-						char[] name = new char[len];
-						sb.getChars(0, len, name, 0);
-						return name;
-					}
-					return this.firstBound.shortReadableName();
-				} finally {
-					this.prototype.recursionLevel--;
-				}
-			} else {
+			if (this.prototype.recursionLevel >= 2) {
 				return this.originalName;
 			}
+            try {
+            	this.prototype.recursionLevel++;
+            	if (this.upperBounds != null && this.upperBounds.length > 1) {
+            		StringBuilder sb = new StringBuilder();
+            		sb.append(this.upperBounds[0].shortReadableName());
+            		for (int i = 1; i < this.upperBounds.length; i++)
+            			sb.append('&').append(this.upperBounds[i].shortReadableName());
+            		int len = sb.length();
+            		char[] name = new char[len];
+            		sb.getChars(0, len, name, 0);
+            		return name;
+            	}
+            	return this.firstBound.shortReadableName();
+            } finally {
+            	this.prototype.recursionLevel--;
+            }
 		}
 		return super.shortReadableName();
 	}

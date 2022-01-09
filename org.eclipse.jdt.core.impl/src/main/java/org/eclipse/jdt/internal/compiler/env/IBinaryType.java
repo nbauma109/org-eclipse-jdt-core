@@ -24,9 +24,9 @@ import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 public interface IBinaryType extends IGenericType {
 
 	char[][] NoInterface = CharOperation.NO_CHAR_CHAR;
-	IBinaryNestedType[] NoNestedType = new IBinaryNestedType[0];
-	IBinaryField[] NoField = new IBinaryField[0];
-	IBinaryMethod[] NoMethod = new IBinaryMethod[0];
+	IBinaryNestedType[] NoNestedType = {};
+	IBinaryField[] NoField = {};
+	IBinaryMethod[] NoMethod = {};
 /**
  * Answer the runtime visible and invisible annotations for this type or null if none.
  */

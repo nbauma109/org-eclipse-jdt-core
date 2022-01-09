@@ -199,7 +199,7 @@ public abstract class FilterImpl implements Filter {
 	 */
 	@Override
 	public boolean match(ServiceReference<?> reference) {
-		return matches0((reference != null) ? ServiceReferenceMap.asMap(reference) : Collections.emptyMap());
+		return matches0(reference != null ? ServiceReferenceMap.asMap(reference) : Collections.emptyMap());
 	}
 
 	/**
@@ -216,7 +216,7 @@ public abstract class FilterImpl implements Filter {
 	 */
 	@Override
 	public boolean match(Dictionary<String, ?> dictionary) {
-		return matches0((dictionary != null) ? new CaseInsensitiveDictionaryMap<>(dictionary) : Collections.emptyMap());
+		return matches0(dictionary != null ? new CaseInsensitiveDictionaryMap<>(dictionary) : Collections.emptyMap());
 	}
 
 	/**
@@ -232,7 +232,7 @@ public abstract class FilterImpl implements Filter {
 	 */
 	@Override
 	public boolean matchCase(Dictionary<String, ?> dictionary) {
-		return matches0((dictionary != null) ? DictionaryMap.asMap(dictionary) : Collections.emptyMap());
+		return matches0(dictionary != null ? DictionaryMap.asMap(dictionary) : Collections.emptyMap());
 	}
 
 	/**
@@ -249,7 +249,7 @@ public abstract class FilterImpl implements Filter {
 	 */
 	@Override
 	public boolean matches(Map<String, ?> map) {
-		return matches0((map != null) ? map : Collections.emptyMap());
+		return matches0(map != null ? map : Collections.emptyMap());
 	}
 
 	abstract boolean matches0(Map<String, ?> map);
@@ -490,7 +490,7 @@ public abstract class FilterImpl implements Filter {
 			if (debug) {
 				if (value1 == null) {
 					Debug.println("compare(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				} else if (!(value1.getClass().isArray() || (value1 instanceof Collection<?>))) {
+				} else if (!value1.getClass().isArray() && !(value1 instanceof Collection<?>)) {
 					Debug.println(operation() + "(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 			}
@@ -520,16 +520,16 @@ public abstract class FilterImpl implements Filter {
 				return compare_Long(((Number) value1).longValue());
 			}
 			if (value1 instanceof Character) {
-				return compare_Character(((Character) value1).charValue());
+				return compare_Character((Character) value1);
 			}
 			if (value1 instanceof Float) {
-				return compare_Float(((Float) value1).floatValue());
+				return compare_Float((Float) value1);
 			}
 			if (value1 instanceof Double) {
-				return compare_Double(((Double) value1).doubleValue());
+				return compare_Double((Double) value1);
 			}
 			if (value1 instanceof Boolean) {
-				return compare_Boolean(((Boolean) value1).booleanValue());
+				return compare_Boolean((Boolean) value1);
 			}
 			if (value1 instanceof Comparable<?>) {
 				@SuppressWarnings("unchecked")
@@ -652,7 +652,6 @@ public abstract class FilterImpl implements Filter {
 						return true;
 					}
 				}
-				return false;
 			}
 			return false;
 		}
@@ -779,39 +778,7 @@ public abstract class FilterImpl implements Filter {
 			int pos = 0;
 			for (int i = 0, size = substrings.length; i < size; i++) {
 				String substr = substrings[i];
-				if (i + 1 < size) /* if this is not that last substr */ {
-					if (substr == null) /* * */ {
-						String substr2 = substrings[i + 1];
-						if (substr2 == null) /* ** */
-							continue; /* ignore first star */
-						/* xxx */
-						if (debug) {
-							Debug.println("indexOf(\"" + substr2 + "\"," + pos + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}
-						int index = string.indexOf(substr2, pos);
-						if (index == -1) {
-							return false;
-						}
-						pos = index + substr2.length();
-						if (i + 2 < size) // if there are more
-							// substrings, increment
-							// over the string we just
-							// matched; otherwise need
-							// to do the last substr
-							// check
-							i++;
-					} else /* xxx */ {
-						int len = substr.length();
-						if (debug) {
-							Debug.println("regionMatches(" + pos + ",\"" + substr + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}
-						if (string.regionMatches(pos, substr, 0, len)) {
-							pos += len;
-						} else {
-							return false;
-						}
-					}
-				} else /* last substr */ {
+				if (i + 1 >= size) /* last substr */ {
 					if (substr == null) /* * */ {
 						return true;
 					}
@@ -821,6 +788,36 @@ public abstract class FilterImpl implements Filter {
 					}
 					return string.endsWith(substr);
 				}
+                if (substr == null) /* * */ {
+                	String substr2 = substrings[i + 1];
+                	if (substr2 == null) /* ** */
+                		continue; /* ignore first star */
+                	/* xxx */
+                	if (debug) {
+                		Debug.println("indexOf(\"" + substr2 + "\"," + pos + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                	}
+                	int index = string.indexOf(substr2, pos);
+                	if (index == -1) {
+                		return false;
+                	}
+                	pos = index + substr2.length();
+                	if (i + 2 < size) // if there are more
+                		// substrings, increment
+                		// over the string we just
+                		// matched; otherwise need
+                		// to do the last substr
+                		// check
+                		i++;
+                } else /* xxx */ {
+                	int len = substr.length();
+                	if (debug) {
+                		Debug.println("regionMatches(" + pos + ",\"" + substr + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                	}
+                	if (!string.regionMatches(pos, substr, 0, len)) {
+                		return false;
+                	}
+                    pos += len;
+                }
 			}
 			return true;
 		}
@@ -855,7 +852,7 @@ public abstract class FilterImpl implements Filter {
 		private <T> T convert(Class<T> type, Function<String, ? extends T> converter) {
 			@SuppressWarnings("unchecked")
 			T converted = (T) cached;
-			if ((converted != null) && type.isInstance(converted)) {
+			if (converted != null && type.isInstance(converted)) {
 				return converted;
 			}
 			cached = converted = converter.apply(value.trim());
@@ -878,7 +875,7 @@ public abstract class FilterImpl implements Filter {
 
 		@Override
 		boolean compare_String(String string) {
-			return comparison((string == value) ? 0 : string.compareTo(value));
+			return comparison(string == value ? 0 : string.compareTo(value));
 		}
 
 		@Override
@@ -894,7 +891,7 @@ public abstract class FilterImpl implements Filter {
 
 		@Override
 		boolean compare_Boolean(boolean boolval) {
-			boolean boolval2 = convert(Boolean.class, Boolean::valueOf).booleanValue();
+			boolean boolval2 = convert(Boolean.class, Boolean::valueOf);
 			return comparison(Boolean.compare(boolval, boolval2));
 		}
 
@@ -913,7 +910,7 @@ public abstract class FilterImpl implements Filter {
 		boolean compare_Double(double doubleval) {
 			double doubleval2;
 			try {
-				doubleval2 = convert(Double.class, Double::valueOf).doubleValue();
+				doubleval2 = convert(Double.class, Double::valueOf);
 			} catch (IllegalArgumentException e) {
 				return false;
 			}
@@ -924,7 +921,7 @@ public abstract class FilterImpl implements Filter {
 		boolean compare_Float(float floatval) {
 			float floatval2;
 			try {
-				floatval2 = convert(Float.class, Float::valueOf).floatValue();
+				floatval2 = convert(Float.class, Float::valueOf);
 			} catch (IllegalArgumentException e) {
 				return false;
 			}
@@ -935,7 +932,7 @@ public abstract class FilterImpl implements Filter {
 		boolean compare_Long(long longval) {
 			long longval2;
 			try {
-				longval2 = convert(Long.class, Long::valueOf).longValue();
+				longval2 = convert(Long.class, Long::valueOf);
 			} catch (IllegalArgumentException e) {
 				return false;
 			}
@@ -1041,13 +1038,12 @@ public abstract class FilterImpl implements Filter {
 				// this is an exact range e.g. [value,value]
 				Range currentRange = versionAttrs.get(attr);
 				if (currentRange != null) {
-					if (not) {
-						// this is an expanded form of the filter, e.g.:
-						// [1.0,2.0) -> (&(version>=1.0)(version<=2.0)(!(version=2.0)))
-						currentRange.addExclude(Version.valueOf(value));
-					} else {
+					if (!not) {
 						throw new IllegalStateException("Invalid range for: " + attr); //$NON-NLS-1$
 					}
+                    // this is an expanded form of the filter, e.g.:
+                    // [1.0,2.0) -> (&(version>=1.0)(version<=2.0)(!(version=2.0)))
+                    currentRange.addExclude(Version.valueOf(value));
 				} else {
 					currentRange = new Range();
 					Version version = Version.valueOf(value);
@@ -1105,12 +1101,10 @@ public abstract class FilterImpl implements Filter {
 				if (!currentRange.setLeft('(', Version.valueOf(value))) {
 					throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
 				}
-			} else {
-				// this must be a range end "value]"
-				if (!currentRange.setRight(']', Version.valueOf(value))) {
-					throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
-				}
-			}
+			} else // this must be a range end "value]"
+            if (!currentRange.setRight(']', Version.valueOf(value))) {
+            	throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
+            }
 		}
 	}
 
@@ -1160,12 +1154,10 @@ public abstract class FilterImpl implements Filter {
 				if (!currentRange.setRight(')', Version.valueOf(value))) {
 					throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
 				}
-			} else {
-				// this must be a range start "[value"
-				if (!currentRange.setLeft('[', Version.valueOf(value))) {
-					throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
-				}
-			}
+			} else // this must be a range start "[value"
+            if (!currentRange.setLeft('[', Version.valueOf(value))) {
+            	throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
+            }
 		}
 	}
 
@@ -1201,7 +1193,7 @@ public abstract class FilterImpl implements Filter {
 			} catch (IndexOutOfBoundsException e) {
 				return false;
 			}
-			return (charval == charval2) || (Character.toUpperCase(charval) == Character.toUpperCase(charval2)) || (Character.toLowerCase(charval) == Character.toLowerCase(charval2));
+			return charval == charval2 || Character.toUpperCase(charval) == Character.toUpperCase(charval2) || Character.toLowerCase(charval) == Character.toLowerCase(charval2);
 		}
 
 		@Override
@@ -1612,7 +1604,7 @@ public abstract class FilterImpl implements Filter {
 		}
 
 		private void skipWhiteSpace() {
-			for (int length = filterChars.length; (pos < length) && Character.isWhitespace(filterChars[pos]);) {
+			for (int length = filterChars.length; pos < length && Character.isWhitespace(filterChars[pos]);) {
 				pos++;
 			}
 		}
@@ -1627,9 +1619,7 @@ public abstract class FilterImpl implements Filter {
 	private static final class DictionaryMap extends AbstractMap<String, Object> implements Map<String, Object> {
 		static Map<String, ?> asMap(Dictionary<String, ?> dictionary) {
 			if (dictionary instanceof Map) {
-				@SuppressWarnings("unchecked")
-				Map<String, ?> coerced = (Map<String, ?>) dictionary;
-				return coerced;
+				return (Map<String, ?>) dictionary;
 			}
 			return new DictionaryMap(dictionary);
 		}

@@ -96,10 +96,9 @@ public class StringLiteral extends Expression {
 		if (property == ESCAPED_VALUE_PROPERTY) {
 			if (get) {
 				return getEscapedValue();
-			} else {
-				setEscapedValue((String) value);
-				return null;
 			}
+            setEscapedValue((String) value);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetObjectProperty(property, get, value);
@@ -271,8 +270,7 @@ public class StringLiteral extends Expression {
 
 	@Override
 	int memSize() {
-		int size = BASE_NODE_SIZE + 1 * 4 + stringSize(this.escapedValue);
-		return size;
+		return BASE_NODE_SIZE + 1 * 4 + stringSize(this.escapedValue);
 	}
 
 	@Override

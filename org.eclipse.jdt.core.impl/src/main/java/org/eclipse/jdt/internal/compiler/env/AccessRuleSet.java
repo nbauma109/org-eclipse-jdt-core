@@ -74,8 +74,7 @@ public AccessRule[] getAccessRules() {
  * @return the first access restriction that applies if any, null else
  */
 public AccessRestriction getViolatedRestriction(char[] targetTypeFilePath) {
-	for (int i = 0, length = this.accessRules.length; i < length; i++) {
-		AccessRule accessRule = this.accessRules[i];
+	for (AccessRule accessRule : this.accessRules) {
 		if (CharOperation.pathMatch(accessRule.pattern, targetTypeFilePath,
 				true/*case sensitive*/, '/')) {
 			switch (accessRule.getProblemId()) {
@@ -95,9 +94,8 @@ public int hashCode() {
 	final int prime = 31;
 	int result = 1;
 	result = prime * result + hashCode(this.accessRules);
-	result = prime * result + ((this.classpathEntryName == null) ? 0 : this.classpathEntryName.hashCode());
-	result = prime * result + this.classpathEntryType;
-	return result;
+	result = prime * result + (this.classpathEntryName == null ? 0 : this.classpathEntryName.hashCode());
+	return prime * result + this.classpathEntryType;
 }
 
 private int hashCode(AccessRule[] rules) {
@@ -105,8 +103,8 @@ private int hashCode(AccessRule[] rules) {
 	if (rules == null)
 		return 0;
 	int result = 1;
-	for (int i = 0, length = rules.length; i < length; i++) {
-		result = prime * result + (rules[i] == null ? 0 : rules[i].hashCode());
+	for (AccessRule rule : rules) {
+		result = prime * result + (rule == null ? 0 : rule.hashCode());
 	}
 	return result;
 }

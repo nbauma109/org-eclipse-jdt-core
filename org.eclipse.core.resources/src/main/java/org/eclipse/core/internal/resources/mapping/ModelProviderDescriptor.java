@@ -34,8 +34,7 @@ public class ModelProviderDescriptor implements IModelProviderDescriptor {
 	private Expression enablementRule;
 
 	private static EvaluationContext createEvaluationContext(Object element) {
-		EvaluationContext result = new EvaluationContext(null, element);
-		return result;
+		return new EvaluationContext(null, element);
 	}
 
 	public ModelProviderDescriptor(IExtension extension) throws CoreException {

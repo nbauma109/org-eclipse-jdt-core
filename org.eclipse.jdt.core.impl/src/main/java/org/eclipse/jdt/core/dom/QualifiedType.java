@@ -198,18 +198,16 @@ public class QualifiedType extends AnnotatableType {
 		if (property == QUALIFIER_PROPERTY) {
 			if (get) {
 				return getQualifier();
-			} else {
-				setQualifier((Type) child);
-				return null;
 			}
+            setQualifier((Type) child);
+            return null;
 		}
 		if (property == NAME_PROPERTY) {
 			if (get) {
 				return getName();
-			} else {
-				setName((SimpleName) child);
-				return null;
 			}
+            setName((SimpleName) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

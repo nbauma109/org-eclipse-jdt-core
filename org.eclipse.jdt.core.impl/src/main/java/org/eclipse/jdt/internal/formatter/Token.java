@@ -142,20 +142,19 @@ public class Token {
 	public static Token fromCurrent(Scanner scanner, int currentToken) {
 		int start = scanner.getCurrentTokenStartPosition();
 		int end = scanner.getCurrentTokenEndPosition();
-		if (currentToken == TokenNameCOMMENT_LINE) {
-			// don't include line separator, but set break-after
-			while (end > start) {
-				char c = scanner.source[end];
-				if (c != '\r' && c != '\n')
-					break;
-				end--;
-			}
-			Token token = new Token(start, end, currentToken);
-			token.breakAfter();
-			return token;
-		} else {
+		if (currentToken != TokenNameCOMMENT_LINE) {
 			return new Token(start, end, currentToken);
 		}
+        // don't include line separator, but set break-after
+        while (end > start) {
+        	char c = scanner.source[end];
+        	if (c != '\r' && c != '\n')
+        		break;
+        	end--;
+        }
+        Token token = new Token(start, end, currentToken);
+        token.breakAfter();
+        return token;
 	}
 
 	/** Adds space before this token */

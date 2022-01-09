@@ -79,49 +79,43 @@ public class CopyPackageFragmentRootOperation extends JavaModelOperation {
 			final int sourceSegmentCount = rootEntry.getPath().segmentCount();
 			final IFolder destFolder = workspaceRoot.getFolder(this.destination);
 			final IPath[] nestedFolders = getNestedFolders(root);
-			IResourceProxyVisitor visitor = new IResourceProxyVisitor() {
-				@Override
-				public boolean visit(IResourceProxy proxy) throws CoreException {
-					if (proxy.getType() == IResource.FOLDER) {
-						IPath path = proxy.requestFullPath();
-						if (prefixesOneOf(path, nestedFolders)) {
-							if (equalsOneOf(path, nestedFolders)) {
-								// nested source folder
-								return false;
-							} else {
-								// folder containing nested source folder
-								IFolder folder = destFolder.getFolder(path.removeFirstSegments(sourceSegmentCount));
-								if ((CopyPackageFragmentRootOperation.this.updateModelFlags & IPackageFragmentRoot.REPLACE) != 0
-										&& folder.exists()) {
-									return true;
-								}
-								folder.create(CopyPackageFragmentRootOperation.this.updateResourceFlags, true, CopyPackageFragmentRootOperation.this.progressMonitor);
-								return true;
-							}
-						} else {
-							// subtree doesn't contain any nested source folders
-							IPath destPath = CopyPackageFragmentRootOperation.this.destination.append(path.removeFirstSegments(sourceSegmentCount));
-							IResource destRes;
-							if ((CopyPackageFragmentRootOperation.this.updateModelFlags & IPackageFragmentRoot.REPLACE) != 0
-									&& (destRes = workspaceRoot.findMember(destPath)) != null) {
-								destRes.delete(CopyPackageFragmentRootOperation.this.updateResourceFlags, CopyPackageFragmentRootOperation.this.progressMonitor);
-							}
-							proxy.requestResource().copy(destPath, CopyPackageFragmentRootOperation.this.updateResourceFlags, CopyPackageFragmentRootOperation.this.progressMonitor);
-							return false;
-						}
-					} else {
-						IPath path = proxy.requestFullPath();
-						IPath destPath = CopyPackageFragmentRootOperation.this.destination.append(path.removeFirstSegments(sourceSegmentCount));
-						IResource destRes;
-						if ((CopyPackageFragmentRootOperation.this.updateModelFlags & IPackageFragmentRoot.REPLACE) != 0
-								&& (destRes = workspaceRoot.findMember(destPath)) != null) {
-							destRes.delete(CopyPackageFragmentRootOperation.this.updateResourceFlags, CopyPackageFragmentRootOperation.this.progressMonitor);
-						}
-						proxy.requestResource().copy(destPath, CopyPackageFragmentRootOperation.this.updateResourceFlags, CopyPackageFragmentRootOperation.this.progressMonitor);
-						return false;
-					}
-				}
-			};
+			IResourceProxyVisitor visitor = proxy -> {
+            	if (proxy.getType() != IResource.FOLDER) {
+            		IPath path2 = proxy.requestFullPath();
+            		IPath destPath2 = CopyPackageFragmentRootOperation.this.destination.append(path2.removeFirstSegments(sourceSegmentCount));
+            		IResource destRes2;
+            		if ((CopyPackageFragmentRootOperation.this.updateModelFlags & IPackageFragmentRoot.REPLACE) != 0
+            				&& (destRes2 = workspaceRoot.findMember(destPath2)) != null) {
+            			destRes2.delete(CopyPackageFragmentRootOperation.this.updateResourceFlags, CopyPackageFragmentRootOperation.this.progressMonitor);
+            		}
+            		proxy.requestResource().copy(destPath2, CopyPackageFragmentRootOperation.this.updateResourceFlags, CopyPackageFragmentRootOperation.this.progressMonitor);
+            		return false;
+            	}
+                IPath path1 = proxy.requestFullPath();
+                if (!prefixesOneOf(path1, nestedFolders)) {
+                	// subtree doesn't contain any nested source folders
+                	IPath destPath1 = CopyPackageFragmentRootOperation.this.destination.append(path1.removeFirstSegments(sourceSegmentCount));
+                	IResource destRes1;
+                	if ((CopyPackageFragmentRootOperation.this.updateModelFlags & IPackageFragmentRoot.REPLACE) != 0
+                			&& (destRes1 = workspaceRoot.findMember(destPath1)) != null) {
+                		destRes1.delete(CopyPackageFragmentRootOperation.this.updateResourceFlags, CopyPackageFragmentRootOperation.this.progressMonitor);
+                	}
+                	proxy.requestResource().copy(destPath1, CopyPackageFragmentRootOperation.this.updateResourceFlags, CopyPackageFragmentRootOperation.this.progressMonitor);
+                	return false;
+                }
+                if (equalsOneOf(path1, nestedFolders)) {
+                	// nested source folder
+                	return false;
+                }
+                // folder containing nested source folder
+                IFolder folder = destFolder.getFolder(path1.removeFirstSegments(sourceSegmentCount));
+                if ((CopyPackageFragmentRootOperation.this.updateModelFlags & IPackageFragmentRoot.REPLACE) != 0
+                		&& folder.exists()) {
+                	return true;
+                }
+                folder.create(CopyPackageFragmentRootOperation.this.updateResourceFlags, true, CopyPackageFragmentRootOperation.this.progressMonitor);
+                return true;
+            };
 			try {
 				rootResource.accept(visitor, IResource.NONE);
 			} catch (CoreException e) {
@@ -223,11 +217,9 @@ public class CopyPackageFragmentRootOperation extends JavaModelOperation {
 		}
 
 		IResource resource = root.resource();
-		if (resource instanceof IFolder) {
-			if (resource.isLinked()) {
-				return new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, root);
-			}
-		}
+		if (resource instanceof IFolder && resource.isLinked()) {
+        	return new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, root);
+        }
 
 		if ((this.updateModelFlags & IPackageFragmentRoot.DESTINATION_PROJECT_CLASSPATH) != 0) {
 			String destProjectName = this.destination.segment(0);
@@ -238,8 +230,7 @@ public class CopyPackageFragmentRootOperation extends JavaModelOperation {
 					IClasspathEntry[] destClasspath = destProject.getRawClasspath();
 					boolean foundSibling = false;
 					boolean foundExistingEntry = false;
-					for (int i = 0, length = destClasspath.length; i < length; i++) {
-						IClasspathEntry entry = destClasspath[i];
+					for (IClasspathEntry entry : destClasspath) {
 						if (entry.equals(this.sibling)) {
 							foundSibling = true;
 							break;

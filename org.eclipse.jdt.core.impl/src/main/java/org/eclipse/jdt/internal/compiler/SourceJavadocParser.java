@@ -57,19 +57,14 @@ protected boolean parseIdentifierTag(boolean report) {
 			// Store optional additional category identifiers
 			consumeToken();
 			while (this.index < end) {
-				if (readTokenSafely() == TerminalTokens.TokenNameIdentifier && (this.scanner.currentCharacter == ' ' || ScannerHelper.isWhitespace(this.scanner.currentCharacter))) {
-					if (this.index > (this.lineEnd+1)) break;
-					// valid additional identifier
-					if (++this.categoriesPtr >= length) {
-						System.arraycopy(this.categories, 0, this.categories = new char[length+5][], 0, length);
-						length += 5;
-					}
-					this.categories[this.categoriesPtr] = this.scanner.getCurrentIdentifierSource();
-					consumeToken();
-				} else {
-					// TODO (frederic) raise warning for invalid syntax when javadoc spec will be finalized...
-					break;
-				}
+				if (readTokenSafely() != TerminalTokens.TokenNameIdentifier || this.scanner.currentCharacter != ' ' && !ScannerHelper.isWhitespace(this.scanner.currentCharacter) || this.index > this.lineEnd+1) break;
+                // valid additional identifier
+                if (++this.categoriesPtr >= length) {
+                	System.arraycopy(this.categories, 0, this.categories = new char[length+5][], 0, length);
+                	length += 5;
+                }
+                this.categories[this.categoriesPtr] = this.scanner.getCurrentIdentifierSource();
+                consumeToken();
 			}
 			// Reset position to end of line
 			this.index = end;
@@ -93,10 +88,7 @@ protected void parseSimpleTag() {
 		this.index++;
 		while (this.source[this.index] == 'u')
 			this.index++;
-		if (!(((c1 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) > 15 || c1 < 0)
-				|| ((c2 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) > 15 || c2 < 0)
-				|| ((c3 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) > 15 || c3 < 0)
-				|| ((c4 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) > 15 || c4 < 0))) {
+		if ((c1 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) <= 15 && c1 >= 0 && (c2 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) <= 15 && c2 >= 0 && (c3 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) <= 15 && c3 >= 0 && (c4 = ScannerHelper.getHexadecimalValue(this.source[this.index++])) <= 15 && c4 >= 0) {
 			first = (char) (((c1 * 16 + c2) * 16 + c3) * 16 + c4);
 		} else {
 			this.index = pos;
@@ -106,11 +98,11 @@ protected void parseSimpleTag() {
 	// switch on first tag char
 	switch (first) {
 		case 'd': // perhaps @deprecated tag?
-	        if ((readChar() == 'e') &&
-					(readChar() == 'p') && (readChar() == 'r') &&
-					(readChar() == 'e') && (readChar() == 'c') &&
-					(readChar() == 'a') && (readChar() == 't') &&
-					(readChar() == 'e') && (readChar() == 'd')) {
+	        if (readChar() == 'e' &&
+					readChar() == 'p' && readChar() == 'r' &&
+					readChar() == 'e' && readChar() == 'c' &&
+					readChar() == 'a' && readChar() == 't' &&
+					readChar() == 'e' && readChar() == 'd') {
 				// ensure the tag is properly ended: either followed by a space, a tab, line end or asterisk.
 				char c = readChar();
 				if (ScannerHelper.isWhitespace(c) || c == '*') {
@@ -120,10 +112,10 @@ protected void parseSimpleTag() {
 	        }
 			break;
 		case 'c': // perhaps @category tag?
-	        if ((readChar() == 'a') &&
-					(readChar() == 't') && (readChar() == 'e') &&
-					(readChar() == 'g') && (readChar() == 'o') &&
-					(readChar() == 'r') && (readChar() == 'y')) {
+	        if (readChar() == 'a' &&
+					readChar() == 't' && readChar() == 'e' &&
+					readChar() == 'g' && readChar() == 'o' &&
+					readChar() == 'r' && readChar() == 'y') {
 				// ensure the tag is properly ended: either followed by a space, a tab, line end or asterisk.
 				char c = readChar();
 				if (ScannerHelper.isWhitespace(c) || c == '*') {

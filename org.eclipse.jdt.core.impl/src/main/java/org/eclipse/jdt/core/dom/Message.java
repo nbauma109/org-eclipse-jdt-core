@@ -49,10 +49,7 @@ public class Message {
 	 * @throws IllegalArgumentException if the startPosition is lower than -1.
 	 */
 	public Message(String message, int startPosition) {
-		if (message == null) {
-			throw new IllegalArgumentException();
-		}
-		if (startPosition < -1) {
+		if (message == null || startPosition < -1) {
 			throw new IllegalArgumentException();
 		}
 		this.message = message;
@@ -74,10 +71,7 @@ public class Message {
 	 * @throws IllegalArgumentException if the startPosition is lower than -1.
 	 */
 	public Message(String message, int startPosition, int length) {
-		if (message == null) {
-			throw new IllegalArgumentException();
-		}
-		if (startPosition < -1) {
+		if (message == null || startPosition < -1) {
 			throw new IllegalArgumentException();
 		}
 		this.message = message;
@@ -107,7 +101,8 @@ public class Message {
 	 * @deprecated Use {@link #getStartPosition()} instead.
 	 * @see #getLength()
 	 */
-	public int getSourcePosition() {
+	@Deprecated
+    public int getSourcePosition() {
 		return getStartPosition();
 	}
 

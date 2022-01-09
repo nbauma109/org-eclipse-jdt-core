@@ -339,7 +339,8 @@ public final class NamingConventions {
 	 *
 	 * @deprecated Use {@link #getBaseName(int, String, IJavaProject)} instead with {@link #VK_PARAMETER} as variable kind.
 	 */
-	public static char[] removePrefixAndSuffixForArgumentName(IJavaProject javaProject, char[] argumentName) {
+	@Deprecated
+    public static char[] removePrefixAndSuffixForArgumentName(IJavaProject javaProject, char[] argumentName) {
 		return InternalNamingConventions.removeVariablePrefixAndSuffix(VK_PARAMETER, javaProject, argumentName);
 	}
 
@@ -368,7 +369,8 @@ public final class NamingConventions {
 	 *
 	 * @deprecated Use {@link #getBaseName(int, String, IJavaProject)} instead with {@link #VK_PARAMETER} as variable kind.
 	 */
-	public static String removePrefixAndSuffixForArgumentName(IJavaProject javaProject, String argumentName) {
+	@Deprecated
+    public static String removePrefixAndSuffixForArgumentName(IJavaProject javaProject, String argumentName) {
 		return String.valueOf(removePrefixAndSuffixForArgumentName(javaProject, argumentName.toCharArray()));
 	}
 	/**
@@ -401,7 +403,8 @@ public final class NamingConventions {
 	 * @deprecated Use {@link #getBaseName(int, String, IJavaProject)} instead
 	 * with {@link #VK_INSTANCE_FIELD} or {@link #VK_STATIC_FIELD} as variable kind.
 	 */
-	public static char[] removePrefixAndSuffixForFieldName(IJavaProject javaProject, char[] fieldName, int modifiers) {
+	@Deprecated
+    public static char[] removePrefixAndSuffixForFieldName(IJavaProject javaProject, char[] fieldName, int modifiers) {
 		return InternalNamingConventions.removeVariablePrefixAndSuffix(
 				Flags.isStatic(modifiers) ? VK_STATIC_FIELD : VK_INSTANCE_FIELD,
 				javaProject,
@@ -438,7 +441,8 @@ public final class NamingConventions {
 	 * @deprecated Use {@link #getBaseName(int, String, IJavaProject)} instead
 	 * with {@link #VK_INSTANCE_FIELD} or {@link #VK_STATIC_FIELD} as variable kind.
 	 */
-	public static String removePrefixAndSuffixForFieldName(IJavaProject javaProject, String fieldName, int modifiers) {
+	@Deprecated
+    public static String removePrefixAndSuffixForFieldName(IJavaProject javaProject, String fieldName, int modifiers) {
 		return String.valueOf(removePrefixAndSuffixForFieldName(javaProject, fieldName.toCharArray(), modifiers));
 	}
 
@@ -467,7 +471,8 @@ public final class NamingConventions {
 	 *
 	 * @deprecated Use {@link #getBaseName(int, String, IJavaProject)} instead with {@link #VK_LOCAL} as variable kind.
 	 */
-	public static char[] removePrefixAndSuffixForLocalVariableName(IJavaProject javaProject, char[] localName) {
+	@Deprecated
+    public static char[] removePrefixAndSuffixForLocalVariableName(IJavaProject javaProject, char[] localName) {
 		return InternalNamingConventions.removeVariablePrefixAndSuffix(VK_LOCAL, javaProject, localName);
 	}
 
@@ -496,7 +501,8 @@ public final class NamingConventions {
 	 *
 	 * @deprecated Use {@link #getBaseName(int, String, IJavaProject)} instead with {@link #VK_LOCAL} as variable kind.
 	 */
-	public static String removePrefixAndSuffixForLocalVariableName(IJavaProject javaProject, String localName) {
+	@Deprecated
+    public static String removePrefixAndSuffixForLocalVariableName(IJavaProject javaProject, String localName) {
 		return String.valueOf(removePrefixAndSuffixForLocalVariableName(javaProject, localName.toCharArray()));
 	}
 
@@ -550,11 +556,9 @@ public final class NamingConventions {
 
 	private static char[] suggestAccessorName(IJavaProject project, char[] fieldName, int modifiers) {
 		char[] name = InternalNamingConventions.getBaseName(getFieldVariableKind(modifiers), project, fieldName, false);
-		if (name.length > 0 && ScannerHelper.isLowerCase(name[0])) {
-			if (name.length == 1 || !ScannerHelper.isUpperCase(name[1])) {
-				name[0] = ScannerHelper.toUpperCase(name[0]);
-			}
-		}
+		if (name.length > 0 && ScannerHelper.isLowerCase(name[0]) && (name.length == 1 || !ScannerHelper.isUpperCase(name[1]))) {
+        	name[0] = ScannerHelper.toUpperCase(name[0]);
+        }
 		return name;
 	}
 
@@ -588,7 +592,8 @@ public final class NamingConventions {
 	 *
 	 * @deprecated Use {@link #suggestVariableNames(int, int, String, IJavaProject, int, String[], boolean)} instead with {@link #VK_PARAMETER} as variable kind.
 	 */
-	public static char[][] suggestArgumentNames(IJavaProject javaProject, char[] packageName, char[] qualifiedTypeName, int dim, char[][] excludedNames) {
+	@Deprecated
+    public static char[][] suggestArgumentNames(IJavaProject javaProject, char[] packageName, char[] qualifiedTypeName, int dim, char[][] excludedNames) {
 		if(qualifiedTypeName == null || qualifiedTypeName.length == 0)
 			return CharOperation.NO_CHAR_CHAR;
 
@@ -639,7 +644,8 @@ public final class NamingConventions {
 	 *
 	 * @deprecated Use {@link #suggestVariableNames(int, int, String, IJavaProject, int, String[], boolean)} instead with {@link #VK_PARAMETER} as variable kind.
 	 */
-	public static String[] suggestArgumentNames(IJavaProject javaProject, String packageName, String qualifiedTypeName, int dim, String[] excludedNames) {
+	@Deprecated
+    public static String[] suggestArgumentNames(IJavaProject javaProject, String packageName, String qualifiedTypeName, int dim, String[] excludedNames) {
 		return convertCharsToString(
 			suggestArgumentNames(
 				javaProject,
@@ -684,7 +690,8 @@ public final class NamingConventions {
 	 * @deprecated Use {@link #suggestVariableNames(int, int, String, IJavaProject, int, String[], boolean)} instead
 	 * with {@link #VK_INSTANCE_FIELD} or  {@link #VK_STATIC_FIELD} as variable kind.
 	 */
-	public static char[][] suggestFieldNames(IJavaProject javaProject, char[] packageName, char[] qualifiedTypeName, int dim, int modifiers, char[][] excludedNames) {
+	@Deprecated
+    public static char[][] suggestFieldNames(IJavaProject javaProject, char[] packageName, char[] qualifiedTypeName, int dim, int modifiers, char[][] excludedNames) {
 		if(qualifiedTypeName == null || qualifiedTypeName.length == 0)
 			return CharOperation.NO_CHAR_CHAR;
 
@@ -740,7 +747,8 @@ public final class NamingConventions {
 	 * @deprecated Use {@link #suggestVariableNames(int, int, String, IJavaProject, int, String[], boolean)} instead
 	 * with {@link #VK_INSTANCE_FIELD} or  {@link #VK_STATIC_FIELD} as variable kind.
 	 */
-	public static String[] suggestFieldNames(IJavaProject javaProject, String packageName, String qualifiedTypeName, int dim, int modifiers, String[] excludedNames) {
+	@Deprecated
+    public static String[] suggestFieldNames(IJavaProject javaProject, String packageName, String qualifiedTypeName, int dim, int modifiers, String[] excludedNames) {
 		return convertCharsToString(
 			suggestFieldNames(
 				javaProject,
@@ -783,24 +791,22 @@ public final class NamingConventions {
 	 * @see JavaCore#getDefaultOptions()
 	 */
 	public static char[] suggestGetterName(IJavaProject project, char[] fieldName, int modifiers, boolean isBoolean, char[][] excludedNames) {
-		if (isBoolean) {
-			char[] name = InternalNamingConventions.getBaseName(getFieldVariableKind(modifiers), project, fieldName, false);
-			int prefixLen =  GETTER_BOOL_NAME.length;
-			if (CharOperation.prefixEquals(GETTER_BOOL_NAME, name)
-				&& name.length > prefixLen && ScannerHelper.isUpperCase(name[prefixLen])) {
-				return suggestNewName(name, excludedNames);
-			} else {
-				return suggestNewName(
-					CharOperation.concat(GETTER_BOOL_NAME, suggestAccessorName(project, fieldName, modifiers)),
-					excludedNames
-				);
-			}
-		} else {
+		if (!isBoolean) {
 			return suggestNewName(
 				CharOperation.concat(GETTER_NAME, suggestAccessorName(project, fieldName, modifiers)),
 				excludedNames
 			);
 		}
+        char[] name = InternalNamingConventions.getBaseName(getFieldVariableKind(modifiers), project, fieldName, false);
+        int prefixLen =  GETTER_BOOL_NAME.length;
+        if (CharOperation.prefixEquals(GETTER_BOOL_NAME, name)
+        	&& name.length > prefixLen && ScannerHelper.isUpperCase(name[prefixLen])) {
+        	return suggestNewName(name, excludedNames);
+        }
+        return suggestNewName(
+        	CharOperation.concat(GETTER_BOOL_NAME, suggestAccessorName(project, fieldName, modifiers)),
+        	excludedNames
+        );
 	}
 	/**
 	 * Suggest name for a getter method. The name is computed from field's name
@@ -872,7 +878,8 @@ public final class NamingConventions {
 	 *
 	 * @deprecated Use {@link #suggestVariableNames(int, int, String, IJavaProject, int, String[], boolean)} instead with {@link #VK_LOCAL} as variable kind.
 	 */
-	public static char[][] suggestLocalVariableNames(IJavaProject javaProject, char[] packageName, char[] qualifiedTypeName, int dim, char[][] excludedNames) {
+	@Deprecated
+    public static char[][] suggestLocalVariableNames(IJavaProject javaProject, char[] packageName, char[] qualifiedTypeName, int dim, char[][] excludedNames) {
 		if(qualifiedTypeName == null || qualifiedTypeName.length == 0)
 			return CharOperation.NO_CHAR_CHAR;
 
@@ -923,7 +930,8 @@ public final class NamingConventions {
 	 *
 	 * @deprecated Use {@link #suggestVariableNames(int, int, String, IJavaProject, int, String[], boolean)} instead with {@link #VK_LOCAL} as variable kind.
 	 */
-	public static String[] suggestLocalVariableNames(IJavaProject javaProject, String packageName, String qualifiedTypeName, int dim, String[] excludedNames) {
+	@Deprecated
+    public static String[] suggestLocalVariableNames(IJavaProject javaProject, String packageName, String qualifiedTypeName, int dim, String[] excludedNames) {
 		return convertCharsToString(
 			suggestLocalVariableNames(
 				javaProject,
@@ -983,28 +991,26 @@ public final class NamingConventions {
 	 */
 	public static char[] suggestSetterName(IJavaProject project, char[] fieldName, int modifiers, boolean isBoolean, char[][] excludedNames) {
 
-		if (isBoolean) {
-			char[] name = InternalNamingConventions.getBaseName(getFieldVariableKind(modifiers), project, fieldName, false);
-			int prefixLen =  GETTER_BOOL_NAME.length;
-			if (CharOperation.prefixEquals(GETTER_BOOL_NAME, name)
-				&& name.length > prefixLen && ScannerHelper.isUpperCase(name[prefixLen])) {
-				name = CharOperation.subarray(name, prefixLen, name.length);
-				return suggestNewName(
-					CharOperation.concat(SETTER_NAME, suggestAccessorName(project, name, modifiers)),
-					excludedNames
-				);
-			} else {
-				return suggestNewName(
-					CharOperation.concat(SETTER_NAME, suggestAccessorName(project, fieldName, modifiers)),
-					excludedNames
-				);
-			}
-		} else {
+		if (!isBoolean) {
 			return suggestNewName(
 				CharOperation.concat(SETTER_NAME, suggestAccessorName(project, fieldName, modifiers)),
 				excludedNames
 			);
 		}
+        char[] name = InternalNamingConventions.getBaseName(getFieldVariableKind(modifiers), project, fieldName, false);
+        int prefixLen =  GETTER_BOOL_NAME.length;
+        if (CharOperation.prefixEquals(GETTER_BOOL_NAME, name)
+        	&& name.length > prefixLen && ScannerHelper.isUpperCase(name[prefixLen])) {
+        	name = CharOperation.subarray(name, prefixLen, name.length);
+        	return suggestNewName(
+        		CharOperation.concat(SETTER_NAME, suggestAccessorName(project, name, modifiers)),
+        		excludedNames
+        	);
+        }
+        return suggestNewName(
+        	CharOperation.concat(SETTER_NAME, suggestAccessorName(project, fieldName, modifiers)),
+        	excludedNames
+        );
 	}
 	/**
 	 * Suggest name for a setter method. The name is computed from field's name

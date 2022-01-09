@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.eclipse.core.resources;
 
+import java.nio.charset.Charset;
 import java.util.Hashtable;
 import org.eclipse.core.internal.resources.CheckMissingNaturesListener;
 import org.eclipse.core.internal.resources.Workspace;
@@ -398,7 +399,7 @@ public final class ResourcesPlugin extends Plugin {
 	public static String getEncoding() {
 		String enc = getPlugin().getPluginPreferences().getString(PREF_ENCODING);
 		if (enc == null || enc.length() == 0) {
-			enc = System.getProperty("file.encoding"); //$NON-NLS-1$
+			enc = Charset.defaultCharset().displayName();
 		}
 		return enc;
 	}

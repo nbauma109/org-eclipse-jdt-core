@@ -142,17 +142,15 @@ protected char[][] getInterfaceNames(TypeDeclaration typeDeclaration) {
 	if (superInterfaces != null) {
 		superInterfacesLength = superInterfaces.length;
 		interfaceNames = new char[superInterfacesLength][];
-	} else {
-		if ((typeDeclaration.bits & ASTNode.IsAnonymousType) != 0) {
-			// see PR 3442
-			QualifiedAllocationExpression alloc = typeDeclaration.allocation;
-			if (alloc != null && alloc.type != null) {
-				superInterfaces = new TypeReference[] { alloc.type};
-				superInterfacesLength = 1;
-				interfaceNames = new char[1][];
-			}
-		}
-	}
+	} else if ((typeDeclaration.bits & ASTNode.IsAnonymousType) != 0) {
+    	// see PR 3442
+    	QualifiedAllocationExpression alloc = typeDeclaration.allocation;
+    	if (alloc != null && alloc.type != null) {
+    		superInterfaces = new TypeReference[] { alloc.type};
+    		superInterfacesLength = 1;
+    		interfaceNames = new char[1][];
+    	}
+    }
 	if (superInterfaces != null) {
 		for (int i = 0; i < superInterfacesLength; i++) {
 			interfaceNames[i] =
@@ -214,7 +212,7 @@ private TypeParameterInfo[] getTypeParameterInfos(TypeParameter[] typeParameters
 		TypeParameter typeParameter = typeParameters[i];
 		char[][] typeParameterBounds = getTypeParameterBounds(typeParameter);
 		ISourceElementRequestor.TypeParameterInfo typeParameterInfo = new ISourceElementRequestor.TypeParameterInfo();
-		typeParameterInfo.typeAnnotated = ((typeParameter.bits & ASTNode.HasTypeAnnotations) != 0);
+		typeParameterInfo.typeAnnotated = (typeParameter.bits & ASTNode.HasTypeAnnotations) != 0;
 		typeParameterInfo.declarationStart = typeParameter.declarationSourceStart;
 		typeParameterInfo.declarationEnd = typeParameter.declarationSourceEnd;
 		typeParameterInfo.name = typeParameter.name;
@@ -231,8 +229,7 @@ private TypeParameterInfo[] getTypeParameterInfos(TypeParameter[] typeParameters
  */
 private boolean hasDeprecatedAnnotation(Annotation[] annotations) {
 	if (annotations != null) {
-		for (int i = 0, length = annotations.length; i < length; i++) {
-			Annotation annotation = annotations[i];
+		for (Annotation annotation : annotations) {
 			if (CharOperation.equals(annotation.type.getLastToken(), TypeConstants.JAVA_LANG_DEPRECATED[2])) {
 				return true;
 			}
@@ -287,7 +284,7 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 	Argument[] arguments = methodDeclaration.arguments;
 	ParameterInfo[] parameterInfos = null;
 	ISourceElementRequestor.MethodInfo methodInfo = new ISourceElementRequestor.MethodInfo();
-	methodInfo.typeAnnotated = ((methodDeclaration.bits & ASTNode.HasTypeAnnotations) != 0);
+	methodInfo.typeAnnotated = (methodDeclaration.bits & ASTNode.HasTypeAnnotations) != 0;
 
 	if (arguments != null && arguments.length > 0) {
 		Object[][] argumentInfos = getArgumentInfos(arguments);
@@ -429,8 +426,8 @@ public void notifySourceElementRequestor(
 					&& this.eofPosition >= parsedUnit.sourceEnd;
 
 		// collect the top level ast nodes
-		int length = 0;
-		ASTNode[] nodes = null;
+		int length;
+		ASTNode[] nodes;
 		if (isInRange) {
 			this.requestor.enterCompilationUnit();
 		}
@@ -451,13 +448,13 @@ public void notifySourceElementRequestor(
 			nodes[index++] = currentPackage;
 		}
 		if (imports != null) {
-			for (int i = 0, max = imports.length; i < max; i++) {
-				nodes[index++] = imports[i];
+			for (ImportReference import1 : imports) {
+				nodes[index++] = import1;
 			}
 		}
 		if (types != null) {
-			for (int i = 0, max = types.length; i < max; i++) {
-				nodes[index++] = types[i];
+			for (TypeDeclaration type : types) {
+				nodes[index++] = type;
 			}
 		}
 
@@ -500,16 +497,14 @@ protected void notifySourceElementRequestor(FieldDeclaration fieldDeclaration, T
 
 	switch(fieldDeclaration.getKind()) {
 		case AbstractVariableDeclaration.ENUM_CONSTANT:
-			if (this.reportReferenceInfo) {
-				// accept constructor reference for enum constant
-				if (fieldDeclaration.initialization instanceof AllocationExpression) {
-					AllocationExpression alloc = (AllocationExpression) fieldDeclaration.initialization;
-					this.requestor.acceptConstructorReference(
-						declaringType.name,
-						alloc.arguments == null ? 0 : alloc.arguments.length,
-						alloc.sourceStart);
-				}
-			}
+			// accept constructor reference for enum constant
+            if (this.reportReferenceInfo && fieldDeclaration.initialization instanceof AllocationExpression) {
+            	AllocationExpression alloc = (AllocationExpression) fieldDeclaration.initialization;
+            	this.requestor.acceptConstructorReference(
+            		declaringType.name,
+            		alloc.arguments == null ? 0 : alloc.arguments.length,
+            		alloc.sourceStart);
+            }
 			// $FALL-THROUGH$
 		case AbstractVariableDeclaration.FIELD:
 			int fieldEndPosition = this.sourceEnds.get(fieldDeclaration);
@@ -533,10 +528,10 @@ protected void notifySourceElementRequestor(FieldDeclaration fieldDeclaration, T
 					typeName = CharOperation.concatWith(fieldDeclaration.type.getParameterizedTypeName(), '.');
 				}
 				ISourceElementRequestor.FieldInfo fieldInfo = new ISourceElementRequestor.FieldInfo();
-				fieldInfo.typeAnnotated = ((fieldDeclaration.bits & ASTNode.HasTypeAnnotations) != 0);
+				fieldInfo.typeAnnotated = (fieldDeclaration.bits & ASTNode.HasTypeAnnotations) != 0;
 				fieldInfo.declarationStart = fieldDeclaration.declarationSourceStart;
 				fieldInfo.name = fieldDeclaration.name;
-				fieldInfo.modifiers = deprecated ? (currentModifiers & ExtraCompilerModifiers.AccJustFlag) | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccJustFlag;
+				fieldInfo.modifiers = deprecated ? currentModifiers & ExtraCompilerModifiers.AccJustFlag | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccJustFlag;
 				if (fieldDeclaration.isARecordComponent) {
 					fieldInfo.modifiers |= ExtraCompilerModifiers.AccRecord;
 					fieldInfo.isRecordComponent = true;
@@ -553,7 +548,7 @@ protected void notifySourceElementRequestor(FieldDeclaration fieldDeclaration, T
 			if (isInRange){
 				this.requestor.exitField(
 					// filter out initializations that are not a constant (simple check)
-					(fieldDeclaration.initialization == null
+					fieldDeclaration.initialization == null
 							|| fieldDeclaration.initialization instanceof ArrayInitializer
 							|| fieldDeclaration.initialization instanceof AllocationExpression
 							|| fieldDeclaration.initialization instanceof ArrayAllocationExpression
@@ -561,7 +556,7 @@ protected void notifySourceElementRequestor(FieldDeclaration fieldDeclaration, T
 							|| fieldDeclaration.initialization instanceof ClassLiteralAccess
 							|| fieldDeclaration.initialization instanceof MessageSend
 							|| fieldDeclaration.initialization instanceof ArrayReference
-							|| fieldDeclaration.initialization instanceof ThisReference) ?
+							|| fieldDeclaration.initialization instanceof ThisReference ?
 						-1 :
 						fieldDeclaration.initialization.sourceStart,
 					fieldEndPosition,
@@ -611,7 +606,7 @@ protected void notifySourceElementRequestor(ModuleDeclaration moduleDeclaration)
 		boolean deprecated = (currentModifiers & ClassFileConstants.AccDeprecated) != 0 || hasDeprecatedAnnotation(moduleDeclaration.annotations);
 
 		info.declarationStart = moduleDeclaration.declarationSourceStart;
-		info.modifiers = deprecated ? (currentModifiers & ExtraCompilerModifiers.AccJustFlag) | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccJustFlag;
+		info.modifiers = deprecated ? currentModifiers & ExtraCompilerModifiers.AccJustFlag | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccJustFlag;
 		info.name = TypeConstants.MODULE_INFO_NAME;
 		info.nameSourceStart = moduleDeclaration.sourceStart;
 		info.nameSourceEnd = moduleDeclaration.sourceEnd;
@@ -682,7 +677,7 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 		int kind = TypeDeclaration.kind(typeDeclaration.modifiers);
 		char[] implicitSuperclassName = TypeConstants.CharArray_JAVA_LANG_OBJECT;
 		ISourceElementRequestor.TypeInfo typeInfo = new ISourceElementRequestor.TypeInfo();
-		typeInfo.typeAnnotated = ((typeDeclaration.bits & ASTNode.HasTypeAnnotations) != 0);
+		typeInfo.typeAnnotated = (typeDeclaration.bits & ASTNode.HasTypeAnnotations) != 0;
 		if (isInRange) {
 			int currentModifiers = typeDeclaration.modifiers;
 
@@ -705,7 +700,7 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 				typeInfo.declarationStart = typeDeclaration.allocation.sourceStart;
 			}
 			typeInfo.modifiers = deprecated
-					? (currentModifiers & ExtraCompilerModifiers.AccJustFlag) | ClassFileConstants.AccDeprecated
+					? currentModifiers & ExtraCompilerModifiers.AccJustFlag | ClassFileConstants.AccDeprecated
 					: currentModifiers & ExtraCompilerModifiers.AccJustFlag;
 			typeInfo.modifiers |= currentModifiers & (ExtraCompilerModifiers.AccSealed | ExtraCompilerModifiers.AccNonSealed);
 			typeInfo.name = typeDeclaration.name;
@@ -746,15 +741,15 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 		}
 		if (this.nestedTypeIndex == this.typeNames.length) {
 			// need a resize
-			System.arraycopy(this.typeNames, 0, (this.typeNames = new char[this.nestedTypeIndex * 2][]), 0, this.nestedTypeIndex);
-			System.arraycopy(this.superTypeNames, 0, (this.superTypeNames = new char[this.nestedTypeIndex * 2][]), 0, this.nestedTypeIndex);
+			System.arraycopy(this.typeNames, 0, this.typeNames = new char[this.nestedTypeIndex * 2][], 0, this.nestedTypeIndex);
+			System.arraycopy(this.superTypeNames, 0, this.superTypeNames = new char[this.nestedTypeIndex * 2][], 0, this.nestedTypeIndex);
 		}
 		this.typeNames[this.nestedTypeIndex] = typeDeclaration.name;
 		this.superTypeNames[this.nestedTypeIndex++] = implicitSuperclassName;
 	}
-	while ((fieldIndex < fieldCounter)
-			|| (memberTypeIndex < memberTypeCounter)
-			|| (methodIndex < methodCounter)) {
+	while (fieldIndex < fieldCounter
+			|| memberTypeIndex < memberTypeCounter
+			|| methodIndex < methodCounter) {
 		FieldDeclaration nextFieldDeclaration = null;
 		AbstractMethodDeclaration nextMethodDeclaration = null;
 		TypeDeclaration nextMemberDeclaration = null;
@@ -909,14 +904,13 @@ private void reset() {
 	this.sourceEnds = null;
 }
 private int sourceEnd(TypeDeclaration typeDeclaration) {
-	if ((typeDeclaration.bits & ASTNode.IsAnonymousType) != 0) {
-		QualifiedAllocationExpression allocation = typeDeclaration.allocation;
-		if (allocation.enumConstant != null) // case of enum constant body
-			return allocation.enumConstant.sourceEnd;
-		return allocation.type.sourceEnd;
-	} else {
+	if ((typeDeclaration.bits & ASTNode.IsAnonymousType) == 0) {
 		return typeDeclaration.sourceEnd;
 	}
+    QualifiedAllocationExpression allocation = typeDeclaration.allocation;
+    if (allocation.enumConstant != null) // case of enum constant body
+    	return allocation.enumConstant.sourceEnd;
+    return allocation.type.sourceEnd;
 }
 private void visitIfNeeded(AbstractMethodDeclaration method) {
 	if (this.localDeclarationVisitor != null
@@ -937,24 +931,20 @@ private void visitIfNeeded(AbstractMethodDeclaration method) {
 
 private void visitIfNeeded(FieldDeclaration field, TypeDeclaration declaringType) {
 	if (this.localDeclarationVisitor != null
-		&& (field.bits & ASTNode.HasLocalType) != 0) {
-			if (field.initialization != null) {
-				try {
-					this.localDeclarationVisitor.pushDeclaringType(declaringType);
-					field.initialization.traverse(this.localDeclarationVisitor, (MethodScope) null);
-				} finally {
-					this.localDeclarationVisitor.popDeclaringType();
-				}
-			}
-	}
+    	&& (field.bits & ASTNode.HasLocalType) != 0 && field.initialization != null) {
+    	try {
+    		this.localDeclarationVisitor.pushDeclaringType(declaringType);
+    		field.initialization.traverse(this.localDeclarationVisitor, (MethodScope) null);
+    	} finally {
+    		this.localDeclarationVisitor.popDeclaringType();
+    	}
+    }
 }
 
 private void visitIfNeeded(Initializer initializer) {
 	if (this.localDeclarationVisitor != null
-		&& (initializer.bits & ASTNode.HasLocalType) != 0) {
-			if (initializer.block != null) {
-				initializer.block.traverse(this.localDeclarationVisitor, null);
-			}
-	}
+    	&& (initializer.bits & ASTNode.HasLocalType) != 0 && initializer.block != null) {
+    	initializer.block.traverse(this.localDeclarationVisitor, null);
+    }
 }
 }

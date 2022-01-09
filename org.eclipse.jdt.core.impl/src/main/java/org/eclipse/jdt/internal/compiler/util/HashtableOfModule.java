@@ -100,11 +100,11 @@ public final class HashtableOfModule {
 	}
 	@Override
 	public String toString() {
-		String s = ""; //$NON-NLS-1$
+		StringBuilder s = new StringBuilder();
 		ModuleBinding pkg;
-		for (int i = 0, length = this.valueTable.length; i < length; i++)
-			if ((pkg = this.valueTable[i]) != null)
-				s += pkg + "\n"; //$NON-NLS-1$
-		return s;
+		for (ModuleBinding element : this.valueTable)
+            if ((pkg = element) != null)
+				s.append(pkg).append("\n"); //$NON-NLS-1$
+		return s.toString();
 	}
 }

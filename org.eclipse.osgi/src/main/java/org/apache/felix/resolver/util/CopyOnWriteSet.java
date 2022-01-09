@@ -40,26 +40,32 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         data = col.toArray(new Object[col.size()]);
     }
 
+    @Override
     public Iterator<E> iterator() {
-        return new Iterator<E>() {
+        return new Iterator<>() {
             int idx = 0;
+            @Override
             public boolean hasNext() {
                 return idx < data.length;
             }
+            @Override
             @SuppressWarnings("unchecked")
             public E next() {
                 return (E) data[idx++];
             }
+            @Override
             public void remove() {
                 CopyOnWriteSet.this.remove(--idx);
             }
         };
     }
 
+    @Override
     public int size() {
         return data.length;
     }
 
+    @Override
     public boolean add(E e) {
         Object[] d = data;
         if (d.length == 0) {
@@ -92,10 +98,12 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         data = a;
     }
 
+    @Override
     public Object[] toArray() {
         return data.clone();
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] a) {
         int size = data.length;
@@ -128,9 +136,7 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
             Object v1 = o1[i];
             for (int j = l; j-- > 0;) {
                 Object v2 = o2[j];
-                if (v1 == v2)
-                    continue loop;
-                if (v1 != null && v1.equals(v2))
+                if (v1 == v2 || v1 != null && v1.equals(v2))
                     continue loop;
             }
             return false;
@@ -159,14 +165,17 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         }
     }
 
+    @Override
     public boolean isEmpty() {
         return size() == 0;
     }
 
+    @Override
     public boolean contains(Object o) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean remove(Object o) {
         int index;
         if ((index = indexOf(o, data, data.length)) >= 0) {
@@ -191,10 +200,12 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         return -1;
     }
 
+    @Override
     public boolean containsAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean addAll(Collection<? extends E> c) {
         Object[] cs = c.toArray();
         if (cs.length == 0)
@@ -218,14 +229,17 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         return false;
     }
 
+    @Override
     public boolean retainAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean removeAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void clear() {
         throw new UnsupportedOperationException();
     }

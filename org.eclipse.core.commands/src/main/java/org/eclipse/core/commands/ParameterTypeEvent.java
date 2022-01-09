@@ -59,7 +59,7 @@ public final class ParameterTypeEvent extends AbstractHandleObjectEvent {
 	 * @return the instance of the parameter type that changed. Guaranteed not
 	 *         to be <code>null</code>.
 	 */
-	public final ParameterType getParameterType() {
+	public ParameterType getParameterType() {
 		return parameterType;
 	}
 

@@ -56,7 +56,7 @@ public class Region implements IRegion {
 
 	@Override
 	public int hashCode() {
-	 	return (fOffset << 24) | (fLength << 16);
+	 	return fOffset << 24 | fLength << 16;
 	}
 
 	@Override

@@ -79,7 +79,7 @@ public class ComponentInfo extends ClassFileStruct implements IComponentInfo {
 			} else {
 				this.attributes[attributesIndex++] = new ClassFileAttribute(classFileBytes, constantPool, offset + readOffset);
 			}
-			readOffset += (6 + u4At(classFileBytes, readOffset + 2, offset));
+			readOffset += 6 + u4At(classFileBytes, readOffset + 2, offset);
 		}
 
 		this.attributeBytes = readOffset;

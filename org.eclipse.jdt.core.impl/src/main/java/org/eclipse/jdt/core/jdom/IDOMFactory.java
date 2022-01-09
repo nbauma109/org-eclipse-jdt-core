@@ -54,6 +54,7 @@ package org.eclipse.jdt.core.jdom;
  * org.eclipse.jdt.core.dom package.
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@Deprecated
 public interface IDOMFactory {
 /**
  * Creates and return an empty JDOM. The initial content is an empty string.

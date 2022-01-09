@@ -184,6 +184,7 @@ public interface ITypeBinding extends IBinding {
 	 * delegated to the method <code>getModifiers</code>. Clients should call
 	 * <code>getModifiers</code> method directly.
 	 */
+    @Deprecated
     int getDeclaredModifiers();
 
 	/**

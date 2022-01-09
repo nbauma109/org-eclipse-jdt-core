@@ -65,11 +65,9 @@ public final class NodeComparison {
 
 		if (comparison == K_ADDED) {
 			comparison = K_REMOVED;
-		} else {
-			if (comparison == K_REMOVED) {
-				comparison = K_ADDED;
-			}
-		}
+		} else if (comparison == K_REMOVED) {
+        	comparison = K_ADDED;
+        }
 		return this;
 	}
 

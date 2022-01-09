@@ -24,7 +24,7 @@ package org.eclipse.jdt.internal.compiler.env;
  */
 public interface ITypeAnnotationWalker {
 
-	IBinaryAnnotation[] NO_ANNOTATIONS = new IBinaryAnnotation[0];
+	IBinaryAnnotation[] NO_ANNOTATIONS = {};
 	/**
 	 * A no-effect annotation walker, all walking methods are implemented as identity-functions.
 	 * At the end of any walk an empty array of annotations is returned.

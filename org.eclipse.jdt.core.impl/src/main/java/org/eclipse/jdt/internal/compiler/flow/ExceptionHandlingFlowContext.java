@@ -62,7 +62,7 @@ public class ExceptionHandlingFlowContext extends FlowContext {
 	// for dealing with anonymous constructor thrown exceptions
 	public List extendedExceptions;
 
-	private static final Argument[] NO_ARGUMENTS = new Argument[0];
+	private static final Argument[] NO_ARGUMENTS = {};
 	public  Argument [] catchArguments;
 
 	private int[] exceptionToCatchBlockMap;
@@ -106,7 +106,7 @@ ExceptionHandlingFlowContext(
 	this.handledExceptions = handledExceptions;
 	this.catchArguments = catchArguments;
 	this.exceptionToCatchBlockMap = exceptionToCatchBlockMap;
-	int count = handledExceptions.length, cacheSize = (count / ExceptionHandlingFlowContext.BitCacheSize) + 1;
+	int count = handledExceptions.length, cacheSize = count / ExceptionHandlingFlowContext.BitCacheSize + 1;
 	this.isReached = new int[cacheSize]; // none is reached by default
 	this.isNeeded = new int[cacheSize]; // none is needed by default
 	this.initsOnExceptions = new UnconditionalFlowInfo[count];
@@ -120,7 +120,7 @@ ExceptionHandlingFlowContext(
 			if (markExceptionsAndThrowableAsReached ||
 					handledException.id != TypeIds.T_JavaLangThrowable &&
 					handledException.id != TypeIds.T_JavaLangException) {
-				this.isReached[i / ExceptionHandlingFlowContext.BitCacheSize] |= 1 << (i % ExceptionHandlingFlowContext.BitCacheSize);
+				this.isReached[i / ExceptionHandlingFlowContext.BitCacheSize] |= 1 << i % ExceptionHandlingFlowContext.BitCacheSize;
 			}
 			this.initsOnExceptions[catchBlock] = flowInfo.unconditionalCopy();
 		} else {
@@ -155,11 +155,11 @@ public void complainIfUnusedExceptionHandlers(AbstractMethodDeclaration method) 
 			docCommentReferences[i] = method.javadoc.exceptionReferences[i].resolvedType;
 		}
 	}
-	nextHandledException: for (int i = 0, count = this.handledExceptions.length; i < count; i++) {
-		int index = this.indexes.get(this.handledExceptions[i]);
-		if ((this.isReached[index / ExceptionHandlingFlowContext.BitCacheSize] & 1 << (index % ExceptionHandlingFlowContext.BitCacheSize)) == 0) {
+	nextHandledException: for (ReferenceBinding handledException : this.handledExceptions) {
+		int index = this.indexes.get(handledException);
+		if ((this.isReached[index / ExceptionHandlingFlowContext.BitCacheSize] & 1 << index % ExceptionHandlingFlowContext.BitCacheSize) == 0) {
 			for (int j = 0; j < docCommentReferencesLength; j++) {
-				if (TypeBinding.equalsEquals(docCommentReferences[j], this.handledExceptions[i])) {
+				if (TypeBinding.equalsEquals(docCommentReferences[j], handledException)) {
 					continue nextHandledException;
 				}
 			}
@@ -175,18 +175,16 @@ public void complainIfUnusedExceptionHandlers(BlockScope scope,TryStatement tryS
 	// report errors for unreachable exception handlers
 	for (int index = 0, count = this.handledExceptions.length; index < count; index++) {
 		int cacheIndex = index / ExceptionHandlingFlowContext.BitCacheSize;
-		int bitMask = 1 << (index % ExceptionHandlingFlowContext.BitCacheSize);
+		int bitMask = 1 << index % ExceptionHandlingFlowContext.BitCacheSize;
 		if ((this.isReached[cacheIndex] & bitMask) == 0) {
 			scope.problemReporter().unreachableCatchBlock(
 				this.handledExceptions[index],
 				getExceptionType(index));
-		} else {
-			if ((this.isNeeded[cacheIndex] & bitMask) == 0) {
-				scope.problemReporter().hiddenCatchBlock(
-					this.handledExceptions[index],
-					getExceptionType(index));
-			}
-		}
+		} else if ((this.isNeeded[cacheIndex] & bitMask) == 0) {
+        	scope.problemReporter().hiddenCatchBlock(
+        		this.handledExceptions[index],
+        		getExceptionType(index));
+        }
 	}
 }
 
@@ -198,8 +196,7 @@ private ASTNode getExceptionType(int index) {
 	ASTNode node = this.catchArguments[catchBlock].type;
 	if (node instanceof UnionTypeReference) {
 		TypeReference[] typeRefs = ((UnionTypeReference)node).typeReferences;
-		for (int i = 0, len = typeRefs.length; i < len; i++) {
-			TypeReference typeRef = typeRefs[i];
+		for (TypeReference typeRef : typeRefs) {
 			if (TypeBinding.equalsEquals(typeRef.resolvedType, this.handledExceptions[index])) return typeRef;
 		}
 	}
@@ -217,7 +214,7 @@ public String individualToString() {
 	int length = this.handledExceptions.length;
 	for (int i = 0; i < length; i++) {
 		int cacheIndex = i / ExceptionHandlingFlowContext.BitCacheSize;
-		int bitMask = 1 << (i % ExceptionHandlingFlowContext.BitCacheSize);
+		int bitMask = 1 << i % ExceptionHandlingFlowContext.BitCacheSize;
 		buffer.append('[').append(this.handledExceptions[i].readableName());
 		if ((this.isReached[cacheIndex] & bitMask) != 0) {
 			if ((this.isNeeded[cacheIndex] & bitMask) == 0) {
@@ -283,7 +280,7 @@ public void recordHandlingException(
 
 	int index = this.indexes.get(exceptionType);
 	int cacheIndex = index / ExceptionHandlingFlowContext.BitCacheSize;
-	int bitMask = 1 << (index % ExceptionHandlingFlowContext.BitCacheSize);
+	int bitMask = 1 << index % ExceptionHandlingFlowContext.BitCacheSize;
 	if (!wasAlreadyDefinitelyCaught) {
 		this.isNeeded[cacheIndex] |= bitMask;
 	}

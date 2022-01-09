@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.util.IInnerClassesAttributeEntry;
  * Default implementation of IInnerClassesAttribute.
  */
 public class InnerClassesAttribute extends ClassFileAttribute implements IInnerClassesAttribute {
-	private static final IInnerClassesAttributeEntry[] NO_ENTRIES = new IInnerClassesAttributeEntry[0];
+	private static final IInnerClassesAttributeEntry[] NO_ENTRIES = {};
 
 	private int numberOfClasses;
 	private IInnerClassesAttributeEntry[] entries;

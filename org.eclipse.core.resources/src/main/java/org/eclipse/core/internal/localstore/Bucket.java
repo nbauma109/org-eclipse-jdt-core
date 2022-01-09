@@ -232,11 +232,8 @@ public abstract class Bucket {
 	 * Tries to delete as many empty levels as possible.
 	 */
 	private void cleanUp(File toDelete) {
-		if (!toDelete.delete())
-			// if deletion didn't go well, don't bother trying to delete the parent dir
-			return;
 		// don't try to delete beyond the root for bucket indexes
-		if (toDelete.getName().equals(INDEXES_DIR_NAME))
+		if (!toDelete.delete() || toDelete.getName().equals(INDEXES_DIR_NAME))
 			return;
 		// recurse to parent directory
 		cleanUp(toDelete.getParentFile());
@@ -305,7 +302,7 @@ public abstract class Bucket {
 	public void load(String newProjectName, File baseLocation, boolean force) throws CoreException {
 		try {
 			// avoid reloading
-			if (!force && this.location != null && baseLocation.equals(this.location.getParentFile()) && (projectName == null ? (newProjectName == null) : projectName.equals(newProjectName))) {
+			if (!force && this.location != null && baseLocation.equals(this.location.getParentFile()) && (projectName == null ? newProjectName == null : projectName.equals(newProjectName))) {
 				this.projectName = newProjectName;
 				return;
 			}
@@ -447,7 +444,7 @@ public abstract class Bucket {
 		// omit the project name
 		int pathLength = path.length();
 		int projectLength = projectName.length();
-		String key = (pathLength == projectLength + 1) ? "" : path.substring(projectLength + 1); //$NON-NLS-1$
+		String key = pathLength == projectLength + 1 ? "" : path.substring(projectLength + 1); //$NON-NLS-1$
 		destination.writeUTF(key);
 	}
 

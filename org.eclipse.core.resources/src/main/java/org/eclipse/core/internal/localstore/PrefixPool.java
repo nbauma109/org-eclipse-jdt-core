@@ -116,7 +116,8 @@ public class PrefixPool {
 			if (pool[i].startsWith(s)) {
 				//prefix of an existing String --> no-op
 				return;
-			} else if (s.startsWith(pool[i])) {
+			}
+            if (s.startsWith(pool[i])) {
 				//replace, since a longer s has more prefixes than a short one
 				pool[i] = s;
 				return;
@@ -152,7 +153,8 @@ public class PrefixPool {
 			if (s.startsWith(pool[i])) {
 				//longer or equal to an existing prefix - nothing to do
 				return false;
-			} else if (pool[i].startsWith(s)) {
+			}
+            if (pool[i].startsWith(s)) {
 				if (replaced) {
 					//replaced before, so shrink the array.
 					//Safe since we are iterating in reverse order.

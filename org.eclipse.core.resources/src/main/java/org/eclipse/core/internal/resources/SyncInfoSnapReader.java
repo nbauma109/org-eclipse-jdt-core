@@ -24,7 +24,6 @@ public class SyncInfoSnapReader {
 	protected Synchronizer synchronizer;
 
 	public SyncInfoSnapReader(Workspace workspace, Synchronizer synchronizer) {
-		super();
 		this.workspace = workspace;
 		this.synchronizer = synchronizer;
 	}

@@ -33,7 +33,7 @@ public PackageReferencePattern(char[] pkgName, int matchRule) {
 		this.segments = new char[][] {CharOperation.NO_CHAR};
 		this.mustResolve = false;
 	} else {
-		this.pkgName = (this.isCaseSensitive || this.isCamelCase) ? pkgName : CharOperation.toLowerCase(pkgName);
+		this.pkgName = this.isCaseSensitive || this.isCamelCase ? pkgName : CharOperation.toLowerCase(pkgName);
 		this.segments = CharOperation.splitOn('.', this.pkgName);
 		this.mustResolve = true;
 	}

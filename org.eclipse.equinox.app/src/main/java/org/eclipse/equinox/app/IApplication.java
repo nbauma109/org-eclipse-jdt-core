@@ -30,12 +30,12 @@ public interface IApplication {
 	/**
 	 * Exit object indicating normal termination
 	 */
-    Integer EXIT_OK = Integer.valueOf(0);
+    Integer EXIT_OK = 0;
 
 	/**
 	 * Exit object requesting platform restart
 	 */
-    Integer EXIT_RESTART = Integer.valueOf(23);
+    Integer EXIT_RESTART = 23;
 
 	/**
 	 * Exit object requesting that the command passed back be executed.  Typically
@@ -43,7 +43,7 @@ public interface IApplication {
 	 * relaunched the command line will be retrieved from the 
 	 * {@link IApplicationContext#EXIT_DATA_PROPERTY eclipse.exitdata} system property.  
 	 */
-    Integer EXIT_RELAUNCH = Integer.valueOf(24);
+    Integer EXIT_RELAUNCH = 24;
 
 	/**
 	 * Starts this application with the given context and returns a result.  The content of 

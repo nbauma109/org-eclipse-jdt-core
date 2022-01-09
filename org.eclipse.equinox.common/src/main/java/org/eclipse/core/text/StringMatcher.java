@@ -15,6 +15,7 @@ package org.eclipse.core.text;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A string pattern matcher. Supports '*' and '?' wildcards.
@@ -87,11 +88,7 @@ public final class StringMatcher {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + end;
-			result = prime * result + start;
-			return result;
+			return Objects.hash(end, start);
 		}
 
 		@Override
@@ -279,7 +276,7 @@ public final class StringMatcher {
 			return false;
 		}
 		if (fIgnoreWildCards) {
-			return (end - start == fLength) && fPattern.regionMatches(fIgnoreCase, 0, text, start, fLength);
+			return end - start == fLength && fPattern.regionMatches(fIgnoreCase, 0, text, start, fLength);
 		}
 
 		int segCount = fSegments.length;
@@ -320,7 +317,7 @@ public final class StringMatcher {
 			++i;
 			tCurPos = tCurPos + segLength;
 		}
-		if ((fSegments.length == 1) && (!fHasLeadingStar) && (!fHasTrailingStar)) {
+		if (fSegments.length == 1 && !fHasLeadingStar && !fHasTrailingStar) {
 			// Only one segment to match, no wildcards specified
 			return tCurPos == end;
 		}
@@ -331,15 +328,12 @@ public final class StringMatcher {
 			int k = current.indexOf(fSingleWildCard);
 			if (k < 0) {
 				currentMatch = textPosIn(text, tCurPos, end, current);
-				if (currentMatch < 0) {
-					return false;
-				}
 			} else {
 				currentMatch = regExpPosIn(text, tCurPos, end, current);
-				if (currentMatch < 0) {
-					return false;
-				}
 			}
+            if (currentMatch < 0) {
+            	return false;
+            }
 			tCurPos = currentMatch + current.length();
 			i++;
 		}
@@ -381,14 +375,12 @@ public final class StringMatcher {
 						buf.append(c);
 					} else {
 						char next = fPattern.charAt(pos++);
-						if (next == '*' || next == '?' || next == '\\') {
-							// It _is_ an escape sequence
-							buf.append(next);
-						} else {
+						if (next != '*' && next != '?' && next != '\\') {
 							// Not an escape sequence, just insert literally
 							buf.append(c);
-							buf.append(next);
 						}
+                        // It _is_ an escape sequence
+                        buf.append(next);
 					}
 					break;
 				case '*' :
@@ -494,17 +486,10 @@ public final class StringMatcher {
 				continue;
 			}
 			char tchar = text.charAt(tStart++);
-			if (pchar == tchar) {
-				continue;
-			}
-			if (fIgnoreCase) {
-				if (Character.toUpperCase(tchar) == Character.toUpperCase(pchar))
-					continue;
-				// comparing after converting to upper case doesn't handle all cases;
-				// also compare after converting to lower case
-				if (Character.toLowerCase(tchar) == Character.toLowerCase(pchar))
-					continue;
-			}
+			// comparing after converting to upper case doesn't handle all cases;
+            // also compare after converting to lower case
+            if (pchar == tchar || fIgnoreCase && (Character.toUpperCase(tchar) == Character.toUpperCase(pchar) || Character.toLowerCase(tchar) == Character.toLowerCase(pchar)))
+            	continue;
 			return false;
 		}
 		return true;
@@ -522,10 +507,10 @@ public final class StringMatcher {
 		if (!fIgnoreWildCards) {
 			flags += '*';
 		}
-		String result = '[' + fPattern;
+		StringBuilder result = new StringBuilder().append('[').append(fPattern);
 		if (!flags.isEmpty()) {
-			result += '/' + flags;
+			result.append('/').append(flags);
 		}
-		return result + ']';
+		return result.append(']').toString();
 	}
 }

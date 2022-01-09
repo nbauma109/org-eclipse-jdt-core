@@ -126,7 +126,8 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 				exactMatch.clear();
 				stemMatch.clear();
 				break;
-			} else if (bootPackage.endsWith("*")) { //$NON-NLS-1$
+			}
+            if (bootPackage.endsWith("*")) { //$NON-NLS-1$
 				if (bootPackage.length() > 2 && bootPackage.endsWith(".*")) { //$NON-NLS-1$
 					stemMatch.add(bootPackage.substring(0, bootPackage.length() - 1));
 				}
@@ -196,9 +197,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	}
 
 	public boolean isBootDelegationPackage(String name) {
-		if (bootDelegateAll)
-			return true;
-		if (bootDelegation.contains(name))
+		if (bootDelegateAll || bootDelegation.contains(name))
 			return true;
 		if (bootDelegationStems != null)
 			for (String bootDelegationStem : bootDelegationStems) {
@@ -264,7 +263,6 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			}
 			contextFinder = new ContextFinder(parent, bootLoader);
 			current.setContextClassLoader(contextFinder);
-			return;
 		} catch (Exception e) {
 			logServices.log(NAME, FrameworkLogEntry.INFO, NLS.bind(Msg.CANNOT_SET_CONTEXTFINDER, null), e);
 		}
@@ -375,14 +373,13 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			if (moduleConnector == null) {
 				return null;
 			}
-			ConnectModule result = connectModules.compute(location, (k, v) -> {
+			return connectModules.compute(location, (k, v) -> {
 				try {
 					return moduleConnector.connect(location).orElse(null);
 				} catch (BundleException e) {
 					throw new IllegalStateException(e);
 				}
 			});
-			return result;
 		}
 
 		public ConnectBundleFile getConnectBundleFile(ConnectModule module, File basefile,

@@ -198,7 +198,7 @@ public class TemplateStoreCore {
 	public void save() throws IOException {
 		ArrayList<TemplatePersistenceData> custom= new ArrayList<>();
 		for (TemplatePersistenceData data : fTemplates) {
-			if (data.isCustom() && !(data.isUserAdded() && data.isDeleted())) // don't save deleted user-added templates
+			if (data.isCustom() && (!data.isUserAdded() || !data.isDeleted())) // don't save deleted user-added templates
 				custom.add(data);
 		}
 

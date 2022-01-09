@@ -50,7 +50,7 @@ public class TryStatement extends SubRoutineStatement {
 	static final char[] SECRET_CAUGHT_THROWABLE_VARIABLE_NAME = " caughtThrowable".toCharArray(); //$NON-NLS-1$;
 	static final char[] SECRET_RETURN_VALUE_NAME = " returnValue".toCharArray(); //$NON-NLS-1$
 
-	public Statement[] resources = new Statement[0];
+	public Statement[] resources = {};
 	public Block tryBlock;
 	public Block[] catchBlocks;
 
@@ -175,8 +175,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			MethodBinding closeMethod = findCloseMethod(resource, resolvedType);
 			if (closeMethod != null && closeMethod.isValidBinding() && closeMethod.returnType.id == TypeIds.T_void) {
 				ReferenceBinding[] thrownExceptions = closeMethod.thrownExceptions;
-				for (int j = 0, length = thrownExceptions.length; j < length; j++) {
-					handlingContext.checkExceptionHandlers(thrownExceptions[j], this.resources[i], tryInfo, currentScope, true);
+				for (ReferenceBinding thrownException : thrownExceptions) {
+					handlingContext.checkExceptionHandlers(thrownException, this.resources[i], tryInfo, currentScope, true);
 				}
 			}
 		}
@@ -226,156 +226,154 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		flowContext.mergeFinallyNullInfo(handlingContext.initsOnFinally);
 
 		return tryInfo;
-	} else {
-		InsideSubRoutineFlowContext insideSubContext;
-		FinallyFlowContext finallyContext;
-		UnconditionalFlowInfo subInfo;
-		// analyse finally block first
-		insideSubContext = new InsideSubRoutineFlowContext(flowContext, this);
-		if (flowContext instanceof FinallyFlowContext) {
-			// if this TryStatement sits inside another TryStatement, establish the wiring so that
-			// FlowContext.markFinallyNullStatus can report into initsOnFinally of the outer try context:
-			insideSubContext.outerTryContext = ((FinallyFlowContext)flowContext).tryContext;
-		}
-
-		// process the try block in a context handling the local exceptions.
-		// (advance instantiation so we can wire this into the FinallyFlowContext)
-		ExceptionHandlingFlowContext handlingContext =
-			new ExceptionHandlingFlowContext(
-				insideSubContext,
-				this,
-				this.caughtExceptionTypes,
-				this.caughtExceptionsCatchBlocks,
-				null,
-				this.scope,
-				flowInfo);
-		insideSubContext.initsOnFinally = handlingContext.initsOnFinally;
-
-		subInfo =
-			this.finallyBlock
-				.analyseCode(
-					currentScope,
-					finallyContext = new FinallyFlowContext(flowContext, this.finallyBlock, handlingContext),
-					flowInfo.nullInfoLessUnconditionalCopy())
-				.unconditionalInits();
-		handlingContext.conditionalLevel = 0; // start collection initsOnFinally only after analysing the finally block
-		if (subInfo == FlowInfo.DEAD_END) {
-			this.bits |= ASTNode.IsSubRoutineEscaping;
-			this.scope.problemReporter().finallyMustCompleteNormally(this.finallyBlock);
-		} else {
-			// for resource analysis we need the finallyInfo in these nested scopes:
-			FlowInfo finallyInfo = subInfo.copy();
-			this.tryBlock.scope.finallyInfo = finallyInfo;
-			if (this.catchBlocks != null) {
-				for (int i = 0; i < this.catchBlocks.length; i++)
-					this.catchBlocks[i].scope.finallyInfo = finallyInfo;
-			}
-		}
-		this.subRoutineInits = subInfo;
-		// only try blocks initialize that member - may consider creating a
-		// separate class if needed
-
-		FlowInfo tryInfo = flowInfo.copy();
-		for (int i = 0; i < resourcesLength; i++) {
-			final Statement resource = this.resources[i];
-			tryInfo = resource.analyseCode(currentScope, handlingContext, tryInfo);
-			this.postResourcesInitStateIndexes[i] = currentScope.methodScope().recordInitializationStates(tryInfo);
-			TypeBinding resolvedType = null;
-			LocalVariableBinding localVariableBinding = null;
-			if (resource instanceof LocalDeclaration) {
-				localVariableBinding = ((LocalDeclaration) this.resources[i]).binding;
-				resolvedType = localVariableBinding.type;
-				if (localVariableBinding.closeTracker != null) {
-					// this was false alarm, we don't need to track the resource
-					localVariableBinding.closeTracker.withdraw();
-					// keep the tracking variable in the resourceBinding in order to prevent creating a new one while analyzing the try block
-				}
-			} else { // Expression
-				if (resource instanceof NameReference && ((NameReference) resource).binding instanceof LocalVariableBinding) {
-					localVariableBinding = (LocalVariableBinding)((NameReference) resource).binding;
-				}
-				recordCallingClose(currentScope, flowContext, tryInfo, (Expression)resource);
-				resolvedType = ((Expression) resource).resolvedType;
-			}
-			if (localVariableBinding != null) {
-				localVariableBinding.useFlag = LocalVariableBinding.USED; // Is implicitly used anyways.
-			}
-			MethodBinding closeMethod = findCloseMethod(resource, resolvedType);
-			if (closeMethod != null && closeMethod.isValidBinding() && closeMethod.returnType.id == TypeIds.T_void) {
-				ReferenceBinding[] thrownExceptions = closeMethod.thrownExceptions;
-				for (int j = 0, length = thrownExceptions.length; j < length; j++) {
-					handlingContext.checkExceptionHandlers(thrownExceptions[j], this.resources[i], tryInfo, currentScope, true);
-				}
-			}
-		}
-		if (!this.tryBlock.isEmptyBlock()) {
-			tryInfo = this.tryBlock.analyseCode(currentScope, handlingContext, tryInfo);
-			if ((tryInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0)
-				this.bits |= ASTNode.IsTryBlockExiting;
-		}
-		if (resourcesLength > 0) {
-			this.postTryInitStateIndex = currentScope.methodScope().recordInitializationStates(tryInfo);
-			// the resources are not in scope after the try block, so remove their assignment info
-			// to avoid polluting the state indices. However, do this after the postTryInitStateIndex is calculated since
-			// it is used to add or remove assigned resources during code gen
-			for (int i = 0; i < resourcesLength; i++) {
-				if (this.resources[i] instanceof LocalDeclaration)
-					tryInfo.resetAssignmentInfo(((LocalDeclaration)this.resources[i]).binding);
-			}
-		}
-		// check unreachable catch blocks
-		handlingContext.complainIfUnusedExceptionHandlers(this.scope, this);
-
-		// process the catch blocks - computing the minimal exit depth amongst try/catch
-		if (this.catchArguments != null) {
-			int catchCount;
-			this.catchExits = new boolean[catchCount = this.catchBlocks.length];
-			this.catchExitInitStateIndexes = new int[catchCount];
-			for (int i = 0; i < catchCount; i++) {
-				// keep track of the inits that could potentially have led to this exception handler (for final assignments diagnosis)
-				FlowInfo catchInfo = prepareCatchInfo(flowInfo, handlingContext, tryInfo, i);
-				insideSubContext.conditionalLevel = 1;
-				catchInfo =
-					this.catchBlocks[i].analyseCode(
-						currentScope,
-						insideSubContext,
-						catchInfo);
-				this.catchExitInitStateIndexes[i] = currentScope.methodScope().recordInitializationStates(catchInfo);
-				this.catchExits[i] =
-					(catchInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0;
-				tryInfo = tryInfo.mergedWith(catchInfo.unconditionalInits());
-			}
-		}
-		// we also need to check potential multiple assignments of final variables inside the finally block
-		// need to include potential inits from returns inside the try/catch parts - 1GK2AOF
-		finallyContext.complainOnDeferredChecks(
-			((tryInfo.tagBits & FlowInfo.UNREACHABLE) == 0 ?
-				flowInfo.unconditionalCopy().
-					addPotentialInitializationsFrom(tryInfo).
-					// lighten the influence of the try block, which may have
-					// exited at any point
-					addPotentialInitializationsFrom(insideSubContext.initsOnReturn) :
-				insideSubContext.initsOnReturn).
-			addNullInfoFrom(
-					handlingContext.initsOnFinally),
-			currentScope);
-
-		// chain up null info registry
-		flowContext.mergeFinallyNullInfo(handlingContext.initsOnFinally);
-
-		this.naturalExitMergeInitStateIndex =
-			currentScope.methodScope().recordInitializationStates(tryInfo);
-		if (subInfo == FlowInfo.DEAD_END) {
-			this.mergedInitStateIndex =
-				currentScope.methodScope().recordInitializationStates(subInfo);
-			return subInfo;
-		} else {
-			FlowInfo mergedInfo = tryInfo.addInitializationsFrom(subInfo);
-			this.mergedInitStateIndex =
-				currentScope.methodScope().recordInitializationStates(mergedInfo);
-			return mergedInfo;
-		}
 	}
+    InsideSubRoutineFlowContext insideSubContext;
+    FinallyFlowContext finallyContext;
+    UnconditionalFlowInfo subInfo;
+    // analyse finally block first
+    insideSubContext = new InsideSubRoutineFlowContext(flowContext, this);
+    if (flowContext instanceof FinallyFlowContext) {
+    	// if this TryStatement sits inside another TryStatement, establish the wiring so that
+    	// FlowContext.markFinallyNullStatus can report into initsOnFinally of the outer try context:
+    	insideSubContext.outerTryContext = ((FinallyFlowContext)flowContext).tryContext;
+    }
+
+    // process the try block in a context handling the local exceptions.
+    // (advance instantiation so we can wire this into the FinallyFlowContext)
+    ExceptionHandlingFlowContext handlingContext =
+    	new ExceptionHandlingFlowContext(
+    		insideSubContext,
+    		this,
+    		this.caughtExceptionTypes,
+    		this.caughtExceptionsCatchBlocks,
+    		null,
+    		this.scope,
+    		flowInfo);
+    insideSubContext.initsOnFinally = handlingContext.initsOnFinally;
+
+    subInfo =
+    	this.finallyBlock
+    		.analyseCode(
+    			currentScope,
+    			finallyContext = new FinallyFlowContext(flowContext, this.finallyBlock, handlingContext),
+    			flowInfo.nullInfoLessUnconditionalCopy())
+    		.unconditionalInits();
+    handlingContext.conditionalLevel = 0; // start collection initsOnFinally only after analysing the finally block
+    if (subInfo == FlowInfo.DEAD_END) {
+    	this.bits |= ASTNode.IsSubRoutineEscaping;
+    	this.scope.problemReporter().finallyMustCompleteNormally(this.finallyBlock);
+    } else {
+    	// for resource analysis we need the finallyInfo in these nested scopes:
+    	FlowInfo finallyInfo = subInfo.copy();
+    	this.tryBlock.scope.finallyInfo = finallyInfo;
+    	if (this.catchBlocks != null) {
+    		for (int i = 0; i < this.catchBlocks.length; i++)
+    			this.catchBlocks[i].scope.finallyInfo = finallyInfo;
+    	}
+    }
+    this.subRoutineInits = subInfo;
+    // only try blocks initialize that member - may consider creating a
+    // separate class if needed
+
+    FlowInfo tryInfo = flowInfo.copy();
+    for (int i = 0; i < resourcesLength; i++) {
+    	final Statement resource = this.resources[i];
+    	tryInfo = resource.analyseCode(currentScope, handlingContext, tryInfo);
+    	this.postResourcesInitStateIndexes[i] = currentScope.methodScope().recordInitializationStates(tryInfo);
+    	TypeBinding resolvedType = null;
+    	LocalVariableBinding localVariableBinding = null;
+    	if (resource instanceof LocalDeclaration) {
+    		localVariableBinding = ((LocalDeclaration) this.resources[i]).binding;
+    		resolvedType = localVariableBinding.type;
+    		if (localVariableBinding.closeTracker != null) {
+    			// this was false alarm, we don't need to track the resource
+    			localVariableBinding.closeTracker.withdraw();
+    			// keep the tracking variable in the resourceBinding in order to prevent creating a new one while analyzing the try block
+    		}
+    	} else { // Expression
+    		if (resource instanceof NameReference && ((NameReference) resource).binding instanceof LocalVariableBinding) {
+    			localVariableBinding = (LocalVariableBinding)((NameReference) resource).binding;
+    		}
+    		recordCallingClose(currentScope, flowContext, tryInfo, (Expression)resource);
+    		resolvedType = ((Expression) resource).resolvedType;
+    	}
+    	if (localVariableBinding != null) {
+    		localVariableBinding.useFlag = LocalVariableBinding.USED; // Is implicitly used anyways.
+    	}
+    	MethodBinding closeMethod = findCloseMethod(resource, resolvedType);
+    	if (closeMethod != null && closeMethod.isValidBinding() && closeMethod.returnType.id == TypeIds.T_void) {
+    		ReferenceBinding[] thrownExceptions = closeMethod.thrownExceptions;
+    		for (ReferenceBinding thrownException : thrownExceptions) {
+    			handlingContext.checkExceptionHandlers(thrownException, this.resources[i], tryInfo, currentScope, true);
+    		}
+    	}
+    }
+    if (!this.tryBlock.isEmptyBlock()) {
+    	tryInfo = this.tryBlock.analyseCode(currentScope, handlingContext, tryInfo);
+    	if ((tryInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0)
+    		this.bits |= ASTNode.IsTryBlockExiting;
+    }
+    if (resourcesLength > 0) {
+    	this.postTryInitStateIndex = currentScope.methodScope().recordInitializationStates(tryInfo);
+    	// the resources are not in scope after the try block, so remove their assignment info
+    	// to avoid polluting the state indices. However, do this after the postTryInitStateIndex is calculated since
+    	// it is used to add or remove assigned resources during code gen
+    	for (int i = 0; i < resourcesLength; i++) {
+    		if (this.resources[i] instanceof LocalDeclaration)
+    			tryInfo.resetAssignmentInfo(((LocalDeclaration)this.resources[i]).binding);
+    	}
+    }
+    // check unreachable catch blocks
+    handlingContext.complainIfUnusedExceptionHandlers(this.scope, this);
+
+    // process the catch blocks - computing the minimal exit depth amongst try/catch
+    if (this.catchArguments != null) {
+    	int catchCount;
+    	this.catchExits = new boolean[catchCount = this.catchBlocks.length];
+    	this.catchExitInitStateIndexes = new int[catchCount];
+    	for (int i = 0; i < catchCount; i++) {
+    		// keep track of the inits that could potentially have led to this exception handler (for final assignments diagnosis)
+    		FlowInfo catchInfo = prepareCatchInfo(flowInfo, handlingContext, tryInfo, i);
+    		insideSubContext.conditionalLevel = 1;
+    		catchInfo =
+    			this.catchBlocks[i].analyseCode(
+    				currentScope,
+    				insideSubContext,
+    				catchInfo);
+    		this.catchExitInitStateIndexes[i] = currentScope.methodScope().recordInitializationStates(catchInfo);
+    		this.catchExits[i] =
+    			(catchInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0;
+    		tryInfo = tryInfo.mergedWith(catchInfo.unconditionalInits());
+    	}
+    }
+    // we also need to check potential multiple assignments of final variables inside the finally block
+    // need to include potential inits from returns inside the try/catch parts - 1GK2AOF
+    finallyContext.complainOnDeferredChecks(
+    	((tryInfo.tagBits & FlowInfo.UNREACHABLE) == 0 ?
+    		flowInfo.unconditionalCopy().
+    			addPotentialInitializationsFrom(tryInfo).
+    			// lighten the influence of the try block, which may have
+    			// exited at any point
+    			addPotentialInitializationsFrom(insideSubContext.initsOnReturn) :
+    		insideSubContext.initsOnReturn).
+    	addNullInfoFrom(
+    			handlingContext.initsOnFinally),
+    	currentScope);
+
+    // chain up null info registry
+    flowContext.mergeFinallyNullInfo(handlingContext.initsOnFinally);
+
+    this.naturalExitMergeInitStateIndex =
+    	currentScope.methodScope().recordInitializationStates(tryInfo);
+    if (subInfo == FlowInfo.DEAD_END) {
+    	this.mergedInitStateIndex =
+    		currentScope.methodScope().recordInitializationStates(subInfo);
+    	return subInfo;
+    }
+    FlowInfo mergedInfo = tryInfo.addInitializationsFrom(subInfo);
+    this.mergedInitStateIndex =
+    	currentScope.methodScope().recordInitializationStates(mergedInfo);
+    return mergedInfo;
 }
 private void recordCallingClose(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo, Expression closeTarget) {
 	FakedTrackingVariable trackingVariable = FakedTrackingVariable.getCloseTrackingVariable(closeTarget, flowInfo, flowContext);
@@ -448,11 +446,9 @@ private boolean isUncheckedCatchBlock(int catchBlock) {
 		return this.caughtExceptionTypes[catchBlock].isUncheckedException(true);
 	}
 	for (int i = 0, length = this.caughtExceptionsCatchBlocks.length; i < length; i++) {
-		if (this.caughtExceptionsCatchBlocks[i] == catchBlock) {
-			if (this.caughtExceptionTypes[i].isUncheckedException(true)) {
-				return true;
-			}
-		}
+		if (this.caughtExceptionsCatchBlocks[i] == catchBlock && this.caughtExceptionTypes[i].isUncheckedException(true)) {
+        	return true;
+        }
 	}
 	return false;
 }
@@ -495,13 +491,14 @@ public void exitDeclaredExceptionHandlers(CodeStream codeStream) {
 private int finallyMode() {
 	if (this.subRoutineStartLabel == null) {
 		return NO_FINALLY;
-	} else if (isSubRoutineEscaping()) {
-		return FINALLY_DOES_NOT_COMPLETE;
-	} else if (this.scope.compilerOptions().inlineJsrBytecode) {
-		return FINALLY_INLINE;
-	} else {
-		return FINALLY_SUBROUTINE;
 	}
+    if (isSubRoutineEscaping()) {
+		return FINALLY_DOES_NOT_COMPLETE;
+	}
+    if (this.scope.compilerOptions().inlineJsrBytecode) {
+		return FINALLY_INLINE;
+	}
+    return FINALLY_SUBROUTINE;
 }
 /**
  * Try statement code generation with or without jsr bytecode use
@@ -768,7 +765,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 			}
 		}
 		// extra handler for trailing natural exit (will be fixed up later on when natural exit is generated below)
-		ExceptionLabel naturalExitExceptionHandler = requiresNaturalExit && (finallyMode == FINALLY_SUBROUTINE)
+		ExceptionLabel naturalExitExceptionHandler = requiresNaturalExit && finallyMode == FINALLY_SUBROUTINE
 					? new ExceptionLabel(codeStream, null)
 					: null;
 
@@ -885,12 +882,10 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 			// no subroutine, simply position end label (natural exit == end)
 			naturalExitLabel.place();
 		}
-	} else {
-		// try block had no effect, only generate the body of the finally block if any
-		if (this.subRoutineStartLabel != null) {
-			this.finallyBlock.generateCode(this.scope, codeStream);
-		}
-	}
+	} else // try block had no effect, only generate the body of the finally block if any
+    if (this.subRoutineStartLabel != null) {
+    	this.finallyBlock.generateCode(this.scope, codeStream);
+    }
 	// May loose some local variable initializations : affecting the local variable attributes
 	if (this.mergedInitStateIndex != -1) {
 		codeStream.removeNotDefinitelyAssignedVariables(currentScope, this.mergedInitStateIndex);
@@ -1002,9 +997,7 @@ public boolean generateSubRoutineInvocation(BlockScope currentScope, CodeStream 
 			nextReusableTarget: for (int i = 0, count = this.reusableJSRTargetsCount; i < count; i++) {
 				Object reusableJSRTarget = this.reusableJSRTargets[i];
 				differentTarget: {
-					if (targetLocation == reusableJSRTarget)
-						break differentTarget;
-					if (targetLocation instanceof Constant
+					if (targetLocation == reusableJSRTarget || targetLocation instanceof Constant
 							&& reusableJSRTarget instanceof Constant
 							&& ((Constant)targetLocation).hasSameValue((Constant) reusableJSRTarget)) {
 						break differentTarget;
@@ -1013,13 +1006,12 @@ public boolean generateSubRoutineInvocation(BlockScope currentScope, CodeStream 
 					continue nextReusableTarget;
 				}
 				// current target has been used in the past, simply branch to its label
-				if ((this.reusableJSRStateIndexes[i] != stateIndex) && finallyMode == FINALLY_INLINE) {
+				if (this.reusableJSRStateIndexes[i] != stateIndex && finallyMode == FINALLY_INLINE) {
 					reuseTargetLocation = false;
 					break nextReusableTarget;
-				} else {
-					codeStream.goto_(this.reusableJSRSequenceStartLabels[i]);
-					return true;
 				}
+                codeStream.goto_(this.reusableJSRSequenceStartLabels[i]);
+                return true;
 			}
 		} else {
 			this.reusableJSRTargets = new Object[3];
@@ -1183,8 +1175,8 @@ public void resolve(BlockScope upperScope) {
 
 			if (!methodScope.isInsideInitializer()) {
 				MethodBinding methodBinding = methodScope.referenceContext instanceof AbstractMethodDeclaration ?
-					((AbstractMethodDeclaration) methodScope.referenceContext).binding : (methodScope.referenceContext instanceof LambdaExpression ?
-							((LambdaExpression)methodScope.referenceContext).binding : null);
+					((AbstractMethodDeclaration) methodScope.referenceContext).binding : methodScope.referenceContext instanceof LambdaExpression ?
+							((LambdaExpression)methodScope.referenceContext).binding : null;
 				if (methodBinding != null) {
 					TypeBinding methodReturnType = methodBinding.returnType;
 					if (methodReturnType.id != TypeIds.T_void) {
@@ -1248,8 +1240,8 @@ public void resolve(BlockScope upperScope) {
 public void traverse(ASTVisitor visitor, BlockScope blockScope) {
 	if (visitor.visit(this, blockScope)) {
 		Statement[] statements = this.resources;
-		for (int i = 0, max = statements.length; i < max; i++) {
-			statements[i].traverse(visitor, this.scope);
+		for (Statement statement : statements) {
+			statement.traverse(visitor, this.scope);
 		}
 		this.tryBlock.traverse(visitor, this.scope);
 		if (this.catchArguments != null) {
@@ -1341,8 +1333,8 @@ public boolean doesNotCompleteNormally() {
 		return this.finallyBlock != null && this.finallyBlock.doesNotCompleteNormally();
 	}
 	if (this.catchBlocks != null) {
-		for (int i = 0; i < this.catchBlocks.length; i++) {
-			if (!this.catchBlocks[i].doesNotCompleteNormally()) {
+		for (Block catchBlock : this.catchBlocks) {
+			if (!catchBlock.doesNotCompleteNormally()) {
 				return this.finallyBlock != null && this.finallyBlock.doesNotCompleteNormally();
 			}
 		}
@@ -1355,8 +1347,8 @@ public boolean completesByContinue() {
 		return this.finallyBlock == null || !this.finallyBlock.doesNotCompleteNormally() || this.finallyBlock.completesByContinue();
 	}
 	if (this.catchBlocks != null) {
-		for (int i = 0; i < this.catchBlocks.length; i++) {
-			if (this.catchBlocks[i].completesByContinue()) {
+		for (Block catchBlock : this.catchBlocks) {
+			if (catchBlock.completesByContinue()) {
 				return this.finallyBlock == null || !this.finallyBlock.doesNotCompleteNormally() || this.finallyBlock.completesByContinue();
 			}
 		}
@@ -1369,8 +1361,8 @@ public boolean canCompleteNormally() {
 		return this.finallyBlock == null || this.finallyBlock.canCompleteNormally();
 	}
 	if (this.catchBlocks != null) {
-		for (int i = 0; i < this.catchBlocks.length; i++) {
-			if (this.catchBlocks[i].canCompleteNormally()) {
+		for (Block catchBlock : this.catchBlocks) {
+			if (catchBlock.canCompleteNormally()) {
 				return this.finallyBlock == null || this.finallyBlock.canCompleteNormally();
 			}
 		}
@@ -1383,8 +1375,8 @@ public boolean continueCompletes() {
 		return this.finallyBlock == null || this.finallyBlock.canCompleteNormally() || this.finallyBlock.continueCompletes();
 	}
 	if (this.catchBlocks != null) {
-		for (int i = 0; i < this.catchBlocks.length; i++) {
-			if (this.catchBlocks[i].continueCompletes()) {
+		for (Block catchBlock : this.catchBlocks) {
+			if (catchBlock.continueCompletes()) {
 				return this.finallyBlock == null || this.finallyBlock.canCompleteNormally() || this.finallyBlock.continueCompletes();
 			}
 		}

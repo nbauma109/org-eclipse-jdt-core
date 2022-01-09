@@ -149,40 +149,7 @@ public class IterateExpression extends CompositeExpression {
 	@Override
 	public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
 		Object var= context.getDefaultVariable();
-		if (var instanceof Collection) {
-			Collection<?> col= (Collection<?>)var;
-			switch (col.size()) {
-				case 0:
-					if (fEmptyResult == null) {
-						return fOperator == AND ? EvaluationResult.TRUE : EvaluationResult.FALSE;
-					} else {
-						return fEmptyResult.booleanValue() ? EvaluationResult.TRUE : EvaluationResult.FALSE;
-					}
-				case 1:
-					if (col instanceof List)
-						return evaluateAnd(new DefaultVariable(context, ((List<?>)col).get(0)));
-					//$FALL-THROUGH$
-				default:
-					IteratePool iter= new IteratePool(context, col.iterator());
-					EvaluationResult result= fOperator == AND ? EvaluationResult.TRUE : EvaluationResult.FALSE;
-					while (iter.hasNext()) {
-						iter.next();
-						switch(fOperator) {
-							case OR:
-								result= result.or(evaluateAnd(iter));
-								if (result == EvaluationResult.TRUE)
-									return result;
-								break;
-							case AND:
-								result= result.and(evaluateAnd(iter));
-								if (result != EvaluationResult.TRUE)
-									return result;
-								break;
-						}
-					}
-					return result;
-			}
-		} else {
+		if (!(var instanceof Collection)) {
 			IIterable<?> iterable= Expressions.getAsIIterable(var, this);
 			if (iterable == null)
 				return EvaluationResult.NOT_LOADED;
@@ -207,12 +174,44 @@ public class IterateExpression extends CompositeExpression {
 			}
 			if (count > 0) {
 				return result;
-			} else if (fEmptyResult == null) {
-				return fOperator == AND ? EvaluationResult.TRUE : EvaluationResult.FALSE;
-			} else {
-				return fEmptyResult.booleanValue() ? EvaluationResult.TRUE : EvaluationResult.FALSE;
 			}
+            if (fEmptyResult == null) {
+				return fOperator == AND ? EvaluationResult.TRUE : EvaluationResult.FALSE;
+			}
+            return fEmptyResult ? EvaluationResult.TRUE : EvaluationResult.FALSE;
 		}
+        Collection<?> col= (Collection<?>)var;
+        switch (col.size()) {
+        	case 0:
+        		if (fEmptyResult == null) {
+        			return fOperator == AND ? EvaluationResult.TRUE : EvaluationResult.FALSE;
+        		} else {
+        			return fEmptyResult ? EvaluationResult.TRUE : EvaluationResult.FALSE;
+        		}
+        	case 1:
+        		if (col instanceof List)
+        			return evaluateAnd(new DefaultVariable(context, ((List<?>)col).get(0)));
+        		//$FALL-THROUGH$
+        	default:
+        		IteratePool iter= new IteratePool(context, col.iterator());
+        		EvaluationResult result= fOperator == AND ? EvaluationResult.TRUE : EvaluationResult.FALSE;
+        		while (iter.hasNext()) {
+        			iter.next();
+        			switch(fOperator) {
+        				case OR:
+        					result= result.or(evaluateAnd(iter));
+        					if (result == EvaluationResult.TRUE)
+        						return result;
+        					break;
+        				case AND:
+        					result= result.and(evaluateAnd(iter));
+        					if (result != EvaluationResult.TRUE)
+        						return result;
+        					break;
+        			}
+        		}
+        		return result;
+        }
 	}
 
 	@Override
@@ -230,7 +229,7 @@ public class IterateExpression extends CompositeExpression {
 			return false;
 
 		final IterateExpression that= (IterateExpression)object;
-		return (this.fOperator == that.fOperator) && equals(this.fExpressions, that.fExpressions);
+		return this.fOperator == that.fOperator && equals(this.fExpressions, that.fExpressions);
 	}
 
 	@Override

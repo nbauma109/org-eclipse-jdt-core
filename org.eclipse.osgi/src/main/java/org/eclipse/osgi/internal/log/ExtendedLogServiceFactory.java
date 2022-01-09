@@ -150,11 +150,10 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 				String lookupName = name;
 				while ((level = contextLogLevels.get(lookupName)) == null) {
 					int lastDot = lookupName.lastIndexOf('.');
-					if (lastDot >= 0) {
-						lookupName = lookupName.substring(0, lastDot);
-					} else {
+					if (lastDot < 0) {
 						break;
 					}
+                    lookupName = lookupName.substring(0, lastDot);
 				}
 				if (level == null) {
 					level = contextLogLevels.get(Logger.ROOT_LOGGER_NAME);

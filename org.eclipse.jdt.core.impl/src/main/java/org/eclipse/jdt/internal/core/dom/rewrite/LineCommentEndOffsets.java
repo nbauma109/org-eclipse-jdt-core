@@ -65,7 +65,7 @@ public class LineCommentEndOffsets {
 	}
 
 	public boolean isEndOfLineComment(int offset, char[] content) {
-		if (offset < 0 || (offset < content.length && !IndentManipulation.isLineDelimiterChar(content[offset]))) {
+		if (offset < 0 || offset < content.length && !IndentManipulation.isLineDelimiterChar(content[offset])) {
 			return false;
 		}
 		return Arrays.binarySearch(getOffsets(), offset) >= 0;

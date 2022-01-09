@@ -88,8 +88,7 @@ String[] directoryList(String qualifiedPackageName) {
 			int index = 0;
 			boolean foundClass = false;
 			if (members.length > 0) {
-				for (int i = 0, l = members.length; i < l; i++) {
-					IResource m = members[i];
+				for (IResource m : members) {
 					String name = m.getName();
 					boolean isClass = m.getType() == IResource.FILE && org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(name);
 					if (m.getType() == IResource.FOLDER || isClass) {
@@ -106,11 +105,10 @@ String[] directoryList(String qualifiedPackageName) {
 					if (members.length > 0) {
 						dirList = new String[members.length];
 						index = 0;
-						for (int i = 0, l = members.length; i < l; i++) {
-							IResource m = members[i];
+						for (IResource m : members) {
 							String name = m.getName();
 							if (m.getType() == IResource.FOLDER
-									|| (m.getType() == IResource.FILE && org.eclipse.jdt.internal.compiler.util.Util.isJavaFileName(name))) {
+									|| m.getType() == IResource.FILE && org.eclipse.jdt.internal.compiler.util.Util.isJavaFileName(name)) {
 								// FIXME: check if .java file has any declarations?
 								dirList[index++] = name;
 							}

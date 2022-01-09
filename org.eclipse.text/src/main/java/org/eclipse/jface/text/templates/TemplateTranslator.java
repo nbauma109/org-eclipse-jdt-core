@@ -242,16 +242,16 @@ public class TemplateTranslator {
 		SortedMap<Integer, TemplateVariable> varsByOffset = new TreeMap<>();
 		for (TemplateVariable var : vars) {
 			for (int offset : var.getOffsets()) {
-				varsByOffset.put(Integer.valueOf(offset), var);
+				varsByOffset.put(offset, var);
 			}
 		}
 		int totalOffsetDelta = 0;
 		Map<TemplateVariable, Collection<Integer>> fixedOffsets = new HashMap<>(vars.length, 1.f);
 		for (Entry<Integer, TemplateVariable> entry : varsByOffset.entrySet()) {
-			final int initialOffset = entry.getKey().intValue();
+			final int initialOffset = entry.getKey();
 			TemplateVariable variable = entry.getValue();
 			final int fixedOffset = initialOffset + totalOffsetDelta;
-			fixedOffsets.computeIfAbsent(variable, v -> new ArrayList<>(v.getOffsets().length)).add(Integer.valueOf(fixedOffset));
+			fixedOffsets.computeIfAbsent(variable, v -> new ArrayList<>(v.getOffsets().length)).add(fixedOffset);
 			int currentOffsetDelta = variable.getDefaultValue().length() - variable.getName().length();
 			buffer.replace(fixedOffset, fixedOffset + variable.getName().length(), variable.getDefaultValue());
 			totalOffsetDelta += currentOffsetDelta;
@@ -307,7 +307,7 @@ public class TemplateTranslator {
 		} else {
 			varDesc.mergeType(type);
 		}
-		varDesc.fOffsets.add(Integer.valueOf(offset));
+		varDesc.fOffsets.add(offset);
 		return varDesc;
 	}
 
@@ -328,7 +328,7 @@ public class TemplateTranslator {
 			int i= 0;
 			for (Iterator<Integer> intIt= desc.fOffsets.iterator(); intIt.hasNext(); i++) {
 				Integer offset= intIt.next();
-				offsets[i]= offset.intValue();
+				offsets[i]= offset;
 			}
 			fCurrentType= type;
 			/*

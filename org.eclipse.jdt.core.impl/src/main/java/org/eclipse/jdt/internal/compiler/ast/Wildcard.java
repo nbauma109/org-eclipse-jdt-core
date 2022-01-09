@@ -72,7 +72,7 @@ public class Wildcard extends SingleTypeReference {
 			boundType = scope.kind == Scope.CLASS_SCOPE
 					? this.bound.resolveType((ClassScope)scope, Binding.DefaultLocationTypeBound)
 					: this.bound.resolveType((BlockScope)scope, true /* check bounds*/, Binding.DefaultLocationTypeBound);
-			this.bits |= (this.bound.bits & ASTNode.HasTypeAnnotations);
+			this.bits |= this.bound.bits & ASTNode.HasTypeAnnotations;
 			if (boundType == null) {
 				return null;
 			}
@@ -114,7 +114,7 @@ public class Wildcard extends SingleTypeReference {
 	public TypeBinding resolveType(BlockScope scope, boolean checkBounds, int location) {
 		if (this.bound != null) {
 			this.bound.resolveType(scope, checkBounds, Binding.DefaultLocationTypeBound);
-			this.bits |= (this.bound.bits & ASTNode.HasTypeAnnotations);
+			this.bits |= this.bound.bits & ASTNode.HasTypeAnnotations;
 		}
 		return null;
 	}
@@ -123,7 +123,7 @@ public class Wildcard extends SingleTypeReference {
 	public TypeBinding resolveType(ClassScope scope, int location) {
 		if (this.bound != null) {
 			this.bound.resolveType(scope, Binding.DefaultLocationTypeBound);
-			this.bits |= (this.bound.bits & ASTNode.HasTypeAnnotations);
+			this.bits |= this.bound.bits & ASTNode.HasTypeAnnotations;
 		}
 		return null;
 	}

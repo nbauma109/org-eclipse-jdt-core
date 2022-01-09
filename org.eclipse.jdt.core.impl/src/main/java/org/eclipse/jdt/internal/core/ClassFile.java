@@ -132,41 +132,38 @@ public IJavaElement[] codeSelect(int offset, int length, WorkingCopyOwner owner)
 	    BinaryType type = (BinaryType) getType();
 		BasicCompilationUnit cu = new BasicCompilationUnit(contents, null, type.sourceFileName((IBinaryType) type.getElementInfo()), this);
 		return super.codeSelect(cu, offset, length, owner);
-	} else {
-		//has no associated souce
-		return new IJavaElement[] {};
 	}
+    //has no associated souce
+    return new IJavaElement[] {};
 }
 public boolean existsUsingJarTypeCache() {
-	if (getPackageFragmentRoot().isArchive()) {
-		JavaModelManager manager = JavaModelManager.getJavaModelManager();
-		IType type = getType();
-		Object info = manager.getInfo(type);
-		if (info == JavaModelCache.NON_EXISTING_JAR_TYPE_INFO)
-			return false;
-		else if (info != null)
-			return true;
-		// info is null
-		JavaElementInfo parentInfo = (JavaElementInfo) manager.getInfo(getParent());
-		if (parentInfo != null) {
-			// if parent is open, this class file must be in its children
-			IJavaElement[] children = parentInfo.getChildren();
-			for (int i = 0, length = children.length; i < length; i++) {
-				IJavaElement child = children[i];
-				if (child instanceof ClassFile && this.name.equals(((ClassFile) child).name))
-					return true;
-			}
-			return false;
-		}
-		try {
-			info = getJarBinaryTypeInfo();
-		} catch (CoreException | IOException | ClassFormatException e) {
-			// leave info null
-		}
-		manager.putJarTypeInfo(type, info == null ? JavaModelCache.NON_EXISTING_JAR_TYPE_INFO : info);
-		return info != null;
-	} else
-		return exists();
+	if (!getPackageFragmentRoot().isArchive())
+        return exists();
+    JavaModelManager manager = JavaModelManager.getJavaModelManager();
+    IType type = getType();
+    Object info = manager.getInfo(type);
+    if (info == JavaModelCache.NON_EXISTING_JAR_TYPE_INFO)
+    	return false;
+    if (info != null)
+    	return true;
+    // info is null
+    JavaElementInfo parentInfo = (JavaElementInfo) manager.getInfo(getParent());
+    if (parentInfo != null) {
+    	// if parent is open, this class file must be in its children
+    	IJavaElement[] children = parentInfo.getChildren();
+    	for (IJavaElement child : children) {
+    		if (child instanceof ClassFile && this.name.equals(((ClassFile) child).name))
+    			return true;
+    	}
+    	return false;
+    }
+    try {
+    	info = getJarBinaryTypeInfo();
+    } catch (CoreException | IOException | ClassFormatException e) {
+    	// leave info null
+    }
+    manager.putJarTypeInfo(type, info == null ? JavaModelCache.NON_EXISTING_JAR_TYPE_INFO : info);
+    return info != null;
 }
 
 /**
@@ -214,9 +211,8 @@ public IBinaryType getBinaryTypeInfo() throws JavaModelException {
 	} catch (CoreException e) {
 		if (e instanceof JavaModelException) {
 			throw (JavaModelException)e;
-		} else {
-			throw new JavaModelException(e);
 		}
+        throw new JavaModelException(e);
 	}
 }
 
@@ -232,22 +228,18 @@ private IBinaryType getJarBinaryTypeInfo() throws CoreException, IOException, Cl
 	}
 	IBinaryType result = null;
 	IPackageFragmentRoot root = getPackageFragmentRoot();
-	if (getPackageFragmentRoot() instanceof JarPackageFragmentRoot) {
-		if (root instanceof JrtPackageFragmentRoot || this.name.equals(IModule.MODULE_INFO)) {
-			PackageFragment pkg = (PackageFragment) getParent();
-			JarPackageFragmentRoot jarRoot = (JarPackageFragmentRoot) getPackageFragmentRoot();
-			String entryName = jarRoot.getClassFilePath(Util.concatWith(pkg.names, getElementName(), '/'));
-			byte[] contents = getClassFileContent(jarRoot, entryName);
-			if (contents != null) {
-				String fileName = root.getHandleIdentifier() + IDependent.JAR_FILE_ENTRY_SEPARATOR + entryName;
-				result = new ClassFileReader(contents, fileName.toCharArray(), false);
-			}
-		} else {
-			result = BinaryTypeFactory.readType(descriptor, null);
-		}
-	} else {
-		result = BinaryTypeFactory.readType(descriptor, null);
-	}
+	if (getPackageFragmentRoot() instanceof JarPackageFragmentRoot && (root instanceof JrtPackageFragmentRoot || this.name.equals(IModule.MODULE_INFO))) {
+    	PackageFragment pkg = (PackageFragment) getParent();
+    	JarPackageFragmentRoot jarRoot = (JarPackageFragmentRoot) getPackageFragmentRoot();
+    	String entryName = jarRoot.getClassFilePath(Util.concatWith(pkg.names, getElementName(), '/'));
+    	byte[] contents = getClassFileContent(jarRoot, entryName);
+    	if (contents != null) {
+    		String fileName = root.getHandleIdentifier() + IDependent.JAR_FILE_ENTRY_SEPARATOR + entryName;
+    		result = new ClassFileReader(contents, fileName.toCharArray(), false);
+    	}
+    } else {
+    	result = BinaryTypeFactory.readType(descriptor, null);
+    }
 
 	if (result == null) {
 		return null;
@@ -310,14 +302,13 @@ private IBinaryType setupExternalAnnotationProvider(IProject project, final IPat
 	}
 	ZipFile annotationZip = null;
 	try {
-		annotationZip = ExternalAnnotationDecorator.getAnnotationZipFile(resolvedPath, new ExternalAnnotationDecorator.ZipFileProducer() {
-			@Override public ZipFile produce() throws IOException {
-				try {
-					return JavaModelManager.getJavaModelManager().getZipFile(externalAnnotationPath); // use (absolute, but) unresolved path here
-				} catch (CoreException e) {
-					throw new IOException("Failed to read annotation file for "+typeName+" from "+ externalAnnotationPath, e); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}});
+		annotationZip = ExternalAnnotationDecorator.getAnnotationZipFile(resolvedPath, () -> {
+        	try {
+        		return JavaModelManager.getJavaModelManager().getZipFile(externalAnnotationPath); // use (absolute, but) unresolved path here
+        	} catch (CoreException e) {
+        		throw new IOException("Failed to read annotation file for "+typeName+" from "+ externalAnnotationPath, e); //$NON-NLS-1$ //$NON-NLS-2$
+        	}
+        });
 
 		ExternalAnnotationProvider annotationProvider = ExternalAnnotationDecorator
 				.externalAnnotationProvider(resolvedPath, typeName, annotationZip);
@@ -370,13 +361,12 @@ public IJavaElement getElementAt(int position) throws JavaModelException {
 	SourceMapper mapper = root.getSourceMapper();
 	if (mapper == null) {
 		return null;
-	} else {
-		// ensure this class file's buffer is open so that source ranges are computed
-		getBuffer();
-
-		IType type = getType();
-		return findElement(type, position, mapper);
 	}
+    // ensure this class file's buffer is open so that source ranges are computed
+    getBuffer();
+
+    IType type = getType();
+    return findElement(type, position, mapper);
 }
 
 /*
@@ -502,17 +492,16 @@ private IBuffer mapSource(SourceMapper mapper, IBinaryType info, IClassFile buff
 		mapper.mapSource((NamedMember) getOuterMostEnclosingType(), contents, info);
 
 		return buffer;
-	} else {
-		// create buffer
-		IBuffer buffer = BufferManager.createNullBuffer(bufferOwner);
-		if (buffer == null) return null;
-		BufferManager bufManager = getBufferManager();
-		bufManager.addBuffer(buffer);
-
-		// listen to buffer changes
-		buffer.addBufferChangedListener(this);
-		return buffer;
 	}
+    // create buffer
+    IBuffer buffer = BufferManager.createNullBuffer(bufferOwner);
+    if (buffer == null) return null;
+    BufferManager bufManager = getBufferManager();
+    bufManager.addBuffer(buffer);
+
+    // listen to buffer changes
+    buffer.addBufferChangedListener(this);
+    return buffer;
 }
 /* package */ static String simpleName(char[] className) {
 	if (className == null)
@@ -521,8 +510,7 @@ private IBuffer mapSource(SourceMapper mapper, IBinaryType info, IClassFile buff
 	int lastDollar = simpleName.lastIndexOf('$');
 	if (lastDollar != -1)
 		return Util.localTypeName(simpleName, lastDollar, simpleName.length());
-	else
-		return simpleName;
+    return simpleName;
 }
 
 /** Returns the type of the top-level declaring class used to find the source code */

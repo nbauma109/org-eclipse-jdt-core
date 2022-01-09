@@ -74,7 +74,6 @@ public final class ModuleWiring implements BundleWiring {
 	ModuleWiring(ModuleRevision revision, NamespaceList<ModuleCapability> capabilities,
 			NamespaceList<ModuleRequirement> requirements, NamespaceList<ModuleWire> providedWires,
 			NamespaceList<ModuleWire> requiredWires, Collection<String> substitutedPkgNames) {
-		super();
 		this.revision = revision;
 		this.capabilities = capabilities;
 		this.requirements = requirements;
@@ -145,11 +144,9 @@ public final class ModuleWiring implements BundleWiring {
 		List<ModuleRequirement> persistentRequriements = new ArrayList<>(requirements.getList(null));
 		for (Iterator<ModuleRequirement> iRequirements = persistentRequriements.iterator(); iRequirements.hasNext();) {
 			ModuleRequirement requirement = iRequirements.next();
-			if (PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace())) {
-				if ("true".equals(requirement.getDirectives().get(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE))) { //$NON-NLS-1$
-					iRequirements.remove();
-				}
-			}
+			if (PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace()) && "true".equals(requirement.getDirectives().get(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE))) { //$NON-NLS-1$
+            	iRequirements.remove();
+            }
 		}
 		return persistentRequriements;
 	}
@@ -204,11 +201,9 @@ public final class ModuleWiring implements BundleWiring {
 		List<ModuleWire> persistentWires = new ArrayList<>(allWires.getList(null));
 		for (Iterator<ModuleWire> iWires = persistentWires.iterator(); iWires.hasNext();) {
 			ModuleWire wire = iWires.next();
-			if (PackageNamespace.PACKAGE_NAMESPACE.equals(wire.getRequirement().getNamespace())) {
-				if ("true".equals(wire.getRequirement().getDirectives().get(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE))) { //$NON-NLS-1$
-					iWires.remove();
-				}
-			}
+			if (PackageNamespace.PACKAGE_NAMESPACE.equals(wire.getRequirement().getNamespace()) && "true".equals(wire.getRequirement().getDirectives().get(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE))) { //$NON-NLS-1$
+            	iWires.remove();
+            }
 		}
 		return persistentWires;
 	}
@@ -430,7 +425,7 @@ public final class ModuleWiring implements BundleWiring {
 			requirmentsBuilder.addAll(newRequirements);
 			requirements = requirmentsBuilder.build();
 			// clear out miss cache when adding new dynamic imports.
-			dynamicMissRef.updateAndGet((s) -> {
+			dynamicMissRef.updateAndGet(s -> {
 				if (s != null) {
 					s.clear();
 				}

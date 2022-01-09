@@ -59,14 +59,11 @@ import org.eclipse.jdt.internal.compiler.util.HashSetOfInt;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class CompilationUnitDeclaration extends ASTNode implements ProblemSeverities, ReferenceContext {
 
-	private static final Comparator STRING_LITERAL_COMPARATOR = new Comparator() {
-		@Override
-		public int compare(Object o1, Object o2) {
-			StringLiteral literal1 = (StringLiteral) o1;
-			StringLiteral literal2 = (StringLiteral) o2;
-			return literal1.sourceStart - literal2.sourceStart;
-		}
-	};
+	private static final Comparator STRING_LITERAL_COMPARATOR = (o1, o2) -> {
+    	StringLiteral literal1 = (StringLiteral) o1;
+    	StringLiteral literal2 = (StringLiteral) o2;
+    	return literal1.sourceStart - literal2.sourceStart;
+    };
 	private static final int STRING_LITERALS_INCREMENT = 10;
 
 	public ImportReference currentPackage;
@@ -132,8 +129,8 @@ public void analyseCode() {
 		return;
 	try {
 		if (this.types != null) {
-			for (int i = 0, count = this.types.length; i < count; i++) {
-				this.types[i].analyseCode(this.scope);
+			for (TypeDeclaration type2 : this.types) {
+				type2.analyseCode(this.scope);
 			}
 		}
 		if (this.moduleDeclaration != null) {
@@ -153,8 +150,8 @@ public void analyseCode() {
  */
 public void cleanUp() {
 	if (this.types != null) {
-		for (int i = 0, max = this.types.length; i < max; i++) {
-			cleanUp(this.types[i]);
+		for (TypeDeclaration type2 : this.types) {
+			cleanUp(type2);
 		}
 		for (LocalTypeBinding localType : this.localTypes.values()) {
 			// null out the type's scope backpointers
@@ -171,9 +168,9 @@ public void cleanUp() {
 	this.compilationResult.recoveryScannerData = null; // recovery is already done
 
 	ClassFile[] classFiles = this.compilationResult.getClassFiles();
-	for (int i = 0, max = classFiles.length; i < max; i++) {
+	for (ClassFile classFile2 : classFiles) {
 		// clear the classFile back pointer to the bindings
-		ClassFile classFile = classFiles[i];
+		ClassFile classFile = classFile2;
 		// null out the classfile backpointer to a type binding
 		classFile.referenceBinding = null;
 		classFile.innerClassesBindings = null;
@@ -190,8 +187,8 @@ public void cleanUp() {
 
 private void cleanUp(TypeDeclaration type) {
 	if (type.memberTypes != null) {
-		for (int i = 0, max = type.memberTypes.length; i < max; i++){
-			cleanUp(type.memberTypes[i]);
+		for (TypeDeclaration memberType : type.memberTypes) {
+			cleanUp(memberType);
 		}
 	}
 	if (type.binding != null && type.binding.isAnnotationType())
@@ -204,10 +201,9 @@ private void cleanUp(TypeDeclaration type) {
 
 public void checkUnusedImports(){
 	if (this.scope.imports != null){
-		for (int i = 0, max = this.scope.imports.length; i < max; i++){
-			ImportBinding importBinding = this.scope.imports[i];
+		for (ImportBinding importBinding : this.scope.imports) {
 			ImportReference importReference = importBinding.reference;
-			if (importReference != null && ((importReference.bits & ASTNode.Used) == 0)){
+			if (importReference != null && (importReference.bits & ASTNode.Used) == 0){
 				this.scope.problemReporter().unusedImport(importReference);
 			}
 		}
@@ -234,8 +230,8 @@ public void createPackageInfoType() {
  * e.g. if we're looking for X.A.B then a type name would be {X, A, B}
  */
 public TypeDeclaration declarationOfType(char[][] typeName) {
-	for (int i = 0; i < this.types.length; i++) {
-		TypeDeclaration typeDecl = this.types[i].declarationOfType(typeName);
+	for (TypeDeclaration type2 : this.types) {
+		TypeDeclaration typeDecl = type2.declarationOfType(typeName);
 		if (typeDecl != null) {
 			return typeDecl;
 		}
@@ -274,9 +270,7 @@ public void finalizeProblems() {
 			long position = this.suppressWarningScopePositions[iSuppress];
 			int startSuppress = (int) (position >>> 32);
 			int endSuppress = (int) position;
-			if (start < startSuppress) continue nextSuppress;
-			if (end > endSuppress) continue nextSuppress;
-			if (!this.suppressWarningIrritants[iSuppress].isSet(irritant)) {
+			if (start < startSuppress || end > endSuppress || !this.suppressWarningIrritants[iSuppress].isSet(irritant)) {
 				continue nextSuppress;
 			}
 			// discard suppressed warning
@@ -328,29 +322,26 @@ public void finalizeProblems() {
 										Constant cst = inits[iToken].constant;
 										if (cst != Constant.NotAConstant && cst.typeID() == TypeIds.T_JavaLangString) {
 											IrritantSet tokenIrritants = CompilerOptions.warningTokenToIrritants(cst.stringValue());
-											if (tokenIrritants != null) {
-												if (!tokenIrritants.areAllSet() // no complaint against @SuppressWarnings("all")
-														&& (foundIrritants[iSuppress] == null || !foundIrritants[iSuppress].isAnySet(tokenIrritants))) { // if irritant had no matching problem
-													if (unusedWarningTokenIsWarning) {
-														int start = value.sourceStart, end = value.sourceEnd;
-														nextSuppress: for (int jSuppress = iSuppress - 1; jSuppress >= 0; jSuppress--) {
-															long position = this.suppressWarningScopePositions[jSuppress];
-															int startSuppress = (int) (position >>> 32);
-															int endSuppress = (int) position;
-															if (start < startSuppress) continue nextSuppress;
-															if (end > endSuppress) continue nextSuppress;
-															if (this.suppressWarningIrritants[jSuppress].areAllSet()) break pairLoop; // suppress all?
-														}
-													}
-													int id = options.getIgnoredIrritant(tokenIrritants);
-													if (id > 0) {
-														String key = CompilerOptions.optionKeyFromIrritant(id);
-														this.scope.problemReporter().problemNotAnalysed(inits[iToken], key);
-													} else {
-														this.scope.problemReporter().unusedWarningToken(inits[iToken]);
-													}
-												}
-											}
+											if (tokenIrritants != null && !tokenIrritants.areAllSet() // no complaint against @SuppressWarnings("all")
+                                            		&& (foundIrritants[iSuppress] == null || !foundIrritants[iSuppress].isAnySet(tokenIrritants))) { // if irritant had no matching problem
+                                            	if (unusedWarningTokenIsWarning) {
+                                            		int start = value.sourceStart, end = value.sourceEnd;
+                                            		nextSuppress: for (int jSuppress = iSuppress - 1; jSuppress >= 0; jSuppress--) {
+                                            			long position = this.suppressWarningScopePositions[jSuppress];
+                                            			int startSuppress = (int) (position >>> 32);
+                                            			int endSuppress = (int) position;
+                                            			if (start < startSuppress || end > endSuppress) continue nextSuppress;
+                                            			if (this.suppressWarningIrritants[jSuppress].areAllSet()) break pairLoop; // suppress all?
+                                            		}
+                                            	}
+                                            	int id = options.getIgnoredIrritant(tokenIrritants);
+                                            	if (id > 0) {
+                                            		String key = CompilerOptions.optionKeyFromIrritant(id);
+                                            		this.scope.problemReporter().problemNotAnalysed(inits[iToken], key);
+                                            	} else {
+                                            		this.scope.problemReporter().unusedWarningToken(inits[iToken]);
+                                            	}
+                                            }
 										}
 									}
 								}
@@ -358,29 +349,26 @@ public void finalizeProblems() {
 								Constant cst = value.constant;
 								if (cst != Constant.NotAConstant && cst.typeID() == T_JavaLangString) {
 									IrritantSet tokenIrritants = CompilerOptions.warningTokenToIrritants(cst.stringValue());
-									if (tokenIrritants != null) {
-										if (!tokenIrritants.areAllSet() // no complaint against @SuppressWarnings("all")
-												&& (foundIrritants[iSuppress] == null || !foundIrritants[iSuppress].isAnySet(tokenIrritants))) { // if irritant had no matching problem
-											if (unusedWarningTokenIsWarning) {
-												int start = value.sourceStart, end = value.sourceEnd;
-												nextSuppress: for (int jSuppress = iSuppress - 1; jSuppress >= 0; jSuppress--) {
-													long position = this.suppressWarningScopePositions[jSuppress];
-													int startSuppress = (int) (position >>> 32);
-													int endSuppress = (int) position;
-													if (start < startSuppress) continue nextSuppress;
-													if (end > endSuppress) continue nextSuppress;
-													if (this.suppressWarningIrritants[jSuppress].areAllSet()) break pairLoop; // suppress all?
-												}
-											}
-											int id = options.getIgnoredIrritant(tokenIrritants);
-											if (id > 0) {
-												String key = CompilerOptions.optionKeyFromIrritant(id);
-												this.scope.problemReporter().problemNotAnalysed(value, key);
-											} else {
-												this.scope.problemReporter().unusedWarningToken(value);
-											}
-										}
-									}
+									if (tokenIrritants != null && !tokenIrritants.areAllSet() // no complaint against @SuppressWarnings("all")
+                                    		&& (foundIrritants[iSuppress] == null || !foundIrritants[iSuppress].isAnySet(tokenIrritants))) { // if irritant had no matching problem
+                                    	if (unusedWarningTokenIsWarning) {
+                                    		int start = value.sourceStart, end = value.sourceEnd;
+                                    		nextSuppress: for (int jSuppress = iSuppress - 1; jSuppress >= 0; jSuppress--) {
+                                    			long position = this.suppressWarningScopePositions[jSuppress];
+                                    			int startSuppress = (int) (position >>> 32);
+                                    			int endSuppress = (int) position;
+                                    			if (start < startSuppress || end > endSuppress) continue nextSuppress;
+                                    			if (this.suppressWarningIrritants[jSuppress].areAllSet()) break pairLoop; // suppress all?
+                                    		}
+                                    	}
+                                    	int id = options.getIgnoredIrritant(tokenIrritants);
+                                    	if (id > 0) {
+                                    		String key = CompilerOptions.optionKeyFromIrritant(id);
+                                    		this.scope.problemReporter().problemNotAnalysed(value, key);
+                                    	} else {
+                                    		this.scope.problemReporter().unusedWarningToken(value);
+                                    	}
+                                    }
 								}
 							}
 							break pairLoop;
@@ -408,8 +396,8 @@ public void generateCode() {
 	}
 	try {
 		if (this.types != null) {
-			for (int i = 0, count = this.types.length; i < count; i++)
-				this.types[i].generateCode(this.scope);
+			for (TypeDeclaration type2 : this.types)
+                type2.generateCode(this.scope);
 		}
 		if (this.moduleDeclaration != null) {
 			this.moduleDeclaration.generateCode();
@@ -429,25 +417,24 @@ public char[] getFileName() {
 }
 
 public char[] getMainTypeName() {
-	if (this.compilationResult.compilationUnit == null) {
-		char[] fileName = this.compilationResult.getFileName();
-
-		int start = CharOperation.lastIndexOf('/', fileName) + 1;
-		if (start == 0 || start < CharOperation.lastIndexOf('\\', fileName))
-			start = CharOperation.lastIndexOf('\\', fileName) + 1;
-
-		int end = CharOperation.lastIndexOf('.', fileName);
-		if (end == -1)
-			end = fileName.length;
-
-		return CharOperation.subarray(fileName, start, end);
-	} else {
+	if (this.compilationResult.compilationUnit != null) {
 		return this.compilationResult.compilationUnit.getMainTypeName();
 	}
+    char[] fileName = this.compilationResult.getFileName();
+
+    int start = CharOperation.lastIndexOf('/', fileName) + 1;
+    if (start == 0 || start < CharOperation.lastIndexOf('\\', fileName))
+    	start = CharOperation.lastIndexOf('\\', fileName) + 1;
+
+    int end = CharOperation.lastIndexOf('.', fileName);
+    if (end == -1)
+    	end = fileName.length;
+
+    return CharOperation.subarray(fileName, start, end);
 }
 
 public boolean isEmpty() {
-	return (this.currentPackage == null) && (this.imports == null) && (this.types == null);
+	return this.currentPackage == null && this.imports == null && this.types == null;
 }
 
 public boolean isPackageInfo() {
@@ -468,8 +455,7 @@ public boolean isSuppressed(CategorizedProblem problem) {
 		long position = this.suppressWarningScopePositions[iSuppress];
 		int startSuppress = (int) (position >>> 32);
 		int endSuppress = (int) position;
-		if (start < startSuppress) continue nextSuppress;
-		if (end > endSuppress) continue nextSuppress;
+		if (start < startSuppress || end > endSuppress) continue nextSuppress;
 		if (this.suppressWarningIrritants[iSuppress].isSet(irritant))
 			return true;
 	}
@@ -492,9 +478,8 @@ public StringBuffer print(int indent, StringBuffer output) {
 		this.currentPackage.print(0, output, false).append(";\n"); //$NON-NLS-1$
 	}
 	if (this.imports != null)
-		for (int i = 0; i < this.imports.length; i++) {
+        for (ImportReference currentImport : this.imports) {
 			printIndent(indent, output).append("import "); //$NON-NLS-1$
-			ImportReference currentImport = this.imports[i];
 			if (currentImport.isStatic()) {
 				output.append("static "); //$NON-NLS-1$
 			}
@@ -503,8 +488,8 @@ public StringBuffer print(int indent, StringBuffer output) {
 	if (this.moduleDeclaration != null) {
 		this.moduleDeclaration.print(indent, output).append("\n"); //$NON-NLS-1$
 	} else if (this.types != null) {
-		for (int i = 0; i < this.types.length; i++) {
-			this.types[i].print(indent, output).append("\n"); //$NON-NLS-1$
+		for (TypeDeclaration type2 : this.types) {
+			type2.print(indent, output).append("\n"); //$NON-NLS-1$
 		}
 	}
 	return output;
@@ -613,7 +598,7 @@ public int record(FunctionalExpression expression) {
 	if (this.functionalExpressionsCount == 0) {
 		this.functionalExpressions = new FunctionalExpression[5];
 	} else if (this.functionalExpressionsCount == this.functionalExpressions.length) {
-		System.arraycopy(this.functionalExpressions, 0, (this.functionalExpressions = new FunctionalExpression[this.functionalExpressionsCount * 2]), 0, this.functionalExpressionsCount);
+		System.arraycopy(this.functionalExpressions, 0, this.functionalExpressions = new FunctionalExpression[this.functionalExpressionsCount * 2], 0, this.functionalExpressionsCount);
 	}
 	this.functionalExpressions[this.functionalExpressionsCount++] = expression;
 	return expression.enclosingScope.classScope().referenceContext.record(expression);
@@ -652,12 +637,10 @@ public void resolve() {
 						severity);
 			}
 		}
-	} else {
-		// resolve compilation unit javadoc package if any
-		if (this.javadoc != null) {
-			this.javadoc.resolve(this.scope);
-		}
-	}
+	} else // resolve compilation unit javadoc package if any
+    if (this.javadoc != null) {
+    	this.javadoc.resolve(this.scope);
+    }
 	if (this.currentPackage != null && this.currentPackage.annotations != null && !isPackageInfo) {
 		this.scope.problemReporter().invalidFileNameForPackageAnnotations(this.currentPackage.annotations[0]);
 	}
@@ -691,7 +674,7 @@ private void reportNLSProblems() {
 		} else if (nlsTagsLength == 0) {
 			// resize string literals
 			if (this.stringLiterals.length != stringLiteralsLength) {
-				System.arraycopy(this.stringLiterals, 0, (this.stringLiterals = new StringLiteral[stringLiteralsLength]), 0, stringLiteralsLength);
+				System.arraycopy(this.stringLiterals, 0, this.stringLiterals = new StringLiteral[stringLiteralsLength], 0, stringLiteralsLength);
 			}
 			Arrays.sort(this.stringLiterals, STRING_LITERAL_COMPARATOR);
 			for (int i = 0; i < stringLiteralsLength; i++) {
@@ -700,7 +683,7 @@ private void reportNLSProblems() {
 		} else {
 			// need to iterate both arrays to find non matching elements
 			if (this.stringLiterals.length != stringLiteralsLength) {
-				System.arraycopy(this.stringLiterals, 0, (this.stringLiterals = new StringLiteral[stringLiteralsLength]), 0, stringLiteralsLength);
+				System.arraycopy(this.stringLiterals, 0, this.stringLiterals = new StringLiteral[stringLiteralsLength], 0, stringLiteralsLength);
 			}
 			Arrays.sort(this.stringLiterals, STRING_LITERAL_COMPARATOR);
 			int indexInLine = 1;
@@ -725,35 +708,32 @@ private void reportNLSProblems() {
 						if (literalLineNumber < tagLineNumber) {
 							this.scope.problemReporter().nonExternalizedStringLiteral(literal);
 							continue stringLiteralsLoop;
-						} else if (literalLineNumber == tagLineNumber) {
-							if (tag.index == indexInLine) {
-								this.nlsTags[index] = null;
-								index++;
-								continue stringLiteralsLoop;
-							} else {
-								nlsTagsLoop2: for (int index2 = index + 1; index2 < nlsTagsLength; index2++) {
-									NLSTag tag2 = this.nlsTags[index2];
-									if (tag2 == null) continue nlsTagsLoop2;
-									int tagLineNumber2 = tag2.lineNumber;
-									if (literalLineNumber == tagLineNumber2) {
-										if (tag2.index == indexInLine) {
-											this.nlsTags[index2] = null;
-											continue stringLiteralsLoop;
-										} else {
-											continue nlsTagsLoop2;
-										}
-									} else {
-										this.scope.problemReporter().nonExternalizedStringLiteral(literal);
-										continue stringLiteralsLoop;
-									}
-								}
-								this.scope.problemReporter().nonExternalizedStringLiteral(literal);
-								continue stringLiteralsLoop;
-							}
-						} else {
+						}
+                        if (literalLineNumber != tagLineNumber) {
 							this.scope.problemReporter().unnecessaryNLSTags(tag.start, tag.end);
 							continue nlsTagsLoop;
 						}
+                        if (tag.index == indexInLine) {
+                        	this.nlsTags[index] = null;
+                        	index++;
+                        	continue stringLiteralsLoop;
+                        }
+                        nlsTagsLoop2: for (int index2 = index + 1; index2 < nlsTagsLength; index2++) {
+                        	NLSTag tag2 = this.nlsTags[index2];
+                        	if (tag2 == null) continue nlsTagsLoop2;
+                        	int tagLineNumber2 = tag2.lineNumber;
+                        	if (literalLineNumber != tagLineNumber2) {
+                        		this.scope.problemReporter().nonExternalizedStringLiteral(literal);
+                        		continue stringLiteralsLoop;
+                        	}
+                            if (tag2.index == indexInLine) {
+                            	this.nlsTags[index2] = null;
+                            	continue stringLiteralsLoop;
+                            }
+                            continue nlsTagsLoop2;
+                        }
+                        this.scope.problemReporter().nonExternalizedStringLiteral(literal);
+                        continue stringLiteralsLoop;
 					}
 				}
 				// all nls tags have been processed, so remaining string literals are not externalized

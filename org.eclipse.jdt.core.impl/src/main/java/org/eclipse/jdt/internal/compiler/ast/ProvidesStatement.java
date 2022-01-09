@@ -42,19 +42,19 @@ public class ProvidesStatement extends ModuleStatement {
 		if (infBinding == null || !infBinding.isValidBinding()) {
 			return false;
 		}
-		if (!(infBinding.isClass() || infBinding.isInterface() || infBinding.isAnnotationType())) {
+		if (!infBinding.isClass() && !infBinding.isInterface() && !infBinding.isAnnotationType()) {
 			scope.problemReporter().invalidServiceRef(IProblem.InvalidServiceIntfType, this.serviceInterface);
 		}
 		ReferenceBinding intf = (ReferenceBinding) this.serviceInterface.resolvedType;
 		Set<TypeBinding> impls = new HashSet<>();
-		for (int i = 0; i < this.implementations.length; i++) {
-			ReferenceBinding impl = (ReferenceBinding) this.implementations[i].resolveType(scope);
+		for (TypeReference implementation : this.implementations) {
+			ReferenceBinding impl = (ReferenceBinding) implementation.resolveType(scope);
 			if (impl == null || !impl.isValidBinding() || !impl.canBeSeenBy(scope)) {
 				hasErrors = true;
 				continue;
 			}
 			if (!impls.add(impl)) {
-				scope.problemReporter().duplicateTypeReference(IProblem.DuplicateServices, this.implementations[i]);
+				scope.problemReporter().duplicateTypeReference(IProblem.DuplicateServices, implementation);
 				continue;
 			}
 			int problemId = ProblemReasons.NoError;
@@ -68,7 +68,7 @@ public class ProvidesStatement extends ModuleStatement {
 				problemId = IProblem.NestedServiceImpl;
 			} else {
 				MethodBinding provider = impl.getExactMethod(TypeConstants.PROVIDER, Binding.NO_PARAMETERS, scope.compilationUnitScope());
-				if (provider != null && (!provider.isValidBinding() || !(provider.isPublic() && provider.isStatic()))) {
+				if (provider != null && (!provider.isValidBinding() || !provider.isPublic() || !provider.isStatic())) {
 					provider = null;
 				}
 				TypeBinding implType = impl;
@@ -76,29 +76,27 @@ public class ProvidesStatement extends ModuleStatement {
 					implType = provider.returnType;
 					if (implType instanceof ReferenceBinding && !implType.canBeSeenBy(scope)) {
 						ReferenceBinding referenceBinding = (ReferenceBinding) implType;
-						scope.problemReporter().invalidType(this.implementations[i], new ProblemReferenceBinding(
+						scope.problemReporter().invalidType(implementation, new ProblemReferenceBinding(
 								referenceBinding.compoundName, referenceBinding, ProblemReasons.NotVisible));
 						hasErrors = true;
 					}
-				} else {
-					if (impl.isAbstract()) {
-						problemId = IProblem.AbstractServiceImplementation;
-					} else {
-						MethodBinding defaultConstructor = impl.getExactConstructor(Binding.NO_PARAMETERS);
-						if (defaultConstructor == null || !defaultConstructor.isValidBinding()) {
-							problemId = IProblem.ProviderMethodOrConstructorRequiredForServiceImpl;
-						} else if (!defaultConstructor.isPublic()) {
-							problemId = IProblem.ServiceImplDefaultConstructorNotPublic;
-						}
-					}
-				}
+				} else if (impl.isAbstract()) {
+                	problemId = IProblem.AbstractServiceImplementation;
+                } else {
+                	MethodBinding defaultConstructor = impl.getExactConstructor(Binding.NO_PARAMETERS);
+                	if (defaultConstructor == null || !defaultConstructor.isValidBinding()) {
+                		problemId = IProblem.ProviderMethodOrConstructorRequiredForServiceImpl;
+                	} else if (!defaultConstructor.isPublic()) {
+                		problemId = IProblem.ServiceImplDefaultConstructorNotPublic;
+                	}
+                }
 				if (implType.findSuperTypeOriginatingFrom(intf) == null) {
-					scope.problemReporter().typeMismatchError(implType, intf, this.implementations[i], null);
+					scope.problemReporter().typeMismatchError(implType, intf, implementation, null);
 					hasErrors = true;
 				}
 			}
 			if (problemId != ProblemReasons.NoError) {
-				scope.problemReporter().invalidServiceRef(problemId, this.implementations[i]);
+				scope.problemReporter().invalidServiceRef(problemId, implementation);
 				hasErrors = true;
 			}
 		}

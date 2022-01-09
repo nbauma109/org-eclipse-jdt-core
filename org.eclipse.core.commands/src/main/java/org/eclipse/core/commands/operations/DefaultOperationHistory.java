@@ -167,7 +167,6 @@ public final class DefaultOperationHistory implements IOperationHistory {
 	 * Create an instance of DefaultOperationHistory.
 	 */
 	public DefaultOperationHistory() {
-		super();
 	}
 
 	@Override
@@ -259,14 +258,14 @@ public final class DefaultOperationHistory implements IOperationHistory {
 	public boolean canRedo(IUndoContext context) {
 		// null context is allowed and passed through
 		IUndoableOperation operation = getRedoOperation(context);
-		return (operation != null && operation.canRedo());
+		return operation != null && operation.canRedo();
 	}
 
 	@Override
 	public boolean canUndo(IUndoContext context) {
 		// null context is allowed and passed through
 		IUndoableOperation operation = getUndoOperation(context);
-		return (operation != null && operation.canUndo());
+		return operation != null && operation.canUndo();
 	}
 
 	/**
@@ -631,16 +630,14 @@ public final class DefaultOperationHistory implements IOperationHistory {
 		 */
 		ICompositeOperation endedComposite = null;
 		synchronized (openCompositeLock) {
-			if (openComposite != null) {
-				if (openComposite.hasContext(context)) {
-					if (context == GLOBAL_UNDO_CONTEXT || openComposite.getContexts().length == 1) {
-						endedComposite = openComposite;
-						openComposite = null;
-					} else {
-						openComposite.removeContext(context);
-					}
-				}
-			}
+			if (openComposite != null && openComposite.hasContext(context)) {
+            	if (context == GLOBAL_UNDO_CONTEXT || openComposite.getContexts().length == 1) {
+            		endedComposite = openComposite;
+            		openComposite = null;
+            	} else {
+            		openComposite.removeContext(context);
+            	}
+            }
 		}
 		// notify outside of the synchronized block.
 		if (endedComposite != null) {
@@ -721,7 +718,7 @@ public final class DefaultOperationHistory implements IOperationHistory {
 		if (!limits.containsKey(context)) {
 			return DEFAULT_LIMIT;
 		}
-		return (limits.get(context)).intValue();
+		return limits.get(context);
 	}
 
 	/*
@@ -1120,7 +1117,7 @@ public final class DefaultOperationHistory implements IOperationHistory {
 		 * override this if a global limit is desired.
 		 */
 		Assert.isNotNull(context);
-		limits.put(context, Integer.valueOf(limit));
+		limits.put(context, limit);
 		synchronized (undoRedoHistoryLock) {
 			forceUndoLimit(context, limit);
 			forceRedoLimit(context, limit);
@@ -1195,12 +1192,10 @@ public final class DefaultOperationHistory implements IOperationHistory {
 		ICompositeOperation endedComposite = null;
 
 		synchronized (openCompositeLock) {
-			if (DEBUG_OPERATION_HISTORY_UNEXPECTED) {
-				if (openComposite == null) {
-					Tracing.printTrace(OPERATIONHISTORY, "Attempted to close operation when none was open"); //$NON-NLS-1$
-					return;
-				}
-			}
+			if (DEBUG_OPERATION_HISTORY_UNEXPECTED && openComposite == null) {
+            	Tracing.printTrace(OPERATIONHISTORY, "Attempted to close operation when none was open"); //$NON-NLS-1$
+            	return;
+            }
 			// notifications will occur outside the synchonized block
 			if (openComposite != null) {
 				if (DEBUG_OPERATION_HISTORY_OPENOPERATION) {

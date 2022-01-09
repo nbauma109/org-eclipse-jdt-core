@@ -35,7 +35,7 @@ public class MarkerAttributeMap<V> implements Map<String, V>, IStringPoolPartici
 	protected static final int DEFAULT_SIZE = 16;
 	protected static final int GROW_SIZE = 10;
 
-	private static final Object[] EMPTY = new Object[0];
+	private static final Object[] EMPTY = {};
 
 	/**
 	 * Creates a new marker attribute map of default size
@@ -116,7 +116,7 @@ public class MarkerAttributeMap<V> implements Map<String, V>, IStringPoolPartici
 
 		//values for each key must be equal
 		for (int i = 0; i < elements.length; i = i + 2) {
-			if (elements[i] != null && (!elements[i + 1].equals(other.get(elements[i]))))
+			if (elements[i] != null && !elements[i + 1].equals(other.get(elements[i])))
 				return false;
 		}
 		return true;
@@ -187,7 +187,7 @@ public class MarkerAttributeMap<V> implements Map<String, V>, IStringPoolPartici
 			return remove(k);
 		String key = k.intern();
 
-		if (elements.length <= (count * 2))
+		if (elements.length <= count * 2)
 			grow();
 
 		// handle the case where we don't have any attributes yet

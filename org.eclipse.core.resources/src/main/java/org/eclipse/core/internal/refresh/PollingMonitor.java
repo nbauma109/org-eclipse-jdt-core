@@ -112,7 +112,7 @@ public class PollingMonitor extends Job implements IRefreshMonitor {
 					//ignore
 				}
 				//don't wait forever
-				if ((System.currentTimeMillis() - waitStart) > 90000)
+				if (System.currentTimeMillis() - waitStart > 90000)
 					break;
 			}
 		}
@@ -177,10 +177,8 @@ public class PollingMonitor extends Job implements IRefreshMonitor {
 	}
 
 	private void poll(IResource resource) {
-		if (resource.isSynchronized(IResource.DEPTH_INFINITE))
-			return;
 		//don't refresh links with no local content
-		if (resource.isLinked() && !((Resource) resource).getStore().fetchInfo().exists())
+		if (resource.isSynchronized(IResource.DEPTH_INFINITE) || resource.isLinked() && !((Resource) resource).getStore().fetchInfo().exists())
 			return;
 		//submit refresh request
 		refreshManager.refresh(resource);

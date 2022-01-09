@@ -151,10 +151,8 @@ public class TextEditProcessor {
 	public UndoEdit performEdits() throws MalformedTreeException, BadLocationException {
 		if (!fChecked) {
 			fRoot.dispatchCheckIntegrity(this);
-		} else {
-			if (fException != null)
-				throw fException;
-		}
+		} else if (fException != null)
+        	throw fException;
 		return fRoot.dispatchPerformEdits(this);
 	}
 

@@ -123,7 +123,7 @@ public class ElementTreeReader {
 	 */
 	protected static int readNumber(DataInput input) throws IOException {
 		byte b = input.readByte();
-		int number = (b & 0xff); // not a no-op! converts unsigned byte to int
+		int number = b & 0xff; // not a no-op! converts unsigned byte to int
 
 		if (number == 0xff) { // magic escape value
 			number = input.readInt();

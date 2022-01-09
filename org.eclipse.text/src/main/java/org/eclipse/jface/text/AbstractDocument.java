@@ -218,9 +218,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 
 	private static <T> List<T> asList(ListenerList<T> listenerList) {
 		List<?> list= Arrays.asList(listenerList.getListeners());
-		@SuppressWarnings("unchecked")
-		List<T> castList= (List<T>) list;
-		return castList;
+		return (List<T>) list;
 	}
 
 
@@ -346,7 +344,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 	@Override
 	public void addPosition(String category, Position position) throws BadLocationException, BadPositionCategoryException  {
 
-		if ((0 > position.offset) || (0 > position.length) || (position.offset + position.length > getLength()))
+		if (0 > position.offset || 0 > position.length || position.offset + position.length > getLength())
 			throw new BadLocationException();
 
 		if (category == null)
@@ -409,7 +407,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 				if (p.length == length)
 					return true;
 				++ index;
-				p= (index < size) ? list.get(index) : null;
+				p= index < size ? list.get(index) : null;
 			}
 		}
 
@@ -486,10 +484,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 		int pos= left;
 		p= positions.get(pos);
 		int pPosition= getOffset(orderedByOffset, p);
-		if (offset > pPosition) {
-			// append to the end
-			pos++;
-		} else {
+		if (offset <= pPosition) {
 			// entry will become the first of all entries with the same offset
 			do {
 				--pos;
@@ -498,8 +493,9 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 				p= positions.get(pos);
 				pPosition= getOffset(orderedByOffset, p);
 			} while (offset == pPosition);
-			++pos;
 		}
+        // append to the end
+        pos++;
 
 		Assert.isTrue(0 <= pos && pos <= positions.size());
 
@@ -676,10 +672,8 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 					IRegion r= extension.documentChanged2(event);
 					if (r != null)
 						fDocumentPartitioningChangedEvent.setPartitionChange(partitioning, r.getOffset(), r.getLength());
-				} else {
-					if (partitioner.documentChanged(event))
-						fDocumentPartitioningChangedEvent.setPartitionChange(partitioning, 0, event.getDocument().getLength());
-				}
+				} else if (partitioner.documentChanged(event))
+                	fDocumentPartitioningChangedEvent.setPartitionChange(partitioning, 0, event.getDocument().getLength());
 			}
 		}
 
@@ -779,7 +773,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 
 	@Override
 	public char getChar(int pos) throws BadLocationException {
-		if ((0 > pos) || (pos >= getLength()))
+		if (0 > pos || pos >= getLength())
 			throw new BadLocationException();
 		return getStore().get(pos);
 	}
@@ -963,7 +957,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 	@Override
 	public String get(int pos, int length) throws BadLocationException {
 		int myLength= getLength();
-		if ((0 > pos) || (0 > length) || (pos + length > myLength))
+		if (0 > pos || 0 > length || pos + length > myLength)
 			throw new BadLocationException();
 		return getStore().get(pos, length);
 	}
@@ -1084,7 +1078,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 
 	@Override
 	public void replace(int pos, int length, String text, long modificationStamp) throws BadLocationException {
-		if ((0 > pos) || (0 > length) || (pos + length > getLength()))
+		if (0 > pos || 0 > length || pos + length > getLength())
 			throw new BadLocationException();
 
 		DocumentEvent e= new DocumentEvent(this, pos, length, text);
@@ -1165,9 +1159,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 		try {
 			IRegion region= getFindReplaceDocumentAdapter().find(startPosition, findString, forwardSearch, caseSensitive, wholeWord, false);
 			return region == null ?  -1 : region.getOffset();
-		} catch (IllegalStateException ex) {
-			return -1;
-		} catch (PatternSyntaxException ex) {
+		} catch (IllegalStateException | PatternSyntaxException ex) {
 			return -1;
 		}
 	}
@@ -1306,7 +1298,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 	 */
 	@Override
 	public ITypedRegion[] computePartitioning(String partitioning, int offset, int length, boolean includeZeroLengthPartitions) throws BadLocationException, BadPartitioningException {
-		if ((0 > offset) || (0 > length) || (offset + length > getLength()))
+		if (0 > offset || 0 > length || offset + length > getLength())
 			throw new BadLocationException();
 
 		IDocumentPartitioner partitioner= getDocumentPartitioner(partitioning);
@@ -1314,13 +1306,14 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 		if (partitioner instanceof IDocumentPartitionerExtension2) {
 			checkStateOfPartitioner(partitioner, partitioning);
 			return ((IDocumentPartitionerExtension2) partitioner).computePartitioning(offset, length, includeZeroLengthPartitions);
-		} else if (partitioner != null) {
+		}
+        if (partitioner != null) {
 			checkStateOfPartitioner(partitioner, partitioning);
 			return partitioner.computePartitioning(offset, length);
-		} else if (DEFAULT_PARTITIONING.equals(partitioning))
+		}
+        if (DEFAULT_PARTITIONING.equals(partitioning))
 			return new TypedRegion[] { new TypedRegion(offset, length, DEFAULT_CONTENT_TYPE) };
-		else
-			throw new BadPartitioningException();
+        throw new BadPartitioningException();
 	}
 
 	/*
@@ -1329,7 +1322,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 	 */
 	@Override
 	public String getContentType(String partitioning, int offset, boolean preferOpenPartitions) throws BadLocationException, BadPartitioningException {
-		if ((0 > offset) || (offset > getLength()))
+		if (0 > offset || offset > getLength())
 			throw new BadLocationException();
 
 		IDocumentPartitioner partitioner= getDocumentPartitioner(partitioning);
@@ -1337,13 +1330,14 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 		if (partitioner instanceof IDocumentPartitionerExtension2) {
 			checkStateOfPartitioner(partitioner, partitioning);
 			return ((IDocumentPartitionerExtension2) partitioner).getContentType(offset, preferOpenPartitions);
-		} else if (partitioner != null) {
+		}
+        if (partitioner != null) {
 			checkStateOfPartitioner(partitioner, partitioning);
 			return partitioner.getContentType(offset);
-		} else if (DEFAULT_PARTITIONING.equals(partitioning))
+		}
+        if (DEFAULT_PARTITIONING.equals(partitioning))
 			return DEFAULT_CONTENT_TYPE;
-		else
-			throw new BadPartitioningException();
+        throw new BadPartitioningException();
 	}
 
 	@Override
@@ -1367,7 +1361,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 	 */
 	@Override
 	public ITypedRegion getPartition(String partitioning, int offset, boolean preferOpenPartitions) throws BadLocationException, BadPartitioningException {
-		if ((0 > offset) || (offset > getLength()))
+		if (0 > offset || offset > getLength())
 			throw new BadLocationException();
 
 		IDocumentPartitioner partitioner= getDocumentPartitioner(partitioning);
@@ -1375,13 +1369,14 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 		if (partitioner instanceof IDocumentPartitionerExtension2) {
 			checkStateOfPartitioner(partitioner, partitioning);
 			return ((IDocumentPartitionerExtension2) partitioner).getPartition(offset, preferOpenPartitions);
-		} else if (partitioner != null) {
+		}
+        if (partitioner != null) {
 			checkStateOfPartitioner(partitioner, partitioning);
 			return partitioner.getPartition(offset);
-		} else if (DEFAULT_PARTITIONING.equals(partitioning))
+		}
+        if (DEFAULT_PARTITIONING.equals(partitioning))
 			return new TypedRegion(0, getLength(), DEFAULT_CONTENT_TYPE);
-		else
-			throw new BadPartitioningException();
+        throw new BadPartitioningException();
 	}
 
 	@Override
@@ -1591,7 +1586,7 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 	 * @since 3.4
 	 */
 	public Position[] getPositions(String category, int offset, int length, boolean canStartBefore, boolean canEndAfter) throws BadPositionCategoryException {
-		if (canStartBefore && canEndAfter || (!canStartBefore && !canEndAfter)) {
+		if (canStartBefore == canEndAfter) {
 			List<Position> documentPositions;
 			if (canStartBefore && canEndAfter) {
 				if (offset < getLength() / 2) {
@@ -1616,19 +1611,19 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 			Position[] positions= new Position[list.size()];
 			list.toArray(positions);
 			return positions;
-		} else if (canStartBefore) {
+		}
+        if (canStartBefore) {
 			List<Position> list= getEndingPositions(category, offset, length);
 			Position[] positions= new Position[list.size()];
 			list.toArray(positions);
 			return positions;
-		} else {
-			Assert.isLegal(canEndAfter && !canStartBefore);
-
-			List<Position> list= getStartingPositions(category, offset, length);
-			Position[] positions= new Position[list.size()];
-			list.toArray(positions);
-			return positions;
 		}
+        Assert.isLegal(canEndAfter && !canStartBefore);
+
+        List<Position> list= getStartingPositions(category, offset, length);
+        Position[] positions= new Position[list.size()];
+        list.toArray(positions);
+        return positions;
 	}
 
 	/*
@@ -1637,14 +1632,15 @@ public abstract class AbstractDocument implements IDocument, IDocumentExtension,
 	private boolean isWithinRegion(Position region, Position position, boolean canStartBefore, boolean canEndAfter) {
 		if (canStartBefore && canEndAfter) {
 			return region.overlapsWith(position.getOffset(), position.getLength());
-		} else if (canStartBefore) {
-			return region.includes(position.getOffset() + position.getLength() - 1);
-		} else if (canEndAfter) {
-			return region.includes(position.getOffset());
-		} else {
-			int start= position.getOffset();
-			return region.includes(start) && region.includes(start + position.getLength() - 1);
 		}
+        if (canStartBefore) {
+			return region.includes(position.getOffset() + position.getLength() - 1);
+		}
+        if (canEndAfter) {
+			return region.includes(position.getOffset());
+		}
+        int start= position.getOffset();
+        return region.includes(start) && region.includes(start + position.getLength() - 1);
 	}
 
 	/**

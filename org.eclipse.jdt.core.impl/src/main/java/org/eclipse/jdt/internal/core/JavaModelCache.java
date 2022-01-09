@@ -188,7 +188,7 @@ protected double getMemoryRatio() {
 		long maxMemory = Runtime.getRuntime().maxMemory();
 		// if max memory is infinite, set the ratio to 4d which corresponds to the 256MB that Eclipse defaults to
 		// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=111299)
-		this.memoryRatio = maxMemory == Long.MAX_VALUE ? 4d : ((double) maxMemory) / (64 * 0x100000); // 64MB is the base memory for most JVM
+		this.memoryRatio = maxMemory == Long.MAX_VALUE ? 4d : (double) maxMemory / (64 * 0x100000); // 64MB is the base memory for most JVM
 	}
 	return this.memoryRatio;
 }
@@ -254,27 +254,14 @@ protected void putInfo(IJavaElement element, Object info) {
 }
 
 public static String getElementType(IJavaElement element) {
-	String elementType;
-	switch (element.getElementType()) {
-		case IJavaElement.JAVA_PROJECT:
-			elementType = "project"; //$NON-NLS-1$
-			break;
-		case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-			elementType = "root"; //$NON-NLS-1$
-			break;
-		case IJavaElement.PACKAGE_FRAGMENT:
-			elementType = "package"; //$NON-NLS-1$
-			break;
-		case IJavaElement.CLASS_FILE:
-			elementType = "class file"; //$NON-NLS-1$
-			break;
-		case IJavaElement.COMPILATION_UNIT:
-			elementType = "compilation unit"; //$NON-NLS-1$
-			break;
-		default:
-			elementType = "element"; //$NON-NLS-1$
-	}
-	return elementType;
+	return switch (element.getElementType()) {
+        case IJavaElement.JAVA_PROJECT -> "project"; //$NON-NLS-1$
+        case IJavaElement.PACKAGE_FRAGMENT_ROOT -> "root"; //$NON-NLS-1$
+        case IJavaElement.PACKAGE_FRAGMENT -> "package"; //$NON-NLS-1$
+        case IJavaElement.CLASS_FILE -> "class file"; //$NON-NLS-1$
+        case IJavaElement.COMPILATION_UNIT -> "compilation unit"; //$NON-NLS-1$
+        default -> "element"; //$NON-NLS-1$
+    };
 }
 
 /**
@@ -290,7 +277,7 @@ protected void removeInfo(JavaElement element) {
 			this.modelInfo = null;
 			break;
 		case IJavaElement.JAVA_PROJECT:
-			this.projectCache.remove((IJavaProject)element);
+			this.projectCache.remove(element);
 			this.rootCache.resetSpaceLimit((int) (DEFAULT_ROOT_SIZE * getMemoryRatio()), element);
 			break;
 		case IJavaElement.PACKAGE_FRAGMENT_ROOT:

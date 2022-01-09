@@ -125,26 +125,23 @@ public class ConditionalExpression extends Expression {
 		if (property == EXPRESSION_PROPERTY) {
 			if (get) {
 				return getExpression();
-			} else {
-				setExpression((Expression) child);
-				return null;
 			}
+            setExpression((Expression) child);
+            return null;
 		}
 		if (property == THEN_EXPRESSION_PROPERTY) {
 			if (get) {
 				return getThenExpression();
-			} else {
-				setThenExpression((Expression) child);
-				return null;
 			}
+            setThenExpression((Expression) child);
+            return null;
 		}
 		if (property == ELSE_EXPRESSION_PROPERTY) {
 			if (get) {
 				return getElseExpression();
-			} else {
-				setElseExpression((Expression) child);
-				return null;
 			}
+            setElseExpression((Expression) child);
+            return null;
 		}
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);

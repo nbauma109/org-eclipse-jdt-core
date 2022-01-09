@@ -95,7 +95,7 @@ public class ReconcileWorkingCopyOperation extends JavaModelOperation {
 
 			// notify reconcile participants only if working copy was not consistent or if forcing problem detection
 			// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=177319)
-			if (!wasConsistent || ((this.reconcileFlags & ICompilationUnit.FORCE_PROBLEM_DETECTION) != 0)) {
+			if (!wasConsistent || (this.reconcileFlags & ICompilationUnit.FORCE_PROBLEM_DETECTION) != 0) {
 				notifyParticipants(workingCopy);
 
 				// recreate ast if one participant reset it
@@ -104,7 +104,7 @@ public class ReconcileWorkingCopyOperation extends JavaModelOperation {
 			}
 
 			// report problems
-			if (this.problems != null && (((this.reconcileFlags & ICompilationUnit.FORCE_PROBLEM_DETECTION) != 0) || !wasConsistent)) {
+			if (this.problems != null && ((this.reconcileFlags & ICompilationUnit.FORCE_PROBLEM_DETECTION) != 0 || !wasConsistent)) {
 				if (defaultRequestorIsActive) {
 					reportProblems(workingCopy, problemRequestor);
 				}
@@ -135,8 +135,7 @@ public class ReconcileWorkingCopyOperation extends JavaModelOperation {
 			for (Iterator iteraror = this.problems.values().iterator(); iteraror.hasNext();) {
 				CategorizedProblem[] categorizedProblems = (CategorizedProblem[]) iteraror.next();
 				if (categorizedProblems == null) continue;
-				for (int i = 0, length = categorizedProblems.length; i < length; i++) {
-					CategorizedProblem problem = categorizedProblems[i];
+				for (CategorizedProblem problem : categorizedProblems) {
 					if (JavaModelManager.VERBOSE){
 						System.out.println("PROBLEM FOUND while reconciling : " + problem.getMessage());//$NON-NLS-1$
 					}
@@ -242,16 +241,16 @@ public class ReconcileWorkingCopyOperation extends JavaModelOperation {
 		if (participants == null) return;
 
 		final ReconcileContext context = new ReconcileContext(this, workingCopy);
-		for (int i = 0, length = participants.length; i < length; i++) {
-			final CompilationParticipant participant = participants[i];
+		for (final CompilationParticipant participant : participants) {
 			SafeRunner.run(new ISafeRunnable() {
 				@Override
 				public void handleException(Throwable exception) {
 					if (exception instanceof Error) {
 						throw (Error) exception; // errors are not supposed to be caught
-					} else if (exception instanceof OperationCanceledException)
+					}
+                    if (exception instanceof OperationCanceledException)
 						throw (OperationCanceledException) exception;
-					else if (exception instanceof UnsupportedOperationException) {
+                    if (exception instanceof UnsupportedOperationException) {
 						// might want to disable participant as it tried to modify the buffer of the working copy being reconciled
 						Util.log(exception, "Reconcile participant attempted to modify the buffer of the working copy being reconciled"); //$NON-NLS-1$
 					} else

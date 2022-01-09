@@ -184,8 +184,7 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 		addAnnotationTypeReference(replace('/', '.', Signature.toCharArray(annotation.getTypeName())));
 		IBinaryElementValuePair[] valuePairs = annotation.getElementValuePairs();
 		if (valuePairs != null) {
-			for (int j=0, vpLength=valuePairs.length; j<vpLength; j++) {
-				IBinaryElementValuePair valuePair = valuePairs[j];
+			for (IBinaryElementValuePair valuePair : valuePairs) {
 				addMethodReference(valuePair.getName(), 0);
 				Object pairValue = valuePair.getValue();
 				addPairValue(pairValue);
@@ -204,8 +203,8 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 			addBinaryAnnotation((IBinaryAnnotation) pairValue);
 		} else if (pairValue instanceof Object[]) {
 			Object[] objects = (Object[]) pairValue;
-			for (int i=0,l=objects.length; i<l; i++) {
-				addPairValue(objects[i]);
+			for (Object object2 : objects) {
+				addPairValue(object2);
 			}
 		}
 	}
@@ -244,8 +243,8 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 		char[] arrayType = new char[length + arrayDim*2];
 		System.arraycopy(parameterTypes[counter], 0, arrayType, 0, length);
 		for (int i = 0; i < arrayDim; i++) {
-			arrayType[length + (i * 2)] = '[';
-			arrayType[length + (i * 2) + 1] = ']';
+			arrayType[length + i * 2] = '[';
+			arrayType[length + i * 2 + 1] = ']';
 		}
 		parameterTypes[counter] = arrayType;
 	}
@@ -259,8 +258,8 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 		char[] arrayType = new char[length + arrayDim*2];
 		System.arraycopy(typeName, 0, arrayType, 0, length);
 		for (int i = 0; i < arrayDim; i++) {
-			arrayType[length + (i * 2)] = '[';
-			arrayType[length + (i * 2) + 1] = ']';
+			arrayType[length + i * 2] = '[';
+			arrayType[length + i * 2 + 1] = ']';
 		}
 		return arrayType;
 	}
@@ -351,7 +350,7 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 		for (int i = 1; i < indexOfClosingParen; i++) {
 			if (parameterTypesCounter == parameterTypes.length) {
 				// resize
-				System.arraycopy(parameterTypes, 0, (parameterTypes = new char[parameterTypesCounter * 2][]), 0, parameterTypesCounter);
+				System.arraycopy(parameterTypes, 0, parameterTypes = new char[parameterTypesCounter * 2][], 0, parameterTypesCounter);
 			}
 			switch(signature[i]) {
 				case 'B':
@@ -535,10 +534,10 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 					if (className != null && parameterTypesCounter == 0) {
 						char[] classSignature = Signature.createCharArrayTypeSignature(className, true);
 						int length = indexOfSemiColon-i+1;
-						if (classSignature.length > (length+1)) {
+						if (classSignature.length > length+1) {
 							// synthetic means that parameter type has same signature than given class
 							for (int j=i, k=0; j<indexOfSemiColon; j++, k++) {
-								if (!(signature[j] == classSignature[k] || (signature[j] == '/' && classSignature[k] == '.' ))) {
+								if (signature[j] != classSignature[k] && (signature[j] != '/' || classSignature[k] != '.')) {
 									parameterTypesCounter++;
 									break;
 								}
@@ -636,8 +635,8 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 
 					// also add a simple reference on each segment of the qualification (see http://bugs.eclipse.org/bugs/show_bug.cgi?id=24741)
 					char[][] qualification = CharOperation.splitOn('.', name);
-					for (int j = 0, length = qualification.length; j < length; j++) {
-						addNameReference(qualification[j]);
+					for (char[] element : qualification) {
+						addNameReference(element);
 					}
 					break;
 			}
@@ -737,8 +736,7 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 			// Look for references in class annotations
 			IBinaryAnnotation[] annotations = reader.getAnnotations();
 			if (annotations != null) {
-				for (int a=0, length=annotations.length; a<length; a++) {
-					IBinaryAnnotation annotation = annotations[a];
+				for (IBinaryAnnotation annotation : annotations) {
 					addBinaryAnnotation(annotation);
 				}
 			}
@@ -753,8 +751,7 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 			MethodInfo[] methods = (MethodInfo[]) reader.getMethods();
 			boolean noConstructor = true;
 			if (methods != null) {
-				for (int i = 0, max = methods.length; i < max; i++) {
-					MethodInfo method = methods[i];
+				for (MethodInfo method : methods) {
 					boolean isConstructor = method.isConstructor();
 					char[] descriptor = method.getMethodDescriptor();
 					char[][] parameterTypes = decodeParameterTypes(descriptor, isConstructor && isNestedType);
@@ -764,7 +761,7 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 						noConstructor = false;
 						char[] signature = method.getGenericSignature();
 						if (signature == null) {
-							if (reader.isNestedType() && ((modifiers & ClassFileConstants.AccStatic) == 0)) {
+							if (reader.isNestedType() && (modifiers & ClassFileConstants.AccStatic) == 0) {
 								signature = removeFirstSyntheticParameter(descriptor);
 							} else {
 								signature = descriptor;
@@ -781,37 +778,34 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 								modifiers,
 								exceptionTypes,
 								extraFlags);
-					} else {
-						if (!method.isClinit()) {
-							char[] selector = method.getSelector();
-							addMethodDeclaration(selector, parameterTypes, returnType, exceptionTypes);
-							char[] signature = method.getGenericSignature();
-							if (signature == null) {
-								signature = descriptor;
-							}
-							if (name.length > 0)  {
-								addMethodDeclaration(
-										name,
-										null,
-										selector,
-										parameterTypes == null ? 0 : parameterTypes.length,
-												signature,
-												parameterTypes,
-												method.getArgumentNames(),
-												returnType,
-												method.getModifiers(),
-												packageName,
-												modifiers,
-												exceptionTypes,
-												extraFlags);
-							}
-						}
-					}
+					} else if (!method.isClinit()) {
+                    	char[] selector = method.getSelector();
+                    	addMethodDeclaration(selector, parameterTypes, returnType, exceptionTypes);
+                    	char[] signature = method.getGenericSignature();
+                    	if (signature == null) {
+                    		signature = descriptor;
+                    	}
+                    	if (name.length > 0)  {
+                    		addMethodDeclaration(
+                    				name,
+                    				null,
+                    				selector,
+                    				parameterTypes == null ? 0 : parameterTypes.length,
+                    						signature,
+                    						parameterTypes,
+                    						method.getArgumentNames(),
+                    						returnType,
+                    						method.getModifiers(),
+                    						packageName,
+                    						modifiers,
+                    						exceptionTypes,
+                    						extraFlags);
+                    	}
+                    }
 					// look for references in method annotations
 					annotations = method.getAnnotations();
 					if (annotations != null) {
-						for (int a=0, length=annotations.length; a<length; a++) {
-							IBinaryAnnotation annotation = annotations[a];
+						for (IBinaryAnnotation annotation : annotations) {
 							addBinaryAnnotation(annotation);
 						}
 					}
@@ -826,16 +820,14 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 			}
 			FieldInfo[] fields = (FieldInfo[]) reader.getFields();
 			if (fields != null) {
-				for (int i = 0, max = fields.length; i < max; i++) {
-					FieldInfo field = fields[i];
+				for (FieldInfo field : fields) {
 					char[] fieldName = field.getName();
 					char[] fieldType = decodeFieldType(replace('/', '.', field.getTypeName()));
 					addFieldDeclaration(fieldType, fieldName);
 					// look for references in field annotations
 					annotations = field.getAnnotations();
 					if (annotations != null) {
-						for (int a=0, length=annotations.length; a<length; a++) {
-							IBinaryAnnotation annotation = annotations[a];
+						for (IBinaryAnnotation annotation : annotations) {
 							addBinaryAnnotation(annotation);
 						}
 					}
@@ -899,8 +891,8 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 	private void indexTypeReferences(char[][] ref) {
 		if (ref == null || ref == CharOperation.NO_CHAR_CHAR)
 			return;
-		for (int i = 0; i < ref.length; i++) {
-			addTypeReference(ref[i]);
+		for (char[] element : ref) {
+			addTypeReference(element);
 		}
 	}
 	private void indexTypeReference(char[] ref) {
@@ -911,8 +903,7 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 
 	private char[] removeFirstSyntheticParameter(char[] descriptor) {
 		if (descriptor == null) return null;
-		if (descriptor.length < 3) return descriptor;
-		if (descriptor[0] != '(') return descriptor;
+		if (descriptor.length < 3 || descriptor[0] != '(') return descriptor;
 		if (descriptor[1] != ')') {
 			// remove the first synthetic parameter
 			int start = org.eclipse.jdt.internal.compiler.util.Util.scanTypeSignature(descriptor, 1) + 1;
@@ -921,17 +912,16 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 			signature[0] = descriptor[0];
 			System.arraycopy(descriptor, start, signature, 1, length);
 			return signature;
-		} else {
-			return descriptor;
 		}
+        return descriptor;
 	}
 	/*
 	 * Modify the array by replacing all occurences of toBeReplaced with newChar
 	 */
 	private char[][] replace(char toBeReplaced, char newChar, char[][] array) {
 		if (array == null) return null;
-		for (int i = 0, max = array.length; i < max; i++) {
-			replace(toBeReplaced, newChar, array[i]);
+		for (char[] element : array) {
+			replace(toBeReplaced, newChar, element);
 		}
 		return array;
 	}

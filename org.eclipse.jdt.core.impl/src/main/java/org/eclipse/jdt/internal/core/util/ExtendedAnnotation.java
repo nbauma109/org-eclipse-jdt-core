@@ -57,9 +57,9 @@ import org.eclipse.jdt.core.util.ILocalVariableReferenceInfo;
  */
 public class ExtendedAnnotation extends ClassFileStruct implements IExtendedAnnotation {
 
-	private static final IAnnotationComponent[] NO_ENTRIES = new IAnnotationComponent[0];
-	private final static int[][] NO_TYPEPATH = new int[0][0];
-	private final static ILocalVariableReferenceInfo[] NO_LOCAL_VARIABLE_TABLE_ENTRIES = new ILocalVariableReferenceInfo[0];
+	private static final IAnnotationComponent[] NO_ENTRIES = {};
+	private final static int[][] NO_TYPEPATH = {};
+	private final static ILocalVariableReferenceInfo[] NO_LOCAL_VARIABLE_TABLE_ENTRIES = {};
 
 	private int targetType;
 	private int annotationTypeIndex;
@@ -106,7 +106,7 @@ public class ExtendedAnnotation extends ClassFileStruct implements IExtendedAnno
 		} else {
 			this.typePath = new int[typePathEntryCount][];
 			for (int i = 0; i < typePathEntryCount; i++) {
-				int[] typePathEntry = (this.typePath[i] = new int[2]);
+				int[] typePathEntry = this.typePath[i] = new int[2];
 				typePathEntry[0] = u1At(classFileBytes, this.readOffset++, offset);
 				typePathEntry[1] = u1At(classFileBytes, this.readOffset++, offset);
 			}
@@ -116,15 +116,14 @@ public class ExtendedAnnotation extends ClassFileStruct implements IExtendedAnno
 		index = u2At(classFileBytes, this.readOffset, offset);
 		this.typeIndex = index;
 		this.readOffset+=2;
-		if (index != 0) {
-			IConstantPoolEntry constantPoolEntry = constantPool.decodeEntry(index);
-			if (constantPoolEntry.getKind() != IConstantPoolConstant.CONSTANT_Utf8) {
-				throw new ClassFormatException(ClassFormatException.INVALID_CONSTANT_POOL_ENTRY);
-			}
-			this.typeName = constantPoolEntry.getUtf8Value();
-		} else {
+		if (index == 0) {
 			throw new ClassFormatException(ClassFormatException.INVALID_CONSTANT_POOL_ENTRY);
 		}
+        IConstantPoolEntry constantPoolEntry = constantPool.decodeEntry(index);
+        if (constantPoolEntry.getKind() != IConstantPoolConstant.CONSTANT_Utf8) {
+        	throw new ClassFormatException(ClassFormatException.INVALID_CONSTANT_POOL_ENTRY);
+        }
+        this.typeName = constantPoolEntry.getUtf8Value();
 		final int length = u2At(classFileBytes, this.readOffset, offset);
 		this.componentsNumber = length;
 		this.readOffset+=2;

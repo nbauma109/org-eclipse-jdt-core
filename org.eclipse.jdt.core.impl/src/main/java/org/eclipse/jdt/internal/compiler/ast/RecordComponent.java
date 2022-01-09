@@ -41,7 +41,7 @@ public class RecordComponent extends AbstractVariableDeclaration {
 		this.modifiers = modifiers;
 		this.type = tr;
 		if (tr != null) {
-			this.bits |= (tr.bits & ASTNode.HasTypeAnnotations);
+			this.bits |= tr.bits & ASTNode.HasTypeAnnotations;
 		}
 	}
 
@@ -54,12 +54,12 @@ public class RecordComponent extends AbstractVariableDeclaration {
 	public void checkModifiers() {
 
 		//only potential valid modifier is <<final>>
-		if (((this.modifiers & ExtraCompilerModifiers.AccJustFlag) & ~ClassFileConstants.AccFinal) != 0)
+		if ((this.modifiers & ExtraCompilerModifiers.AccJustFlag & ~ClassFileConstants.AccFinal) != 0)
 			//AccModifierProblem -> other (non-visibility problem)
 			//AccAlternateModifierProblem -> duplicate modifier
 			//AccModifierProblem | AccAlternateModifierProblem -> visibility problem"
 
-			this.modifiers = (this.modifiers & ~ExtraCompilerModifiers.AccAlternateModifierProblem) | ExtraCompilerModifiers.AccModifierProblem;
+			this.modifiers = this.modifiers & ~ExtraCompilerModifiers.AccAlternateModifierProblem | ExtraCompilerModifiers.AccModifierProblem;
 	}
 
 	@Override
@@ -93,8 +93,8 @@ public class RecordComponent extends AbstractVariableDeclaration {
 		resolveAnnotations(scope, this.annotations, this.binding);
 		// Check if this declaration should now have the type annotations bit set
 		if (this.annotations != null) {
-			for (int i = 0, max = this.annotations.length; i < max; i++) {
-				TypeBinding resolvedAnnotationType = this.annotations[i].resolvedType;
+			for (Annotation annotation2 : this.annotations) {
+				TypeBinding resolvedAnnotationType = annotation2.resolvedType;
 				if (resolvedAnnotationType != null && (resolvedAnnotationType.getAnnotationTagBits() & TagBits.AnnotationForTypeUse) != 0) {
 					this.bits |= ASTNode.HasTypeAnnotations;
 					break;

@@ -192,16 +192,16 @@ public class InternalUtils {
 		long mostSignificantBits = 0;
 		long leastSignificantBits = 0;
 		for (int i = 0; i < 8; i++) {
-			mostSignificantBits = (mostSignificantBits << 8) | (uuidBytes[i] & 0xff);
+			mostSignificantBits = mostSignificantBits << 8 | uuidBytes[i] & 0xff;
 		}
 		for (int i = 8; i < 16; i++) {
-			leastSignificantBits = (leastSignificantBits << 8) | (uuidBytes[i] & 0xff);
+			leastSignificantBits = leastSignificantBits << 8 | uuidBytes[i] & 0xff;
 		}
 		return new UUID(mostSignificantBits, leastSignificantBits).toString();
 	}
 
 	public static <E> Enumeration<E> asEnumeration(Iterator<E> it) {
-		return new Enumeration<E>() {
+		return new Enumeration<>() {
 			@Override
 			public boolean hasMoreElements() {
 				return it.hasNext();

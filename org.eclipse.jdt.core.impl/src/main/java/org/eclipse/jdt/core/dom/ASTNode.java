@@ -1519,7 +1519,6 @@ public abstract class ASTNode {
 		 * @since 3.0
 		 */
 		NodeList(ChildListPropertyDescriptor property) {
-			super();
 			this.propertyDescriptor = property;
 		}
 
@@ -1831,12 +1830,12 @@ public abstract class ASTNode {
 			if (p.getValueType() == int.class) {
 				int result = internalGetSetIntProperty(p, true, 0);
 				return Integer.valueOf(result);
-			} else if (p.getValueType() == boolean.class) {
+			}
+            if (p.getValueType() == boolean.class) {
 				boolean result = internalGetSetBooleanProperty(p, true, false);
 				return Boolean.valueOf(result);
-			} else {
-				return internalGetSetObjectProperty(p, true, null);
 			}
+            return internalGetSetObjectProperty(p, true, null);
 		}
 		if (property instanceof ChildPropertyDescriptor) {
 			return internalGetSetChildProperty((ChildPropertyDescriptor) property, true, null);
@@ -1868,20 +1867,18 @@ public abstract class ASTNode {
 		if (property instanceof SimplePropertyDescriptor) {
 			SimplePropertyDescriptor p = (SimplePropertyDescriptor) property;
 			if (p.getValueType() == int.class) {
-				int arg = ((Integer) value).intValue();
+				int arg = (Integer) value;
 				internalGetSetIntProperty(p, false, arg);
-				return;
 			} else if (p.getValueType() == boolean.class) {
-				boolean arg = ((Boolean) value).booleanValue();
+				boolean arg = (Boolean) value;
 				internalGetSetBooleanProperty(p, false, arg);
-				return;
 			} else {
 				if (value == null && p.isMandatory()) {
 					throw new IllegalArgumentException();
 				}
 				internalGetSetObjectProperty(p, false, value);
-				return;
 			}
+            return;
 		}
 		if (property instanceof ChildPropertyDescriptor) {
 			ChildPropertyDescriptor p = (ChildPropertyDescriptor) property;
@@ -2093,8 +2090,7 @@ public abstract class ASTNode {
 	static List reapPropertyList(List propertyList) {
 		propertyList.remove(0); // remove nodeClass
 		// compact
-		ArrayList a = new ArrayList(propertyList.size());
-		a.addAll(propertyList);
+		ArrayList a = new ArrayList(propertyList);
 		return Collections.unmodifiableList(a);
 	}
 
@@ -2203,7 +2199,8 @@ public abstract class ASTNode {
 	 * @deprecated
 	 * @since 3.16
 	 */
-	final void unsupportedBelow12() {
+	@Deprecated
+    final void unsupportedBelow12() {
 		if (this.ast.apiLevel < AST.JLS12_INTERNAL) {
 			throw new UnsupportedOperationException("Operation only supported in ASTs with level JLS12 and above"); //$NON-NLS-1$
 		}
@@ -2496,15 +2493,7 @@ public abstract class ASTNode {
 	 */
 	static void checkNewChild(ASTNode node, ASTNode newChild,
 			boolean cycleCheck, Class nodeType) {
-		if (newChild.ast != node.ast) {
-			// new child is from a different AST
-			throw new IllegalArgumentException();
-		}
-		if (newChild.getParent() != null) {
-			// new child currently has a different parent
-			throw new IllegalArgumentException();
-		}
-		if (cycleCheck && newChild == node.getRoot()) {
+		if (newChild.ast != node.ast || newChild.getParent() != null || cycleCheck && newChild == node.getRoot()) {
 			// inserting new child would create a cycle
 			throw new IllegalArgumentException();
 		}
@@ -2578,11 +2567,9 @@ public abstract class ASTNode {
 				this.ast.preRemoveChildEvent(this, oldChild, property);
 			}
 			oldChild.setParent(null, null);
-		} else {
-			if(newChild != null) {
-				this.ast.preAddChildEvent(this, newChild, property);
-			}
-		}
+		} else if(newChild != null) {
+        	this.ast.preAddChildEvent(this, newChild, property);
+        }
 		// link new child to parent
 		if (newChild != null) {
 			newChild.setParent(this, property);
@@ -2729,9 +2716,8 @@ public abstract class ASTNode {
 			// node has only a single property
 			if (propertyName.equals(this.property1)) {
 				return this.property2;
-			} else {
-				return null;
 			}
+            return null;
 		}
 		// otherwise node has table of properties
 		Map m = (Map) this.property1;
@@ -2814,11 +2800,8 @@ public abstract class ASTNode {
 				this.property1 = entries[0].getKey();
 				this.property2 = entries[0].getValue();
 			}
-			return;
 		} else {
 			m.put(propertyName, data);
-			// still has two or more properties
-			return;
 		}
 	}
 
@@ -2902,7 +2885,7 @@ public abstract class ASTNode {
 	public final void setFlags(int flags) {
 		this.ast.modifying();
 		int old = this.typeAndFlags & 0xFFFF0000;
-		this.typeAndFlags = old | (flags & 0xFFFF);
+		this.typeAndFlags = old | flags & 0xFFFF;
 	}
 
 	/**
@@ -2928,7 +2911,7 @@ public abstract class ASTNode {
 	 */
 	private void setNodeType(int nodeType) {
 		int old = this.typeAndFlags & 0xFFFF0000;
-		this.typeAndFlags = old | (nodeType << 16);
+		this.typeAndFlags = old | nodeType << 16;
 	}
 
 	/**
@@ -3023,8 +3006,7 @@ public abstract class ASTNode {
 		if (target.apiLevel() != node.getAST().apiLevel()) {
 			throw new UnsupportedOperationException();
 		}
-		ASTNode newNode = node.clone(target);
-		return newNode;
+		return node.clone(target);
 	}
 
 	/**
@@ -3259,10 +3241,7 @@ public abstract class ASTNode {
 	 * @see ASTParser
 	 */
 	public final void setSourceRange(int startPosition, int length) {
-		if (startPosition >= 0 && length < 0) {
-			throw new IllegalArgumentException();
-		}
-		if (startPosition < 0 && length != 0) {
+		if (startPosition >= 0 ? length < 0 : length != 0) {
 			throw new IllegalArgumentException();
 		}
 		// source positions are not considered a structural property

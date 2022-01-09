@@ -41,7 +41,6 @@ public class MarkerWriter {
 	public static final byte ATTRIBUTE_STRING = 3;
 
 	public MarkerWriter(MarkerManager manager) {
-		super();
 		this.manager = manager;
 	}
 
@@ -99,7 +98,7 @@ public class MarkerWriter {
 		IMarkerSetElement[] elements = markers.elements();
 		// filter out the markers...determine if there are any persistent ones
 		Object[] result = filterMarkers(elements);
-		int count = ((Integer) result[0]).intValue();
+		int count = (Integer) result[0];
 		if (count == 0)
 			return;
 		// if this is the first set of markers that we have written, then
@@ -141,9 +140,7 @@ public class MarkerWriter {
 	 */
 	public void snap(ResourceInfo info, IPathRequestor requestor, DataOutputStream output) throws IOException {
 		// phantom resources don't have markers
-		if (info.isSet(ICoreConstants.M_PHANTOM))
-			return;
-		if (!info.isSet(ICoreConstants.M_MARKERS_SNAP_DIRTY))
+		if (info.isSet(ICoreConstants.M_PHANTOM) || !info.isSet(ICoreConstants.M_MARKERS_SNAP_DIRTY))
 			return;
 		MarkerSet markers = info.getMarkers(false);
 		if (markers == null)
@@ -151,7 +148,7 @@ public class MarkerWriter {
 		IMarkerSetElement[] elements = markers.elements();
 		// filter out the markers...determine if there are any persistent ones
 		Object[] result = filterMarkers(elements);
-		int count = ((Integer) result[0]).intValue();
+		int count = (Integer) result[0];
 		// write the version id for the snapshot.
 		output.writeInt(MARKERS_SNAP_VERSION);
 		boolean[] isPersistent = (boolean[]) result[1];
@@ -177,12 +174,12 @@ public class MarkerWriter {
 			Object value = e.getValue();
 			if (value instanceof Integer) {
 				output.writeByte(ATTRIBUTE_INTEGER);
-				output.writeInt(((Integer) value).intValue());
+				output.writeInt((Integer) value);
 				continue;
 			}
 			if (value instanceof Boolean) {
 				output.writeByte(ATTRIBUTE_BOOLEAN);
-				output.writeBoolean(((Boolean) value).booleanValue());
+				output.writeBoolean((Boolean) value);
 				continue;
 			}
 			if (value instanceof String) {

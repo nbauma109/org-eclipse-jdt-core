@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 public class PossibleMatch implements ICompilationUnit {
 
 public static final String NO_SOURCE_FILE_NAME = "NO SOURCE FILE NAME"; //$NON-NLS-1$
-public static final char[] NO_SOURCE_FILE = new char[0];
+public static final char[] NO_SOURCE_FILE = {};
 
 public IResource resource;
 public Openable openable;
@@ -68,7 +68,7 @@ public boolean equals(Object obj) {
 }
 @Override
 public char[] getContents() {
-	char[] contents = (this.source == NO_SOURCE_FILE) ? null : this.source;
+	char[] contents = this.source == NO_SOURCE_FILE ? null : this.source;
 	if (this.source == null) {
 		if (this.openable instanceof AbstractClassFile) {
 			String fileName = getSourceFileName();
@@ -95,7 +95,7 @@ public char[] getContents() {
 		} else {
 			contents = this.document.getCharContents();
 		}
-		this.source = (contents == null) ? NO_SOURCE_FILE : contents;
+		this.source = contents == null ? NO_SOURCE_FILE : contents;
 	}
 	return contents;
 }
@@ -132,7 +132,8 @@ private char[] getQualifiedName() {
 		char[] mainTypeName = Util.getNameWithoutJavaLikeExtension(fileName).toCharArray();
 		CompilationUnit cu = (CompilationUnit) this.openable;
 		return cu.getType(new String(mainTypeName)).getFullyQualifiedName().toCharArray();
-	} else if (this.openable instanceof ClassFile) {
+	}
+    if (this.openable instanceof ClassFile) {
 		String fileName = getSourceFileName();
 		if (fileName == NO_SOURCE_FILE_NAME)
 			return ((ClassFile) this.openable).getType().getFullyQualifiedName('.').toCharArray();
@@ -142,7 +143,8 @@ private char[] getQualifiedName() {
 		String simpleName = index==-1 ? fileName : fileName.substring(0, index);
 		PackageFragment pkg = (PackageFragment) this.openable.getParent();
 		return Util.concatWith(pkg.names, simpleName, '.').toCharArray();
-	} else if (this.openable instanceof ModularClassFile) {
+	}
+    if (this.openable instanceof ModularClassFile) {
 		// FIXME(SHMOD): not useful https://bugs.eclipse.org/501162#c30
 		String simpleName = TypeConstants.MODULE_INFO_NAME_STRING;
 		PackageFragment pkg = (PackageFragment) this.openable.getParent();
@@ -184,8 +186,8 @@ public int hashCode() {
 	if (this.compoundName == null) return super.hashCode();
 
 	int hashCode = 0;
-	for (int i = 0, length = this.compoundName.length; i < length; i++)
-		hashCode += CharOperation.hashCode(this.compoundName[i]);
+	for (char[] element : this.compoundName)
+        hashCode += CharOperation.hashCode(element);
 	return hashCode;
 }
 @Override
@@ -209,7 +211,8 @@ public String toString() {
 public char[] getModuleName() {
 	if (this.openable instanceof CompilationUnit) {
 		return ((CompilationUnit) this.openable).getModuleName();
-	} else if (this.openable instanceof ClassFile) {
+	}
+    if (this.openable instanceof ClassFile) {
 		IModuleDescription moduleDescription = this.openable.getPackageFragmentRoot().getModuleDescription();
 		if (moduleDescription != null) {
 			return moduleDescription.getElementName().toCharArray();

@@ -152,7 +152,7 @@ public final void addClinit() {
 			System.arraycopy(
 				methodDeclarations,
 				0,
-				(methodDeclarations = new AbstractMethodDeclaration[length + 1]),
+				methodDeclarations = new AbstractMethodDeclaration[length + 1],
 				1,
 				length);
 		}
@@ -182,7 +182,7 @@ public MethodDeclaration addMissingAbstractMethodFor(MethodBinding methodBinding
 
 	if (argumentsLength > 0) {
 		String baseName = "arg";//$NON-NLS-1$
-		Argument[] arguments = (methodDeclaration.arguments = new Argument[argumentsLength]);
+		Argument[] arguments = methodDeclaration.arguments = new Argument[argumentsLength];
 		for (int i = argumentsLength; --i >= 0;) {
 			arguments[i] = new Argument((baseName + i).toCharArray(), 0L, null /*type ref*/, ClassFileConstants.AccDefault);
 		}
@@ -367,8 +367,8 @@ public ConstructorDeclaration createDefaultConstructorForRecord(boolean needExpl
 //	constructor.modifiers |= ClassFileConstants.AccPublic; // JLS 14 8.10.5
 	constructor.arguments = getArgumentsFromComponents(this.recordComponents);
 
-	for (int i = 0, max = constructor.arguments.length; i < max; i++) {
-		if ((constructor.arguments[i].bits & ASTNode.HasTypeAnnotations) != 0) {
+	for (Argument argument : constructor.arguments) {
+		if ((argument.bits & ASTNode.HasTypeAnnotations) != 0) {
 			constructor.bits |= ASTNode.HasTypeAnnotations;
 			break;
 		}
@@ -430,7 +430,7 @@ private Argument[] getArgumentsFromComponents(RecordComponent[] comps) {
 		new Argument[comps.length];
 	int count = 0;
 	for (RecordComponent comp : comps) {
-		Argument argument = new Argument(comp.name, ((long)comp.sourceStart) << 32 | comp.sourceEnd,
+		Argument argument = new Argument(comp.name, (long)comp.sourceStart << 32 | comp.sourceEnd,
 				comp.type, 0); // no modifiers allowed for record components - enforce
 		args2[count++] = argument;
 	}
@@ -503,7 +503,7 @@ public MethodBinding createDefaultConstructorWithBinding(MethodBinding inherited
 	constructor.bits |= ASTNode.IsDefaultConstructor;
 
 	if (argumentsLength > 0) {
-		Argument[] arguments = (constructor.arguments = new Argument[argumentsLength]);
+		Argument[] arguments = constructor.arguments = new Argument[argumentsLength];
 		for (int i = argumentsLength; --i >= 0;) {
 			arguments[i] = new Argument((baseName + i).toCharArray(), 0L, null /*type ref*/, ClassFileConstants.AccDefault);
 		}
@@ -543,7 +543,7 @@ public MethodBinding createDefaultConstructorWithBinding(MethodBinding inherited
 			argumentsLength == 0 ? Binding.NO_PARAMETERS : argumentTypes, //arguments bindings
 			thrownExceptions, //exceptions
 			sourceType); //declaringClass
-	constructor.binding.tagBits |= (inheritedConstructorBinding.tagBits & TagBits.HasMissingType);
+	constructor.binding.tagBits |= inheritedConstructorBinding.tagBits & TagBits.HasMissingType;
 	constructor.binding.modifiers |= ExtraCompilerModifiers.AccIsDefaultConstructor;
 	if (inheritedConstructorBinding.parameterNonNullness != null // this implies that annotation based null analysis is enabled
 			&& argumentsLength > 0)
@@ -576,9 +576,9 @@ public MethodBinding createDefaultConstructorWithBinding(MethodBinding inherited
  */
 public FieldDeclaration declarationOf(FieldBinding fieldBinding) {
 	if (fieldBinding != null && this.fields != null) {
-		for (int i = 0, max = this.fields.length; i < max; i++) {
+		for (FieldDeclaration field : this.fields) {
 			FieldDeclaration fieldDecl;
-			if ((fieldDecl = this.fields[i]).binding == fieldBinding)
+			if ((fieldDecl = field).binding == fieldBinding)
 				return fieldDecl;
 		}
 	}
@@ -590,9 +590,9 @@ public FieldDeclaration declarationOf(FieldBinding fieldBinding) {
  */
 public TypeDeclaration declarationOf(MemberTypeBinding memberTypeBinding) {
 	if (memberTypeBinding != null && this.memberTypes != null) {
-		for (int i = 0, max = this.memberTypes.length; i < max; i++) {
+		for (TypeDeclaration memberType : this.memberTypes) {
 			TypeDeclaration memberTypeDecl;
-			if (TypeBinding.equalsEquals((memberTypeDecl = this.memberTypes[i]).binding, memberTypeBinding))
+			if (TypeBinding.equalsEquals((memberTypeDecl = memberType).binding, memberTypeBinding))
 				return memberTypeDecl;
 		}
 	}
@@ -604,10 +604,10 @@ public TypeDeclaration declarationOf(MemberTypeBinding memberTypeBinding) {
  */
 public AbstractMethodDeclaration declarationOf(MethodBinding methodBinding) {
 	if (methodBinding != null && this.methods != null) {
-		for (int i = 0, max = this.methods.length; i < max; i++) {
+		for (AbstractMethodDeclaration method : this.methods) {
 			AbstractMethodDeclaration methodDecl;
 
-			if ((methodDecl = this.methods[i]).binding == methodBinding)
+			if ((methodDecl = method).binding == methodBinding)
 				return methodDecl;
 		}
 	}
@@ -619,9 +619,9 @@ public AbstractMethodDeclaration declarationOf(MethodBinding methodBinding) {
  */
 public RecordComponent declarationOf(RecordComponentBinding recordComponentBinding) {
 	if (recordComponentBinding != null && this.recordComponents != null) {
-		for (int i = 0, max = this.recordComponents.length; i < max; i++) {
+		for (RecordComponent recordComponent2 : this.recordComponents) {
 			RecordComponent recordComponent;
-			if ((recordComponent = this.recordComponents[i]).binding == recordComponentBinding)
+			if ((recordComponent = recordComponent2).binding == recordComponentBinding)
 				return recordComponent;
 		}
 	}
@@ -645,8 +645,8 @@ public TypeDeclaration declarationOfType(char[][] typeName) {
 	}
 	char[][] subTypeName = new char[typeNameLength - 1][];
 	System.arraycopy(typeName, 1, subTypeName, 0, typeNameLength - 1);
-	for (int i = 0; i < this.memberTypes.length; i++) {
-		TypeDeclaration typeDecl = this.memberTypes[i].declarationOfType(subTypeName);
+	for (TypeDeclaration memberType : this.memberTypes) {
+		TypeDeclaration typeDecl = memberType.declarationOfType(subTypeName);
 		if (typeDecl != null) {
 			return typeDecl;
 		}
@@ -737,8 +737,7 @@ public void generateCode(ClassFile enclosingClassFile) {
 				ocf.recordNestMember(this.binding);
 		}
 		TypeVariableBinding[] typeVariables = this.binding.typeVariables();
-		for (int i = 0, max = typeVariables.length; i < max; i++) {
-			TypeVariableBinding typeVariableBinding = typeVariables[i];
+		for (TypeVariableBinding typeVariableBinding : typeVariables) {
 			if ((typeVariableBinding.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 				Util.recordNestedType(classFile, typeVariableBinding);
 			}
@@ -748,8 +747,7 @@ public void generateCode(ClassFile enclosingClassFile) {
 		classFile.addFieldInfos();
 
 		if (this.memberTypes != null) {
-			for (int i = 0, max = this.memberTypes.length; i < max; i++) {
-				TypeDeclaration memberType = this.memberTypes[i];
+			for (TypeDeclaration memberType : this.memberTypes) {
 				classFile.recordInnerClasses(memberType.binding);
 				memberType.generateCode(this.scope, classFile);
 			}
@@ -757,8 +755,8 @@ public void generateCode(ClassFile enclosingClassFile) {
 		// generate all methods
 		classFile.setForMethodInfos();
 		if (this.methods != null) {
-			for (int i = 0, max = this.methods.length; i < max; i++) {
-				this.methods[i].generateCode(this.scope, classFile);
+			for (AbstractMethodDeclaration method : this.methods) {
+				method.generateCode(this.scope, classFile);
 			}
 		}
 		// generate all synthetic and abstract methods
@@ -787,10 +785,7 @@ public void generateCode(ClassFile enclosingClassFile) {
  */
 @Override
 public void generateCode(BlockScope blockScope, CodeStream codeStream) {
-	if ((this.bits & ASTNode.IsReachable) == 0) {
-		return;
-	}
-	if ((this.bits & ASTNode.HasBeenGenerated) != 0) return;
+	if ((this.bits & ASTNode.IsReachable) == 0 || (this.bits & ASTNode.HasBeenGenerated) != 0) return;
 	int pc = codeStream.position;
 	if (this.binding != null) {
 		SyntheticArgumentBinding[] enclosingInstances = ((NestedTypeBinding) this.binding).syntheticEnclosingInstances();
@@ -844,17 +839,14 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 		this.scope.problemReporter().validateRestrictedKeywords(this.name, this);
 	}
 
-	if (!this.binding.isUsed() && this.binding.isOrEnclosedByPrivateType()) {
-		if (!this.scope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
-			this.scope.problemReporter().unusedPrivateType(this);
-		}
-	}
+	if (!this.binding.isUsed() && this.binding.isOrEnclosedByPrivateType() && !this.scope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
+    	this.scope.problemReporter().unusedPrivateType(this);
+    }
 
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=385780
 	if (this.typeParameters != null &&
 			!this.scope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
-		for (int i = 0, length = this.typeParameters.length; i < length; ++i) {
-			TypeParameter typeParameter = this.typeParameters[i];
+		for (TypeParameter typeParameter : this.typeParameters) {
 			if ((typeParameter.binding.modifiers & ExtraCompilerModifiers.AccLocallyUsed) == 0) {
 				this.scope.problemReporter().unusedTypeParameter(typeParameter);
 			}
@@ -863,15 +855,15 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 
 	// for local classes we use the flowContext as our parent, but never use an initialization context for this purpose
 	// see Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
-	FlowContext parentContext = (flowContext instanceof InitializationFlowContext) ? null : flowContext;
+	FlowContext parentContext = flowContext instanceof InitializationFlowContext ? null : flowContext;
 	InitializationFlowContext initializerContext = new InitializationFlowContext(parentContext, this, flowInfo, flowContext, this.initializerScope);
 	// no static initializer in local classes, thus no need to set parent:
 	InitializationFlowContext staticInitializerContext = new InitializationFlowContext(null, this, flowInfo, flowContext, this.staticInitializerScope);
 	FlowInfo nonStaticFieldInfo = flowInfo.unconditionalFieldLessCopy();
 	FlowInfo staticFieldInfo = flowInfo.unconditionalFieldLessCopy();
 	if (this.fields != null) {
-		for (int i = 0, count = this.fields.length; i < count; i++) {
-			FieldDeclaration field = this.fields[i];
+		for (FieldDeclaration field2 : this.fields) {
+			FieldDeclaration field = field2;
 			if (field.isStatic()) {
 				if ((staticFieldInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0)
 					field.bits &= ~ASTNode.IsReachable;
@@ -908,36 +900,34 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 		}
 	}
 	if (this.memberTypes != null) {
-		for (int i = 0, count = this.memberTypes.length; i < count; i++) {
+		for (TypeDeclaration memberType : this.memberTypes) {
 			if (flowContext != null){ // local type
-				this.memberTypes[i].analyseCode(this.scope, flowContext, nonStaticFieldInfo.copy().setReachMode(flowInfo.reachMode())); // reset reach mode in case initializers did abrupt completely
+				memberType.analyseCode(this.scope, flowContext, nonStaticFieldInfo.copy().setReachMode(flowInfo.reachMode())); // reset reach mode in case initializers did abrupt completely
 			} else {
-				this.memberTypes[i].analyseCode(this.scope);
+				memberType.analyseCode(this.scope);
 			}
 		}
 	}
-	if (this.scope.compilerOptions().complianceLevel >= ClassFileConstants.JDK9) {
-		// synthesize <clinit> if one is not present. Required to initialize
-		// synthetic final fields as modifying final fields outside of a <clinit>
-		// is disallowed in Java 9
-		if (this.methods == null || !this.methods[0].isClinit()) {
-			Clinit clinit = new Clinit(this.compilationResult);
-			clinit.declarationSourceStart = clinit.sourceStart = this.sourceStart;
-			clinit.declarationSourceEnd = clinit.sourceEnd = this.sourceEnd;
-			clinit.bodyEnd = this.sourceEnd;
-			int length = this.methods == null ? 0 : this.methods.length;
-			AbstractMethodDeclaration[] methodDeclarations = new AbstractMethodDeclaration[length + 1];
-			methodDeclarations[0] = clinit;
-			if (this.methods != null)
-				System.arraycopy(this.methods, 0, methodDeclarations, 1, length);
-		}
-	}
+	// synthesize <clinit> if one is not present. Required to initialize
+    // synthetic final fields as modifying final fields outside of a <clinit>
+    // is disallowed in Java 9
+    if (this.scope.compilerOptions().complianceLevel >= ClassFileConstants.JDK9 && (this.methods == null || !this.methods[0].isClinit())) {
+    	Clinit clinit = new Clinit(this.compilationResult);
+    	clinit.declarationSourceStart = clinit.sourceStart = this.sourceStart;
+    	clinit.declarationSourceEnd = clinit.sourceEnd = this.sourceEnd;
+    	clinit.bodyEnd = this.sourceEnd;
+    	int length = this.methods == null ? 0 : this.methods.length;
+    	AbstractMethodDeclaration[] methodDeclarations = new AbstractMethodDeclaration[length + 1];
+    	methodDeclarations[0] = clinit;
+    	if (this.methods != null)
+    		System.arraycopy(this.methods, 0, methodDeclarations, 1, length);
+    }
 	if (this.methods != null) {
 		UnconditionalFlowInfo outerInfo = flowInfo.unconditionalFieldLessCopy();
 		FlowInfo constructorInfo = nonStaticFieldInfo.unconditionalInits().discardNonFieldInitializations().addInitializationsFrom(outerInfo);
 		SimpleSetOfCharArray jUnitMethodSourceValues = getJUnitMethodSourceValues();
-		for (int i = 0, count = this.methods.length; i < count; i++) {
-			AbstractMethodDeclaration method = this.methods[i];
+		for (AbstractMethodDeclaration method2 : this.methods) {
+			AbstractMethodDeclaration method = method2;
 			if (method.ignoreFurtherInvestigation)
 				continue;
 			if (method.isInitializationMethod()) {
@@ -1002,7 +992,8 @@ private void addJUnitMethodSourceValues(SimpleSetOfCharArray junitMethodSourceVa
 private char[] getValueAsChars(Expression value) {
 	if (value instanceof StringLiteral) { // e.g. "someMethod"
 		return ((StringLiteral) value).source;
-	} else if (value.constant instanceof StringConstant) { // e.g. SOME_CONSTANT + "value"
+	}
+    if (value.constant instanceof StringConstant) { // e.g. SOME_CONSTANT + "value"
 		return value.constant.stringValue().toCharArray();
 	}
 	return CharOperation.NO_CHAR;
@@ -1131,7 +1122,7 @@ public void parseMethods(Parser parser, CompilationUnitDeclaration unit) {
 		for (int i = 0; i < length; i++) {
 			TypeDeclaration typeDeclaration = this.memberTypes[i];
 			typeDeclaration.parseMethods(parser, unit);
-			this.bits |= (typeDeclaration.bits & ASTNode.HasSyntaxErrors);
+			this.bits |= typeDeclaration.bits & ASTNode.HasSyntaxErrors;
 		}
 	}
 
@@ -1141,7 +1132,7 @@ public void parseMethods(Parser parser, CompilationUnitDeclaration unit) {
 		for (int i = 0; i < length; i++) {
 			AbstractMethodDeclaration abstractMethodDeclaration = this.methods[i];
 			abstractMethodDeclaration.parseStatements(parser, unit);
-			this.bits |= (abstractMethodDeclaration.bits & ASTNode.HasSyntaxErrors);
+			this.bits |= abstractMethodDeclaration.bits & ASTNode.HasSyntaxErrors;
 		}
 	}
 
@@ -1153,7 +1144,7 @@ public void parseMethods(Parser parser, CompilationUnitDeclaration unit) {
 			switch(fieldDeclaration.getKind()) {
 				case AbstractVariableDeclaration.INITIALIZER:
 					((Initializer) fieldDeclaration).parseStatements(parser, this, unit);
-					this.bits |= (fieldDeclaration.bits & ASTNode.HasSyntaxErrors);
+					this.bits |= fieldDeclaration.bits & ASTNode.HasSyntaxErrors;
 					break;
 			}
 		}
@@ -1175,26 +1166,26 @@ public StringBuffer print(int indent, StringBuffer output) {
 public StringBuffer printBody(int indent, StringBuffer output) {
 	output.append(" {"); //$NON-NLS-1$
 	if (this.memberTypes != null) {
-		for (int i = 0; i < this.memberTypes.length; i++) {
-			if (this.memberTypes[i] != null) {
+		for (TypeDeclaration memberType : this.memberTypes) {
+			if (memberType != null) {
 				output.append('\n');
-				this.memberTypes[i].print(indent + 1, output);
+				memberType.print(indent + 1, output);
 			}
 		}
 	}
 	if (this.fields != null) {
-		for (int fieldI = 0; fieldI < this.fields.length; fieldI++) {
-			if (this.fields[fieldI] != null) {
+		for (FieldDeclaration field : this.fields) {
+			if (field != null) {
 				output.append('\n');
-				this.fields[fieldI].print(indent + 1, output);
+				field.print(indent + 1, output);
 			}
 		}
 	}
 	if (this.methods != null) {
-		for (int i = 0; i < this.methods.length; i++) {
-			if (this.methods[i] != null) {
+		for (AbstractMethodDeclaration method : this.methods) {
+			if (method != null) {
 				output.append('\n');
-				this.methods[i].print(indent + 1, output);
+				method.print(indent + 1, output);
 			}
 		}
 	}
@@ -1314,11 +1305,9 @@ public void resolve() {
 				&& this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
 			this.scope.problemReporter().missingDeprecatedAnnotationForType(this);
 		}
-		if ((annotationTagBits & TagBits.AnnotationFunctionalInterface) != 0) {
-			if(!this.binding.isFunctionalInterface(this.scope)) {
-				this.scope.problemReporter().notAFunctionalInterface(this);
-			}
-		}
+		if((annotationTagBits & TagBits.AnnotationFunctionalInterface) != 0 && !this.binding.isFunctionalInterface(this.scope)) {
+        	this.scope.problemReporter().notAFunctionalInterface(this);
+        }
 
 		if ((this.bits & ASTNode.UndocumentedEmptyBlock) != 0) {
 			this.scope.problemReporter().undocumentedEmptyBlock(this.bodyStart-1, this.bodyEnd);
@@ -1393,8 +1382,8 @@ public void resolve() {
 		FieldDeclaration[] enumConstantsWithoutBody = null;
 
 		if (this.memberTypes != null) {
-			for (int i = 0, count = this.memberTypes.length; i < count; i++) {
-				this.memberTypes[i].resolve(this.scope);
+			for (TypeDeclaration memberType : this.memberTypes) {
+				memberType.resolve(this.scope);
 			}
 		}
 		if (this.recordComponents != null) {
@@ -1423,7 +1412,7 @@ public void resolve() {
 							continue;
 						}
 						if (needSerialVersion
-								&& ((fieldBinding.modifiers & (ClassFileConstants.AccStatic | ClassFileConstants.AccFinal)) == (ClassFileConstants.AccStatic | ClassFileConstants.AccFinal))
+								&& (fieldBinding.modifiers & (ClassFileConstants.AccStatic | ClassFileConstants.AccFinal)) == (ClassFileConstants.AccStatic | ClassFileConstants.AccFinal)
 								&& CharOperation.equals(TypeConstants.SERIALVERSIONUID, fieldBinding.name)
 								&& TypeBinding.equalsEquals(TypeBinding.LONG, fieldBinding.type)) {
 							needSerialVersion = false;
@@ -1474,18 +1463,16 @@ public void resolve() {
 				// check enum abstract methods
 				if (this.binding.isAbstract()) {
 					if (!hasEnumConstants) {
-						for (int i = 0, count = this.methods.length; i < count; i++) {
-							final AbstractMethodDeclaration methodDeclaration = this.methods[i];
+						for (final AbstractMethodDeclaration methodDeclaration : this.methods) {
 							if (methodDeclaration.isAbstract() && methodDeclaration.binding != null)
 								this.scope.problemReporter().enumAbstractMethodMustBeImplemented(methodDeclaration);
 						}
 					} else if (enumConstantsWithoutBody != null) {
-						for (int i = 0, count = this.methods.length; i < count; i++) {
-							final AbstractMethodDeclaration methodDeclaration = this.methods[i];
+						for (final AbstractMethodDeclaration methodDeclaration : this.methods) {
 							if (methodDeclaration.isAbstract() && methodDeclaration.binding != null) {
-								for (int f = 0, l = enumConstantsWithoutBody.length; f < l; f++)
-									if (enumConstantsWithoutBody[f] != null)
-										this.scope.problemReporter().enumConstantMustImplementAbstractMethod(methodDeclaration, enumConstantsWithoutBody[f]);
+								for (FieldDeclaration element : enumConstantsWithoutBody)
+                                    if (element != null)
+										this.scope.problemReporter().enumConstantMustImplementAbstractMethod(methodDeclaration, element);
 							}
 						}
 					}
@@ -1495,17 +1482,17 @@ public void resolve() {
 
 		int missingAbstractMethodslength = this.missingAbstractMethods == null ? 0 : this.missingAbstractMethods.length;
 		int methodsLength = this.methods == null ? 0 : this.methods.length;
-		if ((methodsLength + missingAbstractMethodslength) > 0xFFFF) {
+		if (methodsLength + missingAbstractMethodslength > 0xFFFF) {
 			this.scope.problemReporter().tooManyMethods(this);
 		}
 		if (this.methods != null) {
-			for (int i = 0, count = this.methods.length; i < count; i++) {
-				this.methods[i].resolve(this.scope);
+			for (AbstractMethodDeclaration method : this.methods) {
+				method.resolve(this.scope);
 			}
 		}
 		// Resolve javadoc
 		if (this.javadoc != null) {
-			if (this.scope != null && (this.name != TypeConstants.PACKAGE_INFO_NAME)) {
+			if (this.scope != null && this.name != TypeConstants.PACKAGE_INFO_NAME) {
 				// if the type is package-info, the javadoc was resolved as part of the compilation unit javadoc
 				this.javadoc.resolve(this.scope);
 			}
@@ -1518,7 +1505,7 @@ public void resolve() {
 				if (this.enclosingType != null) {
 					visibility = Util.computeOuterMostVisibility(this.enclosingType, visibility);
 				}
-				int javadocModifiers = (this.binding.modifiers & ~ExtraCompilerModifiers.AccVisibilityMASK) | visibility;
+				int javadocModifiers = this.binding.modifiers & ~ExtraCompilerModifiers.AccVisibilityMASK | visibility;
 				reporter.javadocMissing(this.sourceStart, this.sourceEnd, severity, javadocModifiers);
 			}
 		}
@@ -1612,7 +1599,7 @@ public void resolve(ClassScope upperScope) {
 	// member scopes are already created
 	// request the construction of a binding if local member type
 
-	if (this.binding != null && this.binding instanceof LocalTypeBinding) {
+	if (this.binding instanceof LocalTypeBinding) {
 		// remember local types binding for innerclass emulation propagation
 		upperScope.referenceCompilationUnit().record((LocalTypeBinding)this.binding);
 	}

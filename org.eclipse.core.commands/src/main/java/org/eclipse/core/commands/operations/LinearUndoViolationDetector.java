@@ -32,7 +32,6 @@ public abstract class LinearUndoViolationDetector implements IOperationApprover 
 	 * Create an instance of LinearUndoViolationDetector.
 	 */
 	public LinearUndoViolationDetector() {
-		super();
 	}
 
 	/**

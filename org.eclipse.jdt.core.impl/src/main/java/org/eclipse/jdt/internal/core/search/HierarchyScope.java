@@ -145,8 +145,7 @@ public class HierarchyScope extends AbstractSearchScope implements SuffixConstan
 		} else {
 			types = this.hierarchy.getAllTypes();
 		}
-		for (int i = 0; i < types.length; i++) {
-			IType type = types[i];
+		for (IType type : types) {
 			if (this.subTypes != null) {
 				// remember subtypes for later use in encloses()
 				this.subTypes.add(type);
@@ -218,15 +217,14 @@ public class HierarchyScope extends AbstractSearchScope implements SuffixConstan
 			IJavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
 			IJavaProject[] projects = model.getJavaProjects();
 			HashSet visited = new HashSet();
-			for (int i = 0; i < projects.length; i++) {
-				JavaProject project = (JavaProject) projects[i];
+			for (IJavaProject project2 : projects) {
+				JavaProject project = (JavaProject) project2;
 				IClasspathEntry entry = project.getClasspathEntryFor(rootPath);
 				if (entry != null) {
 					// add the project and its binary pkg fragment roots
 					IPackageFragmentRoot[] roots = project.getAllPackageFragmentRoots();
 					set.add(project.getPath());
-					for (int k = 0; k < roots.length; k++) {
-						IPackageFragmentRoot pkgFragmentRoot = roots[k];
+					for (IPackageFragmentRoot pkgFragmentRoot : roots) {
 						if (pkgFragmentRoot.getKind() == IPackageFragmentRoot.K_BINARY) {
 							set.add(pkgFragmentRoot.getPath());
 						}
@@ -239,8 +237,7 @@ public class HierarchyScope extends AbstractSearchScope implements SuffixConstan
 			// add all the project's pkg fragment roots
 			IJavaProject project = (IJavaProject)root.getParent();
 			IPackageFragmentRoot[] roots = project.getAllPackageFragmentRoots();
-			for (int i = 0; i < roots.length; i++) {
-				IPackageFragmentRoot pkgFragmentRoot = roots[i];
+			for (IPackageFragmentRoot pkgFragmentRoot : roots) {
 				if (pkgFragmentRoot.getKind() == IPackageFragmentRoot.K_BINARY) {
 					set.add(pkgFragmentRoot.getPath());
 				} else {
@@ -258,13 +255,12 @@ public class HierarchyScope extends AbstractSearchScope implements SuffixConstan
 		if (visited.contains(project)) return;
 		visited.add(project);
 		IProject[] dependents = project.getProject().getReferencingProjects();
-		for (int i = 0; i < dependents.length; i++) {
+		for (IProject dependent2 : dependents) {
 			try {
-				IJavaProject dependent = JavaCore.create(dependents[i]);
+				IJavaProject dependent = JavaCore.create(dependent2);
 				IPackageFragmentRoot[] roots = dependent.getPackageFragmentRoots();
 				set.add(dependent.getPath());
-				for (int j = 0; j < roots.length; j++) {
-					IPackageFragmentRoot pkgFragmentRoot = roots[j];
+				for (IPackageFragmentRoot pkgFragmentRoot : roots) {
 					if (pkgFragmentRoot.isArchive()) {
 						set.add(pkgFragmentRoot.getPath());
 					}
@@ -282,21 +278,14 @@ public class HierarchyScope extends AbstractSearchScope implements SuffixConstan
 	}
 	public boolean encloses(String resourcePath, IProgressMonitor progressMonitor) {
 		if (this.hierarchy == null) {
-			if (resourcePath.equals(this.focusPath)) {
+			if (resourcePath.equals(this.focusPath) || !this.needsRefresh) {
 				return true;
-			} else {
-				if (this.needsRefresh) {
-					try {
-						initialize(progressMonitor);
-					} catch (JavaModelException e) {
-						return false;
-					}
-				} else {
-					// the scope is used only to find enclosing projects and jars
-					// clients is responsible for filtering out elements not in the hierarchy (see SearchEngine)
-					return true;
-				}
 			}
+            try {
+            	initialize(progressMonitor);
+            } catch (JavaModelException e) {
+            	return false;
+            }
 		}
 		if (this.needsRefresh) {
 			try {
@@ -308,9 +297,8 @@ public class HierarchyScope extends AbstractSearchScope implements SuffixConstan
 		int separatorIndex = resourcePath.indexOf(JAR_FILE_ENTRY_SEPARATOR);
 		if (separatorIndex != -1) {
 			return this.resourcePaths.contains(resourcePath);
-		} else {
-			return this.elements.contains(resourcePath);
 		}
+        return this.elements.contains(resourcePath);
 	}
 	/**
 	 * Optionally perform additional checks after element has already passed matching based on index/documents.
@@ -320,7 +308,7 @@ public class HierarchyScope extends AbstractSearchScope implements SuffixConstan
 	 *         (regarding subtypes and members) is requested
 	 */
 	public boolean enclosesFineGrained(IJavaElement element) {
-		if ((this.subTypes == null) && this.allowMemberAndEnclosingTypes)
+		if (this.subTypes == null && this.allowMemberAndEnclosingTypes)
 			return true; // no fine grained checking requested
 		return encloses(element, null);
 	}
@@ -331,21 +319,14 @@ public class HierarchyScope extends AbstractSearchScope implements SuffixConstan
 	}
 	public boolean encloses(IJavaElement element, IProgressMonitor progressMonitor) {
 		if (this.hierarchy == null) {
-			if (this.includeFocusType && this.focusType.equals(element.getAncestor(IJavaElement.TYPE))) {
+			if (this.includeFocusType && this.focusType.equals(element.getAncestor(IJavaElement.TYPE)) || !this.needsRefresh) {
 				return true;
-			} else {
-				if (this.needsRefresh) {
-					try {
-						initialize(progressMonitor);
-					} catch (JavaModelException e) {
-						return false;
-					}
-				} else {
-					// the scope is used only to find enclosing projects and jars
-					// clients is responsible for filtering out elements not in the hierarchy (see SearchEngine)
-					return true;
-				}
 			}
+            try {
+            	initialize(progressMonitor);
+            } catch (JavaModelException e) {
+            	return false;
+            }
 		}
 		if (this.needsRefresh) {
 			try {
@@ -392,31 +373,26 @@ public class HierarchyScope extends AbstractSearchScope implements SuffixConstan
 			if (original != type && this.subTypes.contains(original)) {
 				return true;
 			}
-		} else {
-			if (this.hierarchy.contains(type)) {
-				return true;
-			} else {
-				// be flexible: look at original element (see bug 14106 Declarations in Hierarchy does not find declarations in hierarchy)
-				IType original;
-				if (!type.isBinary()
-						&& (original = (IType)type.getPrimaryElement()) != null) {
-					if (this.hierarchy.contains(original)) {
-						return true;
-					}
-				}
-			}
-		}
+		} else if (this.hierarchy.contains(type)) {
+        	return true;
+        } else {
+        	// be flexible: look at original element (see bug 14106 Declarations in Hierarchy does not find declarations in hierarchy)
+        	IType original;
+        	if (!type.isBinary()
+            		&& (original = (IType)type.getPrimaryElement()) != null && this.hierarchy.contains(original)) {
+            	return true;
+            }
+        }
 		if (recurse) {
 			// queried type is enclosed in this scope if one of its members is:
 			try {
 				IType[] memberTypes = type.getTypes();
-				for (int i = 0; i < memberTypes.length; i++) {
-					if (enclosesType(memberTypes[i], recurse)) {
+				for (IType memberType : memberTypes) {
+					if (enclosesType(memberType, recurse)) {
 						return true;
 					}
 				}
 			} catch (JavaModelException e) {
-				return false;
 			}
 		}
 		return false;

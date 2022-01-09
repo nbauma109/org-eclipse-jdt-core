@@ -36,7 +36,7 @@ public final class ObjectVector implements Iterable<Object> {
 	public void add(Object newElement) {
 
 		if (this.size == this.maxSize) // knows that size starts <= maxSize
-			System.arraycopy(this.elements, 0, (this.elements = new Object[this.maxSize *= 2]), 0, this.size);
+			System.arraycopy(this.elements, 0, this.elements = new Object[this.maxSize *= 2], 0, this.size);
 		this.elements[this.size++] = newElement;
 	}
 
@@ -44,7 +44,7 @@ public final class ObjectVector implements Iterable<Object> {
 
 		if (this.size + newElements.length >= this.maxSize) {
 			this.maxSize = this.size + newElements.length; // assume no more elements will be added
-			System.arraycopy(this.elements, 0, (this.elements = new Object[this.maxSize]), 0, this.size);
+			System.arraycopy(this.elements, 0, this.elements = new Object[this.maxSize], 0, this.size);
 		}
 		System.arraycopy(newElements, 0, this.elements, this.size, newElements.length);
 		this.size += newElements.length;
@@ -54,7 +54,7 @@ public final class ObjectVector implements Iterable<Object> {
 
 		if (this.size + newVector.size >= this.maxSize) {
 			this.maxSize = this.size + newVector.size; // assume no more elements will be added
-			System.arraycopy(this.elements, 0, (this.elements = new Object[this.maxSize]), 0, this.size);
+			System.arraycopy(this.elements, 0, this.elements = new Object[this.maxSize], 0, this.size);
 		}
 		System.arraycopy(newVector.elements, 0, this.elements, this.size, newVector.size);
 		this.size += newVector.size;
@@ -133,15 +133,15 @@ public final class ObjectVector implements Iterable<Object> {
 	@Override
 	public String toString() {
 
-		String s = ""; //$NON-NLS-1$
+		StringBuilder s = new StringBuilder();
 		for (int i = 0; i < this.size; i++)
-			s += this.elements[i].toString() + "\n"; //$NON-NLS-1$
-		return s;
+			s.append(this.elements[i].toString()).append("\n"); //$NON-NLS-1$
+		return s.toString();
 	}
 
 	@Override
 	public Iterator<Object> iterator() {
-		return new Iterator<Object>() {
+		return new Iterator<>() {
 			int i=0;
 			@Override
 			public boolean hasNext() {

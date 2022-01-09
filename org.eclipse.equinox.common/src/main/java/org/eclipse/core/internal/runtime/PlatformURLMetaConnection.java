@@ -50,7 +50,7 @@ public class PlatformURLMetaConnection extends PlatformURLConnection {
 		if (target == null)
 			throw new IOException(NLS.bind(CommonMessages.url_resolvePlugin, url.toString()));
 		IPath path = MetaDataKeeper.getMetaArea().getStateLocation(target);
-		if (ix != -1 || (ix + 1) <= spec.length())
+		if (ix != -1 || ix + 1 <= spec.length())
 			path = path.append(spec.substring(ix + 1));
 		return path.toFile().toURL();
 	}

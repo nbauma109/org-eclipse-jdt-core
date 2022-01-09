@@ -75,13 +75,11 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 				return;
 
 			if (!this.binding.isUsed() && !this.binding.isAbstract()) {
-				if (this.binding.isPrivate()
-					|| (((this.binding.modifiers & (ExtraCompilerModifiers.AccOverriding|ExtraCompilerModifiers.AccImplementing)) == 0)
-						&& this.binding.isOrEnclosedByPrivateType())) {
-					if (!classScope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
-						this.scope.problemReporter().unusedPrivateMethod(this);
-					}
-				}
+				if ((this.binding.isPrivate()
+                	|| (this.binding.modifiers & (ExtraCompilerModifiers.AccOverriding|ExtraCompilerModifiers.AccImplementing)) == 0
+                		&& this.binding.isOrEnclosedByPrivateType()) && !classScope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
+                	this.scope.problemReporter().unusedPrivateMethod(this);
+                }
 			}
 
 			// skip enum implicit methods
@@ -95,8 +93,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=385780
 			if (this.typeParameters != null &&
 					!this.scope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
-				for (int i = 0, length = this.typeParameters.length; i < length; ++i) {
-					TypeParameter typeParameter = this.typeParameters[i];
+				for (TypeParameter typeParameter : this.typeParameters) {
 					if ((typeParameter.binding.modifiers  & ExtraCompilerModifiers.AccLocallyUsed) == 0) {
 						this.scope.problemReporter().unusedTypeParameter(typeParameter);
 					}
@@ -123,8 +120,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 				CompilerOptions compilerOptions = this.scope.compilerOptions();
 				boolean enableSyntacticNullAnalysisForFields = compilerOptions.enableSyntacticNullAnalysisForFields;
 				int complaintLevel = (flowInfo.reachMode() & FlowInfo.UNREACHABLE) == 0 ? Statement.NOT_COMPLAINED : Statement.COMPLAINED_FAKE_REACHABLE;
-				for (int i = 0, count = this.statements.length; i < count; i++) {
-					Statement stat = this.statements[i];
+				for (Statement stat : this.statements) {
 					if ((complaintLevel = stat.complainIfUnreachable(flowInfo, this.scope, complaintLevel, true)) < Statement.COMPLAINED_UNREACHABLE) {
 						flowInfo = stat.analyseCode(this.scope, methodContext, flowInfo);
 					}
@@ -141,15 +137,13 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 			}
 			// check for missing returning path
 			TypeBinding returnTypeBinding = this.binding.returnType;
-			if ((returnTypeBinding == TypeBinding.VOID) || isAbstract()) {
+			if (returnTypeBinding == TypeBinding.VOID || isAbstract()) {
 				if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) == 0) {
 					this.bits |= ASTNode.NeedFreeReturn;
 				}
-			} else {
-				if (flowInfo != FlowInfo.DEAD_END) {
-					this.scope.problemReporter().shouldReturn(returnTypeBinding, this);
-				}
-			}
+			} else if (flowInfo != FlowInfo.DEAD_END) {
+            	this.scope.problemReporter().shouldReturn(returnTypeBinding, this);
+            }
 			// check unreachable catch blocks
 			methodContext.complainIfUnusedExceptionHandlers(this);
 			// check unused parameters
@@ -174,8 +168,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 	@Override
 	public void getAllAnnotationContexts(int targetType, List allAnnotationContexts) {
 		AnnotationCollector collector = new AnnotationCollector(this.returnType, targetType, allAnnotationContexts);
-		for (int i = 0, max = this.annotations.length; i < max; i++) {
-			Annotation annotation = this.annotations[i];
+		for (Annotation annotation : this.annotations) {
 			annotation.traverse(collector, (BlockScope) null);
 		}
 	}
@@ -183,7 +176,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 	public boolean hasNullTypeAnnotation(AnnotationPosition position) {
 		// parser associates SE8 annotations to the declaration
 		return TypeReference.containsNullAnnotation(this.annotations) ||
-				(this.returnType != null && this.returnType.hasNullTypeAnnotation(position)); // just in case
+				this.returnType != null && this.returnType.hasNullTypeAnnotation(position); // just in case
 	}
 
 	@Override
@@ -202,9 +195,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 			return null;
 		ClassScope skope = this.scope.classScope();
 		TypeDeclaration typeDecl = skope.referenceContext;
-		if (!typeDecl.isRecord())
-			return null;
-		if (!(skope.referenceContext.isRecord()))
+		if (!typeDecl.isRecord() || !skope.referenceContext.isRecord())
 			return null;
 		RecordComponent[] recComps = typeDecl.recordComponents;
 		if (recComps == null || recComps.length == 0)
@@ -236,7 +227,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 	public void resolveStatements() {
 		// ========= abort on fatal error =============
 		if (this.returnType != null && this.binding != null) {
-			this.bits |= (this.returnType.bits & ASTNode.HasTypeAnnotations);
+			this.bits |= this.returnType.bits & ASTNode.HasTypeAnnotations;
 			this.returnType.resolvedType = this.binding.returnType;
 			// record the return type binding
 		}
@@ -263,11 +254,10 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 		// to check whether the method returns a type parameter not declared by it.
 		boolean returnsUndeclTypeVar = this.returnType != null && this.returnType.resolvedType instanceof TypeVariableBinding;
         if (this.typeParameters != null) {
-			for (int i = 0, length = this.typeParameters.length; i < length; i++) {
-				TypeParameter typeParameter = this.typeParameters[i];
-				this.bits |= (typeParameter.bits & ASTNode.HasTypeAnnotations);
+			for (TypeParameter typeParameter : this.typeParameters) {
+				this.bits |= typeParameter.bits & ASTNode.HasTypeAnnotations;
 				// typeParameter is already resolved from Scope#connectTypeVariables()
-				if (returnsUndeclTypeVar && TypeBinding.equalsEquals(this.typeParameters[i].binding, this.returnType.resolvedType)) {
+				if (returnsUndeclTypeVar && TypeBinding.equalsEquals(typeParameter.binding, this.returnType.resolvedType)) {
 					returnsUndeclTypeVar = false;
 				}
 			}
@@ -285,48 +275,37 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 			boolean hasUnresolvedArguments = (this.binding.tagBits & TagBits.HasUnresolvedArguments) != 0;
 			if (hasOverrideAnnotation  && !hasUnresolvedArguments) {
 				// no static method is considered overriding
-				if ((bindingModifiers & (ClassFileConstants.AccStatic|ExtraCompilerModifiers.AccOverriding)) == ExtraCompilerModifiers.AccOverriding)
-					break checkOverride;
 				//	in 1.5, strictly for overriding superclass method
 				//	in 1.6 and above, also tolerate implementing interface method
-				if (complianceLevel >= ClassFileConstants.JDK1_6
-						&& ((bindingModifiers & (ClassFileConstants.AccStatic|ExtraCompilerModifiers.AccImplementing)) == ExtraCompilerModifiers.AccImplementing))
+				if ((bindingModifiers & (ClassFileConstants.AccStatic|ExtraCompilerModifiers.AccOverriding)) == ExtraCompilerModifiers.AccOverriding || complianceLevel >= ClassFileConstants.JDK1_6
+						&& (bindingModifiers & (ClassFileConstants.AccStatic|ExtraCompilerModifiers.AccImplementing)) == ExtraCompilerModifiers.AccImplementing)
 					break checkOverride;
 				// claims to override, and doesn't actually do so
 				this.scope.problemReporter().methodMustOverride(this, complianceLevel);
-			} else {
-				//In case of  a concrete class method, we have to check if it overrides(in 1.5 and above) OR implements a method(1.6 and above).
-				//Also check if the method has a signature that is override-equivalent to that of any public method declared in Object.
-				if (!this.binding.declaringClass.isInterface()){
-						if((bindingModifiers & (ClassFileConstants.AccStatic|ExtraCompilerModifiers.AccOverriding)) == ExtraCompilerModifiers.AccOverriding) {
-							this.scope.problemReporter().missingOverrideAnnotation(this);
-						} else {
-							if(complianceLevel >= ClassFileConstants.JDK1_6
-								&& compilerOptions.reportMissingOverrideAnnotationForInterfaceMethodImplementation
-								&& this.binding.isImplementing()) {
-									// actually overrides, but did not claim to do so
-									this.scope.problemReporter().missingOverrideAnnotationForInterfaceMethodImplementation(this);
-							}
-
-						}
-				}
-				else {	//For 1.6 and above only
-					//In case of a interface class method, we have to check if it overrides a method (isImplementing returns true in case it overrides)
-					//Also check if the method has a signature that is override-equivalent to that of any public method declared in Object.
-					if(complianceLevel >= ClassFileConstants.JDK1_6
-							&& compilerOptions.reportMissingOverrideAnnotationForInterfaceMethodImplementation
-							&& (((bindingModifiers & (ClassFileConstants.AccStatic|ExtraCompilerModifiers.AccOverriding)) == ExtraCompilerModifiers.AccOverriding) || this.binding.isImplementing())){
-						// actually overrides, but did not claim to do so
-						this.scope.problemReporter().missingOverrideAnnotationForInterfaceMethodImplementation(this);
-					}
-				}
-			}
+			} else //In case of  a concrete class method, we have to check if it overrides(in 1.5 and above) OR implements a method(1.6 and above).
+            //Also check if the method has a signature that is override-equivalent to that of any public method declared in Object.
+            if (!this.binding.declaringClass.isInterface()){
+            		if((bindingModifiers & (ClassFileConstants.AccStatic|ExtraCompilerModifiers.AccOverriding)) == ExtraCompilerModifiers.AccOverriding) {
+            			this.scope.problemReporter().missingOverrideAnnotation(this);
+            		} else if(complianceLevel >= ClassFileConstants.JDK1_6
+                    	&& compilerOptions.reportMissingOverrideAnnotationForInterfaceMethodImplementation
+                    	&& this.binding.isImplementing()) {
+                    		// actually overrides, but did not claim to do so
+                    		this.scope.problemReporter().missingOverrideAnnotationForInterfaceMethodImplementation(this);
+                    }
+            } else //In case of a interface class method, we have to check if it overrides a method (isImplementing returns true in case it overrides)
+            //Also check if the method has a signature that is override-equivalent to that of any public method declared in Object.
+            if(complianceLevel >= ClassFileConstants.JDK1_6
+            		&& compilerOptions.reportMissingOverrideAnnotationForInterfaceMethodImplementation
+            		&& ((bindingModifiers & (ClassFileConstants.AccStatic|ExtraCompilerModifiers.AccOverriding)) == ExtraCompilerModifiers.AccOverriding || this.binding.isImplementing())){
+            	// actually overrides, but did not claim to do so
+            	this.scope.problemReporter().missingOverrideAnnotationForInterfaceMethodImplementation(this);
+            }
 		}
 
 		switch (TypeDeclaration.kind(this.scope.referenceType().modifiers)) {
 			case TypeDeclaration.ENUM_DECL :
-				if (this.selector == TypeConstants.VALUES) break;
-				if (this.selector == TypeConstants.VALUEOF) break;
+				if (this.selector == TypeConstants.VALUES || this.selector == TypeConstants.VALUEOF) break;
 				//$FALL-THROUGH$
 			case TypeDeclaration.CLASS_DECL :
 			case TypeDeclaration.RECORD_DECL:
@@ -336,21 +315,19 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 					if ((this.modifiers & ClassFileConstants.AccNative) == 0)
 						if ((this.modifiers & ClassFileConstants.AccAbstract) == 0)
 							this.scope.problemReporter().methodNeedBody(this);
-				} else {
-					// the method HAS a body --> abstract native modifiers are forbidden
-					if (((this.modifiers & ClassFileConstants.AccNative) != 0) || ((this.modifiers & ClassFileConstants.AccAbstract) != 0))
-						this.scope.problemReporter().methodNeedingNoBody(this);
-					else if (this.binding == null || this.binding.isStatic() || (this.binding.declaringClass instanceof LocalTypeBinding) || returnsUndeclTypeVar) {
-						// Cannot be static for one of the reasons stated above
-						this.bits &= ~ASTNode.CanBeStatic;
-					}
-				}
+				} else // the method HAS a body --> abstract native modifiers are forbidden
+                if ((this.modifiers & ClassFileConstants.AccNative) != 0 || (this.modifiers & ClassFileConstants.AccAbstract) != 0)
+                	this.scope.problemReporter().methodNeedingNoBody(this);
+                else if (this.binding == null || this.binding.isStatic() || this.binding.declaringClass instanceof LocalTypeBinding || returnsUndeclTypeVar) {
+                	// Cannot be static for one of the reasons stated above
+                	this.bits &= ~ASTNode.CanBeStatic;
+                }
 				break;
 			case TypeDeclaration.INTERFACE_DECL :
 				if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8
 						&& (this.modifiers & (ExtraCompilerModifiers.AccSemicolonBody | ClassFileConstants.AccAbstract)) == ExtraCompilerModifiers.AccSemicolonBody) {
 					boolean isPrivateMethod = compilerOptions.sourceLevel >= ClassFileConstants.JDK9 && (this.modifiers & ClassFileConstants.AccPrivate) != 0;
-					if (isPrivateMethod || ((this.modifiers & (ClassFileConstants.AccStatic | ExtraCompilerModifiers.AccDefaultMethod)) != 0)) {
+					if (isPrivateMethod || (this.modifiers & (ClassFileConstants.AccStatic | ExtraCompilerModifiers.AccDefaultMethod)) != 0) {
 							this.scope.problemReporter().methodNeedBody(this);
 					}
 				}
@@ -359,15 +336,13 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 		super.resolveStatements();
 
 		// TagBits.OverridingMethodWithSupercall is set during the resolveStatements() call
-		if (compilerOptions.getSeverity(CompilerOptions.OverridingMethodWithoutSuperInvocation) != ProblemSeverities.Ignore) {
-			if (this.binding != null) {
-        		int bindingModifiers = this.binding.modifiers;
-        		if ((bindingModifiers & (ExtraCompilerModifiers.AccOverriding|ExtraCompilerModifiers.AccImplementing)) == ExtraCompilerModifiers.AccOverriding
-        				&& (this.bits & ASTNode.OverridingMethodWithSupercall) == 0) {
-        			this.scope.problemReporter().overridesMethodWithoutSuperInvocation(this.binding);
-        		}
-			}
-		}
+		if (compilerOptions.getSeverity(CompilerOptions.OverridingMethodWithoutSuperInvocation) != ProblemSeverities.Ignore && this.binding != null) {
+        	int bindingModifiers = this.binding.modifiers;
+        	if ((bindingModifiers & (ExtraCompilerModifiers.AccOverriding|ExtraCompilerModifiers.AccImplementing)) == ExtraCompilerModifiers.AccOverriding
+        			&& (this.bits & ASTNode.OverridingMethodWithSupercall) == 0) {
+        		this.scope.problemReporter().overridesMethodWithoutSuperInvocation(this.binding);
+        	}
+        }
 	}
 
 	@Override

@@ -105,7 +105,7 @@ public class ArrayMap<K, V> implements Collection<K> {
 		final Iterator<K> keyIter = keys.iterator();
 		final Iterator<V> valueIter = values.iterator();
 
-		return new Iterator<K>() {
+		return new Iterator<>() {
 		@Override
 			public boolean hasNext() {
 				return keyIter.hasNext();

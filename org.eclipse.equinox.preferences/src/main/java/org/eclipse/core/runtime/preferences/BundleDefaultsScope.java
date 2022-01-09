@@ -57,8 +57,8 @@ public final class BundleDefaultsScope extends AbstractScope {
 	 * Create and return a new default scope instance.
 	 * @deprecated use <code>BundleDefaultsScope.INSTANCE</code> instead
 	 */
-	public BundleDefaultsScope() {
-		super();
+	@Deprecated
+    public BundleDefaultsScope() {
 	}
 
 

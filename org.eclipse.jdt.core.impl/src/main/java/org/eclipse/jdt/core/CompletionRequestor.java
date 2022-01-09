@@ -120,7 +120,7 @@ public abstract class CompletionRequestor {
 			|| completionProposalKind > CompletionProposal.LAST_KIND) {
 				throw new IllegalArgumentException("Unknown kind of completion proposal: "+completionProposalKind); //$NON-NLS-1$
 		}
-		return 0 != (this.ignoreSet & (1 << completionProposalKind));
+		return 0 != (this.ignoreSet & 1 << completionProposalKind);
 	}
 
 	/**
@@ -140,7 +140,7 @@ public abstract class CompletionRequestor {
 				throw new IllegalArgumentException("Unknown kind of completion proposal: "+completionProposalKind); //$NON-NLS-1$
 		}
 		if (ignore) {
-			this.ignoreSet |= (1 << completionProposalKind);
+			this.ignoreSet |= 1 << completionProposalKind;
 		} else {
 			this.ignoreSet &= ~(1 << completionProposalKind);
 		}
@@ -177,7 +177,7 @@ public abstract class CompletionRequestor {
 		}
 		if (this.requiredProposalAllowSet == null) return false;
 
-		return 0 != (this.requiredProposalAllowSet[proposalKind] & (1 << requiredProposalKind));
+		return 0 != (this.requiredProposalAllowSet[proposalKind] & 1 << requiredProposalKind);
 	}
 
 	/**
@@ -218,7 +218,7 @@ public abstract class CompletionRequestor {
 		}
 
 		if (allow) {
-			this.requiredProposalAllowSet[proposalKind] |= (1 << requiredProposalKind);
+			this.requiredProposalAllowSet[proposalKind] |= 1 << requiredProposalKind;
 		} else {
 			this.requiredProposalAllowSet[proposalKind] &= ~(1 << requiredProposalKind);
 		}

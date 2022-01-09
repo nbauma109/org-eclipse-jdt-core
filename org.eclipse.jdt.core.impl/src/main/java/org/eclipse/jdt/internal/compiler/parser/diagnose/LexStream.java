@@ -217,9 +217,11 @@ public class LexStream implements TerminalTokens {
 	public boolean isInsideStream(int index) {
 		if(this.tokenCacheEOFIndex >= 0 && index > this.tokenCacheEOFIndex) {
 			return false;
-		} else if(index > this.tokenCacheIndex) {
+		}
+        if(index > this.tokenCacheIndex) {
 			return true;
-		} else return this.tokenCacheIndex - this.tokenCache.length < index;
+		}
+        return this.tokenCacheIndex - this.tokenCache.length < index;
 	}
 
 	@Override

@@ -68,7 +68,7 @@ public class CaptureBinding extends TypeVariableBinding {
 		} else {
 			computeId(this.environment);
 			if(wildcard.hasNullTypeAnnotations()) {
-				this.tagBits |= (wildcard.tagBits & TagBits.AnnotationNullMASK) | TagBits.HasNullTypeAnnotation;
+				this.tagBits |= wildcard.tagBits & TagBits.AnnotationNullMASK | TagBits.HasNullTypeAnnotation;
 			}
 		}
 	}
@@ -91,7 +91,7 @@ public class CaptureBinding extends TypeVariableBinding {
 		this.end = prototype.end;
 		this.captureID = prototype.captureID;
 		this.lowerBound = prototype.lowerBound;
-		this.tagBits |= (prototype.tagBits & TagBits.HasCapturedWildcard);
+		this.tagBits |= prototype.tagBits & TagBits.HasCapturedWildcard;
 		this.cud = prototype.cud;
 	}
 
@@ -282,21 +282,20 @@ public class CaptureBinding extends TypeVariableBinding {
 	}
 	@Override
 	public ReferenceBinding upwardsProjection(Scope scope, TypeBinding[] mentionedTypeVariables) {
-		if (enterRecursiveProjectionFunction()) {
-			try {
-				for (int i = 0; i < mentionedTypeVariables.length; ++i) {
-					if (TypeBinding.equalsEquals(this, mentionedTypeVariables[i])) {
-						TypeBinding upperBoundForProjection = this.upperBoundForProjection();
-						return ((ReferenceBinding)upperBoundForProjection).upwardsProjection(scope, mentionedTypeVariables);
-					}
-				}
-				return this;
-			} finally {
-				exitRecursiveProjectionFunction();
-			}
-		} else {
+		if (!enterRecursiveProjectionFunction()) {
 			return scope.getJavaLangObject();
 		}
+        try {
+        	for (TypeBinding mentionedTypeVariable : mentionedTypeVariables) {
+        		if (TypeBinding.equalsEquals(this, mentionedTypeVariable)) {
+        			TypeBinding upperBoundForProjection = this.upperBoundForProjection();
+        			return ((ReferenceBinding)upperBoundForProjection).upwardsProjection(scope, mentionedTypeVariables);
+        		}
+        	}
+        	return this;
+        } finally {
+        	exitRecursiveProjectionFunction();
+        }
 	}
 	public TypeBinding upperBoundForProjection() {
 		TypeBinding upperBound = null;
@@ -327,16 +326,14 @@ public class CaptureBinding extends TypeVariableBinding {
 					upperBound = this.superclass();
 				} else if (supers.length == 1) {
 					upperBound = superClassIsObject ? supers[0] : this.environment.createIntersectionType18(new ReferenceBinding[] {this.superclass(), supers[0]});
-				} else {
-					if (superClassIsObject) {
-						upperBound = this.environment.createIntersectionType18(supers);
-					} else {
-						ReferenceBinding[] allBounds = new ReferenceBinding[supers.length + 1];
-						System.arraycopy(supers, 0, allBounds, 1, supers.length);
-						allBounds[0] = this.superclass();
-						upperBound = this.environment.createIntersectionType18(allBounds);
-					}
-				}
+				} else if (superClassIsObject) {
+                	upperBound = this.environment.createIntersectionType18(supers);
+                } else {
+                	ReferenceBinding[] allBounds = new ReferenceBinding[supers.length + 1];
+                	System.arraycopy(supers, 0, allBounds, 1, supers.length);
+                	allBounds[0] = this.superclass();
+                	upperBound = this.environment.createIntersectionType18(allBounds);
+                }
 			}
 		} else {
 			upperBound = super.upperBound();
@@ -360,10 +357,8 @@ public class CaptureBinding extends TypeVariableBinding {
 	    if (equalsEquals(this, otherType)) return true;
 	    if (otherType == null) return false;
 		// capture of ? extends X[]
-		if (this.firstBound != null && this.firstBound.isArrayType()) {
-			if (this.firstBound.isCompatibleWith(otherType))
-				return true;
-		}
+		if (this.firstBound != null && this.firstBound.isArrayType() && this.firstBound.isCompatibleWith(otherType))
+        	return true;
 		switch (otherType.kind()) {
 			case Binding.WILDCARD_TYPE :
 			case Binding.INTERSECTION_TYPE :
@@ -374,9 +369,7 @@ public class CaptureBinding extends TypeVariableBinding {
 
 	@Override
 	public boolean isProperType(boolean admitCapture18) {
-		if (this.lowerBound != null && !this.lowerBound.isProperType(admitCapture18))
-			return false;
-		if (this.wildcard != null && !this.wildcard.isProperType(admitCapture18))
+		if (this.lowerBound != null && !this.lowerBound.isProperType(admitCapture18) || this.wildcard != null && !this.wildcard.isProperType(admitCapture18))
 			return false;
 		return super.isProperType(admitCapture18);
 	}
@@ -533,8 +526,8 @@ public class CaptureBinding extends TypeVariableBinding {
 	public ReferenceBinding downwardsProjection(Scope scope, TypeBinding[] mentionedTypeVariables) {
 		ReferenceBinding result = null;
 		if (enterRecursiveProjectionFunction()) {
-			for (int i = 0; i < mentionedTypeVariables.length; ++i) {
-				if (TypeBinding.equalsEquals(this, mentionedTypeVariables[i])) {
+			for (TypeBinding mentionedTypeVariable : mentionedTypeVariables) {
+				if (TypeBinding.equalsEquals(this, mentionedTypeVariable)) {
 					if (this.lowerBound != null) {
 						result = (ReferenceBinding) this.lowerBound.downwardsProjection(scope, mentionedTypeVariables);
 					}

@@ -29,7 +29,6 @@ public class VoidTypeBinding extends BaseTypeBinding {
 
 	@Override
 	public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNullAnnotations) {
-		return; // reject misguided attempt.
 	}
 
 	@Override

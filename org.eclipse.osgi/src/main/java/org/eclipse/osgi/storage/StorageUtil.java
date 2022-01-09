@@ -130,15 +130,13 @@ public class StorageUtil {
 
 			boolean success = file.delete();
 
-			if (DEBUG) {
-				if (!success) {
-					Debug.println("  rm failed!"); //$NON-NLS-1$
-				}
-			}
+			if (DEBUG && !success) {
+            	Debug.println("  rm failed!"); //$NON-NLS-1$
+            }
 
-			return (success);
+			return success;
 		}
-		return (true);
+		return true;
 	}
 
 	public static String readString(DataInputStream in, boolean intern) throws IOException {

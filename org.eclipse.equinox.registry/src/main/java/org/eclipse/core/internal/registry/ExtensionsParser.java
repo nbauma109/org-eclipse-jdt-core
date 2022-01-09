@@ -150,7 +150,6 @@ public class ExtensionsParser extends DefaultHandler {
 	private final ArrayList<RegistryObject> addedRegistryObjects = new ArrayList<>(5);
 
 	public ExtensionsParser(MultiStatus status, ExtensionRegistry registry) {
-		super();
 		this.status = status;
 		this.registry = registry;
 	}
@@ -168,7 +167,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 */
 	@Override
 	public void characters(char[] ch, int start, int length) {
-		int state = stateStack.peek().intValue();
+		int state = stateStack.peek();
 		if (state != CONFIGURATION_ELEMENT_STATE)
 			return;
 		if (state == CONFIGURATION_ELEMENT_STATE) {
@@ -201,7 +200,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 */
 	@Override
 	public void endElement(String uri, String elementName, String qName) {
-		switch (stateStack.peek().intValue()) {
+		switch (stateStack.peek()) {
 			case IGNORED_ELEMENT_STATE :
 				stateStack.pop();
 				break;
@@ -313,7 +312,7 @@ public class ExtensionsParser extends DefaultHandler {
 
 	private void handleExtensionPointState(String elementName) {
 		// We ignore all elements under extension points (if there are any)
-		stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
+		stateStack.push(IGNORED_ELEMENT_STATE);
 		unknownElement(EXTENSION_POINT, elementName);
 	}
 
@@ -325,7 +324,7 @@ public class ExtensionsParser extends DefaultHandler {
 		// its parent configuration element object.  However, the first configuration
 		// element object we created (the last one we pop off the stack) will need to
 		// be added to a vector in the extension object called _configuration.
-		stateStack.push(Integer.valueOf(CONFIGURATION_ELEMENT_STATE));
+		stateStack.push(CONFIGURATION_ELEMENT_STATE);
 
 		configurationElementValue = null;
 
@@ -348,25 +347,25 @@ public class ExtensionsParser extends DefaultHandler {
 		// new manifests should have the plugin (or fragment) element empty
 		// in compatibility mode, any extraneous elements will be silently ignored
 		compatibilityMode = attributes.getLength() > 0;
-		stateStack.push(Integer.valueOf(BUNDLE_STATE));
+		stateStack.push(BUNDLE_STATE);
 		objectStack.push(contribution);
 	}
 
 	private void handleBundleState(String elementName, Attributes attributes) {
 		if (elementName.equals(EXTENSION_POINT)) {
-			stateStack.push(Integer.valueOf(BUNDLE_EXTENSION_POINT_STATE));
+			stateStack.push(BUNDLE_EXTENSION_POINT_STATE);
 			parseExtensionPointAttributes(attributes);
 			return;
 		}
 		if (elementName.equals(EXTENSION)) {
-			stateStack.push(Integer.valueOf(BUNDLE_EXTENSION_STATE));
+			stateStack.push(BUNDLE_EXTENSION_STATE);
 			parseExtensionAttributes(attributes);
 			return;
 		}
 
 		// If we get to this point, the element name is one we don't currently accept.
 		// Set the state to indicate that this element will be ignored
-		stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
+		stateStack.push(IGNORED_ELEMENT_STATE);
 		if (!compatibilityMode)
 			unknownElement(PLUGIN, elementName);
 	}
@@ -384,7 +383,7 @@ public class ExtensionsParser extends DefaultHandler {
 		if (name.equals("")) //$NON-NLS-1$
 			msg = NLS.bind(RegistryMessages.parse_error, ex.getMessage());
 		else
-			msg = NLS.bind(RegistryMessages.parse_errorNameLineColumn, (new Object[] {name, Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage()}));
+			msg = NLS.bind(RegistryMessages.parse_errorNameLineColumn, new Object[] {name, Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage()});
 		error(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, PARSE_PROBLEM, msg, ex));
 	}
 
@@ -415,7 +414,7 @@ public class ExtensionsParser extends DefaultHandler {
 			return (Contribution) objectStack.pop();
 		} finally {
 			if (registry.debug()) {
-				cumulativeTime = cumulativeTime + (System.currentTimeMillis() - start);
+				cumulativeTime = cumulativeTime + System.currentTimeMillis() - start;
 				System.out.println("Cumulative parse time so far : " + cumulativeTime); //$NON-NLS-1$
 			}
 		}
@@ -425,7 +424,7 @@ public class ExtensionsParser extends DefaultHandler {
 		ConfigurationElement parentConfigurationElement = (ConfigurationElement) objectStack.peek();
 
 		// process attributes
-		int len = (attributes != null) ? attributes.getLength() : 0;
+		int len = attributes != null ? attributes.getLength() : 0;
 		if (len == 0) {
 			parentConfigurationElement.setProperties(RegistryObjectManager.EMPTY_STRING_ARRAY);
 			return;
@@ -446,7 +445,7 @@ public class ExtensionsParser extends DefaultHandler {
 		String simpleId = null;
 		String namespaceName = null;
 		// Process Attributes
-		int len = (attributes != null) ? attributes.getLength() : 0;
+		int len = attributes != null ? attributes.getLength() : 0;
 		for (int i = 0; i < len; i++) {
 			String attrName = attributes.getLocalName(i);
 			String attrValue = attributes.getValue(i).trim();
@@ -455,7 +454,7 @@ public class ExtensionsParser extends DefaultHandler {
 				currentExtension.setLabel(translate(attrValue));
 			else if (attrName.equals(EXTENSION_ID)) {
 				int simpleIdStart = attrValue.lastIndexOf('.');
-				if ((simpleIdStart != -1) && extractNamespaces) {
+				if (simpleIdStart != -1 && extractNamespaces) {
 					simpleId = attrValue.substring(simpleIdStart + 1);
 					namespaceName = attrValue.substring(0, simpleIdStart);
 				} else {
@@ -479,7 +478,7 @@ public class ExtensionsParser extends DefaultHandler {
 		if (currentExtension.getExtensionPointIdentifier() == null) {
 			missingAttribute(EXTENSION_TARGET, EXTENSION);
 			stateStack.pop();
-			stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
+			stateStack.push(IGNORED_ELEMENT_STATE);
 			objectStack.pop();
 			return;
 		}
@@ -518,28 +517,28 @@ public class ExtensionsParser extends DefaultHandler {
 		if (locator == null)
 			internalError(NLS.bind(RegistryMessages.parse_missingAttribute, attribute, element));
 		else
-			internalError(NLS.bind(RegistryMessages.parse_missingAttributeLine, (new String[] {attribute, element, Integer.toString(locator.getLineNumber())})));
+			internalError(NLS.bind(RegistryMessages.parse_missingAttributeLine, new String[] {attribute, element, Integer.toString(locator.getLineNumber())}));
 	}
 
 	private void unknownAttribute(String attribute, String element) {
 		if (locator == null)
 			internalError(NLS.bind(RegistryMessages.parse_unknownAttribute, attribute, element));
 		else
-			internalError(NLS.bind(RegistryMessages.parse_unknownAttributeLine, (new String[] {attribute, element, Integer.toString(locator.getLineNumber())})));
+			internalError(NLS.bind(RegistryMessages.parse_unknownAttributeLine, new String[] {attribute, element, Integer.toString(locator.getLineNumber())}));
 	}
 
 	private void unknownElement(String parent, String element) {
 		if (locator == null)
 			internalError(NLS.bind(RegistryMessages.parse_unknownElement, element, parent));
 		else
-			internalError(NLS.bind(RegistryMessages.parse_unknownElementLine, (new String[] {element, parent, Integer.toString(locator.getLineNumber())})));
+			internalError(NLS.bind(RegistryMessages.parse_unknownElementLine, new String[] {element, parent, Integer.toString(locator.getLineNumber())}));
 	}
 
 	private void parseExtensionPointAttributes(Attributes attributes) {
 		ExtensionPoint currentExtPoint = registry.getElementFactory().createExtensionPoint(contribution.shouldPersist());
 
 		// Process Attributes
-		int len = (attributes != null) ? attributes.getLength() : 0;
+		int len = attributes != null ? attributes.getLength() : 0;
 		for (int i = 0; i < len; i++) {
 			String attrName = attributes.getLocalName(i);
 			String attrValue = attributes.getValue(i).trim();
@@ -569,7 +568,7 @@ public class ExtensionsParser extends DefaultHandler {
 			String attribute = currentExtPoint.getSimpleIdentifier() == null ? EXTENSION_POINT_ID : EXTENSION_POINT_NAME;
 			missingAttribute(attribute, EXTENSION_POINT);
 			stateStack.pop();
-			stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
+			stateStack.push(IGNORED_ELEMENT_STATE);
 			return;
 		}
 		if (!objectManager.addExtensionPoint(currentExtPoint, true)) {
@@ -581,7 +580,7 @@ public class ExtensionsParser extends DefaultHandler {
 				registry.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, null));
 			}
 			stateStack.pop();
-			stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
+			stateStack.push(IGNORED_ELEMENT_STATE);
 			return;
 		}
 		if (currentExtPoint.getNamespace() == null)
@@ -598,7 +597,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 */
 	@Override
 	public void startDocument() {
-		stateStack.push(Integer.valueOf(INITIAL_STATE));
+		stateStack.push(INITIAL_STATE);
 		for (int i = 0; i <= LAST_INDEX; i++) {
 			scratchVectors[i] = new ArrayList<>();
 		}
@@ -609,7 +608,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 */
 	@Override
 	public void startElement(String uri, String elementName, String qName, Attributes attributes) {
-		switch (stateStack.peek().intValue()) {
+		switch (stateStack.peek()) {
 			case INITIAL_STATE :
 				handleInitialState(elementName, attributes);
 				break;
@@ -624,7 +623,7 @@ public class ExtensionsParser extends DefaultHandler {
 				handleExtensionState(elementName, attributes);
 				break;
 			default :
-				stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
+				stateStack.push(IGNORED_ELEMENT_STATE);
 				if (!compatibilityMode)
 					internalError(NLS.bind(RegistryMessages.parse_unknownTopElement, elementName));
 		}
@@ -708,7 +707,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 * if Eclipse version specified in the plugin.xml (<?eclipse version="3.2"?>) is at least 3.2.
 	 */
 	private void initializeExtractNamespace() {
-		extractNamespaces = Boolean.valueOf(versionAtLeast(VERSION_3_2)).booleanValue();
+		extractNamespaces = versionAtLeast(VERSION_3_2);
 	}
 
 	/**

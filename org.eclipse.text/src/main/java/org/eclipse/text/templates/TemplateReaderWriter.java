@@ -226,7 +226,7 @@ public class TemplateReaderWriter {
 		} catch (ParserConfigurationException e) {
 			Assert.isTrue(false);
 		} catch (SAXException e) {
-			throw (IOException) new IOException("Could not read template file", e); //$NON-NLS-1$
+			throw new IOException("Could not read template file", e); //$NON-NLS-1$
 		}
 
 		return null; // dummy
@@ -351,7 +351,7 @@ public class TemplateReaderWriter {
 	private static String validateXML(String string) throws IOException {
 		for (int i= 0; i < string.length(); i++) {
 			char ch= string.charAt(i);
-			if (!(ch == 9 || ch == 10 || ch == 13 || ch >= 32))
+			if (ch != 9 && ch != 10 && ch != 13 && ch < 32)
 				throw new IOException("Character reference \"&#" + Integer.toString(ch) + "\" is an invalid XML character."); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return string;
@@ -361,12 +361,11 @@ public class TemplateReaderWriter {
 		Node enabledNode= attributes.getNamedItem(attribute);
 		if (enabledNode == null)
 			return defaultValue;
-		else if (enabledNode.getNodeValue().equals(Boolean.toString(true)))
+        if (enabledNode.getNodeValue().equals(Boolean.toString(true)))
 			return true;
-		else if (enabledNode.getNodeValue().equals(Boolean.toString(false)))
+        if (enabledNode.getNodeValue().equals(Boolean.toString(false)))
 			return false;
-		else
-			throw new SAXException(TextTemplateMessages.getString("TemplateReaderWriter.error.illegal_boolean_attribute")); //$NON-NLS-1$
+        throw new SAXException(TextTemplateMessages.getString("TemplateReaderWriter.error.illegal_boolean_attribute")); //$NON-NLS-1$
 	}
 
 	private String getStringValue(NamedNodeMap attributes, String name) throws SAXException {

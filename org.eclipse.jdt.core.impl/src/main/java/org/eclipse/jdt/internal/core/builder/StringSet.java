@@ -75,11 +75,11 @@ private void rehash() {
 
 @Override
 public String toString() {
-	String s = ""; //$NON-NLS-1$
+	StringBuilder s = new StringBuilder();
 	String value;
-	for (int i = 0, l = this.values.length; i < l; i++)
-		if ((value = this.values[i]) != null)
-			s += value + "\n"; //$NON-NLS-1$
-	return s;
+	for (String value2 : this.values)
+        if ((value = value2) != null)
+			s.append(value).append("\n"); //$NON-NLS-1$
+	return s.toString();
 }
 }

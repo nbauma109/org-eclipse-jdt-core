@@ -58,10 +58,9 @@ public class ModularClassFileMatchLocator implements IIndexConstants {
 				break;
 			case OR_PATTERN:
 				SearchPattern[] patterns = ((OrPattern) pattern).patterns;
-				for (int i = 0, length = patterns.length; i < length; i++) {
-					SearchPattern p = patterns[i];
+				for (SearchPattern p : patterns) {
 					if (p.kind == MODULE_PATTERN)
-						matchModuleReferences(patterns[i], locator);
+						matchModuleReferences(p, locator);
 				}
 				// $FALL-THROUGH$ - fall through default to return
 			default:
@@ -89,10 +88,9 @@ public class ModularClassFileMatchLocator implements IIndexConstants {
 				break;
 			case OR_PATTERN:
 				SearchPattern[] patterns = ((OrPattern) pattern).patterns;
-				for (int i = 0, length = patterns.length; i < length; i++) {
-					SearchPattern p = patterns[i];
+				for (SearchPattern p : patterns) {
 					if (p.kind == MODULE_PATTERN)
-						matchModuleReferences(patterns[i], locator);
+						matchModuleReferences(p, locator);
 				}
 				// $FALL-THROUGH$ - fall through default to return
 			default:
@@ -113,8 +111,7 @@ public class ModularClassFileMatchLocator implements IIndexConstants {
 		if (modules == null)
 			return;
 		for (char[] module1 : modules) {
-			if (module1 == null || module1.length == 0) continue;
-			if (!locator.patternLocator.matchesName(modulePattern.name, module1)) continue;
+			if (module1 == null || module1.length == 0 || !locator.patternLocator.matchesName(modulePattern.name, module1)) continue;
 			// no resolve for target modules - report accurate match else resolve
 			ModuleReferenceMatch match = locator.newModuleReferenceMatch(this.moduleDesc, null, isTarget ? SearchMatch.A_ACCURATE : SearchMatch.A_INACCURATE, -1, 0, null);
 			locator.report(match);
@@ -147,10 +144,9 @@ public class ModularClassFileMatchLocator implements IIndexConstants {
 				break;
 			case OR_PATTERN:
 				SearchPattern[] patterns = ((OrPattern) pattern).patterns;
-				for (int i = 0, length = patterns.length; i < length; i++) {
-					SearchPattern p = patterns[i];
+				for (SearchPattern p : patterns) {
 					if (p.kind == PKG_REF_PATTERN)
-						matchPackageReferences(patterns[i], locator);
+						matchPackageReferences(p, locator);
 				}
 				// $FALL-THROUGH$ - fall through default to return
 			default:
@@ -196,10 +192,9 @@ public class ModularClassFileMatchLocator implements IIndexConstants {
 				break;
 			case OR_PATTERN:
 				SearchPattern[] patterns = ((OrPattern) pattern).patterns;
-				for (int i = 0, length = patterns.length; i < length; i++) {
-					SearchPattern p = patterns[i];
+				for (SearchPattern p : patterns) {
 					if (p.kind == TYPE_REF_PATTERN)
-						matchTypeReferences(patterns[i], locator);
+						matchTypeReferences(p, locator);
 				}
 				// $FALL-THROUGH$ - fall through default to return
 			default:

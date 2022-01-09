@@ -22,7 +22,7 @@ import org.osgi.service.log.admin.LoggerContext;
 
 public class LoggerImpl implements Logger {
 	static final String THIS_PACKAGE_NAME = LoggerImpl.class.getName().substring(0, LoggerImpl.class.getName().length() - LoggerImpl.class.getSimpleName().length());
-	static final Object[] EMPTY = new Object[0];
+	static final Object[] EMPTY = {};
 	protected final ExtendedLogServiceImpl logServiceImpl;
 	protected final String name;
 
@@ -323,19 +323,18 @@ public class LoggerImpl implements Logger {
 			// Once all arguments have been processed, formatting stops. This means some escape characters
 			// and place holders may remain unconsumed. This matches SLF4J behavior.
 			while (matcher.find()) {
-				if (matcher.group(2).isEmpty()) {
-					if (matcher.group(1).isEmpty()) {
-						// {} Handle curly brackets as normal.
-						offset = append(message, matcher, chars, offset, matcher.start(3) - offset, argument);
-						break;
-					}
-					// \{} Ignore curly brackets. Consume backslash.
-					offset = append(message, matcher, chars, offset, matcher.start(3) - offset - 1, matcher.group(3));
-				} else {
+				if (!matcher.group(2).isEmpty()) {
 					// \\{} Handle curly brackets as normal. Consume one backslash.
 					offset = append(message, matcher, chars, offset, matcher.start(3) - offset - 1, argument);
 					break;
 				}
+                if (matcher.group(1).isEmpty()) {
+                	// {} Handle curly brackets as normal.
+                	offset = append(message, matcher, chars, offset, matcher.start(3) - offset, argument);
+                	break;
+                }
+                // \{} Ignore curly brackets. Consume backslash.
+                offset = append(message, matcher, chars, offset, matcher.start(3) - offset - 1, matcher.group(3));
 			}
 		}
 		message.append(chars, offset, chars.length - offset);

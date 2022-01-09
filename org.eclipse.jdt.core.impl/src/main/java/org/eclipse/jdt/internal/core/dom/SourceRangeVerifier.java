@@ -58,28 +58,26 @@ public class SourceRangeVerifier extends ASTVisitor {
 		ASTNode previous = null;
 
 		List properties = node.structuralPropertiesForType();
-		for (int i = 0; i < properties.size(); i++) {
-			StructuralPropertyDescriptor property = (StructuralPropertyDescriptor) properties.get(i);
+		for (Object element : properties) {
+			StructuralPropertyDescriptor property = (StructuralPropertyDescriptor) element;
 			if (property.isChildProperty()) {
 				ASTNode child = (ASTNode) node.getStructuralProperty(property);
 				if (child != null) {
 					boolean ok = checkChild(node, previous, child);
-					if (ok) {
-						previous = child;
-					} else {
+					if (!ok) {
 						return false;
 					}
+                    previous = child;
 				}
 			} else if (property.isChildListProperty()) {
 				List children = (List) node.getStructuralProperty(property);
-				for (int j= 0; j < children.size(); j++) {
-					ASTNode child = (ASTNode) children.get(j);
+				for (Object child2 : children) {
+					ASTNode child = (ASTNode) child2;
 					boolean ok = checkChild(node, previous, child);
-					if (ok) {
-						previous = child;
-					} else {
+					if (!ok) {
 						return false;
 					}
+                    previous = child;
 				}
 			}
 		}
@@ -90,11 +88,9 @@ public class SourceRangeVerifier extends ASTVisitor {
 		if ((parent.getFlags() & (ASTNode.RECOVERED | ASTNode.MALFORMED)) != 0
 				|| (child.getFlags() & (ASTNode.RECOVERED | ASTNode.MALFORMED)) != 0)
 			return false;
-		if (DOMASTUtil.isRecordDeclarationSupported(child.getAST()) && child instanceof SingleVariableDeclaration) {
-			if (previous != null && previous instanceof MethodDeclaration && ((MethodDeclaration)previous).isCompactConstructor()) {
-				return true; // For compact constructors, do not validate for parameters
-			}
-		}
+		if (DOMASTUtil.isRecordDeclarationSupported(child.getAST()) && child instanceof SingleVariableDeclaration && previous instanceof MethodDeclaration && ((MethodDeclaration)previous).isCompactConstructor()) {
+        	return true; // For compact constructors, do not validate for parameters
+        }
 
 		int parentStart = parent.getStartPosition();
 		int parentEnd = parentStart + parent.getLength();
@@ -116,7 +112,7 @@ public class SourceRangeVerifier extends ASTVisitor {
 				this.bugs.append(bug);
 			}
 		}
-		if (!(parentStart <= childStart && childEnd <= parentEnd)) {
+		if (parentStart > childStart || childEnd > parentEnd) {
 			String bug = "- parent [" + parentStart + ", " + parentEnd + "] " + parent.getClass().getName() + '\n' //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					   + "   " + child.getLocationInParent().getId() + " [" + childStart + ", " + childEnd + "] " + child.getClass().getName() + '\n'; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			this.bugs.append(bug);

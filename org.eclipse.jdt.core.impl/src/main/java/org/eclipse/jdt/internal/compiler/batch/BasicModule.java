@@ -67,8 +67,8 @@ public class BasicModule implements ISourceModule {
 		ModuleReference[] imp = ref.targets;
 		if (imp != null) {
 			exp.exportedTo = new char[imp.length][];
-			for(int j = 0; j < imp.length; j++) {
-				exp.exportedTo = imp[j].tokens;
+			for (ModuleReference element : imp) {
+				exp.exportedTo = element.tokens;
 			}
 		}
 		return exp;
@@ -88,8 +88,8 @@ public class BasicModule implements ISourceModule {
 		ModuleReference[] imp = ref.targets;
 		if (imp != null) {
 			exp.exportedTo = new char[imp.length][];
-			for(int j = 0; j < imp.length; j++) {
-				exp.exportedTo = imp[j].tokens;
+			for (ModuleReference element : imp) {
+				exp.exportedTo = element.tokens;
 			}
 		}
 		return exp;
@@ -204,8 +204,7 @@ public class BasicModule implements ISourceModule {
 		int c = CharOperation.hashCode(this.name);
 		result = 31 * result + c;
 		c =  Arrays.hashCode(this.requires);
-		result = 31 * result + c;
-		return result;
+		return 31 * result + c;
 	}
 	@Override
 	public String toString() {
@@ -218,20 +217,20 @@ public class BasicModule implements ISourceModule {
 		buffer.append(this.name).append(' ');
 		buffer.append('{').append('\n');
 		if (this.requires != null) {
-			for(int i = 0; i < this.requires.length; i++) {
+			for (IModuleReference require : this.requires) {
 				buffer.append("\trequires "); //$NON-NLS-1$
-				if (this.requires[i].isTransitive()) {
+				if (require.isTransitive()) {
 					buffer.append(" public "); //$NON-NLS-1$
 				}
-				buffer.append(this.requires[i].name());
+				buffer.append(require.name());
 				buffer.append(';').append('\n');
 			}
 		}
 		if (this.exports != null) {
 			buffer.append('\n');
-			for(int i = 0; i < this.exports.length; i++) {
+			for (IPackageExport export : this.exports) {
 				buffer.append("\texports "); //$NON-NLS-1$
-				buffer.append(this.exports[i].toString());
+				buffer.append(export.toString());
 			}
 		}
 		if (this.uses != null) {

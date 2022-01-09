@@ -75,21 +75,22 @@ public abstract class JarEntryResource  extends PlatformObject implements IJarEn
 	public IPackageFragmentRoot getPackageFragmentRoot() {
 		if (this.parent instanceof IPackageFragment) {
 			return (IPackageFragmentRoot) ((IPackageFragment) this.parent).getParent();
-		} else if (this.parent instanceof IPackageFragmentRoot) {
-			return (IPackageFragmentRoot) this.parent;
-		} else {
-			return ((JarEntryDirectory) this.parent).getPackageFragmentRoot();
 		}
+        if (this.parent instanceof IPackageFragmentRoot) {
+			return (IPackageFragmentRoot) this.parent;
+		}
+        return ((JarEntryDirectory) this.parent).getPackageFragmentRoot();
 	}
 
 	protected ZipFile getZipFile() throws CoreException {
 		if (this.parent instanceof IPackageFragment) {
 			JarPackageFragmentRoot root = (JarPackageFragmentRoot) ((IPackageFragment) this.parent).getParent();
 			return root.getJar();
-		} else if (this.parent instanceof JarPackageFragmentRoot) {
+		}
+        if (this.parent instanceof JarPackageFragmentRoot) {
 			return ((JarPackageFragmentRoot) this.parent).getJar();
-		} else
-			return ((JarEntryDirectory) this.parent).getZipFile();
+		}
+        return ((JarEntryDirectory) this.parent).getZipFile();
 	}
 
 	@Override

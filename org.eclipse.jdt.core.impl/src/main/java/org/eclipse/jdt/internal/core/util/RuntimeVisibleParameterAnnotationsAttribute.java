@@ -25,7 +25,7 @@ public class RuntimeVisibleParameterAnnotationsAttribute
 	extends ClassFileAttribute
 	implements IRuntimeVisibleParameterAnnotationsAttribute {
 
-	private static final IParameterAnnotation[] NO_ENTRIES = new IParameterAnnotation[0];
+	private static final IParameterAnnotation[] NO_ENTRIES = {};
 	private int parametersNumber;
 	private IParameterAnnotation[] parameterAnnotations;
 

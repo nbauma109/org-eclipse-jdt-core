@@ -136,9 +136,8 @@ public String getTypeContainerName() {
 	IType outerType = getType().getDeclaringType();
 	if (outerType != null) {
 		return outerType.getFullyQualifiedName('.');
-	} else {
-		return getType().getPackageFragment().getElementName();
 	}
+    return getType().getPackageFragment().getElementName();
 }
 
 /**

@@ -21,8 +21,6 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceProxy;
-import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -59,8 +57,7 @@ public class IndexAllProject extends IndexRequest {
 	@Override
 	public boolean execute(IProgressMonitor progressMonitor) {
 
-		if (this.isCancelled || progressMonitor != null && progressMonitor.isCanceled()) return true;
-		if (!this.project.isAccessible()) return true; // nothing to do
+		if (this.isCancelled || progressMonitor != null && progressMonitor.isCanceled() || !this.project.isAccessible()) return true; // nothing to do
 
 		ReadWriteMonitor monitor = null;
 		try {
@@ -141,67 +138,59 @@ public class IndexAllProject extends IndexRequest {
 					final char[][] exclusionPatterns = ((ClasspathEntry) entry).fullExclusionPatternChars();
 					if (max == 0) {
 						sourceFolder.accept(
-							new IResourceProxyVisitor() {
-								@Override
-								public boolean visit(IResourceProxy proxy) {
-									if (IndexAllProject.this.isCancelled) return false;
-									switch(proxy.getType()) {
-										case IResource.FILE :
-											if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
-												IFile file = (IFile) proxy.requestResource();
-												if (exclusionPatterns != null || inclusionPatterns != null)
-													if (Util.isExcluded(file, inclusionPatterns, exclusionPatterns))
-														return false;
-												indexedFileNames.put(Util.relativePath(file.getFullPath(), 1/*remove project segment*/), file);
-											}
-											return false;
-										case IResource.FOLDER :
-											if (exclusionPatterns != null && inclusionPatterns == null) {
-												// if there are inclusion patterns then we must walk the children
-												if (Util.isExcluded(proxy.requestFullPath(), inclusionPatterns, exclusionPatterns, true))
-												    return false;
-											}
-											if (hasOutputs && outputs.contains(proxy.requestFullPath()))
-												return false;
-									}
-									return true;
-								}
-							},
+							proxy -> {
+                            	if (IndexAllProject.this.isCancelled) return false;
+                            	switch(proxy.getType()) {
+                            		case IResource.FILE :
+                            			if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
+                            				IFile file = (IFile) proxy.requestResource();
+                            				if (exclusionPatterns != null || inclusionPatterns != null)
+                            					if (Util.isExcluded(file, inclusionPatterns, exclusionPatterns))
+                            						return false;
+                            				indexedFileNames.put(Util.relativePath(file.getFullPath(), 1/*remove project segment*/), file);
+                            			}
+                            			return false;
+                            		case IResource.FOLDER :
+                            			// if there are inclusion patterns then we must walk the children
+                                        if (exclusionPatterns != null && inclusionPatterns == null && Util.isExcluded(proxy.requestFullPath(), inclusionPatterns, exclusionPatterns, true))
+                                            return false;
+                            			if (hasOutputs && outputs.contains(proxy.requestFullPath()))
+                            				return false;
+                            	}
+                            	return true;
+                            },
 							IResource.NONE
 						);
 					} else {
 						sourceFolder.accept(
-							new IResourceProxyVisitor() {
-								@Override
-								public boolean visit(IResourceProxy proxy) throws CoreException {
-									if (IndexAllProject.this.isCancelled) return false;
-									switch(proxy.getType()) {
-										case IResource.FILE :
-											if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
-												IFile file = (IFile) proxy.requestResource();
-												URI location = file.getLocationURI();
-												if (location == null) return false;
-												if (exclusionPatterns != null || inclusionPatterns != null)
-													if (Util.isExcluded(file, inclusionPatterns, exclusionPatterns))
-														return false;
-												String relativePathString = Util.relativePath(file.getFullPath(), 1/*remove project segment*/);
-												indexedFileNames.put(relativePathString,
-													indexedFileNames.get(relativePathString) == null
-															|| indexLastModified < EFS.getStore(location).fetchInfo().getLastModified()
-														? file
-														: OK);
-											}
-											return false;
-										case IResource.FOLDER :
-											if (exclusionPatterns != null || inclusionPatterns != null)
-												if (Util.isExcluded(proxy.requestResource(), inclusionPatterns, exclusionPatterns))
-													return false;
-											if (hasOutputs && outputs.contains(proxy.requestFullPath()))
-												return false;
-									}
-									return true;
-								}
-							},
+							proxy -> {
+                            	if (IndexAllProject.this.isCancelled) return false;
+                            	switch(proxy.getType()) {
+                            		case IResource.FILE :
+                            			if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
+                            				IFile file = (IFile) proxy.requestResource();
+                            				URI location = file.getLocationURI();
+                            				if (location == null) return false;
+                            				if (exclusionPatterns != null || inclusionPatterns != null)
+                            					if (Util.isExcluded(file, inclusionPatterns, exclusionPatterns))
+                            						return false;
+                            				String relativePathString = Util.relativePath(file.getFullPath(), 1/*remove project segment*/);
+                            				indexedFileNames.put(relativePathString,
+                            					indexedFileNames.get(relativePathString) == null
+                            							|| indexLastModified < EFS.getStore(location).fetchInfo().getLastModified()
+                            						? file
+                            						: OK);
+                            			}
+                            			return false;
+                            		case IResource.FOLDER :
+                            			if (exclusionPatterns != null || inclusionPatterns != null)
+                            				if (Util.isExcluded(proxy.requestResource(), inclusionPatterns, exclusionPatterns))
+                            					return false;
+                            			if (hasOutputs && outputs.contains(proxy.requestFullPath()))
+                            				return false;
+                            	}
+                            	return true;
+                            },
 							IResource.NONE
 						);
 					}

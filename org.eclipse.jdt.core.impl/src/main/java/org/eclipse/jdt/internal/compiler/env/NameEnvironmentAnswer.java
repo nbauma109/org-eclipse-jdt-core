@@ -183,8 +183,7 @@ public class NameEnvironmentAnswer {
 	 * non-accessible)
 	 */
 	public boolean isBetter(NameEnvironmentAnswer otherAnswer) {
-		if (otherAnswer == null) return true;
-		if (this.accessRestriction == null) return true;
+		if (otherAnswer == null || this.accessRestriction == null) return true;
 		return otherAnswer.accessRestriction != null
 			&& this.accessRestriction.getProblemId() < otherAnswer.accessRestriction.getProblemId();
 	}

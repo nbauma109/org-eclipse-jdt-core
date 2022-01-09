@@ -67,13 +67,12 @@ public IGlobalVariable[] allVariables() {
  * Checks to ensure that there is a previously built state.
  */
 protected void checkBuilderState() {
-
-	return;
 }
 /**
  * @see org.eclipse.jdt.core.eval.IEvaluationContext#codeComplete(String, int, ICompletionRequestor)
  * @deprecated
  */
+@Deprecated
 @Override
 public void codeComplete(String codeSnippet, int position, ICompletionRequestor requestor) throws JavaModelException {
 	codeComplete(codeSnippet, position, requestor, DefaultWorkingCopyOwner.PRIMARY);
@@ -82,6 +81,7 @@ public void codeComplete(String codeSnippet, int position, ICompletionRequestor 
  * @see org.eclipse.jdt.core.eval.IEvaluationContext#codeComplete(String, int, ICompletionRequestor, WorkingCopyOwner)
  * @deprecated
  */
+@Deprecated
 @Override
 public void codeComplete(String codeSnippet, int position, ICompletionRequestor requestor, WorkingCopyOwner owner) throws JavaModelException {
 	if (requestor == null) {
@@ -162,12 +162,11 @@ public IJavaElement[] codeSelect(String codeSnippet, int offset, int length, Wor
  */
 @Override
 public void deleteVariable(IGlobalVariable variable) {
-	if (variable instanceof GlobalVariableWrapper) {
-		GlobalVariableWrapper wrapper = (GlobalVariableWrapper)variable;
-		this.context.deleteVariable(wrapper.variable);
-	} else {
+	if (!(variable instanceof GlobalVariableWrapper)) {
 		throw new Error("Unknown implementation of IGlobalVariable"); //$NON-NLS-1$
 	}
+    GlobalVariableWrapper wrapper = (GlobalVariableWrapper)variable;
+    this.context.deleteVariable(wrapper.variable);
 }
 /**
  * @see IEvaluationContext#evaluateCodeSnippet(String, String[], String[], int[], IType, boolean, boolean, ICodeSnippetRequestor, IProgressMonitor)
@@ -368,7 +367,7 @@ public IGlobalVariable newVariable(String typeName, String name, String initiali
 		this.context.newVariable(
 			typeName.toCharArray(),
 			name.toCharArray(),
-			(initializer == null) ?
+			initializer == null ?
 				null :
 				initializer.toCharArray());
 	return new GlobalVariableWrapper(newVar);
@@ -413,6 +412,7 @@ public void validateImports(ICodeSnippetRequestor requestor) {
  * @see IEvaluationContext#codeComplete(String, int, ICodeCompletionRequestor)
  * @deprecated - use codeComplete(String, int, ICompletionRequestor) instead
  */
+@Deprecated
 @Override
 public void codeComplete(String codeSnippet, int position, final org.eclipse.jdt.core.ICodeCompletionRequestor requestor) throws JavaModelException {
 

@@ -170,9 +170,8 @@ class ModuleResolutionReport implements ResolutionReport {
 	private static Object printCapability(Capability cap) {
 		if (PackageNamespace.PACKAGE_NAMESPACE.equals(cap.getNamespace())) {
 			return Constants.EXPORT_PACKAGE + ": " + createOSGiCapability(cap); //$NON-NLS-1$
-		} else if (BundleNamespace.BUNDLE_NAMESPACE.equals(cap.getNamespace())) {
-			return Constants.BUNDLE_SYMBOLICNAME + ": " + createOSGiCapability(cap); //$NON-NLS-1$
-		} else if (HostNamespace.HOST_NAMESPACE.equals(cap.getNamespace())) {
+		}
+        if (BundleNamespace.BUNDLE_NAMESPACE.equals(cap.getNamespace()) || HostNamespace.HOST_NAMESPACE.equals(cap.getNamespace())) {
 			return Constants.BUNDLE_SYMBOLICNAME + ": " + createOSGiCapability(cap); //$NON-NLS-1$
 		}
 		return Constants.PROVIDE_CAPABILITY + ": " + cap; //$NON-NLS-1$
@@ -192,9 +191,11 @@ class ModuleResolutionReport implements ResolutionReport {
 		Requirement req = (Requirement) data;
 		if (PackageNamespace.PACKAGE_NAMESPACE.equals(req.getNamespace())) {
 			return Constants.IMPORT_PACKAGE + ": " + createOSGiRequirement(req, PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE, PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE); //$NON-NLS-1$
-		} else if (BundleNamespace.BUNDLE_NAMESPACE.equals(req.getNamespace())) {
+		}
+        if (BundleNamespace.BUNDLE_NAMESPACE.equals(req.getNamespace())) {
 			return Constants.REQUIRE_BUNDLE + ": " + createOSGiRequirement(req, BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE); //$NON-NLS-1$
-		} else if (HostNamespace.HOST_NAMESPACE.equals(req.getNamespace())) {
+		}
+        if (HostNamespace.HOST_NAMESPACE.equals(req.getNamespace())) {
 			return Constants.FRAGMENT_HOST + ": " + createOSGiRequirement(req, HostNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE); //$NON-NLS-1$
 		}
 		return Constants.REQUIRE_CAPABILITY + ": " + req; //$NON-NLS-1$

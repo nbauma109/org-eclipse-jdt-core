@@ -103,39 +103,38 @@ public class FileUtil {
 			if (i == 0 && path.isUNC()) {
 				realPath = realPath.append(segment.toUpperCase());
 				realPath = realPath.makeUNC(true);
-			} else {
-				if (MACOSX) {
-					// IFileInfo.getName() may not return the real name of the file on Mac OS X.
-					// Obtain the real name of the file from a listing of its parent directory.
-					String[] names = realPath.toFile().list((dir, n) -> n.equalsIgnoreCase(segment));
-					String realName;
-					if (names == null || names.length == 0) {
-						// The remainder of the path doesn't exist on the file system - copy from
-						// the original path.
-						realPath = realPath.append(path.removeFirstSegments(realPath.segmentCount()));
-						break;
-					} else if (names.length == 1) {
-						realName = names[0];
-					} else {
-						// More than one file matches the file name. Maybe the file system was
-						// misreported to be case insensitive. Preserve the original name.
-						realName = segment;
-					}
-					realPath = realPath.append(realName);
-				} else {
-					if (fileStore == null)
-						fileStore = fileSystem.getStore(realPath);
-					fileStore = fileStore.getChild(segment);
-					IFileInfo info = fileStore.fetchInfo();
-					if (!info.exists()) {
-						// The remainder of the path doesn't exist on the file system - copy from
-						// the original path.
-						realPath = realPath.append(path.removeFirstSegments(realPath.segmentCount()));
-						break;
-					}
-					realPath = realPath.append(info.getName());
-				}
-			}
+			} else if (MACOSX) {
+            	// IFileInfo.getName() may not return the real name of the file on Mac OS X.
+            	// Obtain the real name of the file from a listing of its parent directory.
+            	String[] names = realPath.toFile().list((dir, n) -> n.equalsIgnoreCase(segment));
+            	String realName;
+            	if (names == null || names.length == 0) {
+            		// The remainder of the path doesn't exist on the file system - copy from
+            		// the original path.
+            		realPath = realPath.append(path.removeFirstSegments(realPath.segmentCount()));
+            		break;
+            	}
+                if (names.length == 1) {
+            		realName = names[0];
+            	} else {
+            		// More than one file matches the file name. Maybe the file system was
+            		// misreported to be case insensitive. Preserve the original name.
+            		realName = segment;
+            	}
+            	realPath = realPath.append(realName);
+            } else {
+            	if (fileStore == null)
+            		fileStore = fileSystem.getStore(realPath);
+            	fileStore = fileStore.getChild(segment);
+            	IFileInfo info = fileStore.fetchInfo();
+            	if (!info.exists()) {
+            		// The remainder of the path doesn't exist on the file system - copy from
+            		// the original path.
+            		realPath = realPath.append(path.removeFirstSegments(realPath.segmentCount()));
+            		break;
+            	}
+            	realPath = realPath.append(info.getName());
+            }
 		}
 		if (path.hasTrailingSeparator()) {
 			realPath = realPath.addTrailingSeparator();
@@ -204,7 +203,7 @@ public class FileUtil {
 			one = new Path(location1.toOSString().toLowerCase());
 			two = new Path(location2.toOSString().toLowerCase());
 		}
-		return one.isPrefixOf(two) || (bothDirections && two.isPrefixOf(one));
+		return one.isPrefixOf(two) || bothDirections && two.isPrefixOf(one);
 	}
 
 	/**
@@ -232,11 +231,11 @@ public class FileUtil {
 			//we are stuck with string comparison
 			String string1 = location1.toString();
 			String string2 = location2.toString();
-			return string1.startsWith(string2) || (bothDirections && string2.startsWith(string1));
+			return string1.startsWith(string2) || bothDirections && string2.startsWith(string1);
 		}
 		IFileStore store1 = system.getStore(location1);
 		IFileStore store2 = system.getStore(location2);
-		return store1.equals(store2) || store1.isParentOf(store2) || (bothDirections && store2.isParentOf(store1));
+		return store1.equals(store2) || store1.isParentOf(store2) || bothDirections && store2.isParentOf(store1);
 	}
 
 	/**
@@ -306,7 +305,7 @@ public class FileUtil {
 			}
 		}
 		Preferences rootNode = Platform.getPreferencesService().getRootNode();
-		String value = null;
+		String value;
 		// if the file does not exist or has no content yet, try with project preferences
 		value = getLineSeparatorFromPreferences(rootNode.node(ProjectScope.SCOPE).node(file.getProject().getName()));
 		if (value != null)
@@ -434,6 +433,5 @@ public class FileUtil {
 	 * Not intended for instantiation.
 	 */
 	private FileUtil() {
-		super();
 	}
 }

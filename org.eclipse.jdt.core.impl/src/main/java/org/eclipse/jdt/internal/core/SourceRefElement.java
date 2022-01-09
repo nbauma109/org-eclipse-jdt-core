@@ -63,8 +63,8 @@ public void copy(IJavaElement container, IJavaElement sibling, String rename, bo
 	if (container == null) {
 		throw new IllegalArgumentException(Messages.operation_nullContainer);
 	}
-	IJavaElement[] elements= new IJavaElement[] {this};
-	IJavaElement[] containers= new IJavaElement[] {container};
+	IJavaElement[] elements= {this};
+	IJavaElement[] containers= {container};
 	IJavaElement[] siblings= null;
 	if (sibling != null) {
 		siblings= new IJavaElement[] {sibling};
@@ -79,7 +79,7 @@ public void copy(IJavaElement container, IJavaElement sibling, String rename, bo
  * @see ISourceManipulation
  */
 public void delete(boolean force, IProgressMonitor monitor) throws JavaModelException {
-	IJavaElement[] elements = new IJavaElement[] {this};
+	IJavaElement[] elements = {this};
 	getJavaModel().delete(elements, force, monitor);
 }
 @Override
@@ -263,8 +263,8 @@ public void move(IJavaElement container, IJavaElement sibling, String rename, bo
 	if (container == null) {
 		throw new IllegalArgumentException(Messages.operation_nullContainer);
 	}
-	IJavaElement[] elements= new IJavaElement[] {this};
-	IJavaElement[] containers= new IJavaElement[] {container};
+	IJavaElement[] elements= {this};
+	IJavaElement[] containers= {container};
 	IJavaElement[] siblings= null;
 	if (sibling != null) {
 		siblings= new IJavaElement[] {sibling};
@@ -282,9 +282,9 @@ public void rename(String newName, boolean force, IProgressMonitor monitor) thro
 	if (newName == null) {
 		throw new IllegalArgumentException(Messages.element_nullName);
 	}
-	IJavaElement[] elements= new IJavaElement[] {this};
-	IJavaElement[] dests= new IJavaElement[] {getParent()};
-	String[] renamings= new String[] {newName};
+	IJavaElement[] elements= {this};
+	IJavaElement[] dests= {getParent()};
+	String[] renamings= {newName};
 	getJavaModel().rename(elements, dests, renamings, force, monitor);
 }
 @Override

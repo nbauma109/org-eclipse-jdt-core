@@ -90,9 +90,8 @@ public RecoveredElement add(Block nestedBlockDeclaration, int bracketBalanceValu
 				resetPendingModifiers();
 				if (this.parent == null){
 					return this; // ignore
-				} else {
-					return this.parent.add(nestedBlockDeclaration, bracketBalanceValue);
 				}
+                return this.parent.add(nestedBlockDeclaration, bracketBalanceValue);
 	}
 	/* consider that if the opening brace was not found, it is there */
 	if (!this.foundOpeningBrace && !isArgument){
@@ -118,15 +117,14 @@ public RecoveredElement add(FieldDeclaration fieldDeclaration, int bracketBalanc
 	/* local variables inside method can only be final and non void */
 	char[][] fieldTypeName;
 	if ((fieldDeclaration.modifiers & ~ClassFileConstants.AccFinal) != 0 // local var can only be final
-		|| (fieldDeclaration.type == null) // initializer
-		|| ((fieldTypeName = fieldDeclaration.type.getTypeName()).length == 1 // non void
-			&& CharOperation.equals(fieldTypeName[0], TypeBinding.VOID.sourceName()))){
+		|| fieldDeclaration.type == null // initializer
+		|| (fieldTypeName = fieldDeclaration.type.getTypeName()).length == 1 // non void
+			&& CharOperation.equals(fieldTypeName[0], TypeBinding.VOID.sourceName())){
 		if (this.parent == null){
 			return this; // ignore
-		} else {
-			this.updateSourceEndIfNecessary(previousAvailableLineEnd(fieldDeclaration.declarationSourceStart - 1));
-			return this.parent.add(fieldDeclaration, bracketBalanceValue);
 		}
+        this.updateSourceEndIfNecessary(previousAvailableLineEnd(fieldDeclaration.declarationSourceStart - 1));
+        return this.parent.add(fieldDeclaration, bracketBalanceValue);
 	}
 	/* default behavior is to delegate recording to parent if any,
 	do not consider elements passed the known end (if set)
@@ -137,9 +135,8 @@ public RecoveredElement add(FieldDeclaration fieldDeclaration, int bracketBalanc
 			> this.methodDeclaration.declarationSourceEnd){
 		if (this.parent == null){
 			return this; // ignore
-		} else {
-			return this.parent.add(fieldDeclaration, bracketBalanceValue);
 		}
+        return this.parent.add(fieldDeclaration, bracketBalanceValue);
 	}
 	/* consider that if the opening brace was not found, it is there */
 	if (!this.foundOpeningBrace){
@@ -179,9 +176,8 @@ public RecoveredElement add(LocalDeclaration localDeclaration, int bracketBalanc
 
 		if (this.parent == null) {
 			return this; // ignore
-		} else {
-			return this.parent.add(localDeclaration, bracketBalanceValue);
 		}
+        return this.parent.add(localDeclaration, bracketBalanceValue);
 	}
 	if (this.methodBody == null){
 		Block block = new Block(0);
@@ -211,9 +207,8 @@ public RecoveredElement add(Statement statement, int bracketBalanceValue) {
 
 		if (this.parent == null) {
 			return this; // ignore
-		} else {
-			return this.parent.add(statement, bracketBalanceValue);
 		}
+        return this.parent.add(statement, bracketBalanceValue);
 	}
 	if (this.methodBody == null){
 		Block block = new Block(0);
@@ -270,16 +265,14 @@ public RecoveredElement add(TypeDeclaration typeDeclaration, int bracketBalanceV
 	if (this.localTypes == null) {
 		this.localTypes = new RecoveredType[5];
 		this.localTypeCount = 0;
-	} else {
-		if (this.localTypeCount == this.localTypes.length) {
-			System.arraycopy(
-				this.localTypes,
-				0,
-				(this.localTypes = new RecoveredType[2 * this.localTypeCount]),
-				0,
-				this.localTypeCount);
-		}
-	}
+	} else if (this.localTypeCount == this.localTypes.length) {
+    	System.arraycopy(
+    		this.localTypes,
+    		0,
+    		this.localTypes = new RecoveredType[2 * this.localTypeCount],
+    		0,
+    		this.localTypeCount);
+    }
 	RecoveredType element = new RecoveredType(typeDeclaration, this, bracketBalanceValue);
 	this.localTypes[this.localTypeCount++] = element;
 
@@ -400,7 +393,7 @@ public AbstractMethodDeclaration updatedMethodDeclaration(int depth, Set<TypeDec
 					System.arraycopy(
 						this.methodDeclaration.statements,
 						1,
-						(this.methodDeclaration.statements = new Statement[length-1]),
+						this.methodDeclaration.statements = new Statement[length-1],
 						0,
 						length-1);
 					}
@@ -409,19 +402,17 @@ public AbstractMethodDeclaration updatedMethodDeclaration(int depth, Set<TypeDec
 					}
 			}
 		}
-	} else {
-		if (this.methodDeclaration.declarationSourceEnd == 0) {
-			if (this.methodDeclaration.sourceEnd + 1 == this.methodDeclaration.bodyStart) {
-				// right brace is missing
-				this.methodDeclaration.declarationSourceEnd = this.methodDeclaration.sourceEnd;
-				this.methodDeclaration.bodyStart = this.methodDeclaration.sourceEnd;
-				this.methodDeclaration.bodyEnd = this.methodDeclaration.sourceEnd;
-			} else {
-				this.methodDeclaration.declarationSourceEnd = this.methodDeclaration.bodyStart;
-				this.methodDeclaration.bodyEnd = this.methodDeclaration.bodyStart;
-			}
-		}
-	}
+	} else if (this.methodDeclaration.declarationSourceEnd == 0) {
+    	if (this.methodDeclaration.sourceEnd + 1 == this.methodDeclaration.bodyStart) {
+    		// right brace is missing
+    		this.methodDeclaration.declarationSourceEnd = this.methodDeclaration.sourceEnd;
+    		this.methodDeclaration.bodyStart = this.methodDeclaration.sourceEnd;
+    		this.methodDeclaration.bodyEnd = this.methodDeclaration.sourceEnd;
+    	} else {
+    		this.methodDeclaration.declarationSourceEnd = this.methodDeclaration.bodyStart;
+    		this.methodDeclaration.bodyEnd = this.methodDeclaration.bodyStart;
+    	}
+    }
 	if (this.localTypeCount > 0) this.methodDeclaration.bits |= ASTNode.HasLocalType;
 	return this.methodDeclaration;
 }
@@ -444,7 +435,7 @@ public void updateFromParserState(){
 				int astPtr = parser.astPtr - length;
 				boolean canConsume = astPtr >= 0;
 				if(canConsume) {
-					if((!(parser.astStack[astPtr] instanceof AbstractMethodDeclaration))) {
+					if(!(parser.astStack[astPtr] instanceof AbstractMethodDeclaration)) {
 						canConsume = false;
 					}
 					for (int i = 1, max = length + 1; i < max; i++) {
@@ -490,27 +481,26 @@ public void updateFromParserState(){
 				int count;
 				for (count = 0; count < argLength; count++){
 					ASTNode aNode = parser.astStack[argStart+count];
-					if(aNode instanceof Argument) {
-						Argument argument = (Argument)aNode;
-						/* cannot be an argument if non final */
-						char[][] argTypeName = argument.type.getTypeName();
-						if ((argument.modifiers & ~ClassFileConstants.AccFinal) != 0
-							|| (argTypeName.length == 1
-								&& CharOperation.equals(argTypeName[0], TypeBinding.VOID.sourceName()))){
-							parser.astLengthStack[parser.astLengthPtr] = count;
-							parser.astPtr = argStart+count-1;
-							parser.listLength = count;
-							parser.currentToken = 0;
-							break;
-						}
-						if (needUpdateRParenPos) parser.rParenPos = argument.sourceEnd + 1;
-					} else {
+					if(!(aNode instanceof Argument)) {
 						parser.astLengthStack[parser.astLengthPtr] = count;
 						parser.astPtr = argStart+count-1;
 						parser.listLength = count;
 						parser.currentToken = 0;
 						break;
 					}
+                    Argument argument = (Argument)aNode;
+                    /* cannot be an argument if non final */
+                    char[][] argTypeName = argument.type.getTypeName();
+                    if ((argument.modifiers & ~ClassFileConstants.AccFinal) != 0
+                    	|| argTypeName.length == 1
+                    		&& CharOperation.equals(argTypeName[0], TypeBinding.VOID.sourceName())){
+                    	parser.astLengthStack[parser.astLengthPtr] = count;
+                    	parser.astPtr = argStart+count-1;
+                    	parser.listLength = count;
+                    	parser.currentToken = 0;
+                    	break;
+                    }
+                    if (needUpdateRParenPos) parser.rParenPos = argument.sourceEnd + 1;
 				}
 				if (parser.listLength > 0 && parser.astLengthPtr > 0){
 
@@ -519,7 +509,7 @@ public void updateFromParserState(){
 					int astPtr = parser.astPtr - length;
 					boolean canConsume = astPtr >= 0;
 					if(canConsume) {
-						if((!(parser.astStack[astPtr] instanceof AbstractMethodDeclaration))) {
+						if(!(parser.astStack[astPtr] instanceof AbstractMethodDeclaration)) {
 							canConsume = false;
 						}
 						for (int i = 1, max = length + 1; i < max; i++) {
@@ -562,14 +552,12 @@ public RecoveredElement updateOnClosingBrace(int braceStart, int braceEnd){
 		}
 		return this;
 	}
-	if(this.parent != null && this.parent instanceof RecoveredType) {
+	if(this.parent instanceof RecoveredType) {
 		int mods = ((RecoveredType)this.parent).typeDeclaration.modifiers;
-		if (TypeDeclaration.kind(mods) == TypeDeclaration.INTERFACE_DECL) {
-			if (!this.foundOpeningBrace) {
-				this.updateSourceEndIfNecessary(braceStart - 1, braceStart - 1);
-				return this.parent.updateOnClosingBrace(braceStart, braceEnd);
-			}
-		}
+		if (TypeDeclaration.kind(mods) == TypeDeclaration.INTERFACE_DECL && !this.foundOpeningBrace) {
+        	this.updateSourceEndIfNecessary(braceStart - 1, braceStart - 1);
+        	return this.parent.updateOnClosingBrace(braceStart, braceEnd);
+        }
 	}
 	return super.updateOnClosingBrace(braceStart, braceEnd);
 }
@@ -621,16 +609,14 @@ public RecoveredElement addAnnotationName(int identifierPtr, int identifierLengt
 	if (this.pendingAnnotations == null) {
 		this.pendingAnnotations = new RecoveredAnnotation[5];
 		this.pendingAnnotationCount = 0;
-	} else {
-		if (this.pendingAnnotationCount == this.pendingAnnotations.length) {
-			System.arraycopy(
-				this.pendingAnnotations,
-				0,
-				(this.pendingAnnotations = new RecoveredAnnotation[2 * this.pendingAnnotationCount]),
-				0,
-				this.pendingAnnotationCount);
-		}
-	}
+	} else if (this.pendingAnnotationCount == this.pendingAnnotations.length) {
+    	System.arraycopy(
+    		this.pendingAnnotations,
+    		0,
+    		this.pendingAnnotations = new RecoveredAnnotation[2 * this.pendingAnnotationCount],
+    		0,
+    		this.pendingAnnotationCount);
+    }
 
 	RecoveredAnnotation element = new RecoveredAnnotation(identifierPtr, identifierLengthPtr, annotationStart, this, bracketBalanceValue);
 
@@ -654,9 +640,7 @@ void attach(TypeParameter[] parameters, int startPos) {
 	Parser parser = parser();
 	Scanner scanner = parser.scanner;
 	if(Util.getLineNumber(this.methodDeclaration.declarationSourceStart, scanner.lineEnds, 0, scanner.linePtr)
-			!= Util.getLineNumber(lastParameterEnd, scanner.lineEnds, 0, scanner.linePtr)) return;
-
-	if(parser.modifiersSourceStart > lastParameterEnd
+			!= Util.getLineNumber(lastParameterEnd, scanner.lineEnds, 0, scanner.linePtr) || parser.modifiersSourceStart > lastParameterEnd
 			&& parser.modifiersSourceStart < this.methodDeclaration.declarationSourceStart) return;
 
 	if (this.methodDeclaration instanceof MethodDeclaration) {
@@ -674,8 +658,8 @@ public void attach(RecoveredAnnotation[] annots, int annotCount, int mods, int m
 			this.annotations = new RecoveredAnnotation[annotCount];
 			this.annotationCount = 0;
 			next : for (int i = 0; i < annotCount; i++) {
-				for (int j = 0; j < existingAnnotations.length; j++) {
-					if (annots[i].annotation == existingAnnotations[j]) continue next;
+				for (Annotation existingAnnotation : existingAnnotations) {
+					if (annots[i].annotation == existingAnnotation) continue next;
 				}
 				this.annotations[this.annotationCount++] = annots[i];
 			}

@@ -53,14 +53,10 @@ public void generateOptimizedBoolean(BlockScope currentScope, CodeStream codeStr
 
 	int pc = codeStream.position;
 	// constant == true
-	if (valueRequired) {
-		if (falseLabel == null) {
-			// implicit falling through the FALSE case
-			if (trueLabel != null) {
-				codeStream.goto_(trueLabel);
-			}
-		}
-	}
+	// implicit falling through the FALSE case
+    if (valueRequired && falseLabel == null && trueLabel != null) {
+    	codeStream.goto_(trueLabel);
+    }
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 }
 @Override

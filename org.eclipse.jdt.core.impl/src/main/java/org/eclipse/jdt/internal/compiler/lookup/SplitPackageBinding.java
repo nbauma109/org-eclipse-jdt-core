@@ -110,9 +110,7 @@ public class SplitPackageBinding extends PackageBinding {
 		char[] flatName = CharOperation.concatWith(childPackage.compoundName, '.');
 		for (PackageBinding incarnation :  this.incarnations) {
 			ModuleBinding moduleBinding = incarnation.enclosingModule;
-			if (moduleBinding == module)
-				continue;
-			if (childPackage.isDeclaredIn(moduleBinding))
+			if (moduleBinding == module || childPackage.isDeclaredIn(moduleBinding))
 				continue;
 			PlainPackageBinding next = moduleBinding.getDeclaredPackage(flatName);
 			childPackage = combine(next, childPackage, primaryModule);
@@ -169,7 +167,7 @@ public class SplitPackageBinding extends PackageBinding {
 			PackageBinding candidate = candidateModule.getVisiblePackage(subpackageCompoundName);
 			if (candidate != null
 					&& candidate != LookupEnvironment.TheNotFoundPackage
-					&& ((candidate.tagBits & TagBits.HasMissingType) == 0))
+					&& (candidate.tagBits & TagBits.HasMissingType) == 0)
 			{
 				candidates.add(candidate);
 			}
@@ -207,8 +205,7 @@ public class SplitPackageBinding extends PackageBinding {
 			return false;
 		if (binding instanceof SplitPackageBinding)
 			return this.declaringModules.containsAll(((SplitPackageBinding) binding).declaringModules);
-		else
-			return this.declaringModules.contains(binding.enclosingModule);
+        return this.declaringModules.contains(binding.enclosingModule);
 	}
 
 	@Override
@@ -264,12 +261,11 @@ public class SplitPackageBinding extends PackageBinding {
 			if (incarnation.hasCompilationUnit(false)) {
 				if (preferLocal && incarnation.enclosingModule == clientModule) {
 					return incarnation;
-				} else {
-					if (clientModule.canAccess(incarnation)) {
-						visibleCount++;
-						unique = incarnation;
-					}
 				}
+                if (clientModule.canAccess(incarnation)) {
+                	visibleCount++;
+                	unique = incarnation;
+                }
 			}
 		}
 		if (visibleCount > 1)

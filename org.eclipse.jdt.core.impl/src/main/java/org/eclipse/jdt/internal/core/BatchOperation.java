@@ -42,15 +42,14 @@ public class BatchOperation extends JavaModelOperation {
 		} catch (CoreException ce) {
 			if (ce instanceof JavaModelException) {
 				throw (JavaModelException)ce;
-			} else {
-				if (ce.getStatus().getCode() == IResourceStatus.OPERATION_FAILED) {
-					Throwable e= ce.getStatus().getException();
-					if (e instanceof JavaModelException) {
-						throw (JavaModelException) e;
-					}
-				}
-				throw new JavaModelException(ce);
 			}
+            if (ce.getStatus().getCode() == IResourceStatus.OPERATION_FAILED) {
+            	Throwable e= ce.getStatus().getException();
+            	if (e instanceof JavaModelException) {
+            		throw (JavaModelException) e;
+            	}
+            }
+            throw new JavaModelException(ce);
 		}
 	}
 

@@ -43,7 +43,7 @@ public class Semaphore {
 			if (timeLeft <= 0)
 				return false;
 			wait(timeLeft);
-			timeLeft = ((start - System.nanoTime()) / NANOS_IN_MS) + delay;
+			timeLeft = (start - System.nanoTime()) / NANOS_IN_MS + delay;
 		}
 	}
 
@@ -61,13 +61,10 @@ public class Semaphore {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if (obj == null || !(obj instanceof Semaphore)) {
 			return false;
 		}
-		if (!(obj instanceof Semaphore)) {
-			return false;
-		}
-		return (runnable == ((Semaphore) obj).runnable);
+		return runnable == ((Semaphore) obj).runnable;
 	}
 
 	@Override

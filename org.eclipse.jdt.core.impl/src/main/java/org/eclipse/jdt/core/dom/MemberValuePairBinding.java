@@ -27,9 +27,9 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
  * Internal class.
  */
 class MemberValuePairBinding implements IMemberValuePairBinding {
-	static final MemberValuePairBinding[] NoPair = new MemberValuePairBinding[0];
+	static final MemberValuePairBinding[] NoPair = {};
 	private static final Object NoValue = new Object();
-	private static final Object[] EmptyArray = new Object[0];
+	private static final Object[] EmptyArray = {};
 
 	private ElementValuePair internalPair;
 	protected Object value = null;
@@ -203,34 +203,30 @@ class MemberValuePairBinding implements IMemberValuePairBinding {
 			}
 			return false;
 		}
-		if (currentValue.getClass().isArray()) {
-			if (!otherValue.getClass().isArray()) {
-				return false;
-			}
-			Object[] currentValues = (Object[]) currentValue;
-			Object[] otherValues = (Object[]) otherValue;
-			final int length = currentValues.length;
-			if (length != otherValues.length) {
-				return false;
-			}
-			for (int i = 0; i < length; i++) {
-				Object current = currentValues[i];
-				Object other = otherValues[i];
-				if (current instanceof IBinding) {
-					if (!(other instanceof IBinding)) {
-						return false;
-					}
-					if (!((IBinding) current).isEqualTo((IBinding) other)) {
-						return false;
-					}
-				} else if (!current.equals(other)) {
-					return false;
-				}
-			}
-			return true;
-		} else {
+		if (!currentValue.getClass().isArray()) {
 			return currentValue.equals(otherValue);
 		}
+        if (!otherValue.getClass().isArray()) {
+        	return false;
+        }
+        Object[] currentValues = (Object[]) currentValue;
+        Object[] otherValues = (Object[]) otherValue;
+        final int length = currentValues.length;
+        if (length != otherValues.length) {
+        	return false;
+        }
+        for (int i = 0; i < length; i++) {
+        	Object current = currentValues[i];
+        	Object other = otherValues[i];
+        	if (current instanceof IBinding) {
+        		if (!(other instanceof IBinding) || !((IBinding) current).isEqualTo((IBinding) other)) {
+        			return false;
+        		}
+        	} else if (!current.equals(other)) {
+        		return false;
+        	}
+        }
+        return true;
 	}
 
 	@Override

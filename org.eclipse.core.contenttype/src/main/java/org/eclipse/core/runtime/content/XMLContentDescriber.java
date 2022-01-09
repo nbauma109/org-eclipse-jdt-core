@@ -49,7 +49,7 @@ import org.eclipse.core.runtime.QualifiedName;
  * @since org.eclipse.core.contenttype 3.4
  */
 public class XMLContentDescriber extends TextContentDescriber {
-	private static final QualifiedName[] SUPPORTED_OPTIONS = new QualifiedName[] {IContentDescription.CHARSET, IContentDescription.BYTE_ORDER_MARK};
+	private static final QualifiedName[] SUPPORTED_OPTIONS = {IContentDescription.CHARSET, IContentDescription.BYTE_ORDER_MARK};
 	private static final String XML_PREFIX = "<?xml "; //$NON-NLS-1$
 	private static final String XML_DECL_END = "?>"; //$NON-NLS-1$
 	private static final String BOM = "org.eclipse.core.runtime.content.XMLContentDescriber.bom"; //$NON-NLS-1$
@@ -174,7 +174,7 @@ public class XMLContentDescriber extends TextContentDescriber {
 		String line = null;
 
 		StringBuilder stringBuilder = new StringBuilder(100);
-		while (stringBuilder.length() < 100 && ((line = reader.readLine()) != null)) {
+		while (stringBuilder.length() < 100 && (line = reader.readLine()) != null) {
 			stringBuilder.append(line);
 			if (line.contains(XML_DECL_END)) {
 				String resultString = stringBuilder.toString();
@@ -192,7 +192,7 @@ public class XMLContentDescriber extends TextContentDescriber {
 		int firstQuote = firstLine.indexOf('"', encodingPos);
 		int firstApostrophe = firstLine.indexOf('\'', encodingPos);
 		//use apostrophe if there is no quote, or an apostrophe comes first
-		if (firstQuote == -1 || (firstApostrophe != -1 && firstApostrophe < firstQuote)) {
+		if (firstQuote == -1 || firstApostrophe != -1 && firstApostrophe < firstQuote) {
 			quoteChar = '\'';
 			firstQuote = firstApostrophe;
 		}
@@ -232,12 +232,12 @@ public class XMLContentDescriber extends TextContentDescriber {
 			return false;
 
 		char c = charset.charAt(0);
-		if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z'))
+		if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
 			return false;
 
 		for (int i = 1; i < charset.length(); i++) {
 			c = charset.charAt(i);
-			if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.')
+			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '-' || c == '_' || c == '.')
 				continue;
 			return false;
 		}

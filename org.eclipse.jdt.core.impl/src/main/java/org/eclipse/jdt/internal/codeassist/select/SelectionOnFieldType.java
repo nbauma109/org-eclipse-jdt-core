@@ -19,7 +19,6 @@ import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 
 public class SelectionOnFieldType extends FieldDeclaration {
 	public SelectionOnFieldType(TypeReference type) {
-		super();
 		this.sourceStart = type.sourceStart;
 		this.sourceEnd = type.sourceEnd;
 		this.type = type;

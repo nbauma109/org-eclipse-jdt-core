@@ -161,9 +161,7 @@ public void buildDeltas() {
 private boolean equals(char[][][] first, char[][][] second) {
 	if (first == second)
 		return true;
-	if (first == null || second == null)
-		return false;
-	if (first.length != second.length)
+	if (first == null || second == null || first.length != second.length)
 		return false;
 
 	for (int i = first.length; --i >= 0;)
@@ -239,8 +237,7 @@ private void findChangesInPositioning(IJavaElement element, int depth) {
 }
 private void findAnnotationChanges(IAnnotation[] oldAnnotations, IAnnotation[] newAnnotations, IJavaElement parent) {
 	ArrayList annotationDeltas = null;
-	for (int i = 0, length = newAnnotations.length; i < length; i++) {
-		IAnnotation newAnnotation = newAnnotations[i];
+	for (IAnnotation newAnnotation : newAnnotations) {
 		Object oldInfo = this.annotationInfos.remove(newAnnotation);
 		if (oldInfo == null) {
 			JavaElementDelta annotationDelta = new JavaElementDelta(newAnnotation);
@@ -248,23 +245,21 @@ private void findAnnotationChanges(IAnnotation[] oldAnnotations, IAnnotation[] n
 			if (annotationDeltas == null) annotationDeltas = new ArrayList();
 			annotationDeltas.add(annotationDelta);
 			continue;
-		} else {
-			AnnotationInfo newInfo = null;
-			try {
-				newInfo = (AnnotationInfo) ((JavaElement) newAnnotation).getElementInfo();
-			} catch (JavaModelException npe) {
-				return;
-			}
-			if (!Util.equalArraysOrNull(((AnnotationInfo) oldInfo).members, newInfo.members)) {
-				JavaElementDelta annotationDelta = new JavaElementDelta(newAnnotation);
-				annotationDelta.changed(IJavaElementDelta.F_CONTENT);
-				if (annotationDeltas == null) annotationDeltas = new ArrayList();
-				annotationDeltas.add(annotationDelta);
-			}
 		}
+        AnnotationInfo newInfo = null;
+        try {
+        	newInfo = (AnnotationInfo) ((JavaElement) newAnnotation).getElementInfo();
+        } catch (JavaModelException npe) {
+        	return;
+        }
+        if (!Util.equalArraysOrNull(((AnnotationInfo) oldInfo).members, newInfo.members)) {
+        	JavaElementDelta annotationDelta = new JavaElementDelta(newAnnotation);
+        	annotationDelta.changed(IJavaElementDelta.F_CONTENT);
+        	if (annotationDeltas == null) annotationDeltas = new ArrayList();
+        	annotationDeltas.add(annotationDelta);
+        }
 	}
-	for (int i = 0, length = oldAnnotations.length; i < length; i++) {
-		IAnnotation oldAnnotation = oldAnnotations[i];
+	for (IAnnotation oldAnnotation : oldAnnotations) {
 		if (this.annotationInfos.remove(oldAnnotation) != null) {
 			JavaElementDelta annotationDelta = new JavaElementDelta(oldAnnotation);
 			annotationDelta.removed();
@@ -383,11 +378,11 @@ private void initialize() {
  */
 private void insertPositions(IJavaElement[] elements, boolean isNew) {
 	int length = elements.length;
-	IJavaElement previous = null, current = null, next = (length > 0) ? elements[0] : null;
+	IJavaElement previous = null, current = null, next = length > 0 ? elements[0] : null;
 	for(int i = 0; i < length; i++) {
 		previous = current;
 		current = next;
-		next = (i + 1 < length) ? elements[i + 1] : null;
+		next = i + 1 < length ? elements[i + 1] : null;
 		if (isNew) {
 			this.newPositions.put(current, new ListItem(previous, next));
 		} else {
@@ -409,9 +404,8 @@ private boolean isPositionedCorrectly(IJavaElement element) {
 	IJavaElement newPrevious = newListItem.previous;
 	if (oldPrevious == null) {
 		return newPrevious == null;
-	} else {
-		return oldPrevious.equals(newPrevious);
 	}
+    return oldPrevious.equals(newPrevious);
 }
 /**
  * Records this elements info, and attempts
@@ -430,8 +424,8 @@ private void recordElementInfo(IJavaElement element, JavaModel model, int depth)
 		IJavaElement[] children = info.getChildren();
 		if (children != null) {
 			insertPositions(children, false);
-			for(int i = 0, length = children.length; i < length; i++)
-				recordElementInfo(children[i], model, depth + 1);
+			for (IJavaElement child : children)
+                recordElementInfo(child, model, depth + 1);
 		}
 	}
 	IAnnotation[] annotations = null;
@@ -441,8 +435,8 @@ private void recordElementInfo(IJavaElement element, JavaModel model, int depth)
 		if (this.annotationInfos == null)
 			this.annotationInfos = new HashMap();
 		JavaModelManager manager = JavaModelManager.getJavaModelManager();
-		for (int i = 0, length = annotations.length; i < length; i++) {
-			this.annotationInfos.put(annotations[i], manager.getInfo(annotations[i]));
+		for (IAnnotation annotation : annotations) {
+			this.annotationInfos.put(annotation, manager.getInfo(annotation));
 		}
 	}
 }
@@ -461,8 +455,8 @@ private void recordNewPositions(IJavaElement newElement, int depth) {
 		IJavaElement[] children = info.getChildren();
 		if (children != null) {
 			insertPositions(children, true);
-			for(int i = 0, length = children.length; i < length; i++) {
-				recordNewPositions(children[i], depth + 1);
+			for (IJavaElement child : children) {
+				recordNewPositions(child, depth + 1);
 			}
 		}
 	}
@@ -503,8 +497,8 @@ private void trimDelta(JavaElementDelta elementDelta) {
 		elementDelta.clearAffectedChildren();
 	} else {
 		IJavaElementDelta[] children = elementDelta.getAffectedChildren();
-		for(int i = 0, length = children.length; i < length; i++) {
-			trimDelta((JavaElementDelta)children[i]);
+		for (IJavaElementDelta child : children) {
+			trimDelta((JavaElementDelta)child);
 		}
 	}
 }

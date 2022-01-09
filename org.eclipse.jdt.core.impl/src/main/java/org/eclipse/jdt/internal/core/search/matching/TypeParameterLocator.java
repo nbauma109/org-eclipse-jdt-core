@@ -38,14 +38,10 @@ public class TypeParameterLocator extends PatternLocator {
 	 */
 	@Override
 	public int match(TypeReference node, MatchingNodeSet nodeSet) {
-		if (this.pattern.findReferences) {
-			if (node instanceof SingleTypeReference) { // Type parameter cannot be qualified
-				if (matchesName(this.pattern.name, ((SingleTypeReference) node).token)) {
-					int level = this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
-					return nodeSet.addMatch(node, level);
-				}
-			}
-		}
+		if (this.pattern.findReferences && node instanceof SingleTypeReference && matchesName(this.pattern.name, ((SingleTypeReference) node).token)) {
+        	int level = this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
+        	return nodeSet.addMatch(node, level);
+        }
 		return IMPOSSIBLE_MATCH;
 	}
 
@@ -55,12 +51,10 @@ public class TypeParameterLocator extends PatternLocator {
 	 */
 	@Override
 	public int match(TypeParameter node, MatchingNodeSet nodeSet) {
-		if (this.pattern.findDeclarations) {
-			if (matchesName(this.pattern.name, node.name)) {
-				int level = this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
-				return nodeSet.addMatch(node, level);
-			}
-		}
+		if (this.pattern.findDeclarations && matchesName(this.pattern.name, node.name)) {
+        	int level = this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
+        	return nodeSet.addMatch(node, level);
+        }
 		return IMPOSSIBLE_MATCH;
 	}
 
@@ -120,16 +114,12 @@ public class TypeParameterLocator extends PatternLocator {
 	 */
 	@Override
 	public int resolveLevel(ASTNode possibleMatchingNode) {
-		if (this.pattern.findReferences) {
-			if (possibleMatchingNode instanceof SingleTypeReference) {
-				return resolveLevel(((SingleTypeReference) possibleMatchingNode).resolvedType);
-			}
-		}
-		if (this.pattern.findDeclarations) {
-			if (possibleMatchingNode instanceof TypeParameter) {
-				return matchTypeParameter(((TypeParameter) possibleMatchingNode).binding, true);
-			}
-		}
+		if (this.pattern.findReferences && possibleMatchingNode instanceof SingleTypeReference) {
+        	return resolveLevel(((SingleTypeReference) possibleMatchingNode).resolvedType);
+        }
+		if (this.pattern.findDeclarations && possibleMatchingNode instanceof TypeParameter) {
+        	return matchTypeParameter(((TypeParameter) possibleMatchingNode).binding, true);
+        }
 		return IMPOSSIBLE_MATCH;
 	}
 

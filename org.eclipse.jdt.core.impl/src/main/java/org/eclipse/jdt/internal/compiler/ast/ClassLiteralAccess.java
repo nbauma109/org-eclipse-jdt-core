@@ -102,7 +102,8 @@ public class ClassLiteralAccess extends Expression {
 			if (leafComponentType == TypeBinding.VOID) {
 				scope.problemReporter().cannotAllocateVoidArray(this);
 				return null;
-			} else if (leafComponentType.isTypeVariable()) {
+			}
+            if (leafComponentType.isTypeVariable()) {
 				scope.problemReporter().illegalClassLiteralForTypeVariable((TypeVariableBinding)leafComponentType, this);
 			}
 		} else if (this.targetType.isTypeVariable()) {

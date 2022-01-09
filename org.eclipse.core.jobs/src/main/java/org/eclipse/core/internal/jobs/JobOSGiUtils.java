@@ -46,7 +46,6 @@ class JobOSGiUtils {
 	 * Private constructor to block instance creation.
 	 */
 	private JobOSGiUtils() {
-		super();
 	}
 
 	void openServices() {

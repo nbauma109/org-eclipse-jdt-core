@@ -50,6 +50,7 @@ public final class CompilationUnitSorter {
     /**
      * @deprecated marking deprecated as it is using deprecated code
      */
+    @Deprecated
     private static void checkASTLevel(int level) {
         DOMASTUtil.checkASTLevel(level);
     }
@@ -185,7 +186,8 @@ public final class CompilationUnitSorter {
      *    CompilationUnitSorter.sort(AST.JLS3, compilationUnit, positions, comparator, options, monitor)}
      *    instead of using this method.
 	 */
-	public static void sort(ICompilationUnit compilationUnit,
+	@Deprecated
+    public static void sort(ICompilationUnit compilationUnit,
 	        int[] positions,
 	        Comparator comparator,
 	        int options,
@@ -327,7 +329,7 @@ public final class CompilationUnitSorter {
             throw new IllegalArgumentException();
         }
         checkASTLevel(level);
-        ICompilationUnit[] compilationUnits = new ICompilationUnit[] { compilationUnit };
+        ICompilationUnit[] compilationUnits = { compilationUnit };
         SortElementsOperation operation = new SortElementsOperation(level, compilationUnits, positions, comparator);
         operation.runOperation(monitor);
     }

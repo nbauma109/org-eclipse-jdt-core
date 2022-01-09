@@ -146,7 +146,7 @@ public final class HookRegistry {
 				String hooksValue = configuratorProps.getProperty(HOOK_CONFIGURATORS);
 				if (hooksValue == null)
 					continue;
-				boolean builtin = Boolean.valueOf(configuratorProps.getProperty(BUILTIN_HOOKS)).booleanValue();
+				boolean builtin = Boolean.parseBoolean(configuratorProps.getProperty(BUILTIN_HOOKS));
 				String[] configurators = ManifestElement.getArrayFromList(hooksValue, ","); //$NON-NLS-1$
 				for (String configurator : configurators) {
 					if (!configuratorList.contains(configurator)) {

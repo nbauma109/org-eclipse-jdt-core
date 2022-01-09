@@ -81,7 +81,7 @@ public static MethodInfo createAnnotationMethod(byte[] classFileBytes, int[] off
 					break;
 			}
 		}
-		readOffset += (6 + methodInfo.u4At(readOffset + 2));
+		readOffset += 6 + methodInfo.u4At(readOffset + 2);
 	}
 	methodInfo.attributeBytes = readOffset;
 

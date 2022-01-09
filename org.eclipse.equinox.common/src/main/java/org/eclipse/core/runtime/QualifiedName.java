@@ -73,10 +73,7 @@ public final class QualifiedName {
 		}
 		QualifiedName qName = (QualifiedName) obj;
 		/* There may or may not be a qualifier */
-		if (qualifier == null && qName.getQualifier() != null) {
-			return false;
-		}
-		if (qualifier != null && !qualifier.equals(qName.getQualifier())) {
+		if (qualifier == null && qName.getQualifier() != null || qualifier != null && !qualifier.equals(qName.getQualifier())) {
 			return false;
 		}
 		return localName.equals(qName.getLocalName());

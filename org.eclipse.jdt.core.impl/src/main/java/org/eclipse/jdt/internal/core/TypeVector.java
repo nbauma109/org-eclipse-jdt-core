@@ -32,7 +32,7 @@ public final class TypeVector {
 	 */
 	private HashMap<IType, IType> elementSet = null;
 
-	public final static IType[] NoElements = new IType[0];
+	public final static IType[] NoElements = {};
 
 public TypeVector() {
 	this.maxSize = INITIAL_SIZE;
@@ -53,7 +53,7 @@ public TypeVector(IType type) {
 }
 public void add(IType newElement) {
 	if (this.size == this.maxSize)	// knows that size starts <= maxSize
-		System.arraycopy(this.elements, 0, (this.elements = new IType[this.maxSize *= 2]), 0, this.size);
+		System.arraycopy(this.elements, 0, this.elements = new IType[this.maxSize *= 2], 0, this.size);
 	this.elements[this.size++] = newElement;
 	if (this.elementSet != null) {
 		this.elementSet.put(newElement, newElement);
@@ -62,7 +62,7 @@ public void add(IType newElement) {
 public void addAll(IType[] newElements) {
 	if (this.size + newElements.length >= this.maxSize) {
 		this.maxSize = this.size + newElements.length;	// assume no more elements will be added
-		System.arraycopy(this.elements, 0, (this.elements = new IType[this.maxSize]), 0, this.size);
+		System.arraycopy(this.elements, 0, this.elements = new IType[this.maxSize], 0, this.size);
 	}
 	System.arraycopy(newElements, 0, this.elements, this.size, newElements.length);
 	this.size += newElements.length;
@@ -113,7 +113,7 @@ public IType[] elements() {
 
 	if (this.size < this.maxSize) {
 		this.maxSize = this.size;
-		System.arraycopy(this.elements, 0, (this.elements = new IType[this.maxSize]), 0, this.size);
+		System.arraycopy(this.elements, 0, this.elements = new IType[this.maxSize], 0, this.size);
 	}
 	return this.elements;
 }
@@ -121,11 +121,10 @@ public IType[] elements() {
 public IType remove(IType element) {
 	if (this.elementSet != null) {
 		IType value = this.elementSet.get(element);
-		if (value == element) {
-			this.elementSet.remove(element);
-		} else {
+		if (value != element) {
 			return null;
 		}
+        this.elementSet.remove(element);
 	}
 	// assumes only one occurrence of the element exists
 	for (int i = this.size; --i >= 0;)

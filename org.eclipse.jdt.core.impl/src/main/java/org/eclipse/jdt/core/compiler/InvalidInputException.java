@@ -28,7 +28,6 @@ public class InvalidInputException extends Exception {
  * Creates a new exception with no detail message.
  */
 public InvalidInputException() {
-	super();
 }
 
 /**

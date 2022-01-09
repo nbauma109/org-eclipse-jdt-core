@@ -65,7 +65,6 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 	final EquinoxContainer container;
 
 	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ClasspathEntry classpathEntry, BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> deniedHooks) {
-		super();
 		this.className = className;
 		this.validBytes = this.resultBytes = bytes;
 		this.entry = entry;
@@ -135,11 +134,9 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 		this.clazz = clazz;
 		hookFlags |= FLAG_WEAVINGCOMPLETE;
 		// Only notify listeners if weaving hooks were called.
-		if ((hookFlags & FLAG_HOOKCALLED) == 0)
-			return;
 		// Only notify listeners if they haven't already been notified of
 		// the terminal TRANSFORMING_FAILED state.
-		if (error != null)
+		if ((hookFlags & FLAG_HOOKCALLED) == 0 || error != null)
 			return;
 		// If clazz is null, a class definition failure occurred.
 		setState(clazz == null ? DEFINE_FAILED : DEFINED);
@@ -168,10 +165,9 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 
 	@Override
 	public void call(final WeavingHook hook, ServiceRegistration<WeavingHook> hookRegistration) throws Exception {
-		if (error != null)
-			return; // do not call any other hooks once an error has occurred.
+		 // do not call any other hooks once an error has occurred.
 
-		if (skipRegistration(hookRegistration)) {
+		if (error != null || skipRegistration(hookRegistration)) {
 			// Note we double check denied hooks here just
 			// in case another thread denied the hook since the first check
 			return;
@@ -203,11 +199,7 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 	}
 
 	private boolean validBytes(byte[] checkBytes) {
-		if (checkBytes == null || checkBytes.length < 4)
-			return false;
-		if ((checkBytes[0] & 0xCA) != 0xCA)
-			return false;
-		if ((checkBytes[1] & 0xFE) != 0xFE)
+		if (checkBytes == null || checkBytes.length < 4 || (checkBytes[0] & 0xCA) != 0xCA || (checkBytes[1] & 0xFE) != 0xFE)
 			return false;
 		if ((checkBytes[2] & 0xBA) != 0xBA)
 			return false;

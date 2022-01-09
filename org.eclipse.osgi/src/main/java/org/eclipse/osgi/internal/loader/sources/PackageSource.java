@@ -134,12 +134,8 @@ public abstract class PackageSource {
 		// 3) for the specified bundle, find the wiring for the package.  If no wiring is found return true
 		PackageSource consumerSource = getSourceFromLoader(consumerBL, pkgName, className, checkInternal,
 				container);
-		if (consumerSource == null) {
-			// confirmed no source for consumer
-			return true;
-		}
 		// if boot delegate just return true
-		if (container.isBootDelegationPackage(pkgName)) {
+		if (consumerSource == null || container.isBootDelegationPackage(pkgName)) {
 			return true;
 		}
 
@@ -184,12 +180,12 @@ public abstract class PackageSource {
 				if (b != null) {
 					if (loader.getWiring().getBundle() == b) {
 						// create a source that represents the private package
-						return (new SingleSourcePackage(pkgName, loader));
+						return new SingleSourcePackage(pkgName, loader);
 					}
 					// it is from a different loader (probably something with connect)
 					BundleLoader classBundleLoader = getBundleLoader(b);
 					if (classBundleLoader != null) {
-						return (new SingleSourcePackage(pkgName, classBundleLoader));
+						return new SingleSourcePackage(pkgName, classBundleLoader);
 					}
 				}
 			}

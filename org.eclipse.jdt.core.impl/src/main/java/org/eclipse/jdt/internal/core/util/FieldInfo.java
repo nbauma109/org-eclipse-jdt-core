@@ -102,7 +102,7 @@ public class FieldInfo extends ClassFileStruct implements IFieldInfo {
 			} else {
 				this.attributes[attributesIndex++] = new ClassFileAttribute(classFileBytes, constantPool, offset + readOffset);
 			}
-			readOffset += (6 + u4At(classFileBytes, readOffset + 2, offset));
+			readOffset += 6 + u4At(classFileBytes, readOffset + 2, offset);
 		}
 
 		this.attributeBytes = readOffset;

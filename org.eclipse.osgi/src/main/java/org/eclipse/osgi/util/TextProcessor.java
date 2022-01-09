@@ -282,14 +282,14 @@ public class TextProcessor {
 		 *
 		 * NOTE: Farsi and Urdu fall within the Arabic scripts.
 		 */
-		return (((c >= 0x05d0) && (c <= 0x07b1)) || ((c >= 0xfb1d) && (c <= 0xfefc)));
+		return c >= 0x05d0 && c <= 0x07b1 || c >= 0xfb1d && c <= 0xfefc;
 	}
 
 	/*
 	 * Return whether or not the given character has a weak directional type
 	 */
 	private static boolean isNeutral(char c) {
-		return !(Character.isDigit(c) || Character.isLetter(c));
+		return !Character.isDigit(c) && !Character.isLetter(c);
 	}
 
 	/*

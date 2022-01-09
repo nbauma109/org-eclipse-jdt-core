@@ -102,14 +102,12 @@ class AutoBuildJob extends Job implements Preferences.IPropertyChangeListener {
 			case NONE :
 				if (isAutoBuilding) {
 					schedule(delay);
-				} else {
-					// The code below is required to maintain the ancient contract
-					// in IResourceChangeEvent, stating that even if autobuild is
-					// switched off, we still send PRE_BUILD/POST_BUILD events
-					if (noBuildJob.getState() != Job.RUNNING) {
-						noBuildJob.schedule(delay);
-					}
-				}
+				} else // The code below is required to maintain the ancient contract
+                // in IResourceChangeEvent, stating that even if autobuild is
+                // switched off, we still send PRE_BUILD/POST_BUILD events
+                if (noBuildJob.getState() != Job.RUNNING) {
+                	noBuildJob.schedule(delay);
+                }
 				break;
 		}
 	}

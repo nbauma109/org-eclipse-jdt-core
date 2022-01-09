@@ -95,13 +95,13 @@ public class ModulePathEntry implements IModulePathEntry {
 	// Once we have a mechanism to map a folder to a module path entry, this should no longer be
 	// needed
 	private void initializeModule() {
-		for (int i = 0; i < this.locations.length; i++) {
-			this.locations[i].setModule(this.module);
+		for (ClasspathLocation location : this.locations) {
+			location.setModule(this.module);
 		}
 	}
 	@Override
 	public char[][] getModulesDeclaringPackage(String qualifiedPackageName, String moduleName) {
-		if (moduleName != null && ((this.module == null) || !moduleName.equals(String.valueOf(this.module.name()))))
+		if (moduleName != null && (this.module == null || !moduleName.equals(String.valueOf(this.module.name()))))
 			return null;
 		// search all locations
 		char[][] names = CharOperation.NO_CHAR_CHAR;
@@ -128,7 +128,6 @@ public class ModulePathEntry implements IModulePathEntry {
 			for (ClasspathLocation cp : this.locations) {
 				packages = CharOperation.arrayConcat(packages, cp.listPackages());
 			}
-			return packages;
 		}
 		return packages;
 	}

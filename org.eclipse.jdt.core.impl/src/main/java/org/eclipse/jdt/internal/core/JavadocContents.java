@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.compiler.util.HashtableOfObjectToIntArray;
 import org.eclipse.jdt.internal.core.util.Util;
 
 public class JavadocContents {
-	private static final int[] UNKNOWN_FORMAT = new int[0];
+	private static final int[] UNKNOWN_FORMAT = {};
 
 	private BinaryType type;
 	private char[] content;
@@ -211,13 +211,12 @@ public class JavadocContents {
 
 			if (CharOperation.prefixEquals(anchor, this.content, false, anchorEndStart)) {
 				return computeChildRange(anchorEndStart, anchor, indexOfSectionBottom);
-			} else {
-				if (this.tempAnchorIndexes.length == this.tempAnchorIndexesCount) {
-					System.arraycopy(this.tempAnchorIndexes, 0, this.tempAnchorIndexes = new int[this.tempAnchorIndexesCount + 20], 0, this.tempAnchorIndexesCount);
-				}
-
-				this.tempAnchorIndexes[this.tempAnchorIndexesCount++] = anchorEndStart;
 			}
+            if (this.tempAnchorIndexes.length == this.tempAnchorIndexesCount) {
+            	System.arraycopy(this.tempAnchorIndexes, 0, this.tempAnchorIndexes = new int[this.tempAnchorIndexesCount + 20], 0, this.tempAnchorIndexesCount);
+            }
+
+            this.tempAnchorIndexes[this.tempAnchorIndexesCount++] = anchorEndStart;
 			index = getAnchorIndex(fromIndex);
 		}
 
@@ -233,9 +232,8 @@ public class JavadocContents {
 		}
 		if (index == -1) {
 			return new int[]{-1, -1};
-		} else {
-			return new int[]{index, JavadocConstants.ANCHOR_PREFIX_START2_LENGTH};
 		}
+        return new int[]{index, JavadocConstants.ANCHOR_PREFIX_START2_LENGTH};
 	}
 	private int[] computeChildRange(int anchorEndStart, char[] anchor, int indexOfBottom) {
 		int[] range = null;
@@ -411,8 +409,7 @@ public class JavadocContents {
 		// fix for bug 432284: [1.8] Javadoc-8-style anchors not found by IMethod#getAttachedJavadoc(..)
 		char[] anchor8 = new char[anchor.length];
 		int i8 = 0;
-		for (int i = 0; i < anchor.length; i++) {
-			char ch = anchor[i];
+		for (char ch : anchor) {
 			switch (ch) {
 				case '(':
 				case ')':
@@ -469,26 +466,24 @@ public class JavadocContents {
 			anchor = Signature.toString(method.getSignature().replace('/', '.'), methodName, null, true, false, Flags.isVarargs(method.getFlags()));
 		}
 		IType declaringType = this.type;
-		if (declaringType.isMember()) {
-			// might need to remove a part of the signature corresponding to the synthetic argument (only for constructor)
-			if (method.isConstructor() && !Flags.isStatic(declaringType.getFlags())) {
-				int indexOfOpeningParen = anchor.indexOf('(');
-				if (indexOfOpeningParen == -1) {
-					// should not happen as this is a method signature
-					return null;
-				}
-				int index = indexOfOpeningParen;
-				indexOfOpeningParen++;
-				int indexOfComma = anchor.indexOf(',', index);
-				if (indexOfComma != -1) {
-					index = indexOfComma + 2;
-				} else {
-					// no argument, but a synthetic argument
-					index = anchor.indexOf(')', index);
-				}
-				anchor = anchor.substring(0, indexOfOpeningParen) + anchor.substring(index);
-			}
-		}
+		// might need to remove a part of the signature corresponding to the synthetic argument (only for constructor)
+        if (declaringType.isMember() && method.isConstructor() && !Flags.isStatic(declaringType.getFlags())) {
+        	int indexOfOpeningParen = anchor.indexOf('(');
+        	if (indexOfOpeningParen == -1) {
+        		// should not happen as this is a method signature
+        		return null;
+        	}
+        	int index = indexOfOpeningParen;
+        	indexOfOpeningParen++;
+        	int indexOfComma = anchor.indexOf(',', index);
+        	if (indexOfComma != -1) {
+        		index = indexOfComma + 2;
+        	} else {
+        		// no argument, but a synthetic argument
+        		index = anchor.indexOf(')', index);
+        	}
+        	anchor = anchor.substring(0, indexOfOpeningParen) + anchor.substring(index);
+        }
 		return anchor + JavadocConstants.ANCHOR_PREFIX_END;
 	}
 

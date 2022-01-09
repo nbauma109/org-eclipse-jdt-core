@@ -276,13 +276,11 @@ public final class CopySourceEdit extends TextEdit {
 					applyTransformation(subDocument);
 				fSourceContent= subDocument.get();
 				fSourceRoot= null;
-			} else {
-				if (needsTransformation()) {
-					EditDocument subDocument= new EditDocument(fSourceContent);
-					applyTransformation(subDocument);
-					fSourceContent= subDocument.get();
-				}
-			}
+			} else if (needsTransformation()) {
+            	EditDocument subDocument= new EditDocument(fSourceContent);
+            	applyTransformation(subDocument);
+            	fSourceContent= subDocument.get();
+            }
 		} catch (BadLocationException cannotHappen) {
 			Assert.isTrue(false);
 		}

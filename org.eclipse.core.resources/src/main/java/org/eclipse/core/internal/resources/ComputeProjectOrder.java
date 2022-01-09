@@ -189,7 +189,6 @@ public class ComputeProjectOrder {
 		 * </p>
 		 */
 		public Digraph(Class<T> clazz) {
-			super();
 			this.clazz = clazz;
 		}
 
@@ -247,10 +246,7 @@ public class ComputeProjectOrder {
 			Vertex<T> fromVertex = vertexMap.get(fromId);
 			Vertex<T> toVertex = vertexMap.get(toId);
 			// nip problems with bogus vertexes in the bud
-			if (fromVertex == null) {
-				throw new IllegalArgumentException();
-			}
-			if (toVertex == null) {
+			if (fromVertex == null || toVertex == null) {
 				throw new IllegalArgumentException();
 			}
 			fromVertex.adjacent.add(toVertex);
@@ -473,7 +469,7 @@ public class ComputeProjectOrder {
 						vertex.color = Vertex.BLACK;
 						time++;
 						vertex.finishTime = time;
-						state = ((Integer) stack.remove(stack.size() - 1)).intValue();
+						state = (Integer) stack.remove(stack.size() - 1);
 						continue nextStateLoop;
 					case AFTER_NEXTED_DFS_VISIT :
 						// on entry, stack contains "vertex" and "allAjacent"
@@ -706,7 +702,8 @@ public class ComputeProjectOrder {
 			public Set<T> apply(T id) {
 				if (adjacentsMap.containsKey(id)) {
 					return adjacentsMap.get(id);
-				} else if (processing.contains(id)) {
+				}
+                if (processing.contains(id)) {
 					// in a cycle, skip processing as no new edge is to expect.
 					// But don't store result, return directly!
 					return Collections.emptySet();
