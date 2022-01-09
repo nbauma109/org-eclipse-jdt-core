@@ -178,10 +178,8 @@ public class InferenceContext18 {
 			return true;
 		if (site1 == null || site2 == null)
 			return false;
-		if (site1.sourceStart() == site2.sourceStart() && site1.sourceEnd() == site2.sourceEnd())
-			return true;
-		return false;
-	}
+        return site1.sourceStart() == site2.sourceStart() && site1.sourceEnd() == site2.sourceEnd();
+    }
 
 	public static final int CHECK_UNKNOWN = 0;
 	public static final int CHECK_STRICT = 1;
@@ -299,8 +297,7 @@ public class InferenceContext18 {
 			Binding declaringElement = ((TypeVariableBinding) type).declaringElement;
 			if (declaringElement == candidate)
 				return true;
-			if (candidate.isConstructor() && declaringElement == candidate.declaringClass)
-				return true;
+            return candidate.isConstructor() && declaringElement == candidate.declaringClass;
 		}
 		return false;
 	}
@@ -957,7 +954,7 @@ public class InferenceContext18 {
 				}
 			}
 			return reduceAndIncorporate(ConstraintTypeFormula.create(r1, r2, ReductionResult.SUBTYPE));
-		} else if (expri instanceof ReferenceExpression && ((ReferenceExpression)expri).isExactMethodReference()) {
+		} else if (expri instanceof ReferenceExpression && expri.isExactMethodReference()) {
 			ReferenceExpression reference = (ReferenceExpression) expri;
 			for (int i = 0; i < u.length; i++) {
 				if (!reduceAndIncorporate(ConstraintTypeFormula.create(u[i], v[i], ReductionResult.SAME)))
@@ -1320,11 +1317,9 @@ public class InferenceContext18 {
 			}
 			// for deterministic results sort this array by id:
 			sortTypes(glbs);
-			if (!typeVariable.setUpperBounds(glbs, this.object))
-				return false;
+            return typeVariable.setUpperBounds(glbs, this.object);
 		}
-		return true;
-	}
+    }
 
 	static void sortTypes(TypeBinding[] types) {
 		Arrays.sort(types, new Comparator<TypeBinding>() {
@@ -1776,7 +1771,7 @@ public class InferenceContext18 {
 					buf.append('\t').append(this.initialConstraints[i].toString()).append('\n');
 		}
 		if (this.currentBounds != null)
-			buf.append(this.currentBounds.toString());
+			buf.append(this.currentBounds);
 		return buf.toString();
 	}
 

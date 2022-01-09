@@ -162,10 +162,8 @@ public class CopyVisitor implements IUnifiedTreeVisitor {
 		/* is lastModified different? */
 		Resource target = (Resource) node.getResource();
 		long lastModifed = target.getResourceInfo(false, false).getLocalSyncInfo();
-		if (lastModifed != node.getLastModified())
-			return false;
-		return true;
-	}
+        return lastModifed == node.getLastModified();
+    }
 
 	protected void synchronize(UnifiedTreeNode node) throws CoreException {
 		getRefreshLocalVisitor().visit(node);

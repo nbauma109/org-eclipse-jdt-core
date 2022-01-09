@@ -36,7 +36,7 @@ public class Policy {
 		buffer.append(Thread.currentThread().getName());
 		buffer.append("] "); //$NON-NLS-1$
 		buffer.append(message);
-		System.out.println(buffer.toString());
+		System.out.println(buffer);
 	}
 
 	public static void error(int code, String message) throws CoreException {

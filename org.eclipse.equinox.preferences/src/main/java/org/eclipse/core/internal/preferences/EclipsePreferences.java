@@ -17,6 +17,7 @@
 package org.eclipse.core.internal.preferences;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
@@ -126,7 +127,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		synchronized (childAndPropertyLock) {
 			if (children == null)
 				children = Collections.synchronizedMap(new HashMap<String, Object>());
-			children.put(childName, child == null ? (Object) childName : child);
+			children.put(childName, child == null ? childName : child);
 			return child;
 		}
 	}
@@ -279,7 +280,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		OutputStream output = null;
 		try {
 			output = new SafeFileOutputStream(new File(location.toOSString()));
-			output.write(removeTimestampFromTable(properties).getBytes("UTF-8")); //$NON-NLS-1$
+			output.write(removeTimestampFromTable(properties).getBytes(StandardCharsets.UTF_8)); //$NON-NLS-1$
 			output.flush();
 		} catch (IOException e) {
 			String message = NLS.bind(PrefsMessages.preferences_saveException, location);
@@ -303,7 +304,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		} finally {
 			output.close();
 		}
-		String string = output.toString("UTF-8"); //$NON-NLS-1$
+		String string = output.toString(StandardCharsets.UTF_8); //$NON-NLS-1$
 		String separator = System.getProperty("line.separator"); //$NON-NLS-1$
 		return string.substring(string.indexOf(separator) + separator.length());
 	}
@@ -653,7 +654,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * Subclasses to over-ride.
 	 */
 	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
-		return descriptor == null ? true : descriptor.isAlreadyLoaded(node.absolutePath());
+		return descriptor == null || descriptor.isAlreadyLoaded(node.absolutePath());
 	}
 
 

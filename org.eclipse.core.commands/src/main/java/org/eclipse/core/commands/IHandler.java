@@ -41,7 +41,7 @@ public interface IHandler {
 	 * longer referenced. This can be used as an opportunity to unhook listeners
 	 * from other objects.
 	 */
-	public void dispose();
+    void dispose();
 
 	/**
 	 * Executes with the map of parameter values by name.
@@ -66,7 +66,7 @@ public interface IHandler {
 	 *         otherwise.
 	 * @see IHandler2#setEnabled(Object)
 	 */
-	public boolean isEnabled();
+    boolean isEnabled();
 
 	/**
 	 * Returns whether this handler is really capable of handling delegation. In
@@ -77,7 +77,7 @@ public interface IHandler {
 	 * @return <code>true</code> if the handler is handled; <code>false</code>
 	 *         otherwise.
 	 */
-	public boolean isHandled();
+    boolean isHandled();
 
 	/**
 	 * Unregisters an instance of <code>IHandlerListener</code> listening for

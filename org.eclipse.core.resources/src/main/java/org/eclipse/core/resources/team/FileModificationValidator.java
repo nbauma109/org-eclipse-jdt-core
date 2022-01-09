@@ -82,7 +82,7 @@ public abstract class FileModificationValidator implements IFileModificationVali
 	 */
 	@Override
 	public IStatus validateSave(IFile file) {
-		return validateEdit(new IFile[] {file}, (FileModificationValidationContext) null);
+		return validateEdit(new IFile[] {file}, null);
 	}
 
 	/**

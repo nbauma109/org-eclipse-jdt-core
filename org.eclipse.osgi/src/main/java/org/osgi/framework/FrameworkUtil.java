@@ -562,7 +562,7 @@ public class FrameworkUtil {
 				if (dnChainPatternIndex >= dnChainPattern.size()) {
 					// return true iff the wild card is '-' or if we are at the
 					// end of the chain
-					return dnPattern.equals(MINUS_WILDCARD) ? true : dnChain.size() - 1 == dnChainIndex;
+					return dnPattern.equals(MINUS_WILDCARD) || dnChain.size() - 1 == dnChainIndex;
 				}
 				//
 				// we will now recursively call to see if the rest of the

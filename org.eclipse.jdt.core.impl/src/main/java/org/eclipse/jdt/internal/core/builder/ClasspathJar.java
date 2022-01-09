@@ -105,7 +105,7 @@ protected String readJarContent(final SimpleSet packageSet) {
 		if (modInfo == null) {
 			int folderEnd = fileName.lastIndexOf('/');
 			folderEnd += 1;
-			String className = fileName.substring(folderEnd, fileName.length());
+			String className = fileName.substring(folderEnd);
 			if (className.equalsIgnoreCase(IModule.MODULE_INFO_CLASS)) {
 				modInfo = fileName;
 			}

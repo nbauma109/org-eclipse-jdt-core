@@ -46,5 +46,5 @@ public interface IRegistryChangeListener extends EventListener {
 	 * @param event the registry change event
 	 * @see IRegistryChangeEvent
 	 */
-	public void registryChanged(IRegistryChangeEvent event);
+    void registryChanged(IRegistryChangeEvent event);
 }

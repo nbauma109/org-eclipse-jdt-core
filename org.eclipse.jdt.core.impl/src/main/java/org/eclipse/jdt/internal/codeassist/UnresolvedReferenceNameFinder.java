@@ -39,8 +39,8 @@ public class UnresolvedReferenceNameFinder extends ASTVisitor {
 	private static final int MAX_LINE_COUNT = 100;
 	private static final int FAKE_BLOCKS_COUNT = 20;
 
-	public static interface UnresolvedReferenceNameRequestor {
-		public void acceptName(char[] name);
+	public interface UnresolvedReferenceNameRequestor {
+		void acceptName(char[] name);
 	}
 
 	private UnresolvedReferenceNameRequestor requestor;

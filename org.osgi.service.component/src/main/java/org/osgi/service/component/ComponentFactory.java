@@ -49,5 +49,5 @@ public interface ComponentFactory<S> {
 	 * @throws ComponentException If Service Component Runtime is unable to
 	 *         activate the component configuration.
 	 */
-	public ComponentInstance<S> newInstance(Dictionary<String, ? > properties);
+    ComponentInstance<S> newInstance(Dictionary<String, ?> properties);
 }

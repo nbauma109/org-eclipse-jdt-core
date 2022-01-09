@@ -33,7 +33,7 @@ public interface IDOMPackage extends IDOMNode {
  *         if it has none
  */
 @Override
-public String getName();
+String getName();
 /**
  * The <code>IDOMPackage</code> refinement of this <code>IDOMNode</code>
  * method sets the name of this package declaration. The syntax for a package
@@ -44,5 +44,5 @@ public String getName();
  * @param name the given name
  */
 @Override
-public void setName(String name);
+void setName(String name);
 }

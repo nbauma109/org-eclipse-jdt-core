@@ -29,7 +29,7 @@ public interface IAdapterFactoryExt {
 	 * will occur.
 	 * @return the adapter factory, or <code>null</code>
 	 */
-	public IAdapterFactory loadFactory(boolean force);
+    IAdapterFactory loadFactory(boolean force);
 
-	public String[] getAdapterNames();
+	String[] getAdapterNames();
 }

@@ -901,7 +901,7 @@ public TypeBinding convertToRawType(TypeBinding type, boolean forceRawEnclosingT
 		}
 	}
 	if (TypeBinding.notEquals(originalType, convertedType)) {
-		return dimension > 0 ? (TypeBinding)createArrayType(convertedType, dimension) : convertedType;
+		return dimension > 0 ? createArrayType(convertedType, dimension) : convertedType;
 	}
 	return type;
 }
@@ -983,7 +983,7 @@ public TypeBinding convertUnresolvedBinaryToRawType(TypeBinding type) {
 		}
 	}
 	if (TypeBinding.notEquals(originalType, convertedType)) {
-		return dimension > 0 ? (TypeBinding)createArrayType(convertedType, dimension) : convertedType;
+		return dimension > 0 ? createArrayType(convertedType, dimension) : convertedType;
 	}
 	return type;
 }

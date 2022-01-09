@@ -366,7 +366,7 @@ public boolean canBeSeenBy(ReferenceBinding receiverType, ReferenceBinding invoc
 				outerDeclaringClass = temp;
 				temp = temp.enclosingType();
 			}
-			if (TypeBinding.notEquals(outerInvocationType, outerDeclaringClass)) return false;
+            return !TypeBinding.notEquals(outerInvocationType, outerDeclaringClass);
 		}
 		return true;
 	}
@@ -1573,7 +1573,7 @@ protected boolean isSubTypeOfRTL(TypeBinding other) {
 		return (lower != null && isSubtypeOf(lower, false));
 	}
 	if (other instanceof ReferenceBinding) {
-		TypeBinding[] intersecting = ((ReferenceBinding) other).getIntersectingTypes();
+		TypeBinding[] intersecting = other.getIntersectingTypes();
 		if (intersecting != null) {
 			for (int i = 0; i < intersecting.length; i++) {
 				if (!isSubtypeOf(intersecting[i], false))

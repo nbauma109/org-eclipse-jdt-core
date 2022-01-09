@@ -35,14 +35,14 @@ public interface HookContext<T> {
 	 * @param hookRegistration the registration for the hook object
 	 * @throws Exception An exception thrown by the hook object.
 	 */
-	public void call(T hook, ServiceRegistration<T> hookRegistration) throws Exception;
+    void call(T hook, ServiceRegistration<T> hookRegistration) throws Exception;
 
 	/**
 	 * Returns true if the given registration should be skipped.
 	 * @param hookRegistration the registration to check
 	 * @return true if the given registration should be skipped.
 	 */
-	public default boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
+	default boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
 		return false;
 	}
 }

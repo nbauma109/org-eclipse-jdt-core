@@ -361,11 +361,8 @@ class VariableBinding implements IVariableBinding {
 				IMethodBinding declaringMethod = getDeclaringMethod();
 				IMethodBinding otherDeclaringMethod = ((VariableBinding) other).getDeclaringMethod();
 				if (declaringMethod == null) {
-					if (otherDeclaringMethod != null) {
-						return false;
-					}
-					return true;
-				}
+                    return otherDeclaringMethod == null;
+                }
 				return declaringMethod.isEqualTo(otherDeclaringMethod);
 			}
 			return false;

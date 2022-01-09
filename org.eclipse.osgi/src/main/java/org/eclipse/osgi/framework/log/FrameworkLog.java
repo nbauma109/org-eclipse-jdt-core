@@ -33,19 +33,19 @@ public interface FrameworkLog {
 	 *
 	 * @since 3.1
 	 */
-	public static final String SERVICE_PERFORMANCE = "performance"; //$NON-NLS-1$
+    String SERVICE_PERFORMANCE = "performance"; //$NON-NLS-1$
 
 	/**
 	 * Logs the information from a FrameworkEvent to the FrameworkLog.
 	 * @param frameworkEvent The FrameworkEvent to log.
 	 */
-	public void log(FrameworkEvent frameworkEvent);
+    void log(FrameworkEvent frameworkEvent);
 
 	/**
 	 * Logs the FrameworkLogEntry to the FrameworkLog
 	 * @param logEntry The entry to log.
 	 */
-	public void log(FrameworkLogEntry logEntry);
+    void log(FrameworkLogEntry logEntry);
 
 	/**
 	 * Sets the current Writer used to log messages to the specified
@@ -57,7 +57,7 @@ public interface FrameworkLog {
 	 * used for logging messages should be appended to the end of the new
 	 * Writer.
 	 */
-	public void setWriter(Writer newWriter, boolean append);
+    void setWriter(Writer newWriter, boolean append);
 
 	/**
 	 * Sets the current File used to log messages to a FileWriter
@@ -74,24 +74,24 @@ public interface FrameworkLog {
 	 * FrameworkLog will not be affected and will continue to use the
 	 * current Writer to log messages.
 	 */
-	public void setFile(File newFile, boolean append) throws IOException;
+    void setFile(File newFile, boolean append) throws IOException;
 
 	/**
 	 * Returns the log File if it is set, otherwise null is returned.
 	 * @return the log File if it is set, otherwise null is returned.
 	 */
-	public File getFile();
+    File getFile();
 
 	/**
 	 * Sets the console log option.  If this is set then all logs will be
 	 * logged to System.out as well as the current Writer.
 	 * @param consoleLog indicates whether to log to System.out
 	 */
-	public void setConsoleLog(boolean consoleLog);
+    void setConsoleLog(boolean consoleLog);
 
 	/**
 	 * Closes the FrameworkLog.  After the FrameworkLog is closed messages may
 	 * no longer be logged to it.
 	 */
-	public void close();
+    void close();
 }

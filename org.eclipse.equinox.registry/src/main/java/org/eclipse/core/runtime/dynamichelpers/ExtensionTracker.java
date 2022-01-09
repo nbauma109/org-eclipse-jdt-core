@@ -115,7 +115,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	 */
 	@Override
 	public void registryChanged(IRegistryChangeEvent event) {
-		IExtensionDelta delta[] = event.getExtensionDeltas();
+		IExtensionDelta[] delta = event.getExtensionDeltas();
 		int len = delta.length;
 		for (int i = 0; i < len; i++)
 			switch (delta[i].getKind()) {

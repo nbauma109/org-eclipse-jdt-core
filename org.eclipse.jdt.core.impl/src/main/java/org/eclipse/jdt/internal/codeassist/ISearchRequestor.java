@@ -23,18 +23,18 @@ import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
  * to the raw name environment results before answering them to the UI.
  */
 public interface ISearchRequestor {
-	public void acceptConstructor(
-						int modifiers,
-						char[] simpleTypeName,
-						int parameterCount,
-						char[] signature,
-						char[][] parameterTypes,
-						char[][] parameterNames,
-						int typeModifiers,
-						char[] packageName,
-						int extraFlags,
-						String path,
-						AccessRestriction access);
+	void acceptConstructor(
+            int modifiers,
+            char[] simpleTypeName,
+            int parameterCount,
+            char[] signature,
+            char[][] parameterTypes,
+            char[][] parameterNames,
+            int typeModifiers,
+            char[] packageName,
+            int extraFlags,
+            String path,
+            AccessRestriction access);
 	/**
 	 * One result of the search consists of a new type.
 	 *
@@ -43,7 +43,7 @@ public interface ISearchRequestor {
 	 *    Nested type names are in the qualified form "A.I".
 	 *    The default package is represented by an empty array.
 	 */
-	public void acceptType(char[] packageName, char[] typeName, char[][] enclosingTypeNames, int modifiers, AccessRestriction accessRestriction);
+    void acceptType(char[] packageName, char[] typeName, char[][] enclosingTypeNames, int modifiers, AccessRestriction accessRestriction);
 
 //	/**
 //	 * One result of the search consists of a new annotation.
@@ -92,7 +92,7 @@ public interface ISearchRequestor {
 	 *    Package names are in the form "a.b.c".
 	 *    The default package is represented by an empty array.
 	 */
-	public void acceptPackage(char[] packageName);
+    void acceptPackage(char[] packageName);
 
-	public void acceptModule(char[] moduleName);
+	void acceptModule(char[] moduleName);
 }

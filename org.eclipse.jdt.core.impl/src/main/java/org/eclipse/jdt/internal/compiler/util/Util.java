@@ -557,7 +557,7 @@ public class Util implements SuffixConstants {
 		exception.printStackTrace(new PrintWriter(stringWriter));
 		StringBuffer buffer = stringWriter.getBuffer();
 		StringBuffer exceptionBuffer = new StringBuffer(50);
-		exceptionBuffer.append(exception.toString());
+		exceptionBuffer.append(exception);
 		// only keep leading frame portion of the trace (i.e. line no. 2 from the stacktrace)
 		lookupLine2: for (int i = 0, lineSep = 0, max = buffer.length(), line2Start = 0; i < max; i++) {
 			switch (buffer.charAt(i)) {
@@ -976,7 +976,7 @@ public class Util implements SuffixConstants {
 			return;
 		}
 		*/
-		try (BufferedOutputStream output = new BufferedOutputStream(file, DEFAULT_WRITING_SIZE);) {
+		try (BufferedOutputStream output = new BufferedOutputStream(file, DEFAULT_WRITING_SIZE)) {
 			// if no IOException occured, output cannot be null
 			output.write(classFile.header, 0, classFile.headerOffset);
 			output.write(classFile.contents, 0, classFile.contentsOffset);
@@ -1615,7 +1615,7 @@ public class Util implements SuffixConstants {
 				if (stringLiteral) {
 					buffer.append(c);
 				} else {
-					buffer.append("\\\'"); //$NON-NLS-1$
+					buffer.append("\\'"); //$NON-NLS-1$
 				}
 				break;
 			case '\\':

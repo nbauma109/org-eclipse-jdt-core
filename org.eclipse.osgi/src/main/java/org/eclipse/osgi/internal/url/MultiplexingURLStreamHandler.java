@@ -40,37 +40,37 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (methodsInitialized)
 			return;
 		try {
-			openConnectionMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", new Class[] {URL.class}); //$NON-NLS-1$
+			openConnectionMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(openConnectionMethod);
 
-			openConnectionProxyMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", new Class[] {URL.class, Proxy.class}); //$NON-NLS-1$
+			openConnectionProxyMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class, Proxy.class); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(openConnectionProxyMethod);
 
-			equalsMethod = URLStreamHandler.class.getDeclaredMethod("equals", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
+			equalsMethod = URLStreamHandler.class.getDeclaredMethod("equals", URL.class, URL.class); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(equalsMethod);
 
 			getDefaultPortMethod = URLStreamHandler.class.getDeclaredMethod("getDefaultPort", (Class[]) null); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(getDefaultPortMethod);
 
-			getHostAddressMethod = URLStreamHandler.class.getDeclaredMethod("getHostAddress", new Class[] {URL.class}); //$NON-NLS-1$
+			getHostAddressMethod = URLStreamHandler.class.getDeclaredMethod("getHostAddress", URL.class); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(getHostAddressMethod);
 
-			hashCodeMethod = URLStreamHandler.class.getDeclaredMethod("hashCode", new Class[] {URL.class}); //$NON-NLS-1$
+			hashCodeMethod = URLStreamHandler.class.getDeclaredMethod("hashCode", URL.class); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(hashCodeMethod);
 
-			hostsEqualMethod = URLStreamHandler.class.getDeclaredMethod("hostsEqual", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
+			hostsEqualMethod = URLStreamHandler.class.getDeclaredMethod("hostsEqual", URL.class, URL.class); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(hostsEqualMethod);
 
-			parseURLMethod = URLStreamHandler.class.getDeclaredMethod("parseURL", new Class[] {URL.class, String.class, Integer.TYPE, Integer.TYPE}); //$NON-NLS-1$
+			parseURLMethod = URLStreamHandler.class.getDeclaredMethod("parseURL", URL.class, String.class, Integer.TYPE, Integer.TYPE); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(parseURLMethod);
 
-			sameFileMethod = URLStreamHandler.class.getDeclaredMethod("sameFile", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
+			sameFileMethod = URLStreamHandler.class.getDeclaredMethod("sameFile", URL.class, URL.class); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(sameFileMethod);
 
-			setURLMethod = URLStreamHandler.class.getDeclaredMethod("setURL", new Class[] {URL.class, String.class, String.class, Integer.TYPE, String.class, String.class, String.class, String.class, String.class}); //$NON-NLS-1$
+			setURLMethod = URLStreamHandler.class.getDeclaredMethod("setURL", URL.class, String.class, String.class, Integer.TYPE, String.class, String.class, String.class, String.class, String.class); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(setURLMethod);
 
-			toExternalFormMethod = URLStreamHandler.class.getDeclaredMethod("toExternalForm", new Class[] {URL.class}); //$NON-NLS-1$
+			toExternalFormMethod = URLStreamHandler.class.getDeclaredMethod("toExternalForm", URL.class); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(toExternalFormMethod);
 
 			try {
@@ -218,7 +218,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			try {
 				// set the real handler for the URL
 				handlerField.set(arg0, handler);
-				parseURLMethod.invoke(handler, new Object[] {arg0, arg1, Integer.valueOf(arg2), Integer.valueOf(arg3)});
+				parseURLMethod.invoke(handler, arg0, arg1, Integer.valueOf(arg2), Integer.valueOf(arg3));
 				return;
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
@@ -253,7 +253,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			try {
 				// set the real handler for the URL
 				handlerField.set(arg0, handler);
-				setURLMethod.invoke(handler, new Object[] {arg0, arg1, arg2, Integer.valueOf(arg3), arg4, arg5, arg6, arg7, arg8});
+				setURLMethod.invoke(handler, arg0, arg1, arg2, Integer.valueOf(arg3), arg4, arg5, arg6, arg7, arg8);
 				return;
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();

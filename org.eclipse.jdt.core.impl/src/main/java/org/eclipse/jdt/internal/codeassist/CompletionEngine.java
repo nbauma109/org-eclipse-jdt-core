@@ -1867,7 +1867,7 @@ public final class CompletionEngine
 		buildTokenLocationContext(context, scope, astNode, astNodeParent);
 
 		if(DEBUG) {
-			System.out.println(context.toString());
+			System.out.println(context);
 		}
 		this.requestor.acceptContext(context);
 	}
@@ -2106,7 +2106,7 @@ public final class CompletionEngine
 			if (parsedUnit != null) {
 				if(DEBUG) {
 					System.out.println("COMPLETION - Diet AST :"); //$NON-NLS-1$
-					System.out.println(parsedUnit.toString());
+					System.out.println(parsedUnit);
 				}
 
 				if (parsedUnit.isModuleInfo()) {
@@ -2299,7 +2299,7 @@ public final class CompletionEngine
 							parseBlockStatements(parsedUnit, this.actualCompletionPosition);
 							if(DEBUG) {
 								System.out.println("COMPLETION - AST :"); //$NON-NLS-1$
-								System.out.println(parsedUnit.toString());
+								System.out.println(parsedUnit);
 							}
 							parsedUnit.resolve();
 						}
@@ -2556,7 +2556,7 @@ public final class CompletionEngine
 
 				if(DEBUG) {
 					System.out.println("SNIPPET COMPLETION AST :"); //$NON-NLS-1$
-					System.out.println(compilationUnit.toString());
+					System.out.println(compilationUnit);
 				}
 
 				if (compilationUnit.types != null) {
@@ -4370,7 +4370,7 @@ public final class CompletionEngine
 				}
 				addExpectedType(expected, scope);
 			} else {
-				TypeVariableBinding[] typeVariables = ((ReferenceBinding)ref.resolvedType).typeVariables();
+				TypeVariableBinding[] typeVariables = ref.resolvedType.typeVariables();
 				int length = ref.typeArguments == null ? 0 : ref.typeArguments.length;
 				if(typeVariables != null && typeVariables.length >= length) {
 					int index = length - 1;
@@ -4398,7 +4398,7 @@ public final class CompletionEngine
 				}
 				addExpectedType(expected, scope);
 			} else {
-				TypeVariableBinding[] typeVariables = ((ReferenceBinding)ref.resolvedType).typeVariables();
+				TypeVariableBinding[] typeVariables = ref.resolvedType.typeVariables();
 				if(typeVariables != null) {
 					int iLength = arguments == null ? 0 : arguments.length;
 					done: for (int i = 0; i < iLength; i++) {
@@ -13170,14 +13170,10 @@ public final class CompletionEngine
 	protected boolean hasPossibleAnnotationTarget(TypeBinding typeBinding, Scope scope) {
 		if (this.targetedElement == TagBits.AnnotationForPackage) {
 			long target = typeBinding.getAnnotationTagBits() & TagBits.AnnotationTargetMASK;
-			if(target != 0 && (target & TagBits.AnnotationForPackage) == 0) {
-				return false;
-			}
+			return target == 0 || (target & TagBits.AnnotationForPackage) != 0;
 		} else if (this.targetedElement == TagBits.AnnotationForModule) {
 			long target = typeBinding.getAnnotationTagBits() & TagBits.AnnotationTargetMASK;
-			if(target != 0 && (target & TagBits.AnnotationForModule) == 0) {
-				return false;
-			}
+			return target == 0 || (target & TagBits.AnnotationForModule) != 0;
 		} else if ((this.targetedElement & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0) {
 			if (scope.parent != null &&
 					scope.parent.parent != null &&
@@ -13185,13 +13181,9 @@ public final class CompletionEngine
 					scope.parent.parent instanceof CompilationUnitScope) {
 				long target = typeBinding.getAnnotationTagBits() & TagBits.AnnotationTargetMASK;
 				if ((this.targetedElement & TagBits.AnnotationForAnnotationType) != 0) {
-					if(target != 0 && (target &(TagBits.AnnotationForType | TagBits.AnnotationForAnnotationType | TagBits.AnnotationForTypeUse)) == 0) {
-						return false;
-					}
+					return target == 0 || (target & (TagBits.AnnotationForType | TagBits.AnnotationForAnnotationType | TagBits.AnnotationForTypeUse)) != 0;
 				} else {
-					if (target != 0 && (target & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) == 0) {
-						return false;
-					}
+					return target == 0 || (target & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0;
 				}
 			}
 		}
@@ -13232,14 +13224,10 @@ public final class CompletionEngine
 	 * <code>false</code> otherwise
 	 */
 	private boolean isFailedMatch(char[] token, char[] name) {
-		if ((this.options.substringMatch && CharOperation.substringMatch(token, name))
-				|| (this.options.camelCaseMatch && CharOperation.camelCaseMatch(token, name))
-				|| CharOperation.prefixEquals(token, name, false)
-				|| (this.options.subwordMatch && CharOperation.subWordMatch(token, name))) {
-			return false;
-		}
-
-		return true;
+		return (!this.options.substringMatch || !CharOperation.substringMatch(token, name))
+				&& (!this.options.camelCaseMatch || !CharOperation.camelCaseMatch(token, name))
+				&& !CharOperation.prefixEquals(token, name, false)
+				&& (!this.options.subwordMatch || !CharOperation.subWordMatch(token, name));
 	}
 	private boolean isForbidden(ReferenceBinding binding) {
 		for (int i = 0; i <= this.forbbidenBindingsPtr; i++) {
@@ -13247,10 +13235,7 @@ public final class CompletionEngine
 				return true;
 			}
 		}
-		if (!isValidPackageName(binding.qualifiedPackageName())) {
-			return true;
-		}
-		return false;
+		return !isValidPackageName(binding.qualifiedPackageName());
 	}
 
 	private boolean isForbidden(char[] givenPkgName, char[] givenTypeName, char[][] enclosingTypeNames) {
@@ -13269,11 +13254,7 @@ public final class CompletionEngine
 			}
 		}
 
-		if (!isValidPackageName(givenPkgName)) {
-			return true;
-		}
-
-		return false;
+		return !isValidPackageName(givenPkgName);
 	}
 
 	private boolean isIgnored(int kind) {
@@ -13314,7 +13295,7 @@ public final class CompletionEngine
 
 		if(parent instanceof ParameterizedSingleTypeReference) {
 			ParameterizedSingleTypeReference ref = (ParameterizedSingleTypeReference) parent;
-			TypeVariableBinding[] typeVariables = ((ReferenceBinding)ref.resolvedType).typeVariables();
+			TypeVariableBinding[] typeVariables = ref.resolvedType.typeVariables();
 			int length = ref.typeArguments == null ? 0 : ref.typeArguments.length;
 			int nodeIndex = -1;
 			for(int i = length - 1 ; i > -1 ; i--) {
@@ -13338,7 +13319,7 @@ public final class CompletionEngine
 			}
 		} else if(parent instanceof ParameterizedQualifiedTypeReference) {
 			ParameterizedQualifiedTypeReference ref = (ParameterizedQualifiedTypeReference) parent;
-			TypeVariableBinding[] typeVariables = ((ReferenceBinding)ref.resolvedType).typeVariables();
+			TypeVariableBinding[] typeVariables = ref.resolvedType.typeVariables();
 			TypeReference[][] arguments = ref.typeArguments;
 			int iLength = arguments == null ? 0 : arguments.length;
 			for (int i = 0; i < iLength; i++) {
@@ -13453,7 +13434,7 @@ public final class CompletionEngine
 	protected void printDebug(CompletionProposal proposal){
 		StringBuffer buffer = new StringBuffer();
 		printDebug(proposal, 0, buffer);
-		System.out.println(buffer.toString());
+		System.out.println(buffer);
 	}
 
 	private void printDebug(CompletionProposal proposal, int tab, StringBuffer buffer){

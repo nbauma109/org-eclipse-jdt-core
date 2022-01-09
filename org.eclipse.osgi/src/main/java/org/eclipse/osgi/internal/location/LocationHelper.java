@@ -15,6 +15,8 @@ package org.eclipse.osgi.internal.location;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
+
 import org.eclipse.osgi.internal.location.Locker.MockLocker;
 
 /**
@@ -144,8 +146,8 @@ public class LocationHelper {
 			urlString = buf.toString();
 		}
 		try {
-			return URLDecoder.decode(urlString, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException | RuntimeException e) {
+			return URLDecoder.decode(urlString, StandardCharsets.UTF_8); //$NON-NLS-1$
+		} catch (RuntimeException e) {
 			// Tried but failed
 			// TODO should we throw runtime exception here?
 			// May have illegal characters for decoding

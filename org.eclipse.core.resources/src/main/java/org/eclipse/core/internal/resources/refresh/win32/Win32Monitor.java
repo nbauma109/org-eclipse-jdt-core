@@ -268,7 +268,7 @@ class Win32Monitor extends Job implements IRefreshMonitor {
 		@Override
 		public boolean exists() {
 			IPath location = resource.getLocation();
-			return location == null ? false : location.toFile().exists();
+			return location != null && location.toFile().exists();
 		}
 
 		@Override

@@ -35,21 +35,21 @@ public interface SignedContentEntry {
 	 * Returns the name of the entry.
 	 * @return the name of the entry.
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the signer infos for this <code>SignedContentEntry</code>.  If the entry
 	 * is not signed then an empty array is returned.
 	 * @return the signer infos for this <code>SignedContentEntry</code>
 	 */
-	public SignerInfo[] getSignerInfos();
+    SignerInfo[] getSignerInfos();
 
 	/**
 	 * Returns true if the entry is signed; false otherwise.  This is a convenience method
 	 * equivalent to calling <code>{@link #getSignerInfos()}.length &gt; 0</code>
 	 * @return true if the content is signed
 	 */
-	public boolean isSigned();
+    boolean isSigned();
 
 	// Does the digest of this entry match what is expected?
 	// TODO: what does this mean in the face of multiple signers
@@ -58,6 +58,6 @@ public interface SignedContentEntry {
 	 * @throws IOException if an error occurred reading the entry content
 	 * @throws InvalidContentException if the entry content is not valid
 	 */
-	public void verify() throws IOException, InvalidContentException;
+    void verify() throws IOException, InvalidContentException;
 
 }

@@ -35,7 +35,7 @@ public interface IScopeContext {
 	 *
 	 * @return the name of the scope
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Return the preferences node that contains the preferences for the
@@ -57,7 +57,7 @@ public interface IScopeContext {
 	 * @return the node containing the plug-in preferences or <code>null</code>
 	 * @see IPreferencesService
 	 */
-	public IEclipsePreferences getNode(String qualifier);
+    IEclipsePreferences getNode(String qualifier);
 
 	/**
 	 * Return a path to a location in the file-system where clients are able
@@ -69,5 +69,5 @@ public interface IScopeContext {
 	 * </p>
 	 * @return a writable location in the file system or <code>null</code>
 	 */
-	public IPath getLocation();
+    IPath getLocation();
 }

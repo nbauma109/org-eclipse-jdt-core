@@ -648,7 +648,7 @@ public int resolveLevel(Binding binding) {
 	if (typeBinding instanceof ArrayBinding)
 		typeBinding = ((ArrayBinding) typeBinding).leafComponentType;
 	if (typeBinding instanceof ProblemReferenceBinding)
-		typeBinding = ((ProblemReferenceBinding) typeBinding).closestMatch();
+		typeBinding = typeBinding.closestMatch();
 
 	return resolveLevelForTypeOrEnclosingTypes(this.pattern.simpleName, this.pattern.qualification, typeBinding);
 }
@@ -752,7 +752,7 @@ protected int resolveLevel(TypeReference typeRef) {
 	if (typeBinding instanceof ArrayBinding)
 		typeBinding = ((ArrayBinding) typeBinding).leafComponentType;
 	if (typeBinding instanceof ProblemReferenceBinding)
-		typeBinding = ((ProblemReferenceBinding) typeBinding).closestMatch();
+		typeBinding = typeBinding.closestMatch();
 
 	if (typeRef instanceof SingleTypeReference) {
 		return resolveLevelForType(typeBinding);

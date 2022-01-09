@@ -847,9 +847,7 @@ public boolean isEquivalent(Reference reference) {
 		for (int i=0; i<len; i++) {
 			if (this.otherBindings[i] != qualifiedReference.otherBindings[i]) return false;
 		}
-	} else if (qualifiedReference.otherBindings != null) {
-		return false;
-	}
+	} else return qualifiedReference.otherBindings == null;
 	return true;
 }
 

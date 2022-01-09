@@ -38,5 +38,5 @@ public interface ICacheEnumeration<K,V> extends Enumeration<K> {
 	 *
 	 * @return Value of current cache entry
 	 */
-	public V getValue();
+    V getValue();
 }

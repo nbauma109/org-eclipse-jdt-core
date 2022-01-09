@@ -14,7 +14,7 @@
 package org.eclipse.jdt.internal.compiler.env;
 
 public interface IBinaryModule extends IModule {
-	public IBinaryAnnotation[] getAnnotations();
+	IBinaryAnnotation[] getAnnotations();
 
-	public long getTagBits();
+	long getTagBits();
 }

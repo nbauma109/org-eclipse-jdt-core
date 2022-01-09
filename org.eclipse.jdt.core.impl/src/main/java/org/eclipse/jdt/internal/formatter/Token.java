@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
  */
 public class Token {
 
-	public static enum WrapMode {
+	public enum WrapMode {
 		/**
 		 * Wrap mode for the "Do not wrap" policy. Tokens still should be indented as if wrapped when a preceding line
 		 * break cannot be removed due to a line comment or formatting region restriction.

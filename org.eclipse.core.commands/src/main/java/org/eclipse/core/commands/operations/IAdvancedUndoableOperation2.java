@@ -88,7 +88,7 @@ public interface IAdvancedUndoableOperation2 {
 	 * @see IAdvancedUndoableOperation#computeUndoableStatus(IProgressMonitor)
 	 * @see IAdvancedUndoableOperation#computeRedoableStatus(IProgressMonitor)
 	 */
-	public void setQuietCompute(boolean quiet);
+    void setQuietCompute(boolean quiet);
 
 	/**
 	 * Return a boolean that instructs whether the operation should be executed,
@@ -97,5 +97,5 @@ public interface IAdvancedUndoableOperation2 {
 	 * @return <code>true</code> if the operation should be run in the
 	 *         background, <code>false</code> if it should not.
 	 */
-	public boolean runInBackground();
+    boolean runInBackground();
 }

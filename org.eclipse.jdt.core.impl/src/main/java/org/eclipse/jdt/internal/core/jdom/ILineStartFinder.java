@@ -24,5 +24,5 @@ public interface ILineStartFinder {
  * <p>This defaults to zero if the position corresponds to a position on the first line
  * of the source.
  */
-public int getLineStart(int position);
+int getLineStart(int position);
 }

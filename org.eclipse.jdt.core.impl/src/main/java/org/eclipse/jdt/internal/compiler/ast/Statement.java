@@ -66,7 +66,7 @@ public abstract class Statement extends ASTNode {
 			expression = ((UnaryExpression) expression).expression;
 		}
 		// if (DEBUG) print(); - tolerated
-		if (expression instanceof Reference) return true;
+        return expression instanceof Reference;
 
 //		if (expression instanceof BinaryExpression) {
 //			BinaryExpression binary = (BinaryExpression) expression;
@@ -83,8 +83,7 @@ public abstract class Statement extends ASTNode {
 //						return true;
 //			}
 //		}
-		return false;
-	}
+    }
 public abstract FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
 /** Lambda shape analysis: *Assuming* this is reachable, analyze if this completes normally i.e control flow can reach the textually next statement.
    For blocks, we don't perform intra-reachability analysis. We assume the lambda body is free of intrinsic control flow errors (if such errors

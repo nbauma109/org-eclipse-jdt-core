@@ -499,9 +499,7 @@ public class UnifiedTree {
 
 					// Recursive if resolved target points to the resolved parent of this tree
 					Path realTargetPath = targetPath.toRealPath();
-					if (realParentPath.startsWith(realTargetPath)) {
-						return true;
-					}
+                    return realParentPath.startsWith(realTargetPath);
 
 					// If link is outside the project tree, consider as non recursive
 					// The link still can create recursion in the tree, but we can't detect it here.

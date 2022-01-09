@@ -15,20 +15,20 @@ package org.eclipse.jdt.internal.compiler.problem;
 
 public interface ProblemSeverities {
 
-	final int Warning = 0; // during handling only
+	int Warning = 0; // during handling only
 
-	final int Error = 1; // when bit is set: problem is error, if not it is a warning
-	final int AbortCompilation = 2;
-	final int AbortCompilationUnit = 4;
-	final int AbortType = 8;
-	final int AbortMethod = 16;
-	final int Abort = 30; // 2r11110
-	final int Optional = 32; // when bit is set: problem was configurable
-	final int SecondaryError = 64;
-	final int Fatal = 128; // when bit is set: problem was either a mandatory error, or an optional+treatOptionalErrorAsFatal
-	final int Ignore = 256; // during handling only
-	final int InternalError = 512;  // always exposed, even when silent error handling policy is in effect.
-	final int Info = 1024; // When bit is set, the unit or project is not flagged.
+	int Error = 1; // when bit is set: problem is error, if not it is a warning
+	int AbortCompilation = 2;
+	int AbortCompilationUnit = 4;
+	int AbortType = 8;
+	int AbortMethod = 16;
+	int Abort = 30; // 2r11110
+	int Optional = 32; // when bit is set: problem was configurable
+	int SecondaryError = 64;
+	int Fatal = 128; // when bit is set: problem was either a mandatory error, or an optional+treatOptionalErrorAsFatal
+	int Ignore = 256; // during handling only
+	int InternalError = 512;  // always exposed, even when silent error handling policy is in effect.
+	int Info = 1024; // When bit is set, the unit or project is not flagged.
 
-	final int CoreSeverityMASK = Warning | Error | Info | Ignore;
+	int CoreSeverityMASK = Warning | Error | Info | Ignore;
 }

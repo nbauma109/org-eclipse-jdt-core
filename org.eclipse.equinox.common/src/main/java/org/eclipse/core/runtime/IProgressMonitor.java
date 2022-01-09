@@ -96,7 +96,7 @@ public interface IProgressMonitor {
 
 	/** Constant indicating an unknown amount of work.
 	 */
-	public final static int UNKNOWN = -1;
+    int UNKNOWN = -1;
 
 	/**
 	 * Notifies that the main task is beginning.  This must only be called once
@@ -108,14 +108,14 @@ public interface IProgressMonitor {
 	 *  the implementation is free to indicate progress in a way which 
 	 *  doesn't require the total number of work units in advance.
 	 */
-	public void beginTask(String name, int totalWork);
+    void beginTask(String name, int totalWork);
 
 	/**
 	 * Notifies that the work is done; that is, either the main task is completed 
 	 * or the user canceled it. This method may be called more than once 
 	 * (implementations should be prepared to handle this case).
 	 */
-	public void done();
+    void done();
 
 	/**
 	 * Internal method to handle scaling correctly. This method
@@ -124,7 +124,7 @@ public interface IProgressMonitor {
 	 * 
 	 * @param work the amount of work done
 	 */
-	public void internalWorked(double work);
+    void internalWorked(double work);
 
 	/**
 	 * Returns whether cancelation of current operation has been requested.
@@ -135,7 +135,7 @@ public interface IProgressMonitor {
 	 *    and <code>false</code> otherwise
 	 * @see #setCanceled(boolean)
 	 */
-	public boolean isCanceled();
+    boolean isCanceled();
 
 	/**
 	 * Sets the cancel state to the given value.
@@ -145,7 +145,7 @@ public interface IProgressMonitor {
 	 *     <code>false</code> clears this flag
 	 * @see #isCanceled()
 	 */
-	public void setCanceled(boolean value);
+    void setCanceled(boolean value);
 
 	/**
 	 * Sets the task name to the given value. This method is used to 
@@ -155,7 +155,7 @@ public interface IProgressMonitor {
 	 * @param name the name (or description) of the main task
 	 * @see #beginTask(java.lang.String, int)
 	 */
-	public void setTaskName(String name);
+    void setTaskName(String name);
 
 	/**
 	 * Notifies that a subtask of the main task is beginning.
@@ -163,7 +163,7 @@ public interface IProgressMonitor {
 	 *
 	 * @param name the name (or description) of the subtask
 	 */
-	public void subTask(String name);
+    void subTask(String name);
 
 	/**
 	 * Notifies that a given number of work unit of the main task
@@ -173,7 +173,7 @@ public interface IProgressMonitor {
 	 *
 	 * @param work a non-negative number of work units just completed
 	 */
-	public void worked(int work);
+    void worked(int work);
 
 	/**
 	 * Indicates that this operation is blocked by some background activity. If
@@ -193,7 +193,7 @@ public interface IProgressMonitor {
 	 * @see #clearBlocked()
 	 * @since 3.13
 	 */
-	public default void setBlocked(IStatus reason) {
+	default void setBlocked(IStatus reason) {
 		//default implementation does nothing
 	}
 
@@ -205,7 +205,7 @@ public interface IProgressMonitor {
 	 * @see #setBlocked(IStatus)
 	 * @since 3.13
 	 */
-	public default void clearBlocked() {
+	default void clearBlocked() {
 		//default implementation does nothing
 	}
 
@@ -237,7 +237,7 @@ public interface IProgressMonitor {
 	 * 			the default implementation suppress any strings passed to {@link #setTaskName(String)}, {@link #subTask(String)} and {@link #beginTask(String, int)}, and does not propagate {@link #setCanceled(boolean)} (but reports cancelation of the parent
 	 * @since 3.14
 	 */
-	public default IProgressMonitor slice(int work) {
+	default IProgressMonitor slice(int work) {
 		return new SlicedProgressMonitor(this, work);
 	}
 

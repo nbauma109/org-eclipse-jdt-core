@@ -38,5 +38,5 @@ public interface IScope {
 	 * @param name the name of the node
 	 * @return the new node
 	 */
-	public IEclipsePreferences create(IEclipsePreferences parent, String name);
+    IEclipsePreferences create(IEclipsePreferences parent, String name);
 }

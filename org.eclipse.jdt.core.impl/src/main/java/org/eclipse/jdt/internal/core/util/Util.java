@@ -102,8 +102,8 @@ public class Util {
 		int compare(Object a, Object b);
 	}
 
-	public static interface BindingsToNodesMap {
-		public org.eclipse.jdt.internal.compiler.ast.ASTNode get(Binding binding);
+	public interface BindingsToNodesMap {
+		org.eclipse.jdt.internal.compiler.ast.ASTNode get(Binding binding);
 	}
 
 	private static final char ARGUMENTS_DELIMITER = '#';
@@ -974,7 +974,7 @@ public class Util {
 			lineSeparator = findLineSeparator(text);
 			if (lineSeparator == null) {
 				// default to system line separator
-				return getLineSeparator((String) null, (IJavaProject) null);
+				return getLineSeparator(null, (IJavaProject) null);
 			}
 		}
 		return lineSeparator;
@@ -992,7 +992,7 @@ public class Util {
 		} else {
 			Path path = new Path(new String(fileName, 0, pkgEnd));
 			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-			IContainer folder = path.segmentCount() == 1 ? workspaceRoot.getProject(path.lastSegment()) : (IContainer) workspaceRoot.getFolder(path);
+			IContainer folder = path.segmentCount() == 1 ? workspaceRoot.getProject(path.lastSegment()) : workspaceRoot.getFolder(path);
 			IJavaElement element = JavaCore.create(folder);
 			if (element == null) return null;
 			switch (element.getElementType()) {
@@ -1491,7 +1491,7 @@ public class Util {
 			return null;
 		switch (typeBinding.kind()) {
 			case Binding.ARRAY_TYPE :
-				typeBinding = ((org.eclipse.jdt.internal.compiler.lookup.ArrayBinding) typeBinding).leafComponentType();
+				typeBinding = typeBinding.leafComponentType();
 				return getUnresolvedJavaElement(typeBinding, workingCopyOwner, bindingsToNodes);
 			case Binding.BASE_TYPE :
 			case Binding.WILDCARD_TYPE :

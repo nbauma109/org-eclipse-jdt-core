@@ -81,10 +81,8 @@ public class XMLContentDescriber extends TextContentDescriber {
 
 	private boolean isProcessed(Map<String, Object> properties) {
 		Boolean result = (Boolean) properties.get(RESULT);
-		if (result != null)
-			return true;
-		return false;
-	}
+        return result != null;
+    }
 
 	private void fillContentProperties(InputStream input, IContentDescription description, Map<String, Object> properties) throws IOException {
 		byte[] bom = Util.getByteOrderMark(input);
@@ -136,10 +134,9 @@ public class XMLContentDescriber extends TextContentDescriber {
 	private boolean isNonDefaultCharset(String charset) {
 		if (charset == null)
 			return false;
-		if ("utf8".equalsIgnoreCase(charset) || "utf-8".equalsIgnoreCase(charset)) //$NON-NLS-1$ //$NON-NLS-2$
-			return false;
-		return true;
-	}
+        //$NON-NLS-1$ //$NON-NLS-2$
+        return !"utf8".equalsIgnoreCase(charset) && !"utf-8".equalsIgnoreCase(charset);
+    }
 
 	private boolean isFullXMLDecl(String xmlDecl) {
 		return xmlDecl.endsWith(XML_DECL_END);

@@ -126,7 +126,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 					thrownExceptions,
 					(this.accessMode == ExplicitConstructorCall.ImplicitSuper)
 						? (ASTNode) currentScope.methodScope().referenceContext
-						: (ASTNode) this,
+						: this,
 					flowInfo,
 					currentScope);
 			}

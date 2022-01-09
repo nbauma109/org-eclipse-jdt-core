@@ -285,7 +285,7 @@ public class Preferences {
 		 * @param event the property change event object describing which
 		 *    property changed and how
 		 */
-		public void propertyChange(Preferences.PropertyChangeEvent event);
+        void propertyChange(Preferences.PropertyChangeEvent event);
 	}
 
 	/**
@@ -342,7 +342,7 @@ public class Preferences {
 			fos = new FileOutputStream(file);
 			output = new BufferedOutputStream(fos);
 			IEclipsePreferences node = (IEclipsePreferences) service.getRootNode().node(InstanceScope.SCOPE);
-			service.exportPreferences(node, output, (String[]) null);
+			service.exportPreferences(node, output, null);
 			output.flush();
 			fos.getFD().sync();
 		} catch (IOException e) {

@@ -17,8 +17,8 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 
 public class CharArrayCache {
 	// to avoid using Enumerations, walk the individual tables skipping nulls
-	public char[] keyTable[];
-	public int valueTable[];
+	public char[][] keyTable;
+	public int[] valueTable;
 	int elementSize; // number of elements in the table
 	int threshold;
 /**

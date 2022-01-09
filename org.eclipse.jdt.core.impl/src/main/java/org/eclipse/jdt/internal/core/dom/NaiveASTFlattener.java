@@ -1632,11 +1632,8 @@ public class NaiveASTFlattener extends ASTVisitor {
 	}
 
 	private boolean isCaseDefaultExpression(SwitchCase node) {
-		if (node.expressions() != null && node.expressions().size() == 1 && node.expressions().get(0) instanceof CaseDefaultExpression) {
-			return true;
-		}
-		return false;
-	}
+        return node.expressions() != null && node.expressions().size() == 1 && node.expressions().get(0) instanceof CaseDefaultExpression;
+    }
 	/**
 	 * @deprecated
 	 */

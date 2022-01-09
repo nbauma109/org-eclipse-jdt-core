@@ -447,7 +447,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 */
 	@Override
 	public ReferenceBinding enclosingType() {
-		if (this.type instanceof UnresolvedReferenceBinding && ((UnresolvedReferenceBinding) this.type).depth() > 0) {
+		if (this.type instanceof UnresolvedReferenceBinding && this.type.depth() > 0) {
 			((UnresolvedReferenceBinding) this.type).resolve(this.environment, false); // may set enclosingType as side effect
 		}
 	    return this.enclosingType;
@@ -866,7 +866,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public boolean hasTypeBit(int bit) {
 		TypeBinding erasure = erasure();
 		if (erasure instanceof ReferenceBinding)
-			return ((ReferenceBinding) erasure).hasTypeBit(bit);
+			return erasure.hasTypeBit(bit);
 		return false;
 	}
 
@@ -999,11 +999,8 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	       on whether the underlying type was "seen to be" a generic type in the particular build environment or
 	       not. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=328827
 	     */
-	    if (TypeBinding.equalsEquals(erasure(), otherType)) {
-	    	return true;
-	    }
-	    return false;
-	}
+        return TypeBinding.equalsEquals(erasure(), otherType);
+    }
 
 	@Override
 	public boolean isHierarchyConnected() {

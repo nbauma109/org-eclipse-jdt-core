@@ -50,9 +50,7 @@ class AnnotationBinding implements IAnnotationBinding {
 	@Override
 	public ITypeBinding getAnnotationType() {
 		ITypeBinding typeBinding = this.bindingResolver.getTypeBinding(this.binding.getAnnotationType());
-		if (typeBinding == null)
-			return null;
-		return typeBinding;
+        return typeBinding;
 	}
 
 	@Override

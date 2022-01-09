@@ -436,13 +436,10 @@ private boolean encloses(String enclosingPath, String path, int index) {
 		// if looking at a package, this scope encloses the given path
 		// if the given path is a direct child of the folder
 		// or if the given path path is the folder path (see bug 13919 Declaration for package not found if scope is not project)
-		if (path.startsWith(enclosingPath)
-			&& ((enclosingPath.length() == path.lastIndexOf('/'))
-				|| (enclosingPath.length() == path.length()))) {
-			return true;
-		}
+        return path.startsWith(enclosingPath)
+                && ((enclosingPath.length() == path.lastIndexOf('/'))
+                || (enclosingPath.length() == path.length()));
 	}
-	return false;
 }
 
 @Override
@@ -560,7 +557,7 @@ public void processDelta(IJavaElementDelta delta, int eventType) {
 						path = ((IJavaProject)element).getProject().getFullPath().toString();
 						break;
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-						path = ((IPackageFragmentRoot)element).getPath().toString();
+						path = element.getPath().toString();
 						break;
 					default:
 						return;

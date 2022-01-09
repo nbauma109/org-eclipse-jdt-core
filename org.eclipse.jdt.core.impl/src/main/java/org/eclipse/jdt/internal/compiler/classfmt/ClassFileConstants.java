@@ -165,7 +165,7 @@ public interface ClassFileConstants {
 	long JDK16 = ((long)ClassFileConstants.MAJOR_VERSION_16 << 16) + ClassFileConstants.MINOR_VERSION_0;
 	long JDK17 = ((long)ClassFileConstants.MAJOR_VERSION_17 << 16) + ClassFileConstants.MINOR_VERSION_0;
 
-	public static long getLatestJDKLevel() {
+	static long getLatestJDKLevel() {
 		return ((long)ClassFileConstants.MAJOR_LATEST_VERSION << 16) + ClassFileConstants.MINOR_VERSION_0;
 	}
 
@@ -176,7 +176,7 @@ public interface ClassFileConstants {
 	 * @param major Java major version
 	 * @return the compliance level for the given Java version
 	 */
-	public static long getComplianceLevelForJavaVersion(int major) {
+	static long getComplianceLevelForJavaVersion(int major) {
 		switch(major) {
 			case ClassFileConstants.MAJOR_VERSION_1_1:
 				return ((long)ClassFileConstants.MAJOR_VERSION_1_1 << 16) + ClassFileConstants.MINOR_VERSION_3;

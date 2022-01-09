@@ -31,7 +31,7 @@ public interface DebugOptions {
 	 *
 	 * @since 3.5
 	 */
-	public static String LISTENER_SYMBOLICNAME = "listener.symbolic.name"; //$NON-NLS-1$
+    String LISTENER_SYMBOLICNAME = "listener.symbolic.name"; //$NON-NLS-1$
 
 	/**
 	 * Returns the identified option as a boolean value.  The specified
@@ -47,7 +47,7 @@ public interface DebugOptions {
 	 * @return the value of the requested debug option or the
 	 * defaultValue if no such option is found.
 	 */
-	public abstract boolean getBooleanOption(String option, boolean defaultValue);
+    boolean getBooleanOption(String option, boolean defaultValue);
 
 	/**
 	 * Returns the identified option.  A <code>null</code> value
@@ -62,7 +62,7 @@ public interface DebugOptions {
 	 * @param option the name of the option to lookup
 	 * @return the value of the requested debug option or <code>null</code>
 	 */
-	public abstract String getOption(String option);
+    String getOption(String option);
 
 	/**
 	 * Returns the identified option.  The specified defaultValue is
@@ -79,7 +79,7 @@ public interface DebugOptions {
 	 * @return the value of the requested debug option or the
 	 * defaultValue if no such option is found.
 	 */
-	public abstract String getOption(String option, String defaultValue);
+    String getOption(String option, String defaultValue);
 
 	/**
 	 * Returns the identified option as an int value.  The specified
@@ -98,7 +98,7 @@ public interface DebugOptions {
 	 * @return the value of the requested debug option or the
 	 * defaultValue if no such option is found.
 	 */
-	public abstract int getIntegerOption(String option, int defaultValue);
+    int getIntegerOption(String option, int defaultValue);
 
 	/**
 	 * Returns a snapshot of the current options.  All
@@ -111,7 +111,7 @@ public interface DebugOptions {
 	 * @return a snapshot of the current options.
 	 * @since 3.6
 	 */
-	public Map<String, String> getOptions();
+    Map<String, String> getOptions();
 
 	/**
 	 * Sets the identified option to the identified value.  If debug is
@@ -119,7 +119,7 @@ public interface DebugOptions {
 	 * @param option the name of the option to set
 	 * @param value the value of the option to set
 	 */
-	public abstract void setOption(String option, String value);
+    void setOption(String option, String value);
 
 	/**
 	 * Sets the current option key/value pairs to the specified options.
@@ -137,7 +137,7 @@ public interface DebugOptions {
 	 * @param options the new set of options
 	 * @since 3.6
 	 */
-	public abstract void setOptions(Map<String, String> options);
+    void setOptions(Map<String, String> options);
 
 	/**
 	 * Removes the identified option.  If debug is not enabled then
@@ -145,14 +145,14 @@ public interface DebugOptions {
 	 * @param option the name of the option to remove
 	 * @since 3.5
 	 */
-	public abstract void removeOption(String option);
+    void removeOption(String option);
 
 	/**
 	 * Returns true if debugging/tracing is currently enabled.
 	 * @return true if debugging/tracing is currently enabled;  Otherwise false is returned.
 	 * @since 3.5
 	 */
-	public abstract boolean isDebugEnabled();
+    boolean isDebugEnabled();
 
 	/**
 	 * Enables or disables debugging/tracing.
@@ -168,7 +168,7 @@ public interface DebugOptions {
 	 * debug is disabled.
 	 * @since 3.5
 	 */
-	public abstract void setDebugEnabled(boolean value);
+    void setDebugEnabled(boolean value);
 
 	/**
 	 * Sets the current file used to trace messages to.
@@ -180,7 +180,7 @@ public interface DebugOptions {
 	 * A <code>null</code> value is allowed.
 	 * @since 3.5
 	 */
-	public abstract void setFile(File newFile);
+    void setFile(File newFile);
 
 	/**
 	 * Returns the trace file if it is set, otherwise <code>null</code> is returned.
@@ -190,7 +190,7 @@ public interface DebugOptions {
 	 * @return the trace file if it is set, otherwise <code>null</code> is returned.
 	 * @since 3.5
 	 */
-	public abstract File getFile();
+    File getFile();
 
 	/**
 	 * Creates a new <code>DebugTrace</code> instance for the specified bundle symbolic name.
@@ -206,7 +206,7 @@ public interface DebugOptions {
 	 * @return A new or existing <code>DebugTrace</code> object for the specified plug-in ID
 	 * @since 3.5
 	 */
-	public abstract DebugTrace newDebugTrace(String bundleSymbolicName);
+    DebugTrace newDebugTrace(String bundleSymbolicName);
 
 	/**
 	 * Create a new <code>DebugTrace</code> instance for the specified bundle symbolic name.
@@ -224,5 +224,5 @@ public interface DebugOptions {
 	 * @return A new or existing <code>DebugTrace</code> object for the specified plug-in ID
 	 * @since 3.5
 	 */
-	public abstract DebugTrace newDebugTrace(String bundleSymbolicName, Class<?> traceEntryClass);
+    DebugTrace newDebugTrace(String bundleSymbolicName, Class<?> traceEntryClass);
 }

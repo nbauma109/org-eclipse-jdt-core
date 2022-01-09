@@ -48,7 +48,7 @@ public interface State {
 	 * @return a boolean indicating whether the bundle was successfully added
 	 * @throws IllegalStateException if the bundle already exists in another state
 	 */
-	public boolean addBundle(BundleDescription description);
+    boolean addBundle(BundleDescription description);
 
 	/**
 	 * Returns a delta describing the differences between this state and the
@@ -61,7 +61,7 @@ public interface State {
 	 * @param baseState the base state
 	 * @return a delta describing differences between this and the base state state
 	 */
-	public StateDelta compare(State baseState) throws BundleException;
+    StateDelta compare(State baseState) throws BundleException;
 
 	/**
 	 * Removes a bundle description with the given bundle id.
@@ -70,7 +70,7 @@ public interface State {
 	 * @return the removed bundle description, or <code>null</code>, if a bundle
 	 * 	with the given id does not exist in this state
 	 */
-	public BundleDescription removeBundle(long bundleId);
+    BundleDescription removeBundle(long bundleId);
 
 	/**
 	 * Removes the given bundle description.
@@ -79,7 +79,7 @@ public interface State {
 	 * @return <code>true</code>, if if the bundle description was removed,
 	 * 	<code>false</code> otherwise
 	 */
-	public boolean removeBundle(BundleDescription bundle);
+    boolean removeBundle(BundleDescription bundle);
 
 	/**
 	 * Updates an existing bundle description with the given description.
@@ -88,7 +88,7 @@ public interface State {
 	 * @return <code>true</code>, if if the bundle description was updated,
 	 * 	<code>false</code> otherwise
 	 */
-	public boolean updateBundle(BundleDescription newDescription);
+    boolean updateBundle(BundleDescription newDescription);
 
 	/**
 	 * Returns the delta representing the changes from the time this state was
@@ -96,14 +96,14 @@ public interface State {
 	 *
 	 * @return the state delta
 	 */
-	public StateDelta getChanges();
+    StateDelta getChanges();
 
 	/**
 	 * Returns descriptions for all bundles known to this state.
 	 *
 	 * @return the descriptions for all bundles known to this state.
 	 */
-	public BundleDescription[] getBundles();
+    BundleDescription[] getBundles();
 
 	/**
 	 * Returns the bundle descriptor for the bundle with the given id.
@@ -113,7 +113,7 @@ public interface State {
 	 * @return the descriptor for the identified bundle
 	 * @see BundleDescription#getBundleId()
 	 */
-	public BundleDescription getBundle(long id);
+    BundleDescription getBundle(long id);
 
 	/**
 	 * Returns the bundle descriptor for the bundle with the given name and
@@ -127,7 +127,7 @@ public interface State {
 	 * @param version version of the bundle to query. null matches any bundle
 	 * @return the descriptor for the identified bundle
 	 */
-	public BundleDescription getBundle(String symbolicName, Version version);
+    BundleDescription getBundle(String symbolicName, Version version);
 
 	/**
 	 * Returns the bundle descriptor for the bundle with the given location
@@ -136,7 +136,7 @@ public interface State {
 	 * @param location location identifier of the bundle to query
 	 * @return the descriptor for the identified bundle
 	 */
-	public BundleDescription getBundleByLocation(String location);
+    BundleDescription getBundleByLocation(String location);
 
 	/**
 	 * Returns the timestamp for this state. This
@@ -147,13 +147,13 @@ public interface State {
 	 *
 	 * @return the timestamp of this state
 	 */
-	public long getTimeStamp();
+    long getTimeStamp();
 
 	/**
 	 * Sets the timestamp for this state
 	 * @param newTimeStamp the new timestamp for this state
 	 */
-	public void setTimeStamp(long newTimeStamp);
+    void setTimeStamp(long newTimeStamp);
 
 	/**
 	 * Returns true if there have been no modifications to this state since the
@@ -161,7 +161,7 @@ public interface State {
 	 *
 	 * @return whether or not this state has changed since last resolved.
 	 */
-	public boolean isResolved();
+    boolean isResolved();
 
 	/**
 	 * Resolves the given version constraint with the given supplier. The given
@@ -179,7 +179,7 @@ public interface State {
 	 * @throws IllegalStateException if this is not done during a call to
 	 * <code>resolve</code>
 	 */
-	public void resolveConstraint(VersionConstraint constraint, BaseDescription supplier);
+    void resolveConstraint(VersionConstraint constraint, BaseDescription supplier);
 
 	/**
 	 * Sets whether or not the given bundle is selected in this state.
@@ -197,7 +197,7 @@ public interface State {
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
 	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[], Map)}
 	 */
-	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
+    void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
 
 	/**
 	 * Sets whether or not the given bundle is selected in this state.
@@ -217,7 +217,7 @@ public interface State {
 	 * @since 3.4
 	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[], Map)}
 	 */
-	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
+    void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
 
 	/**
 	 * Sets whether or not the given bundle is selected in this state.
@@ -239,7 +239,7 @@ public interface State {
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
 	 * @since 3.7
 	 */
-	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolvedCapabilities, Map<String, List<StateWire>> resolvedWires);
+    void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolvedCapabilities, Map<String, List<StateWire>> resolvedWires);
 
 	/**
 	 * Sets the given removal pending bundle to removal complete for this state.
@@ -251,7 +251,7 @@ public interface State {
 	 * @throws IllegalStateException if this is not done during a call to
 	 * <code>resolve</code>
 	 */
-	public void removeBundleComplete(BundleDescription bundle);
+    void removeBundleComplete(BundleDescription bundle);
 
 	/**
 	 * Adds a new <code>ResolverError</code> for the specified bundle.
@@ -268,7 +268,7 @@ public interface State {
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
 	 * @since 3.2
 	 */
-	public void addResolverError(BundleDescription bundle, int type, String data, VersionConstraint unsatisfied);
+    void addResolverError(BundleDescription bundle, int type, String data, VersionConstraint unsatisfied);
 
 	/**
 	 * Removes all <code>ResolverError</code>s for the specified bundle.
@@ -281,7 +281,7 @@ public interface State {
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
 	 * @since 3.2
 	 */
-	public void removeResolverErrors(BundleDescription bundle);
+    void removeResolverErrors(BundleDescription bundle);
 
 	/**
 	 * Returns all <code>ResolverError</code>s for the given bundle
@@ -289,7 +289,7 @@ public interface State {
 	 * @return all <code>ResolverError</code>s for the given bundle
 	 * @since 3.2
 	 */
-	public ResolverError[] getResolverErrors(BundleDescription bundle);
+    ResolverError[] getResolverErrors(BundleDescription bundle);
 
 	/**
 	 * Returns the resolver associated with this state. A state can work with
@@ -299,7 +299,7 @@ public interface State {
 	 * @return the resolver for this state. null is returned if the state does
 	 * not have a resolver
 	 */
-	public Resolver getResolver();
+    Resolver getResolver();
 
 	/**
 	 * Sets the resolver associated with this state. A state can work with at
@@ -319,7 +319,7 @@ public interface State {
 	// TODO what happens if you set the Resolver after some bundles have
 	// been added to the state but it is not resolved?  Should setting
 	// the resolver force a state to be unresolved?
-	public void setResolver(Resolver value);
+    void setResolver(Resolver value);
 
 	/**
 	 * Resolves the constraints contained in this state using the resolver
@@ -345,12 +345,12 @@ public interface State {
 	 * @return a delta describing the changes in resolved state and
 	 * interconnections
 	 */
-	public StateDelta resolve(boolean incremental);
+    StateDelta resolve(boolean incremental);
 
 	/**
 	 * Same as State.resolve(true);
 	 */
-	public StateDelta resolve();
+    StateDelta resolve();
 
 	/**
 	 * Resolves the constraints contained in this state using the resolver
@@ -364,7 +364,7 @@ public interface State {
 	 * @return a delta describing the changes in resolved state and
 	 * 	interconnections
 	 */
-	public StateDelta resolve(BundleDescription[] discard);
+    StateDelta resolve(BundleDescription[] discard);
 
 	/**
 	 * Resolves the constraints contained in this state using the resolver
@@ -384,7 +384,7 @@ public interface State {
 	 * interconnections.
 	 * @since 3.7
 	 */
-	public StateDelta resolve(BundleDescription[] resolve, boolean discard);
+    StateDelta resolve(BundleDescription[] resolve, boolean discard);
 
 	/**
 	 * Sets the version overrides which are to be applied during the resolution
@@ -396,7 +396,7 @@ public interface State {
 	 * @deprecated The exact form of this has never been defined.  There is
 	 * no alternative method available.
 	 */
-	public void setOverrides(Object value);
+    void setOverrides(Object value);
 
 	/**
 	 * Returns descriptions for all bundles currently resolved in this state.
@@ -404,14 +404,14 @@ public interface State {
 	 * @return the descriptions for all bundles currently resolved in this
 	 * state.
 	 */
-	public BundleDescription[] getResolvedBundles();
+    BundleDescription[] getResolvedBundles();
 
 	/**
 	 * Returns descriptions for all bundles in a removal pending state.
 	 * @return the descriptions for all bundles in a removal pending state.
 	 * @since 3.7
 	 */
-	public BundleDescription[] getRemovalPending();
+    BundleDescription[] getRemovalPending();
 
 	/**
 	 * Returns the dependency closure for the specified bundles.
@@ -431,20 +431,20 @@ public interface State {
 	 *         specified bundles.
 	 * @since 3.7
 	 */
-	public Collection<BundleDescription> getDependencyClosure(Collection<BundleDescription> bundles);
+    Collection<BundleDescription> getDependencyClosure(Collection<BundleDescription> bundles);
 
 	/**
 	 * Returns whether this state is empty.
 	 * @return <code>true</code> if this state is empty, <code>false</code>
 	 * 	otherwise
 	 */
-	public boolean isEmpty();
+    boolean isEmpty();
 
 	/**
 	 * Returns all exported packages in this state, according to the OSGi rules for resolution.
 	 * @see org.osgi.service.packageadmin.PackageAdmin#getExportedPackages(org.osgi.framework.Bundle)
 	 */
-	public ExportPackageDescription[] getExportedPackages();
+    ExportPackageDescription[] getExportedPackages();
 
 	/**
 	 * Returns all bundle descriptions with the given bundle symbolic name.
@@ -452,13 +452,13 @@ public interface State {
 	 * @return the descriptors for all bundles known to this state with the
 	 * specified symbolic name.
 	 */
-	public BundleDescription[] getBundles(String symbolicName);
+    BundleDescription[] getBundles(String symbolicName);
 
 	/**
 	 * Returns the factory that created this state.
 	 * @return the state object factory that created this state
 	 */
-	public StateObjectFactory getFactory();
+    StateObjectFactory getFactory();
 
 	/**
 	 * Attempts to find an ExportPackageDescription that will satisfy a dynamic import
@@ -470,7 +470,7 @@ public interface State {
 	 * @return the ExportPackageDescription that satisfies the dynamic import request;
 	 * a value of <code>null</code> is returned if none is available.
 	 */
-	public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage);
+    ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage);
 
 	/**
 	 * Adds the specified dynamic imports to the specified importingBundle.  The added
@@ -481,7 +481,7 @@ public interface State {
 	 * @since 3.7
 	 * @see BundleDescription#getAddedDynamicImportPackages()
 	 */
-	public void addDynamicImportPackages(BundleDescription importingBundle, ImportPackageSpecification[] dynamicImports);
+    void addDynamicImportPackages(BundleDescription importingBundle, ImportPackageSpecification[] dynamicImports);
 
 	/**
 	 * Sets the platform properties of the state.  The platform properties
@@ -518,7 +518,7 @@ public interface State {
 	 * supported properties already set.  If any of the supported property values
 	 * are changed as a result of calling this method then true is returned.
 	 */
-	public boolean setPlatformProperties(Dictionary<?, ?> platformProperties);
+    boolean setPlatformProperties(Dictionary<?, ?> platformProperties);
 
 	/**
 	 * Sets the platform properties of the state to a list of platform properties.
@@ -529,14 +529,14 @@ public interface State {
 	 * supported properties already set.  If any of the supported property values
 	 * are changed as a result of calling this method then true is returned.
 	 */
-	public boolean setPlatformProperties(Dictionary<?, ?>[] platformProperties);
+    boolean setPlatformProperties(Dictionary<?, ?>[] platformProperties);
 
 	/**
 	 * Returns the list of platform properties currently set for this state.
 	 * @return the list of platform properties currently set for this state.
 	 */
 	@SuppressWarnings("rawtypes")
-	public Dictionary[] getPlatformProperties();
+    Dictionary[] getPlatformProperties();
 
 	/**
 	 * Returns the list of system packages which are exported by the system bundle.
@@ -545,7 +545,7 @@ public interface State {
 	 * @see #setPlatformProperties(Dictionary)
 	 * @return the list of system packages
 	 */
-	public ExportPackageDescription[] getSystemPackages();
+    ExportPackageDescription[] getSystemPackages();
 
 	/**
 	 * Returns a state helper object. State helpers provide convenience methods
@@ -559,7 +559,7 @@ public interface State {
 	 * @see StateHelper
 	 * @since 3.2
 	 */
-	public StateHelper getStateHelper();
+    StateHelper getStateHelper();
 
 	/**
 	 * Returns the highest bundle ID.  The value -1 is returned if no
@@ -570,7 +570,7 @@ public interface State {
 	 * @return the highest bundle ID.
 	 * @since 3.3
 	 */
-	public long getHighestBundleId();
+    long getHighestBundleId();
 
 	/**
 	 * Sets the native code paths of a native code description as invalid.  Native
@@ -583,7 +583,7 @@ public interface State {
 	 * @param hasInvalidNativePaths true if the native code paths are invalid; false otherwise.
 	 * @since 3.4
 	 */
-	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidNativePaths);
+    void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidNativePaths);
 
 	/**
 	 * Returns an array of BundleDescriptions for the bundles that are disabled
@@ -593,7 +593,7 @@ public interface State {
 	 * @see DisabledInfo
 	 * @since 3.4
 	 */
-	public BundleDescription[] getDisabledBundles();
+    BundleDescription[] getDisabledBundles();
 
 	/**
 	 * Adds the disabled info to this state.  If a disable info already exists
@@ -604,14 +604,14 @@ public interface State {
 	 * the specified disabled info does not exist in this state.
 	 * @since 3.4
 	 */
-	public void addDisabledInfo(DisabledInfo disabledInfo);
+    void addDisabledInfo(DisabledInfo disabledInfo);
 
 	/**
 	 * Removes the disabled info from the state.
 	 * @param disabledInfo the disabled info to remove
 	 * @since 3.4
 	 */
-	public void removeDisabledInfo(DisabledInfo disabledInfo);
+    void removeDisabledInfo(DisabledInfo disabledInfo);
 
 	/**
 	 * Returns an array of disabled info for the specified bundle.  If no disabled info exist
@@ -620,7 +620,7 @@ public interface State {
 	 * @return the array of disabled info.
 	 * @since 3.4
 	 */
-	public DisabledInfo[] getDisabledInfos(BundleDescription bundle);
+    DisabledInfo[] getDisabledInfos(BundleDescription bundle);
 
 	/**
 	 * Returns the disabled info for the specified bundle with the specified policy name.
@@ -629,7 +629,7 @@ public interface State {
 	 * @return the disabled info.
 	 * @since 3.4
 	 */
-	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName);
+    DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName);
 
 	/**
 	 * Sets the resolver hook factory for this state.  The resolver hook factory is
@@ -639,5 +639,5 @@ public interface State {
 	 * @since 3.7
 	 * @throws IllegalStateException if the resolver hook factory is already set
 	 */
-	public void setResolverHookFactory(ResolverHookFactory hookFactory);
+    void setResolverHookFactory(ResolverHookFactory hookFactory);
 }

@@ -23,5 +23,5 @@ public interface HookConfigurator {
 	 * Adds hooks to the specified hook registry.
 	 * @param hookRegistry the hook registry used to add hooks
 	 */
-	public void addHooks(HookRegistry hookRegistry);
+    void addHooks(HookRegistry hookRegistry);
 }

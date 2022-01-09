@@ -486,8 +486,8 @@ public class EclipseStarter {
 			return;
 		// register the output stream to the launcher if it exists
 		try {
-			Method method = endSplashHandler.getClass().getMethod("getOutputStream", new Class[0]); //$NON-NLS-1$
-			Object outputStream = method.invoke(endSplashHandler, new Object[0]);
+			Method method = endSplashHandler.getClass().getMethod("getOutputStream"); //$NON-NLS-1$
+			Object outputStream = method.invoke(endSplashHandler);
 			if (outputStream instanceof OutputStream) {
 				Dictionary<String, Object> osProperties = new Hashtable<>();
 				osProperties.put("name", "splashstream"); //$NON-NLS-1$//$NON-NLS-2$
@@ -635,7 +635,7 @@ public class EclipseStarter {
 			boolean start = false;
 			int index = name.lastIndexOf('@');
 			if (index >= 0) {
-				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ":"); //$NON-NLS-1$
+				String[] attributes = getArrayFromList(name.substring(index + 1), ":"); //$NON-NLS-1$
 				for (String attribute : attributes) {
 					if (attribute.equals("start")) //$NON-NLS-1$
 						start = true;

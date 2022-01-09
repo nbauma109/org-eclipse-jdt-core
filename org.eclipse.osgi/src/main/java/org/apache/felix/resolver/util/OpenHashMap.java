@@ -166,14 +166,14 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             if (this == e.getKey()) {
                 s.append("(this map)");
             } else {
-                s.append(String.valueOf(e.getKey()));
+                s.append(e.getKey());
             }
 
             s.append("=>");
             if (this == e.getValue()) {
                 s.append("(this map)");
             } else {
-                s.append(String.valueOf(e.getValue()));
+                s.append(e.getValue());
             }
         }
 
@@ -194,7 +194,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
     }
 
     private void tryCapacity(long capacity) {
-        int needed = (int) Math.min(1073741824L, Math.max(2L, nextPowerOfTwo((long) Math.ceil((double) ((float) capacity / this.f)))));
+        int needed = (int) Math.min(1073741824L, Math.max(2L, nextPowerOfTwo((long) Math.ceil((float) capacity / this.f))));
         if (needed > this.n) {
             this.rehash(needed);
         }
@@ -233,7 +233,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         if ((double) this.f <= 0.5D) {
             this.ensureCapacity(m.size());
         } else {
-            this.tryCapacity((long) (this.size() + m.size()));
+            this.tryCapacity(this.size() + m.size());
         }
 
         int n = m.size();
@@ -537,8 +537,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         if (size != 0) {
             size = 0;
             containsNullKey = false;
-            Arrays.fill(key, (Object) null);
-            Arrays.fill(value, (Object) null);
+            Arrays.fill(key, null);
+            Arrays.fill(value, null);
             first = last = -1;
         }
     }
@@ -726,7 +726,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
      * @see #trim()
      */
     public boolean trim(int n) {
-        int l = nextPowerOfTwo((int) Math.ceil((double) ((float) n / f)));
+        int l = nextPowerOfTwo((int) Math.ceil((float) n / f));
         if (n <= l) {
             return true;
         } else {
@@ -883,7 +883,6 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
                 this.containsNullKey = true;
             } else {
                 for (pos = mix(k.hashCode()) & this.mask; key[pos] != null; pos = pos + 1 & this.mask) {
-                    ;
                 }
 
                 key[pos] = k;
@@ -1039,14 +1038,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
                 if (k == null) {
                     if (containsNullKey) {
                         if (value[n] == null) {
-                            if (e.getValue() != null) {
-                                return false;
-                            }
-                        } else if (!value[n].equals(e.getValue())) {
-                            return false;
-                        }
-
-                        return true;
+                            return e.getValue() == null;
+                        } else return value[n].equals(e.getValue());
                     }
 
                     return false;
@@ -1355,14 +1348,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
                 }
 
                 if (value[this.index] == null) {
-                    if (e.getValue() != null) {
-                        return false;
-                    }
-                } else if (!value[this.index].equals(e.getValue())) {
-                    return false;
-                }
-
-                return true;
+                    return e.getValue() == null;
+                } else return value[this.index].equals(e.getValue());
             }
         }
 
@@ -1479,7 +1466,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
                 if (this == k) {
                     s.append("(this collection)");
                 } else {
-                    s.append(String.valueOf(k));
+                    s.append(k);
                 }
             }
 
@@ -1489,7 +1476,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
     }
 
     private static int arraySize(int expected, float f) {
-        long s = Math.max(2L, nextPowerOfTwo((long) Math.ceil((double) ((float) expected / f))));
+        long s = Math.max(2L, nextPowerOfTwo((long) Math.ceil((float) expected / f)));
         if (s > 0x40000000L) {
             throw new IllegalArgumentException("Too large (" + expected + " expected elements with load factor " + f + ")");
         } else {
@@ -1498,7 +1485,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
     }
 
     private static int maxFill(int n, float f) {
-        return Math.min((int) Math.ceil((double) ((float) n * f)), n - 1);
+        return Math.min((int) Math.ceil((float) n * f), n - 1);
     }
 
     private static int nextPowerOfTwo(int x) {
@@ -1539,7 +1526,6 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         } else if (offset >= 0 && offset + max <= array.length) {
             int j;
             for (j = max; j-- != 0 && i.hasNext(); array[offset++] = i.next()) {
-                ;
             }
 
             return max - j - 1;

@@ -156,7 +156,7 @@ public class ClasspathJep247Jdk12 extends ClasspathJep247 {
 			return;
 		}
 		final Path modPath = this.fs.getPath(this.releaseInHex);
-		this.modulePath = this.file.getPath() + "|" + modPath.toString(); //$NON-NLS-1$
+		this.modulePath = this.file.getPath() + "|" + modPath; //$NON-NLS-1$
 		this.modules = ModulesCache.get(this.modulePath);
 		if (this.modules == null) {
 			try (DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(this.releasePath)) {

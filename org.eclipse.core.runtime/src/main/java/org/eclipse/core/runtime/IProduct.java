@@ -42,7 +42,7 @@ public interface IProduct {
 	 *
 	 * @return this product's application or <code>null</code> if none
 	 */
-	public String getApplication();
+    String getApplication();
 
 	/**
 	 * Returns the name of this product.  The name is typically used in the title
@@ -50,20 +50,20 @@ public interface IProduct {
 	 *
 	 * @return the name of this product or <code>null</code> if none
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the text description of this product
 	 *
 	 * @return the description of this product or <code>null</code> if none
 	 */
-	public String getDescription();
+    String getDescription();
 
 	/** Returns the unique product id of this product.
 	 *
 	 * @return the id of this product
 	 */
-	public String getId();
+    String getId();
 
 	/**
 	 * Returns the property of this product with the given key.
@@ -72,7 +72,7 @@ public interface IProduct {
 	 * @param key the name of the property to return
 	 * @return the value associated with the given key or <code>null</code> if none
 	 */
-	public String getProperty(String key);
+    String getProperty(String key);
 
 	/**
 	 * Returns the bundle which is responsible for the definition of this product.
@@ -81,5 +81,5 @@ public interface IProduct {
 	 *
 	 * @return the bundle which defines this product or <code>null</code> if none
 	 */
-	public Bundle getDefiningBundle();
+    Bundle getDefiningBundle();
 }

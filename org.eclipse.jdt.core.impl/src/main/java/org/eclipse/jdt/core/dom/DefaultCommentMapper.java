@@ -569,7 +569,7 @@ class DefaultCommentMapper {
 			int previousEnd = parent.getStartPosition();
 
 			// Look for sibling node
- 			ASTNode sibling = parent == this.topSiblingParent ? (ASTNode) this.siblings[this.siblingPtr] : null;
+ 			ASTNode sibling = parent == this.topSiblingParent ? this.siblings[this.siblingPtr] : null;
 			if (sibling != null) {
 				// Found one previous sibling, so compute its trailing comments using current node start position
 				try {
@@ -625,7 +625,7 @@ class DefaultCommentMapper {
 		protected void endVisitNode(ASTNode node) {
 
 			// Look if a child node is waiting for trailing comments computing
-			ASTNode sibling = this.topSiblingParent == node ? (ASTNode) this.siblings[this.siblingPtr] : null;
+			ASTNode sibling = this.topSiblingParent == node ? this.siblings[this.siblingPtr] : null;
 			if (sibling != null) {
 				try {
 					storeTrailingComments(sibling, node.getStartPosition()+node.getLength()-1, true, this.parentLineRange[this.siblingPtr]);

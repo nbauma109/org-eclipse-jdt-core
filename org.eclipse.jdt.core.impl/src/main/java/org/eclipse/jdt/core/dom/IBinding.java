@@ -42,7 +42,7 @@ public interface IBinding {
 	 * @see #getKind()
 	 * @see IPackageBinding
 	 */
-	public static final int PACKAGE = 1;
+    int PACKAGE = 1;
 
 	/**
 	 * Kind constant (value 2) indicating a type binding.
@@ -51,7 +51,7 @@ public interface IBinding {
 	 * @see #getKind()
 	 * @see ITypeBinding
 	 */
-	public static final int TYPE = 2;
+    int TYPE = 2;
 
 	/**
 	 * Kind constant (value 3) indicating a field or local variable binding.
@@ -60,7 +60,7 @@ public interface IBinding {
 	 * @see #getKind()
 	 * @see IVariableBinding
 	 */
-	public static final int VARIABLE = 3;
+    int VARIABLE = 3;
 
 	/**
 	 * Kind constant (value 4) indicating a method or constructor binding.
@@ -69,7 +69,7 @@ public interface IBinding {
 	 * @see #getKind()
 	 * @see IMethodBinding
 	 */
-	public static final int METHOD = 4;
+    int METHOD = 4;
 
 	/**
 	 * Kind constant (value 5) indicating an annotation binding.
@@ -79,7 +79,7 @@ public interface IBinding {
 	 * @see IAnnotationBinding
 	 * @since 3.2
 	 */
-	public static final int ANNOTATION = 5;
+    int ANNOTATION = 5;
 
 	/**
 	 * Kind constant (value 6) indicating a member value pair binding.
@@ -89,7 +89,7 @@ public interface IBinding {
 	 * @see IMemberValuePairBinding
 	 * @since 3.2
 	 */
-	public static final int MEMBER_VALUE_PAIR = 6;
+    int MEMBER_VALUE_PAIR = 6;
 
 	/**
 	 * Kind constant (value 7) indicating a module binding (added in JLS9 API).
@@ -99,7 +99,7 @@ public interface IBinding {
 	 * @see IModuleBinding
 	 * @since 3.14
 	 */
-	public static final int MODULE = 7;
+    int MODULE = 7;
 
 	/**
 	 * Returns the resolved declaration annotations associated with this binding.
@@ -127,7 +127,7 @@ public interface IBinding {
 	 *    declaration annotations associated with the entity represented by this binding
 	 * @since 3.2
 	 */
-	public IAnnotationBinding[] getAnnotations();
+    IAnnotationBinding[] getAnnotations();
 
 	/**
 	 * Returns the kind of bindings this is. That is one of the kind constants:
@@ -146,7 +146,7 @@ public interface IBinding {
 	 * </p>
 	 * @return one of the kind constants
 	 */
-	public int getKind();
+    int getKind();
 
 	/**
 	 * Returns the name of this binding.
@@ -154,7 +154,7 @@ public interface IBinding {
 	 *
 	 * @return the name of this binding
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the modifiers for this binding.
@@ -166,7 +166,7 @@ public interface IBinding {
 	 * @return the bit-wise or of <code>Modifier</code> constants
 	 * @see Modifier
 	 */
-	public int getModifiers();
+    int getModifiers();
 
 	/**
 	 * Return whether this binding is for something that is deprecated.
@@ -176,7 +176,7 @@ public interface IBinding {
 	 * @return <code>true</code> if this binding is deprecated, and
 	 *    <code>false</code> otherwise
 	 */
-	public boolean isDeprecated();
+    boolean isDeprecated();
 
 	/**
 	 * Return whether this binding is created because the bindings recovery is enabled. This binding is considered
@@ -186,7 +186,7 @@ public interface IBinding {
 	 *    <code>false</code> otherwise
 	 * @since 3.3
 	 */
-	public boolean isRecovered();
+    boolean isRecovered();
 
 	/**
 	 * Returns whether this binding is synthetic. A synthetic binding is one that
@@ -203,7 +203,7 @@ public interface IBinding {
 	 *    <code>false</code> otherwise
 	 * @see IMethodBinding#isDefaultConstructor()
 	 */
-	public boolean isSynthetic();
+    boolean isSynthetic();
 
 	/**
 	 * Returns the Java element that corresponds to this binding.
@@ -239,7 +239,7 @@ public interface IBinding {
 	 * 		or <code>null</code> if none
 	 * @since 3.1
 	 */
-	public IJavaElement getJavaElement();
+    IJavaElement getJavaElement();
 
 	/**
 	 * Returns the key for this binding.
@@ -308,7 +308,7 @@ public interface IBinding {
 	 *
 	 * @return the key for this binding
 	 */
-	public String getKey();
+    String getKey();
 
 	/**
 	 * There is no special definition of equality for bindings; equality is
@@ -331,7 +331,7 @@ public interface IBinding {
 	 * @see ITypeBinding#getTypeDeclaration()
 	 */
 	@Override
-	public boolean equals(Object obj);
+    boolean equals(Object obj);
 
 	/**
 	 * Returns whether this binding has the same key as that of the given
@@ -358,7 +358,7 @@ public interface IBinding {
 	 * @see #getKey()
 	 * @since 3.1
 	 */
-	public boolean isEqualTo(IBinding binding);
+    boolean isEqualTo(IBinding binding);
 
 	/**
 	 * Returns a string representation of this binding suitable for debugging
@@ -367,5 +367,5 @@ public interface IBinding {
 	 * @return a debug string
 	 */
 	@Override
-	public String toString();
+    String toString();
 }

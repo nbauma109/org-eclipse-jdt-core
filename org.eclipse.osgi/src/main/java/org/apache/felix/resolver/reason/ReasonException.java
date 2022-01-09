@@ -33,7 +33,7 @@ public class ReasonException extends ResolutionException {
     /**
      * The reasons for resolution failure.
      */
-    public static enum Reason {
+    public enum Reason {
         /**
          * Represents an unresolved package referenced by {@code Dynamic-ImportPackage}.
          * <p>

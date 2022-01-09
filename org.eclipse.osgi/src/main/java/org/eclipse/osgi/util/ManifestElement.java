@@ -18,6 +18,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -436,7 +437,7 @@ public class ManifestElement {
 			}
 			headerElements.add(manifestElement);
 			if (SupplementDebug.STATIC_DEBUG_MANIFEST)
-				System.out.println(""); //$NON-NLS-1$
+				System.out.println(); //$NON-NLS-1$
 			if (c == ',') /* another manifest element */
 				continue parseloop;
 			if (c == '\0') /* end of value */
@@ -583,7 +584,7 @@ public class ManifestElement {
 			}
 			buffer.write(c);
 		}
-		String result = buffer.toString("UTF8"); //$NON-NLS-1$
+		String result = buffer.toString(StandardCharsets.UTF_8); //$NON-NLS-1$
 		buffer.reset();
 		return result;
 	}

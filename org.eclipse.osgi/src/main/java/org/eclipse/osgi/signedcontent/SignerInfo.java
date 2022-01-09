@@ -29,21 +29,21 @@ public interface SignerInfo {
 	 * Returns the certificate chain
 	 * @return the certificate chain
 	 */
-	public Certificate[] getCertificateChain();
+    Certificate[] getCertificateChain();
 
 	/**
 	 * Returns the certificate trust anchor used to establish authenticity.
 	 * If authenticity cannot be established then <code>null</code> is returned.
 	 * @return the trust anchor
 	 */
-	public Certificate getTrustAnchor();
+    Certificate getTrustAnchor();
 
 	/**
 	 * Returns true if the trust anchor has been authenticated.  This is a convenience
 	 * method equivalent to calling <code>{@link #getTrustAnchor()} != null</code>
 	 * @return true if the the signer info is trusted
 	 */
-	public boolean isTrusted();
+    boolean isTrusted();
 
 	/**
 	 * Returns the <code>MessageDigest</code> algorithm used to verify content
@@ -53,6 +53,6 @@ public interface SignerInfo {
 	 * @deprecated This information is not readily available using the JAR APIs
 	 *             included with Java. A value {@literal unknown} will be returned.
 	 */
-	public String getMessageDigestAlgorithm();
+    String getMessageDigestAlgorithm();
 
 }

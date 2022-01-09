@@ -202,10 +202,8 @@ public class LineBreaksPreparator extends ASTVisitor {
 			return true;
 		if (bd1 instanceof AbstractTypeDeclaration && bd2 instanceof AbstractTypeDeclaration)
 			return true;
-		if ((bd1 instanceof FieldDeclaration || bd1 instanceof Initializer)
-				&& (bd2 instanceof FieldDeclaration || bd2 instanceof Initializer))
-			return true; // special case: initializers are often related to fields, don't separate
-		return false;
+		return (bd1 instanceof FieldDeclaration || bd1 instanceof Initializer)
+				&& (bd2 instanceof FieldDeclaration || bd2 instanceof Initializer); // special case: initializers are often related to fields, don't separate
 	}
 
 	@Override

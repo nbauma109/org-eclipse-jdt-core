@@ -112,9 +112,9 @@ public final class XMLRootElementContentDescriber2 extends XMLContentDescriber i
 		}
 
 		public boolean matches(String someNamespace, String someElement, String someDtd) {
-			boolean nsMatch = this.namespace != null ? this.namespace.equals(someNamespace) : true;
-			boolean elementEquals = this.element != null ? this.element.equals(someElement) : true;
-			boolean dtdEquals = this.dtd != null ? this.dtd.equals(someDtd) : true;
+			boolean nsMatch = this.namespace == null || this.namespace.equals(someNamespace);
+			boolean elementEquals = this.element == null || this.element.equals(someElement);
+			boolean dtdEquals = this.dtd == null || this.dtd.equals(someDtd);
 			return nsMatch && elementEquals && dtdEquals;
 		}
 	}
@@ -195,10 +195,8 @@ public final class XMLRootElementContentDescriber2 extends XMLContentDescriber i
 	static boolean isProcessed(Map<String, Object> properties) {
 		Boolean result = (Boolean) properties.get(RESULT);
 		// It can be set to false which means that content can't be parsed
-		if (result != null)
-			return true;
-		return false;
-	}
+        return result != null;
+    }
 
 	static void fillContentProperties(InputSource input, Map<String, Object> properties) throws IOException {
 		XMLRootHandler xmlHandler = new XMLRootHandler(true);

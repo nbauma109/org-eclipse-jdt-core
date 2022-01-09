@@ -36,7 +36,7 @@ public class RecordComponentInfo extends ClassFileStruct implements IRecordCompo
 	protected long tagBits;
 	protected long version;
 
-public static RecordComponentInfo createComponent(byte classFileBytes[], int offsets[], int offset, long version) {
+public static RecordComponentInfo createComponent(byte[] classFileBytes, int[] offsets, int offset, long version) {
 	RecordComponentInfo componentInfo = new RecordComponentInfo(classFileBytes, offsets, offset, version);
 
 	int attributesCount = componentInfo.u2At(4);
@@ -105,7 +105,7 @@ public static RecordComponentInfo createComponent(byte classFileBytes[], int off
  * @param offset int
  * @param version class file version
  */
-protected RecordComponentInfo (byte classFileBytes[], int offsets[], int offset, long version) {
+protected RecordComponentInfo (byte[] classFileBytes, int[] offsets, int offset, long version) {
 	super(classFileBytes, offsets, offset);
 	this.signatureUtf8Offset = -1;
 	this.version = version;

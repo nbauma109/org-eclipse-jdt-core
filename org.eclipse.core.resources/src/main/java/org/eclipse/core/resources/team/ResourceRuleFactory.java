@@ -140,7 +140,7 @@ public class ResourceRuleFactory implements IResourceRuleFactory {
 
 	private boolean isReadOnly(IResource resource) {
 		ResourceAttributes attributes = resource.getResourceAttributes();
-		return attributes == null ? false : attributes.isReadOnly();
+		return attributes != null && attributes.isReadOnly();
 	}
 
 	/**

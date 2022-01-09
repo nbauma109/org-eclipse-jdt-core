@@ -68,17 +68,17 @@ public final class JavaConventions {
 		restrictedIdentifiersMap= new HashMap<>();
 		//restricted identifier for Java10 and above
 		Set<String> set= new HashSet<String>();
-		set.add(new String(VAR_ID));
+		set.add(VAR_ID);
 		restrictedIdentifiersMap.put(CompilerOptions.VERSION_10, set);
 		//restricted identifier for Java14 and above
 		set= new HashSet<String>();
-		set.add(new String(YIELD_ID));
+		set.add(YIELD_ID);
 		restrictedIdentifiersMap.put(CompilerOptions.VERSION_14, set);
 
 		restrictedIdentifierPreviewMap= new HashMap<>();
 		//restricted identifier for Java10 and above
 		set= new HashSet<String>();
-		set.add(new String(RECORD_ID));
+		set.add(RECORD_ID);
 		restrictedIdentifierPreviewMap.put(CompilerOptions.VERSION_14, set);
 
 	}
@@ -126,7 +126,7 @@ public final class JavaConventions {
 		// Set scanner for given source and compliance levels
 		SCANNER.sourceLevel = sourceLevel == null ? ClassFileConstants.JDK1_3 : CompilerOptions.versionToJdkLevel(sourceLevel);
 		SCANNER.complianceLevel = complianceLevel == null ? ClassFileConstants.JDK1_3 : CompilerOptions.versionToJdkLevel(complianceLevel);
-		SCANNER.previewEnabled = previewEnabled == null ? false : JavaCore.ENABLED.equals(previewEnabled);
+		SCANNER.previewEnabled = previewEnabled != null && JavaCore.ENABLED.equals(previewEnabled);
 
 		try {
 			SCANNER.setSource(id.toCharArray());

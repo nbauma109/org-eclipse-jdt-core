@@ -35,12 +35,12 @@ public interface NativeCodeSpecification extends VersionConstraint {
 	 * will be selected and returned by {@link VersionConstraint#getSupplier()}.
 	 * @return the list of possible suppliers.
 	 */
-	public NativeCodeDescription[] getPossibleSuppliers();
+    NativeCodeDescription[] getPossibleSuppliers();
 
 	/**
 	 * Returns whether or not this native code specification is optional.
 	 *
 	 * @return whether this specification is optional
 	 */
-	public boolean isOptional();
+    boolean isOptional();
 }

@@ -82,7 +82,7 @@ public interface StartLevel {
 	 * 
 	 * @return The active start level value of the Framework.
 	 */
-	public int getStartLevel();
+    int getStartLevel();
 
 	/**
 	 * Modify the active start level of the Framework.
@@ -145,7 +145,7 @@ public interface StartLevel {
 	 *         {@code AdminPermission[System Bundle,STARTLEVEL]} and the
 	 *         Java runtime environment supports permissions.
 	 */
-	public void setStartLevel(int startlevel);
+    void setStartLevel(int startlevel);
 
 	/**
 	 * Return the assigned start level value for the specified Bundle.
@@ -157,7 +157,7 @@ public interface StartLevel {
 	 *         the same framework instance that registered this
 	 *         {@code StartLevel} service.
 	 */
-	public int getBundleStartLevel(Bundle bundle);
+    int getBundleStartLevel(Bundle bundle);
 
 	/**
 	 * Assign a start level value to the specified Bundle.
@@ -194,7 +194,7 @@ public interface StartLevel {
 	 *         {@code AdminPermission[bundle,EXECUTE]} and the Java runtime
 	 *         environment supports permissions.
 	 */
-	public void setBundleStartLevel(Bundle bundle, int startlevel);
+    void setBundleStartLevel(Bundle bundle, int startlevel);
 
 	/**
 	 * Return the initial start level value that is assigned to a Bundle when it
@@ -203,7 +203,7 @@ public interface StartLevel {
 	 * @return The initial start level value for Bundles.
 	 * @see #setInitialBundleStartLevel(int)
 	 */
-	public int getInitialBundleStartLevel();
+    int getInitialBundleStartLevel();
 
 	/**
 	 * Set the initial start level value that is assigned to a Bundle when it is
@@ -232,7 +232,7 @@ public interface StartLevel {
 	 *         {@code AdminPermission[System Bundle,STARTLEVEL]} and the
 	 *         Java runtime environment supports permissions.
 	 */
-	public void setInitialBundleStartLevel(int startlevel);
+    void setInitialBundleStartLevel(int startlevel);
 
 	/**
 	 * Returns whether the specified bundle's autostart setting indicates the
@@ -251,7 +251,7 @@ public interface StartLevel {
 	 *         {@code StartLevel} service.
 	 * @see Bundle#START_TRANSIENT
 	 */
-	public boolean isBundlePersistentlyStarted(Bundle bundle);
+    boolean isBundlePersistentlyStarted(Bundle bundle);
 
 	/**
 	 * Returns whether the specified bundle's autostart setting indicates that
@@ -271,5 +271,5 @@ public interface StartLevel {
 	 * @since 1.1
 	 * @see Bundle#START_ACTIVATION_POLICY
 	 */
-	public boolean isBundleActivationPolicyUsed(Bundle bundle);
+    boolean isBundleActivationPolicyUsed(Bundle bundle);
 }

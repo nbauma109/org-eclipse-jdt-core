@@ -69,7 +69,7 @@ public final static int FINE_GRAIN_MASK =
 public static char[] createIndexKey(char[] selector, int argCount) {
 	char[] countChars = argCount < 10
 		? COUNTS[argCount]
-		: ("/" + String.valueOf(argCount)).toCharArray(); //$NON-NLS-1$
+		: ("/" + argCount).toCharArray(); //$NON-NLS-1$
 	return CharOperation.concat(selector, countChars);
 }
 

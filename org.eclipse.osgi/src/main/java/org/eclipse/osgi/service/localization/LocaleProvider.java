@@ -43,6 +43,6 @@ public interface LocaleProvider {
 	 * </p>
 	 * @return The current locale.
 	 */
-	public Locale getLocale();
+    Locale getLocale();
 
 }

@@ -239,7 +239,7 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 			}
 		}
 		//still need to copy the result to prevent tampering with the cache
-		return makeCopy ? (IProject[]) projRefs.clone() : projRefs;
+		return makeCopy ? projRefs.clone() : projRefs;
 	}
 
 	/**
@@ -280,7 +280,7 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 			refs = references.toArray(new IBuildConfiguration[references.size()]);
 			cachedConfigRefs.put(configName, refs);
 		}
-		return makeCopy ? (IBuildConfiguration[]) refs.clone() : refs;
+		return makeCopy ? refs.clone() : refs;
 	}
 
 	/**
@@ -302,7 +302,7 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 			}
 			cachedBuildConfigs = configs;
 		}
-		return makeCopy ? (IBuildConfiguration[]) configs.clone() : configs;
+		return makeCopy ? configs.clone() : configs;
 	}
 
 	@Override
@@ -314,7 +314,7 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 		if (!hasBuildConfig(configName) || !dynamicConfigRefs.containsKey(configName))
 			return EMPTY_BUILD_CONFIG_REFERENCE_ARRAY;
 
-		return makeCopy ? (IBuildConfiguration[]) dynamicConfigRefs.get(configName).clone() : dynamicConfigRefs.get(configName);
+		return makeCopy ? dynamicConfigRefs.get(configName).clone() : dynamicConfigRefs.get(configName);
 	}
 
 	/**
@@ -355,7 +355,7 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 	}
 
 	public IProject[] getDynamicReferences(boolean makeCopy) {
-		return makeCopy ? (IProject[]) dynamicRefs.clone() : dynamicRefs;
+		return makeCopy ? dynamicRefs.clone() : dynamicRefs;
 	}
 
 	/**
@@ -432,7 +432,7 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 	public String[] getNatureIds(boolean makeCopy) {
 		if (natures == null)
 			return EMPTY_STRING_ARRAY;
-		return makeCopy ? (String[]) natures.clone() : natures;
+		return makeCopy ? natures.clone() : natures;
 	}
 
 	@Override
@@ -443,7 +443,7 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 	public IProject[] getReferencedProjects(boolean makeCopy) {
 		if (staticRefs == null)
 			return EMPTY_PROJECT_ARRAY;
-		return makeCopy ? (IProject[]) staticRefs.clone() : staticRefs;
+		return makeCopy ? staticRefs.clone() : staticRefs;
 	}
 
 	/**
@@ -524,11 +524,8 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 		if (!Arrays.equals(configNames, description.configNames))
 			return true;
 		// Configuration level references
-		if (configRefsHaveChanges(dynamicConfigRefs, description.dynamicConfigRefs))
-			return true;
-
-		return false;
-	}
+        return configRefsHaveChanges(dynamicConfigRefs, description.dynamicConfigRefs);
+    }
 
 	/**
 	 * Returns true if any public attributes of the description have changed.
@@ -568,8 +565,7 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 
 		final URI otherSnapshotLoc = description.getSnapshotLocationURI();
 		if (snapshotLocation != otherSnapshotLoc) {
-			if (snapshotLocation == null || !snapshotLocation.equals(otherSnapshotLoc))
-				return true;
+            return snapshotLocation == null || !snapshotLocation.equals(otherSnapshotLoc);
 		}
 		return false;
 	}
@@ -814,10 +810,8 @@ public class ProjectDescription extends ModelObject implements IProjectDescripti
 			if (filterDescriptions == null)
 				filterDescriptions = new HashMap<>(10);
 			Object oldValue = filterDescriptions.put(path, descriptions);
-			if (oldValue != null && descriptions.equals(oldValue)) {
-				//not actually changed anything
-				return false;
-			}
+            //not actually changed anything
+            return oldValue == null || !descriptions.equals(oldValue);
 		} else {
 			// removal
 			if (filterDescriptions == null)

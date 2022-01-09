@@ -91,7 +91,7 @@ public class FrameworkExtensionInstaller {
 
 	private static void callAddURLMethod(URL arg) throws InvocationTargetException {
 		try {
-			ADD_FWK_URL_METHOD.invoke(CL, new Object[] {arg});
+			ADD_FWK_URL_METHOD.invoke(CL, arg);
 		} catch (Throwable t) {
 			throw new InvocationTargetException(t);
 		}
@@ -99,7 +99,7 @@ public class FrameworkExtensionInstaller {
 
 	private static void callAddFilePathMethod(File file) throws InvocationTargetException {
 		try {
-			ADD_FWK_FILE_PATH_METHOD.invoke(CL, new Object[] {file.getCanonicalPath()});
+			ADD_FWK_FILE_PATH_METHOD.invoke(CL, file.getCanonicalPath());
 		} catch (Throwable t) {
 			throw new InvocationTargetException(t);
 		}

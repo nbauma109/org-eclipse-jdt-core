@@ -21,7 +21,7 @@ import java.util.List;
  * Simple tokenizer class. Used to parse data.
  */
 public class Tokenizer {
-	protected char value[];
+	protected char[] value;
 	protected int max;
 	protected int cursor;
 
@@ -158,9 +158,6 @@ public class Tokenizer {
 	}
 
 	public boolean hasMoreTokens() {
-		if (cursor < max) {
-			return true;
-		}
-		return false;
-	}
+        return cursor < max;
+    }
 }

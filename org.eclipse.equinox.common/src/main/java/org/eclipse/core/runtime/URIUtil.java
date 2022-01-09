@@ -223,7 +223,7 @@ public final class URIUtil {
 
 		// check if we have two local file references that are case variants
 		File file1 = toFile(uri1);
-		return file1 == null ? false : file1.equals(toFile(uri2));
+		return file1 != null && file1.equals(toFile(uri2));
 	}
 
 	private static boolean sameString(String s1, String s2) {
@@ -264,7 +264,7 @@ public final class URIUtil {
 			if (entryPath == null)
 				entryPath = Path.EMPTY;
 			//must deconstruct the input URI to obtain unencoded strings, and then pass to URI constructor that will encode the entry path
-			return new URI(SCHEME_JAR, uri.getScheme() + ':' + uri.getSchemeSpecificPart() + JAR_SUFFIX + entryPath.toString(), null);
+			return new URI(SCHEME_JAR, uri.getScheme() + ':' + uri.getSchemeSpecificPart() + JAR_SUFFIX + entryPath, null);
 		} catch (URISyntaxException e) {
 			//should never happen
 			throw new RuntimeException(e);

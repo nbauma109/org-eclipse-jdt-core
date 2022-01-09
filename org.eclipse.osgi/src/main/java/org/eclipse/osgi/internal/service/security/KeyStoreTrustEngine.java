@@ -201,7 +201,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException ke) {
-			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
+			throw (CertificateException) new CertificateException(ke.getMessage(), ke);
 		}
 		return alias;
 	}
@@ -223,7 +223,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				removeTrustAnchor(alias);
 			}
 		} catch (KeyStoreException ke) {
-			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
+			throw (CertificateException) new CertificateException(ke.getMessage(), ke);
 		}
 	}
 
@@ -248,7 +248,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException ke) {
-			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
+			throw (CertificateException) new CertificateException(ke.getMessage(), ke);
 		}
 	}
 
@@ -265,7 +265,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				return store.getCertificate(alias);
 			}
 		} catch (KeyStoreException ke) {
-			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
+			throw (CertificateException) new CertificateException(ke.getMessage(), ke);
 		}
 	}
 
@@ -284,7 +284,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException ke) {
-			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
+			throw (CertificateException) new CertificateException(ke.getMessage(), ke);
 		}
 		return returnList.toArray(new String[] {});
 	}

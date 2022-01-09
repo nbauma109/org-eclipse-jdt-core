@@ -51,7 +51,7 @@ public interface IPreferencesService {
 	 * @return the stored preference value or the specified default value
 	 * @see org.osgi.service.prefs.Preferences
 	 */
-	public String get(String key, String defaultValue, Preferences[] nodes);
+    String get(String key, String defaultValue, Preferences[] nodes);
 
 	/**
 	 * Return the value stored in the preference store for the given key.
@@ -106,7 +106,7 @@ public interface IPreferencesService {
 	 * @see #getLookupOrder(java.lang.String, java.lang.String)
 	 * @see #getDefaultLookupOrder(java.lang.String, java.lang.String)
 	 */
-	public boolean getBoolean(String qualifier, String key, boolean defaultValue, IScopeContext[] contexts);
+    boolean getBoolean(String qualifier, String key, boolean defaultValue, IScopeContext[] contexts);
 
 	/**
 	 * Return the value stored in the preference store for the given key.
@@ -161,7 +161,7 @@ public interface IPreferencesService {
 	 * @see #getLookupOrder(java.lang.String, java.lang.String)
 	 * @see #getDefaultLookupOrder(java.lang.String, java.lang.String)
 	 */
-	public byte[] getByteArray(String qualifier, String key, byte[] defaultValue, IScopeContext[] contexts);
+    byte[] getByteArray(String qualifier, String key, byte[] defaultValue, IScopeContext[] contexts);
 
 	/**
 	 * Return the value stored in the preference store for the given key.
@@ -216,7 +216,7 @@ public interface IPreferencesService {
 	 * @see #getLookupOrder(java.lang.String, java.lang.String)
 	 * @see #getDefaultLookupOrder(java.lang.String, java.lang.String)
 	 */
-	public double getDouble(String qualifier, String key, double defaultValue, IScopeContext[] contexts);
+    double getDouble(String qualifier, String key, double defaultValue, IScopeContext[] contexts);
 
 	/**
 	 * Return the value stored in the preference store for the given key.
@@ -271,7 +271,7 @@ public interface IPreferencesService {
 	 * @see #getLookupOrder(java.lang.String, java.lang.String)
 	 * @see #getDefaultLookupOrder(java.lang.String, java.lang.String)
 	 */
-	public float getFloat(String qualifier, String key, float defaultValue, IScopeContext[] contexts);
+    float getFloat(String qualifier, String key, float defaultValue, IScopeContext[] contexts);
 
 	/**
 	 * Return the value stored in the preference store for the given key.
@@ -326,7 +326,7 @@ public interface IPreferencesService {
 	 * @see #getLookupOrder(java.lang.String, java.lang.String)
 	 * @see #getDefaultLookupOrder(java.lang.String, java.lang.String)
 	 */
-	public int getInt(String qualifier, String key, int defaultValue, IScopeContext[] contexts);
+    int getInt(String qualifier, String key, int defaultValue, IScopeContext[] contexts);
 
 	/**
 	 * Return the value stored in the preference store for the given key.
@@ -381,7 +381,7 @@ public interface IPreferencesService {
 	 * @see #getLookupOrder(java.lang.String, java.lang.String)
 	 * @see #getDefaultLookupOrder(java.lang.String, java.lang.String)
 	 */
-	public long getLong(String qualifier, String key, long defaultValue, IScopeContext[] contexts);
+    long getLong(String qualifier, String key, long defaultValue, IScopeContext[] contexts);
 
 	/**
 	 * Return the value stored in the preference store for the given key.
@@ -436,14 +436,14 @@ public interface IPreferencesService {
 	 * @see #getLookupOrder(java.lang.String, java.lang.String)
 	 * @see #getDefaultLookupOrder(java.lang.String, java.lang.String)
 	 */
-	public String getString(String qualifier, String key, String defaultValue, IScopeContext[] contexts);
+    String getString(String qualifier, String key, String defaultValue, IScopeContext[] contexts);
 
 	/**
 	 * Return the root node of the Eclipse preference hierarchy.
 	 *
 	 * @return the root of the hierarchy
 	 */
-	public IEclipsePreferences getRootNode();
+    IEclipsePreferences getRootNode();
 
 	/**
 	 * Exports all preferences for the given preference node and all its children to the specified
@@ -474,7 +474,7 @@ public interface IPreferencesService {
 	 * @see #importPreferences(java.io.InputStream)
 	 * @see #readPreferences(InputStream)
 	 */
-	public IStatus exportPreferences(IEclipsePreferences node, OutputStream output, String[] excludesList) throws CoreException;
+    IStatus exportPreferences(IEclipsePreferences node, OutputStream output, String[] excludesList) throws CoreException;
 
 	/**
 	 * Loads preferences from the given file and stores them in the preferences store.
@@ -494,7 +494,7 @@ public interface IPreferencesService {
 	 * @throws IllegalArgumentException if the stream is <code>null</code>
 	 * @see #exportPreferences(IEclipsePreferences, OutputStream, String[])
 	 */
-	public IStatus importPreferences(InputStream input) throws CoreException;
+    IStatus importPreferences(InputStream input) throws CoreException;
 
 	/**
 	 * Take the given preference tree and apply it to the Eclipse
@@ -517,7 +517,7 @@ public interface IPreferencesService {
 	 * @throws CoreException if there are problems applying the preferences
 	 * @see PreferenceModifyListener
 	 */
-	public IStatus applyPreferences(IExportedPreferences preferences) throws CoreException;
+    IStatus applyPreferences(IExportedPreferences preferences) throws CoreException;
 
 	/**
 	 * Read from the given input stream and create a node hierarchy
@@ -535,7 +535,7 @@ public interface IPreferencesService {
 	 * @see #exportPreferences(IEclipsePreferences, OutputStream, String[])
 	 * @see #applyPreferences(IExportedPreferences)
 	 */
-	public IExportedPreferences readPreferences(InputStream input) throws CoreException;
+    IExportedPreferences readPreferences(InputStream input) throws CoreException;
 
 	/**
 	 * Return an array with the default lookup order for the preference keyed by the given
@@ -553,7 +553,7 @@ public interface IPreferencesService {
 	 * @see #setDefaultLookupOrder(String, String, String[])
 	 * @see #getLookupOrder(String, String)
 	 */
-	public String[] getDefaultLookupOrder(String qualifier, String key);
+    String[] getDefaultLookupOrder(String qualifier, String key);
 
 	/**
 	 * Return an array with the lookup order for the preference keyed by the given
@@ -571,7 +571,7 @@ public interface IPreferencesService {
 	 * @see #getDefaultLookupOrder(String, String)
 	 * @see #setDefaultLookupOrder(String, String, String[])
 	 */
-	public String[] getLookupOrder(String qualifier, String key);
+    String[] getLookupOrder(String qualifier, String key);
 
 	/**
 	 * Set the default scope lookup order for the preference keyed by the given
@@ -594,7 +594,7 @@ public interface IPreferencesService {
 	 * </ul>
 	 * @see #getDefaultLookupOrder(String, String)
 	 */
-	public void setDefaultLookupOrder(String qualifier, String key, String[] order);
+    void setDefaultLookupOrder(String qualifier, String key, String[] order);
 
 	/**
 	 * Export the preference tree rooted at the given node, to the specified output
@@ -619,7 +619,7 @@ public interface IPreferencesService {
 	 * @see IPreferenceFilter
 	 * @since 3.1
 	 */
-	public void exportPreferences(IEclipsePreferences node, IPreferenceFilter[] filters, OutputStream output) throws CoreException;
+    void exportPreferences(IEclipsePreferences node, IPreferenceFilter[] filters, OutputStream output) throws CoreException;
 
 	/**
 	 * Return a list of filters which match the given tree and is a subset of the given
@@ -633,7 +633,7 @@ public interface IPreferencesService {
 	 * @see IPreferenceFilter
 	 * @since 3.1
 	 */
-	public IPreferenceFilter[] matches(IEclipsePreferences node, IPreferenceFilter[] filters) throws CoreException;
+    IPreferenceFilter[] matches(IEclipsePreferences node, IPreferenceFilter[] filters) throws CoreException;
 
 	/**
 	 * Apply the preference tree rooted at the given node, to the system's preference tree.
@@ -657,5 +657,5 @@ public interface IPreferencesService {
 	 * @see PreferenceModifyListener
 	 * @since 3.1
 	 */
-	public void applyPreferences(IEclipsePreferences node, IPreferenceFilter[] filters) throws CoreException;
+    void applyPreferences(IEclipsePreferences node, IPreferenceFilter[] filters) throws CoreException;
 }

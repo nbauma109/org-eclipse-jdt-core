@@ -181,11 +181,11 @@ public abstract class AbstractDataTree {
 	 *	parentKey does not exist in the receiver
 	 */
 	public IPath[] getChildren(IPath parentKey) {
-		String names[] = getNamesOfChildren(parentKey);
+		String[] names = getNamesOfChildren(parentKey);
 		int len = names.length;
 		if (len == 0)
 			return NO_CHILDREN;
-		IPath answer[] = new IPath[len];
+		IPath[] answer = new IPath[len];
 
 		for (int i = 0; i < len; i++) {
 			answer[i] = parentKey.append(names[i]);
@@ -216,7 +216,7 @@ public abstract class AbstractDataTree {
 	 *	if no child with the given index
 	 */
 	public String getNameOfChild(IPath parentKey, int index) {
-		String childNames[] = getNamesOfChildren(parentKey);
+		String[] childNames = getNamesOfChildren(parentKey);
 		/* Return the requested child as long as its in range */
 		return childNames[index];
 	}

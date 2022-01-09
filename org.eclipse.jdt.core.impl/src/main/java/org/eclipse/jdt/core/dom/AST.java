@@ -3767,11 +3767,8 @@ public final class AST {
 	 * @since 3.19
 	 */
 	public boolean isPreviewEnabled() {
-		if (this.apiLevel == AST.JLS_INTERNAL_Latest && this.previewEnabled) {
-				return true;
-		}
-		return false;
-	}
+        return this.apiLevel == AST.JLS_INTERNAL_Latest && this.previewEnabled;
+    }
 
 	/**
 	 * Returns latest supported JLS level

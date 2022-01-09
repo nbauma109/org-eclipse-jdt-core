@@ -561,7 +561,7 @@ private boolean isLambdaExpressionCopyContext(ReferenceContext context) {
 		context instanceof TypeDeclaration ? ((TypeDeclaration) context).scope :
 		context instanceof LambdaExpression ? ((LambdaExpression) context).scope :
 			null;
-	return cScope != null ? isLambdaExpressionCopyContext(cScope.parent.referenceContext()) : false;
+	return cScope != null && isLambdaExpressionCopyContext(cScope.parent.referenceContext());
 }
 public void recordSuppressWarnings(IrritantSet irritants, Annotation annotation, int scopeStart, int scopeEnd, ReferenceContext context) {
 	if (isLambdaExpressionCopyContext(context))

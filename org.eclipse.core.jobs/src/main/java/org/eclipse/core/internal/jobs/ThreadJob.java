@@ -449,7 +449,7 @@ class ThreadJob extends Job {
 	 * @GuardedBy("JobManager.implicitJobs")
 	 */
 	boolean shouldInterrupt() {
-		return realJob == null ? true : !realJob.isSystem();
+		return realJob == null || !realJob.isSystem();
 	}
 
 	/*

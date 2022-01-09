@@ -74,17 +74,17 @@ public interface IOperationHistory {
 	/**
 	 * An operation is to be opened or closed for execution. (value is 1).
 	 */
-	public static final int EXECUTE = 1;
+    int EXECUTE = 1;
 
 	/**
 	 * An operation is to be opened for undo. (value is 2).
 	 */
-	public static final int UNDO = 2;
+    int UNDO = 2;
 
 	/**
 	 * An operation is to be opened for redo. (value is 3).
 	 */
-	public static final int REDO = 3;
+    int REDO = 3;
 
 	/**
 	 * An undo context that can be used to refer to the global undo history.
@@ -92,13 +92,13 @@ public interface IOperationHistory {
 	 * used for querying the history or performing an undo or redo on the entire
 	 * history, regardless of each operation's undo contexts.
 	 */
-	public static final IUndoContext GLOBAL_UNDO_CONTEXT = new GlobalUndoContext();
+    IUndoContext GLOBAL_UNDO_CONTEXT = new GlobalUndoContext();
 
 	/**
 	 * An operation info status describing the condition that there is no
 	 * available operation for redo.
 	 */
-	public static final IStatus NOTHING_TO_REDO_STATUS = new OperationStatus(
+    IStatus NOTHING_TO_REDO_STATUS = new OperationStatus(
 			IStatus.INFO, OperationStatus.DEFAULT_PLUGIN_ID,
 			OperationStatus.NOTHING_TO_REDO, "No operation to redo", null); //$NON-NLS-1$
 
@@ -106,7 +106,7 @@ public interface IOperationHistory {
 	 * An operation info status describing the condition that there is no
 	 * available operation for undo.
 	 */
-	public static final IStatus NOTHING_TO_UNDO_STATUS = new OperationStatus(
+    IStatus NOTHING_TO_UNDO_STATUS = new OperationStatus(
 			IStatus.INFO, OperationStatus.DEFAULT_PLUGIN_ID,
 			OperationStatus.NOTHING_TO_UNDO, "No operation to undo", null); //$NON-NLS-1$
 
@@ -115,7 +115,7 @@ public interface IOperationHistory {
 	 * available for execution, undo or redo is not in a valid state for the
 	 * action to be performed.
 	 */
-	public static final IStatus OPERATION_INVALID_STATUS = new OperationStatus(
+    IStatus OPERATION_INVALID_STATUS = new OperationStatus(
 			IStatus.ERROR, OperationStatus.DEFAULT_PLUGIN_ID,
 			OperationStatus.OPERATION_INVALID, "Operation is not valid", null); //$NON-NLS-1$
 

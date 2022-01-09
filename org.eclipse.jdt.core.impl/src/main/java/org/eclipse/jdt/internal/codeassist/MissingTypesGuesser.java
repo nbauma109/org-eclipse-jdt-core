@@ -34,13 +34,13 @@ import org.eclipse.jdt.internal.core.SearchableEnvironment;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class MissingTypesGuesser extends ASTVisitor {
-	public static interface GuessedTypeRequestor {
-		public void accept(
-				TypeBinding guessedType,
-				Binding[] missingElements,
-				int[] missingElementsStarts,
-				int[] missingElementsEnds,
-				boolean hasProblems);
+	public interface GuessedTypeRequestor {
+		void accept(
+                TypeBinding guessedType,
+                Binding[] missingElements,
+                int[] missingElementsStarts,
+                int[] missingElementsEnds,
+                boolean hasProblems);
 
 	}
 

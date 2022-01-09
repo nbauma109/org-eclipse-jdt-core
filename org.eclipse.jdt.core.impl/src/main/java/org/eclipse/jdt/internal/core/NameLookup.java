@@ -520,7 +520,7 @@ public class NameLookup implements SuffixConstants {
 				if (rootPath.isPrefixOf(path)) {
 					String name = path.toOSString();
 					// + 1 is for the File.separatorChar
-					name = name.substring(rootPath.toOSString().length() + 1, name.length());
+					name = name.substring(rootPath.toOSString().length() + 1);
 					name = name.replace(File.separatorChar, '.');
 					IJavaElement[] list = null;
 					try {
@@ -1652,7 +1652,7 @@ public class NameLookup implements SuffixConstants {
 				IType memberType= types[i];
 				if (memberType.getElementName().toLowerCase().startsWith(memberPrefix))
 					if (isMemberTypePrefix) {
-						String subPrefix = prefix.substring(firstDot + 1, prefix.length());
+						String subPrefix = prefix.substring(firstDot + 1);
 						return seekTypesInType(subPrefix, subPrefix.indexOf('.'), memberType, requestor, acceptFlags);
 					} else {
 						if (acceptType(memberType, acceptFlags, true/*a source type*/)) {

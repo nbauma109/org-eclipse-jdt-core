@@ -44,7 +44,7 @@ public interface IMethodBinding extends IBinding {
 	 * @return <code>true</code> if this is the binding for a constructor,
 	 *    and <code>false</code> if this is the binding for a method
 	 */
-	public boolean isConstructor();
+    boolean isConstructor();
 
 	/**
 	 * Returns whether this binding is for a compact constructor or not.
@@ -73,7 +73,7 @@ public interface IMethodBinding extends IBinding {
 	 * in a source file and and <code>false</code> otherwise
 	 * @since 3.26
 	 */
-	public boolean isCompactConstructor();
+    boolean isCompactConstructor();
 
 	/**
 	 * Returns whether this binding is for a canonical constructor or not.
@@ -86,7 +86,7 @@ public interface IMethodBinding extends IBinding {
 	 * and <code>false</code> otherwise
 	 * @since 3.26
 	 */
-	public boolean isCanonicalConstructor();
+    boolean isCanonicalConstructor();
 
 	/**
 	 * Returns whether this binding is known to be a compiler-generated
@@ -110,7 +110,7 @@ public interface IMethodBinding extends IBinding {
 	 * otherwise
 	 * @since 3.0
 	 */
-	public boolean isDefaultConstructor();
+    boolean isDefaultConstructor();
 
 	/**
 	 * Returns the name of the method declared in this binding. The method name
@@ -121,7 +121,7 @@ public interface IMethodBinding extends IBinding {
 	 *   constructor's declaring class
 	 */
 	@Override
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the type binding representing the class or interface
@@ -130,7 +130,7 @@ public interface IMethodBinding extends IBinding {
 	 * @return the binding of the class or interface that declares this method
 	 *    or constructor
 	 */
-	public ITypeBinding getDeclaringClass();
+    ITypeBinding getDeclaringClass();
 
 	/**
 	 * If this method binding represents a lambda expression then:
@@ -155,7 +155,7 @@ public interface IMethodBinding extends IBinding {
 	 * or null for regular method bindings.
 	 * @since 3.11
 	 */
-	public IBinding getDeclaringMember();
+    IBinding getDeclaringMember();
 
 	/**
 	 * Returns the resolved default value of an annotation type member,
@@ -178,7 +178,7 @@ public interface IMethodBinding extends IBinding {
 	 * if none or not applicable
 	 * @since 3.2
 	 */
-	public Object getDefaultValue();
+    Object getDefaultValue();
 
 	/**
 	 * Returns the resolved declaration annotations of a parameter of this method.
@@ -198,7 +198,7 @@ public interface IMethodBinding extends IBinding {
 	 * not a valid index
 	 * @since 3.2
 	 */
-	public IAnnotationBinding[] getParameterAnnotations(int paramIndex);
+    IAnnotationBinding[] getParameterAnnotations(int paramIndex);
 
 	/**
 	 * Returns a list of type bindings representing the formal parameter types,
@@ -221,7 +221,7 @@ public interface IMethodBinding extends IBinding {
 	 * @return a (possibly empty) list of type bindings for the formal
 	 *   parameters of this method or constructor
 	 */
-	public ITypeBinding[] getParameterTypes();
+    ITypeBinding[] getParameterTypes();
 
 	/**
 	 * Returns the type of this method's receiver or <code>null</code>
@@ -232,7 +232,7 @@ public interface IMethodBinding extends IBinding {
 	 *
 	 * @since 3.10
 	 */
-	public ITypeBinding getDeclaredReceiverType();
+    ITypeBinding getDeclaredReceiverType();
 
 	/**
 	 * Returns the binding for the return type of this method. Returns the
@@ -248,7 +248,7 @@ public interface IMethodBinding extends IBinding {
 	 * @return the binding for the return type of this method, or the
 	 *    <code>void</code> return type for constructors
 	 */
-	public ITypeBinding getReturnType();
+    ITypeBinding getReturnType();
 
 	/**
 	 * Returns a list of type bindings representing the types of the exceptions thrown
@@ -258,7 +258,7 @@ public interface IMethodBinding extends IBinding {
 	 * @return a list of type bindings for exceptions
 	 *   thrown by this method or constructor
 	 */
-	public ITypeBinding[] getExceptionTypes();
+    ITypeBinding[] getExceptionTypes();
 
 	/**
 	 * Returns the type parameters of this method or constructor binding.
@@ -275,7 +275,7 @@ public interface IMethodBinding extends IBinding {
 	 * @see ITypeBinding#isTypeVariable()
 	 * @since 3.1
 	 */
-	public ITypeBinding[] getTypeParameters();
+    ITypeBinding[] getTypeParameters();
 
 	/**
 	 * Returns whether this is the binding for an annotation type member.
@@ -284,7 +284,7 @@ public interface IMethodBinding extends IBinding {
 	 *         and <code>false</code> otherwise
 	 * @since 3.2
 	 */
-	public boolean isAnnotationMember();
+    boolean isAnnotationMember();
 
 	/**
 	 * Returns whether this method binding represents a declaration of
@@ -308,7 +308,7 @@ public interface IMethodBinding extends IBinding {
 	 * @see #getTypeParameters()
 	 * @since 3.1
 	 */
-	public boolean isGenericMethod();
+    boolean isGenericMethod();
 
 	/**
 	 * Returns whether this method binding represents an instance of
@@ -326,7 +326,7 @@ public interface IMethodBinding extends IBinding {
 	 * @see #getTypeArguments()
 	 * @since 3.1
 	 */
-	public boolean isParameterizedMethod();
+    boolean isParameterizedMethod();
 
 	/**
 	 * Returns the type arguments of this generic method instance, or the
@@ -346,7 +346,7 @@ public interface IMethodBinding extends IBinding {
 	 * @see #isRawMethod()
 	 * @since 3.1
 	 */
-	public ITypeBinding[] getTypeArguments();
+    ITypeBinding[] getTypeArguments();
 
 	/**
 	 * Returns the binding for the method declaration corresponding to this
@@ -372,7 +372,7 @@ public interface IMethodBinding extends IBinding {
 	 * @return the method binding
 	 * @since 3.1
 	 */
-	public IMethodBinding getMethodDeclaration();
+    IMethodBinding getMethodDeclaration();
 
 	/**
 	 * Returns whether this method binding represents an instance of
@@ -390,7 +390,7 @@ public interface IMethodBinding extends IBinding {
 	 * @see #getTypeArguments()
 	 * @since 3.1
 	 */
-	public boolean isRawMethod();
+    boolean isRawMethod();
 
 	/**
 	 * Returns whether this method's signature is a subsignature of the given method as
@@ -399,7 +399,7 @@ public interface IMethodBinding extends IBinding {
 	 * @return <code>true</code> if this method's signature is a subsignature of the given method
 	 * @since 3.1
 	 */
-	public boolean isSubsignature(IMethodBinding otherMethod);
+    boolean isSubsignature(IMethodBinding otherMethod);
 
 	/**
 	 * Returns whether this is a variable arity method.
@@ -411,7 +411,7 @@ public interface IMethodBinding extends IBinding {
 	 *    and <code>false</code> otherwise
 	 * @since 3.1
 	 */
-	public boolean isVarargs();
+    boolean isVarargs();
 
 	/**
 	 * Returns whether this method overrides the given method,
@@ -423,7 +423,7 @@ public interface IMethodBinding extends IBinding {
 	 * and <code>false</code> otherwise
 	 * @since 3.1
 	 */
-	public boolean overrides(IMethodBinding method);
+    boolean overrides(IMethodBinding method);
 
 
 	/**
@@ -435,7 +435,7 @@ public interface IMethodBinding extends IBinding {
 	 * outer locals of this method if this is a lambda expression, else an empty array.
 	 * @since 3.18
 	 */
-	public IVariableBinding[] getSyntheticOuterLocals();
+    IVariableBinding[] getSyntheticOuterLocals();
 
 	/**
 	 * Returns if this is a compiler generated  equals(), hashCode(), toString() or any accessor
@@ -449,6 +449,6 @@ public interface IMethodBinding extends IBinding {
 	 * accessor method of a Record, else it returns <code>false</code>.
 	 * @since 3.26
 	 */
-	public boolean isSyntheticRecordMethod();
+    boolean isSyntheticRecordMethod();
 
 }

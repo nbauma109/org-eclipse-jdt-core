@@ -25,19 +25,19 @@ public interface GenericDescription extends BaseDescription {
 	/**
 	 * The default type of generic capability.
 	 */
-	public static String DEFAULT_TYPE = "generic"; //$NON-NLS-1$
+    String DEFAULT_TYPE = "generic"; //$NON-NLS-1$
 
 	/**
 	 * Returns the arbitrary attributes for this description
 	 * @return the arbitrary attributes for this description
 	 */
-	public Dictionary<String, Object> getAttributes();
+    Dictionary<String, Object> getAttributes();
 
 	/**
 	 * Returns the type of generic description capability
 	 * @return the type of generic description capability
 	 */
-	public String getType();
+    String getType();
 
 	/**
 	 * This method is deprecated.  Capabilities do not always have a
@@ -51,7 +51,7 @@ public interface GenericDescription extends BaseDescription {
 	 * attributes.
 	 */
 	@Override
-	public String getName();
+    String getName();
 
 	/**
 	 * This method is deprecated.  Capabilities do not always have a
@@ -65,5 +65,5 @@ public interface GenericDescription extends BaseDescription {
 	 * attributes.
 	 */
 	@Override
-	public Version getVersion();
+    Version getVersion();
 }

@@ -140,7 +140,7 @@ public String toString() {
 	Object object;
 	for (int i = 0, l = this.values.length; i < l; i++)
 		if ((object = this.values[i]) != null)
-			s += object.toString() + "\n"; //$NON-NLS-1$
+			s += object + "\n"; //$NON-NLS-1$
 	return s;
 }
 }

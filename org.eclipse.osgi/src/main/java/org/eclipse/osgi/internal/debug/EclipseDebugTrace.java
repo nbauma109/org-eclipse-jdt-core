@@ -249,7 +249,7 @@ class EclipseDebugTrace implements DebugTrace {
 			if (result == null) {
 				messageBuffer.append(EclipseDebugTrace.NULL_VALUE);
 			} else {
-				messageBuffer.append(result.toString());
+				messageBuffer.append(result);
 			}
 			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null, traceClass);
 			setMessage(record, messageBuffer.toString());
@@ -304,7 +304,7 @@ class EclipseDebugTrace implements DebugTrace {
 		} else {
 			argument = ""; //$NON-NLS-1$
 		}
-		String newMessage = MessageFormat.format(originalMessage, new Object[] {argument});
+		String newMessage = MessageFormat.format(originalMessage, argument);
 		record.setMessage(newMessage);
 	}
 

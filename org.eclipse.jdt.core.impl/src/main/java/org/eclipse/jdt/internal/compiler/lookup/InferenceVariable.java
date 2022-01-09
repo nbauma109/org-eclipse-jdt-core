@@ -55,10 +55,8 @@ public class InferenceVariable extends TypeVariableBinding {
 				return false;
 			if (this.rank != other.rank)
 				return false;
-			if (TypeBinding.notEquals(this.typeParameter, other.typeParameter))
-				return false;
-			return true;
-		}
+            return !TypeBinding.notEquals(this.typeParameter, other.typeParameter);
+        }
 	}
 
 	/**

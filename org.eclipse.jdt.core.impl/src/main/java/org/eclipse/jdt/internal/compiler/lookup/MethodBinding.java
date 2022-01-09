@@ -293,10 +293,8 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 		// Static interface methods can be explicitly invoked only through the type reference of the declaring interface or implicitly in the interface itself or via static import.
 		if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8)
 			return false;
-		if ((invocationSite.isTypeAccess() || invocationSite.receiverIsImplicitThis()) && TypeBinding.equalsEquals(receiverType, this.declaringClass))
-			return true;
-		return false;
-	}
+        return (invocationSite.isTypeAccess() || invocationSite.receiverIsImplicitThis()) && TypeBinding.equalsEquals(receiverType, this.declaringClass);
+    }
 
 	if (isPublic()) return true;
 
@@ -367,7 +365,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 				outerDeclaringClass = temp;
 				temp = temp.enclosingType();
 			}
-			if (TypeBinding.notEquals(outerInvocationType, outerDeclaringClass)) return false;
+            return !TypeBinding.notEquals(outerInvocationType, outerDeclaringClass);
 		}
 		return true;
 	}
@@ -870,9 +868,7 @@ public final boolean isMain() {
 			&& TypeBinding.VOID == this.returnType
 			&& this.parameters.length == 1) {
 		TypeBinding paramType = this.parameters[0];
-		if (paramType.dimensions() == 1 && paramType.leafComponentType().id == TypeIds.T_JavaLangString) {
-			return true;
-		}
+        return paramType.dimensions() == 1 && paramType.leafComponentType().id == TypeIds.T_JavaLangString;
 	}
 	return false;
 }

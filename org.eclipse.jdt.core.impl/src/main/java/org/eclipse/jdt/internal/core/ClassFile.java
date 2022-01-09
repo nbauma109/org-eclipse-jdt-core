@@ -315,7 +315,7 @@ private IBinaryType setupExternalAnnotationProvider(IProject project, final IPat
 				try {
 					return JavaModelManager.getJavaModelManager().getZipFile(externalAnnotationPath); // use (absolute, but) unresolved path here
 				} catch (CoreException e) {
-					throw new IOException("Failed to read annotation file for "+typeName+" from "+externalAnnotationPath.toString(), e); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new IOException("Failed to read annotation file for "+typeName+" from "+ externalAnnotationPath, e); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}});
 

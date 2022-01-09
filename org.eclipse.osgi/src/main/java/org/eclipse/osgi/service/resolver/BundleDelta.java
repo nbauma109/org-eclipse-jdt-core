@@ -30,40 +30,40 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * to the new state.
 	 * @see BundleDelta#getType
 	 */
-	public static final int ADDED = 0x1;
+    int ADDED = 0x1;
 	/**
 	 * Delta type constant (bit mask) indicating that the bundle is no longer present in
 	 * the new state.
 	 * @see BundleDelta#getType
 	 */
-	public static final int REMOVED = 0x2;
+    int REMOVED = 0x2;
 	/**
 	 * Delta type constant (bit mask) indicating that the bundle has been updated
 	 * between the old and new state.  Note that an update delta may in fact represent
 	 * a downgrading of the bundle to a previous version.
 	 * @see BundleDelta#getType
 	 */
-	public static final int UPDATED = 0x4;
+    int UPDATED = 0x4;
 	/**
 	 * Delta type constant (bit mask) indicating that the bundle has become resolved
 	 * in the new state.
 	 * @see BundleDelta#getType
 	 */
-	public static final int RESOLVED = 0x8;
+    int RESOLVED = 0x8;
 	/**
 	 * Delta type constant (bit mask) indicating that the bundle has become unresolved
 	 * in the new state. Note that newly added bundles are unresolved by default and
 	 * as such, do not transition to unresolved state so this flag is not set.
 	 * @see BundleDelta#getType
 	 */
-	public static final int UNRESOLVED = 0x10;
+    int UNRESOLVED = 0x10;
 	/**
 	 * Delta type constant (bit mask) indicating that the bundles and packages which this
 	 * bundle requires/imports (respectively) have changed in the new state.
 	 * @see BundleDelta#getType
 	 * @deprecated this type is no longer valid
 	 */
-	public static final int LINKAGE_CHANGED = 0x20;
+    int LINKAGE_CHANGED = 0x20;
 
 	/**
 	 * Delta type constant (bit mask) indicating that the bundles which this
@@ -71,7 +71,7 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * @see BundleDelta#getType
 	 * @deprecated this type is no longer valid
 	 */
-	public static final int OPTIONAL_LINKAGE_CHANGED = 0x40;
+    int OPTIONAL_LINKAGE_CHANGED = 0x40;
 
 	/**
 	 * Delta type constant (bit mask) indicating that the this bundle is
@@ -81,20 +81,20 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * existing bundles in the state that depend on it.
 	 * @see BundleDelta#getType
 	 */
-	public static final int REMOVAL_PENDING = 0x80;
+    int REMOVAL_PENDING = 0x80;
 
 	/**
 	 * Delta type constant (bit mask) indicating that the this bundle has
 	 * completed a pending removal.  A bundle will complete a pending removal only
 	 * after it has been re-resolved by the resolver.
 	 */
-	public static final int REMOVAL_COMPLETE = 0x100;
+    int REMOVAL_COMPLETE = 0x100;
 
 	/**
 	 * Returns the BundleDescription that this bundle delta is for.
 	 * @return the BundleDescription that this bundle delta is for.
 	 */
-	public BundleDescription getBundle();
+    BundleDescription getBundle();
 
 	/**
 	 * Returns the type of change which occured.  The return value is composed
@@ -105,7 +105,7 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * runtime states.
 	 * @return the type of change which occured
 	 */
-	public int getType();
+    int getType();
 
 	/**
 	 * Answers an integer indicating the relative positions of the receiver and
@@ -126,5 +126,5 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * @since 3.7
 	 */
 	@Override
-	public int compareTo(BundleDelta obj);
+    int compareTo(BundleDelta obj);
 }

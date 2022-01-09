@@ -84,14 +84,14 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 	public static final char[] FALL_THROUGH_TAG = "$FALL-THROUGH$".toCharArray(); //$NON-NLS-1$
 	public static final char[] CASES_OMITTED_TAG = "$CASES-OMITTED$".toCharArray(); //$NON-NLS-1$
 
-	public static char asb[] = null;
-	public static char asr[] = null;
+	public static char[] asb = null;
+	public static char[] asr = null;
 	//ast stack
 	protected final static int AstStackIncrement = 100;
-	public static char base_action[] = null;
+	public static char[] base_action = null;
 	public static final int BracketKinds = 3;
 
-	public static short check_table[] = null;
+	public static short[] check_table = null;
 	public static final int CurlyBracket = 2;
 	private static final boolean DEBUG = false;
 	private static final boolean DEBUG_AUTOMATON = false;
@@ -103,52 +103,52 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 	protected final static int GenericsStackIncrement = 10;
 
 	private final static String FILEPREFIX = "parser"; //$NON-NLS-1$
-    public static char in_symb[] = null;
+    public static char[] in_symb = null;
 	private static final String INVALID_CHARACTER = "Invalid Character" ; //$NON-NLS-1$
-	public static char lhs[] =  null;
+	public static char[] lhs =  null;
 
-	public static String name[] = null;
-	public static char nasb[] = null;
-	public static char nasr[] = null;
-	public static char non_terminal_index[] = null;
+	public static String[] name = null;
+	public static char[] nasb = null;
+	public static char[] nasr = null;
+	public static char[] non_terminal_index = null;
 	private final static String READABLE_NAMES_FILE = "readableNames"; //$NON-NLS-1$
 
-	public static String readableName[] = null;
+	public static String[] readableName = null;
 
-	public static byte rhs[] = null;
+	public static byte[] rhs = null;
 
 	public static int[] reverse_index = null;
 	public static char[] recovery_templates_index = null;
 	public static char[] recovery_templates = null;
 	public static char[] statements_recovery_filter = null;
 
-	public static long rules_compliance[] =  null;
+	public static long[] rules_compliance =  null;
 
 	public static final int RoundBracket = 0;
 
-    public static char scope_la[] = null;
-    public static char scope_lhs[] = null;
+    public static char[] scope_la = null;
+    public static char[] scope_lhs = null;
 
-	public static char scope_prefix[] = null;
-    public static char scope_rhs[] = null;
-    public static char scope_state[] = null;
+	public static char[] scope_prefix = null;
+    public static char[] scope_rhs = null;
+    public static char[] scope_state = null;
 
-    public static char scope_state_set[] = null;
-    public static char scope_suffix[] = null;
+    public static char[] scope_state_set = null;
+    public static char[] scope_suffix = null;
 	public static final int SquareBracket = 1;
 
 	//internal data for the automat
 	protected final static int StackIncrement = 255;
 
-	public static char term_action[] = null;
-	public static char term_check[] = null;
+	public static char[] term_action = null;
+	public static char[] term_check = null;
 
-	public static char terminal_index[] = null;
+	public static char[] terminal_index = null;
 
 	private static final String UNEXPECTED_EOF = "Unexpected End Of File" ; //$NON-NLS-1$
 	public static boolean VERBOSE_RECOVERY = false;
 
-	private static enum LocalTypeKind {
+	private enum LocalTypeKind {
 		LOCAL,
 		METHOD_REFERENCE,
 		LAMBDA,
@@ -978,7 +978,7 @@ public JavadocParser javadocParser;
 protected int lastJavadocEnd;
 public org.eclipse.jdt.internal.compiler.ReadManager readManager;
 protected int valueLambdaNestDepth = -1;
-private int stateStackLengthStack[] = new int[0];
+private int[] stateStackLengthStack = new int[0];
 protected boolean parsingJava8Plus;
 protected boolean parsingJava9Plus;
 protected boolean parsingJava14Plus;
@@ -9740,8 +9740,8 @@ private SwitchStatement createSwitchStatementOrExpression(boolean isStmt) {
 				length);
 	}
 	switchStatement.explicitDeclarations = this.realBlockStack[this.realBlockPtr--];
-	switchStatement.containsPatterns = isPatternSwitch != null ? isPatternSwitch.booleanValue() : false;
-	switchStatement.containsNull = isNullSwitch != null ? isNullSwitch.booleanValue() : false;
+	switchStatement.containsPatterns = isPatternSwitch != null && isPatternSwitch.booleanValue();
+	switchStatement.containsNull = isNullSwitch != null && isNullSwitch.booleanValue();
 	pushOnAstStack(switchStatement);
 	switchStatement.blockStart = this.intStack[this.intPtr--];
 	switchStatement.sourceStart = this.intStack[this.intPtr--];
@@ -14051,9 +14051,8 @@ protected void recoverStatements() {
 		@Override
 		public boolean visit(Initializer initializer, MethodScope scope) {
 			this.typePtr = -1;
-			if (initializer.block == null) return false;
-			return true;
-		}
+            return initializer.block != null;
+        }
 		@Override
 		public boolean visit(MethodDeclaration methodDeclaration,ClassScope scope) {
 			this.typePtr = -1;
@@ -14148,7 +14147,7 @@ protected void recoverStatements() {
 					Initializer initializer = (Initializer) fieldDeclaration;
 					if (initializer.block == null) break;
 					methodVisitor.enclosingType = typeContext;
-					initializer.traverse(methodVisitor, (MethodScope)null);
+					initializer.traverse(methodVisitor, null);
 					break;
 			}
 		}
@@ -14452,7 +14451,7 @@ public void setStatementsRecovery(boolean enabled) {
 public String toString() {
 
 
-	String s = "lastCheckpoint : int = " + String.valueOf(this.lastCheckPoint) + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+	String s = "lastCheckpoint : int = " + this.lastCheckPoint + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 	s = s + "identifierStack : char["+(this.identifierPtr + 1)+"][] = {"; //$NON-NLS-1$ //$NON-NLS-2$
 	for (int i = 0; i <= this.identifierPtr; i++) {
 		s = s + "\"" + String.valueOf(this.identifierStack[i]) + "\","; //$NON-NLS-1$ //$NON-NLS-2$
@@ -14470,7 +14469,7 @@ public String toString() {
 		s = s + this.astLengthStack[i] + ","; //$NON-NLS-1$
 	}
 	s = s + "}\n"; //$NON-NLS-1$
-	s = s + "astPtr : int = " + String.valueOf(this.astPtr) + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+	s = s + "astPtr : int = " + this.astPtr + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	s = s + "intStack : int["+(this.intPtr + 1)+"] = {"; //$NON-NLS-1$ //$NON-NLS-2$
 	for (int i = 0; i <= this.intPtr; i++) {
@@ -14484,7 +14483,7 @@ public String toString() {
 	}
 	s = s + "}\n"; //$NON-NLS-1$
 
-	s = s + "expressionPtr : int = " + String.valueOf(this.expressionPtr) + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+	s = s + "expressionPtr : int = " + this.expressionPtr + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	s = s + "genericsIdentifiersLengthStack : int["+(this.genericsIdentifiersLengthPtr + 1)+"] = {"; //$NON-NLS-1$ //$NON-NLS-2$
 	for (int i = 0; i <= this.genericsIdentifiersLengthPtr; i++) {
@@ -14498,7 +14497,7 @@ public String toString() {
 	}
 	s = s + "}\n"; //$NON-NLS-1$
 
-	s = s + "genericsPtr : int = " + String.valueOf(this.genericsPtr) + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+	s = s + "genericsPtr : int = " + this.genericsPtr + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	s = s + "\n\n\n----------------Scanner--------------\n" + this.scanner.toString(); //$NON-NLS-1$
 	return s;

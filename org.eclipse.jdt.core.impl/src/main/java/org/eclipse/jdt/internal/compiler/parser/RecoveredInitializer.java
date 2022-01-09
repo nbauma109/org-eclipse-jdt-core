@@ -120,7 +120,7 @@ public RecoveredElement add(LocalDeclaration localDeclaration, int bracketBalanc
 	/* method body should have been created */
 	if (this.initializerBody == null) {
 		Block block = new Block(0);
-		block.sourceStart = ((Initializer)this.fieldDeclaration).sourceStart;
+		block.sourceStart = this.fieldDeclaration.sourceStart;
 		RecoveredElement element = this.add(block, 1);
 		if (this.bracketBalance > 0){
 			for (int i = 0; i < this.bracketBalance - 1; i++){
@@ -155,7 +155,7 @@ public RecoveredElement add(Statement statement, int bracketBalanceValue) {
 	}
 	/* initializer body should have been created */
 	Block block = new Block(0);
-	block.sourceStart = ((Initializer)this.fieldDeclaration).sourceStart;
+	block.sourceStart = this.fieldDeclaration.sourceStart;
 	RecoveredElement element = this.add(block, 1);
 
 	if (this.initializerBody != null) {
@@ -183,7 +183,7 @@ public RecoveredElement add(TypeDeclaration typeDeclaration, int bracketBalanceV
 	if ((typeDeclaration.bits & ASTNode.IsLocalType) != 0  || parser().methodRecoveryActivated || parser().statementRecoveryActivated){
 		/* method body should have been created */
 		Block block = new Block(0);
-		block.sourceStart = ((Initializer)this.fieldDeclaration).sourceStart;
+		block.sourceStart = this.fieldDeclaration.sourceStart;
 		RecoveredElement element = this.add(block, 1);
 		if (this.initializerBody != null) {
 			this.initializerBody.attachPendingModifiers(

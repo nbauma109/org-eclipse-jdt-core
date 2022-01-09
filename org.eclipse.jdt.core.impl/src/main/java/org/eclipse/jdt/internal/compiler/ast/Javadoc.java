@@ -325,9 +325,8 @@ public class Javadoc extends ASTNode {
 
 		// get method declaration
 		AbstractMethodDeclaration methDecl = methScope.referenceMethod();
-		boolean overriding = methDecl == null /* field declaration */ || methDecl.binding == null /* compiler error */
-			? false :
-			!methDecl.binding.isStatic() && ((methDecl.binding.modifiers & (ExtraCompilerModifiers.AccImplementing | ExtraCompilerModifiers.AccOverriding)) != 0);
+        /* compiler error */
+        boolean overriding = methDecl != null /* field declaration */ && methDecl.binding != null && !methDecl.binding.isStatic() && ((methDecl.binding.modifiers & (ExtraCompilerModifiers.AccImplementing | ExtraCompilerModifiers.AccOverriding)) != 0);
 
 		// @see tags
 		int seeTagsLength = this.seeReferences == null ? 0 : this.seeReferences.length;
@@ -816,7 +815,7 @@ public class Javadoc extends ASTNode {
 		if (recordParameters != null) {
 			reportMissing = reportMissing && scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5;
 			int recordParametersLength = recordParameters.length;
-			String argNames[] = new String[paramReferencesLength];
+			String[] argNames = new String[paramReferencesLength];
 			if (paramReferencesLength == 0) {
 				if (reportMissing) {
 					for (int i = 0, l=recordParametersLength; i<l; i++) {

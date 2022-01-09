@@ -43,11 +43,11 @@ public interface URLStreamHandlerSetter {
 	 *             for JDK 1.1.
 	 */
 	@SuppressWarnings("javadoc")
-	public void setURL(URL u, String protocol, String host, int port, String file, String ref);
+    void setURL(URL u, String protocol, String host, int port, String file, String ref);
 
 	/**
 	 * @see "java.net.URLStreamHandler.setURL(URL,String,String,int,String,String,String,String)"
 	 */
 	@SuppressWarnings("javadoc")
-	public void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String path, String query, String ref);
+    void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String path, String query, String ref);
 }

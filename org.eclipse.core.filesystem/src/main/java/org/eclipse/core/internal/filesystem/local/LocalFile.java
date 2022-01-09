@@ -490,7 +490,7 @@ public class LocalFile extends FileStore {
 			// We can compare paths in the local file implementation, because LocalFile don't have a query string, port, or authority
 			// We use `toURI` here because it performs file normalisation e.g. /a/b/../c -> /a/c
 			// The URI is cached by the LocalFile after normalisation so this effectively results in a straight lookup
-			return FileStoreUtil.comparePathSegments(this.toURI().getPath(), ((LocalFile) other).toURI().getPath());
+			return FileStoreUtil.comparePathSegments(this.toURI().getPath(), other.toURI().getPath());
 		}
 		return super.compareTo(other);
 	}

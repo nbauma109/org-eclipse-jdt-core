@@ -32,25 +32,25 @@ public interface CertificateChain {
 	 * and the last is the root Certificate Authority.
 	 * @return the list of X500 distinguished names that make up the certificate chain
 	 */
-	public String getChain();
+    String getChain();
 
 	/**
 	 * Retruns all certificates in this certificate chain
 	 * @return all certificates in this certificate chain
 	 */
-	public Certificate[] getCertificates();
+    Certificate[] getCertificates();
 
 	/**
 	 * Returns the first certificate of the certificate chain
 	 * @return the first certificate of the certificate chain
 	 */
-	public Certificate getSigner();
+    Certificate getSigner();
 
 	/**
 	 * Returns the root certificate of the certificate chain
 	 * @return the foot certificate of the certificate chain
 	 */
-	public Certificate getRoot();
+    Certificate getRoot();
 
 	/**
 	 * Returns true if this certificate chain is trusted
@@ -63,5 +63,5 @@ public interface CertificateChain {
 	 *
 	 * @return	null if there is a signing time for this signer null otherwise
 	 */
-	public Date getSigningTime();
+    Date getSigningTime();
 }

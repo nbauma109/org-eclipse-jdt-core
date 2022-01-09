@@ -23,24 +23,24 @@ public interface GenericSpecification extends VersionConstraint {
 	 * The optional resolution type
 	 * @see #getResolution()
 	 */
-	public static final int RESOLUTION_OPTIONAL = 0x01;
+    int RESOLUTION_OPTIONAL = 0x01;
 	/**
 	 * The multiple resolution type
 	 * @see #getResolution()
 	 */
-	public static final int RESOLUTION_MULTIPLE = 0x02;
+    int RESOLUTION_MULTIPLE = 0x02;
 
 	/**
 	 * Returns a matching filter used to match with a suppliers attributes
 	 * @return a matching filter used to match with a suppliers attributes
 	 */
-	public String getMatchingFilter();
+    String getMatchingFilter();
 
 	/**
 	 * Returns the type of generic specification
 	 * @return the type of generic specification
 	 */
-	public String getType();
+    String getType();
 
 	/**
 	 * Returns the resolution type of the required capability.  The returned
@@ -49,12 +49,12 @@ public interface GenericSpecification extends VersionConstraint {
 	 *
 	 * @return the resolution type of the required capability
 	 */
-	public int getResolution();
+    int getResolution();
 
 	/**
 	 * Returns the suppliers of the capability.  If the the resolution is multiple then
 	 * more than one supplier may be returned
 	 * @return the suppliers of the capability
 	 */
-	public GenericDescription[] getSuppliers();
+    GenericDescription[] getSuppliers();
 }

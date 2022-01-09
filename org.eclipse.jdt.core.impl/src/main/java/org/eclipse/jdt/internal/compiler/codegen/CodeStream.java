@@ -206,7 +206,7 @@ public static final void sort(int[] tab, int lo0, int hi0, int[] result) {
 }
 
 
-private static final void swap(int a[], int i, int j, int result[]) {
+private static final void swap(int[] a, int i, int j, int[] result) {
 	int T;
 	T = a[i];
 	a[i] = a[j];
@@ -3424,7 +3424,7 @@ public void generateSyntheticEnclosingInstanceValues(BlockScope currentScope, Re
  */
 public void generateSyntheticOuterArgumentValues(BlockScope currentScope, ReferenceBinding targetType, ASTNode invocationSite) {
 	// generate the synthetic outer arguments then
-	SyntheticArgumentBinding syntheticArguments[];
+	SyntheticArgumentBinding[] syntheticArguments;
 	if ((syntheticArguments = targetType.syntheticOuterLocalVariables()) != null) {
 		for (int i = 0, max = syntheticArguments.length; i < max; i++) {
 			LocalVariableBinding targetVariable = syntheticArguments[i].actualOuterLocalVariable;
@@ -3467,7 +3467,7 @@ public void generateSyntheticBodyForRecordEquals(SyntheticMethodBinding methodBi
 	aload_0();
 	aload_1();
 	String sig = new String(methodBinding.signature());
-	sig = sig.substring(0, 1)+ new String(methodBinding.declaringClass.signature()) + sig.substring(1);
+	sig = sig.charAt(0)+ new String(methodBinding.declaringClass.signature()) + sig.substring(1);
 	invokeDynamic(index, methodBinding.parameters.length, 1, methodBinding.selector, sig.toCharArray(),
 			TypeIds.T_boolean, TypeBinding.BOOLEAN);
 	ireturn();
@@ -3476,7 +3476,7 @@ public void generateSyntheticBodyForRecordHashCode(SyntheticMethodBinding method
 	initializeMaxLocals(methodBinding);
 	aload_0();
 	String sig = new String(methodBinding.signature());
-	sig = sig.substring(0, 1)+ new String(methodBinding.declaringClass.signature()) + sig.substring(1);
+	sig = sig.charAt(0)+ new String(methodBinding.declaringClass.signature()) + sig.substring(1);
 	invokeDynamic(index, methodBinding.parameters.length, 1, methodBinding.selector, sig.toCharArray(),
 			TypeIds.T_int, TypeBinding.INT);
 	ireturn();
@@ -3485,7 +3485,7 @@ public void generateSyntheticBodyForRecordToString(SyntheticMethodBinding method
 	initializeMaxLocals(methodBinding);
 	aload_0();
 	String sig = new String(methodBinding.signature());
-	sig = sig.substring(0, 1)+ new String(methodBinding.declaringClass.signature()) + sig.substring(1);
+	sig = sig.charAt(0)+ new String(methodBinding.declaringClass.signature()) + sig.substring(1);
 	invokeDynamic(index, methodBinding.parameters.length, 1, methodBinding.selector, sig.toCharArray(),
 			TypeIds.T_JavaLangObject, getPopularBinding(ConstantPool.JavaLangStringConstantPoolName));
 	areturn();
@@ -3782,7 +3782,7 @@ public static TypeBinding getConstantPoolDeclaringClass(Scope currentScope, Meth
 					actualReceiverType = erasedReceiverType; // need to peel the intersecting types below
 				}
 				if (actualReceiverType.isIntersectionType18()) {
-					TypeBinding[] intersectingTypes = ((IntersectionTypeBinding18)actualReceiverType).getIntersectingTypes();
+					TypeBinding[] intersectingTypes = actualReceiverType.getIntersectingTypes();
 					for(int i = 0; i < intersectingTypes.length; i++) {
 						if (intersectingTypes[i].findSuperTypeOriginatingFrom(constantPoolDeclaringClass) != null) {
 							constantPoolDeclaringClass = intersectingTypes[i].erasure();

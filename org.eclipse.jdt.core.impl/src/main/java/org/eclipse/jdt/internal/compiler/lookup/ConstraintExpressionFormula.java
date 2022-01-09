@@ -464,8 +464,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				}
 			}
 			ConstraintTypeFormula newConstraint = ConstraintTypeFormula.create(rTheta, targetType, COMPATIBLE);
-			if (!inferenceContext.reduceAndIncorporate(newConstraint))
-				return false;
+            return inferenceContext.reduceAndIncorporate(newConstraint);
 		}
 		return true;
 	}

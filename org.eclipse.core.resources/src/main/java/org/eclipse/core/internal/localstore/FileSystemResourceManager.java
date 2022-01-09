@@ -241,7 +241,7 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 				count++;
 		}
 		//convert to array and remove null elements
-		IResource[] toReturn = files ? (IResource[]) new IFile[count] : (IResource[]) new IContainer[count];
+		IResource[] toReturn = files ? new IFile[count] : new IContainer[count];
 		count = 0;
 		for (Object element : result) {
 			IResource resource = (IResource) element;
@@ -379,8 +379,8 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 		//buffer size: twice the description length, but maximum 8KB
 		int bufsize = newContents.length > 4096 ? 8192 : newContents.length * 2;
 		try (
-			InputStream oldStream = new BufferedInputStream(descriptionFile.getContents(true), bufsize);
-		) {
+			InputStream oldStream = new BufferedInputStream(descriptionFile.getContents(true), bufsize)
+        ) {
 			InputStream newStream = new ByteArrayInputStream(newContents);
 			//compare streams char by char, ignoring line endings
 			int newChar = newStream.read();
@@ -402,10 +402,8 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 				}
 			}
 			//test for excess data in one stream
-			if (newChar >= 0 || oldChar >= 0)
-				return true;
-			return false;
-		} catch (Exception e) {
+            return newChar >= 0 || oldChar >= 0;
+        } catch (Exception e) {
 			Policy.log(e);
 			//if we failed to compare, just write the new contents
 		}
@@ -418,8 +416,8 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 	@Deprecated
 	public int doGetEncoding(IFileStore store) throws CoreException {
 		try (
-			InputStream input = store.openInputStream(EFS.NONE, null);
-		) {
+			InputStream input = store.openInputStream(EFS.NONE, null)
+        ) {
 			int first = input.read();
 			int second = input.read();
 			if (first == -1 || second == -1)
@@ -453,8 +451,7 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 		ResourceInfo info = target.getResourceInfo(false, false);
 		if (target.exists(target.getFlags(info), true)) {
 			IFileInfo fileInfo = getStore(target).fetchInfo();
-			if (!fileInfo.isDirectory() && info.getLocalSyncInfo() == fileInfo.getLastModified())
-				return true;
+            return !fileInfo.isDirectory() && info.getLocalSyncInfo() == fileInfo.getLastModified();
 		}
 		return false;
 	}
@@ -463,8 +460,7 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 		ResourceInfo info = target.getResourceInfo(false, false);
 		if (target.exists(target.getFlags(info), true)) {
 			IFileInfo fileInfo = getStore(target).fetchInfo();
-			if (!fileInfo.exists() && info.getLocalSyncInfo() == fileInfo.getLastModified())
-				return true;
+            return !fileInfo.exists() && info.getLocalSyncInfo() == fileInfo.getLastModified();
 		}
 		return false;
 	}
@@ -891,8 +887,8 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 		//hold onto any exceptions until after sync info is updated, then throw it
 		ResourceException error = null;
 		try (
-			InputStream in = new BufferedInputStream(descriptionStore.openInputStream(EFS.NONE, SubMonitor.convert(null)));
-		) {
+			InputStream in = new BufferedInputStream(descriptionStore.openInputStream(EFS.NONE, SubMonitor.convert(null)))
+        ) {
 			// IFileStore#openInputStream may cancel the monitor, thus the monitor state is checked
 			description = new ProjectDescriptionReader(target).read(new InputSource(in));
 		} catch (OperationCanceledException e) {
@@ -1020,7 +1016,7 @@ public class FileSystemResourceManager implements ICoreConstants, IManager, Pref
 			return root;
 		if (numSegments == 1)
 			return root.getProject(path.segment(0));
-		return files ? (IResource) root.getFile(path) : (IResource) root.getFolder(path);
+		return files ? root.getFile(path) : root.getFolder(path);
 	}
 
 	/* (non-javadoc)

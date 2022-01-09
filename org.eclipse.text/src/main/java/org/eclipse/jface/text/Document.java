@@ -114,8 +114,8 @@ public class Document extends AbstractDocument {
 		if (defaultLD.length() == 1) {
 			if (rIndex != -1 && !"\r".equals(defaultLD)) //$NON-NLS-1$
 				return true;
-			if (nIndex != -1 && !"\n".equals(defaultLD)) //$NON-NLS-1$
-				return true;
+            //$NON-NLS-1$
+            return nIndex != -1 && !"\n".equals(defaultLD);
 		} else if (defaultLD.length() == 2)
 			return rIndex == -1 || nIndex - rIndex != 1;
 

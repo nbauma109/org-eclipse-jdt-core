@@ -29,13 +29,13 @@ public interface IGlobalVariable {
  * @return the initializer expression, or <code>null</code> if this global does
  *    not have an initializer
  */
-public String getInitializer();
+String getInitializer();
 /**
  * Returns the name of this global variable.
  *
  * @return the name of the global variable
  */
-public String getName();
+String getName();
 /**
  * Returns the fully qualified name of the type of this global
  * variable, or its simple representation if it is a primitive type
@@ -45,5 +45,5 @@ public String getName();
  * </p>
  * @return the type name
  */
-public String getTypeName();
+String getTypeName();
 }

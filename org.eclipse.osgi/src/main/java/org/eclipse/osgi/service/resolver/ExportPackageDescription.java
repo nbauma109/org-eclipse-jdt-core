@@ -34,30 +34,30 @@ public interface ExportPackageDescription extends BaseDescription {
 	 * @deprecated all export package descriptions are roots.  The Reexport-Package header
 	 * never became API.
 	 */
-	public boolean isRoot();
+    boolean isRoot();
 
 	/**
 	 * Returns the arbitrary attributes for this package.
 	 * @return the arbitrary attributes for this package
 	 */
-	public Map<String, Object> getAttributes();
+    Map<String, Object> getAttributes();
 
 	/**
 	 * Returns the directives for this package.
 	 * @return the directives for this package
 	 */
-	public Map<String, Object> getDirectives();
+    Map<String, Object> getDirectives();
 
 	/**
 	 * Returns the specified directive for this package.
 	 * @param key the directive to fetch
 	 * @return the specified directive for this package
 	 */
-	public Object getDirective(String key);
+    Object getDirective(String key);
 
 	/**
 	 * Returns the exporter of this package.
 	 * @return the exporter of this package.
 	 */
-	public BundleDescription getExporter();
+    BundleDescription getExporter();
 }

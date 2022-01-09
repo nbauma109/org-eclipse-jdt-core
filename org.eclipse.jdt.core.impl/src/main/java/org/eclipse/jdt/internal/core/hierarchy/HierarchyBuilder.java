@@ -106,7 +106,7 @@ public abstract class HierarchyBuilder {
 	}
 
 	public abstract void build(boolean computeSubtypes)
-		throws JavaModelException, CoreException;
+		throws CoreException;
 	/**
 	 * Configure this type hierarchy by computing the supertypes only.
 	 */

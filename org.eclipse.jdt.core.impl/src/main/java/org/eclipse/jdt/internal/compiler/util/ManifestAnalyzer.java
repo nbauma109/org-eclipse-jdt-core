@@ -164,9 +164,7 @@ public class ManifestAnalyzer {
 				return true;
 			case SKIP_LINE:
 				if (this.classpathSectionsCount != 0) {
-					if (this.calledFilesNames == null) {
-						return false;
-					}
+                    return this.calledFilesNames != null;
 				}
 				return true;
 			case READING_JAR:

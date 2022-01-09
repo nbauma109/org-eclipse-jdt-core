@@ -389,8 +389,7 @@ private static boolean preventsUnlikelyTypeWarning(TypeBinding castedType, TypeB
 		// does the cast help?
 		argumentChecks = UnlikelyArgumentCheck.determineCheckForNonStaticSingleArgumentMethod(
 				castedType, scope, binding.selector, receiverType, binding.parameters);
-		if (argumentChecks == null || !argumentChecks.isDangerous(scope))
-			return true;
+        return argumentChecks == null || !argumentChecks.isDangerous(scope);
 	}
 	return false;
 }
@@ -708,11 +707,8 @@ private boolean isIndirectlyUsed() {
 				return true;
 		}
 	}
-	if (this.expectedType != null && this.resolvedType.isBaseType() && !this.resolvedType.isCompatibleWith(this.expectedType)) {
-		// boxing: Short s = (short) _byte
-		return true;
-	}
-	return false;
+    // boxing: Short s = (short) _byte
+    return this.expectedType != null && this.resolvedType.isBaseType() && !this.resolvedType.isCompatibleWith(this.expectedType);
 }
 
 /**

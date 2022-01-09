@@ -35,7 +35,7 @@ public interface IDocumentExtension3 {
 	/**
 	 * The identifier of the default partitioning.
 	 */
-	final static String DEFAULT_PARTITIONING= "__dftl_partitioning"; //$NON-NLS-1$
+    String DEFAULT_PARTITIONING= "__dftl_partitioning"; //$NON-NLS-1$
 
 
 	/**

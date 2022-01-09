@@ -492,7 +492,7 @@ protected void updateMatch(ParameterizedTypeBinding parameterizedBinding, char[]
 	if (locator.unitScope == null) return;
 
 	// Set match raw flag
-	boolean endPattern = patternTypeArguments==null  ? true  : depth>=patternTypeArguments.length;
+	boolean endPattern = patternTypeArguments == null || depth >= patternTypeArguments.length;
 	TypeBinding[] argumentsBindings = parameterizedBinding.arguments;
 	boolean isRaw = parameterizedBinding.isRawType()|| (argumentsBindings==null && parameterizedBinding.genericType().isGenericType());
 	if (isRaw && !this.match.isRaw()) {
@@ -976,7 +976,7 @@ protected int resolveLevelForType (char[] simpleNamePattern,
 			// Scan hierarchy
 			TypeBinding leafTypeBinding = argTypeBinding.leafComponentType();
 			if (leafTypeBinding.isBaseType()) return impossible;
-			ReferenceBinding refBinding = ((ReferenceBinding) leafTypeBinding).superclass();
+			ReferenceBinding refBinding = leafTypeBinding.superclass();
 			while (refBinding != null) {
 				if (CharOperation.equals(patternTypeArgument, refBinding.shortReadableName(), this.isCaseSensitive) ||
 					CharOperation.equals(patternTypeArgument, refBinding.readableName(), this.isCaseSensitive)) {

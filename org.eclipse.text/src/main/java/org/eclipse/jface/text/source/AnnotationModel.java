@@ -717,7 +717,7 @@ public class AnnotationModel implements IAnnotationModel, IAnnotationModelExtens
 			return new AnnotationsInterator(positions, fPositions);
 		} catch (BadPositionCategoryException e) {
 			// can happen if e.g. the document doesn't contain such a category, or when removed in a different thread
-			return Collections.<Annotation>emptyList().iterator();
+			return Collections.emptyIterator();
 		}
 	}
 

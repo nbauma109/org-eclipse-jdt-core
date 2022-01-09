@@ -36,7 +36,7 @@ public interface CertificateVerifier {
 	 * @throws CertificateParsingException
 	 * @throws SignatureException
 	 */
-	public void checkContent() throws CertificateException, CertificateExpiredException, SignatureException;
+    void checkContent() throws CertificateException, CertificateExpiredException, SignatureException;
 
 	/**
 	 * Verifies the content of the repository.  An array is returned with the entry names
@@ -44,13 +44,13 @@ public interface CertificateVerifier {
 	 * @return An array of entry names which are corrupt.  An empty array is returned if the
 	 * repository is not corrupt or if the repository is not signed.
 	 */
-	public String[] verifyContent();
+    String[] verifyContent();
 
 	/**
 	 * Returns true if the repository is signed
 	 * @return true if the repository is signed
 	 */
-	public boolean isSigned();
+    boolean isSigned();
 
 	/**
 	 * Returns all certificate chains of the repository.  All certificate chains
@@ -58,5 +58,5 @@ public interface CertificateVerifier {
 	 * then an empty array is returned.
 	 * @return all certificate chains of the repository
 	 */
-	public CertificateChain[] getChains();
+    CertificateChain[] getChains();
 }

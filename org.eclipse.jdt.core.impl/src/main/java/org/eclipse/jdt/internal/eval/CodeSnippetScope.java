@@ -92,8 +92,7 @@ public final boolean canBeSeenByForCodeSnippet(FieldBinding fieldBinding, TypeBi
 				return false;
 			if (invocationType.isSuperclassOf((ReferenceBinding) receiverType))
 				return true;
-			if (fieldBinding.isStatic())
-				return true; // see 1FMEPDL - return invocationSite.isTypeAccess();
+            return fieldBinding.isStatic(); // see 1FMEPDL - return invocationSite.isTypeAccess();
 		}
 		return false;
 	}
@@ -117,7 +116,7 @@ public final boolean canBeSeenByForCodeSnippet(FieldBinding fieldBinding, TypeBi
 				outerDeclaringClass = temp;
 				temp = temp.enclosingType();
 			}
-			if (TypeBinding.notEquals(outerInvocationType, outerDeclaringClass)) return false;
+            return !TypeBinding.notEquals(outerInvocationType, outerDeclaringClass);
 		}
 		return true;
 	}
@@ -167,8 +166,7 @@ public final boolean canBeSeenByForCodeSnippet(MethodBinding methodBinding, Type
 				return false;
 			if (invocationType.isSuperclassOf((ReferenceBinding) receiverType))
 				return true;
-			if (methodBinding.isStatic())
-				return true; // see 1FMEPDL - return invocationSite.isTypeAccess();
+            return methodBinding.isStatic(); // see 1FMEPDL - return invocationSite.isTypeAccess();
 		}
 		return false;
 	}
@@ -192,7 +190,7 @@ public final boolean canBeSeenByForCodeSnippet(MethodBinding methodBinding, Type
 				outerDeclaringClass = temp;
 				temp = temp.enclosingType();
 			}
-			if (TypeBinding.notEquals(outerInvocationType, outerDeclaringClass)) return false;
+            return !TypeBinding.notEquals(outerInvocationType, outerDeclaringClass);
 		}
 		return true;
 	}
@@ -286,7 +284,7 @@ public FieldBinding findFieldForCodeSnippet(TypeBinding receiverType, char[] fie
 	if (receiverType.isArrayType()) {
 		TypeBinding leafType = receiverType.leafComponentType();
 		if (leafType instanceof ReferenceBinding)
-		if (!((ReferenceBinding)leafType).canBeSeenBy(this)) {
+		if (!leafType.canBeSeenBy(this)) {
 			return new ProblemFieldBinding((ReferenceBinding)leafType, fieldName, ProblemReasons.ReceiverTypeNotVisible);
 		}
 		if (CharOperation.equals(fieldName, TypeConstants.LENGTH))

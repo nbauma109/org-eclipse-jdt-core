@@ -120,7 +120,7 @@ public abstract class DTO {
 			return appendString(result, compress(value.toString()));
 		}
 		if (value instanceof Number || value instanceof Boolean) {
-			return result.append(value.toString());
+			return result.append(value);
 		}
 		if (value instanceof Enum) {
 			return appendString(result, ((Enum< ? >) value).name());

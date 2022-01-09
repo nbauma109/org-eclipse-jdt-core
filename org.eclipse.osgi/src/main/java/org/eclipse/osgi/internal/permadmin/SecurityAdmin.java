@@ -168,10 +168,8 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			return true;
 		if ((result & SecurityTable.DENIED) != 0)
 			return false;
-		if ((result & SecurityTable.POSTPONED) != 0)
-			return true;
-		return false;
-	}
+        return (result & SecurityTable.POSTPONED) != 0;
+    }
 
 	@Override
 	public PermissionInfo[] getDefaultPermissions() {
@@ -381,7 +379,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	/* GuardedBy(lock) */
 	private String generateName() {
-		return "generated_" + Long.toString(nextID++); //$NON-NLS-1$ ;
+		return "generated_" + nextID++; //$NON-NLS-1$ ;
 	}
 
 	public ProtectionDomain createProtectionDomain(Bundle bundle) {

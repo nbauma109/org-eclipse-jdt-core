@@ -67,17 +67,12 @@ public class PolymorphicMethodBinding extends MethodBinding {
 		}
 		TypeBinding cachedReturnType = this.returnType;
 		if (matchingReturnType == null) {
-			if (cachedReturnType != null) {
-				return false;
-			}
+            return cachedReturnType == null;
 		} else if (cachedReturnType == null) {
 			return false;
-		} else if (TypeBinding.notEquals(matchingReturnType, cachedReturnType)) {
-			return false;
-		}
+		} else return !TypeBinding.notEquals(matchingReturnType, cachedReturnType);
 		// all arguments match
-		return true;
-	}
+    }
 
 	/*
 	 * Even if polymorphic methods are varargs method, we don't want them to be treated as varargs method

@@ -87,7 +87,7 @@ public final class RewriteEventStore {
 	 * a parent. Use this interface when the rewriter is set up on an already
 	 * modified AST's (as it is the case in the old ASTRewrite infrastructure)
 	 */
-	public static interface INodePropertyMapper {
+	public interface INodePropertyMapper {
 		/**
 		 * Returns the node attribute for a given property name.
 		 * @param parent The parent node
@@ -506,11 +506,8 @@ public final class RewriteEventStore {
 		if (((kind & NEW) != 0) && event.getNewValue() == value) {
 			return true;
 		}
-		if (((kind & ORIGINAL) != 0) && event.getOriginalValue() == value) {
-			return true;
-		}
-		return false;
-	}
+        return ((kind & ORIGINAL) != 0) && event.getOriginalValue() == value;
+    }
 
 
 	public Object getOriginalValue(ASTNode parent, StructuralPropertyDescriptor property) {

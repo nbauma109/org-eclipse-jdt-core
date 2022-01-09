@@ -79,7 +79,7 @@ public class ModuleSourcePathManager {
 			if (!project.getProject().isAccessible())
 				continue;
 			if (project instanceof JavaProject) {
-				IModuleDescription module = ((JavaProject) project).getModuleDescription();
+				IModuleDescription module = project.getModuleDescription();
 				if (module != null) {
 					if (prefixMatcher.matches(name, module.getElementName().toCharArray())) {
 						//addEntry(module, (JavaProject) project);

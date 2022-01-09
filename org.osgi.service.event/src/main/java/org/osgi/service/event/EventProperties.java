@@ -69,7 +69,7 @@ public class EventProperties implements Map<String, Object> {
 		int size = (properties == null) ? 0 : properties.size();
 		Map<String, Object> p = new HashMap<String, Object>(size);
 		if (size > 0) {
-			for (Object key : (Set<?>) properties.keySet()) {
+			for (Object key : properties.keySet()) {
 				if ((key instanceof String) && !EVENT_TOPIC.equals(key)) {
 					Object value = properties.get(key);
 					p.put((String) key, value);

@@ -1162,8 +1162,8 @@ public abstract class Annotation extends Expression {
 	}
 
 	public enum AnnotationTargetAllowed {
-		YES, TYPE_ANNOTATION_ON_QUALIFIED_NAME, NO;
-	}
+		YES, TYPE_ANNOTATION_ON_QUALIFIED_NAME, NO
+    }
 
 	private static AnnotationTargetAllowed isAnnotationTargetAllowed(Binding recipient, BlockScope scope, TypeBinding annotationType, int kind, long metaTagBits) {
 		switch (kind) {
@@ -1188,7 +1188,7 @@ public abstract class Annotation extends Expression {
 				break;
 			case Binding.TYPE :
 			case Binding.GENERIC_TYPE :
-				if (((ReferenceBinding)recipient).isAnnotationType()) {
+				if (recipient.isAnnotationType()) {
 					if ((metaTagBits & (TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0)
 					return AnnotationTargetAllowed.YES;
 				} else if ((metaTagBits & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0) {
@@ -1374,9 +1374,7 @@ public abstract class Annotation extends Expression {
 		if (reference != null && !(reference instanceof SingleTypeReference)) {
 			Binding binding = scope.getPackage(reference.getTypeName());
 			// In case of ProblemReferenceBinding, don't report additional error
-			if (binding instanceof PackageBinding) {
-				return false;
-			}
+            return !(binding instanceof PackageBinding);
 		}
 		return true;
 	}

@@ -36,7 +36,7 @@ public interface ILog {
 	 * @param listener the listener to add to this log
 	 * @see Platform#addLogListener(ILogListener)
 	 */
-	public void addLogListener(ILogListener listener);
+    void addLogListener(ILogListener listener);
 
 	/**
 	 * Returns the plug-in with which this log is associated.
@@ -44,7 +44,7 @@ public interface ILog {
 	 * @return the plug-in with which this log is associated
 	 * @since 3.0
 	 */
-	public Bundle getBundle();
+    Bundle getBundle();
 
 	/**
 	 * Logs the given status.  The status is distributed to the log listeners
@@ -52,7 +52,7 @@ public interface ILog {
 	 *
 	 * @param status the status to log
 	 */
-	public void log(IStatus status);
+    void log(IStatus status);
 
 	/**
 	 * Removes the given log listener to this log.  Subsequently the log listener will
@@ -62,7 +62,7 @@ public interface ILog {
 	 * @param listener the listener to remove
 	 * @see Platform#removeLogListener(ILogListener)
 	 */
-	public void removeLogListener(ILogListener listener);
+    void removeLogListener(ILogListener listener);
 
 	/**
 	 * Logs a status with {@link IStatus#INFO} using this logger

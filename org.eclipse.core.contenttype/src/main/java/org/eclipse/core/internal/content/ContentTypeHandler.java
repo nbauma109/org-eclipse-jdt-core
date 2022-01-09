@@ -169,13 +169,13 @@ public class ContentTypeHandler implements IContentType {
 	@Override
 	public boolean isAssociatedWith(String fileName) {
 		final IContentType target = getTarget();
-		return (target != null) ? target.isAssociatedWith(fileName) : false;
+		return target != null && target.isAssociatedWith(fileName);
 	}
 
 	@Override
 	public boolean isAssociatedWith(String fileName, IScopeContext context) {
 		final IContentType target = getTarget();
-		return (target != null) ? target.isAssociatedWith(fileName, context) : false;
+		return target != null && target.isAssociatedWith(fileName, context);
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class ContentTypeHandler implements IContentType {
 		if (another instanceof ContentTypeHandler)
 			another = ((ContentTypeHandler) another).getTarget();
 		final IContentType target = getTarget();
-		return (target != null) ? target.isKindOf(another) : false;
+		return target != null && target.isKindOf(another);
 	}
 
 	@Override

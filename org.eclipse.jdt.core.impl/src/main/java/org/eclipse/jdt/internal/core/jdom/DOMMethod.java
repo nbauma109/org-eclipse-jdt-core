@@ -570,10 +570,8 @@ public boolean isSignatureEqual(IDOMNode node) {
 		String[] types= method.getParameterTypes();
 		if (this.fParameterTypes == null || this.fParameterTypes.length == 0) {
 			// this method has no parameters
-			if (types == null || types.length == 0) {
-				// the other method has no parameters either
-				return true;
-			}
+            // the other method has no parameters either
+            return types == null || types.length == 0;
 		} else {
 			// this method has parameters
 			if (types == null || types.length == 0) {

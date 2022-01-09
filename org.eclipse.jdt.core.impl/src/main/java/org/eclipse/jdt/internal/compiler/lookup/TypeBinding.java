@@ -567,7 +567,7 @@ public TypeBinding getErasureCompatibleType(TypeBinding declaringClass) {
 			}
 			return this; // only occur if passed null declaringClass for arraylength
 		case Binding.INTERSECTION_TYPE18:
-			ReferenceBinding[] intersectingTypes = ((IntersectionTypeBinding18) this).getIntersectingTypes();
+			ReferenceBinding[] intersectingTypes = this.getIntersectingTypes();
 			ReferenceBinding constantPoolType = intersectingTypes[0];
 			if (constantPoolType.id == TypeIds.T_JavaLangObject && intersectingTypes.length > 1)
 				constantPoolType = intersectingTypes[1];
@@ -700,8 +700,7 @@ public boolean isBoxingCompatibleWith(TypeBinding right, /*@NonNull */ Scope sco
 
 	if (this.isBaseType() != right.isBaseType()) {
 		TypeBinding convertedType = scope.environment().computeBoxingType(this);
-		if (TypeBinding.equalsEquals(convertedType, right) || convertedType.isCompatibleWith(right, scope))
-			return true;
+        return TypeBinding.equalsEquals(convertedType, right) || convertedType.isCompatibleWith(right, scope);
 	}
 	return false;
 }
@@ -833,11 +832,8 @@ public boolean isParameterizedWithOwnVariables() {
 			return false;
 	}
 	ReferenceBinding enclosing = paramType.enclosingType();
-	if (enclosing != null && enclosing.erasure().isGenericType()
-			&& !enclosing.isParameterizedWithOwnVariables()) {
-		return false;
-	}
-	return true;
+    return enclosing == null || !enclosing.erasure().isGenericType()
+            || enclosing.isParameterizedWithOwnVariables();
 }
 
 /**
@@ -871,7 +867,7 @@ private boolean isProvableDistinctSubType(TypeBinding otherType) {
 			return false;
 		if (isArrayType()
 				|| ((this instanceof ReferenceBinding) && ((ReferenceBinding) this).isFinal())
-				|| (isTypeVariable() && ((TypeVariableBinding)this).superclass().isFinal())) {
+				|| (isTypeVariable() && this.superclass().isFinal())) {
 			return !isCompatibleWith(otherType);
 		}
 		return false;
@@ -879,7 +875,7 @@ private boolean isProvableDistinctSubType(TypeBinding otherType) {
 		if (isInterface()) {
 			if (otherType.isArrayType()
 					|| ((otherType instanceof ReferenceBinding) && ((ReferenceBinding) otherType).isFinal())
-					|| (otherType.isTypeVariable() && ((TypeVariableBinding)otherType).superclass().isFinal())) {
+					|| (otherType.isTypeVariable() && otherType.superclass().isFinal())) {
 				return !isCompatibleWith(otherType);
 			}
 		} else {
@@ -1672,9 +1668,7 @@ public static boolean notEquals(TypeBinding that, TypeBinding other) {
 		return false;
 	if (that == null || other == null)
 		return true;
-	if (that.id != TypeIds.NoId && that.id == other.id)
-		return false;
-	return true;
+    return that.id == TypeIds.NoId || that.id != other.id;
 }
 /** Return the primordial type from which the receiver was cloned. Not all types track a prototype, only {@link SourceTypeBinding},
  * {@link BinaryTypeBinding} and {@link UnresolvedReferenceBinding} do so as of now. In fact some types e.g {@link ParameterizedTypeBinding}

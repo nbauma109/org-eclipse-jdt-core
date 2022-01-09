@@ -30,12 +30,12 @@ public interface IProductPreferencesService {
 	 *
 	 * @return default preferences specified by the product.
 	 */
-	public Properties getProductCustomization();
+    Properties getProductCustomization();
 
 	/**
 	 * Returns translations for the customized properties.
 	 *
 	 * @return translation table for default preferences
 	 */
-	public Properties getProductTranslation();
+    Properties getProductTranslation();
 }

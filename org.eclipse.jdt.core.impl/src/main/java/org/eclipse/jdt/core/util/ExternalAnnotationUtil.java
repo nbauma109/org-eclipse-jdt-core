@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -66,7 +67,7 @@ public final class ExternalAnnotationUtil {
 	public static final char NO_ANNOTATION = ExternalAnnotationProvider.NO_ANNOTATION;
 
 	/** Strategy for merging a new signature with an existing (possibly annotated) signature. */
-	public static enum MergeStrategy {
+	public enum MergeStrategy {
 		/** Unconditionally replace the signature. */
 		REPLACE_SIGNATURE,
 		/** Override existing annotations, keeping old annotations in locations that are not annotated in the new signature. */
@@ -485,7 +486,7 @@ public final class ExternalAnnotationUtil {
 			signatureToReplace = originalSignature.substring(start, end);
 			updateTypeParameter(buf, signatureToReplace.toCharArray(), annotatedSignature.toCharArray(), mergeStrategy);
 			// extract postfix:
-			postfix = originalSignature.substring(end, originalSignature.length());
+			postfix = originalSignature.substring(end);
 		} else {
 			switch (updatePosition) {
 				case POSITION_FULL_SIGNATURE:
@@ -506,7 +507,7 @@ public final class ExternalAnnotationUtil {
 					int end = wrapper.skipAngleContents(wrapper.computeEnd());
 					buf.append(originalSignature, 0, start);
 					signatureToReplace = originalSignature.substring(start, end+1);
-					postfix = originalSignature.substring(end+1, originalSignature.length());
+					postfix = originalSignature.substring(end+1);
 			}
 			updateType(buf, signatureToReplace.toCharArray(), annotatedSignature.toCharArray(), mergeStrategy);
 		}
@@ -721,19 +722,15 @@ public final class ExternalAnnotationUtil {
 		String line;
 		while ((line = tailReader.readLine()) != null)
 			head.append(line).append('\n');
-		ByteArrayInputStream newContent = new ByteArrayInputStream(head.toString().getBytes("UTF-8")); //$NON-NLS-1$
+		ByteArrayInputStream newContent = new ByteArrayInputStream(head.toString().getBytes(StandardCharsets.UTF_8)); //$NON-NLS-1$
 		annotationFile.setContents(newContent, IResource.KEEP_HISTORY, monitor);
 	}
 
 	private static void createNewFile(IFile file, String newContent, IProgressMonitor monitor) throws CoreException {
 		ensureExists(file.getParent(), monitor);
 
-		try {
-			file.create(new ByteArrayInputStream(newContent.getBytes("UTF-8")), false, monitor); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, e.getMessage(), e));
-		}
-	}
+        file.create(new ByteArrayInputStream(newContent.getBytes(StandardCharsets.UTF_8)), false, monitor); //$NON-NLS-1$
+    }
 
 	private static void ensureExists(IContainer container, IProgressMonitor monitor) throws CoreException {
 		if (container.exists()) return;
@@ -873,7 +870,7 @@ public final class ExternalAnnotationUtil {
 		result[1] = originalSignature.substring(start, end+1);
 		updateType(buf, result[1].toCharArray(), annotatedType.toCharArray(), mergeStrategy);
 		result[2] = buf.toString();
-		result[3] = originalSignature.substring(end+1, originalSignature.length());
+		result[3] = originalSignature.substring(end+1);
 		return result;
 	}
 
@@ -915,7 +912,7 @@ public final class ExternalAnnotationUtil {
 		updateTypeParameter(buf, oWrap.tail(), nWrap.tail(), mergeStrategy);
 		result[2] = buf.toString();
 		// postfix:
-		result[3] = originalSignature.substring(end, originalSignature.length());
+		result[3] = originalSignature.substring(end);
 		return result;
 	}
 }

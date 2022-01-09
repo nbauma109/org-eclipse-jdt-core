@@ -162,7 +162,7 @@ public class FilePath {
 				//remove leading slash from device part to handle output of URL.getFile()
 				int start = original.charAt(0) == SEPARATOR ? 1 : 0;
 				device = original.substring(start, deviceSeparatorPos + 1);
-				original = original.substring(deviceSeparatorPos + 1, original.length());
+				original = original.substring(deviceSeparatorPos + 1);
 			} else if (original.startsWith(UNC_SLASHES)) {
 				// handle UNC paths
 				int uncPrefixEnd = original.indexOf(SEPARATOR, 2);
@@ -170,7 +170,7 @@ public class FilePath {
 					uncPrefixEnd = original.indexOf(SEPARATOR, uncPrefixEnd + 1);
 				if (uncPrefixEnd >= 0) {
 					device = original.substring(0, uncPrefixEnd);
-					original = original.substring(uncPrefixEnd, original.length());
+					original = original.substring(uncPrefixEnd);
 				} else
 					// not a valid UNC
 					throw new IllegalArgumentException("Not a valid UNC: " + original); //$NON-NLS-1$

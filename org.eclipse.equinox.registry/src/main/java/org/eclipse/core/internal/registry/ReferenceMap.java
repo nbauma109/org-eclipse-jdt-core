@@ -101,12 +101,12 @@ public class ReferenceMap {
 	 * The common interface for all elements in the map.  Both
 	 * hard and soft map values conform to this interface.
 	 */
-	private static interface IEntry {
+	private interface IEntry {
 		/**
 		 * Returns the integer key for this entry.
 		 * @return The integer key
 		 */
-		public int getKey();
+        int getKey();
 
 		/**
 		 * Returns the next entry in the linked list of entries
@@ -114,13 +114,13 @@ public class ReferenceMap {
 		 * if there is no next entry.
 		 * @return The next entry, or <code>null</code>.
 		 */
-		public IEntry getNext();
+        IEntry getNext();
 
 		/**
 		 * Returns the value of this entry.
 		 * @return The entry value.
 		 */
-		public Object getValue();
+        Object getValue();
 
 		/**
 		 * Sets the next entry in the linked list of map entries
@@ -128,7 +128,7 @@ public class ReferenceMap {
 		 *
 		 * @param next The next entry, or <code>null</code>.
 		 */
-		public void setNext(IEntry next);
+        void setNext(IEntry next);
 	}
 
 	/**

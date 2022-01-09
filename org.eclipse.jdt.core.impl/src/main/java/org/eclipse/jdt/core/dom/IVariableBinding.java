@@ -33,7 +33,7 @@ public interface IVariableBinding extends IBinding {
 	 * @return <code>true</code> if this is the binding for a field,
 	 *    and <code>false</code> otherwise
 	 */
-	public boolean isField();
+    boolean isField();
 
 	/**
 	 * Returns whether this binding is for an enum constant.
@@ -44,7 +44,7 @@ public interface IVariableBinding extends IBinding {
 	 *    and <code>false</code> otherwise
 	 * @since 3.1
 	 */
-	public boolean isEnumConstant();
+    boolean isEnumConstant();
 
 	/**
 	 * Returns whether this binding corresponds to a parameter.
@@ -53,7 +53,7 @@ public interface IVariableBinding extends IBinding {
 	 *    and <code>false</code> otherwise
 	 * @since 3.2
 	 */
-	public boolean isParameter();
+    boolean isParameter();
 
 	/**
 	 * Returns whether this binding is for a record component constant.
@@ -64,7 +64,7 @@ public interface IVariableBinding extends IBinding {
 	 *    and <code>false</code> otherwise
 	 * @since 3.26
 	 */
-	public default boolean isRecordComponent() {
+	default boolean isRecordComponent() {
 		return false;
 	}
 
@@ -75,7 +75,7 @@ public interface IVariableBinding extends IBinding {
 	 * @return the name of this field or local variable
 	 */
 	@Override
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the type binding representing the class or interface
@@ -89,14 +89,14 @@ public interface IVariableBinding extends IBinding {
 	 * @return the binding of the class or interface that declares this field,
 	 *   or <code>null</code> if none
 	 */
-	public ITypeBinding getDeclaringClass();
+    ITypeBinding getDeclaringClass();
 
 	/**
 	 * Returns the binding for the type of this field or local variable.
 	 *
 	 * @return the binding for the type of this field or local variable
 	 */
-	public ITypeBinding getType();
+    ITypeBinding getType();
 
 	/**
 	 * Returns a small integer variable id for this variable binding.
@@ -125,7 +125,7 @@ public interface IVariableBinding extends IBinding {
 	 *
 	 * @return a small non-negative variable id
 	 */
-	public int getVariableId();
+    int getVariableId();
 
 	/**
 	 * Returns this binding's constant value if it has one.
@@ -140,7 +140,7 @@ public interface IVariableBinding extends IBinding {
 	 * @return the constant value, or <code>null</code> if none
 	 * @since 3.0
 	 */
-	public Object getConstantValue();
+    Object getConstantValue();
 
 	/**
 	 * Returns the method binding representing the method containing the scope
@@ -159,7 +159,7 @@ public interface IVariableBinding extends IBinding {
 	 * local variable, or <code>null</code> if none
 	 * @since 3.1
 	 */
-	public IMethodBinding getDeclaringMethod();
+    IMethodBinding getDeclaringMethod();
 
 	/**
 	 * Returns the binding for the variable declaration corresponding to this
@@ -172,7 +172,7 @@ public interface IVariableBinding extends IBinding {
 	 * @return the variable binding for the originating declaration
 	 * @since 3.1
 	 */
-	public IVariableBinding getVariableDeclaration();
+    IVariableBinding getVariableDeclaration();
 
 	/**
 	 * Returns whether this binding corresponds to an effectively final local
@@ -183,5 +183,5 @@ public interface IVariableBinding extends IBinding {
 	 * 				and <code>false</code> otherwise
 	 * @since 3.10
 	 */
-	public boolean isEffectivelyFinal();
+    boolean isEffectivelyFinal();
 }

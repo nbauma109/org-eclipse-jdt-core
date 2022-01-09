@@ -68,5 +68,5 @@ public interface IIncrementalProjectBuilder2 {
 	 * @noreference This method is not intended to be referenced by clients.
 	 * @since 3.14
 	 */
-	public void clean(Map<String, String> args, IProgressMonitor monitor) throws CoreException;
+    void clean(Map<String, String> args, IProgressMonitor monitor) throws CoreException;
 }

@@ -35,5 +35,5 @@ public interface IFilter {
 	 * @return <code>true</code> if the target matches this filter
 	 * 	and <code>false</code> otherwise
 	 */
-	public boolean matches(IExtensionPoint target);
+    boolean matches(IExtensionPoint target);
 }

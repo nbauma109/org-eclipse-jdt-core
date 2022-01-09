@@ -79,7 +79,7 @@ public interface IExtensionRegistry {
 	 * @see IRegistryChangeEvent
 	 * @see #removeRegistryChangeListener(IRegistryChangeListener)
 	 */
-	public void addRegistryChangeListener(IRegistryChangeListener listener, String namespace);
+    void addRegistryChangeListener(IRegistryChangeListener listener, String namespace);
 
 	/**
 	 * <b>Note:</b> for new implementations consider using {@link #addListener(IRegistryEventListener)}.
@@ -100,7 +100,7 @@ public interface IExtensionRegistry {
 	 * @see #addRegistryChangeListener(IRegistryChangeListener, String)
 	 * @see #removeRegistryChangeListener(IRegistryChangeListener)
 	 */
-	public void addRegistryChangeListener(IRegistryChangeListener listener);
+    void addRegistryChangeListener(IRegistryChangeListener listener);
 
 	/**
 	 * Returns all configuration elements from all extensions configured
@@ -112,7 +112,7 @@ public interface IExtensionRegistry {
 	 *		(e.g. <code>"org.eclipse.core.resources.builders"</code>)
 	 * @return the configuration elements
 	 */
-	public IConfigurationElement[] getConfigurationElementsFor(String extensionPointId);
+    IConfigurationElement[] getConfigurationElementsFor(String extensionPointId);
 
 	/**
 	 * Returns all configuration elements from all extensions configured
@@ -126,7 +126,7 @@ public interface IExtensionRegistry {
 	 *		extension point (e.g. <code>"builders"</code>)
 	 * @return the configuration elements
 	 */
-	public IConfigurationElement[] getConfigurationElementsFor(String namespace, String extensionPointName);
+    IConfigurationElement[] getConfigurationElementsFor(String namespace, String extensionPointName);
 
 	/**
 	 * Returns all configuration elements from the identified extension.
@@ -141,7 +141,7 @@ public interface IExtensionRegistry {
 	 *		(e.g. <code>"com.example.acme.coolbuilder"</code>)
 	 * @return the configuration elements
 	 */
-	public IConfigurationElement[] getConfigurationElementsFor(String namespace, String extensionPointName, String extensionId);
+    IConfigurationElement[] getConfigurationElementsFor(String namespace, String extensionPointName, String extensionId);
 
 	/**
 	 * Returns the specified extension in this extension registry,
@@ -151,7 +151,7 @@ public interface IExtensionRegistry {
 	 *		(e.g. <code>"com.example.acme.coolbuilder"</code>)
 	 * @return the extension, or <code>null</code>
 	 */
-	public IExtension getExtension(String extensionId);
+    IExtension getExtension(String extensionId);
 
 	/**
 	 * Returns the specified extension in this extension registry,
@@ -165,7 +165,7 @@ public interface IExtensionRegistry {
 	 *		(e.g. <code>"com.example.acme.coolbuilder"</code>)
 	 * @return the extension, or <code>null</code>
 	 */
-	public IExtension getExtension(String extensionPointId, String extensionId);
+    IExtension getExtension(String extensionPointId, String extensionId);
 
 	/**
 	 * Returns the specified extension in this extension registry,
@@ -181,7 +181,7 @@ public interface IExtensionRegistry {
 	 *		(e.g. <code>"com.example.acme.coolbuilder"</code>)
 	 * @return the extension, or <code>null</code>
 	 */
-	public IExtension getExtension(String namespace, String extensionPointName, String extensionId);
+    IExtension getExtension(String namespace, String extensionPointName, String extensionId);
 
 	/**
 	 * Returns the extension point with the given extension point identifier
@@ -192,7 +192,7 @@ public interface IExtensionRegistry {
 	 *    (e.g., <code>"org.eclipse.core.resources.builders"</code>)
 	 * @return the extension point, or <code>null</code>
 	 */
-	public IExtensionPoint getExtensionPoint(String extensionPointId);
+    IExtensionPoint getExtensionPoint(String extensionPointId);
 
 	/**
 	 * Returns the extension point in this extension registry
@@ -205,7 +205,7 @@ public interface IExtensionRegistry {
 	 *		extension point (e.g. <code>"builders"</code>)
 	 * @return the extension point, or <code>null</code>
 	 */
-	public IExtensionPoint getExtensionPoint(String namespace, String extensionPointName);
+    IExtensionPoint getExtensionPoint(String namespace, String extensionPointName);
 
 	/**
 	 * Returns all extension points known to this extension registry.
@@ -213,7 +213,7 @@ public interface IExtensionRegistry {
 	 *
 	 * @return the extension points known to this extension registry
 	 */
-	public IExtensionPoint[] getExtensionPoints();
+    IExtensionPoint[] getExtensionPoints();
 
 	/**
 	 * Returns all extension points declared in the given namespace. Returns an empty array if
@@ -223,7 +223,7 @@ public interface IExtensionRegistry {
 	 *		(e.g. <code>"org.eclipse.core.resources"</code>)
 	 * @return the extension points in this registry declared in the given namespace
 	 */
-	public IExtensionPoint[] getExtensionPoints(String namespace);
+    IExtensionPoint[] getExtensionPoints(String namespace);
 
 	/**
 	 * Returns all extension points supplied by the contributor, or <code>null</code>
@@ -234,7 +234,7 @@ public interface IExtensionRegistry {
 	 * @return the extension points, or <code>null</code>
 	 * @since 3.4
 	 */
-	public IExtensionPoint[] getExtensionPoints(IContributor contributor);
+    IExtensionPoint[] getExtensionPoints(IContributor contributor);
 
 	/**
 	 * Returns all extensions declared in the given namespace. Returns an empty array if
@@ -244,7 +244,7 @@ public interface IExtensionRegistry {
 	 *		(e.g. <code>"org.eclipse.core.resources"</code>)
 	 * @return the extensions in this registry declared in the given namespace
 	 */
-	public IExtension[] getExtensions(String namespace);
+    IExtension[] getExtensions(String namespace);
 
 	/**
 	 * Returns all extensions supplied by the contributor, or <code>null</code> if there
@@ -254,7 +254,7 @@ public interface IExtensionRegistry {
 	 * @return the extensions, or <code>null</code>
 	 * @since 3.4
 	 */
-	public IExtension[] getExtensions(IContributor contributor);
+    IExtension[] getExtensions(IContributor contributor);
 
 	/**
 	 * Returns all namespaces currently used by extensions and extension points in this
@@ -268,7 +268,7 @@ public interface IExtensionRegistry {
 	 * </p>
 	 * @return all namespaces known to this registry
 	 */
-	public String[] getNamespaces();
+    String[] getNamespaces();
 
 	/**
 	 * Removes the given registry change listener from this registry.
@@ -279,7 +279,7 @@ public interface IExtensionRegistry {
 	 * @see #addRegistryChangeListener(IRegistryChangeListener)
 	 * @see #addRegistryChangeListener(IRegistryChangeListener, String)
 	 */
-	public void removeRegistryChangeListener(IRegistryChangeListener listener);
+    void removeRegistryChangeListener(IRegistryChangeListener listener);
 
 	/**
 	 * Adds to this extension registry an extension point(s), extension(s), or
@@ -311,7 +311,7 @@ public interface IExtensionRegistry {
 	 * @see IContributor
 	 * @since org.eclipse.equinox.registry 3.2
 	 */
-	public boolean addContribution(InputStream is, IContributor contributor, boolean persist, String name, ResourceBundle translationBundle, Object token) throws IllegalArgumentException;
+    boolean addContribution(InputStream is, IContributor contributor, boolean persist, String name, ResourceBundle translationBundle, Object token) throws IllegalArgumentException;
 
 	/**
 	 * Removes the given extension from this registry.
@@ -329,7 +329,7 @@ public interface IExtensionRegistry {
 	 *
 	 * @since org.eclipse.equinox.registry 3.2
 	 */
-	public boolean removeExtension(IExtension extension, Object token) throws IllegalArgumentException;
+    boolean removeExtension(IExtension extension, Object token) throws IllegalArgumentException;
 
 	/**
 	 * Removes the specified extension point from this registry.
@@ -348,7 +348,7 @@ public interface IExtensionRegistry {
 	 *
 	 * @since org.eclipse.equinox.registry 3.2
 	 */
-	public boolean removeExtensionPoint(IExtensionPoint extensionPoint, Object token) throws IllegalArgumentException;
+    boolean removeExtensionPoint(IExtensionPoint extensionPoint, Object token) throws IllegalArgumentException;
 
 	/**
 	 * Call this method to properly stop the registry. The method stops registry event processing
@@ -363,7 +363,7 @@ public interface IExtensionRegistry {
 	 *
 	 * @since org.eclipse.equinox.registry 3.2
 	 */
-	public void stop(Object token) throws IllegalArgumentException;
+    void stop(Object token) throws IllegalArgumentException;
 
 	/**
 	 * Adds the given listener for registry change events. Listener will be notified
@@ -383,7 +383,7 @@ public interface IExtensionRegistry {
 	 * @param listener the listener
 	 * @since org.eclipse.equinox.registry 3.4
 	 */
-	public void addListener(IRegistryEventListener listener);
+    void addListener(IRegistryEventListener listener);
 
 	/**
 	 * Adds the given listener for registry change events related to specified
@@ -400,7 +400,7 @@ public interface IExtensionRegistry {
 	 * @see IExtensionPoint#getUniqueIdentifier()
 	 * @since org.eclipse.equinox.registry 3.4
 	 */
-	public void addListener(IRegistryEventListener listener, String extensionPointId);
+    void addListener(IRegistryEventListener listener, String extensionPointId);
 
 	/**
 	 * Removes the given registry change listener from this registry.
@@ -412,7 +412,7 @@ public interface IExtensionRegistry {
 	 * @see #addListener(IRegistryEventListener, String)
 	 * @since org.eclipse.equinox.registry 3.4
 	 */
-	public void removeListener(IRegistryEventListener listener);
+    void removeListener(IRegistryEventListener listener);
 
 	/**
 	 * Call this method to determine if this extension registry supports multiple languages.
@@ -424,5 +424,5 @@ public interface IExtensionRegistry {
 	 * instance of the extension registry; <code>false</code> otherwise.
 	 * @since org.eclipse.equinox.registry 3.5
 	 */
-	public boolean isMultiLanguage();
+    boolean isMultiLanguage();
 }

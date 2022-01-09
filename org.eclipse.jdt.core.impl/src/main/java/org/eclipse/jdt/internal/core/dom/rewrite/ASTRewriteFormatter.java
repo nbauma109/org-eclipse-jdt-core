@@ -130,7 +130,7 @@ public final class ASTRewriteFormatter {
 		this.placeholders= placeholders;
 		this.eventStore= eventStore;
 
-		this.options= options == null ? JavaCore.getOptions() : (Map) new HashMap(options);
+		this.options= options == null ? JavaCore.getOptions() : new HashMap(options);
 		this.options.put(
 				DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_RESOURCES_IN_TRY,
 				DefaultCodeFormatterConstants.createAlignmentValue(true, DefaultCodeFormatterConstants.WRAP_NEXT_PER_LINE, DefaultCodeFormatterConstants.INDENT_DEFAULT));
@@ -445,11 +445,11 @@ public final class ASTRewriteFormatter {
 
 
 
-    public static interface Prefix {
+    public interface Prefix {
 		String getPrefix(int indent);
 	}
 
-	public static interface BlockContext {
+	public interface BlockContext {
 		String[] getPrefixAndSuffix(int indent, ASTNode node, RewriteEventStore events);
 	}
 

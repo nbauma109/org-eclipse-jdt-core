@@ -1296,7 +1296,7 @@ public interface IType extends IMember, IAnnotatable {
 	 * @return true if this type represents a lambda expression, false otherwise
 	 * @since 3.10
 	 */
-	public boolean isLambda();
+    boolean isLambda();
 
 	/**
 	 * Strengthen the contract of the inherited method to signal that the returned class file

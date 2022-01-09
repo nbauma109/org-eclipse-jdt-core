@@ -884,9 +884,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 	public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t, Scope scope) {
 		if (super.sIsMoreSpecific(s, t, scope))
 			return true;
-		return isPolyExpression() ?
-				this.valueIfTrue.sIsMoreSpecific(s, t, scope) && this.valueIfFalse.sIsMoreSpecific(s, t, scope):
-				false;
+		return isPolyExpression() && this.valueIfTrue.sIsMoreSpecific(s, t, scope) && this.valueIfFalse.sIsMoreSpecific(s, t, scope);
 	}
 
 	@Override

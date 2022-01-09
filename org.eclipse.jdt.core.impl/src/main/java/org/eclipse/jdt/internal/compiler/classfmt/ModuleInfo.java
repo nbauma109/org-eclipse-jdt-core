@@ -96,7 +96,7 @@ public class ModuleInfo extends ClassFileStruct implements IBinaryModule {
 	 * @param offsets int[]
 	 * @param offset int
 	 */
-	protected ModuleInfo (byte classFileBytes[], int offsets[], int offset) {
+	protected ModuleInfo (byte[] classFileBytes, int[] offsets, int offset) {
 		super(classFileBytes, offsets, offset);
 	}
 
@@ -106,7 +106,7 @@ public class ModuleInfo extends ClassFileStruct implements IBinaryModule {
 	 * @param offset offset to the "Module" attribute
 	 * @return a module info initialized from the "Module" attribute, which was already detected by the caller
 	 */
-	public static ModuleInfo createModule(byte classFileBytes[], int offsets[], int offset) {
+	public static ModuleInfo createModule(byte[] classFileBytes, int[] offsets, int offset) {
 
 		ModuleInfo module = new ModuleInfo(classFileBytes, offsets, 0);
 

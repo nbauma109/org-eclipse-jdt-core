@@ -482,7 +482,7 @@ public interface IClasspathEntry {
 	 *         {@link IClasspathAttribute#TEST} and whose value is 'true'.
 	 * @since 3.14
 	 */
-	default public boolean isTest() {
+	default boolean isTest() {
 		for (IClasspathAttribute attribute : getExtraAttributes()) {
 			if (IClasspathAttribute.TEST.equals(attribute.getName()) && "true".equals(attribute.getValue())) //$NON-NLS-1$
 				return true;
@@ -500,7 +500,7 @@ public interface IClasspathEntry {
 	 *         {@link IClasspathAttribute#WITHOUT_TEST_CODE} and whose value is 'true'.
 	 * @since 3.14
 	 */
-	default public boolean isWithoutTestCode() {
+	default boolean isWithoutTestCode() {
 		for (IClasspathAttribute attribute : getExtraAttributes()) {
 			if (IClasspathAttribute.WITHOUT_TEST_CODE.equals(attribute.getName()) && "true".equals(attribute.getValue())) //$NON-NLS-1$
 				return true;

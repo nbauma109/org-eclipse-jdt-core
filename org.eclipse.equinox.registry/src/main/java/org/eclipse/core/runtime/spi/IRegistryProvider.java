@@ -34,5 +34,5 @@ public interface IRegistryProvider {
 	 *
 	 * @return an extension registry
 	 */
-	public IExtensionRegistry getRegistry();
+    IExtensionRegistry getRegistry();
 }

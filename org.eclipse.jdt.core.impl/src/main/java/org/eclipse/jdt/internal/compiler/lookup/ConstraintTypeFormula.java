@@ -397,7 +397,7 @@ class ConstraintTypeFormula extends ConstraintFormula {
 		if (ai == null)
 			return true; // no arguments here means nothing to check
 		if (cb.isRawType() || bi == null || bi.length == 0)
-			return (this.isSoft && InferenceContext18.SIMULATE_BUG_JDK_8026527) ? true : false; // FALSE would conform to the spec
+			return this.isSoft && InferenceContext18.SIMULATE_BUG_JDK_8026527; // FALSE would conform to the spec
 		for (int i = 0; i < ai.length; i++)
 			constraints.add(ConstraintTypeFormula.create(bi[i], ai[i], TYPE_ARGUMENT_CONTAINED, this.isSoft));
 		return true;

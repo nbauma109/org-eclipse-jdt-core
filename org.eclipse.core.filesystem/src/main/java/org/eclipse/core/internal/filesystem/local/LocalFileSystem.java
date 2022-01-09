@@ -37,7 +37,7 @@ public class LocalFileSystem extends FileSystem {
 	/**
 	 * Whether the current file system is case sensitive
 	 */
-	private static final boolean caseSensitive = MACOSX ? false : new java.io.File("a").compareTo(new java.io.File("A")) != 0; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final boolean caseSensitive = !MACOSX && new File("a").compareTo(new File("A")) != 0; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * The attributes of this file system. The initial value of -1 is used

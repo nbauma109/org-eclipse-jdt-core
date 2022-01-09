@@ -1201,8 +1201,7 @@ public class ServiceRegistry {
 				return false;
 		Class<?> superClazz = serviceClazz.getSuperclass();
 		if (superClazz != null)
-			if (!extensiveCheckServiceClass(clazz, superClazz))
-				return false;
+            return extensiveCheckServiceClass(clazz, superClazz);
 		return true;
 	}
 

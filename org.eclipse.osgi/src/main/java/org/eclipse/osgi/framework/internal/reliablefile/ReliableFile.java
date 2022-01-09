@@ -82,8 +82,8 @@ public class ReliableFile {
 	private static final int FILETYPE_CORRUPT = 1;
 	private static final int FILETYPE_NOSIGNATURE = 2;
 
-	private static final byte identifier1[] = {'.', 'c', 'r', 'c'};
-	private static final byte identifier2[] = {'.', 'v', '1', '\n'};
+	private static final byte[] identifier1 = {'.', 'c', 'r', 'c'};
+	private static final byte[] identifier2 = {'.', 'v', '1', '\n'};
 
 	private static final int BUF_SIZE = 4096;
 	private static final int maxInputStreamBuffer;
@@ -508,7 +508,7 @@ public class ReliableFile {
 					bufferSize = (int) length;
 				}
 
-				byte buffer[] = new byte[bufferSize];
+				byte[] buffer = new byte[bufferSize];
 				long size = 0;
 				int count;
 				while ((count = in.read(buffer, 0, bufferSize)) > 0) {
@@ -640,7 +640,7 @@ public class ReliableFile {
 	public static String[] getBaseFiles(File directory) throws IOException {
 		if (!directory.isDirectory())
 			throw new IOException("Not a valid directory"); //$NON-NLS-1$
-		String files[] = directory.list();
+		String[] files = directory.list();
 		Set<String> list = new HashSet<>(files.length / 2);
 		for (String file : files) {
 			int pos = file.lastIndexOf('.');
@@ -783,7 +783,7 @@ public class ReliableFile {
 		try {
 			if (len < 16) {
 				if (crc != null) {
-					byte data[] = new byte[16];
+					byte[] data = new byte[16];
 					int num = is.read(data);
 					if (num > 0)
 						crc.update(data, 0, num);
@@ -793,7 +793,7 @@ public class ReliableFile {
 			len -= 16;
 
 			int pos = 0;
-			byte data[] = new byte[BUF_SIZE];
+			byte[] data = new byte[BUF_SIZE];
 
 			while (pos < len) {
 				int read = data.length;

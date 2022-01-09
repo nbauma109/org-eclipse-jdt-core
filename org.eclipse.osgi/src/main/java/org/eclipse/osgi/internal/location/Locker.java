@@ -19,13 +19,13 @@ import java.io.IOException;
  * Internal class.
  */
 public interface Locker {
-	public boolean lock() throws IOException;
+	boolean lock() throws IOException;
 
-	public boolean isLocked() throws IOException;
+	boolean isLocked() throws IOException;
 
-	public void release();
+	void release();
 
-	static class MockLocker implements Locker {
+	class MockLocker implements Locker {
 		/**
 		 * @throws IOException
 		 */

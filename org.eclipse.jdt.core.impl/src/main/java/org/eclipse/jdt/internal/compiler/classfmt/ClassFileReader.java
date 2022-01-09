@@ -109,7 +109,7 @@ public static ClassFileReader read(File file) throws ClassFormatException, IOExc
 }
 
 public static ClassFileReader read(File file, boolean fullyInitialize) throws ClassFormatException, IOException {
-	byte classFileBytes[] = Util.getFileByteContent(file);
+	byte[] classFileBytes = Util.getFileByteContent(file);
 	ClassFileReader classFileReader = new ClassFileReader(classFileBytes, file.getAbsolutePath().toCharArray());
 	if (fullyInitialize) {
 		classFileReader.initialize();
@@ -122,7 +122,7 @@ public static ClassFileReader read(InputStream stream, String fileName) throws C
 }
 
 public static ClassFileReader read(InputStream stream, String fileName, boolean fullyInitialize) throws ClassFormatException, IOException {
-	byte classFileBytes[] = Util.getInputStreamAsByteArray(stream);
+	byte[] classFileBytes = Util.getInputStreamAsByteArray(stream);
 	ClassFileReader classFileReader = new ClassFileReader(classFileBytes, fileName.toCharArray());
 	if (fullyInitialize) {
 		classFileReader.initialize();
@@ -162,7 +162,7 @@ public static ClassFileReader read(
 	java.util.zip.ZipEntry ze = zip.getEntry(filename);
 	if (ze == null)
 		return null;
-	byte classFileBytes[] = Util.getZipEntryByteContent(ze, zip);
+	byte[] classFileBytes = Util.getZipEntryByteContent(ze, zip);
 	ClassFileReader classFileReader = new ClassFileReader(classFileBytes, filename.toCharArray());
 	if (fullyInitialize) {
 		classFileReader.initialize();
@@ -184,7 +184,7 @@ public static ClassFileReader read(String fileName, boolean fullyInitialize) thr
  *
  * @exception ClassFormatException
  */
-public ClassFileReader(byte classFileBytes[], char[] fileName) throws ClassFormatException {
+public ClassFileReader(byte[] classFileBytes, char[] fileName) throws ClassFormatException {
 	this(classFileBytes, fileName, false);
 }
 
@@ -1169,9 +1169,7 @@ public boolean hasStructuralChanges(byte[] newBytes, boolean orderRequired, bool
 					return true;
 				}
 			}
-		} else if (newMissingTypes != null) {
-			return true;
-		}
+		} else return newMissingTypes != null;
 		return false;
 	} catch (ClassFormatException e) {
 		return true;
@@ -1357,9 +1355,7 @@ private boolean hasStructuralTypeAnnotationChanges(IBinaryTypeAnnotation[] curre
 private boolean affectsSignature(IBinaryTypeAnnotation typeAnnotation) {
 	if (typeAnnotation == null) return false;
 	int targetType = typeAnnotation.getTargetType();
-	if (targetType >= AnnotationTargetTypeConstants.LOCAL_VARIABLE && targetType <= AnnotationTargetTypeConstants.METHOD_REFERENCE_TYPE_ARGUMENT)
-		return false; // affects detail within a block
-	return true;
+    return targetType < AnnotationTargetTypeConstants.LOCAL_VARIABLE || targetType > AnnotationTargetTypeConstants.METHOD_REFERENCE_TYPE_ARGUMENT; // affects detail within a block
 }
 
 /**

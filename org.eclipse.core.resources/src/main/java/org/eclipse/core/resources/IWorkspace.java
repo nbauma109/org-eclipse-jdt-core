@@ -355,7 +355,7 @@ public interface IWorkspace extends IAdaptable {
 	 * @see IWorkspace#computeProjectOrder(IProject[])
 	 * @since 2.1
 	 */
-	public static final class ProjectOrder {
+	final class ProjectOrder {
 		/**
 		 * Creates an instance with the given values.
 		 * <p>

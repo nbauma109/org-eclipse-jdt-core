@@ -33,6 +33,6 @@ public interface IHandlerAttributes {
 	 * The command should act and behave as if it has no handler.
 	 * </p>
 	 */
-	public static final String ATTRIBUTE_HANDLED = "handled"; //$NON-NLS-1$
+    String ATTRIBUTE_HANDLED = "handled"; //$NON-NLS-1$
 
 }

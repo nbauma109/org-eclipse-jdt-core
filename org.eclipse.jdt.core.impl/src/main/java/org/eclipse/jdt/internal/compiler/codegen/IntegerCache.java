@@ -14,8 +14,8 @@
 package org.eclipse.jdt.internal.compiler.codegen;
 
 public class IntegerCache {
-	public int keyTable[];
-	public int valueTable[];
+	public int[] keyTable;
+	public int[] valueTable;
 	int elementSize;
 	int threshold;
 /**

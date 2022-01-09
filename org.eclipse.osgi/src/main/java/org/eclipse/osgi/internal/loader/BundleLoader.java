@@ -438,7 +438,7 @@ public class BundleLoader extends ModuleLoader {
 		}
 		Class<?> result = null;
 		try {
-			result = (Class<?>) searchHooks(name, PRE_CLASS);
+			result = searchHooks(name, PRE_CLASS);
 		} catch (FileNotFoundException e) {
 			// will not happen
 		}
@@ -488,7 +488,7 @@ public class BundleLoader extends ModuleLoader {
 
 		if (result == null)
 			try {
-				result = (Class<?>) searchHooks(name, POST_CLASS);
+				result = searchHooks(name, POST_CLASS);
 			} catch (FileNotFoundException e) {
 				// will not happen
 			}
@@ -632,7 +632,7 @@ public class BundleLoader extends ModuleLoader {
 
 		URL result = null;
 		try {
-			result = (URL) searchHooks(name, PRE_RESOURCE);
+			result = searchHooks(name, PRE_RESOURCE);
 		} catch (FileNotFoundException e) {
 			return null;
 		} catch (ClassNotFoundException e) {
@@ -673,7 +673,7 @@ public class BundleLoader extends ModuleLoader {
 
 		if (result == null)
 			try {
-				result = (URL) searchHooks(name, POST_RESOURCE);
+				result = searchHooks(name, POST_RESOURCE);
 			} catch (FileNotFoundException e) {
 				return null;
 			} catch (ClassNotFoundException e) {
@@ -833,8 +833,8 @@ public class BundleLoader extends ModuleLoader {
 				String packagePath = name.replace('.', '/');
 				Collection<String> externalResources = externalSource.listResources(packagePath, filePattern);
 				for (String resource : externalResources) {
-					if (!result.contains(resource)) // prevent duplicates; could happen if the package is split or exporter has fragments/multiple jars
-						result.add(resource);
+                    // prevent duplicates; could happen if the package is split or exporter has fragments/multiple jars
+                    result.add(resource);
 				}
 			}
 		}
@@ -843,7 +843,7 @@ public class BundleLoader extends ModuleLoader {
 		Collection<String> localResources = getModuleClassLoader().listLocalResources(path, filePattern, options);
 		for (String resource : localResources) {
 			String resourcePkg = getResourcePackageName(resource);
-			if (!importedPackages.contains(resourcePkg) && !result.contains(resource))
+			if (!importedPackages.contains(resourcePkg))
 				result.add(resource);
 		}
 		return result;
@@ -973,7 +973,7 @@ public class BundleLoader extends ModuleLoader {
 		if (provider == null) {
 			if (firstUseOfInvalidLoader.getAndSet(true)) {
 				// publish a framework event once per loader, include an exception to show the stack
-				String message = "Invalid class loader from a refreshed bundle is being used: " + toString(); //$NON-NLS-1$
+				String message = "Invalid class loader from a refreshed bundle is being used: " + this; //$NON-NLS-1$
 				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, wiring.getBundle(), new IllegalStateException(message));
 			}
 			return null;
@@ -1113,7 +1113,7 @@ public class BundleLoader extends ModuleLoader {
 			if (importSpec.length() > 0) {
 				importSpec.append(',');
 			}
-			importSpec.append(dynamicImportElement.toString());
+			importSpec.append(dynamicImportElement);
 		}
 
 		if (dynamicImports.size() > 0) {

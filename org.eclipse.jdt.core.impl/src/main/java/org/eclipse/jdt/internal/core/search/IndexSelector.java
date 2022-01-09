@@ -316,7 +316,7 @@ public IndexLocation[] getIndexLocations() {
 	}
 	if (JobManager.VERBOSE) {
 		Util.verbose(String.format("-> selected %s indexes out of total indexes %s after qualify filtering - %s",  //$NON-NLS-1$
-				filtered.length, this.indexLocations.length, this.toString()));
+				filtered.length, this.indexLocations.length, this));
 	}
 	return filtered;
 }

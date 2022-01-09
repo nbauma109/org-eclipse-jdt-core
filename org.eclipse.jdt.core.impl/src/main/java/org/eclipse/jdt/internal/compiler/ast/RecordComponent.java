@@ -81,7 +81,7 @@ public class RecordComponent extends AbstractVariableDeclaration {
 
 	public void getAllAnnotationContexts(int targetType, List<AnnotationContext> allAnnotationContexts) {
 		AnnotationCollector collector = new AnnotationCollector(this, targetType, allAnnotationContexts);
-		this.traverse(collector, (BlockScope) null);
+		this.traverse(collector, null);
 	}
 
 	public boolean isVarArgs() {

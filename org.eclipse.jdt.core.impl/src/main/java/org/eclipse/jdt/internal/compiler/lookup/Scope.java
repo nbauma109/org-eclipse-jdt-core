@@ -710,7 +710,7 @@ public abstract class Scope {
 			// Due to staticness, e.g., Map.Entry<String,Object> is *not* considered as a raw type
 
 			return (substitutedEnclosing != null && substitutedEnclosing.isRawType())
-					&& ((originalType instanceof ReferenceBinding) && !((ReferenceBinding)originalType).isStatic());
+					&& ((originalType instanceof ReferenceBinding) && !originalType.isStatic());
 		}
 
 		/**
@@ -1414,7 +1414,7 @@ public abstract class Scope {
 					break checkArrayField;
 			}
 			if (leafType instanceof ReferenceBinding)
-				if (!((ReferenceBinding) leafType).canBeSeenBy(this))
+				if (!leafType.canBeSeenBy(this))
 					return new ProblemFieldBinding((ReferenceBinding)leafType, fieldName, ProblemReasons.ReceiverTypeNotVisible);
 			if (CharOperation.equals(fieldName, TypeConstants.LENGTH)) {
 				if ((leafType.tagBits & TagBits.HasMissingType) != 0) {
@@ -1655,7 +1655,7 @@ public abstract class Scope {
 		if (method != null && method.isValidBinding() && method.isVarargs()) {
 			TypeBinding elementType = method.parameters[method.parameters.length - 1].leafComponentType();
 			if (elementType instanceof ReferenceBinding) {
-				if (!((ReferenceBinding) elementType).erasure().canBeSeenBy(this)) {
+				if (!elementType.erasure().canBeSeenBy(this)) {
 					return new ProblemMethodBinding(method, method.selector, invocationSite.genericTypeArguments(), ProblemReasons.VarargsElementTypeNotVisible);
 				}
 			}
@@ -1934,7 +1934,7 @@ public abstract class Scope {
 
 		TypeBinding leafType = receiverType.leafComponentType();
 		if (leafType instanceof ReferenceBinding) {
-			if (!((ReferenceBinding) leafType).canBeSeenBy(this))
+			if (!leafType.canBeSeenBy(this))
 				return new ProblemMethodBinding(selector, Binding.NO_PARAMETERS, (ReferenceBinding)leafType, ProblemReasons.ReceiverTypeNotVisible);
 		}
 
@@ -2191,7 +2191,7 @@ public abstract class Scope {
 							// in order to do so, we change the flag as we exit from the type, not the method
 							// itself, because the class scope is used to retrieve the fields.
 							MethodScope enclosingMethodScope = scope.methodScope();
-							insideConstructorCall = enclosingMethodScope == null ? false : enclosingMethodScope.isConstructorCall;
+							insideConstructorCall = enclosingMethodScope != null && enclosingMethodScope.isConstructorCall;
 							break;
 						case COMPILATION_UNIT_SCOPE :
 						case MODULE_SCOPE :
@@ -2441,7 +2441,7 @@ public abstract class Scope {
 		if (method != null && method.isValidBinding() && method.isVarargs()) {
 			TypeBinding elementType = method.parameters[method.parameters.length - 1].leafComponentType();
 			if (elementType instanceof ReferenceBinding) {
-				if (!((ReferenceBinding) elementType).canBeSeenBy(this)) {
+				if (!elementType.canBeSeenBy(this)) {
 					return new ProblemMethodBinding(method, method.selector, invocationSite.genericTypeArguments(), ProblemReasons.VarargsElementTypeNotVisible);
 				}
 			}
@@ -2703,7 +2703,7 @@ public abstract class Scope {
 					// in order to do so, we change the flag as we exit from the type, not the method
 					// itself, because the class scope is used to retrieve the fields.
 					MethodScope enclosingMethodScope = scope.methodScope();
-					insideConstructorCall = enclosingMethodScope == null ? false : enclosingMethodScope.isConstructorCall;
+					insideConstructorCall = enclosingMethodScope != null && enclosingMethodScope.isConstructorCall;
 					break;
 				case COMPILATION_UNIT_SCOPE :
 					break done;
@@ -3564,10 +3564,8 @@ public abstract class Scope {
 		if (resolvedImport instanceof ReferenceBinding) {
 			ReferenceBinding referenceBinding = (ReferenceBinding) resolvedImport;
 			if (unitScope.getCurrentPackage() == referenceBinding.getPackage()) {
-				if (referenceBinding.isNestedType())
-					return false; // importing nested types is still necessary
-				return true;
-			}
+                return !referenceBinding.isNestedType(); // importing nested types is still necessary
+            }
 		}
 		return false;
 	}
@@ -3720,11 +3718,9 @@ public abstract class Scope {
 						TypeBinding oType = ((ArrayBinding) oneParam).elementsType();
 						TypeBinding eType = ((ArrayBinding) twoParam).elementsType();
 						if (CompilerOptions.tolerateIllegalAmbiguousVarargsInvocation && this.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
-							if (TypeBinding.equalsEquals(oneParam, eType) || oneParam.isCompatibleWith(eType))
-								return true; // special case to choose between 2 varargs methods when the last arg is Object[]
+                            return TypeBinding.equalsEquals(oneParam, eType) || oneParam.isCompatibleWith(eType); // special case to choose between 2 varargs methods when the last arg is Object[]
 						} else {
-							if (TypeBinding.equalsEquals(oType, eType) || oType.isCompatibleWith(eType))
-								return true; // special case to choose between 2 varargs methods when the last arg is Object[]
+                            return TypeBinding.equalsEquals(oType, eType) || oType.isCompatibleWith(eType); // special case to choose between 2 varargs methods when the last arg is Object[]
 						}
 					}
 					return false;
@@ -3744,9 +3740,8 @@ public abstract class Scope {
 			for (int i = (oneParamsLength > twoParamsLength ? twoParamsLength : oneParamsLength) - 2; i >= 0; i--)
 				if (TypeBinding.notEquals(oneParams[i], twoParams[i]) && !oneParams[i].isCompatibleWith(twoParams[i]))
 					return false;
-			if (parameterCompatibilityLevel(one, twoParams, true) == NOT_COMPATIBLE
-					&& parameterCompatibilityLevel(two, oneParams, true) == VARARGS_COMPATIBLE)
-				return true;
+            return parameterCompatibilityLevel(one, twoParams, true) == NOT_COMPATIBLE
+                    && parameterCompatibilityLevel(two, oneParams, true) == VARARGS_COMPATIBLE;
 		}
 		return false;
 	}
@@ -4295,7 +4290,7 @@ public abstract class Scope {
 			if (currentType.isCapture()) {
 				TypeBinding firstBound = ((CaptureBinding) currentType).firstBound;
 				if (firstBound != null && firstBound.isArrayType()) {
-					TypeBinding superType = dim == 0 ? firstBound : (TypeBinding)environment().createArrayType(firstBound, dim); // recreate array if needed
+					TypeBinding superType = dim == 0 ? firstBound : environment().createArrayType(firstBound, dim); // recreate array if needed
 					if (!typesToVisit.contains(superType)) {
 						typesToVisit.add(superType);
 						max++;
@@ -4312,7 +4307,7 @@ public abstract class Scope {
 			if (itsInterfaces != null) { // can be null during code assist operations that use LookupEnvironment.completeTypeBindings(parsedUnit, buildFieldsAndMethods)
 				for (int j = 0, count = itsInterfaces.length; j < count; j++) {
 					TypeBinding itsInterface = itsInterfaces[j];
-					TypeBinding superType = dim == 0 ? itsInterface : (TypeBinding)environment().createArrayType(itsInterface, dim); // recreate array if needed
+					TypeBinding superType = dim == 0 ? itsInterface : environment().createArrayType(itsInterface, dim); // recreate array if needed
 					if (!typesToVisit.contains(superType)) {
 						typesToVisit.add(superType);
 						max++;
@@ -4325,7 +4320,7 @@ public abstract class Scope {
 			}
 			TypeBinding itsSuperclass = currentType.superclass();
 			if (itsSuperclass != null) {
-				TypeBinding superType = dim == 0 ? itsSuperclass : (TypeBinding)environment().createArrayType(itsSuperclass, dim); // recreate array if needed
+				TypeBinding superType = dim == 0 ? itsSuperclass : environment().createArrayType(itsSuperclass, dim); // recreate array if needed
 				if (!typesToVisit.contains(superType)) {
 					typesToVisit.add(superType);
 					max++;

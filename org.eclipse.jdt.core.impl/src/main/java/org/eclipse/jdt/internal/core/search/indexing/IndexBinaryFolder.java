@@ -102,8 +102,8 @@ public class IndexBinaryFolder extends IndexRequest {
 											indexedFileNames.get(containerRelativePath) == null
 													|| indexLastModified <
 													EFS.getStore(location).fetchInfo().getLastModified()
-												? (Object) file
-												: (Object) OK);
+												? file
+												: OK);
 									}
 								}
 								return false;

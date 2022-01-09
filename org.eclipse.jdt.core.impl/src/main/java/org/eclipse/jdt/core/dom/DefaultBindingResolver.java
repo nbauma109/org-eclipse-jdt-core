@@ -562,7 +562,7 @@ class DefaultBindingResolver extends BindingResolver {
 		}
 		Object key =  new AnnotationIdentityBinding(internalInstance);
 		IAnnotationBinding newDomInstance = new AnnotationBinding(internalInstance, this);
-		IAnnotationBinding domInstance = (IAnnotationBinding) ((ConcurrentHashMap)this.bindingTables.compilerAnnotationBindingsToASTBindings).putIfAbsent(key, newDomInstance);
+		IAnnotationBinding domInstance = (IAnnotationBinding) this.bindingTables.compilerAnnotationBindingsToASTBindings.putIfAbsent(key, newDomInstance);
 		return domInstance != null ? domInstance : newDomInstance;
 	}
 
@@ -839,22 +839,16 @@ class DefaultBindingResolver extends BindingResolver {
 						if (isStatic) {
 							if (binding instanceof org.eclipse.jdt.internal.compiler.lookup.TypeBinding) {
 								ITypeBinding typeBinding = this.getTypeBinding((org.eclipse.jdt.internal.compiler.lookup.TypeBinding) binding);
-								return typeBinding == null ? null : typeBinding;
+								return typeBinding;
 							}
 						} else {
 							if ((binding.kind() & Binding.PACKAGE) != 0) {
 								IPackageBinding packageBinding = getPackageBinding((org.eclipse.jdt.internal.compiler.lookup.PackageBinding) binding);
-								if (packageBinding == null) {
-									return null;
-								}
-								return packageBinding;
+                                return packageBinding;
 							} else {
 								// if it is not a package, it has to be a type
 								ITypeBinding typeBinding = this.getTypeBinding((org.eclipse.jdt.internal.compiler.lookup.TypeBinding) binding);
-								if (typeBinding == null) {
-									return null;
-								}
-								return typeBinding;
+                                return typeBinding;
 							}
 						}
 					}
@@ -864,21 +858,21 @@ class DefaultBindingResolver extends BindingResolver {
 						if (isStatic) {
 							if (binding instanceof org.eclipse.jdt.internal.compiler.lookup.TypeBinding) {
 								ITypeBinding typeBinding = this.getTypeBinding((org.eclipse.jdt.internal.compiler.lookup.TypeBinding) binding);
-								return typeBinding == null ? null : typeBinding;
+								return typeBinding;
 							} else if (binding instanceof FieldBinding) {
 								IVariableBinding variableBinding = this.getVariableBinding((FieldBinding) binding);
-								return variableBinding == null ? null : variableBinding;
+								return variableBinding;
 							} else if (binding instanceof org.eclipse.jdt.internal.compiler.lookup.MethodBinding) {
 								// it is a type
 								return getMethodBinding((org.eclipse.jdt.internal.compiler.lookup.MethodBinding)binding);
 							} else if (binding instanceof RecordComponentBinding) {
 								IVariableBinding variableBinding = this.getVariableBinding((RecordComponentBinding) binding);
-								return variableBinding == null ? null : variableBinding;
+								return variableBinding;
 							}
 						} else {
 							if (binding instanceof org.eclipse.jdt.internal.compiler.lookup.TypeBinding) {
 								ITypeBinding typeBinding = this.getTypeBinding((org.eclipse.jdt.internal.compiler.lookup.TypeBinding) binding);
-								return typeBinding == null ? null : typeBinding;
+								return typeBinding;
 							}
 						}
 					}
@@ -1024,10 +1018,7 @@ class DefaultBindingResolver extends BindingResolver {
 			if (referenceExpression.receiverType != null && referenceExpression.receiverType.isArrayType())
 				return null;
 			IMethodBinding methodBinding = getMethodBinding(referenceExpression.getMethodBinding());
-			if (methodBinding == null) {
-				return null;
-			}
-			return methodBinding;
+            return methodBinding;
 		}
 		return null;
 	}

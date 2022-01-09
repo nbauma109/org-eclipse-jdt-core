@@ -265,7 +265,7 @@ public TypeBinding resolveType(BlockScope scope) {
 
 	if (!this.binding.isValidBinding()) {
 		if (this.binding instanceof ProblemMethodBinding
-			&& ((ProblemMethodBinding) this.binding).problemId() == ProblemReasons.NotVisible) {
+			&& this.binding.problemId() == ProblemReasons.NotVisible) {
 			if (this.evaluationContext.declaringTypeName != null) {
 				this.delegateThis = scope.getField(scope.enclosingSourceType(), EvaluationConstants.DELEGATE_THIS, this);
 				if (this.delegateThis == null){ // if not found then internal error, field should have been found
@@ -313,7 +313,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	if (!this.binding.isStatic()) {
 		// the "receiver" must not be a type, in other words, a NameReference that the TC has bound to a Type
 		if (this.receiver instanceof NameReference
-				&& (((NameReference) this.receiver).bits & Binding.TYPE) != 0) {
+				&& (this.receiver.bits & Binding.TYPE) != 0) {
 			scope.problemReporter().mustUseAStaticMethod(this, this.binding);
 		} else {
 			// handle indirect inheritance thru variable secondary bound

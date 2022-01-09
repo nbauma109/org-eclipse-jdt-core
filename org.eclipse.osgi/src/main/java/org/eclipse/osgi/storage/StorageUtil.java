@@ -78,7 +78,7 @@ public class StorageUtil {
 		try {
 			fos = new FileOutputStream(file);
 
-			byte buffer[] = new byte[1024];
+			byte[] buffer = new byte[1024];
 			int count;
 			while ((count = in.read(buffer, 0, buffer.length)) > 0) {
 				fos.write(buffer, 0, count);
@@ -111,7 +111,7 @@ public class StorageUtil {
 	public static boolean rm(File file, boolean DEBUG) {
 		if (file.exists()) {
 			if (file.isDirectory()) {
-				String list[] = file.list();
+				String[] list = file.list();
 				if (list != null) {
 					int len = list.length;
 					for (int i = 0; i < len; i++) {
@@ -273,9 +273,9 @@ public class StorageUtil {
 	// reserved names according to
 	// https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file
 	private static HashSet<String> RESERVED_NAMES = new HashSet<>(
-			Arrays.asList(new String[] { "aux", "com1", "com2", "com3", "com4", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-					"com5", "com6", "com7", "com8", "com9", "con", "lpt1", "lpt2", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
-					"lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "nul", "prn" })); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
+			Arrays.asList("aux", "com1", "com2", "com3", "com4", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+                    "com5", "com6", "com7", "com8", "com9", "con", "lpt1", "lpt2", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+                    "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "nul", "prn")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
 
 	/** Tests whether the filename can escape path into special device **/
 	public static boolean isReservedFileName(File file) {

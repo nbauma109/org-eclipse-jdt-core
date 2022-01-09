@@ -165,7 +165,7 @@ protected ReferenceBinding checkMethodRef(MethodBinding method, ReferenceExpress
 	if (result) {
 		Expression lhs = referenceExpression.lhs;
 		if (lhs instanceof NameReference) {
-			Binding binding = ((NameReference) lhs).resolvedType;
+			Binding binding = lhs.resolvedType;
 			if (binding instanceof ReferenceBinding)
 				return (ReferenceBinding) binding;
 		}
@@ -290,7 +290,7 @@ public int match(Annotation node, MatchingNodeSet nodeSet) {
 	for (int i=0; i<length; i++) {
 		pair = node.memberValuePairs()[i];
 		if (matchesName(this.pattern.selector, pair.name)) {
-			ASTNode possibleNode = (node instanceof SingleMemberAnnotation) ? (ASTNode) node : pair;
+			ASTNode possibleNode = (node instanceof SingleMemberAnnotation) ? node : pair;
 			return nodeSet.addMatch(possibleNode, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 		}
 	}
@@ -339,7 +339,7 @@ protected int matchMethod(MethodBinding method, boolean skipImpossibleArg) {
 		// global verification
 		if (method.parameters == null) return INACCURATE_MATCH;
 		if (parameterCount != method.parameters.length) return IMPOSSIBLE_MATCH;
-		if (!method.isValidBinding() && ((ProblemMethodBinding)method).problemId() == ProblemReasons.Ambiguous) {
+		if (!method.isValidBinding() && method.problemId() == ProblemReasons.Ambiguous) {
 			// return inaccurate match for ambiguous call (bug 80890)
 			return INACCURATE_MATCH;
 		}

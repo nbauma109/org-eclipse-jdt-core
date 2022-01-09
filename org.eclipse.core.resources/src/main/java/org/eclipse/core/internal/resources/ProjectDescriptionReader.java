@@ -214,13 +214,13 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 			StringTokenizer tokens = new StringTokenizer(charBuffer.toString(), ","); //$NON-NLS-1$
 			while (tokens.hasMoreTokens()) {
 				String next = tokens.nextToken();
-				if (next.toLowerCase().equals(TRIGGER_AUTO)) {
+				if (next.equalsIgnoreCase(TRIGGER_AUTO)) {
 					command.setBuilding(IncrementalProjectBuilder.AUTO_BUILD, true);
-				} else if (next.toLowerCase().equals(TRIGGER_CLEAN)) {
+				} else if (next.equalsIgnoreCase(TRIGGER_CLEAN)) {
 					command.setBuilding(IncrementalProjectBuilder.CLEAN_BUILD, true);
-				} else if (next.toLowerCase().equals(TRIGGER_FULL)) {
+				} else if (next.equalsIgnoreCase(TRIGGER_FULL)) {
 					command.setBuilding(IncrementalProjectBuilder.FULL_BUILD, true);
-				} else if (next.toLowerCase().equals(TRIGGER_INCREMENTAL)) {
+				} else if (next.equalsIgnoreCase(TRIGGER_INCREMENTAL)) {
 					command.setBuilding(IncrementalProjectBuilder.INCREMENTAL_BUILD, true);
 				}
 			}
@@ -707,7 +707,7 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 				parseProblem(NLS.bind(Messages.projRead_badFilterName, oldResource.getProjectRelativePath(), newPath));
 			} else {
 				if (project != null) {
-					((FilterDescription) objectStack.peek()).setResource(newPath.isEmpty() ? (IResource) project : project.getFolder(newPath));
+					((FilterDescription) objectStack.peek()).setResource(newPath.isEmpty() ? project : project.getFolder(newPath));
 				} else {
 					// if the project is null, that means that we're loading a project description to retrieve
 					// some meta data only.
@@ -953,8 +953,8 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 	 */
 	public ProjectDescription read(IPath location) throws IOException {
 		try (
-			BufferedInputStream file = new BufferedInputStream(new FileInputStream(location.toFile()));
-		) {
+			BufferedInputStream file = new BufferedInputStream(new FileInputStream(location.toFile()))
+        ) {
 			return read(new InputSource(file));
 		}
 	}
@@ -965,8 +965,8 @@ public class ProjectDescriptionReader extends DefaultHandler implements IModelOb
 	 */
 	public ProjectDescription read(IPath location, IPath tempLocation) throws IOException {
 		try (
-			SafeFileInputStream file = new SafeFileInputStream(location.toOSString(), tempLocation.toOSString());
-		) {
+			SafeFileInputStream file = new SafeFileInputStream(location.toOSString(), tempLocation.toOSString())
+        ) {
 			return read(new InputSource(file));
 		}
 	}

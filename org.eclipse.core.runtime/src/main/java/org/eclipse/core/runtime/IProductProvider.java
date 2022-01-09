@@ -34,12 +34,12 @@ public interface IProductProvider {
 	 *
 	 * @return the name of this product provider
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the products provided by this provider.
 	 *
 	 * @return the products provided by this provider
 	 */
-	public IProduct[] getProducts();
+    IProduct[] getProducts();
 }

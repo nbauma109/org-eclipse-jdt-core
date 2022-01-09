@@ -119,18 +119,14 @@ public abstract class ClasspathLocation {
 					return false;
 				if (moduleUpdates.size() != otherModuleUpdates.size())
 					return false;
-				if (!moduleUpdates.containsAll(otherModuleUpdates))
-					return false;
+                return moduleUpdates.containsAll(otherModuleUpdates);
 			} else {
-				if (otherModuleUpdates != null)
-					return false;
+                return otherModuleUpdates == null;
 			}
 		} else {
-			if (other.updates != null)
-				return false;
+            return other.updates == null;
 		}
-		return true;
-	}
+    }
 	static ClasspathLocation forSourceFolder(IContainer sourceFolder, IContainer outputFolder,
 			char[][] inclusionPatterns, char[][] exclusionPatterns, boolean ignoreOptionalProblems, IPath externalAnnotationPath, List<ClasspathLocation> allExternalAnnotationPaths) {
 		return new ClasspathMultiDirectory(sourceFolder, outputFolder, inclusionPatterns, exclusionPatterns, ignoreOptionalProblems,

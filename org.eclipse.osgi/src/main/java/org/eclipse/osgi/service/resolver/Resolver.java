@@ -49,14 +49,14 @@ public interface Resolver {
 	 * against.  A <code>null</code> value indicates that the system properties should
 	 * be used to match against
 	 */
-	public void resolve(BundleDescription[] discard, Dictionary<Object, Object>[] platformProperties);
+    void resolve(BundleDescription[] discard, Dictionary<Object, Object>[] platformProperties);
 
 	/**
 	 * Flushes this resolver of any stored/cached data it may be keeping to
 	 * facilitate incremental processing on its associated state. This is
 	 * typicaly used when switching the resolver's state object.
 	 */
-	public void flush();
+    void flush();
 
 	/**
 	 * Returns the state associated with this resolver. A state can work with
@@ -66,7 +66,7 @@ public interface Resolver {
 	 * @return the state for this resolver. null is returned if the resolver
 	 * does not have a state
 	 */
-	public State getState();
+    State getState();
 
 	/**
 	 * Sets the state associated with this resolver. A state can work with at
@@ -82,13 +82,13 @@ public interface Resolver {
 	 *  if (this.getState() != value) value.setResolver(this);
 	 * </pre>
 	 */
-	public void setState(State value);
+    void setState(State value);
 
 	/**
 	 * Notifies the resolver a bundle has been added to the state.
 	 * @param bundle the bundle added
 	 */
-	public void bundleAdded(BundleDescription bundle);
+    void bundleAdded(BundleDescription bundle);
 
 	/**
 	 * Notifies the resolver a bundle has been removed from the state.
@@ -96,7 +96,7 @@ public interface Resolver {
 	 * @param pending indicates if the bundle to be remove has current dependents and
 	 * will pend complete removal until the bundle has been re-resolved.
 	 */
-	public void bundleRemoved(BundleDescription bundle, boolean pending);
+    void bundleRemoved(BundleDescription bundle, boolean pending);
 
 	/**
 	 * Notifies the resolver a bundle has been updated in the state.
@@ -105,7 +105,7 @@ public interface Resolver {
 	 * @param pending indicates if the bundle to be updated has current dependents and
 	 * will pend complete removal until the bundle has been re-resolved.
 	 */
-	public void bundleUpdated(BundleDescription newDescription, BundleDescription existingDescription, boolean pending);
+    void bundleUpdated(BundleDescription newDescription, BundleDescription existingDescription, boolean pending);
 
 	/**
 	 * Attempts to find an ExportPackageDescription that will satisfy a dynamic import
@@ -117,7 +117,7 @@ public interface Resolver {
 	 * @return the ExportPackageDescription that satisfies the dynamic import request;
 	 * a value of <code>null</code> is returned if none is available.
 	 */
-	public ExportPackageDescription resolveDynamicImport(BundleDescription importingBundle, String requestedPackage);
+    ExportPackageDescription resolveDynamicImport(BundleDescription importingBundle, String requestedPackage);
 
 	/**
 	 * Sets the selection policy for this resolver.  A selection policy is used to sort
@@ -138,12 +138,12 @@ public interface Resolver {
 	 * @param selectionPolicy the selection policy for this resolver
 	 * @since 3.2
 	 */
-	public void setSelectionPolicy(Comparator<BaseDescription> selectionPolicy);
+    void setSelectionPolicy(Comparator<BaseDescription> selectionPolicy);
 
 	/**
 	 * Returns the selection policy for this resolver or null if it is not set
 	 * @return the selection policy for this resolver or null if it is not set
 	 * @since 3.2
 	 */
-	public Comparator<BaseDescription> getSelectionPolicy();
+    Comparator<BaseDescription> getSelectionPolicy();
 }

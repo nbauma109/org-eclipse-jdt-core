@@ -175,7 +175,7 @@ public class LexStream implements TerminalTokens {
 	}
 
 	public boolean afterEol(int i) {
-		return i < 1 ? true : line(i - 1) < line(i);
+		return i < 1 || line(i - 1) < line(i);
 	}
 
 	public void reset() {
@@ -219,11 +219,7 @@ public class LexStream implements TerminalTokens {
 			return false;
 		} else if(index > this.tokenCacheIndex) {
 			return true;
-		} else if(this.tokenCacheIndex - this.tokenCache.length >= index) {
-			return false;
-		} else {
-			return true;
-		}
+		} else return this.tokenCacheIndex - this.tokenCache.length < index;
 	}
 
 	@Override
@@ -237,10 +233,10 @@ public class LexStream implements TerminalTokens {
 				int intervalStart = this.intervalStartToSkip[i];
 				int intervalEnd = this.intervalEndToSkip[i];
 
-				res.append(source.substring(previousEnd + 1, intervalStart));
+				res.append(source, previousEnd + 1, intervalStart);
 				res.append('<');
 				res.append('@');
-				res.append(source.substring(intervalStart, intervalEnd + 1));
+				res.append(source, intervalStart, intervalEnd + 1);
 				res.append('@');
 				res.append('>');
 
@@ -259,32 +255,32 @@ public class LexStream implements TerminalTokens {
 				int intervalEnd = this.intervalEndToSkip[i];
 
 				if(curtokStart >= previousEnd && curtokEnd <= intervalStart) {
-					res.append(source.substring(previousEnd + 1, curtokStart));
+					res.append(source, previousEnd + 1, curtokStart);
 					res.append('<');
 					res.append('#');
-					res.append(source.substring(curtokStart, curtokEnd + 1));
+					res.append(source, curtokStart, curtokEnd + 1);
 					res.append('#');
 					res.append('>');
-					res.append(source.substring(curtokEnd+1, intervalStart));
+					res.append(source, curtokEnd+1, intervalStart);
 				} else {
-					res.append(source.substring(previousEnd + 1, intervalStart));
+					res.append(source, previousEnd + 1, intervalStart);
 				}
 				res.append('<');
 				res.append('@');
-				res.append(source.substring(intervalStart, intervalEnd + 1));
+				res.append(source, intervalStart, intervalEnd + 1);
 				res.append('@');
 				res.append('>');
 
 				previousEnd = intervalEnd;
 			}
 			if(curtokStart >= previousEnd) {
-				res.append(source.substring(previousEnd + 1, curtokStart));
+				res.append(source, previousEnd + 1, curtokStart);
 				res.append('<');
 				res.append('#');
 				if(curtokKind == TokenNameEOF) {
 					res.append("EOF#>"); //$NON-NLS-1$
 				} else {
-					res.append(source.substring(curtokStart, curtokEnd + 1));
+					res.append(source, curtokStart, curtokEnd + 1);
 					res.append('#');
 					res.append('>');
 					res.append(source.substring(curtokEnd+1));

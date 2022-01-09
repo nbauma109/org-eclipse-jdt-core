@@ -343,13 +343,13 @@ public class FakedTrackingVariable extends LocalDeclaration {
 	 */
 	public static void analyseCloseableAllocation(BlockScope scope, FlowInfo flowInfo, AllocationExpression allocation) {
 		// client has checked that the resolvedType is an AutoCloseable, hence the following cast is safe:
-		if (((ReferenceBinding)allocation.resolvedType).hasTypeBit(TypeIds.BitResourceFreeCloseable)) {
+		if (allocation.resolvedType.hasTypeBit(TypeIds.BitResourceFreeCloseable)) {
 			// remove unnecessary attempts (closeable is not relevant)
 			if (allocation.closeTracker != null) {
 				allocation.closeTracker.withdraw();
 				allocation.closeTracker = null;
 			}
-		} else if (((ReferenceBinding)allocation.resolvedType).hasTypeBit(TypeIds.BitWrapperCloseable)) {
+		} else if (allocation.resolvedType.hasTypeBit(TypeIds.BitWrapperCloseable)) {
 			boolean isWrapper = true;
 			if (allocation.arguments != null &&  allocation.arguments.length > 0) {
 				// find the wrapped resource represented by its tracking var:
@@ -424,7 +424,7 @@ public class FakedTrackingVariable extends LocalDeclaration {
 			return flowInfo;
 		}
 		// client has checked that the resolvedType is an AutoCloseable, hence the following cast is safe:
-		if (((ReferenceBinding)acquisition.resolvedType).hasTypeBit(TypeIds.BitResourceFreeCloseable)) {
+		if (acquisition.resolvedType.hasTypeBit(TypeIds.BitResourceFreeCloseable)) {
 			// remove unnecessary attempts (closeable is not relevant)
 			if (acquisition.closeTracker != null) {
 				acquisition.closeTracker.withdraw();
@@ -771,7 +771,7 @@ public class FakedTrackingVariable extends LocalDeclaration {
 	/** Answer wither the given type binding is a subtype of java.lang.AutoCloseable. */
 	public static boolean isAnyCloseable(TypeBinding typeBinding) {
 		return typeBinding instanceof ReferenceBinding
-			&& ((ReferenceBinding)typeBinding).hasTypeBit(TypeIds.BitAutoCloseable|TypeIds.BitCloseable);
+			&& typeBinding.hasTypeBit(TypeIds.BitAutoCloseable|TypeIds.BitCloseable);
 	}
 
 	public int findMostSpecificStatus(FlowInfo flowInfo, BlockScope currentScope, BlockScope locationScope) {
@@ -1016,12 +1016,9 @@ public class FakedTrackingVariable extends LocalDeclaration {
 		if (flowInfo.isDefinitelyNull(this.originalBinding)) {
 			return true;
 		}
-		if (!(flowInfo.isDefinitelyAssigned(this.originalBinding)
-				|| flowInfo.isPotentiallyAssigned(this.originalBinding))) {
-			return true;
-		}
-		return false;
-	}
+        return !(flowInfo.isDefinitelyAssigned(this.originalBinding)
+                || flowInfo.isPotentiallyAssigned(this.originalBinding));
+    }
 
 	public boolean isClosedInFinallyOfEnclosing(BlockScope scope) {
 		BlockScope currentScope = scope;

@@ -67,7 +67,7 @@ public interface IJavaSearchResultCollector {
  *
  * @deprecated Replaced by {@link SearchRequestor#beginReporting()}.
  */
-public void aboutToStart();
+void aboutToStart();
 /**
  * Accepts the given search result.
  *
@@ -84,23 +84,23 @@ public void aboutToStart();
  * @exception CoreException if this collector had a problem accepting the search result
  * @deprecated Replaced by {@link SearchRequestor#acceptSearchMatch(SearchMatch)}.
  */
-public void accept(
-	IResource resource,
-	int start,
-	int end,
-	IJavaElement enclosingElement,
-	int accuracy)
+void accept(
+        IResource resource,
+        int start,
+        int end,
+        IJavaElement enclosingElement,
+        int accuracy)
 	throws CoreException;
 /**
  * Called when the search has ended.
  *
  * @deprecated Replaced by {@link SearchRequestor#endReporting()}.
  */
-public void done();
+void done();
 /**
  * Returns the progress monitor used to report progress.
  *
  * @return a progress monitor or null if no progress monitor is provided
  */
-public IProgressMonitor getProgressMonitor();
+IProgressMonitor getProgressMonitor();
 }

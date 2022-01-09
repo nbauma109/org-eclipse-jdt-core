@@ -223,7 +223,7 @@ public TypeBinding resolveType(BlockScope scope) {
 			scope.problemReporter().cannotInferElidedTypes(this);
 			return this.resolvedType = null;
 		}
-		this.resolvedType = this.type.resolvedType = scope.environment().createParameterizedType(((ParameterizedTypeBinding) this.resolvedType).genericType(), inferredTypes, ((ParameterizedTypeBinding) this.resolvedType).enclosingType());
+		this.resolvedType = this.type.resolvedType = scope.environment().createParameterizedType(((ParameterizedTypeBinding) this.resolvedType).genericType(), inferredTypes, this.resolvedType.enclosingType());
  	}
 
 	ReferenceBinding allocatedType = (ReferenceBinding) this.resolvedType;
@@ -231,7 +231,7 @@ public TypeBinding resolveType(BlockScope scope) {
 
 	if (!this.binding.isValidBinding()) {
 		if (this.binding instanceof ProblemMethodBinding
-			&& ((ProblemMethodBinding) this.binding).problemId() == NotVisible) {
+			&& this.binding.problemId() == NotVisible) {
 			if (this.evaluationContext.declaringTypeName != null) {
 				this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
 				if (this.delegateThis == null) {

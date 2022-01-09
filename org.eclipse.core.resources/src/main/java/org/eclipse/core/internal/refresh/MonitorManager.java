@@ -206,14 +206,14 @@ class MonitorManager implements ILifecycleListener, IPathVariableChangeListener,
 			for (IResource resource : resources) {
 				IPath rawLocation = resource.getRawLocation();
 				if (rawLocation != null) {
-					if (rawLocation.segmentCount() > 0 && variableName.equals(rawLocation.segment(0)) && !invalidResources.contains(resource)) {
+					if (rawLocation.segmentCount() > 0 && variableName.equals(rawLocation.segment(0))) {
 						invalidResources.add(resource);
 					}
 				}
 			}
 		}
 		if (!invalidResources.isEmpty()) {
-			MonitorJob.createSystem(Messages.refresh_restoreOnInvalid, invalidResources, (ICoreRunnable) monitor -> {
+			MonitorJob.createSystem(Messages.refresh_restoreOnInvalid, invalidResources, monitor -> {
 				SubMonitor subMonitor = SubMonitor.convert(monitor, invalidResources.size() * 2);
 				for (IResource resource : invalidResources) {
 					unmonitor(resource, subMonitor.split(1));

@@ -455,8 +455,7 @@ boolean checkInheritedReturnTypes(MethodBinding method, MethodBinding otherMetho
 
 	if (!this.type.isInterface())
 		if (method.declaringClass.isClass() || !this.type.implementsInterface(method.declaringClass, false))
-			if (otherMethod.declaringClass.isClass() || !this.type.implementsInterface(otherMethod.declaringClass, false))
-				return true; // do not complain since the superclass already got blamed
+            return otherMethod.declaringClass.isClass() || !this.type.implementsInterface(otherMethod.declaringClass, false); // do not complain since the superclass already got blamed
 
 	return false;
 }
@@ -772,8 +771,7 @@ static boolean couldMethodOverride(MethodBinding method, MethodBinding inherited
 	if (!method.isPublic()) { // inheritedMethod is either public or protected & method is less than public
 		if (inheritedMethod.isPublic())
 			return false;
-		if (inheritedMethod.isProtected() && !method.isProtected())
-			return false;
+        return !inheritedMethod.isProtected() || method.isProtected();
 	}
 	return true;
 }

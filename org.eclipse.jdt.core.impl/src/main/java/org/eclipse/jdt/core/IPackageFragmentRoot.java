@@ -361,7 +361,7 @@ public interface IPackageFragmentRoot
 	 *
 	 * @return true if this package fragment root's underlying resource is a binary archive, false otherwise
 	 */
-	public boolean isArchive();
+    boolean isArchive();
 
 	/**
 	 * Returns whether this package fragment root is external
@@ -461,5 +461,5 @@ public interface IPackageFragmentRoot
 	 * @return the <code>IModuleDescription</code> this root contains.
 	 * @since 3.14
 	 */
-	public IModuleDescription getModuleDescription();
+    IModuleDescription getModuleDescription();
 }

@@ -86,7 +86,7 @@ public @interface Export {
 	/**
 	 * Substitution policy for this package.
 	 */
-	public enum Substitution {
+    enum Substitution {
 		/**
 		 * Use a consumer type version range for the import package clause when
 		 * substitutably importing a package.

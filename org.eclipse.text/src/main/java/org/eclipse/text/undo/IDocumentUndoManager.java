@@ -168,6 +168,6 @@ public interface IDocumentUndoManager {
 	 *
 	 * @param manager the document undo manger whose history is to be transferred to the receiver
 	 */
-	public void transferUndoHistory(IDocumentUndoManager manager);
+    void transferUndoHistory(IDocumentUndoManager manager);
 
 }

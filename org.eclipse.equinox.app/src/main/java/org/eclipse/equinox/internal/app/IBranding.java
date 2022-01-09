@@ -18,17 +18,17 @@ import org.osgi.framework.Bundle;
 
 public interface IBranding {
 
-	public String getApplication();
+	String getApplication();
 
-	public String getName();
+	String getName();
 
-	public String getDescription();
+	String getDescription();
 
-	public String getId();
+	String getId();
 
-	public String getProperty(String key);
+	String getProperty(String key);
 	
-	public Bundle getDefiningBundle();
+	Bundle getDefiningBundle();
 
-	public Object getProduct();
+	Object getProduct();
 }

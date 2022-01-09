@@ -52,7 +52,7 @@ public class MethodInfo extends ClassFileStruct implements IMethodInfo {
 	 * @param offset int
 	 * @param decodingFlags int
 	 */
-	public MethodInfo(byte classFileBytes[], IConstantPool constantPool, int offset, int decodingFlags)
+	public MethodInfo(byte[] classFileBytes, IConstantPool constantPool, int offset, int decodingFlags)
 		throws ClassFormatException {
 
 		boolean no_code_attribute = (decodingFlags & IClassFileReader.METHOD_BODIES) == 0;

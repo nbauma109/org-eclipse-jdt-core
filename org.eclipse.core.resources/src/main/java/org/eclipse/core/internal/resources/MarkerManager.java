@@ -217,7 +217,7 @@ public class MarkerManager implements IManager {
 		IResource resource = workspace.newResource(path, type);
 		list.ensureCapacity(list.size() + markers.length);
 		for (IMarkerSetElement marker : markers) {
-			list.add(new Marker(resource, ((MarkerInfo) marker).getId()));
+			list.add(new Marker(resource, marker.getId()));
 		}
 	}
 

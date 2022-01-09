@@ -3069,9 +3069,9 @@ public static final boolean match(
 	char patternChar = 0;
 	while (true) {
 		if (iPattern == patternEnd) {
-			if (iName == nameEnd) return true; // the chars match
-			return false; // pattern has ended but not the name, no match
-		}
+            return iName == nameEnd; // the chars match
+// pattern has ended but not the name, no match
+        }
 		if ((patternChar = pattern[iPattern]) == '*') {
 			break;
 		}

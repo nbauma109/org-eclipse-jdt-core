@@ -136,7 +136,7 @@ public class ExtensionsParser extends DefaultHandler {
 	private static final int LAST_INDEX = 1;
 
 	@SuppressWarnings("unchecked")
-	private final ArrayList<RegistryObject> scratchVectors[] = new ArrayList[LAST_INDEX + 1];
+	private final ArrayList<RegistryObject>[] scratchVectors = new ArrayList[LAST_INDEX + 1];
 
 	private Locator locator = null;
 

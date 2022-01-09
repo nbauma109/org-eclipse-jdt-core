@@ -60,14 +60,14 @@ public class LoopingFlowContext extends SwitchFlowContext {
 	public BranchLabel continueLabel;
 	public UnconditionalFlowInfo initsOnContinue = FlowInfo.DEAD_END;
 	private UnconditionalFlowInfo upstreamNullFlowInfo;
-	private LoopingFlowContext innerFlowContexts[] = null;
-	private UnconditionalFlowInfo innerFlowInfos[] = null;
+	private LoopingFlowContext[] innerFlowContexts = null;
+	private UnconditionalFlowInfo[] innerFlowInfos = null;
 	private int innerFlowContextsCount = 0;
-	private LabelFlowContext breakTargetContexts[] = null;
+	private LabelFlowContext[] breakTargetContexts = null;
 	private int breakTargetsCount = 0;
 
-	Reference finalAssignments[];
-	VariableBinding finalVariables[];
+	Reference[] finalAssignments;
+	VariableBinding[] finalVariables;
 	int assignCount = 0;
 
 	// the following three arrays are in sync regarding their indices:

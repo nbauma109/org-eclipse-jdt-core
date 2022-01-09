@@ -31,5 +31,5 @@ public interface IHandler2 extends IHandler {
 	 *            which indicates that the handler can query whatever model that
 	 *            is necessary. This context must not be cached.
 	 */
-	public void setEnabled(Object evaluationContext);
+    void setEnabled(Object evaluationContext);
 }

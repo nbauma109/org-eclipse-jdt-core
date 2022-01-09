@@ -29,44 +29,44 @@ public interface ImportPackageSpecification extends VersionConstraint {
 	/**
 	 * The static resolution directive value.
 	 */
-	public static final String RESOLUTION_STATIC = "static"; //$NON-NLS-1$
+    String RESOLUTION_STATIC = "static"; //$NON-NLS-1$
 	/**
 	 * The optional resolution directive value.
 	 */
-	public static final String RESOLUTION_OPTIONAL = "optional"; //$NON-NLS-1$
+    String RESOLUTION_OPTIONAL = "optional"; //$NON-NLS-1$
 	/**
 	 * The dynamic resolution directive value.
 	 */
-	public static final String RESOLUTION_DYNAMIC = "dynamic"; //$NON-NLS-1$
+    String RESOLUTION_DYNAMIC = "dynamic"; //$NON-NLS-1$
 
 	/**
 	 * Returns the symbolic name of the bundle this import package must be resolved to.
 	 * @return the symbolic name of the bundle this import pacakge must be resolved to.
 	 * A value of <code>null</code> indicates any symbolic name.
 	 */
-	public String getBundleSymbolicName();
+    String getBundleSymbolicName();
 
 	/**
 	 * Returns the version range which this import package may be resolved to.
 	 * @return the version range which this import package may be resolved to.
 	 */
-	public VersionRange getBundleVersionRange();
+    VersionRange getBundleVersionRange();
 
 	/**
 	 * Returns the arbitrary attributes which this import package may be resolved to.
 	 * @return the arbitrary attributes which this import package may be resolved to.
 	 */
-	public Map<String, Object> getAttributes();
+    Map<String, Object> getAttributes();
 
 	/**
 	 * Returns the directives that control this import package.
 	 * @return the directives that control this import package.
 	 */
-	public Map<String, Object> getDirectives();
+    Map<String, Object> getDirectives();
 
 	/**
 	 * Returns the specified directive that control this import package.
 	 * @return the specified directive that control this import package.
 	 */
-	public Object getDirective(String key);
+    Object getDirective(String key);
 }

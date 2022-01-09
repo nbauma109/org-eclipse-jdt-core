@@ -29,5 +29,5 @@ public interface IBufferChangedListener {
 	 *
 	 * @param event the change event
 	 */
-	public void bufferChanged(BufferChangedEvent event);
+    void bufferChanged(BufferChangedEvent event);
 }

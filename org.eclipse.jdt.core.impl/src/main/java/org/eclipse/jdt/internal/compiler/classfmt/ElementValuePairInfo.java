@@ -80,12 +80,7 @@ public boolean equals(Object obj) {
 		return false;
 	}
 	if (this.value == null) {
-		if (other.value != null) {
-			return false;
-		}
-	} else if (!this.value.equals(other.value)) {
-		return false;
-	}
-	return true;
+        return other.value == null;
+	} else return this.value.equals(other.value);
 }
 }

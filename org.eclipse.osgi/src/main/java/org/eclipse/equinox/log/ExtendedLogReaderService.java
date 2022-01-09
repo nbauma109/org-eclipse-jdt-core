@@ -39,5 +39,5 @@ public interface ExtendedLogReaderService extends LogReaderService {
 	 * @see LogEntry
 	 * @see LogReaderService#addLogListener(LogListener)
 	 */
-	public void addLogListener(LogListener listener, LogFilter filter);
+    void addLogListener(LogListener listener, LogFilter filter);
 }

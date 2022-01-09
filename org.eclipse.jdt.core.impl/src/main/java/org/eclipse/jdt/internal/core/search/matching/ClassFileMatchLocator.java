@@ -126,10 +126,7 @@ private boolean checkAnnotations(TypeReferencePattern pattern, IBinaryAnnotation
 			}
 		}
 	}
-	if ((tagBits & TagBits.AllStandardAnnotationsMask) != 0 && checkStandardAnnotations(tagBits, pattern)) {
-		return true;
-	}
-	return false;
+    return (tagBits & TagBits.AllStandardAnnotationsMask) != 0 && checkStandardAnnotations(tagBits, pattern);
 }
 private boolean checkAnnotationTypeReference(char[] fullyQualifiedName, TypeReferencePattern pattern) {
 	return checkTypeName(pattern.simpleName, pattern.qualification, fullyQualifiedName, pattern.isCaseSensitive, pattern.isCamelCase);
@@ -206,9 +203,7 @@ private boolean checkStandardAnnotations(long annotationTagBits, TypeReferencePa
 	}
 	if ((annotationTagBits & TagBits.AnnotationPolymorphicSignature) != 0) {
 		char[][] compoundName = TypeConstants.JAVA_LANG_INVOKE_METHODHANDLE_$_POLYMORPHICSIGNATURE;
-		if (checkAnnotationTypeReference(CharOperation.concatWith(compoundName, '.'), pattern)) {
-			return true;
-		}
+        return checkAnnotationTypeReference(CharOperation.concatWith(compoundName, '.'), pattern);
 	}
 	return false;
 }
@@ -475,8 +470,7 @@ boolean matchConstructor(ConstructorPattern pattern, Object binaryInfo, IBinaryT
 		return false;
 	if (pattern.parameterSimpleNames != null) {
 		char[] methodDescriptor = convertClassFileFormat(method.getMethodDescriptor());
-		if (!checkParameters(methodDescriptor, pattern.parameterSimpleNames, pattern.parameterQualifications, pattern.isCaseSensitive(), pattern.isCamelCase()))
-			return false;
+        return checkParameters(methodDescriptor, pattern.parameterSimpleNames, pattern.parameterQualifications, pattern.isCaseSensitive(), pattern.isCamelCase());
 	}
 	return true;
 }
@@ -511,8 +505,7 @@ boolean matchMethod(MethodPattern pattern, Object binaryInfo, IBinaryType enclos
 			if (!checkTypeName(pattern.returnSimpleName, pattern.returnQualification, returnTypeSignature, pattern.isCaseSensitive(), pattern.isCamelCase()))
 				return false;
 		}
-		if (checkParameters &&  !checkParameters(methodDescriptor, pattern.parameterSimpleNames, pattern.parameterQualifications, pattern.isCaseSensitive(), pattern.isCamelCase()))
-			return false;
+        return !checkParameters || checkParameters(methodDescriptor, pattern.parameterSimpleNames, pattern.parameterQualifications, pattern.isCaseSensitive(), pattern.isCamelCase());
 	}
 	return true;
 }

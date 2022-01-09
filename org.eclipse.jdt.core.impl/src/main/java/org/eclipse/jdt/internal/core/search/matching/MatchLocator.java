@@ -834,11 +834,8 @@ private boolean filterEnum(SearchMatch match) {
 			if (this.options == null) {
 				IJavaProject proj = (IJavaProject)pkg.getAncestor(IJavaElement.JAVA_PROJECT);
 				String complianceStr = proj.getOption(CompilerOptions.OPTION_Source, true);
-				if (CompilerOptions.versionToJdkLevel(complianceStr) >= ClassFileConstants.JDK1_5)
-					return true;
-			} else if (this.options.sourceLevel >= ClassFileConstants.JDK1_5) {
-				return true;
-			}
+                return CompilerOptions.versionToJdkLevel(complianceStr) >= ClassFileConstants.JDK1_5;
+			} else return this.options.sourceLevel >= ClassFileConstants.JDK1_5;
 		}
 	}
 	return false;
@@ -1268,8 +1265,7 @@ public void initialize(JavaProject project, int possibleMatchSize) throws JavaMo
 private boolean skipMatch(JavaProject javaProject, PossibleMatch possibleMatch) {
 	if (this.options.sourceLevel >= ClassFileConstants.JDK9) {
 		char[] pModuleName = possibleMatch.getModuleName();
-		if (pModuleName != null && this.lookupEnvironment.getModule(pModuleName) == null)
-			return true;
+        return pModuleName != null && this.lookupEnvironment.getModule(pModuleName) == null;
 	}
 	return false;
 }
@@ -1902,7 +1898,7 @@ public ModuleReferenceMatch newModuleReferenceMatch(
 		ASTNode reference) {
 	SearchParticipant participant = getParticipant();
 	IResource resource = this.currentPossibleMatch.resource;
-	boolean insideDocComment = reference != null ? (reference.bits & ASTNode.InsideJavadoc) != 0 : false;
+	boolean insideDocComment = reference != null && (reference.bits & ASTNode.InsideJavadoc) != 0;
 	if (enclosingBinding != null)
 		enclosingElement = ((JavaElement) enclosingElement).resolved(enclosingBinding);
 	return new ModuleReferenceMatch(enclosingElement, accuracy, offset, length, insideDocComment, participant, resource);
@@ -2518,7 +2514,7 @@ protected void reportMatching(LambdaExpression lambdaExpression,  IJavaElement p
 	}
 
 	if (lambdaExpression.body != null) {
-		lambdaExpression.body.traverse(declarationVisitor, (BlockScope) null);
+		lambdaExpression.body.traverse(declarationVisitor, null);
 	}
 
 	// Report all nodes and remove them
@@ -2695,7 +2691,7 @@ protected void reportMatching(Annotation[] annotations, IJavaElement enclosingEl
 			MemberValuePair pair = pairs[j];
 			level = (Integer) nodeSet.matchingNodes.removeKey(pair);
 			if (level != null && enclosesElement) {
-				ASTNode reference = (annotationType instanceof SingleMemberAnnotation) ? (ASTNode) annotationType: pair;
+				ASTNode reference = (annotationType instanceof SingleMemberAnnotation) ? annotationType : pair;
 				if (!handlesCreated) {
 					localAnnotation = createHandle(annotationType, (IAnnotatable) enclosingElement);
 					if (length > 0) {
@@ -2904,7 +2900,7 @@ protected void reportMatching(FieldDeclaration field, FieldDeclaration[] otherFi
 		boolean report = (this.matchContainer & PatternLocator.FIELD_CONTAINER) != 0 && encloses(enclosingElement);
 		MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, report ? nodes : null, nodeSet, this, typeInHierarchy);
 		try {
-			field.traverse(declarationVisitor, (MethodScope) null);
+			field.traverse(declarationVisitor, null);
 		} catch (WrappedCoreException e) {
 			throw e.coreException;
 		}
@@ -2979,7 +2975,7 @@ protected void reportMatching(FieldDeclaration field, FieldDeclaration[] otherFi
 				}
 				if (encloses(enclosingElement)) {
 					MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, nodes, nodeSet, this, typeInHierarchy);
-					field.traverse(declarationVisitor, (MethodScope) null);
+					field.traverse(declarationVisitor, null);
 					int length = nodes.length;
 					for (int i = 0; i < length; i++) {
 						ASTNode node = nodes[i];
@@ -3055,7 +3051,7 @@ private void reportMatching(RequiresStatement[] reqs, ModuleDeclaration module, 
 }
 
 private void reportMatching(PackageVisibilityStatement[] psvs, MatchingNodeSet nodeSet, IModuleDescription moduleDesc)
-		throws JavaModelException, CoreException {
+		throws CoreException {
 	if (psvs != null && psvs.length > 0) {
 		for (PackageVisibilityStatement psv : psvs) {
 			ImportReference importRef = psv.pkgRef;
@@ -3075,7 +3071,7 @@ private void reportMatching(PackageVisibilityStatement[] psvs, MatchingNodeSet n
 		}
 	}
 }
-private void reportMatching(ProvidesStatement[] provides, ModuleDeclaration module, MatchingNodeSet nodeSet, IModuleDescription moduleDesc) throws JavaModelException, CoreException {
+private void reportMatching(ProvidesStatement[] provides, ModuleDeclaration module, MatchingNodeSet nodeSet, IModuleDescription moduleDesc) throws CoreException {
 	if (provides != null && provides.length > 0) {
 		for (ProvidesStatement service : provides) {
 			TypeReference intf = service.serviceInterface;
@@ -3137,7 +3133,7 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 					if (fileName != null) {
 						if (fileName.endsWith("jar") || fileName.endsWith(SuffixConstants.SUFFIX_STRING_class)) { //$NON-NLS-1$
 							IOrdinaryClassFile classFile= binaryType.getPackageFragment().getOrdinaryClassFile(binaryType.getTypeQualifiedName() +
-									"$" + Integer.toString(occurrenceCount) + SuffixConstants.SUFFIX_STRING_class);//$NON-NLS-1$
+									"$" + occurrenceCount + SuffixConstants.SUFFIX_STRING_class);//$NON-NLS-1$
 							anonType =  classFile.getType();
 						}
 					} else {

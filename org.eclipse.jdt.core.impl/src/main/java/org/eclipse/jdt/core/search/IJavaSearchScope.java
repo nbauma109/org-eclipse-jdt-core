@@ -63,14 +63,14 @@ int REFERENCED_PROJECTS = 8;
  * the second path is the path to the resource inside the JAR.
  * @return whether the resource is enclosed by this scope
  */
-public boolean encloses(String resourcePath);
+boolean encloses(String resourcePath);
 /**
  * Checks whether this scope encloses the given element.
  *
  * @param element the given element
  * @return <code>true</code> if the element is in this scope
  */
-public boolean encloses(IJavaElement element);
+boolean encloses(IJavaElement element);
 /**
  * Returns the paths to the enclosing projects and JARs for this search scope.
  * <ul>
@@ -120,7 +120,7 @@ boolean includesClasspaths();
  * {@link org.eclipse.jdt.core.search.SearchEngine#createJavaSearchScope(IJavaElement[])}
  * with the package fragment roots that correspond to the binaries instead.
  */
-public void setIncludesBinaries(boolean includesBinaries);
+void setIncludesBinaries(boolean includesBinaries);
 /**
  * Sets whether this scope includes the classpaths defined by
  * the projects of the resources of this search scope.
@@ -130,5 +130,5 @@ public void setIncludesBinaries(boolean includesBinaries);
  * {@link org.eclipse.jdt.core.search.SearchEngine#createJavaSearchScope(IJavaElement[])}
  * with a Java project instead.
  */
-public void setIncludesClasspaths(boolean includesClasspaths);
+void setIncludesClasspaths(boolean includesClasspaths);
 }

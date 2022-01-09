@@ -37,7 +37,7 @@ public interface IPackageFragment extends IParent, IJavaElement, IOpenable, ISou
 	 * string, <code>""</code>).
 	 * </p>
  	*/
-	public static final String DEFAULT_PACKAGE_NAME = ""; //$NON-NLS-1$
+    String DEFAULT_PACKAGE_NAME = ""; //$NON-NLS-1$
 	/**
 	 * Returns whether this fragment contains at least one Java resource.
 	 * @return true if this fragment contains at least one Java resource, false otherwise

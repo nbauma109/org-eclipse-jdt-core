@@ -77,20 +77,20 @@ public interface IAdapterManager {
 	 * was found. 
 	 * @since org.eclipse.equinox.common 3.3
 	 */
-	public static final int NONE = 0;
+    int NONE = 0;
 
 	/**
 	 * This value can be returned to indicate that an adapter factory was found, 
 	 * but has not been loaded.
 	 * @since org.eclipse.equinox.common 3.3
 	 */
-	public static final int NOT_LOADED = 1;
+    int NOT_LOADED = 1;
 
 	/**
 	 * This value can be returned to indicate that an adapter factory is loaded.
 	 * @since org.eclipse.equinox.common 3.3
 	 */
-	public static final int LOADED = 2;
+    int LOADED = 2;
 
 	/**
 	 * Returns the types that can be obtained by converting <code>adaptableClass</code> 
@@ -109,7 +109,7 @@ public interface IAdapterManager {
 	 * is returned if there are none.
 	 * @since 3.1
 	 */
-	public String[] computeAdapterTypes(Class<?> adaptableClass);
+    String[] computeAdapterTypes(Class<?> adaptableClass);
 
 	/**
 	 * Returns the class search order for a given class. The search order from a 
@@ -129,7 +129,7 @@ public interface IAdapterManager {
 	 * search order will minimally  contain the target class.
 	 * @since 3.1
 	 */
-	public <T> Class<? super T>[] computeClassOrder(Class<T> clazz);
+    <T> Class<? super T>[] computeClassOrder(Class<T> clazz);
 
 	/**
 	 * Returns an object which is an instance of the given class associated
@@ -151,7 +151,7 @@ public interface IAdapterManager {
 	 * if the given adaptable object does not have an available adapter of the
 	 * given type
 	 */
-	public <T> T getAdapter(Object adaptable, Class<T> adapterType);
+    <T> T getAdapter(Object adaptable, Class<T> adapterType);
 
 	/**
 	 * Returns an object which is an instance of the given class name associated
@@ -176,7 +176,7 @@ public interface IAdapterManager {
 	 * given type
 	 * @since 3.0
 	 */
-	public Object getAdapter(Object adaptable, String adapterTypeName);
+    Object getAdapter(Object adaptable, String adapterTypeName);
 
 	/**
 	 * Returns whether there is an adapter factory registered that may be able
@@ -197,7 +197,7 @@ public interface IAdapterManager {
 	 * and <code>false</code> otherwise.
 	 * @since 3.0
 	 */
-	public boolean hasAdapter(Object adaptable, String adapterTypeName);
+    boolean hasAdapter(Object adaptable, String adapterTypeName);
 
 	/**
 	 * Returns a status of an adapter factory registered that may be able
@@ -217,7 +217,7 @@ public interface IAdapterManager {
 	 * @return a status of the adapter 
 	 * @since org.eclipse.equinox.common 3.3
 	 */
-	public int queryAdapter(Object adaptable, String adapterTypeName);
+    int queryAdapter(Object adaptable, String adapterTypeName);
 
 	/**
 	 * Returns an object that is an instance of the given class name associated
@@ -243,7 +243,7 @@ public interface IAdapterManager {
 	 * given type
 	 * @since 3.0
 	 */
-	public Object loadAdapter(Object adaptable, String adapterTypeName);
+    Object loadAdapter(Object adaptable, String adapterTypeName);
 
 	/**
 	 * Registers the given adapter factory as extending objects of the given
@@ -260,7 +260,7 @@ public interface IAdapterManager {
 	 * @see #unregisterAdapters(IAdapterFactory)
 	 * @see #unregisterAdapters(IAdapterFactory, Class)
 	 */
-	public void registerAdapters(IAdapterFactory factory, Class<?> adaptable);
+    void registerAdapters(IAdapterFactory factory, Class<?> adaptable);
 
 	/**
 	 * Removes the given adapter factory completely from the list of registered
@@ -271,7 +271,7 @@ public interface IAdapterManager {
 	 * @param factory the adapter factory to remove
 	 * @see #registerAdapters(IAdapterFactory, Class)
 	 */
-	public void unregisterAdapters(IAdapterFactory factory);
+    void unregisterAdapters(IAdapterFactory factory);
 
 	/**
 	 * Removes the given adapter factory from the list of factories registered
@@ -283,5 +283,5 @@ public interface IAdapterManager {
 	 * registered
 	 * @see #registerAdapters(IAdapterFactory, Class)
 	 */
-	public void unregisterAdapters(IAdapterFactory factory, Class<?> adaptable);
+    void unregisterAdapters(IAdapterFactory factory, Class<?> adaptable);
 }

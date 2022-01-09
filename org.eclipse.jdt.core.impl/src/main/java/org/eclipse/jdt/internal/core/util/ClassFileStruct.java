@@ -68,7 +68,7 @@ public abstract class ClassFileStruct {
 	}
 	protected char[] utf8At(byte[] reference, int relativeOffset, int structOffset, int bytesAvailable) {
 		int length = bytesAvailable;
-		char outputBuf[] = new char[bytesAvailable];
+		char[] outputBuf = new char[bytesAvailable];
 		int outputPos = 0;
 		int readOffset = structOffset + relativeOffset;
 

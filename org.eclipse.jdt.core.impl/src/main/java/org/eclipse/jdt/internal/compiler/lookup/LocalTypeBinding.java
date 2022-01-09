@@ -128,7 +128,7 @@ public char[] computeUniqueKey(boolean isLeaf) {
 
 	// insert $sourceStart
 	sig.append('$');
-	sig.append(String.valueOf(this.sourceStart));
+	sig.append(this.sourceStart);
 
 	// insert $LocalName if local
 	if (!isAnonymousType()) {

@@ -170,7 +170,7 @@ public class SwitchStatement extends Expression {
 						this.scope.enclosingCase = this.cases[caseIndex]; // record entering in a switch case block
 						caseIndex++;
 						if (fallThroughState == FALLTHROUGH) {
-							if (((CaseStatement) statement).containsPatternVariable())
+							if (statement.containsPatternVariable())
 								this.scope.problemReporter().IllegalFallThroughToPattern(this.scope.enclosingCase);
 							else if ((statement.bits & ASTNode.DocumentedFallthrough) == 0) { // the case is not fall-through protected by a line comment
 								this.scope.problemReporter().possibleFallThroughCase(this.scope.enclosingCase);
@@ -258,11 +258,8 @@ public class SwitchStatement extends Expression {
 		} else if (this.expression.resolvedType != null
 						&& (this.expression.resolvedType.id == T_JavaLangString || this.expression.resolvedType.isEnum())) {
 			return true;
-		} else if ((this.switchBits & (LabeledRules|NullCase)) == LabeledRules && this.totalPattern == null) {
-			return true;
-		}
-		return false;
-	}
+		} else return (this.switchBits & (LabeledRules | NullCase)) == LabeledRules && this.totalPattern == null;
+    }
 
 	/**
 	 * Switch on String code generation
@@ -337,7 +334,7 @@ public class SwitchStatement extends Expression {
 			 */
 			final boolean hasCases = this.caseCount != 0;
 			int constSize = hasCases ? this.otherConstants.length : 0;
-			BranchLabel[] sourceCaseLabels = this.<BranchLabel>gatherLabels(codeStream, new BranchLabel[this.nConstants], BranchLabel::new);
+			BranchLabel[] sourceCaseLabels = this.gatherLabels(codeStream, new BranchLabel[this.nConstants], BranchLabel::new);
 			StringSwitchCase [] stringCases = new StringSwitchCase[constSize]; // may have to shrink later if multiple strings hash to same code.
 			CaseLabel [] hashCodeCaseLabels = new CaseLabel[constSize];
 			this.constants = new int[constSize];  // hashCode() values.
@@ -501,7 +498,7 @@ public class SwitchStatement extends Expression {
 			// prepare the labels and constants
 			this.breakLabel.initialize(codeStream);
 			int constantCount = this.otherConstants == null ? 0 : this.otherConstants.length;
-			CaseLabel[] caseLabels = this.<CaseLabel>gatherLabels(codeStream, new CaseLabel[this.nConstants], CaseLabel::new);
+			CaseLabel[] caseLabels = this.gatherLabels(codeStream, new CaseLabel[this.nConstants], CaseLabel::new);
 
 			CaseLabel defaultLabel = new CaseLabel(codeStream);
 			final boolean hasCases = this.caseCount != 0;
@@ -882,7 +879,7 @@ public class SwitchStatement extends Expression {
 									if (con.typeID() == TypeIds.T_JavaLangString) {
 										return c2.stringValue().equals(con.stringValue());
 									} else {
-										return (c2.typeID() == TypeIds.T_JavaLangString) ? false : c2.intValue() == c1;
+										return c2.typeID() != TypeIds.T_JavaLangString && c2.intValue() == c1;
 									}
 								};
 								TypeBinding type = c.e.resolvedType;
@@ -1028,7 +1025,7 @@ public class SwitchStatement extends Expression {
 		if (!checkSealed) return;
 		ReferenceBinding ref = (ReferenceBinding) this.expression.resolvedType;
 		if (!ref.isSealed()) return;
-		List<TypeBinding> permittedTypes = Arrays.asList(ref.permittedTypes());
+		TypeBinding[] permittedTypes = ref.permittedTypes();
 		for (TypeBinding pt : permittedTypes) {
 			if (!this.caseLabelElementTypes.contains(pt)) {
 				skope.problemReporter().missingDefaultCase(this, false, ref);
@@ -1089,9 +1086,7 @@ public class SwitchStatement extends Expression {
 			if (duplicate != original)
 				this.scope.problemReporter().duplicateCase(duplicate);
 			this.duplicateCases = new Statement[length];
-			this.duplicateCases[this.duplicateCaseCounter++] = original;
-			if (duplicate != original)
-				this.duplicateCases[this.duplicateCaseCounter++] = duplicate;
+            this.duplicateCases[this.duplicateCaseCounter++] = duplicate;
 		} else {
 			boolean found = false;
 			searchReportedDuplicate: for (int k = 2; k < this.duplicateCaseCounter; k++) {

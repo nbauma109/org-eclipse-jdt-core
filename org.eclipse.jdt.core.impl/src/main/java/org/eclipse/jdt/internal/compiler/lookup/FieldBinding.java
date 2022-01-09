@@ -143,7 +143,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 				outerDeclaringClass = temp;
 				temp = temp.enclosingType();
 			}
-			if (TypeBinding.notEquals(outerInvocationType, outerDeclaringClass)) return false;
+            return !TypeBinding.notEquals(outerInvocationType, outerDeclaringClass);
 		}
 		return true;
 	}

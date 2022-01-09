@@ -1044,8 +1044,7 @@ private void findPackagesFromRequires(char[] prefix, boolean isMatchAllPrefix, I
 					IPackageFragmentRoot[] moduleContext = findModuleContext(moduleName);
 					if (moduleContext != null) {
 						// (this.owner != null && this.owner.isPackage(pkgName)) // TODO(SHMOD) see old isPackage
-						if (this.nameLookup.hasCompilationUnit(pkgName, moduleContext))
-							return true;
+                        return this.nameLookup.hasCompilationUnit(pkgName, moduleContext);
 					}
 				}
 				return false;

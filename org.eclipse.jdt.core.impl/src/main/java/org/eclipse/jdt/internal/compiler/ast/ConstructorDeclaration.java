@@ -224,7 +224,7 @@ protected void doFieldReachAnalysis(FlowInfo flowInfo, FieldBinding[] fields) {
 				this.scope.problemReporter().uninitializedBlankFinalField(
 						field,
 						((this.bits & ASTNode.IsDefaultConstructor) != 0)
-							? (ASTNode) this.scope.referenceType().declarationOf(field.original())
+							? this.scope.referenceType().declarationOf(field.original())
 							: this);
 			} else if (field.isNonNull() || field.type.isFreeTypeVariable()) {
 				FieldDeclaration fieldDecl = this.scope.referenceType().declarationOf(field.original());
@@ -232,7 +232,7 @@ protected void doFieldReachAnalysis(FlowInfo flowInfo, FieldBinding[] fields) {
 					this.scope.problemReporter().uninitializedNonNullField(
 						field,
 						((this.bits & ASTNode.IsDefaultConstructor) != 0)
-							? (ASTNode) fieldDecl
+							? fieldDecl
 							: this);
 			}
 		}
@@ -494,7 +494,7 @@ protected AnnotationBinding[][] getPropagatedRecordComponentAnnotations() {
 	ReferenceBinding declaringClass = this.binding.declaringClass;
 	if (declaringClass instanceof SourceTypeBinding) {
 		assert declaringClass.isRecord();
-		RecordComponentBinding[] rcbs = ((SourceTypeBinding) declaringClass).components();
+		RecordComponentBinding[] rcbs = declaringClass.components();
 		for (int i = 0, length = rcbs.length; i < length; i++) {
 			RecordComponentBinding rcb = rcbs[i];
 			RecordComponent recordComponent = rcb.sourceRecordComponent();

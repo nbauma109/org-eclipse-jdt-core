@@ -53,6 +53,6 @@ public class JobMessages extends NLS {
 		buffer.append(Thread.currentThread().getName());
 		buffer.append("] "); //$NON-NLS-1$
 		buffer.append(message);
-		System.out.println(buffer.toString());
+		System.out.println(buffer);
 	}
 }

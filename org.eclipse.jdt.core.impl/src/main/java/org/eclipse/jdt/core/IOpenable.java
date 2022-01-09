@@ -56,7 +56,7 @@ public interface IOpenable {
  *
  * @exception JavaModelException if an error occurs closing this element
  */
-public void close() throws JavaModelException;
+void close() throws JavaModelException;
 /**
  * Finds and returns the recommended line separator for this element.
  * The element's buffer is first searched and the first line separator in this buffer is returned if any.
@@ -69,7 +69,7 @@ public void close() throws JavaModelException;
  *		exception occurs while accessing its corresponding resource.
  * @since 3.2
  */
-public String findRecommendedLineSeparator() throws JavaModelException;
+String findRecommendedLineSeparator() throws JavaModelException;
 /**
  * Returns the buffer opened for this element, or <code>null</code>
  * if this element does not have a buffer.
@@ -79,7 +79,7 @@ public String findRecommendedLineSeparator() throws JavaModelException;
  * @return the buffer opened for this element, or <code>null</code>
  * if this element does not have a buffer
  */
-public IBuffer getBuffer() throws JavaModelException;
+IBuffer getBuffer() throws JavaModelException;
 /**
  * Returns <code>true</code> if this element is open and:
  * <ul>
@@ -164,7 +164,7 @@ void makeConsistent(IProgressMonitor progress) throws JavaModelException;
  *  <li>This Java element does not exist (ELEMENT_DOES_NOT_EXIST)</li>
  * </ul>
  */
-public void open(IProgressMonitor progress) throws JavaModelException;
+void open(IProgressMonitor progress) throws JavaModelException;
 /**
  * Saves any changes in this element's buffer to its underlying resource
  * via a workspace resource operation. This has no effect if the element has no underlying
@@ -195,5 +195,5 @@ public void open(IProgressMonitor progress) throws JavaModelException;
  *  <li>This Java element is read-only (READ_ONLY)</li>
  * </ul>
  */
-public void save(IProgressMonitor progress, boolean force) throws JavaModelException;
+void save(IProgressMonitor progress, boolean force) throws JavaModelException;
 }

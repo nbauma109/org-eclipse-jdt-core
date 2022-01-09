@@ -27,7 +27,7 @@ public interface ServiceConsumer {
 	/**
 	 * Used for calls from ServiceObjects.
 	 */
-	static ServiceConsumer prototypeConsumer = new ServiceConsumer() {
+    ServiceConsumer prototypeConsumer = new ServiceConsumer() {
 		@Override
 		public <S> S getService(ServiceUse<S> use) {
 			return use.newServiceObject();
@@ -42,7 +42,7 @@ public interface ServiceConsumer {
 	/**
 	 * Used for calls from BundleContext.
 	 */
-	static ServiceConsumer singletonConsumer = new ServiceConsumer() {
+    ServiceConsumer singletonConsumer = new ServiceConsumer() {
 		@Override
 		public <S> S getService(ServiceUse<S> use) {
 			return use.getService();

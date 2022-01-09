@@ -38,7 +38,7 @@ public interface IObjectWithState {
 	 *            The new state to add to this object; must not be
 	 *            <code>null</code>.
 	 */
-	public void addState(String id, State state);
+    void addState(String id, State state);
 
 	/**
 	 * Gets the state with the given id.
@@ -49,7 +49,7 @@ public interface IObjectWithState {
 	 * @return The state; may be <code>null</code> if there is no state with
 	 *         the given id.
 	 */
-	public State getState(String stateId);
+    State getState(String stateId);
 
 	/**
 	 * Gets the identifiers for all of the state associated with this object.
@@ -57,7 +57,7 @@ public interface IObjectWithState {
 	 * @return All of the state identifiers; may be empty, but never
 	 *         <code>null</code>.
 	 */
-	public String[] getStateIds();
+    String[] getStateIds();
 
 	/**
 	 * Removes state from this object.
@@ -66,5 +66,5 @@ public interface IObjectWithState {
 	 *            The id of the state to remove from this object; must not be
 	 *            <code>null</code>.
 	 */
-	public void removeState(String stateId);
+    void removeState(String stateId);
 }

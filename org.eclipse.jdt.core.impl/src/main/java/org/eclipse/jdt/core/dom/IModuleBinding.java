@@ -24,7 +24,7 @@ package org.eclipse.jdt.core.dom;
 public interface IModuleBinding extends IBinding {
 
 	@Override
-	public default int getKind() {
+    default int getKind() {
 		return IBinding.MODULE;
 	}
 
@@ -33,7 +33,7 @@ public interface IModuleBinding extends IBinding {
 	 *
 	 * @return <code>true</code> if open, <code>false</code> otherwise
 	 */
-	public abstract boolean isOpen();
+    boolean isOpen();
 
 	/**
 	 * Returns all required modules.
@@ -41,7 +41,7 @@ public interface IModuleBinding extends IBinding {
 	 *
 	 * @return all required modules
 	 */
-	public abstract IModuleBinding[] getRequiredModules();
+    IModuleBinding[] getRequiredModules();
 
 	/**
 	 * Returns all exported packages.
@@ -49,7 +49,7 @@ public interface IModuleBinding extends IBinding {
 	 *
 	 * @return array of exported package bindings
 	 */
-	public abstract IPackageBinding[] getExportedPackages();
+    IPackageBinding[] getExportedPackages();
 
 	/**
 	 * If this module exports the given package to specific modules, returns the array of names of
@@ -58,7 +58,7 @@ public interface IModuleBinding extends IBinding {
 	 * @param packageBinding a package binding for which targeted modules are declared
 	 * @return array of names of targeted modules
 	 */
-	public abstract String[] getExportedTo(IPackageBinding packageBinding);
+    String[] getExportedTo(IPackageBinding packageBinding);
 
 	/**
 	 * Returns all opened packages.
@@ -66,7 +66,7 @@ public interface IModuleBinding extends IBinding {
 	 *
 	 * @return array of package bindings
 	 */
-	public abstract IPackageBinding[] getOpenedPackages();
+    IPackageBinding[] getOpenedPackages();
 
 	/**
 	 * If this module opens the given package to specific modules, returns the array of names of
@@ -76,7 +76,7 @@ public interface IModuleBinding extends IBinding {
 	 * @param packageBinding a package binding for which targeted modules are declared
 	 * @return array of names of targeted modules
 	 */
-	public abstract String[] getOpenedTo(IPackageBinding packageBinding);
+    String[] getOpenedTo(IPackageBinding packageBinding);
 
 	/**
 	 * Returns the services used by this module.
@@ -84,7 +84,7 @@ public interface IModuleBinding extends IBinding {
 	 *
 	 * @return array of type bindings
 	 */
-	public abstract ITypeBinding[] getUses();
+    ITypeBinding[] getUses();
 
 	/**
 	 * Returns the services provided by this module.
@@ -92,12 +92,12 @@ public interface IModuleBinding extends IBinding {
 	 *
 	 * @return array of services
 	 */
-	public abstract ITypeBinding[] getServices();
+    ITypeBinding[] getServices();
 
 	/**
 	 * Returns the implementations that implement the given service in this module.
 	 *
 	 * @return array of implementation type bindings, in declaration order
 	 */
-	public abstract ITypeBinding[] getImplementations(ITypeBinding service);
+    ITypeBinding[] getImplementations(ITypeBinding service);
 }

@@ -81,7 +81,7 @@ public interface IConfigurationElement {
 	 * @see IExecutableExtensionFactory
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 */
-	public Object createExecutableExtension(String propertyName) throws CoreException;
+    Object createExecutableExtension(String propertyName) throws CoreException;
 
 	/**
 	 * Returns the named attribute of this configuration element, or
@@ -106,7 +106,7 @@ public interface IConfigurationElement {
 	 * @return attribute value, or <code>null</code> if none
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 */
-	public String getAttribute(String name) throws InvalidRegistryObjectException;
+    String getAttribute(String name) throws InvalidRegistryObjectException;
 
 	/**
 	 * When multi-language support is enabled, this method returns the named attribute of this
@@ -127,7 +127,7 @@ public interface IConfigurationElement {
 	 * @see IExtensionRegistry#isMultiLanguage()
 	 * @since org.eclipse.equinox.registry 3.5
 	 */
-	public String getAttribute(String attrName, String locale) throws InvalidRegistryObjectException;
+    String getAttribute(String attrName, String locale) throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the named attribute of this configuration element, or
@@ -156,7 +156,7 @@ public interface IConfigurationElement {
 	 * this method returns a translated value. Use the {@link #getAttribute(String)} method instead.
 	 */
 	@Deprecated
-	public String getAttributeAsIs(String name) throws InvalidRegistryObjectException;
+    String getAttributeAsIs(String name) throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the names of the attributes of this configuration element.
@@ -177,7 +177,7 @@ public interface IConfigurationElement {
 	 * @return the names of the attributes
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 */
-	public String[] getAttributeNames() throws InvalidRegistryObjectException;
+    String[] getAttributeNames() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns all configuration elements that are children of this
@@ -202,7 +202,7 @@ public interface IConfigurationElement {
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 * @see #getChildren(String)
 	 */
-	public IConfigurationElement[] getChildren() throws InvalidRegistryObjectException;
+    IConfigurationElement[] getChildren() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns all child configuration elements with the given name.
@@ -214,7 +214,7 @@ public interface IConfigurationElement {
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 * @see #getChildren()
 	 */
-	public IConfigurationElement[] getChildren(String name) throws InvalidRegistryObjectException;
+    IConfigurationElement[] getChildren(String name) throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the extension that declares this configuration element.
@@ -222,7 +222,7 @@ public interface IConfigurationElement {
 	 * @return the extension
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 */
-	public IExtension getDeclaringExtension() throws InvalidRegistryObjectException;
+    IExtension getDeclaringExtension() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the name of this configuration element.
@@ -237,7 +237,7 @@ public interface IConfigurationElement {
 	 * @return the name of this configuration element
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 */
-	public String getName() throws InvalidRegistryObjectException;
+    String getName() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the element which contains this element.  If this element
@@ -251,7 +251,7 @@ public interface IConfigurationElement {
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 * @since 3.0
 	 */
-	public Object getParent() throws InvalidRegistryObjectException;
+    Object getParent() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the text value of this configuration element.
@@ -270,7 +270,7 @@ public interface IConfigurationElement {
 	 * @return the text value of this configuration element or <code>null</code>
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 */
-	public String getValue() throws InvalidRegistryObjectException;
+    String getValue() throws InvalidRegistryObjectException;
 
 	/**
 	 * When multi-language support is enabled, this method returns the text value of this
@@ -291,7 +291,7 @@ public interface IConfigurationElement {
 	 * @see IExtensionRegistry#isMultiLanguage()
 	 * @since org.eclipse.equinox.registry 3.5
 	 */
-	public String getValue(String locale) throws InvalidRegistryObjectException;
+    String getValue(String locale) throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the untranslated text value of this configuration element.
@@ -321,7 +321,7 @@ public interface IConfigurationElement {
 	 * this method returns a translated value. Use the {@link #getValue()} method instead.
 	 */
 	@Deprecated
-	public String getValueAsIs() throws InvalidRegistryObjectException;
+    String getValueAsIs() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the namespace for this configuration element. This value can be used
@@ -364,7 +364,7 @@ public interface IConfigurationElement {
 	 * </p>
 	 */
 	@Deprecated
-	public String getNamespace() throws InvalidRegistryObjectException;
+    String getNamespace() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the namespace name for this configuration element.
@@ -373,7 +373,7 @@ public interface IConfigurationElement {
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 * @since org.eclipse.equinox.registry 3.2
 	 */
-	public String getNamespaceIdentifier() throws InvalidRegistryObjectException;
+    String getNamespaceIdentifier() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the contributor of this configuration element.
@@ -382,7 +382,7 @@ public interface IConfigurationElement {
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 * @since org.eclipse.equinox.registry 3.2
 	 */
-	public IContributor getContributor() throws InvalidRegistryObjectException;
+    IContributor getContributor() throws InvalidRegistryObjectException;
 
 	/**
 	 * {@inheritDoc}
@@ -390,7 +390,7 @@ public interface IConfigurationElement {
 	 * @see #getHandleId()
 	 */
 	@Override
-	public boolean equals(Object o);
+    boolean equals(Object o);
 
 	/**
 	 * Returns whether this configuration element object is valid.
@@ -399,7 +399,7 @@ public interface IConfigurationElement {
 	 * if it is no longer valid
 	 * @since 3.1
 	 */
-	public boolean isValid();
+    boolean isValid();
 
 	/**
 	 * Returns unique identifier of the registry object from which this element was created.
@@ -408,5 +408,5 @@ public interface IConfigurationElement {
 	 * @see #equals(Object)
 	 * @since 3.8
 	 */
-	public int getHandleId();
+    int getHandleId();
 }

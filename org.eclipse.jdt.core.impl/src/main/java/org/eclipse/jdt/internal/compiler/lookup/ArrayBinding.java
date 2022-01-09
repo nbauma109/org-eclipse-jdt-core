@@ -166,7 +166,7 @@ public String debugName() {
 	StringBuilder brackets = new StringBuilder(this.dimensions * 2);
 	for (int i = this.dimensions; --i >= 0;)
 		brackets.append("[]"); //$NON-NLS-1$
-	return this.leafComponentType.debugName() + brackets.toString();
+	return this.leafComponentType.debugName() + brackets;
 }
 
 @Override

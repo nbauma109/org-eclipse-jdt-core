@@ -88,7 +88,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 					// need a thread to kick the main thread when the framework stops
 					final Thread mainThread = Thread.currentThread();
 					final BundleContext mainContext = context;
-					new Thread((Runnable) () -> {
+					new Thread(() -> {
 						Framework framework = (Framework) mainContext.getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
 						try {
 							framework.waitForStop(0);
@@ -182,11 +182,11 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	 * exists that can be used to relaunch the default application.
 	 */
 	public Object reStart(Object argument) throws Exception {
-		ServiceReference<?> ref[] = null;
+		ServiceReference<?>[] ref = null;
 		ref = context.getServiceReferences("org.osgi.service.application.ApplicationDescriptor", "(eclipse.application.default=true)"); //$NON-NLS-1$//$NON-NLS-2$
 		if (ref != null && ref.length > 0) {
 			Object defaultApp = context.getService(ref[0]);
-			Method launch = defaultApp.getClass().getMethod("launch", new Class[] {Map.class}); //$NON-NLS-1$
+			Method launch = defaultApp.getClass().getMethod("launch", Map.class); //$NON-NLS-1$
 			launch.invoke(defaultApp, new Object[] {null});
 			return start(argument);
 		}

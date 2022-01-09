@@ -201,9 +201,9 @@ public JavaModel getJavaModel() {
 public IJavaProject getJavaProject(IResource resource) {
 	switch(resource.getType()){
 		case IResource.FOLDER:
-			return new JavaProject(((IFolder)resource).getProject(), this);
+			return new JavaProject(resource.getProject(), this);
 		case IResource.FILE:
-			return new JavaProject(((IFile)resource).getProject(), this);
+			return new JavaProject(resource.getProject(), this);
 		case IResource.PROJECT:
 			return new JavaProject((IProject)resource, this);
 		default:
@@ -398,10 +398,7 @@ public static boolean isJimage(File file) {
 }
 public static boolean isJmod(File file) {
 	IPath path = Path.fromOSString(file.getPath());
-	if (path.getFileExtension().equalsIgnoreCase(SuffixConstants.EXTENSION_jmod)) {
-		return true;
-	}
-	return false;
+    return path.getFileExtension().equalsIgnoreCase(SuffixConstants.EXTENSION_jmod);
 }
 
 /**

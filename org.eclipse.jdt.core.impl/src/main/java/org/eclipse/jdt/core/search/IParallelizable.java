@@ -50,7 +50,7 @@ public interface IParallelizable {
 	 *            <code>false</code>.
 	 * @return <code>true</code> if the given object can be used in parallel search.
 	 */
-	public static boolean isParallelSearchSupported(Object o) {
+	static boolean isParallelSearchSupported(Object o) {
 		return (o instanceof IParallelizable) && ((IParallelizable) o).isParallelSearchSupported();
 	}
 

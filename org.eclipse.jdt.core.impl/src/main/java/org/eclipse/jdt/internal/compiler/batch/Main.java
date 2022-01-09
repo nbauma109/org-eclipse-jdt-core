@@ -51,6 +51,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -1272,8 +1273,8 @@ public class Main implements ProblemSeverities, SuffixConstants {
 			try {
 				int index = logFileName.lastIndexOf('.');
 				if (index != -1) {
-					if (logFileName.substring(index).toLowerCase().equals(".xml")) { //$NON-NLS-1$
-						this.log = new GenericXMLWriter(new OutputStreamWriter(new FileOutputStream(logFileName, false), Util.UTF_8), Util.LINE_SEPARATOR, true);
+					if (logFileName.substring(index).equalsIgnoreCase(".xml")) { //$NON-NLS-1$
+						this.log = new GenericXMLWriter(new OutputStreamWriter(new FileOutputStream(logFileName, false), StandardCharsets.UTF_8), Util.LINE_SEPARATOR, true);
 						this.tagBits |= Logger.XML;
 						// insert time stamp as comment
 						this.log.println("<!-- " + dateFormat.format(date) + " -->");//$NON-NLS-1$//$NON-NLS-2$
@@ -1293,10 +1294,8 @@ public class Main implements ProblemSeverities, SuffixConstants {
 				}
 			} catch (FileNotFoundException e) {
 				throw new IllegalArgumentException(this.main.bind("configure.cannotOpenLog", logFileName), e); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e) {
-				throw new IllegalArgumentException(this.main.bind("configure.cannotOpenLogInvalidEncoding", logFileName), e); //$NON-NLS-1$
 			}
-		}
+        }
 		private void startLoggingExtraProblems(int count) {
 			HashMap<String, Object> parameters = new HashMap<>();
 			parameters.put(Logger.NUMBER_OF_PROBLEMS, Integer.valueOf(count));
@@ -1831,8 +1830,7 @@ public boolean compile(String[] argv) {
 	if (this.progress == null || !this.progress.isCanceled()) {
 		if (this.failOnWarning && (this.globalWarningsCount > 0))
 			return false;
-		if (this.globalErrorsCount == 0)
-			return true;
+        return this.globalErrorsCount == 0;
 	}
 
 	return false;
@@ -2384,7 +2382,7 @@ public void configure(String[] argv) {
 						if (length == 7 && debugOption.equals("-g:" + NONE)) //$NON-NLS-1$
 							continue;
 						StringTokenizer tokenizer =
-							new StringTokenizer(debugOption.substring(3, debugOption.length()), ","); //$NON-NLS-1$
+							new StringTokenizer(debugOption.substring(3), ","); //$NON-NLS-1$
 						while (tokenizer.hasMoreTokens()) {
 							String token = tokenizer.nextToken();
 							if (token.equals("vars")) { //$NON-NLS-1$
@@ -2439,7 +2437,7 @@ public void configure(String[] argv) {
 					}
 
 					StringTokenizer tokenizer =
-						new StringTokenizer(infoOption.substring(infoTokenStart, infoOption.length()), ","); //$NON-NLS-1$
+						new StringTokenizer(infoOption.substring(infoTokenStart), ","); //$NON-NLS-1$
 					int tokenCounter = 0;
 
 					while (tokenizer.hasMoreTokens()) {
@@ -2492,7 +2490,7 @@ public void configure(String[] argv) {
 					}
 
 					StringTokenizer tokenizer =
-						new StringTokenizer(warningOption.substring(warnTokenStart, warningOption.length()), ","); //$NON-NLS-1$
+						new StringTokenizer(warningOption.substring(warnTokenStart), ","); //$NON-NLS-1$
 					int tokenCounter = 0;
 
 					if (didSpecifyDeprecation) {  // deprecation could have also been set through -deprecation option
@@ -2545,7 +2543,7 @@ public void configure(String[] argv) {
 					}
 
 					StringTokenizer tokenizer =
-						new StringTokenizer(errorOption.substring(errorTokenStart, errorOption.length()), ","); //$NON-NLS-1$
+						new StringTokenizer(errorOption.substring(errorTokenStart), ","); //$NON-NLS-1$
 					int tokenCounter = 0;
 
 					while (tokenizer.hasMoreTokens()) {

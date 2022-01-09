@@ -261,11 +261,8 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 			this.scope.problemReporter().methodWithConstructorName(this);
 		}
 		// to check whether the method returns a type parameter not declared by it.
-		boolean returnsUndeclTypeVar = false;
-		if (this.returnType != null && this.returnType.resolvedType instanceof TypeVariableBinding) {
-			returnsUndeclTypeVar = true;
-		}
-		if (this.typeParameters != null) {
+		boolean returnsUndeclTypeVar = this.returnType != null && this.returnType.resolvedType instanceof TypeVariableBinding;
+        if (this.typeParameters != null) {
 			for (int i = 0, length = this.typeParameters.length; i < length; i++) {
 				TypeParameter typeParameter = this.typeParameters[i];
 				this.bits |= (typeParameter.bits & ASTNode.HasTypeAnnotations);

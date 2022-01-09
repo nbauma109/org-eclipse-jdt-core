@@ -42,7 +42,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	private final RegistryStrategyOSGI strategy;
 	private final Object token;
 	private final HashMap<String, Long> dynamicAddStateStamps = new HashMap<>();
-	private final long currentStateStamp[] = new long[] {0};
+	private final long[] currentStateStamp = new long[] {0};
 
 	public EclipseBundleListener(ExtensionRegistry registry, Object key, RegistryStrategyOSGI strategy) {
 		this.registry = registry;
@@ -284,8 +284,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 						String manifestVersion = (String) allHeaders.get(org.osgi.framework.Constants.BUNDLE_MANIFESTVERSION);
 						if (manifestVersion == null) {//the header was not defined for previous versions of the bundle
 							//3.0 bundles without a singleton attributes are still being accepted
-							if (OSGIUtils.getDefault().getBundle(symbolicNameElements[0].getValue()) == bundle)
-								return true;
+                            return OSGIUtils.getDefault().getBundle(symbolicNameElements[0].getValue()) == bundle;
 						}
 						return false;
 					}

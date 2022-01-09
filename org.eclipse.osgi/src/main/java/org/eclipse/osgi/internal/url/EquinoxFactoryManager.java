@@ -75,8 +75,8 @@ public class EquinoxFactoryManager {
 			if (factory != null) {
 				try {
 					factory.getClass().getMethod("isMultiplexing", (Class[]) null); //$NON-NLS-1$
-					Method register = factory.getClass().getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$
-					register.invoke(factory, new Object[] {shf});
+					Method register = factory.getClass().getMethod("register", Object.class); //$NON-NLS-1$
+					register.invoke(factory, shf);
 				} catch (NoSuchMethodException e) {
 					// current factory does not support multiplexing, ok we'll wrap it
 					shf.setParentFactory(factory);
@@ -145,8 +145,8 @@ public class EquinoxFactoryManager {
 			if (factory != null) {
 				try {
 					factory.getClass().getMethod("isMultiplexing", (Class[]) null); //$NON-NLS-1$
-					Method register = factory.getClass().getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$
-					register.invoke(factory, new Object[] {chf});
+					Method register = factory.getClass().getMethod("register", Object.class); //$NON-NLS-1$
+					register.invoke(factory, chf);
 				} catch (NoSuchMethodException e) {
 					// current factory does not support multiplexing, ok we'll wrap it
 					chf.setParentFactory(factory);
@@ -191,8 +191,8 @@ public class EquinoxFactoryManager {
 				if (factory == urlStreamHandlerFactory) {
 					factory = (URLStreamHandlerFactory) urlStreamHandlerFactory.designateSuccessor();
 				} else {
-					Method unregister = factory.getClass().getMethod("unregister", new Class[] {Object.class}); //$NON-NLS-1$
-					unregister.invoke(factory, new Object[] {urlStreamHandlerFactory});
+					Method unregister = factory.getClass().getMethod("unregister", Object.class); //$NON-NLS-1$
+					unregister.invoke(factory, urlStreamHandlerFactory);
 				}
 				factoryField.set(null, null);
 				// always attempt to clear the handlers cache
@@ -223,8 +223,8 @@ public class EquinoxFactoryManager {
 				if (factory == contentHandlerFactory) {
 					factory = (java.net.ContentHandlerFactory) contentHandlerFactory.designateSuccessor();
 				} else {
-					Method unregister = factory.getClass().getMethod("unregister", new Class[] {Object.class}); //$NON-NLS-1$
-					unregister.invoke(factory, new Object[] {contentHandlerFactory});
+					Method unregister = factory.getClass().getMethod("unregister", Object.class); //$NON-NLS-1$
+					unregister.invoke(factory, contentHandlerFactory);
 				}
 				// null out the field so that we can successfully call setContentHandlerFactory
 				factoryField.set(null, null);

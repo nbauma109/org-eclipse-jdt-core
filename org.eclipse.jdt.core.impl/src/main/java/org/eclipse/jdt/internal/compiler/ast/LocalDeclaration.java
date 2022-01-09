@@ -188,13 +188,13 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	// for local variables
 	public void getAllAnnotationContexts(int targetType, LocalVariableBinding localVariable, List<AnnotationContext> allAnnotationContexts) {
 		AnnotationCollector collector = new AnnotationCollector(this, targetType, localVariable, allAnnotationContexts);
-		this.traverseWithoutInitializer(collector, (BlockScope) null);
+		this.traverseWithoutInitializer(collector, null);
 	}
 
 	// for arguments
 	public void getAllAnnotationContexts(int targetType, int parameterIndex, List<AnnotationContext> allAnnotationContexts) {
 		AnnotationCollector collector = new AnnotationCollector(this, targetType, parameterIndex, allAnnotationContexts);
-		this.traverse(collector, (BlockScope) null);
+		this.traverse(collector, null);
 	}
 
 	public boolean isArgument() {

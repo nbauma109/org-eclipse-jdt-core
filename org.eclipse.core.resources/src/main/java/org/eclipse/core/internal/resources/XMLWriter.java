@@ -83,7 +83,7 @@ public class XMLWriter extends PrintWriter {
 		if (newLine)
 			println(sb.toString());
 		else
-			print(sb.toString());
+			print(sb);
 	}
 
 	public void startTag(String name, HashMap<String, Object> parameters) {

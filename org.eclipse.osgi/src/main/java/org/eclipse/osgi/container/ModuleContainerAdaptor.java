@@ -98,7 +98,7 @@ public abstract class ModuleContainerAdaptor {
 	 * Event types that may be {@link #publishModuleEvent(ModuleEvent, Module, Module) published} for a module
 	 * indicating a {@link Module#getState() state} change has occurred for a module.
 	 */
-	public static enum ModuleEvent {
+	public enum ModuleEvent {
 		/**
 		 * The module has been installed
 		 */

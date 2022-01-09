@@ -21,19 +21,19 @@ import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
  */
 public interface IRestrictedAccessMethodRequestor {
 
-	public void acceptMethod(
-			char[] methodName,
-			int parameterCount,
-			char[] declaringQualification,
-			char[] simpleTypeName,
-			int typeModifiers,
-			char[] packageName,
-			char[] signature,
-			char[][] parameterTypes,
-			char[][] parameterNames,
-			char[] returnType,
-			int modifiers,
-			String path,
-			AccessRestriction access,
-			int methodIndex);
+	void acceptMethod(
+            char[] methodName,
+            int parameterCount,
+            char[] declaringQualification,
+            char[] simpleTypeName,
+            int typeModifiers,
+            char[] packageName,
+            char[] signature,
+            char[][] parameterTypes,
+            char[][] parameterNames,
+            char[] returnType,
+            int modifiers,
+            String path,
+            AccessRestriction access,
+            int methodIndex);
 }

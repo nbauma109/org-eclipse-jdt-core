@@ -1444,7 +1444,7 @@ public void cannotReadSource(CompilationUnitDeclaration unit, AbortCompilationUn
 	PrintWriter writer = new PrintWriter(stringWriter);
 	if (verbose) {
 		abortException.exception.printStackTrace(writer);
-		System.err.println(stringWriter.toString());
+		System.err.println(stringWriter);
 		stringWriter = new StringWriter();
 		writer = new PrintWriter(stringWriter);
 	}
@@ -5108,7 +5108,7 @@ public void illegalTypeAnnotationsInStaticMemberAccess(Annotation first, Annotat
 }
 public void discouragedValueBasedTypeToSynchronize(Expression expression, TypeBinding type) {
 	if (type.isParameterizedType()) {
-		type =  ((ParameterizedTypeBinding)type).actualType();
+		type =  type.actualType();
 	}
 	this.handle(
 		IProblem.DiscouragedValueBasedTypeSynchronization,
@@ -6362,7 +6362,7 @@ public void nullAnnotationUnsupportedLocation(Annotation annotation) {
 	};
 	int severity = ProblemSeverities.Error | ProblemSeverities.Fatal;
 	if (annotation.recipient instanceof ReferenceBinding) {
-		if (((ReferenceBinding) annotation.recipient).isAnnotationType())
+		if (annotation.recipient.isAnnotationType())
 			severity = ProblemSeverities.Warning; // special case for https://bugs.eclipse.org/461878
 	}
 	handle(IProblem.NullAnnotationUnsupportedLocation,
@@ -10081,7 +10081,7 @@ public void autoManagedVariableResourcesNotBelow9(Expression resource) {
 			resource.sourceEnd);
 }
 public void cannotInferElidedTypes(AllocationExpression allocationExpression) {
-	String arguments [] = new String [] { allocationExpression.type.toString() };
+	String[] arguments = new String [] { allocationExpression.type.toString() };
 	this.handle(
 			IProblem.CannotInferElidedTypes,
 			arguments,
@@ -12072,7 +12072,7 @@ public void sealedSuperInterfaceDoesNotPermit(SourceTypeBinding type, TypeRefere
 	String name = new String(type.sourceName());
 	String superTypeFullName = new String(superTypeBinding.readableName());
 	String superTypeShortName = new String(superTypeBinding.shortReadableName());
-	String keyword = type.isClass() ? new String(TypeConstants.IMPLEMENTS) : new String(TypeConstants.KEYWORD_EXTENDS);
+	String keyword = type.isClass() ? TypeConstants.IMPLEMENTS : TypeConstants.KEYWORD_EXTENDS;
 	if (superTypeShortName.equals(name)) superTypeShortName = superTypeFullName;
 	this.handle(
 			IProblem.SealedSuperInterfaceDoesNotPermit,

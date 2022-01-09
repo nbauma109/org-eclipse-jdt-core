@@ -179,7 +179,7 @@ class MemberValuePairBinding implements IMemberValuePairBinding {
 	@Override
 	public boolean isDeprecated() {
 		MethodBinding methodBinding = this.internalPair.getMethodBinding();
-		return methodBinding == null ? false : methodBinding.isDeprecated();
+		return methodBinding != null && methodBinding.isDeprecated();
 	}
 
 	@Override

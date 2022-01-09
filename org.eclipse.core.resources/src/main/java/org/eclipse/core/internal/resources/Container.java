@@ -186,10 +186,8 @@ public abstract class Container extends Resource implements IContainer {
 		if (desc == null)
 			return false;
 		LinkedList<FilterDescription> filters = desc.getFilter(getProjectRelativePath());
-		if ((filters != null) && (filters.size() > 0))
-			return true;
-		return false;
-	}
+        return (filters != null) && (filters.size() > 0);
+    }
 
 	@Override
 	public IFile getFile(IPath childPath) {

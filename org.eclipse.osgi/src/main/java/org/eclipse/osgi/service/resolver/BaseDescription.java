@@ -32,20 +32,20 @@ public interface BaseDescription {
 	 * Returns the name.
 	 * @return the name
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the version.
 	 * @return the version
 	 */
-	public Version getVersion();
+    Version getVersion();
 
 	/**
 	 * Returns the bundle which supplies this base description
 	 * @return the bundle which supplies this base description
 	 * @since 3.2
 	 */
-	public BundleDescription getSupplier();
+    BundleDescription getSupplier();
 
 	/**
 	 * Returns the directives declared with the description.
@@ -54,7 +54,7 @@ public interface BaseDescription {
 	 * @return the known directives declared with the description
 	 * @since 3.7
 	 */
-	public Map<String, String> getDeclaredDirectives();
+    Map<String, String> getDeclaredDirectives();
 
 	/**
 	 * Returns the attributes declared with the description.
@@ -63,7 +63,7 @@ public interface BaseDescription {
 	 * @return the attributes declared with the description
 	 * @since 3.7
 	 */
-	public Map<String, Object> getDeclaredAttributes();
+    Map<String, Object> getDeclaredAttributes();
 
 	/**
 	 * Returns the capability represented by this description.
@@ -73,7 +73,7 @@ public interface BaseDescription {
 	 * @return the capability represented by this base description
 	 * @since 3.7
 	 */
-	public BundleCapability getCapability();
+    BundleCapability getCapability();
 
 	/**
 	 * Returns the user object associated to this description, or
@@ -83,7 +83,7 @@ public interface BaseDescription {
 	 * or <code>null</code>
 	 * @since 3.8
 	 */
-	public Object getUserObject();
+    Object getUserObject();
 
 	/**
 	 * Associates a user-provided object to this description, or
@@ -95,6 +95,6 @@ public interface BaseDescription {
 	 * <code>null</code>
 	 * @since 3.8
 	 */
-	public void setUserObject(Object userObject);
+    void setUserObject(Object userObject);
 
 }

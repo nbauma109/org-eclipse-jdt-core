@@ -278,8 +278,7 @@ public class EquinoxLocations {
 			File locationDir = new File(location.getPath());
 			if (!locationDir.exists())
 				locationDir.mkdirs();
-			if (locationDir.exists() && StorageUtil.canWrite(locationDir))
-				return true;
+            return locationDir.exists() && StorageUtil.canWrite(locationDir);
 		}
 		return false;
 	}

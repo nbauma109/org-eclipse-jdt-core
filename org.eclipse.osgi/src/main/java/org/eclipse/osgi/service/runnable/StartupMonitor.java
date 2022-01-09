@@ -40,7 +40,7 @@ public interface StartupMonitor {
 	 * first monitor registered).
 	 * </p>
 	 */
-	public void update();
+    void update();
 
 	/**
 	 * This method is called by the platform from the primary thread once the application is completely
@@ -52,5 +52,5 @@ public interface StartupMonitor {
 	 * service ranking tie the service with the lowest service id is called first (i.e. the first monitor registered).
 	 * </p>
 	 */
-	public void applicationRunning();
+    void applicationRunning();
 }

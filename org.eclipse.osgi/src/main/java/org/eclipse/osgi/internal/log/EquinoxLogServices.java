@@ -49,7 +49,7 @@ public class EquinoxLogServices {
 		Location configuration = environmentInfo.getEquinoxLocations().getConfigurationLocation();
 		String logFilePath = environmentInfo.getConfiguration(EclipseStarter.PROP_LOGFILE);
 		if (logFilePath == null) {
-			logFilePath = Long.toString(System.currentTimeMillis()) + EquinoxLogServices.LOG_EXT;
+			logFilePath = System.currentTimeMillis() + EquinoxLogServices.LOG_EXT;
 		}
 
 		File logFile = new File(logFilePath);

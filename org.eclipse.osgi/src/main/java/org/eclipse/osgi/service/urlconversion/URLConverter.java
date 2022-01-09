@@ -41,7 +41,7 @@ public interface URLConverter {
 	 * @throws IOException if an error occurs during the conversion
 	 * @since 3.2
 	 */
-	public URL toFileURL(URL url) throws IOException;
+    URL toFileURL(URL url) throws IOException;
 
 	/**
 	 * Converts a URL that uses a client-defined protocol into a URL that uses a
@@ -61,5 +61,5 @@ public interface URLConverter {
 	 * @throws IOException if an error occurs during the resolution
 	 * @since 3.2
 	 */
-	public URL resolve(URL url) throws IOException;
+    URL resolve(URL url) throws IOException;
 }

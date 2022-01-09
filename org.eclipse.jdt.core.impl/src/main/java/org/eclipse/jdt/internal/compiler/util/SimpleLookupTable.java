@@ -166,7 +166,7 @@ public String toString() {
 	Object object;
 	for (int i = 0, l = this.valueTable.length; i < l; i++)
 		if ((object = this.valueTable[i]) != null)
-			s += this.keyTable[i].toString() + " -> " + object.toString() + "\n"; 	//$NON-NLS-2$ //$NON-NLS-1$
+			s += this.keyTable[i].toString() + " -> " + object + "\n"; 	//$NON-NLS-2$ //$NON-NLS-1$
 	return s;
 }
 }

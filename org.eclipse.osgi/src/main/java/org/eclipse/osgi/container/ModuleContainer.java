@@ -1411,7 +1411,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	static Requirement getIdentityRequirement(String name, Version version) {
 		version = version == null ? Version.emptyVersion : version;
-		String filter = "(&(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + name + ")(" + IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE + "=" + version.toString() + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+		String filter = "(&(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + name + ")(" + IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE + "=" + version + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 		Map<String, String> directives = Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
 		return new ModuleRequirement(IdentityNamespace.IDENTITY_NAMESPACE, directives, Collections.emptyMap(), null);
 	}
@@ -1574,7 +1574,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 		void setDebugOptions() {
 			DebugOptions options = getAdaptor().getDebugOptions();
-			debugStartLevel = options == null ? false : options.getBooleanOption(Debug.OPTION_DEBUG_STARTLEVEL, false);
+			debugStartLevel = options != null && options.getBooleanOption(Debug.OPTION_DEBUG_STARTLEVEL, false);
 		}
 
 		@Override

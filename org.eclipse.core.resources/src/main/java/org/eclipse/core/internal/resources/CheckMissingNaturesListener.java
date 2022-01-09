@@ -212,8 +212,8 @@ public class CheckMissingNaturesListener implements IResourceChangeListener, IPr
 				Pattern.DOTALL);
 		try (
 			InputStream input = file.getContents();
-			ByteArrayOutputStream output = new ByteArrayOutputStream();
-		) {
+			ByteArrayOutputStream output = new ByteArrayOutputStream()
+        ) {
 			IPath path = file.getLocation();
 			if (path == null) {
 				path = file.getFullPath();

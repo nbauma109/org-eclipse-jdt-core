@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
  * @author jkubitz
  */
 public final class CharArrayMap<P> implements CharArrayMapper<P> {
-	private char[] keyTable[];
-	private P valueTable[];
+	private char[][] keyTable;
+	private P[] valueTable;
 
 	/**
 	 * The number of key-value mappings contained in this map.

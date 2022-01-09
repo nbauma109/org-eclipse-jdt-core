@@ -43,14 +43,14 @@ public interface IBundleGroup {
 	 * @see #getVersion()
 	 * @return the identifier for this bundle group
 	 */
-	public String getIdentifier();
+    String getIdentifier();
 
 	/**
 	 * Returns the human-readable name of this bundle group.
 	 * 
 	 * @return the human-readable name
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the version of this bundle group. Bundle group version strings have the same format as 
@@ -60,28 +60,28 @@ public interface IBundleGroup {
 	 * @see #getIdentifier()
 	 * @return the string form of this bundle group's version
 	 */
-	public String getVersion();
+    String getVersion();
 
 	/**
 	 * Returns a text description of this bundle group.
 	 * 
 	 * @return text description of this bundle group
 	 */
-	public String getDescription();
+    String getDescription();
 
 	/**
 	 * Returns the name of the provider of this bundle group.
 	 * 
 	 * @return the name of the provider or <code>null</code> if none
 	 */
-	public String getProviderName();
+    String getProviderName();
 
 	/**
 	 * Returns a list of all bundles supplied by this bundle group.  
 	 * 
 	 * @return the bundles supplied by this bundle group
 	 */
-	public Bundle[] getBundles();
+    Bundle[] getBundles();
 
 	/**
 	 * Returns the property of this bundle group with the given key.
@@ -90,5 +90,5 @@ public interface IBundleGroup {
 	 * @param key the name of the property to return
 	 * @return the value associated with the given key or <code>null</code> if none
 	 */
-	public String getProperty(String key);
+    String getProperty(String key);
 }

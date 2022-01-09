@@ -251,7 +251,7 @@ public class ResourceInfo implements IElementTreeData, ICoreConstants, IStringPo
 		if (syncInfo == null)
 			return null;
 		b = (byte[]) syncInfo.get(id);
-		return b == null ? null : (makeCopy ? (byte[]) b.clone() : b);
+		return b == null ? null : (makeCopy ? b.clone() : b);
 	}
 
 	/**

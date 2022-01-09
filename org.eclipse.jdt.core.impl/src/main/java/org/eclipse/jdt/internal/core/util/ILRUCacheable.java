@@ -27,5 +27,5 @@ public interface ILRUCacheable {
 	 *
 	 * @return int Amount of cache space taken by the receiver
 	 */
-	public int getCacheFootprint();
+    int getCacheFootprint();
 }

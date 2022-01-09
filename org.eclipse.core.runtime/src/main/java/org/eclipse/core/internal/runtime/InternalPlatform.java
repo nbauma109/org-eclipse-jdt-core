@@ -774,7 +774,7 @@ public final class InternalPlatform {
 		buffer.append(Thread.currentThread().getName());
 		buffer.append("] "); //$NON-NLS-1$
 		buffer.append(message);
-		System.out.println(buffer.toString());
+		System.out.println(buffer);
 	}
 
 	public static void start(Bundle bundle) throws BundleException {

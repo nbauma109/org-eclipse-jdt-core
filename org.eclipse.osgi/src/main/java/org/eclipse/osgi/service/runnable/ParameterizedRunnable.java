@@ -37,5 +37,5 @@ public interface ParameterizedRunnable {
 	 * @return the result of evaluating the runnable in the given context
 	 * @throws Exception if there is a problem running this runnable
 	 */
-	public Object run(Object context) throws Exception;
+    Object run(Object context) throws Exception;
 }

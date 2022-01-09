@@ -86,7 +86,7 @@ import org.xml.sax.InputSource;
  * </p>
  */
 public class Workspace extends PlatformObject implements IWorkspace, ICoreConstants {
-	public static final boolean caseSensitive = Platform.OS_MACOSX.equals(Platform.getOS()) ? false : new java.io.File("a").compareTo(new java.io.File("A")) != 0; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final boolean caseSensitive = !Platform.OS_MACOSX.equals(Platform.getOS()) && new java.io.File("a").compareTo(new java.io.File("A")) != 0; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * Work manager should never be accessed directly because accessor
@@ -1056,7 +1056,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 		}
 		if (status.matches(IStatus.ERROR))
 			throw new ResourceException(status);
-		return status.isOK() ? Status.OK_STATUS : (IStatus) status;
+		return status.isOK() ? Status.OK_STATUS : status;
 	}
 
 	protected void copyTree(IResource source, IPath destination, int depth, int updateFlags, boolean keepSyncInfo) throws CoreException {
@@ -1242,11 +1242,11 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 						String copiedVariable = copyVariable(source, dest, var);
 						int index = segment.indexOf(var);
 						if (index != -1) {
-							result.append(segment.substring(0, index));
+							result.append(segment, 0, index);
 							result.append(copiedVariable);
 							int start = index + var.length();
 							int end = segment.length();
-							result.append(segment.substring(start, end));
+							result.append(segment, start, end);
 						}
 					} else
 						result.append(segment);
@@ -2075,7 +2075,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 		}
 		if (status.matches(IStatus.ERROR))
 			throw new ResourceException(status);
-		return status.isOK() ? (IStatus) Status.OK_STATUS : (IStatus) status;
+		return status.isOK() ? Status.OK_STATUS : status;
 	}
 
 	/**
@@ -2133,13 +2133,13 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 		switch (type) {
 			case IResource.FOLDER :
 				if (path.segmentCount() < ICoreConstants.MINIMUM_FOLDER_SEGMENT_LENGTH) {
-					message = "Path must include project and resource name: " + path.toString(); //$NON-NLS-1$
+					message = "Path must include project and resource name: " + path; //$NON-NLS-1$
 					Assert.isLegal(false, message);
 				}
 				return new Folder(path.makeAbsolute(), this);
 			case IResource.FILE :
 				if (path.segmentCount() < ICoreConstants.MINIMUM_FILE_SEGMENT_LENGTH) {
-					message = "Path must include project and resource name: " + path.toString(); //$NON-NLS-1$
+					message = "Path must include project and resource name: " + path; //$NON-NLS-1$
 					Assert.isLegal(false, message);
 				}
 				return new File(path.makeAbsolute(), this);
@@ -2531,7 +2531,7 @@ public class Workspace extends PlatformObject implements IWorkspace, ICoreConsta
 					result.add(new ResourceStatus(IResourceStatus.READ_ONLY_LOCAL, filePath, message));
 				}
 			}
-			return result.getChildren().length == 0 ? Status.OK_STATUS : (IStatus) result;
+			return result.getChildren().length == 0 ? Status.OK_STATUS : result;
 		}
 		// first time through the validator hasn't been initialized so try and create it
 		if (validator == null)

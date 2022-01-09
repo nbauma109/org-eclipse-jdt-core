@@ -376,7 +376,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 	    	else
 	    		this.tagBits |= TagBits.AnnotationNonNull;
 	    }
-	    this.parameters = new TypeBinding[] { purpose == SyntheticMethodBinding.ArrayConstructor ? TypeBinding.INT : (TypeBinding) arrayType};
+	    this.parameters = new TypeBinding[] { purpose == SyntheticMethodBinding.ArrayConstructor ? TypeBinding.INT : arrayType};
 	    this.thrownExceptions = Binding.NO_EXCEPTIONS;
 	    this.purpose = purpose;
 		this.index = nextSmbIndex();
@@ -671,7 +671,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 	    switch (purpose) {
 			case EnumValues:
 				if (environment.usesNullTypeAnnotations()) {
-					TypeBinding elementType = ((ArrayBinding)method.returnType).leafComponentType();
+					TypeBinding elementType = method.returnType.leafComponentType();
 					AnnotationBinding nonNullAnnotation = environment.getNonNullAnnotation();
 					elementType = environment.createAnnotatedType(elementType, new AnnotationBinding[]{ environment.getNonNullAnnotation() });
 					method.returnType = environment.createArrayType(elementType, 1, new AnnotationBinding[]{ nonNullAnnotation, null });

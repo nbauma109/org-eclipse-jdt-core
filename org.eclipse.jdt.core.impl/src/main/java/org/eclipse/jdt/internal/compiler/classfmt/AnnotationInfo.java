@@ -459,9 +459,6 @@ public boolean equals(Object obj) {
 	if (!Arrays.equals(this.pairs, other.pairs)) {
 		return false;
 	}
-	if (!Arrays.equals(this.typename, other.typename)) {
-		return false;
-	}
-	return true;
+    return Arrays.equals(this.typename, other.typename);
 }
 }

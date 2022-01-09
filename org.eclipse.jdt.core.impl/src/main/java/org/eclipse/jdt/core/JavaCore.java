@@ -5004,7 +5004,7 @@ public final class JavaCore extends Plugin {
 		if (containerPath == null) {
 			throw new ClasspathEntry.AssertionFailedException("Container path cannot be null"); //$NON-NLS-1$
 		} else if (containerPath.segmentCount() < 1) {
-			throw new ClasspathEntry.AssertionFailedException("Illegal classpath container path: \'" + containerPath.makeRelative().toString() + "\', must have at least one segment (containerID+hints)"); //$NON-NLS-1$//$NON-NLS-2$
+			throw new ClasspathEntry.AssertionFailedException("Illegal classpath container path: '" + containerPath.makeRelative().toString() + "', must have at least one segment (containerID+hints)"); //$NON-NLS-1$//$NON-NLS-2$
 		}
 		if (accessRules == null || accessRules.length == 0) {
 			accessRules = ClasspathEntry.NO_ACCESS_RULES;
@@ -5698,7 +5698,7 @@ public final class JavaCore extends Plugin {
 
 		if (variablePath == null) throw new ClasspathEntry.AssertionFailedException("Variable path cannot be null"); //$NON-NLS-1$
 		if (variablePath.segmentCount() < 1) {
-			throw new ClasspathEntry.AssertionFailedException("Illegal classpath variable path: \'" + variablePath.makeRelative().toString() + "\', must have at least one segment"); //$NON-NLS-1$//$NON-NLS-2$
+			throw new ClasspathEntry.AssertionFailedException("Illegal classpath variable path: '" + variablePath.makeRelative().toString() + "', must have at least one segment"); //$NON-NLS-1$//$NON-NLS-2$
 		}
 		if (accessRules == null || accessRules.length == 0) {
 			accessRules = ClasspathEntry.NO_ACCESS_RULES;

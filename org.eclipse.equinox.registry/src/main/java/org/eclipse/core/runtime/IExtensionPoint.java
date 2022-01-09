@@ -57,7 +57,7 @@ public interface IExtensionPoint {
 	 *   into this extension point
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 */
-	public IConfigurationElement[] getConfigurationElements() throws InvalidRegistryObjectException;
+    IConfigurationElement[] getConfigurationElements() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the namespace for this extension point. This value can be used
@@ -99,7 +99,7 @@ public interface IExtensionPoint {
 	 * elements belonging to the <code>org.abc</code> namespace would fall into this category.
 	 * </p>
 	 */
-	public String getNamespace() throws InvalidRegistryObjectException;
+    String getNamespace() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the namespace name for this extension point.
@@ -108,7 +108,7 @@ public interface IExtensionPoint {
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 * @since org.eclipse.equinox.registry 3.2
 	 */
-	public String getNamespaceIdentifier() throws InvalidRegistryObjectException;
+    String getNamespaceIdentifier() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the contributor of this extension point.
@@ -117,7 +117,7 @@ public interface IExtensionPoint {
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 * @since org.eclipse.equinox.registry 3.2
 	 */
-	public IContributor getContributor() throws InvalidRegistryObjectException;
+    IContributor getContributor() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the extension with the given unique identifier configured into
@@ -130,7 +130,7 @@ public interface IExtensionPoint {
 	 * @return an extension, or <code>null</code>
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 */
-	public IExtension getExtension(String extensionId) throws InvalidRegistryObjectException;
+    IExtension getExtension(String extensionId) throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns all extensions configured into this extension point.
@@ -139,7 +139,7 @@ public interface IExtensionPoint {
 	 * @return the extensions configured into this extension point
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 */
-	public IExtension[] getExtensions() throws InvalidRegistryObjectException;
+    IExtension[] getExtensions() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns a displayable label for this extension point.
@@ -153,7 +153,7 @@ public interface IExtensionPoint {
 	 *    possibly the empty string
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 */
-	public String getLabel() throws InvalidRegistryObjectException;
+    String getLabel() throws InvalidRegistryObjectException;
 
 	/**
 	 * When multi-language support is enabled, this method returns a displayable label
@@ -175,7 +175,7 @@ public interface IExtensionPoint {
 	 * @see IExtensionRegistry#isMultiLanguage()
 	 * @since 3.5
 	 */
-	public String getLabel(String locale) throws InvalidRegistryObjectException;
+    String getLabel(String locale) throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns reference to the extension point schema. The schema
@@ -187,7 +187,7 @@ public interface IExtensionPoint {
 	 * @return a relative URL path, or an empty string
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 */
-	public String getSchemaReference() throws InvalidRegistryObjectException;
+    String getSchemaReference() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the simple identifier of this extension point.
@@ -198,7 +198,7 @@ public interface IExtensionPoint {
 	 * @return the simple identifier of the extension point (e.g. <code>"builders"</code>)
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 */
-	public String getSimpleIdentifier() throws InvalidRegistryObjectException;
+    String getSimpleIdentifier() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the unique identifier of this extension point.
@@ -211,13 +211,13 @@ public interface IExtensionPoint {
 	 *    (e.g. <code>"org.eclipse.core.resources.builders"</code>)
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 */
-	public String getUniqueIdentifier() throws InvalidRegistryObjectException;
+    String getUniqueIdentifier() throws InvalidRegistryObjectException;
 
 	/* (non-javadoc)
 	 * @see Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object o);
+    boolean equals(Object o);
 
 	/**
 	 * Returns whether this extension point object is valid.
@@ -226,5 +226,5 @@ public interface IExtensionPoint {
 	 * if it is no longer valid
 	 * @since 3.1
 	 */
-	public boolean isValid();
+    boolean isValid();
 }

@@ -268,7 +268,7 @@ public class CompletionJavadocParser extends JavadocParser {
 		int kinds = this.levelTags.length;
 		for (int k=0; k<kinds; k++) {
 			int length = possibleTags[k].length, size = 0;
-			int indexes[] = new int[length];
+			int[] indexes = new int[length];
 			for (int i=0; i<length; i++) {
 				if (CharOperation.prefixEquals(prefix, possibleTags[k][i], false)) {
 					indexes[size++] = i;

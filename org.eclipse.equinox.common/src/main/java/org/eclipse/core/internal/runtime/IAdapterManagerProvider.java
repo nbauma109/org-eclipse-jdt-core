@@ -29,5 +29,5 @@ public interface IAdapterManagerProvider {
 	 * @return <code>true</code> if factories were added; <code>false</code> 
 	 * if no factories were added in this method call.
 	 */
-	public boolean addFactories(AdapterManager adapterManager);
+    boolean addFactories(AdapterManager adapterManager);
 }

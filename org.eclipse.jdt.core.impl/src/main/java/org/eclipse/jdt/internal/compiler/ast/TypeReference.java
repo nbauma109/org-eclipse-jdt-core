@@ -78,7 +78,7 @@ public abstract class TypeReference extends Expression {
 	 * we are looking for type annotations.
 	 * @see TypeReference#hasNullTypeAnnotation(AnnotationPosition)
 	 */
-	public static enum AnnotationPosition {
+	public enum AnnotationPosition {
 		/**
 		 * For arrays: the outermost dimension, for parameterized types the type, for nested types the innermost type.
 		 * This is the level that a declaration annotation would apply to.

@@ -138,7 +138,7 @@ public class AddJrtToIndex extends BinaryContainer {
 					String fullPath = path.toString();
 					byte[] classFileBytes;
 					classFileBytes = JRTUtil.getClassfileContent(this.jrt, fullPath, mod.toString());
-					String docFullPath =  this.container.toString() + JAR_SEPARATOR + mod.toString() + JAR_SEPARATOR + fullPath;
+					String docFullPath =  this.container.toString() + JAR_SEPARATOR + mod + JAR_SEPARATOR + fullPath;
 					JavaSearchDocument entryDocument = new JavaSearchDocument(docFullPath, classFileBytes, this.participant);
 					this.indexManager.indexDocument(entryDocument, this.participant, this.index, this.indexPath);
 				} catch (IOException e) {

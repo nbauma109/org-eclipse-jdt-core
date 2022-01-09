@@ -14,8 +14,8 @@
 package org.eclipse.jdt.internal.compiler.codegen;
 
 public class LongCache {
-	public long keyTable[];
-	public int valueTable[];
+	public long[] keyTable;
+	public int[] valueTable;
 	int elementSize;
 	int threshold;
 /**

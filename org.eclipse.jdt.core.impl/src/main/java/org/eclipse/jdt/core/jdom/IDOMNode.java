@@ -67,49 +67,49 @@ public interface IDOMNode extends Cloneable  {
 	 * Nodes of this type maybe by safely cast to <code>IDOMCompilationUnit</code>.
 	 * @see #getNodeType()
 	 */
-	public static int COMPILATION_UNIT= 1;
+    int COMPILATION_UNIT= 1;
 
 	/**
 	 * Node type constant indicating a package declaration.
 	 * Nodes of this type maybe by safely cast to <code>IDOMPackage</code>.
 	* @see #getNodeType()
 	 */
-	public static int PACKAGE= 2;
+    int PACKAGE= 2;
 
 	/**
 	 * Node type constant indicating an import declaration.
 	 * Nodes of this type maybe by safely cast to <code>IDOMImport</code>.
 	 * @see #getNodeType()
 	 */
-	public static int IMPORT= 3;
+    int IMPORT= 3;
 
 	/**
 	 * Node type constant indicating a type declaration.
 	 * Nodes of this type maybe by safely cast to <code>IDOMType</code>.
 	 * @see #getNodeType()
 	 */
-	public static int TYPE= 4;
+    int TYPE= 4;
 
 	/**
 	 * Node type constant indicating a field declaration.
 	 * Nodes of this type maybe by safely cast to <code>IDOMField</code>.
 	 * @see #getNodeType()
 	 */
-	public static int FIELD= 5;
+    int FIELD= 5;
 
 	/**
 	 * Node type constant indicating a method (or constructor) declaration.
 	 * Nodes of this type maybe by safely cast to <code>IDOMMethod</code>.
 	 * @see #getNodeType()
 	 */
-	public static int METHOD= 6;
+    int METHOD= 6;
 
 	/**
 	 * Node type constant indicating an initializer declaration.
 	 * Nodes of this type maybe by safely cast to <code>IDOMInitializer</code>.
 	 * @see #getNodeType()
 	 */
-	public static int INITIALIZER= 7;
+    int INITIALIZER= 7;
 
 /**
  * Adds the given un-parented node (document fragment) as the last child of this node.
@@ -126,13 +126,13 @@ public interface IDOMNode extends Cloneable  {
  * @see #insertSibling(IDOMNode)
  * @see #remove()
  */
-public void addChild(IDOMNode child) throws DOMException, IllegalArgumentException;
+void addChild(IDOMNode child) throws DOMException, IllegalArgumentException;
 /**
  * Returns whether this node is allowed to have children.
  *
  * @return <code>true</code> if this node can have children
  */
-public boolean canHaveChildren();
+boolean canHaveChildren();
 /**
  * Returns a stand-alone copy of the document fragment represented by this node that
  * is in no way dependent on the document this node is part of.
@@ -142,7 +142,7 @@ public boolean canHaveChildren();
  * @see #insertSibling(IDOMNode)
  * @see #remove()
  */
-public Object clone();
+Object clone();
 /**
  * Returns the current contents of this document fragment as a character array.
  * <p>
@@ -152,14 +152,14 @@ public Object clone();
  *
  * @return the contents, or <code>null</code> if this node has no contents
  */
-public char[] getCharacters();
+char[] getCharacters();
 /**
  * Returns the first named child of this node with the given name.
  *
  * @param name the name
  * @return the child node, or <code>null</code> if no such child exists
  */
-public IDOMNode getChild(String name);
+IDOMNode getChild(String name);
 /**
  * Returns an enumeration of children of this node. Returns an empty enumeration
  * if this node has no children (including nodes that cannot have children).
@@ -167,7 +167,7 @@ public IDOMNode getChild(String name);
  *
  * @return an enumeration of the children
  */
-public Enumeration getChildren();
+Enumeration getChildren();
 /**
  * Returns the current contents of this document fragment.
  * <p>
@@ -177,7 +177,7 @@ public Enumeration getChildren();
  *
  * @return the contents, or <code>null</code> if this node has no contents
  */
-public String getContents();
+String getContents();
 /**
  * Returns the first child of this node.
  * Children appear in the order in which they exist in the source code.
@@ -185,7 +185,7 @@ public String getContents();
  * @return the first child, or <code>null</code> if this node has no children
  * @see #getChildren()
  */
-public IDOMNode getFirstChild();
+IDOMNode getFirstChild();
 /**
  * Returns a handle for the Java element associated with this
  * document fragment, based on the parent Java element.
@@ -196,39 +196,39 @@ public IDOMNode getFirstChild();
  * @return a handle for the Java element associated with this
  *         document fragment, based on the parent Java element
  */
-public IJavaElement getJavaElement(IJavaElement parent) throws IllegalArgumentException;
+IJavaElement getJavaElement(IJavaElement parent) throws IllegalArgumentException;
 /**
  * Returns the name of this node.
  * More details are provided in each of the subtypes.
  *
  * @return the name, or <code>null</code> if it has no name
  */
-public String getName();
+String getName();
 /**
  * Returns the sibling node immediately following this node.
  *
  * @return the next node, or <code>null</code> if there is no following node
  */
-public IDOMNode getNextNode();
+IDOMNode getNextNode();
 /**
  * Returns the type of this node.
  *
  * @return one of the node type constants defined in <code>IDOMNode</code>
  */
-public int getNodeType();
+int getNodeType();
 /**
  * Returns the parent of this node.
  *
  * @return the parent node, or <code>null</code> if this node does not have a
  *   parent
  */
-public IDOMNode getParent();
+IDOMNode getParent();
 /**
  * Returns the sibling node immediately preceding this node.
  *
  * @return the previous node, or <code>null</code> if there is no preceding node
  */
-public IDOMNode getPreviousNode();
+IDOMNode getPreviousNode();
 /**
  * Inserts the given un-parented node as a sibling of this node, immediately before
  * this node.
@@ -246,14 +246,14 @@ public IDOMNode getPreviousNode();
  * @see #clone()
  * @see #remove()
  */
-public void insertSibling(IDOMNode sibling) throws DOMException, IllegalArgumentException;
+void insertSibling(IDOMNode sibling) throws DOMException, IllegalArgumentException;
 /**
  * Returns whether the given node is an allowable child for this node.
  *
  * @param node the potential child node
  * @return <code>true</code> if the given node is an allowable child
  */
-public boolean isAllowableChild(IDOMNode node);
+boolean isAllowableChild(IDOMNode node);
 /**
  * Returns whether this node's signature is equivalent to the given
  * node's signature. In other words, if the nodes were siblings,
@@ -262,7 +262,7 @@ public boolean isAllowableChild(IDOMNode node);
  * @param node the other node
  * @return <code>true</code> if the nodes have equivalent signatures
  */
-public boolean isSignatureEqual(IDOMNode node);
+boolean isSignatureEqual(IDOMNode node);
 /**
  * Separates this node from its parent and siblings, maintaining any ties that this node
  * has to the underlying document fragment. A document fragment that is removed
@@ -273,12 +273,12 @@ public boolean isSignatureEqual(IDOMNode node);
  * @see #clone()
  * @see #insertSibling(IDOMNode)
  */
-public void remove();
+void remove();
 /**
  * Sets the name of this node. Name format depends on node type.
  * More details are provided in each of the subtypes.
  *
  * @param name the name, or <code>null</code> to clear the name
  */
-public void setName(String name);
+void setName(String name);
 }

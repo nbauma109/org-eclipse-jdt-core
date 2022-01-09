@@ -95,7 +95,7 @@ public class CombinedBinaryExpression extends BinaryExpression {
 	 * expression, if appropriate. Null when this only cares about tracking
 	 * the expression's arity.
 	 */
-	public BinaryExpression referencesTable[];
+	public BinaryExpression[] referencesTable;
 
 /**
  * Make a new CombinedBinaryExpression. If arity is strictly greater than one,

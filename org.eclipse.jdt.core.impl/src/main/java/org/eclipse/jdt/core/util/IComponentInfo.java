@@ -78,5 +78,5 @@ public interface IComponentInfo {
 	 * Answer back the total size
 	 * @return the size of the component info
 	 */
-	public int sizeInBytes();
+    int sizeInBytes();
 }

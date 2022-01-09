@@ -147,7 +147,7 @@ public class LinkedModeModel {
 		}
 
 		@Override
-		public void perform(IDocument document, IDocumentListener owner) throws RuntimeException, MalformedTreeException {
+		public void perform(IDocument document, IDocumentListener owner) throws RuntimeException {
 			document.removeDocumentListener(owner);
 			fIsChanging= true;
 			try {

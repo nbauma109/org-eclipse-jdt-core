@@ -15,10 +15,10 @@
 package org.eclipse.jdt.internal.compiler.lookup;
 
 interface ParameterNonNullDefaultProvider {
-	public boolean hasAnyNonNullDefault();
-	public boolean hasNonNullDefaultForParam(int i);
+	boolean hasAnyNonNullDefault();
+	boolean hasNonNullDefaultForParam(int i);
 
-	public static final ParameterNonNullDefaultProvider FALSE_PROVIDER = new ParameterNonNullDefaultProvider() {
+	ParameterNonNullDefaultProvider FALSE_PROVIDER = new ParameterNonNullDefaultProvider() {
 		@Override
 		public boolean hasNonNullDefaultForParam(int i) {
 			return false;
@@ -29,7 +29,7 @@ interface ParameterNonNullDefaultProvider {
 			return false;
 		}
 	};
-	public static final ParameterNonNullDefaultProvider TRUE_PROVIDER = new ParameterNonNullDefaultProvider() {
+	ParameterNonNullDefaultProvider TRUE_PROVIDER = new ParameterNonNullDefaultProvider() {
 		@Override
 		public boolean hasNonNullDefaultForParam(int i) {
 			return true;
@@ -40,7 +40,7 @@ interface ParameterNonNullDefaultProvider {
 			return true;
 		}
 	};
-	public static class MixedProvider implements ParameterNonNullDefaultProvider {
+	class MixedProvider implements ParameterNonNullDefaultProvider {
 		private final boolean[] result;
 
 		public MixedProvider(boolean[] result) {

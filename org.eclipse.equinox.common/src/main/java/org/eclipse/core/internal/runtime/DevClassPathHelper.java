@@ -73,7 +73,7 @@ public class DevClassPathHelper {
 			if (!token.equals("")) //$NON-NLS-1$
 				list.addElement(token);
 		}
-		return list.isEmpty() ? new String[0] : (String[]) list.toArray(new String[list.size()]);
+		return list.isEmpty() ? new String[0] : list.toArray(new String[list.size()]);
 	}
 
 	public static boolean inDevelopmentMode() {

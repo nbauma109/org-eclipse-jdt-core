@@ -75,7 +75,7 @@ public abstract class MultiplexingFactory {
 						Object[].class);
 				@SuppressWarnings("unchecked")
 				Class<Collection<AccessibleObject>> unchecked = (Class<Collection<AccessibleObject>>) defineAnonymousClass
-						.invoke(unsafe, URL.class, bytes, (Object[]) null);
+						.invoke(unsafe, URL.class, bytes, null);
 				collectionClass = unchecked;
 
 			} catch (NoSuchMethodException e) {
@@ -147,8 +147,8 @@ public abstract class MultiplexingFactory {
 		// set parent for each factory so they can do proper delegation
 		try {
 			Class<?> clazz = factory.getClass();
-			Method setParentFactory = clazz.getMethod("setParentFactory", new Class[] {Object.class}); //$NON-NLS-1$
-			setParentFactory.invoke(factory, new Object[] {getParentFactory()});
+			Method setParentFactory = clazz.getMethod("setParentFactory", Object.class); //$NON-NLS-1$
+			setParentFactory.invoke(factory, getParentFactory());
 		} catch (Exception e) {
 			container.getLogServices().log(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, "register", e); //$NON-NLS-1$
 			// just return and not have it registered
@@ -186,9 +186,9 @@ public abstract class MultiplexingFactory {
 		Object successor = released.remove(0);
 		try {
 			Class<?> clazz = successor.getClass();
-			Method register = clazz.getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$
+			Method register = clazz.getMethod("register", Object.class); //$NON-NLS-1$
 			for (Object r : released) {
-				register.invoke(successor, new Object[] {r});
+				register.invoke(successor, r);
 			}
 		} catch (Exception e) {
 			container.getLogServices().log(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, "designateSuccessor", e); //$NON-NLS-1$
@@ -214,7 +214,7 @@ public abstract class MultiplexingFactory {
 				continue;
 			for (Object factory : current) {
 				try {
-					Method hasAuthorityMethod = factory.getClass().getMethod("hasAuthority", new Class[] {Class.class}); //$NON-NLS-1$
+					Method hasAuthorityMethod = factory.getClass().getMethod("hasAuthority", Class.class); //$NON-NLS-1$
 					if (((Boolean) hasAuthorityMethod.invoke(factory, new Object[] {clazz})).booleanValue()) {
 						return factory;
 					}

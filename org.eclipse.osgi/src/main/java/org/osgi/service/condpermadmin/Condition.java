@@ -33,13 +33,13 @@ public interface Condition {
 	 * A Condition object that will always evaluate to true and that is never
 	 * postponed.
 	 */
-	public final static Condition	TRUE	= new BooleanCondition(true);
+    Condition	TRUE	= new BooleanCondition(true);
 
 	/**
 	 * A Condition object that will always evaluate to false and that is never
 	 * postponed.
 	 */
-	public final static Condition	FALSE	= new BooleanCondition(false);
+    Condition	FALSE	= new BooleanCondition(false);
 
 	/**
 	 * Returns whether the evaluation must be postponed until the end of the
@@ -102,7 +102,7 @@ public interface Condition {
 	 *         Otherwise, {@code false} if one of the Condition objects is not
 	 *         satisfied.
 	 */
-	boolean isSatisfied(Condition conditions[], Dictionary<Object, Object> context);
+	boolean isSatisfied(Condition[] conditions, Dictionary<Object, Object> context);
 }
 
 /**

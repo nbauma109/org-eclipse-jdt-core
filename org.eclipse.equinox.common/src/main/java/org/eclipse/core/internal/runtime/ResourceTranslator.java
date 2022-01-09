@@ -33,9 +33,9 @@ public class ResourceTranslator {
 
 	public static String getResourceString(Bundle bundle, String value, ResourceBundle resourceBundle) {
 		String s = value.trim();
-		if (!s.startsWith(KEY_PREFIX, 0))
+		if (!s.startsWith(KEY_PREFIX))
 			return s;
-		if (s.startsWith(KEY_DOUBLE_PREFIX, 0))
+		if (s.startsWith(KEY_DOUBLE_PREFIX))
 			return s.substring(1);
 
 		int ix = s.indexOf(' ');

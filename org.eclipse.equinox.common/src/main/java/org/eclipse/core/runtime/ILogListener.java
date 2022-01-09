@@ -31,5 +31,5 @@ public interface ILogListener extends EventListener {
 	 * @param status the status being logged
 	 * @param plugin the plugin of the log which generated this event
 	 */
-	public void logging(IStatus status, String plugin);
+    void logging(IStatus status, String plugin);
 }

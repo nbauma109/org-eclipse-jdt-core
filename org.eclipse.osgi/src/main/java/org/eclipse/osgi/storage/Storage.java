@@ -385,12 +385,9 @@ public class Storage {
 			}
 			return generation.getLastModified() != secureAction.lastModified(content);
 		}
-		if (!content.exists()) {
-			// the content got deleted since last time!
-			return true;
-		}
-		return false;
-	}
+        // the content got deleted since last time!
+        return !content.exists();
+    }
 
 	private void checkSystemBundle(String[] cachedInfo) {
 		Module systemModule = moduleContainer.getModule(0);
@@ -918,7 +915,7 @@ public class Storage {
 			// TODO Handle connect bundle
 			return;
 		}
-		String spec = (currentGen.getContentType() == Type.REFERENCE ? "reference:" : "") + content.toURI().toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		String spec = (currentGen.getContentType() == Type.REFERENCE ? "reference:" : "") + content.toURI(); //$NON-NLS-1$ //$NON-NLS-2$
 		URLConnection contentConn;
 		try {
 			contentConn = getContentConnection(spec);
@@ -1223,7 +1220,7 @@ public class Storage {
 	private void compact(File directory) {
 		if (getConfiguration().getDebug().DEBUG_STORAGE)
 			Debug.println("compact(" + directory.getPath() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-		String list[] = directory.list();
+		String[] list = directory.list();
 		if (list == null)
 			return;
 
@@ -1513,13 +1510,13 @@ public class Storage {
 				}
 				cachedHeaders.put(headerKey, value);
 			}
-			boolean isMRJar = (version >= MR_JAR_VERSION) ? in.readBoolean() : false;
+			boolean isMRJar = version >= MR_JAR_VERSION && in.readBoolean();
 
 			File content = null;
 			if (contentType != Type.CONNECT) {
 				if (infoId == 0) {
 					content = getSystemContent();
-					isDirectory = content != null ? content.isDirectory() : false;
+					isDirectory = content != null && content.isDirectory();
 					// Note that we do not do any checking for absolute paths with
 					// the system bundle. We always take the content as discovered
 					// by getSystemContent()
@@ -2028,7 +2025,7 @@ public class Storage {
 				else
 					path += path.charAt(path.length() - 1) == '/' ? filePattern : '/' + filePattern;
 				for (BundleFile bundleFile : bundleFiles) {
-					if (bundleFile.getEntry(path) != null && !pathList.contains(path))
+					if (bundleFile.getEntry(path) != null)
 						pathList.add(path);
 				}
 				return new ArrayList<>(pathList);
@@ -2061,7 +2058,7 @@ public class Storage {
 			switch (c) {
 				case '\\' :
 					// we either used the escape found or found a new escape.
-					foundEscape = foundEscape ? false : true;
+					foundEscape = !foundEscape;
 					if (buffer != null)
 						buffer.append(c);
 					break;
@@ -2070,7 +2067,7 @@ public class Storage {
 					if (!foundEscape) {
 						if (buffer == null) {
 							buffer = new StringBuilder(filePattern.length() + 16);
-							buffer.append(filePattern.substring(0, i));
+							buffer.append(filePattern, 0, i);
 						}
 						// must escape with '\'
 						buffer.append('\\');
@@ -2149,7 +2146,7 @@ public class Storage {
 		// in cases where the temp dir may already exist.
 		Long bundleID = Long.valueOf(generation.getBundleInfo().getBundleId());
 		for (int i = 0; i < Integer.MAX_VALUE; i++) {
-			bundleTempDir = new File(libTempDir, bundleID.toString() + "_" + Integer.valueOf(i).toString()); //$NON-NLS-1$
+			bundleTempDir = new File(libTempDir, bundleID + "_" + Integer.valueOf(i).toString()); //$NON-NLS-1$
 			libTempFile = new File(bundleTempDir, libName);
 			if (bundleTempDir.exists()) {
 				if (libTempFile.exists())

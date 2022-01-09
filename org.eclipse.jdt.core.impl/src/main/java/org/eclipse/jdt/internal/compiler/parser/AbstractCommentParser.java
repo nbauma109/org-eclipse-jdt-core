@@ -115,7 +115,7 @@ public abstract class AbstractCommentParser implements JavadocTagConstants {
 	protected AbstractCommentParser(Parser sourceParser) {
 		this.sourceParser = sourceParser;
 		this.scanner = new Scanner(false, false, false, ClassFileConstants.JDK1_3, null, null, true/*taskCaseSensitive*/,
-				sourceParser != null ? this.sourceParser.options.enablePreviewFeatures : false);
+                sourceParser != null && this.sourceParser.options.enablePreviewFeatures);
 		this.identifierStack = new char[20][];
 		this.identifierPositionStack = new long[20];
 		this.identifierLengthStack = new int[10];
@@ -1105,7 +1105,7 @@ public abstract class AbstractCommentParser implements JavadocTagConstants {
 		int curToken = TerminalTokens.TokenNameNotAToken;
 		int moduleRefTokenCount = 0;
 		boolean lookForModule = false;
-		boolean parsingJava15Plus = this.scanner != null ? this.scanner.sourceLevel >= ClassFileConstants.JDK15 : false;
+		boolean parsingJava15Plus = this.scanner != null && this.scanner.sourceLevel >= ClassFileConstants.JDK15;
 		boolean stop = false;
 		nextToken : for (int iToken = 0; ; iToken++) {
 			if (iToken == 0) {
@@ -1763,11 +1763,11 @@ public abstract class AbstractCommentParser implements JavadocTagConstants {
 		if (endPos > this.source.length)
 			return "behind the EOF\n\n" + new String(this.source); //$NON-NLS-1$
 
-		char front[] = new char[startPos];
+		char[] front = new char[startPos];
 		System.arraycopy(this.source, 0, front, 0, startPos);
 
 		int middleLength = (endPos - 1) - startPos + 1;
-		char middle[];
+		char[] middle;
 		if (middleLength > -1) {
 			middle = new char[middleLength];
 			System.arraycopy(
@@ -1780,7 +1780,7 @@ public abstract class AbstractCommentParser implements JavadocTagConstants {
 			middle = CharOperation.NO_CHAR;
 		}
 
-		char end[] = new char[this.source.length - (endPos - 1)];
+		char[] end = new char[this.source.length - (endPos - 1)];
 		System.arraycopy(
 			this.source,
 			(endPos - 1) + 1,

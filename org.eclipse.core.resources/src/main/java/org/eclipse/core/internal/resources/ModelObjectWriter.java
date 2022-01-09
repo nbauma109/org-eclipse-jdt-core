@@ -158,8 +158,8 @@ public class ModelObjectWriter implements IModelObjectConstants {
 	public void write(Object object, IPath location, IPath tempLocation, String lineSeparator) throws IOException {
 		String tempPath = tempLocation == null ? null : tempLocation.toOSString();
 		try (
-			SafeFileOutputStream file = new SafeFileOutputStream(location.toOSString(), tempPath);
-		) {
+			SafeFileOutputStream file = new SafeFileOutputStream(location.toOSString(), tempPath)
+        ) {
 			write(object, file, lineSeparator);
 		}
 	}
@@ -169,8 +169,8 @@ public class ModelObjectWriter implements IModelObjectConstants {
 	 */
 	public void write(Object object, OutputStream output, String lineSeparator) throws IOException {
 		try (
-			XMLWriter writer = new XMLWriter(output, lineSeparator);
-		) {
+			XMLWriter writer = new XMLWriter(output, lineSeparator)
+        ) {
 			write(object, writer);
 			writer.flush();
 			if (writer.checkError())

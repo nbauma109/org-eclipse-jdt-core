@@ -34,7 +34,7 @@ public interface EnvironmentInfo {
 	 *
 	 * @return the array of command line arguments.
 	 */
-	public String[] getCommandLineArgs();
+    String[] getCommandLineArgs();
 
 	/**
 	 * Returns the arguments consumed by the framework implementation itself.  Which
@@ -42,7 +42,7 @@ public interface EnvironmentInfo {
 	 *
 	 * @return the array of command line arguments consumed by the framework.
 	 */
-	public String[] getFrameworkArgs();
+    String[] getFrameworkArgs();
 
 	/**
 	 * Returns the arguments not consumed by the framework implementation itself.  Which
@@ -50,7 +50,7 @@ public interface EnvironmentInfo {
 	 *
 	 * @return the array of command line arguments not consumed by the framework.
 	 */
-	public String[] getNonFrameworkArgs();
+    String[] getNonFrameworkArgs();
 
 	/**
 	 * Returns the string name of the current system architecture.
@@ -60,7 +60,7 @@ public interface EnvironmentInfo {
 	 *
 	 * @return the string name of the current system architecture
 	 */
-	public String getOSArch();
+    String getOSArch();
 
 	/**
 	 * Returns the string name of the current locale for use in finding files
@@ -68,7 +68,7 @@ public interface EnvironmentInfo {
 	 *
 	 * @return the string name of the current locale
 	 */
-	public String getNL();
+    String getNL();
 
 	/**
 	 * Returns the string name of the current operating system for use in finding
@@ -82,7 +82,7 @@ public interface EnvironmentInfo {
 	 *
 	 * @return the string name of the current operating system
 	 */
-	public String getOS();
+    String getOS();
 
 	/**
 	 * Returns the string name of the current window system for use in finding files
@@ -91,7 +91,7 @@ public interface EnvironmentInfo {
 	 *
 	 * @return the string name of the current window system or <code>null</code>
 	 */
-	public String getWS();
+    String getWS();
 
 	/**
 	 * Returns <code>true</code> if the framework is in debug mode and
@@ -99,7 +99,7 @@ public interface EnvironmentInfo {
 	 *
 	 * @return whether or not the framework is in debug mode
 	 */
-	public boolean inDebugMode();
+    boolean inDebugMode();
 
 	/**
 	 * Returns <code>true</code> if the framework is in development mode
@@ -107,7 +107,7 @@ public interface EnvironmentInfo {
 	 *
 	 * @return whether or not the framework is in development mode
 	 */
-	public boolean inDevelopmentMode();
+    boolean inDevelopmentMode();
 
 	/**
 	 * Returns the value for the specified property.  Environment Properties are
@@ -122,7 +122,7 @@ public interface EnvironmentInfo {
 	 * @return the value of the property, or null
 	 * @since 3.4
 	 */
-	public String getProperty(String key);
+    String getProperty(String key);
 
 	/**
 	 * Sets the value for the specified property.  Environment Properties are
@@ -138,5 +138,5 @@ public interface EnvironmentInfo {
 	 * @return the old value of the property, or null
 	 * @since 3.4
 	 */
-	public String setProperty(String key, String value);
+    String setProperty(String key, String value);
 }

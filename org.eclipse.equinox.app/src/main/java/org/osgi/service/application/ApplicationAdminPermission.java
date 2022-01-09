@@ -214,12 +214,9 @@ public class ApplicationAdminPermission extends Permission {
 					return false;
 			}
 		}
-		
-		if( !actionsVector.containsAll( other.actionsVector ) )
-			return false;
-		
-		return true;
-	}
+
+        return actionsVector.containsAll(other.actionsVector);
+    }
 
 	@Override
 	public boolean equals(Object with) {
@@ -262,7 +259,7 @@ public class ApplicationAdminPermission extends Permission {
 	public int hashCode() {
 		int hc = 0;
 		for( int i=0; i != actionsVector.size(); i++ )
-			hc ^= ((String)actionsVector.get( i )).hashCode();
+			hc ^= actionsVector.get( i ).hashCode();
 		hc ^= (null == this.filter )? 0 : this.filter.hashCode();
 		hc ^= (null == this.applicationDescriptor) ? 0 : this.applicationDescriptor.hashCode();
 		hc ^= (null == this.applicationID) ? 0 : this.applicationID.hashCode();
@@ -327,7 +324,7 @@ public class ApplicationAdminPermission extends Permission {
 			if (!(o instanceof SignerWrapper))
 				return false;
 			SignerWrapper other = (SignerWrapper) o;
-			ApplicationDescriptor matchAppDesc = (ApplicationDescriptor) (appDesc != null ? appDesc : other.appDesc);
+			ApplicationDescriptor matchAppDesc = appDesc != null ? appDesc : other.appDesc;
 			String matchPattern = appDesc != null ? other.pattern : pattern;
 			return matchAppDesc.matchDNChain(matchPattern);
 		}

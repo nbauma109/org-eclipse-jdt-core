@@ -38,7 +38,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * @see IEclipsePreferences.INodeChangeListener
 	 * @since 3.0
 	 */
-	public final class NodeChangeEvent extends EventObject {
+	final class NodeChangeEvent extends EventObject {
 		/**
 		 * All serializable objects should have a stable serialVersionUID
 		 */
@@ -90,7 +90,7 @@ public interface IEclipsePreferences extends Preferences {
 	 *
 	 * @since 3.0
 	 */
-	public interface INodeChangeListener {
+    interface INodeChangeListener {
 
 		/**
 		 * Notification that a child node was added to the preference hierarchy.
@@ -101,7 +101,7 @@ public interface IEclipsePreferences extends Preferences {
 		 * @see IEclipsePreferences#addNodeChangeListener(IEclipsePreferences.INodeChangeListener)
 		 * @see IEclipsePreferences#removeNodeChangeListener(IEclipsePreferences.INodeChangeListener)
 		 */
-		public void added(NodeChangeEvent event);
+        void added(NodeChangeEvent event);
 
 		/**
 		 * Notification that a child node was removed from the preference hierarchy.
@@ -112,7 +112,7 @@ public interface IEclipsePreferences extends Preferences {
 		 * @see IEclipsePreferences#addNodeChangeListener(IEclipsePreferences.INodeChangeListener)
 		 * @see IEclipsePreferences#removeNodeChangeListener(IEclipsePreferences.INodeChangeListener)
 		 */
-		public void removed(NodeChangeEvent event);
+        void removed(NodeChangeEvent event);
 	}
 
 	/**
@@ -122,7 +122,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * @see IEclipsePreferences.IPreferenceChangeListener
 	 * @since 3.0
 	 */
-	public final class PreferenceChangeEvent extends EventObject {
+	final class PreferenceChangeEvent extends EventObject {
 		/**
 		 * All serializable objects should have a stable serialVersionUID
 		 */
@@ -204,7 +204,7 @@ public interface IEclipsePreferences extends Preferences {
 	 *
 	 * @since 3.0
 	 */
-	public interface IPreferenceChangeListener {
+    interface IPreferenceChangeListener {
 
 		/**
 		 * Notification that a preference value has changed in the preference store.
@@ -216,7 +216,7 @@ public interface IEclipsePreferences extends Preferences {
 		 * @see IEclipsePreferences#addPreferenceChangeListener(IEclipsePreferences.IPreferenceChangeListener)
 		 * @see IEclipsePreferences#removePreferenceChangeListener(IEclipsePreferences.IPreferenceChangeListener)
 		 */
-		public void preferenceChange(PreferenceChangeEvent event);
+        void preferenceChange(PreferenceChangeEvent event);
 	}
 
 	/**
@@ -229,7 +229,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * @see #removeNodeChangeListener(IEclipsePreferences.INodeChangeListener)
 	 * @see IEclipsePreferences.INodeChangeListener
 	 */
-	public void addNodeChangeListener(INodeChangeListener listener);
+    void addNodeChangeListener(INodeChangeListener listener);
 
 	/**
 	 * De-register the given listener from receiving event change notifications
@@ -241,7 +241,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * @see #addNodeChangeListener(IEclipsePreferences.INodeChangeListener)
 	 * @see IEclipsePreferences.INodeChangeListener
 	 */
-	public void removeNodeChangeListener(INodeChangeListener listener);
+    void removeNodeChangeListener(INodeChangeListener listener);
 
 	/**
 	 * Register the given listener for notification of preference changes to this node.
@@ -253,7 +253,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * @see #removePreferenceChangeListener(IEclipsePreferences.IPreferenceChangeListener)
 	 * @see IEclipsePreferences.IPreferenceChangeListener
 	 */
-	public void addPreferenceChangeListener(IPreferenceChangeListener listener);
+    void addPreferenceChangeListener(IPreferenceChangeListener listener);
 
 	/**
 	 * De-register the given listener from receiving notification of preference changes
@@ -265,7 +265,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * @see #addPreferenceChangeListener(IEclipsePreferences.IPreferenceChangeListener)
 	 * @see IEclipsePreferences.IPreferenceChangeListener
 	 */
-	public void removePreferenceChangeListener(IPreferenceChangeListener listener);
+    void removePreferenceChangeListener(IPreferenceChangeListener listener);
 
 	/**
 	 * Remove this node from the preference hierarchy. If this node is the scope
@@ -287,7 +287,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * @see NodeChangeEvent
 	 */
 	@Override
-	public void removeNode() throws BackingStoreException;
+    void removeNode() throws BackingStoreException;
 
 	/**
 	 * Return the preferences node with the given path. The given path must
@@ -306,7 +306,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * @see NodeChangeEvent
 	 */
 	@Override
-	public Preferences node(String path);
+    Preferences node(String path);
 
 	/**
 	 * Accepts the given visitor. The visitor's <code>visit</code> method
@@ -319,5 +319,5 @@ public interface IEclipsePreferences extends Preferences {
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
 	 */
-	public void accept(IPreferenceNodeVisitor visitor) throws BackingStoreException;
+    void accept(IPreferenceNodeVisitor visitor) throws BackingStoreException;
 }

@@ -154,9 +154,9 @@ protected String problemsMessage() {
 		buffer.append(Messages.build_fixedHeader);
 		buffer.append(' ');
 		if (displayBoth) {
-			buffer.append(String.valueOf(this.fixedErrorCount));
+			buffer.append(this.fixedErrorCount);
 			buffer.append(" + "); //$NON-NLS-1$
-			buffer.append(String.valueOf(this.fixedWarningCount));
+			buffer.append(this.fixedWarningCount);
 		} else {
 			if (this.fixedErrorCount > 0) {
 				if (this.fixedErrorCount == 1)

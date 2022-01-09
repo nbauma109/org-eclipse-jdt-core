@@ -470,12 +470,8 @@ public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castTy
 								checkUnsafeCast(scope, castType, expressionType, null /*no match*/, true);
 								// ensure there is no collision between both interfaces: i.e. I1 extends List<String>, I2 extends List<Object>
 								if (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
-									if (interfaceType.hasIncompatibleSuperType((ReferenceBinding) castType)) {
-										return false;
-									}
-								} else if (!castType.isRawType() && interfaceType.hasIncompatibleSuperType((ReferenceBinding) castType)) {
-									return false;
-								}
+                                    return !interfaceType.hasIncompatibleSuperType((ReferenceBinding) castType);
+								} else return castType.isRawType() || !interfaceType.hasIncompatibleSuperType((ReferenceBinding) castType);
 							} else {
 								// pre1.5 semantics - no covariance allowed (even if 1.5 compliant, but 1.4 source)
 								// look at original methods rather than the parameterized variants at 1.4 to detect
@@ -516,12 +512,8 @@ public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castTy
 								checkUnsafeCast(scope, castType, expressionType, null /*no match*/, true);
 								// ensure there is no collision between both interfaces: i.e. I1 extends List<String>, I2 extends List<Object>
 								if (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
-									if (((ReferenceBinding)castType).hasIncompatibleSuperType((ReferenceBinding) expressionType)) {
-										return false;
-									}
-								} else if (!castType.isRawType() && ((ReferenceBinding)castType).hasIncompatibleSuperType((ReferenceBinding) expressionType)) {
-									return false;
-								}
+                                    return !((ReferenceBinding) castType).hasIncompatibleSuperType((ReferenceBinding) expressionType);
+								} else return castType.isRawType() || !((ReferenceBinding) castType).hasIncompatibleSuperType((ReferenceBinding) expressionType);
 							}
 							return true;
 						}
@@ -571,12 +563,8 @@ public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castTy
 								checkUnsafeCast(scope, castType, expressionType, null /*no match*/, true);
 								// ensure there is no collision between both interfaces: i.e. I1 extends List<String>, I2 extends List<Object>
 								if (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
-									if (refExprType.hasIncompatibleSuperType((ReferenceBinding) castType)) {
-										return false;
-									}
-								} else if (!castType.isRawType() && refExprType.hasIncompatibleSuperType((ReferenceBinding) castType)) {
-									return false;
-								}
+                                    return !refExprType.hasIncompatibleSuperType((ReferenceBinding) castType);
+								} else return castType.isRawType() || !refExprType.hasIncompatibleSuperType((ReferenceBinding) castType);
 							}
 							return true;
 						} else {
@@ -1181,22 +1169,19 @@ public boolean forcedToBeRaw(ReferenceContext referenceContext) {
 					ReferenceBinding declaringClass = methodDecl.binding != null
 							? methodDecl.binding.declaringClass
 							: methodDecl.scope.enclosingReceiverType();
-					if (TypeBinding.notEquals(field.declaringClass, declaringClass)) { // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
-						return true;
-					}
+                    // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
+                    return TypeBinding.notEquals(field.declaringClass, declaringClass);
 				} else if (referenceContext instanceof TypeDeclaration) {
 					TypeDeclaration type = (TypeDeclaration) referenceContext;
-					if (TypeBinding.notEquals(field.declaringClass, type.binding)) { // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
-						return true;
-					}
+                    // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
+                    return TypeBinding.notEquals(field.declaringClass, type.binding);
 				}
 			}
 		}
 	} else if (this instanceof MessageSend) {
-		if (!CharOperation.equals(((MessageSend) this).binding.declaringClass.getFileName(),
-				referenceContext.compilationResult().getFileName())) {  // problem is rooted elsewhere
-			return true;
-		}
+        // problem is rooted elsewhere
+        return !CharOperation.equals(((MessageSend) this).binding.declaringClass.getFileName(),
+                referenceContext.compilationResult().getFileName());
 	} else if (this instanceof FieldReference) {
 		FieldBinding field = ((FieldReference) this).binding;
 		if (!CharOperation.equals(field.declaringClass.getFileName(),
@@ -1209,21 +1194,17 @@ public boolean forcedToBeRaw(ReferenceContext referenceContext) {
 				ReferenceBinding declaringClass = methodDecl.binding != null
 						? methodDecl.binding.declaringClass
 						: methodDecl.scope.enclosingReceiverType();
-				if (TypeBinding.notEquals(field.declaringClass, declaringClass)) { // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
-					return true;
-				}
+                // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
+                return TypeBinding.notEquals(field.declaringClass, declaringClass);
 			} else if (referenceContext instanceof TypeDeclaration) {
 				TypeDeclaration type = (TypeDeclaration) referenceContext;
-				if (TypeBinding.notEquals(field.declaringClass, type.binding)) { // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
-					return true;
-				}
+                // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
+                return TypeBinding.notEquals(field.declaringClass, type.binding);
 			}
 		}
 	} else if (this instanceof ConditionalExpression) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=337751
 		ConditionalExpression ternary = (ConditionalExpression) this;
-		if (ternary.valueIfTrue.forcedToBeRaw(referenceContext) || ternary.valueIfFalse.forcedToBeRaw(referenceContext)) {
-			return true;
-		}
+        return ternary.valueIfTrue.forcedToBeRaw(referenceContext) || ternary.valueIfFalse.forcedToBeRaw(referenceContext);
 	} else if (this instanceof SwitchExpression) {
 		SwitchExpression se = (SwitchExpression) this;
 		for (Expression e : se.resultExpressions) {

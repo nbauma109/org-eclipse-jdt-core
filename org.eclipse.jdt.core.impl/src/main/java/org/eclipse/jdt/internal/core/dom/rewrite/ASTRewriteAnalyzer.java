@@ -1279,7 +1279,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					doTextReplace(pos, endPos - pos, replacement, getEditGroup(children[children.length - 1]));
 					return endPos;
 				} else if (isAllInserted) {
-					doTextInsert(pos, String.valueOf('>' + keyword), getEditGroup(children[children.length - 1]));
+					doTextInsert(pos, '>' + keyword, getEditGroup(children[children.length - 1]));
 					return pos;
 				}
 			} catch (CoreException e) {
@@ -3719,11 +3719,8 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			ASTNode curr= getNode(nodeIndex);
 			ASTNode next= getNode(nodeIndex +1);
 			int currKind= curr.getNodeType();
-		    if (currKind == ASTNode.SWITCH_CASE && next instanceof Statement &&   ((SwitchCase)curr).isSwitchLabeledRule()) {
-					return true;
-			}
-		    return false;
-		}
+            return currKind == ASTNode.SWITCH_CASE && next instanceof Statement && ((SwitchCase) curr).isSwitchLabeledRule();
+        }
 	}
 
 	class SwitchListRewriter extends ParagraphListRewriter {

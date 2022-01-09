@@ -94,7 +94,7 @@ public interface IEvaluationContext {
 	 *
 	 * @return the list of global variables
 	 */
-	public IGlobalVariable[] allVariables();
+    IGlobalVariable[] allVariables();
 	/**
 	 * Performs a code completion at the given position in the given code snippet,
 	 * reporting results to the given completion requestor.
@@ -115,10 +115,10 @@ public interface IEvaluationContext {
 	 * @since 2.0
 	 * @deprecated Use {@link #codeComplete(String,int,CompletionRequestor)} instead.
 	 */
-	public void codeComplete(
-		String codeSnippet,
-		int position,
-		ICompletionRequestor requestor)
+    void codeComplete(
+            String codeSnippet,
+            int position,
+            ICompletionRequestor requestor)
 		throws JavaModelException;
 	/**
 	 * Performs a code completion at the given position in the given code snippet,
@@ -148,11 +148,11 @@ public interface IEvaluationContext {
 	 * @since 3.0
 	 * @deprecated Use {@link #codeComplete(String,int,CompletionRequestor,WorkingCopyOwner)} instead.
 	 */
-	public void codeComplete(
-		String codeSnippet,
-		int position,
-		ICompletionRequestor requestor,
-		WorkingCopyOwner owner)
+    void codeComplete(
+            String codeSnippet,
+            int position,
+            ICompletionRequestor requestor,
+            WorkingCopyOwner owner)
 		throws JavaModelException;
 	/**
 	 * Performs a code completion at the given position in the given code snippet,
@@ -173,10 +173,10 @@ public interface IEvaluationContext {
 	 *  </ul>
 	 * @since 3.1
 	 */
-	public void codeComplete(
-		String codeSnippet,
-		int position,
-		CompletionRequestor requestor)
+    void codeComplete(
+            String codeSnippet,
+            int position,
+            CompletionRequestor requestor)
 		throws JavaModelException;
 
 	/**
@@ -218,11 +218,11 @@ public interface IEvaluationContext {
 	 *  </ul>
 	 * @since 3.5
 	 */
-	public void codeComplete(
-		String codeSnippet,
-		int position,
-		CompletionRequestor requestor,
-		IProgressMonitor monitor)
+    void codeComplete(
+            String codeSnippet,
+            int position,
+            CompletionRequestor requestor,
+            IProgressMonitor monitor)
 		throws JavaModelException;
 
 	/**
@@ -252,11 +252,11 @@ public interface IEvaluationContext {
 	 *  </ul>
 	 * @since 3.1
 	 */
-	public void codeComplete(
-		String codeSnippet,
-		int position,
-		CompletionRequestor requestor,
-		WorkingCopyOwner owner)
+    void codeComplete(
+            String codeSnippet,
+            int position,
+            CompletionRequestor requestor,
+            WorkingCopyOwner owner)
 		throws JavaModelException;
 
 	/**
@@ -306,12 +306,12 @@ public interface IEvaluationContext {
 	 *  </ul>
 	 * @since 3.5
 	 */
-	public void codeComplete(
-		String codeSnippet,
-		int position,
-		CompletionRequestor requestor,
-		WorkingCopyOwner owner,
-		IProgressMonitor monitor)
+    void codeComplete(
+            String codeSnippet,
+            int position,
+            CompletionRequestor requestor,
+            WorkingCopyOwner owner,
+            IProgressMonitor monitor)
 		throws JavaModelException;
 
 	/**
@@ -334,7 +334,7 @@ public interface IEvaluationContext {
 	 *	     length (INDEX_OUT_OF_BOUNDS)</li>
 	 *   </ul>
 	 */
-	public IJavaElement[] codeSelect(String codeSnippet, int offset, int length)
+    IJavaElement[] codeSelect(String codeSnippet, int offset, int length)
 		throws JavaModelException;
 	/**
 	 * Resolves and returns a collection of Java elements corresponding to the source
@@ -365,7 +365,7 @@ public interface IEvaluationContext {
 	 *   </ul>
 	 * @since 3.0
 	 */
-	public IJavaElement[] codeSelect(String codeSnippet, int offset, int length, WorkingCopyOwner owner)
+    IJavaElement[] codeSelect(String codeSnippet, int offset, int length, WorkingCopyOwner owner)
 		throws JavaModelException;
 	/**
 	 * Deletes the given variable from this evaluation context. Does nothing if
@@ -373,7 +373,7 @@ public interface IEvaluationContext {
 	 *
 	 * @param variable the global variable
 	 */
-	public void deleteVariable(IGlobalVariable variable);
+    void deleteVariable(IGlobalVariable variable);
 	/**
 	 * Evaluates the given code snippet in the context of a suspended thread.
 	 * The code snippet is compiled along with this context's package declaration,
@@ -408,16 +408,16 @@ public interface IEvaluationContext {
 	 * @exception JavaModelException if a runtime problem occurred or if this
 	 *   context's project has no build state
 	 */
-	public void evaluateCodeSnippet(
-		String codeSnippet,
-		String[] localVariableTypeNames,
-		String[] localVariableNames,
-		int[] localVariableModifiers,
-		IType declaringType,
-		boolean isStatic,
-		boolean isConstructorCall,
-		ICodeSnippetRequestor requestor,
-		IProgressMonitor progressMonitor)
+    void evaluateCodeSnippet(
+            String codeSnippet,
+            String[] localVariableTypeNames,
+            String[] localVariableNames,
+            int[] localVariableModifiers,
+            IType declaringType,
+            boolean isStatic,
+            boolean isConstructorCall,
+            ICodeSnippetRequestor requestor,
+            IProgressMonitor progressMonitor)
 		throws JavaModelException;
 	/**
 	 * Evaluates the given code snippet. The code snippet is
@@ -438,10 +438,10 @@ public interface IEvaluationContext {
 	 * @exception JavaModelException if a runtime problem occurred or if this
 	 *   context's project has no build state
 	 */
-	public void evaluateCodeSnippet(
-		String codeSnippet,
-		ICodeSnippetRequestor requestor,
-		IProgressMonitor progressMonitor)
+    void evaluateCodeSnippet(
+            String codeSnippet,
+            ICodeSnippetRequestor requestor,
+            IProgressMonitor progressMonitor)
 		throws JavaModelException;
 	/**
 	 * Evaluates the given global variable. During this operation,
@@ -459,10 +459,10 @@ public interface IEvaluationContext {
 	 * @exception JavaModelException if a runtime problem occurred or if this
 	 *   context's project has no build state
 	 */
-	public void evaluateVariable(
-		IGlobalVariable variable,
-		ICodeSnippetRequestor requestor,
-		IProgressMonitor progressMonitor)
+    void evaluateVariable(
+            IGlobalVariable variable,
+            ICodeSnippetRequestor requestor,
+            IProgressMonitor progressMonitor)
 		throws JavaModelException;
 	/**
 	 * Returns the import declarations for this evaluation context. Returns and empty
@@ -473,7 +473,7 @@ public interface IEvaluationContext {
 	 *
 	 * @return the list of import names
 	 */
-	public String[] getImports();
+    String[] getImports();
 	/**
 	 * Returns the name of the package in which code snippets are to be compiled and
 	 * run. Returns an empty string for the default package (the default if the
@@ -482,13 +482,13 @@ public interface IEvaluationContext {
 	 * @return the dot-separated package name, or the empty string indicating the
 	 *   default package
 	 */
-	public String getPackageName();
+    String getPackageName();
 	/**
 	 * Returns the Java project this evaluation context was created for.
 	 *
 	 * @return the Java project
 	 */
-	public IJavaProject getProject();
+    IJavaProject getProject();
 	/**
 	 * Creates a new global variable with the given name, type, and initializer.
 	 * <p>
@@ -505,10 +505,10 @@ public interface IEvaluationContext {
 	 *   variable is not initialized
 	 * @return a new global variable with the given name, type, and initializer
 	 */
-	public IGlobalVariable newVariable(
-		String typeName,
-		String name,
-		String initializer);
+    IGlobalVariable newVariable(
+            String typeName,
+            String name,
+            String initializer);
 	/**
 	 * Sets the import declarations for this evaluation context. An empty
 	 * list indicates there are no imports. The syntax for the import corresponds to a
@@ -518,7 +518,7 @@ public interface IEvaluationContext {
 	 *
 	 * @param imports the list of import names
 	 */
-	public void setImports(String[] imports);
+    void setImports(String[] imports);
 	/**
 	 * Sets the dot-separated name of the package in which code snippets are
 	 * to be compiled and run. For example, <code>"com.example.myapp"</code>.
@@ -526,7 +526,7 @@ public interface IEvaluationContext {
 	 * @param packageName the dot-separated package name, or the empty string
 	 *   indicating the default package
 	 */
-	public void setPackageName(String packageName);
+    void setPackageName(String packageName);
 	/**
 	 * Validates this evaluation context's import declarations. The given requestor's
 	 * <code>acceptProblem</code> method is called for each problem that is detected.
@@ -534,7 +534,7 @@ public interface IEvaluationContext {
 	 * @param requestor the code snippet requestor
 	 * @exception JavaModelException if this context's project has no build state
 	 */
-	public void validateImports(ICodeSnippetRequestor requestor)
+    void validateImports(ICodeSnippetRequestor requestor)
 		throws JavaModelException;
 
 	/**
@@ -556,10 +556,10 @@ public interface IEvaluationContext {
 	 *  </ul>
 	 * @deprecated - use codeComplete(String, int, ICompletionRequestor) instead
 	 */
-	public void codeComplete(
-		String codeSnippet,
-		int position,
-		org.eclipse.jdt.core.ICodeCompletionRequestor requestor)
+    void codeComplete(
+            String codeSnippet,
+            int position,
+            org.eclipse.jdt.core.ICodeCompletionRequestor requestor)
 		throws JavaModelException;
 
 }

@@ -42,7 +42,7 @@ public class CompletionNodeDetector extends ASTVisitor {
 	}
 	public static boolean findAny(CompilationUnitDeclaration unit, ASTNode searchFor) {
 		FindAny visitor = new FindAny(searchFor);
-		unit.traverse(visitor, (CompilationUnitScope)null, false);
+		unit.traverse(visitor, null, false);
 		return visitor.found;
 	}
 

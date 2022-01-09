@@ -42,7 +42,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * The possible start options for a module
 	 */
-	public static enum StartOptions {
+	public enum StartOptions {
 		/**
 		 * The module start operation is transient and the persistent
 		 * autostart or activation policy setting of the module is not modified.
@@ -85,7 +85,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * The possible start options for a module
 	 */
-	public static enum StopOptions {
+	public enum StopOptions {
 		/**
 		 * The module stop operation is transient and the persistent
 		 * autostart setting of the module is not modified.
@@ -108,7 +108,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * An enumeration of the possible {@link Module#getState() states} a module may be in.
 	 */
-	public static enum State {
+	public enum State {
 		/**
 		 * The module is installed but not yet resolved.
 		 */
@@ -143,7 +143,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * An enumeration of persistent settings for a module
 	 */
-	public static enum Settings {
+	public enum Settings {
 		/**
 		 * The module has been set to auto start.
 		 */
@@ -350,7 +350,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			throw new BundleException(Msg.Module_LockError + exceptonInfo, BundleException.STATECHANGE_ERROR, cause);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new BundleException(Msg.Module_LockError + toString() + ' ' + transitionEvent, BundleException.STATECHANGE_ERROR, e);
+			throw new BundleException(Msg.Module_LockError + this + ' ' + transitionEvent, BundleException.STATECHANGE_ERROR, e);
 		} finally {
 			if (previousInterruption) {
 				Thread.currentThread().interrupt();
@@ -624,7 +624,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	private boolean isTriggerSet() {
 		ModuleLoader loader = getCurrentLoader();
-		return loader == null ? false : loader.isTriggerSet();
+		return loader != null && loader.isTriggerSet();
 	}
 
 	private ModuleLoader getCurrentLoader() {
@@ -750,7 +750,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	final boolean hasLazyActivatePolicy() {
 		ModuleRevision current = getCurrentRevision();
-		return current == null ? false : current.hasLazyActivatePolicy();
+		return current != null && current.hasLazyActivatePolicy();
 	}
 
 	/**

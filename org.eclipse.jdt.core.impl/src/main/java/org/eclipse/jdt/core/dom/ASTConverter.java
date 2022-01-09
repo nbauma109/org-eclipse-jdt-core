@@ -4163,7 +4163,7 @@ class ASTConverter {
 			annotations = typeReference.annotations != null ? typeReference.annotations[0] : null;
 			int annotationsEnd = annotations != null ? annotations[annotations.length - 1].declarationSourceEnd + 1 : -1;
 			// this is either an ArrayTypeReference or a SingleTypeReference
-			char[] name = ((org.eclipse.jdt.internal.compiler.ast.SingleTypeReference) typeReference).getTypeName()[0];
+			char[] name = typeReference.getTypeName()[0];
 			length = typeReference.sourceEnd - typeReference.sourceStart + 1;
 			// need to find out if this is an array type of primitive types or not
 			if (isPrimitiveType(name)) {
@@ -4285,7 +4285,7 @@ class ASTConverter {
 				long[] positions = parameterizedQualifiedTypeReference.sourcePositions;
 				switch(this.ast.apiLevel) {
 					case AST.JLS2_INTERNAL : {
-						char[][] name = ((org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) typeReference).getTypeName();
+						char[][] name = typeReference.getTypeName();
 						int nameLength = name.length;
 						sourceStart = (int)(positions[0]>>>32);
 						length = (int)(positions[nameLength - 1] & 0xFFFFFFFF) - sourceStart + 1;
@@ -4818,77 +4818,53 @@ class ASTConverter {
 	protected boolean isPrimitiveType(char[] name) {
 		switch(name[0]) {
 			case 'i' :
-				if (name.length == 3 && name[1] == 'n' && name[2] == 't') {
-					return true;
-				}
-				return false;
-			case 'l' :
-				if (name.length == 4 && name[1] == 'o' && name[2] == 'n' && name[3] == 'g') {
-					return true;
-				}
-				return false;
-			case 'd' :
-				if (name.length == 6
-					 && name[1] == 'o'
-					 && name[2] == 'u'
-					 && name[3] == 'b'
-					 && name[4] == 'l'
-					 && name[5] == 'e') {
-					return true;
-				}
-				return false;
-			case 'f' :
-				if (name.length == 5
-					 && name[1] == 'l'
-					 && name[2] == 'o'
-					 && name[3] == 'a'
-					 && name[4] == 't') {
-					return true;
-				}
-				return false;
-			case 'b' :
+                return name.length == 3 && name[1] == 'n' && name[2] == 't';
+            case 'l' :
+                return name.length == 4 && name[1] == 'o' && name[2] == 'n' && name[3] == 'g';
+            case 'd' :
+                return name.length == 6
+                        && name[1] == 'o'
+                        && name[2] == 'u'
+                        && name[3] == 'b'
+                        && name[4] == 'l'
+                        && name[5] == 'e';
+            case 'f' :
+                return name.length == 5
+                        && name[1] == 'l'
+                        && name[2] == 'o'
+                        && name[3] == 'a'
+                        && name[4] == 't';
+            case 'b' :
 				if (name.length == 4
 					 && name[1] == 'y'
 					 && name[2] == 't'
 					 && name[3] == 'e') {
 					return true;
 				} else
-					if (name.length == 7
-						 && name[1] == 'o'
-						 && name[2] == 'o'
-						 && name[3] == 'l'
-						 && name[4] == 'e'
-						 && name[5] == 'a'
-						 && name[6] == 'n') {
-					return true;
-				}
-				return false;
-			case 'c' :
-				if (name.length == 4
-					 && name[1] == 'h'
-					 && name[2] == 'a'
-					 && name[3] == 'r') {
-					return true;
-				}
-				return false;
-			case 's' :
-				if (name.length == 5
-					 && name[1] == 'h'
-					 && name[2] == 'o'
-					 && name[3] == 'r'
-					 && name[4] == 't') {
-					return true;
-				}
-				return false;
-			case 'v' :
-				if (name.length == 4
-					 && name[1] == 'o'
-					 && name[2] == 'i'
-					 && name[3] == 'd') {
-					return true;
-				}
-				return false;
-		}
+                    return name.length == 7
+                            && name[1] == 'o'
+                            && name[2] == 'o'
+                            && name[3] == 'l'
+                            && name[4] == 'e'
+                            && name[5] == 'a'
+                            && name[6] == 'n';
+            case 'c' :
+                return name.length == 4
+                        && name[1] == 'h'
+                        && name[2] == 'a'
+                        && name[3] == 'r';
+            case 's' :
+                return name.length == 5
+                        && name[1] == 'h'
+                        && name[2] == 'o'
+                        && name[3] == 'r'
+                        && name[4] == 't';
+            case 'v' :
+                return name.length == 4
+                        && name[1] == 'o'
+                        && name[2] == 'i'
+                        && name[3] == 'd';
+        }
 		return false;
 	}
 	private void lookupForScopes() {

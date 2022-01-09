@@ -401,7 +401,7 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 							if (!memento.hasMoreTokens()) return this;
 							param = memento.nextToken();
 						}
-						params.add(buffer.toString() + param);
+						params.add(buffer + param);
 						break;
 					default:
 						break nextParam;

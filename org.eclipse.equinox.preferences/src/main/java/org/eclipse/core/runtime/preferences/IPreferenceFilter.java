@@ -42,7 +42,7 @@ public interface IPreferenceFilter {
 	 *
 	 * @return the array of scopes
 	 */
-	public String[] getScopes();
+    String[] getScopes();
 
 	/**
 	 * Return a mapping which defines the nodes and keys that this filter
@@ -75,6 +75,6 @@ public interface IPreferenceFilter {
 	 * @return the mapping table
 	 * @see PreferenceFilterEntry
 	 */
-	public Map<String, PreferenceFilterEntry[]> getMapping(String scope);
+    Map<String, PreferenceFilterEntry[]> getMapping(String scope);
 
 }

@@ -214,7 +214,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 
 	// generation of code responsible for invoking the finally blocks in sequence
 	if (this.subroutines != null) {
-		Object reusableJSRTarget = this.expression == null ? (Object)TypeBinding.VOID : this.expression.reusableJSRTarget();
+		Object reusableJSRTarget = this.expression == null ? TypeBinding.VOID : this.expression.reusableJSRTarget();
 		for (int i = 0, max = this.subroutines.length; i < max; i++) {
 			SubRoutineStatement sub = this.subroutines[i];
 			boolean didEscape = sub.generateSubRoutineInvocation(currentScope, codeStream, reusableJSRTarget, this.initStateIndex, this.saveValueVariable);

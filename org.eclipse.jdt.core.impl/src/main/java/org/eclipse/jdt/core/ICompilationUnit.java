@@ -46,21 +46,21 @@ public interface ICompilationUnit extends ITypeRoot, IWorkingCopy, ISourceManipu
  * Constant indicating that a reconcile operation should not return an AST.
  * @since 3.0
  */
-public static final int NO_AST = 0;
+int NO_AST = 0;
 
 /**
  * Constant indicating that a reconcile operation should recompute the problems
  * even if the source hasn't changed.
  * @since 3.3
  */
-public static final int FORCE_PROBLEM_DETECTION = 0x01;
+int FORCE_PROBLEM_DETECTION = 0x01;
 
 /**
  * Constant indicating that a reconcile operation should enable the statements recovery.
  * @see ASTParser#setStatementsRecovery(boolean)
  * @since 3.3
  */
-public static final int ENABLE_STATEMENTS_RECOVERY = 0x02;
+int ENABLE_STATEMENTS_RECOVERY = 0x02;
 
 /**
  * Constant indicating that a reconcile operation should enable the bindings recovery
@@ -68,14 +68,14 @@ public static final int ENABLE_STATEMENTS_RECOVERY = 0x02;
  * @see IBinding#isRecovered()
  * @since 3.3
  */
-public static final int ENABLE_BINDINGS_RECOVERY = 0x04;
+int ENABLE_BINDINGS_RECOVERY = 0x04;
 
 /**
  * Constant indicating that a reconcile operation could ignore to parse the method bodies.
  * @see ASTParser#setIgnoreMethodBodies(boolean)
  * @since 3.5.2
  */
-public static final int IGNORE_METHOD_BODIES = 0x08;
+int IGNORE_METHOD_BODIES = 0x08;
 
 
 /**
@@ -100,7 +100,7 @@ public static final int IGNORE_METHOD_BODIES = 0x08;
  *
  * @since 3.4
  */
-public UndoEdit applyTextEdit(TextEdit edit, IProgressMonitor monitor) throws JavaModelException;
+UndoEdit applyTextEdit(TextEdit edit, IProgressMonitor monitor) throws JavaModelException;
 
 /**
  * Changes this compilation unit handle into a working copy. A new {@link IBuffer} is
@@ -551,7 +551,7 @@ ICompilationUnit getWorkingCopy(WorkingCopyOwner owner, IProblemRequestor proble
  * @return whether the resource has changed
  * @since 3.0
  */
-public boolean hasResourceChanged();
+boolean hasResourceChanged();
 /**
  * Returns whether this element is a working copy.
  *

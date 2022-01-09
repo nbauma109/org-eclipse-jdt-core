@@ -52,7 +52,7 @@ public class ConstraintExceptionFormula extends ConstraintFormula {
 		if (sam == null)
 			return FALSE;
 		if (this.left instanceof LambdaExpression) {
-			if (((LambdaExpression)this.left).argumentsTypeElided()) {
+			if (this.left.argumentsTypeElided()) {
 				int nParam = sam.parameters.length;
 				for (int i = 0; i < nParam; i++)
 					if (!sam.parameters[i].isProperType(true))
@@ -61,7 +61,7 @@ public class ConstraintExceptionFormula extends ConstraintFormula {
 			if (sam.returnType != TypeBinding.VOID && !sam.returnType.isProperType(true))
 				return FALSE;
 		} else { // reference expression
-			if (!((ReferenceExpression)this.left).isExactMethodReference()) {
+			if (!this.left.isExactMethodReference()) {
 				int nParam = sam.parameters.length;
 				for (int i = 0; i < nParam; i++)
 					if (!sam.parameters[i].isProperType(true))

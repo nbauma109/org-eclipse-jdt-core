@@ -205,7 +205,7 @@ class MethodBinding implements IMethodBinding {
 				} else {
 					// log error
 					StringBuilder message = new StringBuilder("Report method binding where a parameter is null:\n");  //$NON-NLS-1$
-					message.append(toString());
+					message.append(this);
 					Util.log(new IllegalArgumentException(), message.toString());
 					// report no binding since one or more parameter has no binding
 					return this.parameterTypes = NO_TYPE_BINDINGS;

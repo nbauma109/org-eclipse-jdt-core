@@ -32,7 +32,7 @@ public class InnerClassInfo extends ClassFileStruct implements IBinaryNestedType
 	private boolean readOuterClassName;
 	private boolean readInnerName;
 
-public InnerClassInfo(byte classFileBytes[], int offsets[], int offset) {
+public InnerClassInfo(byte[] classFileBytes, int[] offsets, int offset) {
 	super(classFileBytes, offsets, offset);
 	this.innerClassNameIndex = u2At(0);
 	this.outerClassNameIndex = u2At(2);

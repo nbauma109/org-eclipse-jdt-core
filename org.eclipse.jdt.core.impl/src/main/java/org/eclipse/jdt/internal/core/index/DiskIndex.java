@@ -127,13 +127,13 @@ SimpleSet addDocumentNames(String substring, MemoryIndex memoryIndex) throws IOE
 	} else {
 		if (memoryIndex == null) {
 			for (int i = 0, l = docNames.length; i < l; i++)
-				if (docNames[i].startsWith(substring, 0))
+				if (docNames[i].startsWith(substring))
 					results.add(docNames[i]);
 		} else {
 			SimpleLookupTable docsToRefs = memoryIndex.docsToReferences;
 			for (int i = 0, l = docNames.length; i < l; i++) {
 				String docName = docNames[i];
-				if (docName.startsWith(substring, 0) && !docsToRefs.containsKey(docName))
+				if (docName.startsWith(substring) && !docsToRefs.containsKey(docName))
 					results.add(docName);
 			}
 		}

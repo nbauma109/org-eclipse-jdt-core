@@ -199,7 +199,7 @@ public class TemplateTranslator {
 		int complete= 0;
 		while (matcher.find()) {
 			// append any verbatim text
-			buffer.append(string.substring(complete, matcher.start()));
+			buffer.append(string, complete, matcher.start());
 
 			// check the escaped sequence
 			switch (matcher.group()) {

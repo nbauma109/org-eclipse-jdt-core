@@ -27,7 +27,7 @@ public class BootstrapMethodsEntry
 	private int bootstrapMethodReference;
 	private int[] bootstrapArguments;
 
-	public BootstrapMethodsEntry(byte classFileBytes[], IConstantPool constantPool, int offset) throws ClassFormatException {
+	public BootstrapMethodsEntry(byte[] classFileBytes, IConstantPool constantPool, int offset) throws ClassFormatException {
 		this.bootstrapMethodReference = u2At(classFileBytes, 0, offset);
 		int length = u2At(classFileBytes, 2, offset);
 		int[] arguments = new int[length];

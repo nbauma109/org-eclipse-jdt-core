@@ -34,7 +34,7 @@ public interface AbstractModule extends IModuleDescription {
 	 *
 	 * <p>Note, that by definition this is mostly a fake, only {@link #getElementName()} provides a useful value.</p>
 	 */
-	static class AutoModule extends NamedMember implements AbstractModule {
+    class AutoModule extends NamedMember implements AbstractModule {
 
 		private boolean nameFromManifest;
 
@@ -77,7 +77,7 @@ public interface AbstractModule extends IModuleDescription {
 	}
 
 	// "forward declaration" for a method from JavaElement:
-	abstract Object getElementInfo() throws JavaModelException;
+    Object getElementInfo() throws JavaModelException;
 
 	default IModule getModuleInfo() throws JavaModelException {
 		return (IModule) getElementInfo();

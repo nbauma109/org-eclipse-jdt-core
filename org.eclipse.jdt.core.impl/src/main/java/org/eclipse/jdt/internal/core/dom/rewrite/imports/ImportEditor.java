@@ -351,8 +351,8 @@ final class ImportEditor {
 	private ImportEdits placeNewImport(ImportEntry currentResultantImport, int position) {
 		String declaration = this.declarationWriter.writeImportDeclaration(currentResultantImport.importName);
 		return new ImportEdits(
-				Collections.<TextEdit>emptySet(),
-				Collections.<TextEdit>singleton(new InsertEdit(position, declaration)));
+				Collections.emptySet(),
+				Collections.singleton(new InsertEdit(position, declaration)));
 	}
 
 	/**
@@ -377,10 +377,10 @@ final class ImportEditor {
 	 */
 	private ImportEdits preserveStationaryImport(OriginalImportEntry importEntry) {
 		return new ImportEdits(
-				Collections.<TextEdit>singleton(new RangeMarker(
+				Collections.singleton(new RangeMarker(
 						importEntry.leadingDelimiter.getOffset(),
 						importEntry.leadingDelimiter.getLength())),
-				Collections.<TextEdit>singleton(new RangeMarker(
+				Collections.singleton(new RangeMarker(
 						importEntry.declarationAndComments.getOffset(),
 						importEntry.declarationAndComments.getLength())));
 

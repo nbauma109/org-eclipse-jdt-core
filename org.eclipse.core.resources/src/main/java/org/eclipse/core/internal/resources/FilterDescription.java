@@ -113,10 +113,8 @@ public class FilterDescription implements IResourceFilterDescription, Comparable
 		if (getClass() != obj.getClass())
 			return false;
 		FilterDescription other = (FilterDescription) obj;
-		if (id != other.id)
-			return false;
-		return true;
-	}
+        return id == other.id;
+    }
 
 	/**
 	 * Compare filter descriptions in a way that sorts them topologically by path.

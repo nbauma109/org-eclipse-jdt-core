@@ -116,7 +116,7 @@ public boolean build(SimpleLookupTable deltas) {
 		} else {
 			IResourceDelta sourceDelta = (IResourceDelta) deltas.get(this.javaBuilder.currentProject);
 			if (sourceDelta != null) {
-				if (!findSourceFiles(sourceDelta)) return this.testImageBuilder != null ? this.testImageBuilder.build(deltas) : false;
+				if (!findSourceFiles(sourceDelta)) return this.testImageBuilder != null && this.testImageBuilder.build(deltas);
 				if(this.testImageBuilder != null) {
 					this.testImageBuilder.findSourceFiles(sourceDelta);
 				}
@@ -779,7 +779,7 @@ protected void processAnnotationResults(CompilationParticipantResult[] results) 
 		if (addedGeneratedFiles != null) {
 			for (int j = addedGeneratedFiles.length; --j >= 0;) {
 				SourceFile sourceFile = findSourceFile(addedGeneratedFiles[j], true);
-				if (sourceFile != null && !this.sourceFiles.contains(sourceFile))
+				if (sourceFile != null)
 					this.sourceFiles.add(sourceFile);
 			}
 		}

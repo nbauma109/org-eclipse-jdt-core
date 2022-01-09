@@ -31,7 +31,7 @@ public interface IPackageBinding extends IBinding {
 	 *    an empty string for an unnamed package
 	 */
 	@Override
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns whether this package is an unnamed package.
@@ -40,7 +40,7 @@ public interface IPackageBinding extends IBinding {
 	 * @return <code>true</code> if this is an unnamed package, and
 	 *    <code>false</code> otherwise
 	 */
-	public boolean isUnnamed();
+    boolean isUnnamed();
 
 	/**
 	 * Returns the list of name component making up the name of the package
@@ -51,7 +51,7 @@ public interface IPackageBinding extends IBinding {
 	 * @return the name of the package represented by this binding, or the
 	 *    empty list for unnamed packages
 	 */
-	public String[] getNameComponents();
+    String[] getNameComponents();
 
 	/**
 	 * Returns the binding of the module associated with this package binding.
@@ -60,7 +60,7 @@ public interface IPackageBinding extends IBinding {
 	 *
 	 * @since 3.14
 	 */
-	public default IModuleBinding getModule() {
+	default IModuleBinding getModule() {
 		return null;
 	}
 //	/**

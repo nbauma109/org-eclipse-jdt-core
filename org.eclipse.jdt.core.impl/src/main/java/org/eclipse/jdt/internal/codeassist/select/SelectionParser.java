@@ -1764,12 +1764,12 @@ public  String toString() {
 	String s = Util.EMPTY_STRING;
 	s = s + "elementKindStack : int[] = {"; //$NON-NLS-1$
 	for (int i = 0; i <= this.elementPtr; i++) {
-		s = s + String.valueOf(this.elementKindStack[i]) + ","; //$NON-NLS-1$
+		s = s + this.elementKindStack[i] + ","; //$NON-NLS-1$
 	}
 	s = s + "}\n"; //$NON-NLS-1$
 	s = s + "elementInfoStack : int[] = {"; //$NON-NLS-1$
 	for (int i = 0; i <= this.elementPtr; i++) {
-		s = s + String.valueOf(this.elementInfoStack[i]) + ","; //$NON-NLS-1$
+		s = s + this.elementInfoStack[i] + ","; //$NON-NLS-1$
 	}
 	s = s + "}\n"; //$NON-NLS-1$
 	return s + super.toString();

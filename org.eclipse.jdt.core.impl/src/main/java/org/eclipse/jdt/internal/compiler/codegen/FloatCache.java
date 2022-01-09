@@ -14,8 +14,8 @@
 package org.eclipse.jdt.internal.compiler.codegen;
 
 public class FloatCache {
-	private float keyTable[];
-	private int valueTable[];
+	private float[] keyTable;
+	private int[] valueTable;
 	private int elementSize;
 /**
  * Constructs a new, empty hashtable. A default capacity and

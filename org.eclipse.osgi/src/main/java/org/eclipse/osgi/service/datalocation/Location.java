@@ -34,7 +34,7 @@ public interface Location {
 	 *
 	 * @since 3.2
 	 */
-	public static final String INSTANCE_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.instance.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+    String INSTANCE_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.instance.area))"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * Constant which defines the filter string for acquiring the service which
@@ -42,7 +42,7 @@ public interface Location {
 	 *
 	 * @since 3.2
 	 */
-	public static final String INSTALL_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.install.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+    String INSTALL_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.install.area))"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * Constant which defines the filter string for acquiring the service which
@@ -50,7 +50,7 @@ public interface Location {
 	 *
 	 * @since 3.2
 	 */
-	public static final String CONFIGURATION_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.configuration.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+    String CONFIGURATION_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.configuration.area))"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * Constant which defines the filter string for acquiring the service which
@@ -58,7 +58,7 @@ public interface Location {
 	 *
 	 * @since 3.2
 	 */
-	public static final String USER_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.user.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+    String USER_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.user.area))"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * Constant which defines the filter string for acquiring the service which
@@ -66,7 +66,7 @@ public interface Location {
 	 *
 	 * @since 3.4
 	 */
-	public static final String ECLIPSE_HOME_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=eclipse.home.location))"; //$NON-NLS-1$ //$NON-NLS-2$
+    String ECLIPSE_HOME_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=eclipse.home.location))"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * Returns <code>true</code> if this location allows a default value to be assigned
@@ -74,7 +74,7 @@ public interface Location {
 	 *
 	 * @return whether or not this location can have a default value assigned
 	 */
-	public boolean allowsDefault();
+    boolean allowsDefault();
 
 	/**
 	 * Returns the default value of this location if any.  If no default is available then
@@ -83,14 +83,14 @@ public interface Location {
 	 *
 	 * @return the default value for this location or <code>null</code>
 	 */
-	public URL getDefault();
+    URL getDefault();
 
 	/**
 	 * Returns the parent of this location or <code>null</code> if none is available.
 	 *
 	 * @return the parent of this location or <code>null</code>
 	 */
-	public Location getParentLocation();
+    Location getParentLocation();
 
 	/**
 	 * Returns the actual {@link URL} of this location.  If the location's value has been set,
@@ -100,7 +100,7 @@ public interface Location {
 	 *
 	 * @return the URL for this location or <code>null</code> if none
 	 */
-	public URL getURL();
+    URL getURL();
 
 	/**
 	 * Returns <code>true</code> if this location has a value and <code>false</code>
@@ -108,7 +108,7 @@ public interface Location {
 	 *
 	 * @return boolean value indicating whether or not the value is set
 	 */
-	public boolean isSet();
+    boolean isSet();
 
 	/**
 	 * Returns <code>true</code> if this location represents a read only location and
@@ -118,7 +118,7 @@ public interface Location {
 	 *
 	 * @return boolean value indicating whether the location is read only
 	 */
-	public boolean isReadOnly();
+    boolean isReadOnly();
 
 	/**
 	 * Sets and optionally locks the location's value to the given {@link URL}.  If the location
@@ -131,7 +131,7 @@ public interface Location {
 	 * @throws IllegalStateException if the location's value is already set
 	 * @deprecated use {@link #set(URL, boolean)} instead.
 	 */
-	public boolean setURL(URL value, boolean lock) throws IllegalStateException;
+    boolean setURL(URL value, boolean lock) throws IllegalStateException;
 
 	/**
 	 * Sets and optionally locks the location's value to the given {@link URL}.  If the location
@@ -145,7 +145,7 @@ public interface Location {
 	 * @throws IOException if there was an unexpected problem while acquiring the lock
 	 * @since 3.4
 	 */
-	public boolean set(URL value, boolean lock) throws IllegalStateException, IOException;
+    boolean set(URL value, boolean lock) throws IllegalStateException, IOException;
 
 	/**
 	 * Sets and optionally locks the location's value to the given {@link URL} using the given lock file.  If the location
@@ -162,7 +162,7 @@ public interface Location {
 	 * @throws IOException if there was an unexpected problem while acquiring the lock
 	 * @since 3.5
 	 */
-	public boolean set(URL value, boolean lock, String lockFilePath) throws IllegalStateException, IOException;
+    boolean set(URL value, boolean lock, String lockFilePath) throws IllegalStateException, IOException;
 
 	/**
 	 * Attempts to lock this location with a canonical locking mechanism and return
@@ -176,13 +176,13 @@ public interface Location {
 	 *
 	 * @exception IOException if there was an unexpected problem while acquiring the lock
 	 */
-	public boolean lock() throws IOException;
+    boolean lock() throws IOException;
 
 	/**
 	 * Releases the lock on this location.  If the location is not already locked, no action
 	 * is taken.
 	 */
-	public void release();
+    void release();
 
 	/**
 	 * Returns <code>true</code> if this location is locked and <code>false</code>
@@ -191,7 +191,7 @@ public interface Location {
 	 * @throws IOException if there was an unexpected problem reading the lock
 	 * @since 3.4
 	 */
-	public boolean isLocked() throws IOException;
+    boolean isLocked() throws IOException;
 
 	/**
 	 * Constructs a new location.
@@ -201,7 +201,7 @@ public interface Location {
 	 * @return a new location.
 	 * @since 3.4
 	 */
-	public Location createLocation(Location parent, URL defaultValue, boolean readonly);
+    Location createLocation(Location parent, URL defaultValue, boolean readonly);
 
 	/**
 	 * Returns a URL to the specified path within this location.  The path
@@ -224,5 +224,5 @@ public interface Location {
 	 * @throws IOException if the location URL is not already set
 	 * @since 3.6
 	 */
-	public URL getDataArea(String path) throws IOException;
+    URL getDataArea(String path) throws IOException;
 }

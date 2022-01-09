@@ -1498,7 +1498,7 @@ public final class ImportRewrite {
 	private ITypeBinding checkAnnotationAndGenerics(ITypeBinding binding) {
 		ITypeBinding bindingPoint = null;
 		while (binding != null) {
-			IAnnotationBinding annotationBinding [] = binding.getTypeAnnotations();
+			IAnnotationBinding[] annotationBinding = binding.getTypeAnnotations();
 			ITypeBinding []  typeArguments = binding.getTypeArguments();
 			if ((annotationBinding != null && annotationBinding.length > 0) ||
 					(typeArguments != null && typeArguments.length > 0)) {
@@ -1515,7 +1515,7 @@ public final class ImportRewrite {
 
 	private Type createBaseType(AST ast, ImportRewriteContext context, ITypeBinding normalizedBinding, TypeLocation location) {
 		Type type;
-		IAnnotationBinding annotationBinding [] = normalizedBinding.getTypeAnnotations();
+		IAnnotationBinding[] annotationBinding = normalizedBinding.getTypeAnnotations();
 		boolean annotsPresent = annotationBinding != null && annotationBinding.length > 0;
 
 		String qualifiedName= getRawQualifiedName(normalizedBinding);
@@ -1589,7 +1589,7 @@ public final class ImportRewrite {
 		if (getBase) {
 			type = createBaseType(ast, context, normalizedBinding, location);
 		} else  {
-			type = currentType != null ? (Type) ast.newQualifiedType(currentType, ast.newSimpleName(getRawName(normalizedBinding))) :
+			type = currentType != null ? ast.newQualifiedType(currentType, ast.newSimpleName(getRawName(normalizedBinding))) :
 				ast.newSimpleType(ast.newName(getRawName(normalizedBinding)));
 			type = annotateType(normalizedBinding, ast, context, type, location);
 		}

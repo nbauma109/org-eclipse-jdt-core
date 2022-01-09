@@ -298,7 +298,7 @@ public FieldBinding addSyntheticFieldForInnerclass(LocalVariableBinding actualOu
 					synthField.name = CharOperation.concat(
 						TypeConstants.SYNTHETIC_OUTER_LOCAL_PREFIX,
 						actualOuterLocalVariable.name,
-						("$" + String.valueOf(index++)).toCharArray()); //$NON-NLS-1$
+						("$" + index++).toCharArray()); //$NON-NLS-1$
 					needRecheck = true;
 					break;
 				}
@@ -439,7 +439,7 @@ public FieldBinding addSyntheticFieldForAssert(BlockScope blockScope) {
 				if (fieldDecl.binding == existingField) {
 					synthField.name = CharOperation.concat(
 						TypeConstants.SYNTHETIC_ASSERT_DISABLED,
-						("_" + String.valueOf(index++)).toCharArray()); //$NON-NLS-1$
+						("_" + index++).toCharArray()); //$NON-NLS-1$
 					needRecheck = true;
 					break;
 				}
@@ -486,7 +486,7 @@ public FieldBinding addSyntheticFieldForEnumValues() {
 				if (fieldDecl.binding == existingField) {
 					synthField.name = CharOperation.concat(
 						TypeConstants.SYNTHETIC_ENUM_VALUES,
-						("_" + String.valueOf(index++)).toCharArray()); //$NON-NLS-1$
+						("_" + index++).toCharArray()); //$NON-NLS-1$
 					needRecheck = true;
 					break;
 				}
@@ -579,7 +579,7 @@ public SyntheticFieldBinding addSyntheticFieldForSwitchEnum(char[] fieldName, St
 				if (fieldDecl.binding == existingField) {
 					synthField.name = CharOperation.concat(
 						fieldName,
-						("_" + String.valueOf(index++)).toCharArray()); //$NON-NLS-1$
+						("_" + index++).toCharArray()); //$NON-NLS-1$
 					needRecheck = true;
 					break;
 				}
@@ -1116,7 +1116,7 @@ void faultInTypesForFieldsAndMethods() {
 }
 
 private Map.Entry<TypeReference, ReferenceBinding> getFirstSealedSuperTypeOrInterface(TypeDeclaration typeDecl) {
-	boolean isAnySuperTypeSealed = typeDecl.superclass != null && this.superclass != null ? this.superclass.isSealed() : false;
+	boolean isAnySuperTypeSealed = typeDecl.superclass != null && this.superclass != null && this.superclass.isSealed();
 	if (isAnySuperTypeSealed)
 		return new AbstractMap.SimpleEntry<>(typeDecl.superclass, this.superclass);
 
@@ -1253,11 +1253,8 @@ private void checkPermitsInType() {
 private void reportSealedSuperTypeDoesNotPermitProblem(TypeReference superTypeRef, TypeBinding superType) {
 	ModuleBinding sourceModuleBinding = this.module();
 	boolean isUnnamedModule = sourceModuleBinding.isUnnamed();
-	boolean isClass =  false;
-	if (superType.isClass()) {
-		isClass =  true;
-	}
-	boolean sealedSuperTypeDoesNotPermit = false;
+	boolean isClass = superType.isClass();
+    boolean sealedSuperTypeDoesNotPermit = false;
 	ReferenceBinding superReferenceBinding = null;
 	if (superType instanceof ReferenceBinding) {
 		superReferenceBinding = (ReferenceBinding) superType;
@@ -2349,7 +2346,7 @@ public MethodBinding[] methods() {
 										if (TypeBinding.notEquals(params1[index], params2[index].erasure())) {
 											// If one of them is a raw type
 											if (params1[index] instanceof RawTypeBinding) {
-												if (TypeBinding.notEquals(params2[index].erasure(), ((RawTypeBinding)params1[index]).actualType())) {
+												if (TypeBinding.notEquals(params2[index].erasure(), params1[index].actualType())) {
 													break;
 												}
 											} else  {
@@ -2370,7 +2367,7 @@ public MethodBinding[] methods() {
 											if (TypeBinding.notEquals(params1[index].erasure(), params2[index])) {
 												// If one of them is a raw type
 												if (params2[index] instanceof RawTypeBinding) {
-													if (TypeBinding.notEquals(params1[index].erasure(), ((RawTypeBinding)params2[index]).actualType())) {
+													if (TypeBinding.notEquals(params1[index].erasure(), params2[index].actualType())) {
 														break;
 													}
 												} else  {
@@ -2427,7 +2424,7 @@ public MethodBinding[] methods() {
 				// otherwise duplicates / name clash
 				boolean isEnumSpecialMethod = isEnum() && (CharOperation.equals(selector,TypeConstants.VALUEOF) || CharOperation.equals(selector,TypeConstants.VALUES));
 				// report duplicate
-				boolean removeMethod2 = (severity == ProblemSeverities.Error) ? true : false; // do not remove if in 1.6 and just a warning given
+				boolean removeMethod2 = severity == ProblemSeverities.Error; // do not remove if in 1.6 and just a warning given
 				if (methodDecl == null) {
 					methodDecl = method.sourceMethod(); // cannot be retrieved after binding is lost & may still be null if method is special
 					if (methodDecl != null && methodDecl.binding != null) { // ensure its a valid user defined method

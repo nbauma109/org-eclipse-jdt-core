@@ -64,11 +64,7 @@ public class WrappedCapability implements HostedCapability
         {
             return false;
         }
-        if (m_cap != other.m_cap && (m_cap == null || !m_cap.equals(other.m_cap)))
-        {
-            return false;
-        }
-        return true;
+        return m_cap == other.m_cap || (m_cap != null && m_cap.equals(other.m_cap));
     }
 
     @Override

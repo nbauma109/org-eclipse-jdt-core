@@ -79,7 +79,7 @@ public class Scanner implements TerminalTokens {
 
 	//source should be viewed as a window (aka a part)
 	//of a entire very large stream
-	public char source[];
+	public char[] source;
 
 	//unicode support
 	public char[] withoutUnicodeBuffer;
@@ -177,7 +177,7 @@ public class Scanner implements TerminalTokens {
 	public boolean returnOnlyGreater = false;
 
 	public boolean insideRecovery = false;
-	int lookBack[] = new int[2]; // fall back to spring forward.
+	int[] lookBack = new int[2]; // fall back to spring forward.
 	protected int nextToken = TokenNameNotAToken; // allows for one token push back, only the most recent token can be reliably ungotten.
 	private VanguardScanner vanguardScanner;
 	private VanguardParser vanguardParser;
@@ -2714,7 +2714,7 @@ public final boolean jumpOverUnicodeWhiteSpace() throws InvalidInputException {
 
 public boolean isInModuleDeclaration() {
 	return this.fakeInModule || this.insideModuleInfo ||
-			(this.activeParser != null ? this.activeParser.isParsingModuleDeclaration() : false);
+			(this.activeParser != null && this.activeParser.isParsingModuleDeclaration());
 }
 protected boolean areRestrictedModuleKeywordsActive() {
 	return this.scanContext != null && this.scanContext != ScanContext.INACTIVE;
@@ -2922,11 +2922,7 @@ public final void pushLineSeparator() {
 public final void pushUnicodeLineSeparator() {
 	// cr 000D
 	if (this.currentCharacter == '\r') {
-		if (this.source[this.currentPosition] == '\n') {
-			this.wasAcr = false;
-		} else {
-			this.wasAcr = true;
-		}
+        this.wasAcr = this.source[this.currentPosition] != '\n';
 	} else {
 		// lf 000A
 		if (this.currentCharacter == '\n') { //must merge eventual cr followed by lf
@@ -5427,9 +5423,7 @@ private boolean mayBeAtCaseLabelExpr() {
 	if (this.caseStartPosition <= 0)
 		return false;
 	if (this.lookBack[1] == TokenNamedefault) {
-		return this.complianceLevel == ClassFileConstants.JDK17 && this.previewEnabled ?
-				(this.lookBack[0] == TerminalTokens.TokenNamecase || this.lookBack[0] == TerminalTokens.TokenNameCOMMA)
-				: false;
+		return this.complianceLevel == ClassFileConstants.JDK17 && this.previewEnabled && (this.lookBack[0] == TerminalTokens.TokenNamecase || this.lookBack[0] == TerminalTokens.TokenNameCOMMA);
 	}
 	return true;
 }

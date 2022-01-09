@@ -32,20 +32,20 @@ public interface VersionConstraint extends Cloneable {
 	 *
 	 * @return this constraint's name
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the version range for this constraint.
 	 * @return the version range for this constraint, or <code>null</code>
 	 */
-	public VersionRange getVersionRange();
+    VersionRange getVersionRange();
 
 	/**
 	 * Returns the bundle that declares this constraint.
 	 *
 	 * @return a bundle description
 	 */
-	public BundleDescription getBundle();
+    BundleDescription getBundle();
 
 	/**
 	 * Returns whether this constraint is resolved. A resolved constraint
@@ -54,7 +54,7 @@ public interface VersionConstraint extends Cloneable {
 	 * @return <code>true</code> if this bundle is resolved, <code>false</code>
 	 * otherwise
 	 */
-	public boolean isResolved();
+    boolean isResolved();
 
 	/**
 	 * Returns whether this constraint could be satisfied by the given supplier.
@@ -66,7 +66,7 @@ public interface VersionConstraint extends Cloneable {
 	 * @return <code>true</code> if this constraint could be resolved using the supplier,
 	 * <code>false</code> otherwise
 	 */
-	public boolean isSatisfiedBy(BaseDescription supplier);
+    boolean isSatisfiedBy(BaseDescription supplier);
 
 	/**
 	 * Returns the supplier that satisfies this constraint, if it is resolved.
@@ -74,7 +74,7 @@ public interface VersionConstraint extends Cloneable {
 	 * @return a supplier, or <code>null</code>
 	 * @see #isResolved()
 	 */
-	public BaseDescription getSupplier();
+    BaseDescription getSupplier();
 
 	/**
 	 * Returns the requirement represented by this constraint.
@@ -84,7 +84,7 @@ public interface VersionConstraint extends Cloneable {
 	 * @return the requirement represented by this constraint
 	 * @since 3.7
 	 */
-	public BundleRequirement getRequirement();
+    BundleRequirement getRequirement();
 
 	/**
 	 * Returns the user object associated to this constraint, or
@@ -94,7 +94,7 @@ public interface VersionConstraint extends Cloneable {
 	 * or <code>null</code>
 	 * @since 3.8
 	 */
-	public Object getUserObject();
+    Object getUserObject();
 
 	/**
 	 * Associates a user-provided object to this constraint, or
@@ -106,5 +106,5 @@ public interface VersionConstraint extends Cloneable {
 	 * <code>null</code>
 	 * @since 3.8
 	 */
-	public void setUserObject(Object userObject);
+    void setUserObject(Object userObject);
 }

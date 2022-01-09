@@ -508,7 +508,7 @@ public class ClasspathEntry implements IClasspathEntry {
 		decodeUnknownNode(node, xmlWriter, true/*insert new line*/);
 		xmlWriter.flush();
 		xmlWriter.close();
-		buffer.append(writer.toString());
+		buffer.append(writer);
 	}
 
 	private static void decodeUnknownNode(Node node, XMLWriter xmlWriter, boolean insertNewLine) {
@@ -1187,10 +1187,8 @@ public class ClasspathEntry implements IClasspathEntry {
 				if (!this.specificOutputLocation.equals(otherPath))
 					return false;
 			}
-			if (!equalAttributes(this.extraAttributes, otherEntry.getExtraAttributes()))
-				return false;
-			return true;
-		} else {
+            return equalAttributes(this.extraAttributes, otherEntry.getExtraAttributes());
+        } else {
 			return false;
 		}
 	}
@@ -1541,7 +1539,7 @@ public class ClasspathEntry implements IClasspathEntry {
 		if (target instanceof File)
 			buffer.append(getPath().toOSString());
 		else
-			buffer.append(String.valueOf(getPath()));
+			buffer.append(getPath());
 		buffer.append('[');
 		switch (getEntryKind()) {
 			case IClasspathEntry.CPE_LIBRARY :
@@ -1740,7 +1738,7 @@ public class ClasspathEntry implements IClasspathEntry {
 						String pathString = getPath().toPortableString();
 						CRC32 checksumCalculator = new CRC32();
 						checksumCalculator.update(pathString.getBytes());
-						String fileName = Long.toString(checksumCalculator.getValue()) + ".index"; //$NON-NLS-1$
+						String fileName = checksumCalculator.getValue() + ".index"; //$NON-NLS-1$
 						return new URL("file", null, Paths.get(SHARED_INDEX_LOCATION, fileName).toString()); //$NON-NLS-1$
 					} catch (MalformedURLException e1) {
 						Util.log(e1); // should not happen if protocol known (eg. 'file')
@@ -2466,8 +2464,7 @@ public class ClasspathEntry implements IClasspathEntry {
 					// Validate the contents of the archive
 					if(file.isFile()) {
 						IJavaModelStatus status = validateLibraryContents(path, project, entryPathMsg);
-						if (status != JavaModelStatus.VERIFIED_OK)
-							return status;
+                        return status;
 					}
 				}
 			} else {

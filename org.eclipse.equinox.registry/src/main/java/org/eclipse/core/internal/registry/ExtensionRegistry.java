@@ -496,7 +496,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			KeyedElement[] namespaceElements = registryObjects.getNamespacesIndex().elements();
 			String[] namespaceNames = new String[namespaceElements.length];
 			for (int i = 0; i < namespaceElements.length; i++) {
-				namespaceNames[i] = (String) ((RegistryIndexElement) namespaceElements[i]).getKey();
+				namespaceNames[i] = (String) namespaceElements[i].getKey();
 			}
 			return namespaceNames;
 		} finally {
@@ -1049,10 +1049,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	private boolean checkReadWriteAccess(Object key, boolean persist) {
 		if (masterToken == key)
 			return true;
-		if (userToken == key && !persist)
-			return true;
-		return false;
-	}
+        return userToken == key && !persist;
+    }
 
 	public boolean addContribution(InputStream is, IContributor contributor, boolean persist, String contributionName, ResourceBundle translationBundle, Object key, long timestamp) {
 		boolean result = addContribution(is, contributor, persist, contributionName, translationBundle, key);

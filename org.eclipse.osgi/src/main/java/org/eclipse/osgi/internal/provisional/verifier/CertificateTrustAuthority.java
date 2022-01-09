@@ -29,12 +29,12 @@ public interface CertificateTrustAuthority {
 	 * @param certChain a chain of certificates
 	 * @throws CertificateException if the certficates are not trusted
 	 */
-	public void checkTrust(Certificate[] certChain) throws CertificateException;
+    void checkTrust(Certificate[] certChain) throws CertificateException;
 
 	/**
 	 * Add the specified certificate chain as a trusted certificate chain.
 	 *
 	 * @param certChain a chain of certificates
 	 */
-	public void addTrusted(Certificate[] certChain) throws CertificateException;
+    void addTrusted(Certificate[] certChain) throws CertificateException;
 }

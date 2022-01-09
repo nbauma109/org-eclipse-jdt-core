@@ -17,6 +17,7 @@
 package org.eclipse.core.internal.resources;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.*;
 import org.eclipse.core.internal.preferences.*;
@@ -166,8 +167,8 @@ public class ProjectPreferences extends EclipsePreferences {
 			Policy.debug("Loading preferences from file: " + file.getFullPath()); //$NON-NLS-1$
 		Properties result = new Properties();
 		try (
-			InputStream input = new BufferedInputStream(file.getContents(true));
-		) {
+			InputStream input = new BufferedInputStream(file.getContents(true))
+        ) {
 			result.load(input);
 		} catch (CoreException e) {
 			if (e.getStatus().getCode() == IResourceStatus.RESOURCE_NOT_FOUND) {
@@ -511,8 +512,8 @@ public class ProjectPreferences extends EclipsePreferences {
 			Policy.debug("Loading preferences from file: " + localFile.getFullPath()); //$NON-NLS-1$
 		Properties fromDisk = new Properties();
 		try (
-			InputStream input = new BufferedInputStream(localFile.getContents(true));
-		) {
+			InputStream input = new BufferedInputStream(localFile.getContents(true))
+        ) {
 			fromDisk.load(input);
 			convertFromProperties(this, fromDisk, true);
 			loadedNodes.add(absolutePath());
@@ -621,7 +622,7 @@ public class ProjectPreferences extends EclipsePreferences {
 					String fileLineSeparator = FileUtil.getLineSeparator(fileInWorkspace);
 					if (!systemLineSeparator.equals(fileLineSeparator))
 						s = s.replaceAll(systemLineSeparator, fileLineSeparator);
-					InputStream input = new BufferedInputStream(new ByteArrayInputStream(s.getBytes("UTF-8"))); //$NON-NLS-1$
+					InputStream input = new BufferedInputStream(new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8))); //$NON-NLS-1$
 					// make sure that preference folder and file are in sync
 					fileInWorkspace.getParent().refreshLocal(IResource.DEPTH_ZERO, null);
 					fileInWorkspace.refreshLocal(IResource.DEPTH_ZERO, null);

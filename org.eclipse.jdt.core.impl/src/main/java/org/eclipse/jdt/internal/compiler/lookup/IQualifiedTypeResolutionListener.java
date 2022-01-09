@@ -32,5 +32,5 @@ public interface IQualifiedTypeResolutionListener {
 	 * @param resolution
 	 *            the resolution found
 	 */
-	public void recordResolution(QualifiedTypeReference typeReference, TypeBinding resolution);
+    void recordResolution(QualifiedTypeReference typeReference, TypeBinding resolution);
 }

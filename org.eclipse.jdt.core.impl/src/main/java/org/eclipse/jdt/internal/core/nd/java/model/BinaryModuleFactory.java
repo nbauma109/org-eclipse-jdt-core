@@ -64,7 +64,7 @@ public class BinaryModuleFactory {
 		char[] moduleName = null;
 
 		if (root instanceof JarPackageFragmentRoot) {
-			entryName = ((JarPackageFragmentRoot) root).getClassFilePath(entryName);
+			entryName = root.getClassFilePath(entryName);
 			indexPath = root.getHandleIdentifier() + IDependent.JAR_FILE_ENTRY_SEPARATOR + entryName;
 			// see additional comments in BinaryTypeFactor.createDescriptor()
 			if (root instanceof JrtPackageFragmentRoot) {
@@ -130,7 +130,7 @@ public class BinaryModuleFactory {
 				String entryName = TypeConstants.MODULE_INFO_CLASS_NAME_STRING;
 				ZipEntry ze = zip.getEntry(entryName);
 				if (ze != null) {
-					byte contents[];
+					byte[] contents;
 					try {
 						contents = org.eclipse.jdt.internal.compiler.util.Util.getZipEntryByteContent(ze, zip);
 					} catch (IOException ioe) {

@@ -199,9 +199,7 @@ boolean matchParametersCount(ASTNode node, Expression[] args) {
 		int length = this.pattern.parameterCount;
 		if (length < 0) length = this.pattern.parameterSimpleNames.length;
 		int argsLength = args == null ? 0 : args.length;
-		if (length != argsLength) {
-			return false;
-		}
+        return length == argsLength;
 	}
 	return true;
 }

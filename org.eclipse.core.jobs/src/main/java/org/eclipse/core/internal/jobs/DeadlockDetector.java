@@ -667,15 +667,13 @@ class DeadlockDetector {
 	 * The given thread is waiting for the given lock. Update the graph.
 	 */
 	private void setToWait(Thread owner, ISchedulingRule lock, boolean suspend) {
-		boolean needTransfer = false;
+		boolean needTransfer = !suspend && !(lock instanceof ILock);
 		/**
 		 * if we are adding an entry where a thread is waiting on a scheduling rule,
 		 * then we need to transfer all positive entries for a conflicting rule to the
 		 * newly added rule in order to synchronize the graph.
 		 */
-		if (!suspend && !(lock instanceof ILock))
-			needTransfer = true;
-		int lockIndex = indexOf(lock, !suspend);
+        int lockIndex = indexOf(lock, !suspend);
 		int threadIndex = indexOf(owner, !suspend);
 		if (resize)
 			resizeGraph();

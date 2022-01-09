@@ -1956,7 +1956,7 @@ public class Disassembler extends ClassFileBytesDisassembler {
 					}
 					break;
 				case IConstantPoolConstant.CONSTANT_MethodType:
-					arguments[i] = new String(((ConstantPoolEntry2) constantPoolEntry).getMethodDescriptor());
+					arguments[i] = new String(constantPoolEntry.getMethodDescriptor());
 					break;
 				case IConstantPoolConstant.CONSTANT_Class:
 					arguments[i] = new String(constantPoolEntry.getClassInfoName());
@@ -2230,7 +2230,7 @@ public class Disassembler extends ClassFileBytesDisassembler {
 								buffer.append("false"); //$NON-NLS-1$
 								break;
 							case 'C' :
-								buffer.append("\' \'"); //$NON-NLS-1$
+								buffer.append("' '"); //$NON-NLS-1$
 								break;
 						}
 						break;

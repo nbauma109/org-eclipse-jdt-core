@@ -47,12 +47,12 @@ public interface IPath extends Cloneable {
 	/**
 	 * Path separator character constant "/" used in paths.
 	 */
-	public static final char SEPARATOR = '/';
+    char SEPARATOR = '/';
 
 	/** 
 	 * Device separator character constant ":" used in paths.
 	 */
-	public static final char DEVICE_SEPARATOR = ':';
+    char DEVICE_SEPARATOR = ':';
 
 	/**
 	 * Returns a new path which is the same as this path but with
@@ -71,7 +71,7 @@ public interface IPath extends Cloneable {
 	 * @param extension the file extension to append
 	 * @return the new path
 	 */
-	public IPath addFileExtension(String extension);
+    IPath addFileExtension(String extension);
 
 	/**
 	 * Returns a path with the same segments as this path
@@ -86,7 +86,7 @@ public interface IPath extends Cloneable {
 	 * @see #hasTrailingSeparator()
 	 * @see #removeTrailingSeparator()
 	 */
-	public IPath addTrailingSeparator();
+    IPath addTrailingSeparator();
 
 	/**
 	 * Returns the canonicalized path obtained from the
@@ -103,7 +103,7 @@ public interface IPath extends Cloneable {
 	 * @return the new path
 	 * @see #isValidPath(String)
 	 */
-	public IPath append(String path);
+    IPath append(String path);
 
 	/**
 	 * Returns the canonicalized path obtained from the 
@@ -118,14 +118,14 @@ public interface IPath extends Cloneable {
 	 * @param path the path to concatenate
 	 * @return the new path
 	 */
-	public IPath append(IPath path);
+    IPath append(IPath path);
 
 	/**
 	 * Returns a copy of this path.
 	 *
 	 * @return the cloned path
 	 */
-	public Object clone();
+    Object clone();
 
 	/**
 	 * Returns whether this path equals the given object.
@@ -142,7 +142,7 @@ public interface IPath extends Cloneable {
 	 *    and <code>false</code> if they are not
 	 */
 	@Override
-	public boolean equals(Object obj);
+    boolean equals(Object obj);
 
 	/**
 	 * Returns the device id for this path, or <code>null</code> if this
@@ -151,7 +151,7 @@ public interface IPath extends Cloneable {
 	 * @return the device id, or <code>null</code>
 	 * @see #setDevice(String)
 	 */
-	public String getDevice();
+    String getDevice();
 
 	/**
 	 * Returns the file extension portion of this path, 
@@ -166,7 +166,7 @@ public interface IPath extends Cloneable {
 	 *
 	 * @return the file extension or <code>null</code>
 	 */
-	public String getFileExtension();
+    String getFileExtension();
 
 	/**
 	 * Returns whether this path has a trailing separator.
@@ -180,7 +180,7 @@ public interface IPath extends Cloneable {
 	 * @see #addTrailingSeparator()
 	 * @see #removeTrailingSeparator()
 	 */
-	public boolean hasTrailingSeparator();
+    boolean hasTrailingSeparator();
 
 	/**
 	 * Returns whether this path is an absolute path (ignoring
@@ -194,7 +194,7 @@ public interface IPath extends Cloneable {
 	 * @return <code>true</code> if this path is an absolute path,
 	 *    and <code>false</code> otherwise
 	 */
-	public boolean isAbsolute();
+    boolean isAbsolute();
 
 	/**
 	 * Returns whether this path has no segments and is not
@@ -203,7 +203,7 @@ public interface IPath extends Cloneable {
 	 * @return <code>true</code> if this path is empty,
 	 *    and <code>false</code> otherwise
 	 */
-	public boolean isEmpty();
+    boolean isEmpty();
 
 	/**
 	 * Returns whether this path is a prefix of the given path.
@@ -218,7 +218,7 @@ public interface IPath extends Cloneable {
 	 * @return <code>true</code> if this path is a prefix of the given path,
 	 *    and <code>false</code> otherwise
 	 */
-	public boolean isPrefixOf(IPath anotherPath);
+    boolean isPrefixOf(IPath anotherPath);
 
 	/**
 	 * Returns whether this path is a root path.
@@ -231,7 +231,7 @@ public interface IPath extends Cloneable {
 	 * @return <code>true</code> if this path is a root path,
 	 *    and <code>false</code> otherwise
 	 */
-	public boolean isRoot();
+    boolean isRoot();
 
 	/**
 	 * Returns a boolean value indicating whether or not this path
@@ -241,7 +241,7 @@ public interface IPath extends Cloneable {
 	 * 
 	 * @return boolean indicating if this path is UNC
 	 */
-	public boolean isUNC();
+    boolean isUNC();
 
 	/**
 	 * Returns whether the given string is syntactically correct as a path, on
@@ -258,7 +258,7 @@ public interface IPath extends Cloneable {
 	 *    and <code>false</code> otherwise
 	 * @see #isValidSegment(String)
 	 */
-	public boolean isValidPath(String path);
+    boolean isValidPath(String path);
 
 	/**
 	 * Returns whether the given string is valid as a segment in this path.
@@ -275,7 +275,7 @@ public interface IPath extends Cloneable {
 	 * @return <code>true</code> if the given path segment is valid,
 	 *    and <code>false</code> otherwise
 	 */
-	public boolean isValidSegment(String segment);
+    boolean isValidSegment(String segment);
 
 	/**
 	 * Returns the last segment of this path, or
@@ -283,7 +283,7 @@ public interface IPath extends Cloneable {
 	 *
 	 * @return the last segment of this path, or <code>null</code> 
 	 */
-	public String lastSegment();
+    String lastSegment();
 
 	/**
 	 * Returns an absolute path with the segments and device id of this path.
@@ -292,7 +292,7 @@ public interface IPath extends Cloneable {
 	 *
 	 * @return the new path
 	 */
-	public IPath makeAbsolute();
+    IPath makeAbsolute();
 
 	/**
 	 * Returns a relative path with the segments and device id of this path.
@@ -301,7 +301,7 @@ public interface IPath extends Cloneable {
 	 *
 	 * @return the new path
 	 */
-	public IPath makeRelative();
+    IPath makeRelative();
 
 	/**
 	 * Returns a path equivalent to this path, but relative to the given base path if possible. 
@@ -317,7 +317,7 @@ public interface IPath extends Cloneable {
 	 * not be made relative to the given base
 	 * @since org.eclipse.equinox.common 3.5
 	 */
-	public IPath makeRelativeTo(IPath base);
+    IPath makeRelativeTo(IPath base);
 
 	/**
 	 * Return a new path which is the equivalent of this path converted to UNC
@@ -329,7 +329,7 @@ public interface IPath extends Cloneable {
 	 * @param toUNC true if converting to UNC, false otherwise
 	 * @return the new path, either in UNC form or not depending on the boolean parameter
 	 */
-	public IPath makeUNC(boolean toUNC);
+    IPath makeUNC(boolean toUNC);
 
 	/**
 	 * Returns a count of the number of segments which match in
@@ -339,7 +339,7 @@ public interface IPath extends Cloneable {
 	 * @param anotherPath the other path
 	 * @return the number of matching segments
 	 */
-	public int matchingFirstSegments(IPath anotherPath);
+    int matchingFirstSegments(IPath anotherPath);
 
 	/**
 	 * Returns a new path which is the same as this path but with
@@ -355,7 +355,7 @@ public interface IPath extends Cloneable {
 	 *
 	 * @return the new path
 	 */
-	public IPath removeFileExtension();
+    IPath removeFileExtension();
 
 	/**
 	 * Returns a copy of this path with the given number of segments
@@ -375,7 +375,7 @@ public interface IPath extends Cloneable {
 	 * @param count the number of segments to remove
 	 * @return the new path
 	 */
-	public IPath removeFirstSegments(int count);
+    IPath removeFirstSegments(int count);
 
 	/**
 	 * Returns a copy of this path with the given number of segments
@@ -395,7 +395,7 @@ public interface IPath extends Cloneable {
 	 * @param count the number of segments to remove
 	 * @return the new path
 	 */
-	public IPath removeLastSegments(int count);
+    IPath removeLastSegments(int count);
 
 	/**
 	 * Returns a path with the same segments as this path
@@ -411,7 +411,7 @@ public interface IPath extends Cloneable {
 	 * @see #addTrailingSeparator()
 	 * @see #hasTrailingSeparator()
 	 */
-	public IPath removeTrailingSeparator();
+    IPath removeTrailingSeparator();
 
 	/**
 	 * Returns the specified segment of this path, or
@@ -420,7 +420,7 @@ public interface IPath extends Cloneable {
 	 * @param index the 0-based segment index
 	 * @return the specified segment, or <code>null</code> 
 	 */
-	public String segment(int index);
+    String segment(int index);
 
 	/**
 	 * Returns the number of segments in this path.
@@ -430,14 +430,14 @@ public interface IPath extends Cloneable {
 	 *
 	 * @return the number of segments
 	 */
-	public int segmentCount();
+    int segmentCount();
 
 	/**
 	 * Returns the segments in this path in order.
 	 *
 	 * @return an array of string segments
 	 */
-	public String[] segments();
+    String[] segments();
 
 	/**
 	 * Returns a new path which is the same as this path but with 
@@ -451,14 +451,14 @@ public interface IPath extends Cloneable {
 	 * @return a new path
 	 * @see #getDevice()
 	 */
-	public IPath setDevice(String device);
+    IPath setDevice(String device);
 
 	/**
 	 * Returns a <code>java.io.File</code> corresponding to this path.
 	 *
 	 * @return the file corresponding to this path
 	 */
-	public java.io.File toFile();
+    java.io.File toFile();
 
 	/**
 	 * Returns a string representation of this path which uses the
@@ -471,7 +471,7 @@ public interface IPath extends Cloneable {
 	 *
 	 * @return a platform-dependent string representation of this path
 	 */
-	public String toOSString();
+    String toOSString();
 
 	/**
 	 * Returns a platform-neutral string representation of this path. The 
@@ -486,7 +486,7 @@ public interface IPath extends Cloneable {
 	 * @see Path#fromPortableString(String)
 	 * @since 3.1
 	 */
-	public String toPortableString();
+    String toPortableString();
 
 	/**
 	 * Returns a string representation of this path, including its
@@ -514,7 +514,7 @@ public interface IPath extends Cloneable {
 	 * @see Path
 	 */
 	@Override
-	public String toString();
+    String toString();
 
 	/**
 	 * Returns a copy of this path truncated after the
@@ -532,5 +532,5 @@ public interface IPath extends Cloneable {
 	 * @param count the segment number at which to truncate the path
 	 * @return the new path
 	 */
-	public IPath uptoSegment(int count);
+    IPath uptoSegment(int count);
 }

@@ -33,7 +33,7 @@ public interface IDOMMember extends IDOMNode {
  * @return the comment, or <code>null</code> if this member has no associated
  *   comment
  */
-public String getComment();
+String getComment();
 /**
  * Returns the flags for this member. The flags can be examined using the
  * <code>Flags</code> class.
@@ -41,7 +41,7 @@ public String getComment();
  * @return the flags
  * @see org.eclipse.jdt.core.Flags
  */
-public int getFlags();
+int getFlags();
 /**
  * Sets the comment associated with this member. The comment will appear
  * before the member in the source. The comment must be properly formatted, including
@@ -53,7 +53,7 @@ public int getFlags();
  *   <code>null</code> indicating this member should have no associated comment
  * @see #setFlags(int)
  */
-public void setComment(String comment);
+void setComment(String comment);
 /**
  * Sets the flags for this member. The flags can be examined using the
  * <code>Flags</code> class. The deprecated flag passed in is ignored.
@@ -61,5 +61,5 @@ public void setComment(String comment);
  * @param flags the flags
  * @see org.eclipse.jdt.core.Flags
  */
-public void setFlags(int flags);
+void setFlags(int flags);
 }

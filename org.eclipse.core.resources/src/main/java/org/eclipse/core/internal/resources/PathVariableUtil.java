@@ -216,7 +216,7 @@ public class PathVariableUtil {
 
 	// the format is PARENT-COUNT-ARGUMENT
 	static public int getParentVariableCount(String variableString) {
-		String items[] = variableString.split("-"); //$NON-NLS-1$
+		String[] items = variableString.split("-"); //$NON-NLS-1$
 		if (items.length == 3) {
 			try {
 				Integer count = Integer.valueOf(items[1]);
@@ -230,7 +230,7 @@ public class PathVariableUtil {
 
 	// the format is PARENT-COUNT-ARGUMENT
 	static public String getParentVariableArgument(String variableString) {
-		String items[] = variableString.split("-"); //$NON-NLS-1$
+		String[] items = variableString.split("-"); //$NON-NLS-1$
 		if (items.length == 3)
 			return items[2];
 		return null;
@@ -254,7 +254,7 @@ public class PathVariableUtil {
 		char pathPrefix = 0;
 		if ((userFormat.length() > 0) && (userFormat.charAt(0) == '/' || userFormat.charAt(0) == '\\'))
 			pathPrefix = userFormat.charAt(0);
-		String components[] = splitPathComponents(userFormat);
+		String[] components = splitPathComponents(userFormat);
 		for (int i = 0; i < components.length; i++) {
 			if (components[i] == null)
 				continue;
@@ -383,7 +383,7 @@ public class PathVariableUtil {
 			if (index != -1)
 				buffer.append(value.substring(index));
 		} else {
-			String components[] = splitVariablesAndContent(value);
+			String[] components = splitVariablesAndContent(value);
 			for (String component : components) {
 				String variable = extractVariable(component);
 				convertVariableToUserFormat(buffer, component, variable, true);

@@ -50,7 +50,7 @@ public interface IApplicationContext {
 	 * </ul>
 	 * @since 1.3
 	 */
-	public static final String EXIT_DATA_PROPERTY = "eclipse.exitdata"; //$NON-NLS-1$
+    String EXIT_DATA_PROPERTY = "eclipse.exitdata"; //$NON-NLS-1$
 
 	/**
 	 * A key used to store arguments for the application.  The content of this argument 
@@ -62,7 +62,7 @@ public interface IApplicationContext {
 	 * not contain a value for this key then command line arguments used to launch 
 	 * the platform are set in the arguments of the application context.
 	 */
-	public static final String APPLICATION_ARGS = "application.args"; //$NON-NLS-1$
+    String APPLICATION_ARGS = "application.args"; //$NON-NLS-1$
 
 	/**
 	 * Exit object that indicates the application result will be delivered asynchronously.
@@ -71,7 +71,7 @@ public interface IApplicationContext {
 	 * {@link IApplicationContext#setResult(Object, IApplication)}.
 	 * @since 1.3
 	 */
-	public static final Object EXIT_ASYNC_RESULT = new Object();
+    Object EXIT_ASYNC_RESULT = new Object();
 
 	/**
 	 * The arguments used for the application.  The arguments from 
@@ -80,14 +80,14 @@ public interface IApplicationContext {
 	 * 
 	 * @return a map of application arguments.
 	 */
-	public Map getArguments();
+    Map getArguments();
 
 	/**
 	 * This method should be called once the application is completely initialized and running.
 	 * This method will perform certain operations that are needed once an application is running.  
 	 * One example is bringing down a splash screen if it exists.
 	 */
-	public void applicationRunning();
+    void applicationRunning();
 
 	/**
 	 * Returns the application associated with this application context.  This information 
@@ -95,7 +95,7 @@ public interface IApplicationContext {
 	 * 
 	 * @return this product's application or <code>null</code> if none
 	 */
-	public String getBrandingApplication();
+    String getBrandingApplication();
 
 	/**
 	 * Returns the name of the product associated with this application context.  
@@ -103,20 +103,20 @@ public interface IApplicationContext {
 	 * 
 	 * @return the name of the product or <code>null</code> if none
 	 */
-	public String getBrandingName();
+    String getBrandingName();
 
 	/**
 	 * Returns the text description of the product associated with this application context.
 	 * 
 	 * @return the description of the product or <code>null</code> if none
 	 */
-	public String getBrandingDescription();
+    String getBrandingDescription();
 
 	/** Returns the unique product id of the product associated with this application context.
 	 * 
 	 * @return the id of the product
 	 */
-	public String getBrandingId();
+    String getBrandingId();
 
 	/**
 	 * Returns the property with the given key of the product associated with this application context.
@@ -125,7 +125,7 @@ public interface IApplicationContext {
 	 * @param key the name of the property to return
 	 * @return the value associated with the given key or <code>null</code> if none
 	 */
-	public String getBrandingProperty(String key);
+    String getBrandingProperty(String key);
 
 	/**
 	 * Returns the bundle which is responsible for the definition of the product associated with 
@@ -135,7 +135,7 @@ public interface IApplicationContext {
 	 * 
 	 * @return the bundle which defines the product or <code>null</code> if none
 	 */
-	public Bundle getBrandingBundle();
+    Bundle getBrandingBundle();
 
 	/**
 	 * Sets the result of the application asynchronously.  This method can only be used
@@ -160,6 +160,6 @@ public interface IApplicationContext {
 	 * 
 	 * @since 1.3
 	 */
-	public void setResult(Object result, IApplication application);
+    void setResult(Object result, IApplication application);
 
 }

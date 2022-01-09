@@ -336,7 +336,7 @@ private void findCategoryChange(Map<IJavaElement, String[]> oldCategoriesMap, Ma
 		while (iterator.hasNext()) {
 			IJavaElement element = (IJavaElement) iterator.next();
 			String[] oldCategories = oldCategoriesMap.get(element);
-			String[] newCategories = newCategoriesMap == null ? null : (String[]) newCategoriesMap.get(element);
+			String[] newCategories = newCategoriesMap == null ? null : newCategoriesMap.get(element);
 			if (!Util.equalArraysOrNull(oldCategories, newCategories)) {
 				this.delta.changed(element, IJavaElementDelta.F_CATEGORIES);
 			}

@@ -176,9 +176,7 @@ public class JrtPackageFragmentRoot extends JarPackageFragmentRoot implements IM
 	}
 	@Override
 	protected boolean ignoreErrorStatus(IStatus status) {
-		if (status.getCode() == IJavaModelStatusConstants.ELEMENT_NOT_ON_CLASSPATH
-				&& workingOnOldClasspath.get() == Boolean.TRUE)
-			return true;
-		return false;
-	}
+        return status.getCode() == IJavaModelStatusConstants.ELEMENT_NOT_ON_CLASSPATH
+                && workingOnOldClasspath.get() == Boolean.TRUE;
+    }
 }

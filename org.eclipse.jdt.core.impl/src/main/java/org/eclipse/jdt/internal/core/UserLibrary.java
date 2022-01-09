@@ -104,7 +104,7 @@ public class UserLibrary {
 		XMLWriter xmlWriter = new XMLWriter(writer, null/*use the workspace line delimiter*/, true/*print XML version*/);
 
 		HashMap library = new HashMap();
-		library.put(TAG_VERSION, String.valueOf(CURRENT_VERSION));
+		library.put(TAG_VERSION, CURRENT_VERSION);
 		library.put(TAG_SYSTEMLIBRARY, String.valueOf(isSystemLibrary));
 		xmlWriter.printTag(TAG_USERLIBRARY, library, true, true, false);
 

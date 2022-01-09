@@ -40,7 +40,7 @@ public interface PlatformAdmin {
 	 * </p>
 	 * @return a state representing the current framework.
 	 */
-	public State getState();
+    State getState();
 
 	/**
 	 * Returns a state representing the current system. If there is need to make
@@ -56,7 +56,7 @@ public interface PlatformAdmin {
 	 * @param mutable whether the returned state should mutable
 	 * @return a state representing the current framework.
 	 */
-	public State getState(boolean mutable);
+    State getState(boolean mutable);
 
 	/**
 	 * Returns a state helper object. State helpers provide convenience methods
@@ -69,7 +69,7 @@ public interface PlatformAdmin {
 	 * @return a state helper
 	 * @see StateHelper
 	 */
-	public StateHelper getStateHelper();
+    StateHelper getStateHelper();
 
 	/**
 	 * Commit the differences between the current state and the given state.
@@ -80,7 +80,7 @@ public interface PlatformAdmin {
 	 * @throws BundleException if the id of the given state does not match that of the
 	 * 	current state or if the given state is not resolved.
 	 */
-	public void commit(State state) throws BundleException;
+    void commit(State state) throws BundleException;
 
 	/**
 	 * Returns a resolver supplied by the system.  The returned resolver
@@ -88,21 +88,21 @@ public interface PlatformAdmin {
 	 * @return a system resolver
 	 * @deprecated in favour of {@link #createResolver()}.
 	 */
-	public Resolver getResolver();
+    Resolver getResolver();
 
 	/**
 	 * Creates a new {@link Resolver} that is not associated with any {@link State}.
 	 * @return the new <code>Resolver</code>.
 	 * @since 3.5
 	 */
-	public Resolver createResolver();
+    Resolver createResolver();
 
 	/**
 	 * Returns a factory that knows how to create state objects, such as bundle
 	 * descriptions and the different types of version constraints.
 	 * @return a state object factory
 	 */
-	public StateObjectFactory getFactory();
+    StateObjectFactory getFactory();
 
 	/**
 	 * Adds the disabled info to the state managed by this platform admin.
@@ -113,12 +113,12 @@ public interface PlatformAdmin {
 	 * the specified disabled info does not exist in the state managed by this platform admin.
 	 * @since 3.4
 	 */
-	public void addDisabledInfo(DisabledInfo disabledInfo);
+    void addDisabledInfo(DisabledInfo disabledInfo);
 
 	/**
 	 * Removes the disabled info from the state managed by this platform admin.
 	 * @param disabledInfo the disabled info to remove
 	 * @since 3.4
 	 */
-	public void removeDisabledInfo(DisabledInfo disabledInfo);
+    void removeDisabledInfo(DisabledInfo disabledInfo);
 }

@@ -37,7 +37,7 @@ public interface PreferencesService {
 	 *
 	 * @return The root system node for the calling bundle.
 	 */
-	public Preferences getSystemPreferences();
+    Preferences getSystemPreferences();
 
 	/**
 	 * Returns the root node for the specified user and the calling bundle.
@@ -45,12 +45,12 @@ public interface PreferencesService {
 	 * @param name The user for which to return the preference root node.
 	 * @return The root node for the specified user and the calling bundle.
 	 */
-	public Preferences getUserPreferences(String name);
+    Preferences getUserPreferences(String name);
 
 	/**
 	 * Returns the names of users for which node trees exist.
 	 *
 	 * @return The names of users for which node trees exist.
 	 */
-	public String[] getUsers();
+    String[] getUsers();
 }

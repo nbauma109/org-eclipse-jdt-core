@@ -26,5 +26,5 @@ public interface ActivatorHookFactory {
 	 * started and stopped.
 	 *
 	 */
-	public BundleActivator createActivator();
+    BundleActivator createActivator();
 }

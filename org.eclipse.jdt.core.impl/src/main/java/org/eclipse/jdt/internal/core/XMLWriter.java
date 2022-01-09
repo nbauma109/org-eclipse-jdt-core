@@ -23,6 +23,6 @@ import org.eclipse.jdt.internal.core.util.Util;
 class XMLWriter extends GenericXMLWriter {
 
 	public XMLWriter(Writer writer, IJavaProject project, boolean printXmlVersion) {
-		super(writer, Util.getLineSeparator((String) null, project), printXmlVersion);
+		super(writer, Util.getLineSeparator(null, project), printXmlVersion);
 	}
 }

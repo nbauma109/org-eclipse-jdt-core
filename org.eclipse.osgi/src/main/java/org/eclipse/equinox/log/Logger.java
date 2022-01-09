@@ -24,22 +24,22 @@ public interface Logger extends org.osgi.service.log.Logger {
 	/**
 	 * @see LogService#log(int, String)
 	 */
-	public void log(int level, String message);
+    void log(int level, String message);
 
 	/**
 	 * @see LogService#log(int, String, Throwable)
 	 */
-	public void log(int level, String message, Throwable exception);
+    void log(int level, String message, Throwable exception);
 
 	/**
 	 * @see LogService#log(ServiceReference, int, String)
 	 */
-	public void log(ServiceReference<?> sr, int level, String message);
+    void log(ServiceReference<?> sr, int level, String message);
 
 	/**
 	 * @see LogService#log(ServiceReference, int, String, Throwable)
 	 */
-	public void log(ServiceReference<?> sr, int level, String message, Throwable exception);
+    void log(ServiceReference<?> sr, int level, String message, Throwable exception);
 
 	/**
 	 * Extends the <code>LogService</code>
@@ -50,7 +50,7 @@ public interface Logger extends org.osgi.service.log.Logger {
 	 * @param message A human readable string to associate with log entry.
 	 * @see LogService#log(int, String)
 	 */
-	public void log(Object context, int level, String message);
+    void log(Object context, int level, String message);
 
 	/**
 	 * Logs a message with an exception associated and a
@@ -63,7 +63,7 @@ public interface Logger extends org.osgi.service.log.Logger {
 	 * @param exception The exception associated with this entry
 	 * @see LogService#log(int, String, Throwable)
 	 */
-	public void log(Object context, int level, String message, Throwable exception);
+    void log(Object context, int level, String message, Throwable exception);
 
 	/**
 	 * Pre-checks if there are LogListeners who are listening for a matching log entry from this <code>Logger</code>.
@@ -73,7 +73,7 @@ public interface Logger extends org.osgi.service.log.Logger {
 	 * @see ExtendedLogReaderService#addLogListener(org.osgi.service.log.LogListener, LogFilter)
 	 * @see LogFilter
 	 */
-	public boolean isLoggable(int level);
+    boolean isLoggable(int level);
 
 	/**
 	 * Returns the name associated with this <code>Logger</code>
@@ -84,5 +84,5 @@ public interface Logger extends org.osgi.service.log.Logger {
 	 *         associated.
 	 */
 	@Override
-	public String getName();
+    String getName();
 }

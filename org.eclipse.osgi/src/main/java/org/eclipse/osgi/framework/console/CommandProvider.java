@@ -44,6 +44,6 @@ public interface CommandProvider {
 	 Answer a string (may be as many lines as you like) with help
 	 texts that explain the command.
 	 */
-	public String getHelp();
+    String getHelp();
 
 }

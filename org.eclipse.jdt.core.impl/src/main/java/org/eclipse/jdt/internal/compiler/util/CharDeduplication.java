@@ -23,7 +23,7 @@ public class CharDeduplication {
 
 	// ----- immutable static part (thread safe): ----
 
-	static final char[] ASCII_CHARS[] = new char[128][];
+	static final char[][] ASCII_CHARS = new char[128][];
 	static {
 		for (int i = 0; i < ASCII_CHARS.length; i++) {
 			ASCII_CHARS[i] = new char[] { (char) i };

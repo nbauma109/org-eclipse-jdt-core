@@ -265,7 +265,7 @@ public boolean doesNotCompleteNormally() {
 	Constant cst = this.condition.constant;
 	boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
 	cst = this.condition.optimizedBooleanConstant();
-	boolean isConditionOptimizedTrue = cst == null ? true : cst != Constant.NotAConstant && cst.booleanValue() == true;
+	boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
 
 	if (isConditionTrue || isConditionOptimizedTrue)
 		return this.action == null || !this.action.breaksOut(null);
@@ -284,7 +284,7 @@ public boolean canCompleteNormally() {
 	Constant cst = this.condition.constant;
 	boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
 	cst = this.condition.optimizedBooleanConstant();
-	boolean isConditionOptimizedTrue = cst == null ? true : cst != Constant.NotAConstant && cst.booleanValue() == true;
+	boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
 
 	if (!(isConditionTrue || isConditionOptimizedTrue)) {
 		if (this.action == null || this.action.canCompleteNormally())
@@ -292,10 +292,7 @@ public boolean canCompleteNormally() {
 		if (this.action != null && this.action.continueCompletes())
 			return true;
 	}
-	if (this.action != null && this.action.breaksOut(null))
-		return true;
-
-	return false;
+    return this.action != null && this.action.breaksOut(null);
 }
 @Override
 public boolean continueCompletes() {

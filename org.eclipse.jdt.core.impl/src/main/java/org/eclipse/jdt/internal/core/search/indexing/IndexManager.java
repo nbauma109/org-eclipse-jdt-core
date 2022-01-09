@@ -315,7 +315,7 @@ public synchronized IndexLocation computeIndexLocation(IPath containerPath) {
 		String pathString = containerPath.toOSString();
 		CRC32 checksumCalculator = new CRC32();
 		checksumCalculator.update(pathString.getBytes());
-		String fileName = Long.toString(checksumCalculator.getValue()) + ".index"; //$NON-NLS-1$
+		String fileName = checksumCalculator.getValue() + ".index"; //$NON-NLS-1$
 		if (VERBOSE)
 			Util.verbose("-> index name for " + pathString + " is " + fileName); //$NON-NLS-1$ //$NON-NLS-2$
 		// to share the indexLocation between the indexLocations and indexStates tables, get the key from the indexStates table
@@ -1308,7 +1308,7 @@ public String toString() {
 	for (int i = 0, l = valueTable.length; i < l; i++) {
 		Index index = (Index) valueTable[i];
 		if (index != null)
-			buffer.append(++count).append(" - ").append(index.toString()).append('\n'); //$NON-NLS-1$
+			buffer.append(++count).append(" - ").append(index).append('\n'); //$NON-NLS-1$
 	}
 	return buffer.toString();
 }
@@ -1798,11 +1798,8 @@ class MetaIndexUpdateRequest implements IJob {
 			return false;
 		}
 		MetaIndexUpdateRequest other = (MetaIndexUpdateRequest) obj;
-		if (this.isCancelled != other.isCancelled) {
-			return false;
-		}
-		return true;
-	}
+        return this.isCancelled == other.isCancelled;
+    }
 
 	@Override
 	public int hashCode() {

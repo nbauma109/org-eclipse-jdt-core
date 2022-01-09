@@ -50,11 +50,7 @@ public class WrappedRequirement implements Requirement
         {
             return false;
         }
-        if (m_req != other.m_req && (m_req == null || !m_req.equals(other.m_req)))
-        {
-            return false;
-        }
-        return true;
+        return m_req == other.m_req || (m_req != null && m_req.equals(other.m_req));
     }
 
     @Override

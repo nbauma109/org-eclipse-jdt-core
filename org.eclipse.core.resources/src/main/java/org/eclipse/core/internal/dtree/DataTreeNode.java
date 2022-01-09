@@ -178,7 +178,7 @@ public class DataTreeNode extends AbstractDataTreeNode {
 
 		int index, newSize;
 		DataTreeNode newNode;
-		AbstractDataTreeNode children[];
+		AbstractDataTreeNode[] children;
 
 		index = this.indexOfChild(localName);
 		if (index == -1) {

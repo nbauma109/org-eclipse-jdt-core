@@ -33,7 +33,7 @@ public interface IUpdatableModule {
 	 */
 	enum UpdateKind { MODULE, PACKAGE }
 
-	static class AddExports implements Consumer<IUpdatableModule> {
+	class AddExports implements Consumer<IUpdatableModule> {
 
 		char[] name;
 		char[][] targets;
@@ -65,10 +65,8 @@ public interface IUpdatableModule {
 
 			if (!CharOperation.equals(this.name, pu.name))
 				return false;
-			if (!CharOperation.equals(this.targets, pu.targets))
-				return false;
-			return true;
-		}
+            return CharOperation.equals(this.targets, pu.targets);
+        }
 		@Override
 		public int hashCode() {
 			int hash = CharOperation.hashCode(this.name);
@@ -86,7 +84,7 @@ public interface IUpdatableModule {
 
 	}
 
-	static class AddReads implements Consumer<IUpdatableModule> {
+	class AddReads implements Consumer<IUpdatableModule> {
 
 		char[] targetModule;
 
@@ -124,7 +122,7 @@ public interface IUpdatableModule {
 		}
 	}
 	/** Structure for update operations, sorted by {@link UpdateKind}. */
-	static class UpdatesByKind {
+    class UpdatesByKind {
 		List<Consumer<IUpdatableModule>> moduleUpdates = Collections.emptyList();
 		List<Consumer<IUpdatableModule>> packageUpdates = Collections.emptyList();
 		public List<Consumer<IUpdatableModule>> getList(UpdateKind kind, boolean create) {

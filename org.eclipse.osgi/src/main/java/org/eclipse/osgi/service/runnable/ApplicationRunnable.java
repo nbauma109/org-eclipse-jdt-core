@@ -25,5 +25,5 @@ public interface ApplicationRunnable extends ParameterizedRunnable {
 	/**
 	 * Forces this runnable to stop.
 	 */
-	public void stop();
+    void stop();
 }

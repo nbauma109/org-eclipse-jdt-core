@@ -199,12 +199,8 @@ public class CommentWrapExecutor extends TokenTraverser {
 			// there is a normal token to wrap, but the line would overflow anyway - better use substitute
 			this.potentialWrapToken = null;
 		}
-		if (this.potentialWrapToken == null && this.potentialWrapTokenSubstitute == null) {
-			return false;
-		}
-
-		return true;
-	}
+        return this.potentialWrapToken != null || this.potentialWrapTokenSubstitute != null;
+    }
 
 	private void cleanupIndent(List<Token> structure) {
 		if (this.simulation)

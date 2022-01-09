@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 public class ExceptionLabel extends Label {
 
-	public int ranges[] = {POS_NOT_SET,POS_NOT_SET};
+	public int[] ranges = {POS_NOT_SET,POS_NOT_SET};
 	private int count = 0; // incremented each time placeStart or placeEnd is called
 	public TypeBinding exceptionType;
 	public TypeReference exceptionTypeReference;

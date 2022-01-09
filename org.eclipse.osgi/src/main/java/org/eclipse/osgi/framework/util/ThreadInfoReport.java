@@ -54,7 +54,7 @@ public class ThreadInfoReport extends RuntimeException {
 				dump.append("none"); //$NON-NLS-1$
 			}
 		} else {
-			dump.append(blockedOn.toString());
+			dump.append(blockedOn);
 			dump.append(" LockOwnerId: ").append(info.getLockOwnerId()); //$NON-NLS-1$
 			dump.append(" LockOwnerName: ").append(info.getLockOwnerName()); //$NON-NLS-1$
 		}

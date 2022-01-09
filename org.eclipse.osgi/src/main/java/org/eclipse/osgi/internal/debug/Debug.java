@@ -276,7 +276,7 @@ public class Debug implements DebugOptionsListener {
 	 * Prints x to the PrintStream
 	 * @param x
 	 */
-	public static void print(char x[]) {
+	public static void print(char[] x) {
 		out.print(x);
 	}
 
@@ -348,7 +348,7 @@ public class Debug implements DebugOptionsListener {
 	 * Prints x to the PrintStream
 	 * @param x
 	 */
-	public static void println(char x[]) {
+	public static void println(char[] x) {
 		out.println(x);
 	}
 

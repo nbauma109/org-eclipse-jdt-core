@@ -48,7 +48,7 @@ public class JRTUtil {
 
 	public static final boolean DISABLE_CACHE = Boolean.getBoolean("org.eclipse.jdt.disable_JRT_cache"); //$NON-NLS-1$
 
-	public static final String JAVA_BASE = "java.base".intern(); //$NON-NLS-1$
+	public static final String JAVA_BASE = "java.base"; //$NON-NLS-1$
 	public static final char[] JAVA_BASE_CHAR = JAVA_BASE.toCharArray();
 	static final String MODULES_SUBDIR = "/modules"; //$NON-NLS-1$
 	static final String[] DEFAULT_MODULE = new String[]{JAVA_BASE};
@@ -73,16 +73,16 @@ public class JRTUtil {
 
 	public interface JrtFileVisitor<T> {
 
-		public FileVisitResult visitPackage(T dir, T mod, BasicFileAttributes attrs) throws IOException;
+		FileVisitResult visitPackage(T dir, T mod, BasicFileAttributes attrs) throws IOException;
 
-		public FileVisitResult visitFile(T file, T mod, BasicFileAttributes attrs) throws IOException;
+		FileVisitResult visitFile(T file, T mod, BasicFileAttributes attrs) throws IOException;
 		/**
 		 * Invoked when a root directory of a module being visited. The element returned
 		 * contains only the module name segment - e.g. "java.base". Clients can use this to control
 		 * how the JRT needs to be processed, for e.g., clients can skip a particular module
 		 * by returning FileVisitResult.SKIP_SUBTREE
 		 */
-		public FileVisitResult visitModule(T path, String name) throws IOException;
+        FileVisitResult visitModule(T path, String name) throws IOException;
 	}
 
 	static abstract class AbstractFileVisitor<T> implements FileVisitor<T> {

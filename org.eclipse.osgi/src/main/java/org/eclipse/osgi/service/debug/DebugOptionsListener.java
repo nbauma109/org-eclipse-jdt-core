@@ -64,5 +64,5 @@ public interface DebugOptionsListener extends EventListener {
 	 * acquire the debug options service.
 	 * @param options a reference to the DebugOptions
 	 */
-	public void optionsChanged(DebugOptions options);
+    void optionsChanged(DebugOptions options);
 }

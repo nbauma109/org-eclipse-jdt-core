@@ -43,7 +43,7 @@ public class WeakHashSet {
 		public String toString() {
 			Object referent = get();
 			if (referent == null) return "[hashCode=" + this.hashCode + "] <referent was garbage collected>"; //$NON-NLS-1$  //$NON-NLS-2$
-			return "[hashCode=" + this.hashCode + "] " + referent.toString(); //$NON-NLS-1$ //$NON-NLS-2$
+			return "[hashCode=" + this.hashCode + "] " + referent; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -214,7 +214,7 @@ public class WeakHashSet {
 			if (value != null) {
 				Object ref = value.get();
 				if (ref != null) {
-					buffer.append(ref.toString());
+					buffer.append(ref);
 					buffer.append(", "); //$NON-NLS-1$
 				}
 			}

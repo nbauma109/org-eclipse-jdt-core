@@ -139,7 +139,7 @@ public class Capabilities {
 				}
 			}
 			Object syntheticAttr = requirement.getAttributes().get(SYNTHETIC_REQUIREMENT);
-			boolean synthetic = syntheticAttr instanceof Boolean ? ((Boolean) syntheticAttr).booleanValue() : false;
+			boolean synthetic = syntheticAttr instanceof Boolean && ((Boolean) syntheticAttr).booleanValue();
 
 			List<ModuleCapability> result;
 			if (filterSpec == null) {

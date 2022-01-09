@@ -331,7 +331,7 @@ public class WhileStatement extends Statement {
 		Constant cst = this.condition.constant;
 		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
 		cst = this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedTrue = cst == null ? true : cst != Constant.NotAConstant && cst.booleanValue() == true;
+		boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
 		return (isConditionTrue || isConditionOptimizedTrue) && (this.action == null || !this.action.breaksOut(null));
 	}
 
@@ -345,7 +345,7 @@ public class WhileStatement extends Statement {
 		Constant cst = this.condition.constant;
 		boolean isConditionTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
 		cst = this.condition.optimizedBooleanConstant();
-		boolean isConditionOptimizedTrue = cst == null ? true : cst != Constant.NotAConstant && cst.booleanValue() == true;
+		boolean isConditionOptimizedTrue = cst == null || cst != Constant.NotAConstant && cst.booleanValue() == true;
 		if (!(isConditionTrue || isConditionOptimizedTrue))
 			return true;
 		return this.action != null && this.action.breaksOut(null);

@@ -638,6 +638,6 @@ public class NatureManager implements ILifecycleListener, IManager {
 			}
 		}
 		//if there are no problems we must return a status whose code is OK
-		return result.isOK() ? Status.OK_STATUS : (IStatus) result;
+		return result.isOK() ? Status.OK_STATUS : result;
 	}
 }

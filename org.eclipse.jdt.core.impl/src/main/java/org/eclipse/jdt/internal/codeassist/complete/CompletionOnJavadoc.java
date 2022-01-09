@@ -30,11 +30,11 @@ public interface CompletionOnJavadoc {
 	 *
 	 * @return int Flags of the javadoc completion node.
 	 */
-	public int getCompletionFlags();
+    int getCompletionFlags();
 
 	/**
 	 * @param flags The completionFlags to add.
 	 */
-	public void addCompletionFlags(int flags);
+    void addCompletionFlags(int flags);
 
 }

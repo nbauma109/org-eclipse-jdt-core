@@ -37,7 +37,7 @@ public class ComponentInfo extends ClassFileStruct implements IComponentInfo {
 	 * @param constantPool IConstantPool
 	 * @param offset int
 	 */
-	public ComponentInfo(byte classFileBytes[], IConstantPool constantPool, int offset)
+	public ComponentInfo(byte[] classFileBytes, IConstantPool constantPool, int offset)
 		throws ClassFormatException {
 		this.nameIndex = u2At(classFileBytes, 0, offset);
 		IConstantPoolEntry constantPoolEntry = constantPool.decodeEntry(this.nameIndex);

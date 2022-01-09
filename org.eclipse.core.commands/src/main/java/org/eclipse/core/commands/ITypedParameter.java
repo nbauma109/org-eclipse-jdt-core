@@ -32,5 +32,5 @@ public interface ITypedParameter {
 	 * @return the parameter type associated with a command parameter or
 	 *         <code>null</code> if the parameter does not declare a type
 	 */
-	public ParameterType getParameterType();
+    ParameterType getParameterType();
 }

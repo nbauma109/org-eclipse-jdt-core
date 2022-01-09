@@ -196,7 +196,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 				int i = 0;
 				while (entrySetIterator.hasNext()) {
 					Map.Entry<Object, Object> entry = entrySetIterator.next();
-					optionsArray[i] = ((String) entry.getKey()) + "=" + ((String) entry.getValue()); //$NON-NLS-1$
+					optionsArray[i] = entry.getKey() + "=" + entry.getValue(); //$NON-NLS-1$
 					i++;
 				}
 			}

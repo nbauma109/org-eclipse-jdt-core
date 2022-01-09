@@ -90,7 +90,7 @@ public class ReferenceURLConnection extends URLConnection {
 				// or if an IO error occurred during the listing of the files, including if the
 				// access is denied
 				if (files == null)
-					throw new FileNotFoundException(file.toString() + " (probably access denied)"); //$NON-NLS-1$
+					throw new FileNotFoundException(file + " (probably access denied)"); //$NON-NLS-1$
 			} else {
 				// TODO not sure if we can get here.
 			}

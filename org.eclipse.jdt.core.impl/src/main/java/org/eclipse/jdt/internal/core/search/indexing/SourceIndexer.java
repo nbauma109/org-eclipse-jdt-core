@@ -166,7 +166,7 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 			this.cud = this.basicParser.parse(this.compilationUnit, new CompilationResult(this.compilationUnit, 0, 0, this.options.maxProblemsPerUnit));
 			JavaModelManager.getJavaModelManager().cacheZipFiles(this); // use model only for caching
 			// Use a non model name environment to avoid locks, monitors and such.
-			INameEnvironment nameEnvironment = IndexBasedJavaSearchEnvironment.create(Collections.singletonList((IJavaProject)javaProject), JavaModelManager.getJavaModelManager().getWorkingCopies(DefaultWorkingCopyOwner.PRIMARY, true/*add primary WCs*/));
+			INameEnvironment nameEnvironment = IndexBasedJavaSearchEnvironment.create(Collections.singletonList(javaProject), JavaModelManager.getJavaModelManager().getWorkingCopies(DefaultWorkingCopyOwner.PRIMARY, true/*add primary WCs*/));
 			this.lookupEnvironment = new LookupEnvironment(this, this.options, problemReporter, nameEnvironment);
 			reduceParseTree(this.cud);
 			this.lookupEnvironment.buildTypeBindings(this.cud, null);

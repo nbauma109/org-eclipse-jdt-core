@@ -440,7 +440,7 @@ class TypeBinding implements ITypeBinding {
 	@Override
 	public IModuleBinding getModule() {
 		if (this.binding instanceof ReferenceBinding && !this.binding.isTypeVariable()) {
-			IPackageBinding packageBinding = this.resolver.getPackageBinding(((ReferenceBinding) this.binding).getPackage());
+			IPackageBinding packageBinding = this.resolver.getPackageBinding(this.binding.getPackage());
 			return packageBinding != null ? packageBinding.getModule() : null;
 		}
 		return null;
@@ -694,7 +694,7 @@ class TypeBinding implements ITypeBinding {
 
 			case Binding.INTERSECTION_TYPE18 :
 				// just use the first bound for now (same kludge as in IntersectionTypeBinding18#constantPoolName())
-				return new String(((IntersectionTypeBinding18) this.binding).getIntersectingTypes()[0].sourceName());
+				return new String(this.binding.getIntersectingTypes()[0].sourceName());
 
 			default :
 				if (isPrimitive() || isNullType()) {
@@ -854,7 +854,7 @@ class TypeBinding implements ITypeBinding {
 		}
 		ReferenceBinding superclass = null;
 		try {
-			superclass = ((ReferenceBinding)this.binding).superclass();
+			superclass = this.binding.superclass();
 		} catch (RuntimeException e) {
 			/* in case a method cannot be resolvable due to missing jars on the classpath
 			 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=57871
@@ -1289,9 +1289,7 @@ class TypeBinding implements ITypeBinding {
 				if (this.binding instanceof CaptureBinding18) {
 					CaptureBinding18 captureBinding18 = (CaptureBinding18) this.binding;
 					org.eclipse.jdt.internal.compiler.lookup.TypeBinding upperBound = captureBinding18.upperBound();
-					if (upperBound != null && upperBound.id != TypeIds.T_JavaLangObject) {
-						return true;
-					}
+                    return upperBound != null && upperBound.id != TypeIds.T_JavaLangObject;
 				}
 				return false;
 		}

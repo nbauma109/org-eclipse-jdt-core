@@ -31,7 +31,7 @@ public interface ExtendedLogService extends LogService, Logger {
 	 * @return <code>Logger</code> associated with the logger name.
 	 */
 	@Override
-	public Logger getLogger(String loggerName);
+    Logger getLogger(String loggerName);
 
 	/**
 	 * Returns the logger associated with this logger name and bundle.
@@ -41,5 +41,5 @@ public interface ExtendedLogService extends LogService, Logger {
 	 * @return <code>Logger</code> associated with the logger name.
 	* @throws SecurityException if the caller does not have <code>LogPermission[*,LOG]</code>.
 	*/
-	public Logger getLogger(Bundle bundle, String loggerName);
+    Logger getLogger(Bundle bundle, String loggerName);
 }

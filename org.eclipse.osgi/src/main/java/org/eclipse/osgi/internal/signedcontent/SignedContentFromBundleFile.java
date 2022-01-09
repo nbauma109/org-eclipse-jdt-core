@@ -129,7 +129,7 @@ public class SignedContentFromBundleFile implements SignedContent {
 		}
 
 		@Override
-		public void verify() throws IOException, InvalidContentException {
+		public void verify() throws IOException {
 			// already verified
 		}
 	}
@@ -154,7 +154,7 @@ public class SignedContentFromBundleFile implements SignedContent {
 		}
 
 		@Override
-		public void verify() throws IOException, InvalidContentException {
+		public void verify() throws IOException {
 			throw verifyError;
 		}
 

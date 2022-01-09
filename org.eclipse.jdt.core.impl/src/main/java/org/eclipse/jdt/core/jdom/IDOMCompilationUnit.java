@@ -36,7 +36,7 @@ public interface IDOMCompilationUnit extends IDOMNode {
  * @return the header comment for this compilation unit, or <code>null</code> if
  *   no header comment is present
  */
-public String getHeader();
+String getHeader();
 /**
  * The <code>IDOMCompilationNode</code> refinement of this <code>IDOMNode</code>
  * method returns the name of this compilation unit.
@@ -55,7 +55,7 @@ public String getHeader();
  * @return the name of this compilation unit, or <code>null</code> if none
  */
 @Override
-public String getName();
+String getName();
 /**
  * Sets the header comment for this compilation unit. The header comment
  * appears before the first declaration in a compilation unit.
@@ -65,7 +65,7 @@ public String getName();
  * @param comment the header comment for this compilation unit, or <code>null</code> if
  *   indicating no header comment
  */
-public void setHeader(String comment);
+void setHeader(String comment);
 /**
  * The <code>IDOMCompilationNode</code> refinement of this <code>IDOMNode</code>
  * method has no effect (the name is computed from the types declared within it).
@@ -73,5 +73,5 @@ public void setHeader(String comment);
  * @param name the given name
  */
 @Override
-public void setName(String name);
+void setName(String name);
 }

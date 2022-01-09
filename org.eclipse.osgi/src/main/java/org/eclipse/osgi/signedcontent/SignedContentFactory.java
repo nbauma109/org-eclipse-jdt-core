@@ -46,7 +46,7 @@ public interface SignedContentFactory {
 	 * @throws SignatureException if there is a problem with one of the signatures of the signed content
 	 * @throws InvalidKeyException if there is a problem with one of the certificate keys of the signed content
 	 */
-	public SignedContent getSignedContent(File content) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException;
+    SignedContent getSignedContent(File content) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException;
 
 	/**
 	 * Returns a <code>SignedContent</code> object for the specified bundle.
@@ -59,5 +59,5 @@ public interface SignedContentFactory {
 	 * @throws SignatureException if there is a problem with one of the signatures of the signed content
 	 * @throws InvalidKeyException if there is a problem with one of the certificate keys of the signed content
 	 */
-	public SignedContent getSignedContent(Bundle bundle) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException;
+    SignedContent getSignedContent(Bundle bundle) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException;
 }

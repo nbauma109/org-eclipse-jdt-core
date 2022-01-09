@@ -1907,13 +1907,9 @@ public class CompilerOptions {
 			this.reportUnlikelyCollectionMethodArgumentTypeStrict = ENABLED.equals(optionValue);
 		}
 		if ((optionValue = optionsMap.get(OPTION_ReportUnlikelyEqualsArgumentType)) != null) updateSeverity(UnlikelyEqualsArgumentType, optionValue);
-		if (getSeverity(UnclosedCloseable) == ProblemSeverities.Ignore
-				&& getSeverity(PotentiallyUnclosedCloseable) == ProblemSeverities.Ignore
-				&& getSeverity(ExplicitlyClosedAutoCloseable) == ProblemSeverities.Ignore) {
-			this.analyseResourceLeaks = false;
-		} else {
-			this.analyseResourceLeaks = true;
-		}
+        this.analyseResourceLeaks = getSeverity(UnclosedCloseable) != ProblemSeverities.Ignore
+                || getSeverity(PotentiallyUnclosedCloseable) != ProblemSeverities.Ignore
+                || getSeverity(ExplicitlyClosedAutoCloseable) != ProblemSeverities.Ignore;
 		if ((optionValue = optionsMap.get(OPTION_ReportAPILeak)) != null) updateSeverity(APILeak, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportUnstableAutoModuleName)) != null) updateSeverity(UnstableAutoModuleName, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_AnnotationBasedNullAnalysis)) != null) {
@@ -1962,11 +1958,7 @@ public class CompilerOptions {
 			if ((optionValue = optionsMap.get(OPTION_ReportNonnullParameterAnnotationDropped)) != null) updateSeverity(NonnullParameterAnnotationDropped, optionValue);
 			if ((optionValue = optionsMap.get(OPTION_ReportAnnotatedTypeArgumentToUnannotated)) != null) updateSeverity(AnnotatedTypeArgumentToUnannotated, optionValue);
 			if ((optionValue = optionsMap.get(OPTION_PessimisticNullAnalysisForFreeTypeVariables)) != null) updateSeverity(PessimisticNullAnalysisForFreeTypeVariables, optionValue);
-			if (getSeverity(PessimisticNullAnalysisForFreeTypeVariables) == ProblemSeverities.Ignore) {
-				this.pessimisticNullAnalysisForFreeTypeVariablesEnabled = false;
-			} else {
-				this.pessimisticNullAnalysisForFreeTypeVariablesEnabled = true;
-			}
+            this.pessimisticNullAnalysisForFreeTypeVariablesEnabled = getSeverity(PessimisticNullAnalysisForFreeTypeVariables) != ProblemSeverities.Ignore;
 			if ((optionValue = optionsMap.get(OPTION_ReportNonNullTypeVariableFromLegacyInvocation)) != null) updateSeverity(NonNullTypeVariableFromLegacyInvocation, optionValue);
 		}
 

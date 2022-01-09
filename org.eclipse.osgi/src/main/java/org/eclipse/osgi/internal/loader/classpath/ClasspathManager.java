@@ -628,7 +628,7 @@ public class ClasspathManager {
 		} catch (IOException e) {
 			if (debug.DEBUG_LOADER)
 				Debug.println("  IOException reading " + filename + " from " + classpathEntry.getBundleFile()); //$NON-NLS-1$ //$NON-NLS-2$
-			throw (LinkageError) new LinkageError("Error reading class bytes: " + name).initCause(e); //$NON-NLS-1$
+			throw (LinkageError) new LinkageError("Error reading class bytes: " + name, e); //$NON-NLS-1$
 		}
 		if (debug.DEBUG_LOADER) {
 			Debug.println("  read " + classbytes.length + " bytes from " + classpathEntry.getBundleFile() + "!/" + filename); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

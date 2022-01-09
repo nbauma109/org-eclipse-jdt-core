@@ -303,7 +303,7 @@ public class CharsetManager implements IManager {
 	}
 
 	Preferences getPreferences(IProject project, boolean create, boolean isDerived, boolean isDerivedEncodingStoredSeparately) {
-		boolean localIsDerived = isDerivedEncodingStoredSeparately ? isDerived : false;
+		boolean localIsDerived = isDerivedEncodingStoredSeparately && isDerived;
 		String qualifier = localIsDerived ? ProjectPreferences.PREFS_DERIVED_QUALIFIER : ProjectPreferences.PREFS_REGULAR_QUALIFIER;
 		if (create)
 			// create all nodes down to the one we are interested in

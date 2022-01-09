@@ -40,7 +40,7 @@ final class OrderPreservingImportAdder implements ImportAdder {
 
 		@Override
 		public String toString() {
-			return String.format("(%s, %s)", this.importsBefore.toString(), this.importsAfter.toString()); //$NON-NLS-1$
+			return String.format("(%s, %s)", this.importsBefore, this.importsAfter); //$NON-NLS-1$
 		}
 	}
 

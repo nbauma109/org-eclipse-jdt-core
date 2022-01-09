@@ -34,35 +34,35 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 public interface IPolyExpression {
 
 	// Expression context manipulation
-	public void setExpressionContext(ExpressionContext context);
-	public ExpressionContext getExpressionContext();
+    void setExpressionContext(ExpressionContext context);
+	ExpressionContext getExpressionContext();
 
 	// Target type injection.
-	public void setExpectedType(TypeBinding targetType);
-	public TypeBinding invocationTargetType();
+    void setExpectedType(TypeBinding targetType);
+	TypeBinding invocationTargetType();
 
 	// Compatibility checks.
-	public boolean isPotentiallyCompatibleWith(TypeBinding targetType, Scope scope);
-	public boolean isCompatibleWith(TypeBinding targetType, final Scope scope);
-	public boolean isBoxingCompatibleWith(TypeBinding targetType, Scope scope);
-	public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t, Scope skope);
+    boolean isPotentiallyCompatibleWith(TypeBinding targetType, Scope scope);
+	boolean isCompatibleWith(TypeBinding targetType, final Scope scope);
+	boolean isBoxingCompatibleWith(TypeBinding targetType, Scope scope);
+	boolean sIsMoreSpecific(TypeBinding s, TypeBinding t, Scope skope);
 
 	// Pertinence checks.
-	public boolean isPertinentToApplicability(TypeBinding targetType, MethodBinding method);
+    boolean isPertinentToApplicability(TypeBinding targetType, MethodBinding method);
 
 	// Polyness checks
-	public boolean isPolyExpression(MethodBinding candidate);
-	public boolean isPolyExpression();
-	public boolean isFunctionalType();
-	public Expression[] getPolyExpressions();
+    boolean isPolyExpression(MethodBinding candidate);
+	boolean isPolyExpression();
+	boolean isFunctionalType();
+	Expression[] getPolyExpressions();
 
 
 	/* Resolution: A poly expression must be prepared to be resolved multiple times and should manage matters in a side effect free fashion.
 	   Typically, in invocation contexts, there is an initial resolution, multiple tentative resolutions and then a final resolution against
 	   the ultimate target type.
 	*/
-	public TypeBinding resolveType(BlockScope blockScope);
+    TypeBinding resolveType(BlockScope blockScope);
 	// Resolve expression tentatively - should have no lingering side-effects that may impact final resolution !
-	public Expression resolveExpressionExpecting(TypeBinding targetType, Scope scope, InferenceContext18 inferenceContext);
+    Expression resolveExpressionExpecting(TypeBinding targetType, Scope scope, InferenceContext18 inferenceContext);
 
 }

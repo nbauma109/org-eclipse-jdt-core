@@ -99,7 +99,7 @@ public String toString() {
 	Object object;
 	for (int i = 0, length = this.valueTable.length; i < length; i++)
 		if ((object = this.valueTable[i]) != null)
-			s += this.keyTable[i] + " -> " + object.toString() + "\n"; //$NON-NLS-2$ //$NON-NLS-1$
+			s += this.keyTable[i] + " -> " + object + "\n"; //$NON-NLS-2$ //$NON-NLS-1$
 	return s;
 }
 }

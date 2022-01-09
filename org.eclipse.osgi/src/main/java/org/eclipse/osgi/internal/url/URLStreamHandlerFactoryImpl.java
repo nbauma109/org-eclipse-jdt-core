@@ -42,7 +42,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 
 	private ServiceTracker<URLStreamHandlerService, URLStreamHandlerService> handlerTracker;
 
-	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingURLStreamHandler.class, URLStreamHandlerFactoryImpl.class, URL.class});
+	private static final List<Class<?>> ignoredClasses = Arrays.asList(MultiplexingURLStreamHandler.class, URLStreamHandlerFactoryImpl.class, URL.class);
 	private Map<String, URLStreamHandler> proxies;
 	private URLStreamHandlerFactory parentFactory;
 	private ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<>();
@@ -194,7 +194,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 			return createInternalURLStreamHandler(protocol);
 
 		try {
-			Method createInternalURLStreamHandlerMethod = factory.getClass().getMethod("createInternalURLStreamHandler", new Class[] {String.class}); //$NON-NLS-1$
+			Method createInternalURLStreamHandlerMethod = factory.getClass().getMethod("createInternalURLStreamHandler", String.class); //$NON-NLS-1$
 			return (URLStreamHandler) createInternalURLStreamHandlerMethod.invoke(factory, new Object[] {protocol});
 		} catch (Exception e) {
 			container.getLogServices().log(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, "findAuthorizedURLStreamHandler-loop", e); //$NON-NLS-1$

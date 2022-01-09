@@ -189,11 +189,8 @@ public class ExternalFoldersManager {
 	private static boolean isInternalFilePath(IPath path) {
 		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
 		// in case this is full workspace path it should start with project segment
-		if(path.segmentCount() > 1 && wsRoot.getFile(path).exists()) {
-			return true;
-		}
-		return false;
-	}
+        return path.segmentCount() > 1 && wsRoot.getFile(path).exists();
+    }
 
 	/**
 	 * @param path full absolute workspace path
@@ -205,11 +202,8 @@ public class ExternalFoldersManager {
 		if(segmentCount == 1 && wsRoot.getProject(path.segment(0)).exists()) {
 			return true;
 		}
-		if(segmentCount > 1 && wsRoot.getFolder(path).exists()) {
-			return true;
-		}
-		return false;
-	}
+        return segmentCount > 1 && wsRoot.getFolder(path).exists();
+    }
 
 	public static boolean isInternalPathForExternalFolder(IPath resourcePath) {
 		return EXTERNAL_PROJECT_NAME.equals(resourcePath.segment(0));

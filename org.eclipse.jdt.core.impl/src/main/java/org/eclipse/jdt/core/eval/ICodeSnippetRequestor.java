@@ -34,32 +34,32 @@ public interface ICodeSnippetRequestor {
 	 * The prefix of fields that represent the local variables in a snippet
 	 * class.
 	 */
-	public static final String LOCAL_VAR_PREFIX = new String(EvaluationConstants.LOCAL_VAR_PREFIX);
+    String LOCAL_VAR_PREFIX = new String(EvaluationConstants.LOCAL_VAR_PREFIX);
 
 	/**
 	 * The name of the field that represent 'this' in a snippet class
 	 * instance.
 	 */
-	public static final String DELEGATE_THIS = new String(EvaluationConstants.DELEGATE_THIS);
+    String DELEGATE_THIS = new String(EvaluationConstants.DELEGATE_THIS);
 
 	/**
 	 * The name of the instance method in the snippet class that runs the code
 	 * snippet.
 	 */
-	public static final String RUN_METHOD = EvaluationConstants.RUN_METHOD;
+    String RUN_METHOD = EvaluationConstants.RUN_METHOD;
 
 	/**
 	 * The name of the field (of type <code>java.lang.Object</code>) on the code
 	 * snippet instance that contains the returned value.
 	 */
-	public static final String RESULT_VALUE_FIELD = EvaluationConstants.RESULT_VALUE_FIELD;
+    String RESULT_VALUE_FIELD = EvaluationConstants.RESULT_VALUE_FIELD;
 
 	/**
 	 * The field of type java.lang.Class on the code snippet instance that contains the type of the returned value.
 	 * The name of the field (of type <code>java.lang.Class</code>) on the code
 	 * snippet instance that contains the runtime type of the returned value.
 	 */
-	public static final String RESULT_TYPE_FIELD = EvaluationConstants.RESULT_TYPE_FIELD;
+    String RESULT_TYPE_FIELD = EvaluationConstants.RESULT_TYPE_FIELD;
 
 	/*
 	 * REPORTING A PROBLEM OF COMPILATION IN THE CODE SNIPPET
@@ -76,35 +76,35 @@ public interface ICodeSnippetRequestor {
 	 *
 	 * @see #acceptProblem(IMarker, String, int)
 	 */
-	public static final int VARIABLE = 1;
+    int VARIABLE = 1;
 
 	/**
 	 * Indicates a compilation problem related to a code snippet.
 	 *
 	 * @see #acceptProblem(IMarker, String, int)
 	 */
-	public static final int CODE_SNIPPET = 2;
+    int CODE_SNIPPET = 2;
 
 	/**
 	 * Indicates a compilation problem related to an import declaration.
 	 *
 	 * @see #acceptProblem(IMarker, String, int)
 	 */
-	public static final int IMPORT = 3;
+    int IMPORT = 3;
 
 	/**
 	 * Indicates a compilation problem related to a package declaration.
 	 *
 	 * @see #acceptProblem(IMarker, String, int)
 	 */
-	public static final int PACKAGE = 4;
+    int PACKAGE = 4;
 
 	/**
 	 * Indicates an internal problem.
 	 *
 	 * @see #acceptProblem(IMarker, String, int)
 	 */
-	public static final int INTERNAL = 5;
+    int INTERNAL = 5;
 /**
  * Sends the given class files to the target and loads them. If the given
  * class name is not <code>null</code>, run the code snippet with this class
@@ -149,7 +149,7 @@ public interface ICodeSnippetRequestor {
  *   or <code>null</code> if none
  * @return <code>true</code> if the code snippet was successfully deployed
  */
-public boolean acceptClassFiles(byte[][] classFileBytes, String[][] classFileCompoundNames, String codeSnippetClassName);
+boolean acceptClassFiles(byte[][] classFileBytes, String[][] classFileCompoundNames, String codeSnippetClassName);
 /**
  * Notifies of an evaluation problem.
  * Problems can arise for source of the following kinds:
@@ -170,5 +170,5 @@ public boolean acceptClassFiles(byte[][] classFileBytes, String[][] classFileCom
  *   <code>VARIABLE</code>, <code>CODE_SNIPPET</code>, <code>IMPORT</code>,
  *   <code>PACKAGE</code>, or <code>INTERNAL</code>
  */
-public void acceptProblem(IMarker problemMarker, String fragmentSource, int fragmentKind);
+void acceptProblem(IMarker problemMarker, String fragmentSource, int fragmentKind);
 }

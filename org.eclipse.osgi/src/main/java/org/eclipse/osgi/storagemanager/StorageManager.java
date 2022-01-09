@@ -337,10 +337,10 @@ public final class StorageManager {
 			return null;
 		Set<Object> set = table.keySet();
 		@SuppressWarnings("cast")
-		String[] keys = (String[]) set.toArray(new String[set.size()]);
+		String[] keys = set.toArray(new String[set.size()]);
 		String[] result = new String[keys.length];
 		for (int i = 0; i < keys.length; i++)
-			result[i] = new String(keys[i]);
+			result[i] = keys[i];
 		return result;
 	}
 

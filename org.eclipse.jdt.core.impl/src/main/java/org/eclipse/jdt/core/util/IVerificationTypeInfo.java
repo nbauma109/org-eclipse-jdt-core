@@ -25,47 +25,47 @@ public interface IVerificationTypeInfo {
 	 * The tag value representing top variable info
 	 * @since 3.2
 	 */
-	public static final int ITEM_TOP = 0;
+    int ITEM_TOP = 0;
 	/**
 	 * The tag value representing integer variable info
 	 * @since 3.2
 	 */
-	public static final int ITEM_INTEGER = 1;
+    int ITEM_INTEGER = 1;
 	/**
 	 * The tag value representing float variable info
 	 * @since 3.2
 	 */
-	public static final int ITEM_FLOAT = 2;
+    int ITEM_FLOAT = 2;
 	/**
 	 * The tag value representing double variable info
 	 * @since 3.2
 	 */
-	public static final int ITEM_DOUBLE = 3;
+    int ITEM_DOUBLE = 3;
 	/**
 	 * The tag value representing long variable info
 	 * @since 3.2
 	 */
-	public static final int ITEM_LONG = 4;
+    int ITEM_LONG = 4;
 	/**
 	 * The tag value representing null variable info
 	 * @since 3.2
 	 */
-	public static final int ITEM_NULL = 5;
+    int ITEM_NULL = 5;
 	/**
 	 * The tag value representing uninitialized this variable info
 	 * @since 3.2
 	 */
-	public static final int ITEM_UNINITIALIZED_THIS = 6;
+    int ITEM_UNINITIALIZED_THIS = 6;
 	/**
 	 * The tag value representing object variable info
 	 * @since 3.2
 	 */
-	public static final int ITEM_OBJECT = 7;
+    int ITEM_OBJECT = 7;
 	/**
 	 * The tag value representing uninitialized variable info
 	 * @since 3.2
 	 */
-	public static final int ITEM_UNINITIALIZED = 8;
+    int ITEM_UNINITIALIZED = 8;
 
 	/**
 	 * Answer back the tag of this verification type info as described in the JVM specifications.

@@ -37,5 +37,5 @@ public interface BundleLocalization {
 	 * or <code>null</code> is returned if no ResourceBundle object can
 	 * be loaded.
 	 */
-	public ResourceBundle getLocalization(Bundle bundle, String locale);
+    ResourceBundle getLocalization(Bundle bundle, String locale);
 }

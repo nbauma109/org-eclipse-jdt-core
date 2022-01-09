@@ -55,6 +55,6 @@ public interface IRequiresInfo {
 	 *
 	 * @return the requires version string
 	 */
-	public char[] getRequiresVersionValue();
+    char[] getRequiresVersionValue();
 
 }

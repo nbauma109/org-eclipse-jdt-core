@@ -98,11 +98,11 @@ public class UnifiedTreeNode implements ILocalStoreConstants {
 	}
 
 	public boolean isFolder() {
-		return fileInfo == null ? false : fileInfo.isDirectory();
+		return fileInfo != null && fileInfo.isDirectory();
 	}
 
 	public boolean isSymbolicLink() {
-		return fileInfo == null ? false : fileInfo.getAttribute(EFS.ATTRIBUTE_SYMLINK);
+		return fileInfo != null && fileInfo.getAttribute(EFS.ATTRIBUTE_SYMLINK);
 	}
 
 	public void removeChildrenFromTree() {

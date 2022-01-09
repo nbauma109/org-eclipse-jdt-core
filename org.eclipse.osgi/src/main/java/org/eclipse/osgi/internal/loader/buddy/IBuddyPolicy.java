@@ -17,9 +17,9 @@ import java.net.URL;
 import java.util.Enumeration;
 
 public interface IBuddyPolicy {
-	public Class<?> loadClass(String name);
+	Class<?> loadClass(String name);
 
-	public URL loadResource(String name);
+	URL loadResource(String name);
 
-	public Enumeration<URL> loadResources(String name);
+	Enumeration<URL> loadResources(String name);
 }

@@ -70,7 +70,7 @@ public class LabeledStatement extends Statement {
 			mergedInfo = statementInfo.mergedWith(labelContext.initsOnBreak);
 			if (reinjectNullInfo) {
 				// an embedded loop has had no chance to reinject forgotten null info
-				((UnconditionalFlowInfo)mergedInfo).addNullInfoFrom(flowInfo.unconditionalFieldLessCopy()).
+				mergedInfo.addNullInfoFrom(flowInfo.unconditionalFieldLessCopy()).
 					addNullInfoFrom(labelContext.initsOnBreak.unconditionalFieldLessCopy());
 			}
 			this.mergedInitStateIndex =

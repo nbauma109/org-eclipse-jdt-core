@@ -142,7 +142,7 @@ public class ModuleDatabase {
 	 */
 	private final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock(false);
 
-	static enum Sort {
+	enum Sort {
 		BY_DEPENDENCY, BY_START_LEVEL, BY_ID;
 
 		/**

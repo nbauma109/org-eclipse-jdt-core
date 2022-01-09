@@ -368,7 +368,7 @@ public class ToolFactory {
 			if (!zipEntryName.toLowerCase().endsWith(SuffixConstants.SUFFIX_STRING_class)) {
 				return null;
 			}
-			byte classFileBytes[] = Util.getZipEntryByteContent(zipEntry, zipFile);
+			byte[] classFileBytes = Util.getZipEntryByteContent(zipEntry, zipFile);
 			return new ClassFileReader(classFileBytes, decodingFlag);
 		} catch(ClassFormatException | IOException e) {
 			return null;

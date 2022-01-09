@@ -1742,7 +1742,7 @@ private boolean checkModuleInfoConstructs() {
 
 	if (this.currentElement instanceof RecoveredModule) {
 		RecoveredModule module = (RecoveredModule) this.currentElement;
-		if (checkModuleInfoKeyword(module, index)) return true;
+		return checkModuleInfoKeyword(module, index);
 	} else  {
 		ModuleKeyword keyword = ModuleKeyword.NOT_A_KEYWORD;
 		if (isInModuleStatements()) {
@@ -1809,10 +1809,7 @@ private boolean checkInstanceofKeyword() {
 private boolean checkYieldKeyword() {
 	// Clients to ensure that we are already inside a method
 	char[] id = this.scanner.getCurrentIdentifierSource();
-	if(id.length > 0 && CharOperation.prefixEquals(id, Keywords.YIELD)) {
-		return true;
-	}
-	return false;
+	return id.length > 0 && CharOperation.prefixEquals(id, Keywords.YIELD);
 }
 /**
  * Checks if the completion is inside a method invocation or a constructor invocation.
@@ -5628,10 +5625,7 @@ private boolean isAfterArrayType() {
 	// TBD: The following relies on the fact that array dimensions are small: it says that if the
 	//      top of the intStack is less than 11, then it must be a dimension
 	//      (smallest position of array type in a compilation unit is 11 as in "class X{Y[]")
-	if ((this.intPtr > -1) && (this.intStack[this.intPtr] < 11)) {
-		return true;
-	}
-	return false;
+	return (this.intPtr > -1) && (this.intStack[this.intPtr] < 11);
 }
 private boolean isEmptyNameCompletion() {
 	return
@@ -6157,12 +6151,12 @@ public  String toString() {
 	StringBuffer buffer = new StringBuffer();
 	buffer.append("elementKindStack : int[] = {"); //$NON-NLS-1$
 	for (int i = 0; i <= this.elementPtr; i++) {
-		buffer.append(String.valueOf(this.elementKindStack[i])).append(',');
+		buffer.append(this.elementKindStack[i]).append(',');
 	}
 	buffer.append("}\n"); //$NON-NLS-1$
 	buffer.append("elementInfoStack : int[] = {"); //$NON-NLS-1$
 	for (int i = 0; i <= this.elementPtr; i++) {
-		buffer.append(String.valueOf(this.elementInfoStack[i])).append(',');
+		buffer.append(this.elementInfoStack[i]).append(',');
 	}
 	buffer.append("}\n"); //$NON-NLS-1$
 	buffer.append(super.toString());
@@ -6326,10 +6320,7 @@ private boolean stackHasInstanceOfExpression(Object[] stackToSearch, int startIn
 @Override
 protected boolean isInsideArrayInitializer(){
 	int i = this.elementPtr;
-	if (i > -1 && this.elementKindStack[i] == K_ARRAY_INITIALIZER) {
-		return true;
-	}
-	return false;
+	return i > -1 && this.elementKindStack[i] == K_ARRAY_INITIALIZER;
 }
 private boolean foundToken(int token) {
 	int i = this.elementPtr;

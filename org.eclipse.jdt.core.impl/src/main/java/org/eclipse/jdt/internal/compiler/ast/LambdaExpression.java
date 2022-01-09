@@ -704,8 +704,7 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 			return false;
 
 		if (this.body instanceof Expression && ((Expression) this.body).isTrulyExpression()) {
-			if (!((Expression) this.body).isPertinentToApplicability(targetType, method))
-				return false;
+            return ((Expression) this.body).isPertinentToApplicability(targetType, method);
 		} else {
 			Expression [] returnExpressions = this.resultExpressions;
 			if (returnExpressions != NO_EXPRESSIONS) {
@@ -831,7 +830,7 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 		}
 		if (this.body instanceof Expression && ((Expression) this.body).isTrulyExpression()) {
 			// When completion is still in progress, it is not possible to ask if the expression constitutes a statement expression. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=435219
-			this.voidCompatible = this.assistNode ? true : ((Expression) this.body).statementExpression();
+			this.voidCompatible = this.assistNode || ((Expression) this.body).statementExpression();
 			this.valueCompatible = true; // expression could be of type void - we can't determine that as we are working with unresolved expressions, for potential compatibility it is OK.
 		} else {
 			// For code assist, we need to be a bit tolerant/fuzzy here: the code is being written "just now", if we are too pedantic, selection/completion will break;
@@ -866,14 +865,11 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 
 		analyzeShape();
 		if (sam.returnType.id == TypeIds.T_void) {
-			if (!this.voidCompatible)
-				return false;
+            return this.voidCompatible;
 		} else {
-			if (!this.valueCompatible)
-				return false;
+            return this.valueCompatible;
 		}
-		return true;
-	}
+    }
 
 	private enum CompatibilityResult { COMPATIBLE, INCOMPATIBLE, REPORTED }
 
@@ -1106,8 +1102,7 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 					if (!resultExpression.sIsMoreSpecific(r1, r2, skope))
 						break;
 				}
-				if (i == returnExpressionsLength)
-					return true;
+                return i == returnExpressionsLength;
 			}
 		}
 		return false;
@@ -1132,8 +1127,8 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 		if (this.original == this) // Not in overload resolution context. result expressions not relevant.
 			return;
 		if (this.body instanceof Expression && ((Expression) this.body).isTrulyExpression()) {
-			this.valueCompatible = resultType != null && resultType.id == TypeIds.T_void ? false : true;
-			this.voidCompatible = this.assistNode ? true : ((Expression) this.body).statementExpression(); // while code is still being written and completed, we can't ask if it is a statement
+			this.valueCompatible = resultType == null || resultType.id != TypeIds.T_void;
+			this.voidCompatible = this.assistNode || ((Expression) this.body).statementExpression(); // while code is still being written and completed, we can't ask if it is a statement
 			this.resultExpressions = new Expression[] { expression };
 			return;
 		}

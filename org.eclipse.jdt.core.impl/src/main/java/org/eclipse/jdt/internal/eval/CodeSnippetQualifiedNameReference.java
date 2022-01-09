@@ -564,12 +564,12 @@ public TypeBinding reportError(BlockScope scope) {
 		return super.reportError(scope);
 	}
 
-	if ((this.binding instanceof ProblemFieldBinding && ((ProblemFieldBinding) this.binding).problemId() == NotFound)
-		|| (this.binding instanceof ProblemBinding && ((ProblemBinding) this.binding).problemId() == NotFound)){
+	if ((this.binding instanceof ProblemFieldBinding && this.binding.problemId() == NotFound)
+		|| (this.binding instanceof ProblemBinding && this.binding.problemId() == NotFound)){
 		// will not support innerclass emulation inside delegate
 		FieldBinding fieldBinding = scope.getField(this.delegateThis.type, this.tokens[0], this);
 		if (!fieldBinding.isValidBinding()) {
-			if (((ProblemFieldBinding) fieldBinding).problemId() == NotVisible) {
+			if (fieldBinding.problemId() == NotVisible) {
 				// manage the access to a private field of the enclosing type
 				CodeSnippetScope localScope = new CodeSnippetScope(scope);
 				this.binding = localScope.getFieldForCodeSnippet(this.delegateThis.type, this.tokens[0], this);
@@ -587,7 +587,7 @@ public TypeBinding reportError(BlockScope scope) {
 	}
 
 	TypeBinding result;
-	if (this.binding instanceof ProblemFieldBinding && ((ProblemFieldBinding) this.binding).problemId() == NotVisible) {
+	if (this.binding instanceof ProblemFieldBinding && this.binding.problemId() == NotVisible) {
 		// field and/or local are done before type lookups
 		// the only available value for the restrictiveFlag BEFORE
 		// the TC is Flag_Type Flag_LocalField and Flag_TypeLocalField

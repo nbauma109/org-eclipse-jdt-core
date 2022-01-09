@@ -45,7 +45,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 	private static final String CONTENT_HANDLER_PKGS = "java.content.handler.pkgs"; //$NON-NLS-1$
 	private static final String DEFAULT_VM_CONTENT_HANDLERS = "sun.net.www.content|sun.awt.www.content"; //$NON-NLS-1$
 
-	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingContentHandler.class, ContentHandlerFactoryImpl.class, URLConnection.class});
+	private static final List<Class<?>> ignoredClasses = Arrays.asList(MultiplexingContentHandler.class, ContentHandlerFactoryImpl.class, URLConnection.class);
 
 	private Map<String, ContentHandlerProxy> proxies;
 	private java.net.ContentHandlerFactory parentFactory;
@@ -151,7 +151,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 			return createInternalContentHandler(contentType);
 
 		try {
-			Method createInternalContentHandlerMethod = factory.getClass().getMethod("createInternalContentHandler", new Class[] {String.class}); //$NON-NLS-1$
+			Method createInternalContentHandlerMethod = factory.getClass().getMethod("createInternalContentHandler", String.class); //$NON-NLS-1$
 			return (ContentHandler) createInternalContentHandlerMethod.invoke(factory, new Object[] {contentType});
 		} catch (Exception e) {
 			container.getLogServices().log(ContentHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, "findAuthorizedContentHandler-loop", e); //$NON-NLS-1$

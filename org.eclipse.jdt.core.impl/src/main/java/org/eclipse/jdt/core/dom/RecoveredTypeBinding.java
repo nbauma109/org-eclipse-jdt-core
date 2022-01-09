@@ -522,7 +522,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 			      .append(this.innerTypeBinding.getKey());
 		} else if (this.currentType != null) {
 			buffer.append("currentType") //$NON-NLS-1$
-			      .append(this.currentType.toString());
+			      .append(this.currentType);
 		} else if (this.binding != null) {
 			buffer.append("typeBinding") //$NON-NLS-1$
 				  .append(this.binding.computeUniqueKey());

@@ -155,7 +155,7 @@ private void createTypeHierarchyBasedOnRegion(HashMap allOpenablesInRegion, IPro
 		ArrayList openables) {
 		try {
 			IPackageFragmentRoot[] devPathRoots =
-				((JavaProject) project).getPackageFragmentRoots();
+				project.getPackageFragmentRoots();
 			if (devPathRoots == null) {
 				return;
 			}

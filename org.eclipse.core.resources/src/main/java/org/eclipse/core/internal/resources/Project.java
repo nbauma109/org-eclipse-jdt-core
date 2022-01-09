@@ -592,11 +592,8 @@ public class Project extends Container implements IProject {
 			private boolean shouldBuild() {
 				ResourceInfo info = getResourceInfo(false, false);
 				int flags = getFlags(info);
-				if (!exists(flags, true) || !isOpen(flags)) {
-					return false;
-				}
-				return true;
-			}
+                return exists(flags, true) && isOpen(flags);
+            }
 
 		};
 

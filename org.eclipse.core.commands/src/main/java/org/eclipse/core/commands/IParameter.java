@@ -31,14 +31,14 @@ public interface IParameter {
 	 *
 	 * @return The identifier; never <code>null</code>.
 	 */
-	public String getId();
+    String getId();
 
 	/**
 	 * Returns the human-readable name for this parameter.
 	 *
 	 * @return The parameter name; never <code>null</code>.
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the values associated with this parameter.
@@ -48,7 +48,7 @@ public interface IParameter {
 	 * @throws ParameterValuesException
 	 *             If the values can't be retrieved for some reason.
 	 */
-	public IParameterValues getValues() throws ParameterValuesException;
+    IParameterValues getValues() throws ParameterValuesException;
 
 	/**
 	 * Returns whether parameter is optional. Otherwise, it is required.
@@ -56,5 +56,5 @@ public interface IParameter {
 	 * @return <code>true</code> if the parameter is optional;
 	 *         <code>false</code> if it is required.
 	 */
-	public boolean isOptional();
+    boolean isOptional();
 }

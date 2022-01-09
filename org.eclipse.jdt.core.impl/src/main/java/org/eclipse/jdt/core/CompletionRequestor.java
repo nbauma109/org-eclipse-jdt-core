@@ -72,7 +72,7 @@ public abstract class CompletionRequestor {
 	 * allows for required proposals; <code>0</code> means the set is empty.
 	 * 1 << completionProposalKind
 	 */
-	private int requiredProposalAllowSet[] = null;
+	private int[] requiredProposalAllowSet = null;
 
 	private boolean requireExtendedContext = false;
 

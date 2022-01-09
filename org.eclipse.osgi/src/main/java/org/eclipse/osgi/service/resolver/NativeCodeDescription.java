@@ -29,41 +29,41 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 	 * Returns the paths to the native code libraries.
 	 * @return the paths to the native code libraries.
 	 */
-	public String[] getNativePaths();
+    String[] getNativePaths();
 
 	/**
 	 * Returns the processors supported by the native code.
 	 * @return the processors supported by the native code.  An
 	 * empty array is returned if no processors are supported.
 	 */
-	public String[] getProcessors();
+    String[] getProcessors();
 
 	/**
 	 * Returns the operating system names supported by the native code.
 	 * @return the operating system names supported by the native code.
 	 * An empty array is returned if no operating systems are supported.
 	 */
-	public String[] getOSNames();
+    String[] getOSNames();
 
 	/**
 	 * Returns the operating system version ranges supported by the native code.
 	 * @return the operating system version ranges supported by the native code.
 	 * An empty array is returned if all versions are supported.
 	 */
-	public VersionRange[] getOSVersions();
+    VersionRange[] getOSVersions();
 
 	/**
 	 * Returns the languages supported by the native code.
 	 * @return the languages supported by the native code.  An empty array is
 	 * returned if all languages are supported.
 	 */
-	public String[] getLanguages();
+    String[] getLanguages();
 
 	/**
 	 * Returns the selection filter used to select the native code.
 	 * @return the selection filter used to select the native code.
 	 */
-	public Filter getFilter();
+    Filter getFilter();
 
 	/**
 	 * Native code descriptions are sorted with the following preferences:
@@ -77,12 +77,12 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 	 * @since 3.7
 	 */
 	@Override
-	public int compareTo(NativeCodeDescription other);
+    int compareTo(NativeCodeDescription other);
 
 	/**
 	 * Indicates if this native code description has invalid native code paths.  Native
 	 * code paths are invalid if they can not be found in the bundle content.
 	 * @return true if the native code paths are invalid; otherwise false is returned.
 	 */
-	public boolean hasInvalidNativePaths();
+    boolean hasInvalidNativePaths();
 }

@@ -88,7 +88,7 @@ public List<Classpath> fetchLinkedJars(FileSystem.ClasspathSectionProblemReporte
 				int lastSeparator = directoryPath.lastIndexOf(File.separatorChar);
 				directoryPath = directoryPath.substring(0, lastSeparator + 1); // potentially empty (see bug 214731)
 				while (calledFilesIterator.hasNext()) {
-					result.add(new ClasspathJar(new File(directoryPath + (String) calledFilesIterator.next()), this.closeZipFileAtEnd, this.accessRuleSet, this.destinationPath));
+					result.add(new ClasspathJar(new File(directoryPath + calledFilesIterator.next()), this.closeZipFileAtEnd, this.accessRuleSet, this.destinationPath));
 				}
 			}
 		}

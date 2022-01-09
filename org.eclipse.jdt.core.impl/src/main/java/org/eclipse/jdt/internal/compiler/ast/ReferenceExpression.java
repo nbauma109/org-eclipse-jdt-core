@@ -500,7 +500,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		} else if (isConstructorReference()) {
 			TypeBinding type = this.receiverType.leafComponentType();
 			if (type.isNestedType() &&
-				type instanceof ReferenceBinding && !((ReferenceBinding)type).isStatic()) {
+				type instanceof ReferenceBinding && !type.isStatic()) {
 				currentScope.tagAsAccessingEnclosingInstanceStateOf((ReferenceBinding)type, false);
 				this.shouldCaptureInstance = true;
 				ReferenceBinding allocatedTypeErasure = (ReferenceBinding) type.erasure();
@@ -891,9 +891,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 	        	}
 	        	boolean isVarArgs = false;
 	        	if (this.binding.isVarargs()) {
-	        		isVarArgs = (providedLen == expectedlen)
-						? !this.descriptor.parameters[expectedlen-1].isCompatibleWith(this.binding.parameters[expectedlen-1])
-						: true;
+	        		isVarArgs = providedLen != expectedlen || !this.descriptor.parameters[expectedlen - 1].isCompatibleWith(this.binding.parameters[expectedlen - 1]);
 	        		len = providedLen; // binding parameters will be padded from InferenceContext18.getParameter()
 	        	} else {
 	        		len = Math.min(expectedlen, providedLen);
@@ -951,8 +949,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 	private boolean contextHasSyntaxError() {
 		ReferenceContext referenceContext = this.enclosingScope.referenceContext();
 		if (referenceContext instanceof AbstractMethodDeclaration) {
-			if ((((AbstractMethodDeclaration) referenceContext).bits & ASTNode.HasSyntaxErrors) != 0)
-				return true;
+            return (((AbstractMethodDeclaration) referenceContext).bits & ASTNode.HasSyntaxErrors) != 0;
 		}
 		return false;
 	}

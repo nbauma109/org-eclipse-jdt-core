@@ -411,7 +411,7 @@ private void fixSupertypeBindings() {
 				typeBinding.superclass();
 			} catch (AbortCompilation e) {
 				// allow subsequent call to superclass() to succeed so that we don't have to catch AbortCompilation everywhere
-				((BinaryTypeBinding) typeBinding).tagBits &= ~TagBits.HasUnresolvedSuperclass;
+				typeBinding.tagBits &= ~TagBits.HasUnresolvedSuperclass;
 				this.builder.hierarchy.missingTypes.add(new String(typeBinding.superclass().sourceName()));
 				this.hasMissingSuperClass = true;
 			}
@@ -419,7 +419,7 @@ private void fixSupertypeBindings() {
 				typeBinding.superInterfaces();
 			} catch (AbortCompilation e) {
 				// allow subsequent call to superInterfaces() to succeed so that we don't have to catch AbortCompilation everywhere
-				((BinaryTypeBinding) typeBinding).tagBits &= ~TagBits.HasUnresolvedSuperinterfaces;
+				typeBinding.tagBits &= ~TagBits.HasUnresolvedSuperinterfaces;
 			}
 		}
 	}
@@ -436,7 +436,7 @@ private void remember(IGenericType suppliedType, ReferenceBinding typeBinding) {
 	this.bindingMap.put(typeBinding, suppliedType);
 }
 private void remember(IType type, ReferenceBinding typeBinding) {
-	if (((CompilationUnit)type.getCompilationUnit()).isOpen()) {
+	if (type.getCompilationUnit().isOpen()) {
 		try {
 			IGenericType genericType = (IGenericType)((JavaElement)type).getElementInfo();
 			remember(genericType, typeBinding);
@@ -724,7 +724,8 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 					containsLocalType = true;
 				} else {
 					IPath path = cu.getPath();
-					containsLocalType = cu.isWorkingCopy() ? true /* presume conservatively */ : localTypes.contains(path.toString());
+                    /* presume conservatively */
+                    containsLocalType = cu.isWorkingCopy() || localTypes.contains(path.toString());
 				}
 
 				// build parsed unit

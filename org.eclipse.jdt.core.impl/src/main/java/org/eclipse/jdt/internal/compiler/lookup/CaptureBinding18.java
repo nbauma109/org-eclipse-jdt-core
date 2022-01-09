@@ -82,7 +82,7 @@ public class CaptureBinding18 extends CaptureBinding {
 	@Override
 	public MethodBinding[] getMethods(char[] selector) {
 		if (this.upperBounds.length == 1 && this.upperBounds[0] instanceof ReferenceBinding)
-			return ((ReferenceBinding)this.upperBounds[0]).getMethods(selector);
+			return this.upperBounds[0].getMethods(selector);
 		return super.getMethods(selector);
 	}
 

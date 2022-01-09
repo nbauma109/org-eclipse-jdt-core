@@ -26,7 +26,7 @@ public interface StateDelta {
 	 * Returns an array of all the bundle deltas in this delta regardless of type.
 	 * @return an array of bundle deltas
 	 */
-	public BundleDelta[] getChanges();
+    BundleDelta[] getChanges();
 
 	/**
 	 * Returns an array of all the members
@@ -39,18 +39,18 @@ public interface StateDelta {
 	 * @param exact whether exact match or bit-wise matching should be performed
 	 * @return an array of bundle deltas matching the given match criteria.
 	 */
-	public BundleDelta[] getChanges(int mask, boolean exact);
+    BundleDelta[] getChanges(int mask, boolean exact);
 
 	/**
 	 * Returns the state whose changes are represented by this delta.
 	 * @return the state
 	 */
-	public State getState();
+    State getState();
 
 	/**
 	 * Returns the resolver hook exception if one occurred while
 	 * resolving the state.
 	 * @since 3.7
 	 */
-	public ResolverHookException getResovlerHookException();
+    ResolverHookException getResovlerHookException();
 }

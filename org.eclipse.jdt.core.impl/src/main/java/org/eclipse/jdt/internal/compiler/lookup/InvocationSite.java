@@ -40,7 +40,7 @@ public interface InvocationSite {
 	boolean receiverIsImplicitThis();
 	boolean checkingPotentialCompatibility();
 	void acceptPotentiallyCompatibleMethods(MethodBinding [] methods);
-	public default LocalVariableBinding[] getPatternVariablesWhenTrue() {
+	default LocalVariableBinding[] getPatternVariablesWhenTrue() {
 		return null;
 	}
 
@@ -48,7 +48,7 @@ public interface InvocationSite {
 	InferenceContext18 freshInferenceContext(Scope scope);
 	ExpressionContext getExpressionContext();
 
-	static class EmptyWithAstNode implements InvocationSite {
+	class EmptyWithAstNode implements InvocationSite {
 		ASTNode node;
 		public EmptyWithAstNode(ASTNode node) {
 			this.node = node;

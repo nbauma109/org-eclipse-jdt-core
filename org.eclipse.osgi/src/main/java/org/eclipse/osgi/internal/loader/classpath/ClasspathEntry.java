@@ -88,7 +88,7 @@ public class ClasspathEntry {
 			// this is the root bundle file
 			isMRJar = generation.isMRJar();
 		} else {
-			isMRJar = manifest != null ? Boolean.parseBoolean(manifest.getMainAttributes().getValue(BundleInfo.MULTI_RELEASE_HEADER)) : false;
+			isMRJar = manifest != null && Boolean.parseBoolean(manifest.getMainAttributes().getValue(BundleInfo.MULTI_RELEASE_HEADER));
 		}
 		if (isMRJar) {
 			mrBundleFiles = getMRBundleFiles(bundlefile, generation);

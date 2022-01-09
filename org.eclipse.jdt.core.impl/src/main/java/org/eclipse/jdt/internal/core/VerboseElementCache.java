@@ -36,7 +36,7 @@ public class VerboseElementCache<K extends IJavaElement & IOpenable> extends Ele
 		boolean result = super.makeSpace(space);
 		String newFillingRatio = toStringFillingRation(this.name);
 		if (!fillingRatio.equals(newFillingRatio)) {
-			System.out.println(Thread.currentThread() + " " + new Date(System.currentTimeMillis()).toString()); //$NON-NLS-1$
+			System.out.println(Thread.currentThread() + " " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
 			System.out.println(Thread.currentThread() + " MADE SPACE FOR " + fillingRatio + " (NOW " + NumberFormat.getInstance().format(fillingRatio()) + "% full)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			System.out.println(Thread.currentThread() + " WHILE OPENING "+ ((JavaElement) this.beingAdded).toStringWithAncestors());  //$NON-NLS-1$
 			System.out.println();

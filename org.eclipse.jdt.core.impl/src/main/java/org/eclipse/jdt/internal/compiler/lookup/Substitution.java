@@ -22,7 +22,7 @@ public interface Substitution {
 	 * Don't substitute any type variables.
 	 * Enables the use of {@link Scope.Substitutor} for other purposes.
 	 */
-	public static class NullSubstitution implements Substitution {
+    class NullSubstitution implements Substitution {
 		LookupEnvironment environment;
 
 		public NullSubstitution(LookupEnvironment environment) {

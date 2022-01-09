@@ -466,8 +466,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				scope.problemReporter().unsafeRawGenericMethodInvocation((ASTNode)invocationSite, method, argumentTypes);
 				return true;
 			}
-			if (sourceLevel >= ClassFileConstants.JDK1_8)
-				return true; // signal to erase return type and exceptions, while keeping javac compatibility at 1.7-
+            return sourceLevel >= ClassFileConstants.JDK1_8; // signal to erase return type and exceptions, while keeping javac compatibility at 1.7-
 		}
 		return false;
 	}
@@ -514,9 +513,8 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		if (scope.isDefinedInSameUnit(field.declaringClass)) return false;
 
 		// if context is deprecated, may avoid reporting
-		if (!scope.compilerOptions().reportDeprecationInsideDeprecatedCode && scope.isInsideDeprecatedCode()) return false;
-		return true;
-	}
+        return scope.compilerOptions().reportDeprecationInsideDeprecatedCode || !scope.isInsideDeprecatedCode();
+    }
 
 	public boolean isImplicitThis() {
 
@@ -570,9 +568,8 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		}
 
 		// if context is deprecated, may avoid reporting
-		if (!scope.compilerOptions().reportDeprecationInsideDeprecatedCode && scope.isInsideDeprecatedCode()) return false;
-		return true;
-	}
+        return scope.compilerOptions().reportDeprecationInsideDeprecatedCode || !scope.isInsideDeprecatedCode();
+    }
 
 	public boolean isSuper() {
 
@@ -635,9 +632,8 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		if (scope.isDefinedInSameUnit(refType)) return false;
 
 		// if context is deprecated, may avoid reporting
-		if (!scope.compilerOptions().reportDeprecationInsideDeprecatedCode && scope.isInsideDeprecatedCode()) return false;
-		return true;
-	}
+        return scope.compilerOptions().reportDeprecationInsideDeprecatedCode || !scope.isInsideDeprecatedCode();
+    }
 
 
 	/**

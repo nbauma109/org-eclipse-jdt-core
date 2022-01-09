@@ -34,7 +34,7 @@ public interface IDocumentExtension {
 	/**
 	 * Interface for a post notification replace operation.
 	 */
-	public interface IReplace {
+    interface IReplace {
 
 		/**
 		 * Executes the replace operation on the given document.

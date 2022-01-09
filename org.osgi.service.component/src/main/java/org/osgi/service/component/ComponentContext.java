@@ -45,7 +45,7 @@ public interface ComponentContext {
 	 * @return The properties for this Component Context. The Dictionary is read
 	 *         only and cannot be modified.
 	 */
-	public Dictionary<String, Object> getProperties();
+    Dictionary<String, Object> getProperties();
 
 	/**
 	 * Returns the service object for the specified reference name.
@@ -66,7 +66,7 @@ public interface ComponentContext {
 	 * @throws ComponentException If Service Component Runtime catches an
 	 *         exception while activating the bound service.
 	 */
-	public <S> S locateService(String name);
+    <S> S locateService(String name);
 
 	/**
 	 * Returns the service object for the specified reference name and
@@ -84,7 +84,7 @@ public interface ComponentContext {
 	 * @throws ComponentException If Service Component Runtime catches an
 	 *         exception while activating the bound service.
 	 */
-	public <S> S locateService(String name, ServiceReference<S> reference);
+    <S> S locateService(String name, ServiceReference<S> reference);
 
 	/**
 	 * Returns the service objects for the specified reference name.
@@ -99,7 +99,7 @@ public interface ComponentContext {
 	 * @throws ComponentException If Service Component Runtime catches an
 	 *         exception while activating a bound service.
 	 */
-	public Object[] locateServices(String name);
+    Object[] locateServices(String name);
 
 	/**
 	 * Returns the {@code BundleContext} of the bundle which declares this
@@ -107,7 +107,7 @@ public interface ComponentContext {
 	 * 
 	 * @return The {@code BundleContext} of the bundle declares this component.
 	 */
-	public BundleContext getBundleContext();
+    BundleContext getBundleContext();
 
 	/**
 	 * If the component instance is registered as a service using the
@@ -130,7 +130,7 @@ public interface ComponentContext {
 	 * @return The bundle using the component instance as a service or
 	 *         {@code null}.
 	 */
-	public Bundle getUsingBundle();
+    Bundle getUsingBundle();
 
 	/**
 	 * Returns the Component Instance object for the component instance
@@ -138,7 +138,7 @@ public interface ComponentContext {
 	 * 
 	 * @return The Component Instance object for the component instance.
 	 */
-	public <S> ComponentInstance<S> getComponentInstance();
+    <S> ComponentInstance<S> getComponentInstance();
 
 	/**
 	 * Enables the specified component name. The specified component name must
@@ -153,7 +153,7 @@ public interface ComponentContext {
 	 * @param name The name of a component or {@code null} to indicate all
 	 *        components in the bundle.
 	 */
-	public void enableComponent(String name);
+    void enableComponent(String name);
 
 	/**
 	 * Disables the specified component name. The specified component name must
@@ -167,7 +167,7 @@ public interface ComponentContext {
 	 * 
 	 * @param name The name of a component.
 	 */
-	public void disableComponent(String name);
+    void disableComponent(String name);
 
 	/**
 	 * If the component instance is registered as a service using the
@@ -181,5 +181,5 @@ public interface ComponentContext {
 	 *         {@code null} if the component instance is not registered as a
 	 *         service.
 	 */
-	public ServiceReference<?> getServiceReference();
+    ServiceReference<?> getServiceReference();
 }

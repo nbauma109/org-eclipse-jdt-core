@@ -29,25 +29,25 @@ public interface IJob {
 	/**
 	 * Answer true if the job belongs to a given family (tag)
 	 */
-	public boolean belongsTo(String jobFamily);
+    boolean belongsTo(String jobFamily);
 	/**
 	 * Asks this job to cancel its execution. The cancellation
 	 * can take an undertermined amount of time.
 	 */
-	public void cancel();
+    void cancel();
 	/**
 	 * Ensures that this job is ready to run.
 	 */
-	public void ensureReadyToRun();
+    void ensureReadyToRun();
 	/**
 	 * Execute the current job, answer whether it was successful.
 	 */
-	public boolean execute(IProgressMonitor progress);
+    boolean execute(IProgressMonitor progress);
 
 	/**
 	 * Returns this job's family
 	 */
-	public String getJobFamily();
+    String getJobFamily();
 
 	/**
 	 * Answers if we need some sleep after index write operations. Default implementation returns {@code false}.
@@ -55,7 +55,7 @@ public interface IJob {
 	 * @return true if the job manager should sleep a bit after this job is done to avoid IO tasks overloading OS (which
 	 *         could cause UI freezes etc).
 	 */
-	public default boolean waitNeeded() {
+	default boolean waitNeeded() {
 		return false;
 	}
 }

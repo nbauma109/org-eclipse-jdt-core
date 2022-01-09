@@ -914,7 +914,7 @@ private ReferenceBinding typeToRecord(TypeBinding type) {
 	if (type == null)
 		return null;
 	while (type.isArrayType())
-		type = ((ArrayBinding) type).leafComponentType();
+		type = type.leafComponentType();
 
 	switch (type.kind()) {
 		case Binding.BASE_TYPE :

@@ -308,7 +308,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	boolean isNotVisible = false;
 	if (!this.binding.isValidBinding()) {
 		if (this.binding instanceof ProblemFieldBinding
-			&& ((ProblemFieldBinding) this.binding).problemId() == NotVisible) {
+			&& this.binding.problemId() == NotVisible) {
 				isNotVisible = true;
 				if (this.evaluationContext.declaringTypeName != null) {
 					this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);

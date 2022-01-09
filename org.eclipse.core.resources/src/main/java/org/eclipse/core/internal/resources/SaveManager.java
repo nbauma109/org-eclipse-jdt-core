@@ -511,7 +511,7 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 		};
 		String[] candidates = target.list(filter);
 		if (candidates != null)
-			removeFiles(target, candidates, Collections.<String> emptyList());
+			removeFiles(target, candidates, Collections.emptyList());
 	}
 
 	protected boolean isDeltaCleared(String pluginId) {
@@ -950,8 +950,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 				ElementTree complete = workspace.getElementTree();
 				complete.immutable();
 				try (
-					DataInputStream input = new DataInputStream(new SafeChunkyInputStream(localFile));
-				) {
+					DataInputStream input = new DataInputStream(new SafeChunkyInputStream(localFile))
+                ) {
 					WorkspaceTreeReader reader = WorkspaceTreeReader.getReader(workspace, input.readInt());
 					complete = reader.readSnapshotTree(input, complete, monitor);
 				} finally {
@@ -1065,8 +1065,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 			if (!treeLocation.toFile().exists() && !tempLocation.toFile().exists())
 				return false;
 			try (
-				DataInputStream input = new DataInputStream(new SafeFileInputStream(treeLocation.toOSString(), tempLocation.toOSString()));
-			) {
+				DataInputStream input = new DataInputStream(new SafeFileInputStream(treeLocation.toOSString(), tempLocation.toOSString()))
+            ) {
 				WorkspaceTreeReader reader = WorkspaceTreeReader.getReader(workspace, input.readInt());
 				reader.readTree(project, input, Policy.subMonitorFor(monitor, Policy.totalWork));
 			}
@@ -1102,8 +1102,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 				return false;
 			}
 			try (
-				DataInputStream input = new DataInputStream(zip);
-			) {
+				DataInputStream input = new DataInputStream(zip)
+            ) {
 				WorkspaceTreeReader reader = WorkspaceTreeReader.getReader(workspace, input.readInt(), true);
 				reader.readTree(project, input, Policy.subMonitorFor(monitor, Policy.totalWork));
 			} finally {
@@ -1135,7 +1135,7 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 
 		@Override
 		public boolean isCanceled() {
-			return ignoreCancel ? false : super.isCanceled();
+			return !ignoreCancel && super.isCanceled();
 		}
 	}
 
@@ -1152,7 +1152,7 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 			monitor.beginTask(message, 7);
 			message = Messages.resources_saveWarnings;
 			MultiStatus warnings = new MultiStatus(ResourcesPlugin.PI_RESOURCES, IStatus.WARNING, message, null);
-			ISchedulingRule rule = project != null ? (IResource) project : workspace.getRoot();
+			ISchedulingRule rule = project != null ? project : workspace.getRoot();
 			try {
 				workspace.prepareOperation(rule, monitor);
 				workspace.beginOperation(false);
@@ -1262,8 +1262,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 			if (kind == ISaveContext.FULL_SAVE || kind == ISaveContext.SNAPSHOT)
 				validateMasterTableBeforeSave(target);
 			try (
-				SafeChunkyOutputStream output = new SafeChunkyOutputStream(target);
-			) {
+				SafeChunkyOutputStream output = new SafeChunkyOutputStream(target)
+            ) {
 				masterTable.store(output, "master table"); //$NON-NLS-1$
 				output.succeed();
 			}
@@ -1336,8 +1336,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 		try {
 			FileOutputStream fis = new FileOutputStream(tmpTree);
 			try (
-				DataOutputStream output = new DataOutputStream(fis);
-			) {
+				DataOutputStream output = new DataOutputStream(fis)
+            ) {
 				output.writeInt(ICoreConstants.WORKSPACE_TREE_VERSION_2);
 				writeTree(project, output, monitor);
 			}
@@ -1349,8 +1349,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 			int read = 0;
 			byte[] buffer = new byte[4096];
 			try (
-				InputStream in = new FileInputStream(tmpTree);
-			) {
+				InputStream in = new FileInputStream(tmpTree)
+            ) {
 				while ((read = in.read(buffer)) >= 0) {
 					out.write(buffer, 0, read);
 				}
@@ -1378,8 +1378,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 		try {
 			IPath tempLocation = workspace.getMetaArea().getBackupLocationFor(treeLocation);
 			try (
-				DataOutputStream output = new DataOutputStream(new SafeFileOutputStream(treeLocation.toOSString(), tempLocation.toOSString()));
-			) {
+				DataOutputStream output = new DataOutputStream(new SafeFileOutputStream(treeLocation.toOSString(), tempLocation.toOSString()))
+            ) {
 				output.writeInt(ICoreConstants.WORKSPACE_TREE_VERSION_2);
 				writeTree(computeStatesToSave(contexts, workspace.getElementTree()), output, monitor);
 			}
@@ -1472,7 +1472,7 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 			java.io.File localFile = snapPath.toFile();
 			try {
 				SafeChunkyOutputStream safeStream = new SafeChunkyOutputStream(localFile);
-				try (DataOutputStream out = new DataOutputStream(safeStream);) {
+				try (DataOutputStream out = new DataOutputStream(safeStream)) {
 					out.writeInt(ICoreConstants.WORKSPACE_TREE_VERSION_2);
 					writeWorkspaceFields(out, subMonitor);
 					writer.writeDelta(tree, lastSnap, Path.ROOT, ElementTreeWriter.D_INFINITE, out,
@@ -1576,8 +1576,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 		if (target.exists()) {
 			MasterTable previousMasterTable = new MasterTable();
 			try (
-				SafeChunkyInputStream input = new SafeChunkyInputStream(target);
-			) {
+				SafeChunkyInputStream input = new SafeChunkyInputStream(target)
+            ) {
 				previousMasterTable.load(input);
 				String stringValue = previousMasterTable.getProperty(ROOT_SEQUENCE_NUMBER_KEY);
 				// if there was a full save, then there must be a non-null entry for root
@@ -2096,8 +2096,8 @@ public class SaveManager implements IElementInfoFlattener, IManager, IStringPool
 		try {
 			SafeFileOutputStream safe = new SafeFileOutputStream(treeLocation.toOSString(), tempLocation.toOSString());
 			try (
-				DataOutputStream output = new DataOutputStream(safe);
-			) {
+				DataOutputStream output = new DataOutputStream(safe)
+            ) {
 				output.writeInt(ICoreConstants.WORKSPACE_TREE_VERSION_2);
 				writeTree(project, output, null);
 			}

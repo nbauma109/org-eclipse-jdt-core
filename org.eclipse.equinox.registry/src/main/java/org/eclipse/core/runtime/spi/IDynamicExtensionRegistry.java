@@ -50,19 +50,19 @@ public interface IDynamicExtensionRegistry {
 	 * @param contributor the contributor to be removed
 	 * @param key registry access key
 	 */
-	public void removeContributor(IContributor contributor, Object key);
+    void removeContributor(IContributor contributor, Object key);
 
 	/**
 	 * Finds out if registry has the contributor.
 	 * @param contributor registry contributor
 	 * @return true if the registry has this contributor; false otherwise
 	 */
-	public boolean hasContributor(IContributor contributor);
+    boolean hasContributor(IContributor contributor);
 
 	/**
 	 * Returns all contributors associated with the registry at this time.
 	 * @return all contributors associated with the registry
 	 */
-	public IContributor[] getAllContributors();
+    IContributor[] getAllContributors();
 
 }

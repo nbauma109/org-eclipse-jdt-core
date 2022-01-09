@@ -34,13 +34,13 @@ public interface IAdapterFactory {
 	 * Service property to use when registering a factory as OSGi-service to declare the adaptable class type, this is a multi-string-property, if more than one is given the factory will be register multiple times
 	 * @since 3.14
 	 */
-	static final String SERVICE_PROPERTY_ADAPTABLE_CLASS = "adaptableClass"; //$NON-NLS-1$
+    String SERVICE_PROPERTY_ADAPTABLE_CLASS = "adaptableClass"; //$NON-NLS-1$
 
 	/**
 	 * Optional service property to use when registering a factory as OSGi-service to declare the possible adapter types. If the property is given, the service is only queried when actually required, this is a multi-string-property.
 	 * @since 3.14
 	 */
-	static final String SERVICE_PROPERTY_ADAPTER_NAMES = "adapterNames"; //$NON-NLS-1$
+    String SERVICE_PROPERTY_ADAPTER_NAMES = "adapterNames"; //$NON-NLS-1$
 
 	/**
 	 * Returns an object which is an instance of the given class
@@ -55,7 +55,7 @@ public interface IAdapterFactory {
 	 *    does not have an adapter of the given type for the
 	 *    given object
 	 */
-	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType);
+    <T> T getAdapter(Object adaptableObject, Class<T> adapterType);
 
 	/**
 	 * Returns the collection of adapter types handled by this
@@ -68,5 +68,5 @@ public interface IAdapterFactory {
 	 *
 	 * @return the collection of adapter types
 	 */
-	public Class<?>[] getAdapterList();
+    Class<?>[] getAdapterList();
 }

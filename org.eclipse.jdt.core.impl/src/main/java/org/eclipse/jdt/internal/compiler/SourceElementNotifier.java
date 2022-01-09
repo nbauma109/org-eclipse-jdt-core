@@ -471,11 +471,7 @@ public void notifySourceElementRequestor(
 				ASTNode node = nodes[i];
 				if (node instanceof ImportReference) {
 					ImportReference importRef = (ImportReference)node;
-					if (node == parsedUnit.currentPackage) {
-						notifySourceElementRequestor(importRef, true);
-					} else {
-						notifySourceElementRequestor(importRef, false);
-					}
+					notifySourceElementRequestor(importRef, node == parsedUnit.currentPackage);
 				} else if (node instanceof TypeDeclaration) {
 					notifySourceElementRequestor((TypeDeclaration)node, true, null, currentPackage);
 				} else if (node instanceof ModuleDeclaration) {
@@ -810,7 +806,7 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 }
 private void fillModuleInfo(ModuleDeclaration mod, ISourceElementRequestor.ModuleInfo modInfo) {
 	if (mod.requiresCount > 0) {
-		ISourceElementRequestor.RequiresInfo reqs[] = new ISourceElementRequestor.RequiresInfo[mod.requiresCount];
+		ISourceElementRequestor.RequiresInfo[] reqs = new ISourceElementRequestor.RequiresInfo[mod.requiresCount];
 		for (int i = 0; i < mod.requiresCount; i++) {
 			ISourceElementRequestor.RequiresInfo req = new ISourceElementRequestor.RequiresInfo();
 			req.moduleName = CharOperation.concatWith(mod.requires[i].module.tokens, '.');
@@ -820,7 +816,7 @@ private void fillModuleInfo(ModuleDeclaration mod, ISourceElementRequestor.Modul
 		modInfo.requires = reqs;
 	}
 	if (mod.exportsCount > 0) {
-		ISourceElementRequestor.PackageExportInfo exps[] = new ISourceElementRequestor.PackageExportInfo[mod.exportsCount];
+		ISourceElementRequestor.PackageExportInfo[] exps = new ISourceElementRequestor.PackageExportInfo[mod.exportsCount];
 		for (int i = 0; i < mod.exportsCount; i++) {
 			ISourceElementRequestor.PackageExportInfo exp = new ISourceElementRequestor.PackageExportInfo();
 			ExportsStatement exportsStatement = mod.exports[i];
@@ -858,7 +854,7 @@ private void fillModuleInfo(ModuleDeclaration mod, ISourceElementRequestor.Modul
 		modInfo.usedServices = uses;
 	}
 	if (mod.opensCount > 0) {
-		ISourceElementRequestor.PackageExportInfo opens[] = new ISourceElementRequestor.PackageExportInfo[mod.opensCount];
+		ISourceElementRequestor.PackageExportInfo[] opens = new ISourceElementRequestor.PackageExportInfo[mod.opensCount];
 		for (int i = 0; i < mod.opensCount; i++) {
 			ISourceElementRequestor.PackageExportInfo op = new ISourceElementRequestor.PackageExportInfo();
 			OpensStatement openStmt = mod.opens[i];

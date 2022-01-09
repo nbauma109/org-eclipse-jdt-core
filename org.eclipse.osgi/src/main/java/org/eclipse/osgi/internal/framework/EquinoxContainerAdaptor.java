@@ -109,7 +109,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		// happening.
 		this.resolverExecutor = new AtomicLazyInitializer<>();
 		this.lazyResolverExecutorCreator = createLazyExecutorCreator( //
-				"Equinox resolver thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
+				"Equinox resolver thread - " + EquinoxContainerAdaptor.this, //$NON-NLS-1$
 				resolverThreadCnt, new SynchronousQueue<>());
 
 		// For the start-level we can safely use a growing queue because the thread feeding the
@@ -117,7 +117,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		// for the work of the executor threads to finish.
 		this.startLevelExecutor = new AtomicLazyInitializer<>();
 		this.lazyStartLevelExecutorCreator = createLazyExecutorCreator(//
-				"Equinox start level thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
+				"Equinox start level thread - " + EquinoxContainerAdaptor.this, //$NON-NLS-1$
 				startLevelThreadCnt, new LinkedBlockingQueue<>(1000));
 
 	}

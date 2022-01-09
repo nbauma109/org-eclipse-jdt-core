@@ -48,5 +48,5 @@ public interface EventDispatcher<K, V, E> {
 	 * can complete the delivery of the event to the listener.
 	 * This is typically the actual event object.
 	 */
-	public void dispatchEvent(K eventListener, V listenerObject, int eventAction, E eventObject);
+    void dispatchEvent(K eventListener, V listenerObject, int eventAction, E eventObject);
 }

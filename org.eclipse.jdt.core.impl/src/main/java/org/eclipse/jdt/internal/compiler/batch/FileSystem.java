@@ -123,8 +123,8 @@ public class FileSystem implements IModuleAwareNameEnvironment, SuffixConstants 
 		 *
 		 * @param module
 		 */
-		public void acceptModule(IModule module);
-		public String getDestinationPath();
+        void acceptModule(IModule module);
+		String getDestinationPath();
 		Collection<String> getModuleNames(Collection<String> limitModules);
 		Collection<String> getModuleNames(Collection<String> limitModules, Function<String,IModule> getModule);
 	}

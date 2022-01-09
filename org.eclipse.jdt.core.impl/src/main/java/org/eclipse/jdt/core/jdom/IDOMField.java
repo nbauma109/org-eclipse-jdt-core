@@ -35,7 +35,7 @@ public interface IDOMField extends IDOMMember {
  * @return the initializer expression, or <code>null</code> if this field does
  *    not have an initializer
  */
-public String getInitializer();
+String getInitializer();
 /**
  * The <code>IDOMField</code> refinement of this <code>IDOMNode</code>
  * method returns the name of this field. The syntax for the name of a field
@@ -44,14 +44,14 @@ public String getInitializer();
  * @return the name of this field
  */
 @Override
-public String getName();
+String getName();
 /**
  * Returns the type name of this field. The syntax for a type name of a field
  * corresponds to Type in Field Declaration (JLS2 8.3).
  *
  * @return the type name
  */
-public String getType();
+String getType();
 /**
  * Sets the initializer expression for this field.
  * The syntax for an initializer corresponds to VariableInitializer (JLS2 8.3).
@@ -62,7 +62,7 @@ public String getType();
  * @param initializer the initializer expression, or <code>null</code> indicating
  *   the field does not have an initializer
  */
-public void setInitializer(String initializer);
+void setInitializer(String initializer);
 /**
  * The <code>IDOMField</code> refinement of this <code>IDOMNode</code>
  * method sets the name of this field. The syntax for the name of a field
@@ -72,7 +72,7 @@ public void setInitializer(String initializer);
  * @exception IllegalArgumentException if <code>null</code> is specified
  */
 @Override
-public void setName(String name) throws IllegalArgumentException;
+void setName(String name) throws IllegalArgumentException;
 /**
  * Sets the type name of this field. The syntax for a type name of a field
  * corresponds to Type in Field Declaration (JLS2 8.3). Type names must be
@@ -82,5 +82,5 @@ public void setName(String name) throws IllegalArgumentException;
  * @param typeName the type name
  * @exception IllegalArgumentException if <code>null</code> is specified
  */
-public void setType(String typeName) throws IllegalArgumentException;
+void setType(String typeName) throws IllegalArgumentException;
 }

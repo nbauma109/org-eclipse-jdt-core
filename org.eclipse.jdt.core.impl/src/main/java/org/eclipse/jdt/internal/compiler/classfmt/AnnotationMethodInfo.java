@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.compiler.codegen.AttributeNamesConstants;
 public class AnnotationMethodInfo extends MethodInfo {
 	protected Object defaultValue = null;
 
-public static MethodInfo createAnnotationMethod(byte classFileBytes[], int offsets[], int offset, long version) {
+public static MethodInfo createAnnotationMethod(byte[] classFileBytes, int[] offsets, int offset, long version) {
 	MethodInfo methodInfo = new MethodInfo(classFileBytes, offsets, offset, version);
 	int attributesCount = methodInfo.u2At(6);
 	int readOffset = 8;

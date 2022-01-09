@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.QualifiedName;
 /**
  * @since 3.1
  */
-public abstract interface IContentTypeInfo {
+public interface IContentTypeInfo {
 	/**
 	 * Returns a reference to the corresponding content type.
 	 */

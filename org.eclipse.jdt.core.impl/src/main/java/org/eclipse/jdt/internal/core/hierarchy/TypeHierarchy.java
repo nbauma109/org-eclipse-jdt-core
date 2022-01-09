@@ -314,7 +314,7 @@ protected void checkCanceled() {
 /**
  * Compute this type hierarchy.
  */
-protected void compute() throws JavaModelException, CoreException {
+protected void compute() throws CoreException {
 	if (this.focusType != null) {
 		HierarchyBuilder builder =
 			new IndexBasedHierarchyBuilder(
@@ -337,9 +337,7 @@ public boolean contains(IType type) {
 	if (this.rootClasses.contains(type)) return true;
 
 	// interfaces
-	if (this.interfaces.contains(type)) return true;
-
-	return false;
+    return this.interfaces.contains(type);
 }
 /**
  * Determines if the change affects this hierarchy, and fires
@@ -1327,7 +1325,7 @@ public synchronized void refresh(IProgressMonitor monitor) throws JavaModelExcep
 			} else {
 				System.out.println("CREATED SUPER TYPE HIERARCHY in " + (System.currentTimeMillis() - start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			System.out.println(this.toString());
+			System.out.println(this);
 		}
 	} catch (JavaModelException e) {
 		throw e;

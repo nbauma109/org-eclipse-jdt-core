@@ -30,12 +30,12 @@ public interface IApplication {
 	/**
 	 * Exit object indicating normal termination
 	 */
-	public static final Integer EXIT_OK = Integer.valueOf(0);
+    Integer EXIT_OK = Integer.valueOf(0);
 
 	/**
 	 * Exit object requesting platform restart
 	 */
-	public static final Integer EXIT_RESTART = Integer.valueOf(23);
+    Integer EXIT_RESTART = Integer.valueOf(23);
 
 	/**
 	 * Exit object requesting that the command passed back be executed.  Typically
@@ -43,7 +43,7 @@ public interface IApplication {
 	 * relaunched the command line will be retrieved from the 
 	 * {@link IApplicationContext#EXIT_DATA_PROPERTY eclipse.exitdata} system property.  
 	 */
-	public static final Integer EXIT_RELAUNCH = Integer.valueOf(24);
+    Integer EXIT_RELAUNCH = Integer.valueOf(24);
 
 	/**
 	 * Starts this application with the given context and returns a result.  The content of 
@@ -68,7 +68,7 @@ public interface IApplication {
 	 * @param context the application context to pass to the application
 	 * @exception Exception if there is a problem running this application.
 	 */
-	public Object start(IApplicationContext context) throws Exception;
+    Object start(IApplicationContext context) throws Exception;
 
 	/**
 	 * Forces this running application to exit.  This method should wait until the 
@@ -83,5 +83,5 @@ public interface IApplication {
 	 * to be called directly by clients.
 	 * </p>
 	 */
-	public void stop();
+    void stop();
 }

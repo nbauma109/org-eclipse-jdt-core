@@ -47,6 +47,6 @@ public class ObjectPool {
 	}
 
 	private static String getObjectString(Object obj) {
-		return "[(" + obj.getClass().getName() + ") " + obj.toString() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return "[(" + obj.getClass().getName() + ") " + obj + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }

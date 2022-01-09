@@ -53,13 +53,12 @@ public class CommandLineArgs {
 		configArgs[0] = -1;
 		int configArgIndex = 0;
 		for (int i = 0; i < args.length; i++) {
-			boolean found = false;
+			boolean found = args[i].equalsIgnoreCase(CLASSLOADER_PROPERTIES);
 			// check for args without parameters (i.e., a flag arg)
 
 			// consume obsolete args for compatibility
-			if (args[i].equalsIgnoreCase(CLASSLOADER_PROPERTIES))
-				found = true; // ignored
-			if (args[i].equalsIgnoreCase(NO_PACKAGE_PREFIXES))
+            // ignored
+            if (args[i].equalsIgnoreCase(NO_PACKAGE_PREFIXES))
 				found = true; // ignored
 			if (args[i].equalsIgnoreCase(PLUGINS))
 				found = true; // ignored

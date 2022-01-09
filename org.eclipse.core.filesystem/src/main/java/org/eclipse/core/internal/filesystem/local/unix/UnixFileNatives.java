@@ -87,7 +87,7 @@ public abstract class UnixFileNatives {
 						info.setError(IFileInfo.IO_ERROR);
 				}
 				info.setAttribute(EFS.ATTRIBUTE_SYMLINK, true);
-				byte target[] = new byte[UnixFileFlags.PATH_MAX];
+				byte[] target = new byte[UnixFileFlags.PATH_MAX];
 				int length = readlink(name, target, target.length);
 				if (length > 0)
 					info.setStringAttribute(EFS.ATTRIBUTE_LINK_TARGET, bytesToFileName(target, length));

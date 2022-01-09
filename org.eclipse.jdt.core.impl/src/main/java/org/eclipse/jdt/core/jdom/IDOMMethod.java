@@ -39,7 +39,7 @@ public interface IDOMMethod extends IDOMMember {
  * @exception IllegalArgumentException if <code>null</code> is specified
  * @see #setExceptions(String[])
  */
-public void addException(String exceptionType) throws IllegalArgumentException;
+void addException(String exceptionType) throws IllegalArgumentException;
 /**
  * Adds the given parameter to the end of the parameter list.
  * This is a convenience method for <code>setParameters</code>.
@@ -55,7 +55,7 @@ public void addException(String exceptionType) throws IllegalArgumentException;
  *   either the type or the name
  * @see #setParameters(String[], String[])
  */
-public void addParameter(String type, String name) throws IllegalArgumentException;
+void addParameter(String type, String name) throws IllegalArgumentException;
 /**
  * Returns the body of this method. The method body includes all code following
  * the method declaration, including the enclosing braces.
@@ -63,7 +63,7 @@ public void addParameter(String type, String name) throws IllegalArgumentExcepti
  * @return the body, or <code>null</code> if the method has no body (for
  *   example, for an abstract or native method)
  */
-public String getBody();
+String getBody();
 
 /**
  * Sets the default value expression for an annotation type member.
@@ -72,7 +72,7 @@ public String getBody();
  *   the member does not have a default value
  * @since 3.0
  */
-public void setDefault(String defaultValue);
+void setDefault(String defaultValue);
 
 /**
  * Returns the default value expression for an annotation type member.
@@ -81,7 +81,7 @@ public void setDefault(String defaultValue);
  *   the member does not have a default value
  * @since 3.0
  */
-public String getDefault();
+String getDefault();
 
 /**
  * Returns the names of the exception types this method throws
@@ -93,7 +93,7 @@ public String getDefault();
  *
  * @return the list of exception types
  */
-public String[] getExceptions();
+String[] getExceptions();
 
 /**
  * Returns the formal type parameters for this method.
@@ -118,7 +118,7 @@ String[] getTypeParameters();
  * @return the name of this method or <code>null</code> for constructors
  */
 @Override
-public String getName();
+String getName();
 /**
  * Returns the names of parameters in this method in the order they are declared,
  * or <code>null</code> if no parameters are declared.
@@ -127,7 +127,7 @@ public String getName();
  * @return the list of parameter names, or <code>null</code> if no parameters
  *  are declared
  */
-public String[] getParameterNames();
+String[] getParameterNames();
 /**
  * Returns the type names for the parameters of this method in the order they are declared,
  * or <code>null</code> if no parameters are declared.
@@ -139,7 +139,7 @@ public String[] getParameterNames();
  * @return the list of parameter types, or <code>null</code> if no parameters
  *  are declared
  */
-public String[] getParameterTypes();
+String[] getParameterTypes();
 /**
  * Returns the return type name, or <code>null</code>.
  * Returns <code>null</code> for constructors.
@@ -150,14 +150,14 @@ public String[] getParameterTypes();
  *
  * @return the return type
  */
-public String getReturnType();
+String getReturnType();
 
 /**
  * Returns whether this method is a constructor.
  *
  * @return <code>true</code> for constructors, and <code>false</code> for methods
  */
-public boolean isConstructor();
+boolean isConstructor();
 
 /**
  * Sets the body of this method. The method body includes all code following
@@ -167,13 +167,13 @@ public boolean isConstructor();
  * @param body the body, or <code>null</code> indicating the method has no body (for
  *   example, for an abstract or native method)
  */
-public void setBody(String body);
+void setBody(String body);
 /**
  * Sets whether this method represents a constructor.
  *
  * @param b <code>true</code> for constructors, and <code>false</code> for methods
  */
-public void setConstructor(boolean b);
+void setConstructor(boolean b);
 /**
  * Sets the names of the exception types this method throws,
  * in the order in which they are declared in the source. An empty array
@@ -184,7 +184,7 @@ public void setConstructor(boolean b);
  *
  * @param exceptionTypes the list of exception types
  */
-public void setExceptions(String[] exceptionTypes);
+void setExceptions(String[] exceptionTypes);
 
 /**
  * Sets the formal type parameters for this method.
@@ -212,7 +212,7 @@ void setTypeParameters(String[] typeParameters);
  * @exception IllegalArgumentException if <code>null</code> is specified
  */
 @Override
-public void setName(String name) throws IllegalArgumentException;
+void setName(String name) throws IllegalArgumentException;
 /**
  * Sets the types and names of parameters in this method in the order they are
  * to be declared. If both <code>types</code> and <code>names</code> are <code>null</code>
@@ -228,7 +228,7 @@ public void setName(String name) throws IllegalArgumentException;
  * @exception IllegalArgumentException if the number of types and names do not
  *   match, or if either argument is <code>null</code>
  */
-public void setParameters(String[] types, String[] names) throws IllegalArgumentException;
+void setParameters(String[] types, String[] names) throws IllegalArgumentException;
 
 /**
  * Sets the return type name. This has no effect on constructors.
@@ -240,6 +240,6 @@ public void setParameters(String[] types, String[] names) throws IllegalArgument
  * @param type the return type
  * @exception IllegalArgumentException if <code>null</code> is specified
  */
-public void setReturnType(String type) throws IllegalArgumentException;
+void setReturnType(String type) throws IllegalArgumentException;
 
 }

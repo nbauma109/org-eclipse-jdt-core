@@ -343,12 +343,8 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	@Override
 	public Thread newThread(Runnable r) {
 		String type = equinoxConfig.getConfiguration(EquinoxConfiguration.PROP_ACTIVE_THREAD_TYPE, EquinoxConfiguration.ACTIVE_THREAD_TYPE_NORMAL);
-		Thread t = new Thread(r, "Active Thread: " + toString()); //$NON-NLS-1$
-		if (EquinoxConfiguration.ACTIVE_THREAD_TYPE_NORMAL.equals(type)) {
-			t.setDaemon(false);
-		} else {
-			t.setDaemon(true);
-		}
+		Thread t = new Thread(r, "Active Thread: " + this); //$NON-NLS-1$
+        t.setDaemon(!EquinoxConfiguration.ACTIVE_THREAD_TYPE_NORMAL.equals(type));
 		t.setPriority(Thread.NORM_PRIORITY);
 		return t;
 	}

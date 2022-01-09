@@ -535,7 +535,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 				activeScopedSingleton = null;
 			else if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getCardinalityType() == EclipseAppDescriptor.FLAG_CARD_LIMITED) {
 				if (activeLimited != null) {
-					ArrayList<EclipseAppHandle> limited = activeLimited.get(((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getApplicationId());
+					ArrayList<EclipseAppHandle> limited = activeLimited.get(appHandle.getApplicationDescriptor().getApplicationId());
 					if (limited != null)
 						limited.remove(appHandle);
 				}

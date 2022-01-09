@@ -66,7 +66,7 @@ public interface ComponentServiceObjects<S> {
 	 *             deactivated.
 	 * @see #ungetService(Object)
 	 */
-	public S getService();
+    S getService();
 
 	/**
 	 * Releases a service object for the {@link #getServiceReference()
@@ -84,7 +84,7 @@ public interface ComponentServiceObjects<S> {
 	 *         provided by this {@code ComponentServiceObjects} object.
 	 * @see #getService()
 	 */
-	public void ungetService(S service);
+    void ungetService(S service);
 
 	/**
 	 * Returns the {@link ServiceReference} for the service associated with this
@@ -93,5 +93,5 @@ public interface ComponentServiceObjects<S> {
 	 * @return The {@link ServiceReference} for the service associated with this
 	 *         {@code ComponentServiceObjects} object.
 	 */
-	public ServiceReference<S> getServiceReference();
+    ServiceReference<S> getServiceReference();
 }

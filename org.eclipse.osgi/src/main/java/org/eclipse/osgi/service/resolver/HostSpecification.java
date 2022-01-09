@@ -28,11 +28,11 @@ public interface HostSpecification extends VersionConstraint {
 	 * Returns the list of host BundleDescriptions that satisfy this HostSpecification
 	 * @return the list of host BundleDescriptions that satisfy this HostSpecification
 	 */
-	public BundleDescription[] getHosts();
+    BundleDescription[] getHosts();
 
 	/**
 	 * Returns if this HostSpecification is allowed to have multiple hosts
 	 * @return true if this HostSpecification is allowed to have multiple hosts
 	 */
-	public boolean isMultiHost();
+    boolean isMultiHost();
 }

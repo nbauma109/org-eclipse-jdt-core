@@ -395,7 +395,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	private void copyReader(Reader reader, Writer aWriter) throws IOException {
-		char buffer[] = new char[1024];
+		char[] buffer = new char[1024];
 		int count;
 		while ((count = reader.read(buffer, 0, buffer.length)) > 0) {
 			aWriter.write(buffer, 0, count);
@@ -424,10 +424,10 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	private StringBuilder appendPaddedInt(int value, int pad, StringBuilder buffer) {
 		pad = pad - 1;
 		if (pad == 0)
-			return buffer.append(Integer.toString(value));
+			return buffer.append(value);
 		int padding = (int) Math.pow(10, pad);
 		if (value >= padding)
-			return buffer.append(Integer.toString(value));
+			return buffer.append(value);
 		while (padding > value && padding > 1) {
 			buffer.append('0');
 			padding = padding / 10;

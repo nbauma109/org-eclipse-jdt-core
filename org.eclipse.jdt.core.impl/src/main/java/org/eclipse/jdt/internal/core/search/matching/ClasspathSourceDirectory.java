@@ -150,9 +150,7 @@ public boolean isPackage(String qualifiedPackageName, String moduleName) {
 @Override
 public boolean hasCompilationUnit(String qualifiedPackageName, String moduleName) {
 	SimpleLookupTable dirTable = directoryTable(qualifiedPackageName);
-	if (dirTable != null && dirTable.elementSize > 0)
-		return true;
-	return false;
+    return dirTable != null && dirTable.elementSize > 0;
 }
 
 @Override

@@ -127,7 +127,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * @see FilterInputStream#read(byte[], int, int)
 	 */
 	@Override
-	public synchronized int read(byte b[], int off, int len) throws IOException {
+	public synchronized int read(byte[] b, int off, int len) throws IOException {
 		if (readPos >= length) {
 			return -1;
 		}
@@ -147,7 +147,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * @see FilterInputStream#read(byte[])
 	 */
 	@Override
-	public synchronized int read(byte b[]) throws IOException {
+	public synchronized int read(byte[] b) throws IOException {
 		return read(b, 0, b.length);
 	}
 

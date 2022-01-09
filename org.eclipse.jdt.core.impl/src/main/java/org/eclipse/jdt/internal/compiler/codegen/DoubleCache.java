@@ -14,8 +14,8 @@
 package org.eclipse.jdt.internal.compiler.codegen;
 
 public class DoubleCache {
-	private double keyTable[];
-	private int valueTable[];
+	private double[] keyTable;
+	private int[] valueTable;
 	private int elementSize;
 /**
  * Constructs a new, empty hashtable. A default capacity and

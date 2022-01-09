@@ -485,7 +485,7 @@ private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites) {
 						}
 					}
 			}
-			if (p != null && !projects.contains(p))
+			if (p != null)
 				projects.add(p);
 		}
 	} catch(JavaModelException e) {

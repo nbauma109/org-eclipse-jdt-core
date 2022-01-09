@@ -38,7 +38,7 @@ public interface IContentTypeManager extends IContentTypeMatcher {
 	 * a change in the encoding setting.
 	 * </p>
 	 */
-	public final class ContentTypeChangeEvent extends EventObject {
+	final class ContentTypeChangeEvent extends EventObject {
 		/**
 		 * All serializable objects should have a stable serialVersionUID
 		 */
@@ -107,7 +107,7 @@ public interface IContentTypeManager extends IContentTypeMatcher {
 	 * Clients may implement this interface.
 	 * </p>
 	 */
-	public interface IContentTypeChangeListener {
+    interface IContentTypeChangeListener {
 
 		/**
 		 * Notification that a content type has changed in the content type manager.
@@ -129,7 +129,7 @@ public interface IContentTypeManager extends IContentTypeMatcher {
 	 * @see IContentTypeManager#getMatcher(IContentTypeManager.ISelectionPolicy, IScopeContext)
 	 * @since 3.1
 	 */
-	public interface ISelectionPolicy {
+    interface ISelectionPolicy {
 		/**
 		 * Returns a subset of the given content types sorted by using a custom criterion.
 		 * <p>

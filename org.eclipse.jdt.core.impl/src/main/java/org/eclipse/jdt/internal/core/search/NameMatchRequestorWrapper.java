@@ -112,7 +112,7 @@ private IType createTypeFromJar(String resourcePath, int separatorIndex) throws 
 	String classFilePath= resourcePath.substring(separatorIndex + 1);
 	int actualClassIndexSeparator = classFilePath.indexOf(IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR);
 	String moduleName = actualClassIndexSeparator == -1 ? null : classFilePath.substring(0, actualClassIndexSeparator);
-	classFilePath = moduleName != null ? classFilePath.substring(actualClassIndexSeparator + 1, classFilePath.length()) : classFilePath;
+	classFilePath = moduleName != null ? classFilePath.substring(actualClassIndexSeparator + 1) : classFilePath;
 	String[] simpleNames = new Path(classFilePath).segments();
 	String[] pkgName;
 	int length = simpleNames.length-1;

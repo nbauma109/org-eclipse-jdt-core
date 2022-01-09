@@ -581,7 +581,7 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 public TypeBinding reportError(BlockScope scope) {
 
 	this.constant = Constant.NotAConstant;
-	if (this.binding instanceof ProblemFieldBinding && ((ProblemFieldBinding) this.binding).problemId() == NotFound){
+	if (this.binding instanceof ProblemFieldBinding && this.binding.problemId() == NotFound){
 		if (this.evaluationContext.declaringTypeName != null) {
 			this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
 			if (this.delegateThis != null){  // if not found then internal error, field should have been found
@@ -595,7 +595,7 @@ public TypeBinding reportError(BlockScope scope) {
 			}
 		}
 	}
-	if (this.binding instanceof ProblemBinding && ((ProblemBinding) this.binding).problemId() == NotFound){
+	if (this.binding instanceof ProblemBinding && this.binding.problemId() == NotFound){
 		if (this.evaluationContext.declaringTypeName != null) {
 			this.delegateThis = scope.getField(scope.enclosingSourceType(), DELEGATE_THIS, this);
 			if (this.delegateThis != null){  // if not found then internal error, field should have been found
@@ -603,7 +603,7 @@ public TypeBinding reportError(BlockScope scope) {
 				// will not support innerclass emulation inside delegate
 				FieldBinding fieldBinding = scope.getField(this.delegateThis.type, this.token, this);
 				if (!fieldBinding.isValidBinding()) {
-					if (((ProblemFieldBinding) fieldBinding).problemId() == NotVisible) {
+					if (fieldBinding.problemId() == NotVisible) {
 						// manage the access to a private field of the enclosing type
 						CodeSnippetScope localScope = new CodeSnippetScope(scope);
 						this.binding = localScope.getFieldForCodeSnippet(this.delegateThis.type, this.token, this);

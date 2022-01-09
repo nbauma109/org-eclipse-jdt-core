@@ -31,11 +31,11 @@ public interface INamedHandleStateIds {
 	 * The state id used for overriding the description of a named handle
 	 * object. This state's value must return a {@link String}.
 	 */
-	public static String DESCRIPTION = "DESCRIPTION"; //$NON-NLS-1$
+    String DESCRIPTION = "DESCRIPTION"; //$NON-NLS-1$
 
 	/**
 	 * The state id used for overriding the name of a named handle object. This
 	 * state's value must return a {@link String}.
 	 */
-	public static String NAME = "NAME"; //$NON-NLS-1$
+    String NAME = "NAME"; //$NON-NLS-1$
 }

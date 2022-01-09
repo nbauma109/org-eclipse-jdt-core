@@ -237,8 +237,8 @@ private void computeClasspathLocations(
 							? prereqEntry.getOutputLocation()
 							: prereqJavaProject.getOutputLocation();
 						IContainer binaryFolder = prereqOutputPath.segmentCount() == 1
-							? (IContainer) prereqProject
-							: (IContainer) root.getFolder(prereqOutputPath);
+							? prereqProject
+							: root.getFolder(prereqOutputPath);
 						if (binaryFolder.exists() && !seen.contains(binaryFolder)) {
 							seen.add(binaryFolder);
 							ClasspathLocation bLocation = ClasspathLocation.forBinaryFolder(binaryFolder, true, entry.getAccessRuleSet(),

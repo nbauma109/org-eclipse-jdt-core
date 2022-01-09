@@ -34,7 +34,7 @@ public class BufferedRandomInputStream extends InputStream {
 	 */
 	private long file_pointer;
 
-	private byte buffer[];
+	private byte[] buffer;
 
 	public BufferedRandomInputStream(File file) throws IOException {
 		this(file, 2048); // default buffer size
@@ -72,7 +72,7 @@ public class BufferedRandomInputStream extends InputStream {
 	}
 
 	@Override
-	public int read(byte b[], int off, int len) throws IOException {
+	public int read(byte[] b, int off, int len) throws IOException {
 		int available = buffer_size - buffer_pos;
 		if (available < 0)
 			return -1;

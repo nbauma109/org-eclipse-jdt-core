@@ -21,5 +21,5 @@ public interface ICompilerRequestor {
 	/**
 	 * Accept a compilation result.
 	 */
-	public void acceptResult(CompilationResult result);
+    void acceptResult(CompilationResult result);
 }

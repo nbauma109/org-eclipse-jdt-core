@@ -29,7 +29,7 @@ public abstract class AbstractDataTreeNode {
 	 * Singleton indicating no children.
 	 */
 	static final AbstractDataTreeNode[] NO_CHILDREN = new AbstractDataTreeNode[0];
-	protected AbstractDataTreeNode children[];
+	protected AbstractDataTreeNode[] children;
 	protected String name;
 
 	/* Node types for comparison */
@@ -502,7 +502,7 @@ public abstract class AbstractDataTreeNode {
 	 * Returns the local names of the receiver's children.
 	 */
 	String[] namesOfChildren() {
-		String names[] = new String[children.length];
+		String[] names = new String[children.length];
 		/* copy child names (Reverse loop optimized) */
 		for (int i = children.length; --i >= 0;)
 			names[i] = children[i].getName();
@@ -524,7 +524,7 @@ public abstract class AbstractDataTreeNode {
 	/**
 	 * Set the node's children
 	 */
-	protected void setChildren(AbstractDataTreeNode newChildren[]) {
+	protected void setChildren(AbstractDataTreeNode[] newChildren) {
 		children = newChildren;
 	}
 

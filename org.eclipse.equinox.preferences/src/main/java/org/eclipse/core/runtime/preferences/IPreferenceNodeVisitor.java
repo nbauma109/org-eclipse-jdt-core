@@ -49,5 +49,5 @@ public interface IPreferenceNodeVisitor {
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
 	 */
-	public boolean visit(IEclipsePreferences node) throws BackingStoreException;
+    boolean visit(IEclipsePreferences node) throws BackingStoreException;
 }

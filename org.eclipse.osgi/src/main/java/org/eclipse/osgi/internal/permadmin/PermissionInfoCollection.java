@@ -31,9 +31,9 @@ import org.osgi.service.permissionadmin.PermissionInfo;
 public final class PermissionInfoCollection extends PermissionCollection {
 	private static final long serialVersionUID = 3140511562980923957L;
 	/* Used to find permission constructors in addPermissions */
-	static private final Class<?> twoStringClassArray[] = new Class[] {String.class, String.class};
-	static private final Class<?> oneStringClassArray[] = new Class[] {String.class};
-	static private final Class<?> noArgClassArray[] = new Class[] {};
+	static private final Class<?>[] twoStringClassArray = new Class[] {String.class, String.class};
+	static private final Class<?>[] oneStringClassArray = new Class[] {String.class};
+	static private final Class<?>[] noArgClassArray = new Class[] {};
 	static private final Class<?>[][] permClassArrayArgs = new Class[][] {noArgClassArray, oneStringClassArray, twoStringClassArray};
 	static private final String ALL_PERMISSION_NAME = AllPermission.class.getName();
 	static final String FILE_PERMISSION_NAME = FilePermission.class.getName();
@@ -160,7 +160,7 @@ public final class PermissionInfoCollection extends PermissionCollection {
 		 */
 		for (PermissionInfo permInfo : permInfos) {
 			if (permInfo.getType().equals(permClassName)) {
-				String args[] = new String[numArgs];
+				String[] args = new String[numArgs];
 				if (numArgs > 0) {
 					args[0] = permInfo.getName();
 				}

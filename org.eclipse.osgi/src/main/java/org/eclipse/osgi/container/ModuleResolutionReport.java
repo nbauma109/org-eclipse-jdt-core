@@ -175,7 +175,7 @@ class ModuleResolutionReport implements ResolutionReport {
 		} else if (HostNamespace.HOST_NAMESPACE.equals(cap.getNamespace())) {
 			return Constants.BUNDLE_SYMBOLICNAME + ": " + createOSGiCapability(cap); //$NON-NLS-1$
 		}
-		return Constants.PROVIDE_CAPABILITY + ": " + cap.toString(); //$NON-NLS-1$
+		return Constants.PROVIDE_CAPABILITY + ": " + cap; //$NON-NLS-1$
 	}
 
 	private static String createOSGiCapability(Capability cap) {
@@ -197,7 +197,7 @@ class ModuleResolutionReport implements ResolutionReport {
 		} else if (HostNamespace.HOST_NAMESPACE.equals(req.getNamespace())) {
 			return Constants.FRAGMENT_HOST + ": " + createOSGiRequirement(req, HostNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE); //$NON-NLS-1$
 		}
-		return Constants.REQUIRE_CAPABILITY + ": " + req.toString(); //$NON-NLS-1$
+		return Constants.REQUIRE_CAPABILITY + ": " + req; //$NON-NLS-1$
 	}
 
 	private static String createOSGiRequirement(Requirement requirement, String... versions) {

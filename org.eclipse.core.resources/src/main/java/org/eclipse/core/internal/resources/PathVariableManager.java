@@ -349,7 +349,7 @@ public class PathVariableManager implements IPathVariableManager, IManager {
 	 */
 	@Override
 	public IStatus validateValue(URI path) {
-		return validateValue(path != null ? URIUtil.toPath(path) : (IPath) null);
+		return validateValue(path != null ? URIUtil.toPath(path) : null);
 	}
 
 	public URI resolveURI(URI uri, IResource resource) {

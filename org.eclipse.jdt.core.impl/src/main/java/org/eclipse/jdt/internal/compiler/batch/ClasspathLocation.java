@@ -109,10 +109,8 @@ public abstract class ClasspathLocation implements FileSystem.Classpath,
 				return false;
 		} else if (!localPath.equals(otherPath))
 			return false;
-		if (this.getMode() != other.getMode())
-			return false;
-		return true;
-	}
+        return this.getMode() == other.getMode();
+    }
 	@Override
 	public String getPath() {
 		return this.path;
@@ -128,7 +126,7 @@ public abstract class ClasspathLocation implements FileSystem.Classpath,
 	}
 	@Override
 	public boolean isAutomaticModule() {
-		return this.module == null ? false : this.module.isAutomatic();
+		return this.module != null && this.module.isAutomatic();
 	}
 	@Override
 	public Collection<String> getModuleNames(Collection<String> limitModules) {

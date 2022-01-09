@@ -32,7 +32,7 @@ public interface IRegistryChangeEvent {
 	 *
 	 * @return  all extension deltas
 	 */
-	public IExtensionDelta[] getExtensionDeltas();
+    IExtensionDelta[] getExtensionDeltas();
 
 	/**
 	 * Returns all extension deltas for the given namespace. Returns an empty array if there are
@@ -41,7 +41,7 @@ public interface IRegistryChangeEvent {
 	 * @param namespace the namespace for the extension deltas
 	 * @return all extension deltas for the given namespace
 	 */
-	public IExtensionDelta[] getExtensionDeltas(String namespace);
+    IExtensionDelta[] getExtensionDeltas(String namespace);
 
 	/**
 	 * Returns all the extension deltas for the given namespace and extension point. Returns an
@@ -52,7 +52,7 @@ public interface IRegistryChangeEvent {
 	 * 	extension point (e.g. <code>"builders"</code>)
 	 * @return all extension deltas for the given extension point
 	 */
-	public IExtensionDelta[] getExtensionDeltas(String namespace, String extensionPoint);
+    IExtensionDelta[] getExtensionDeltas(String namespace, String extensionPoint);
 
 	/**
 	 * Returns the delta for the given namespace, extension point and extension.
@@ -64,5 +64,5 @@ public interface IRegistryChangeEvent {
 	 * @param extension the unique identifier of the extension
 	 * @return the extension delta, or <code>null</code>
 	 */
-	public IExtensionDelta getExtensionDelta(String namespace, String extensionPoint, String extension);
+    IExtensionDelta getExtensionDelta(String namespace, String extensionPoint, String extension);
 }

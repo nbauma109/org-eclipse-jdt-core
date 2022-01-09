@@ -41,7 +41,7 @@ public interface IUndoContext {
 	 *
 	 * @return the label for the context.
 	 */
-	public String getLabel();
+    String getLabel();
 
 	/**
 	 * Return whether the specified context is considered a match for the
@@ -55,6 +55,6 @@ public interface IUndoContext {
 	 *         match for the specified context, and <code>false</code> if it
 	 *         cannot.
 	 */
-	public boolean matches(IUndoContext context);
+    boolean matches(IUndoContext context);
 
 }

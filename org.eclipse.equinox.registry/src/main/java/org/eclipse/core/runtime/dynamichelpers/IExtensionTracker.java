@@ -35,21 +35,21 @@ public interface IExtensionTracker {
 	 *
 	 * Value <code>1</code>.
 	 */
-	public static final int REF_STRONG = ReferenceHashSet.HARD;
+    int REF_STRONG = ReferenceHashSet.HARD;
 
 	/**
 	 * Constant for soft reference holding.
 	 *
 	 * Value <code>2</code>.
 	 */
-	public static final int REF_SOFT = ReferenceHashSet.SOFT;
+    int REF_SOFT = ReferenceHashSet.SOFT;
 
 	/**
 	 * Constant for weak reference holding.
 	 *
 	 * Value <code>3</code>.
 	 */
-	public static final int REF_WEAK = ReferenceHashSet.WEAK;
+    int REF_WEAK = ReferenceHashSet.WEAK;
 
 	/**
 	 * Register an extension change handler with this tracker using the given filter.
@@ -57,14 +57,14 @@ public interface IExtensionTracker {
 	 * @param handler the handler to be registered
 	 * @param filter the filter to use to choose interesting changes
 	 */
-	public void registerHandler(IExtensionChangeHandler handler, IFilter filter);
+    void registerHandler(IExtensionChangeHandler handler, IFilter filter);
 
 	/**
 	 * Unregister the given extension change handler previously registered with this tracker.
 	 *
 	 * @param handler the handler to be unregistered
 	 */
-	public void unregisterHandler(IExtensionChangeHandler handler);
+    void unregisterHandler(IExtensionChangeHandler handler);
 
 	/**
 	 * Create an association between the given extension and the given object.
@@ -78,7 +78,7 @@ public interface IExtensionTracker {
 	 * @see #REF_SOFT
 	 * @see #REF_WEAK
 	 */
-	public void registerObject(IExtension extension, Object object, int referenceType);
+    void registerObject(IExtension extension, Object object, int referenceType);
 
 	/**
 	 * Remove an association between the given extension and the given object.
@@ -86,7 +86,7 @@ public interface IExtensionTracker {
 	 * @param extension the extension under which the object has been registered
 	 * @param object the object to unregister
 	 */
-	public void unregisterObject(IExtension extension, Object object);
+    void unregisterObject(IExtension extension, Object object);
 
 	/**
 	 * Remove all the objects associated with the given extension. Return
@@ -95,7 +95,7 @@ public interface IExtensionTracker {
 	 * @param extension the extension for which the objects are removed
 	 * @return the objects that were associated with the extension
 	 */
-	public Object[] unregisterObject(IExtension extension);
+    Object[] unregisterObject(IExtension extension);
 
 	/**
 	 * Return all the objects that have been associated with the given extension.
@@ -106,10 +106,10 @@ public interface IExtensionTracker {
 	 * @param extension the extension for which the object must be returned
 	 * @return the array of associated objects
 	 */
-	public Object[] getObjects(IExtension extension);
+    Object[] getObjects(IExtension extension);
 
 	/**
 	 * Close the tracker. All registered objects are freed and all handlers are being automatically removed.
 	 */
-	public void close();
+    void close();
 }

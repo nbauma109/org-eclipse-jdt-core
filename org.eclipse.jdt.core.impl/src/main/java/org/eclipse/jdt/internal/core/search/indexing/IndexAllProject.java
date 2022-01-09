@@ -188,8 +188,8 @@ public class IndexAllProject extends IndexRequest {
 												indexedFileNames.put(relativePathString,
 													indexedFileNames.get(relativePathString) == null
 															|| indexLastModified < EFS.getStore(location).fetchInfo().getLastModified()
-														? (Object) file
-														: (Object) OK);
+														? file
+														: OK);
 											}
 											return false;
 										case IResource.FOLDER :

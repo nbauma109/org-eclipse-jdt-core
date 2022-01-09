@@ -117,16 +117,16 @@ protected ASTNode generateElementAST(ASTRewrite rewriter, ICompilationUnit cu) t
 			int nameEnd = nameStart + oldName.getLength();
 			StringBuilder newSource = new StringBuilder();
 			if (this.source.equals(createdNodeSource)) {
-				newSource.append(createdNodeSource.substring(0, nameStart));
+				newSource.append(createdNodeSource, 0, nameStart);
 				newSource.append(this.alteredName);
 				newSource.append(createdNodeSource.substring(nameEnd));
 			} else {
 				// syntactically incorrect source
 				int createdNodeStart = this.createdNode.getStartPosition();
 				int createdNodeEnd = createdNodeStart + this.createdNode.getLength();
-				newSource.append(createdNodeSource.substring(createdNodeStart, nameStart));
+				newSource.append(createdNodeSource, createdNodeStart, nameStart);
 				newSource.append(this.alteredName);
-				newSource.append(createdNodeSource.substring(nameEnd, createdNodeEnd));
+				newSource.append(createdNodeSource, nameEnd, createdNodeEnd);
 
 			}
 			this.source = newSource.toString();

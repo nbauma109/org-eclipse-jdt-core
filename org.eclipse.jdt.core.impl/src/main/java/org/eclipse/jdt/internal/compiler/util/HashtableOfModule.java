@@ -19,8 +19,8 @@ import org.eclipse.jdt.internal.compiler.lookup.ModuleBinding;
 
 public final class HashtableOfModule {
 	// to avoid using Enumerations, walk the individual tables skipping nulls
-	public char[] keyTable[];
-	public ModuleBinding valueTable[];
+	public char[][] keyTable;
+	public ModuleBinding[] valueTable;
 
 	public int elementSize; // number of elements in the table
 	int threshold;
@@ -104,7 +104,7 @@ public final class HashtableOfModule {
 		ModuleBinding pkg;
 		for (int i = 0, length = this.valueTable.length; i < length; i++)
 			if ((pkg = this.valueTable[i]) != null)
-				s += pkg.toString() + "\n"; //$NON-NLS-1$
+				s += pkg + "\n"; //$NON-NLS-1$
 		return s;
 	}
 }

@@ -145,7 +145,7 @@ public class ClasspathJep247 extends ClasspathJrt {
 		if (!Files.exists(modPath)) {
 			throw new IllegalArgumentException("release " + this.compliance + " is not found in the system");  //$NON-NLS-1$//$NON-NLS-2$
 		}
-		this.modulePath = this.file.getPath() + "|" + modPath.toString(); //$NON-NLS-1$
+		this.modulePath = this.file.getPath() + "|" + modPath; //$NON-NLS-1$
 		Map<String, IModule> cache = ModulesCache.get(this.modulePath);
 		if (cache == null) {
 			try (DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(modPath)) {

@@ -28,11 +28,11 @@ public interface StateHelper {
 	/**
 	 * Indicates that access is encouraged to an <code>ExportPackageDescription</code>.
 	 */
-	public static int ACCESS_ENCOURAGED = 0x01;
+    int ACCESS_ENCOURAGED = 0x01;
 	/**
 	 * Indicates that access is discouraged to an <code>ExportPackageDescription</code>.
 	 */
-	public static int ACCESS_DISCOURAGED = 0x02;
+    int ACCESS_DISCOURAGED = 0x02;
 
 	/**
 	 * An option to include packages available from the execution environment when
@@ -42,7 +42,7 @@ public interface StateHelper {
 	 * environment which the bundle is wired to will be included.
 	 * @see StateHelper#getVisiblePackages(BundleDescription, int)
 	 */
-	public static int VISIBLE_INCLUDE_EE_PACKAGES = 0x01;
+    int VISIBLE_INCLUDE_EE_PACKAGES = 0x01;
 
 	/**
 	 * An option to get all visible packages that a host bundle is currently wired to.  This
@@ -52,7 +52,7 @@ public interface StateHelper {
 	 * @see StateHelper#getVisiblePackages(BundleDescription, int)
 	 * @since 3.6
 	 */
-	public static int VISIBLE_INCLUDE_ALL_HOST_WIRES = 0x02;
+    int VISIBLE_INCLUDE_ALL_HOST_WIRES = 0x02;
 
 	/**
 	 * Returns all bundles in the state depending on the given bundles. The given bundles
@@ -62,7 +62,7 @@ public interface StateHelper {
 	 * @return an array containing bundle descriptions for the given roots and all
 	 * bundles in the state that depend on them
 	 */
-	public BundleDescription[] getDependentBundles(BundleDescription[] bundles);
+    BundleDescription[] getDependentBundles(BundleDescription[] bundles);
 
 	/**
 	 * Returns all the prerequisite bundles in the state for the given bundles.  The given
@@ -72,7 +72,7 @@ public interface StateHelper {
 	 * prerequisite bundles in the state.
 	 * @since 3.2
 	 */
-	public BundleDescription[] getPrerequisites(BundleDescription[] bundles);
+    BundleDescription[] getPrerequisites(BundleDescription[] bundles);
 
 	/**
 	 * Returns all unsatisfied constraints in the given bundle. Returns an
@@ -85,7 +85,7 @@ public interface StateHelper {
 	 * @param bundle the bundle to examine
 	 * @return an array containing all unsatisfied constraints for the given bundle
 	 */
-	public VersionConstraint[] getUnsatisfiedConstraints(BundleDescription bundle);
+    VersionConstraint[] getUnsatisfiedConstraints(BundleDescription bundle);
 
 	/**
 	 * Returns all unsatisfied constraints in the given bundles that have no possible supplier.
@@ -116,7 +116,7 @@ public interface StateHelper {
 	 * @return an array containing all unsatisfied leaf constraints for the given bundles
 	 * @since 3.2
 	 */
-	public VersionConstraint[] getUnsatisfiedLeaves(BundleDescription[] bundles);
+    VersionConstraint[] getUnsatisfiedLeaves(BundleDescription[] bundles);
 
 	/**
 	 * Returns whether the given package specification constraint is resolvable.
@@ -129,7 +129,7 @@ public interface StateHelper {
 	 * @return <code>true</code> if the constraint can be resolved,
 	 * <code>false</code> otherwise
 	 */
-	public boolean isResolvable(ImportPackageSpecification specification);
+    boolean isResolvable(ImportPackageSpecification specification);
 
 	/**
 	 * Returns whether the given bundle specification constraint is resolvable.
@@ -142,7 +142,7 @@ public interface StateHelper {
 	 * @return <code>true</code> if the constraint can be resolved,
 	 * <code>false</code> otherwise
 	 */
-	public boolean isResolvable(BundleSpecification specification);
+    boolean isResolvable(BundleSpecification specification);
 
 	/**
 	 * Returns whether the given host specification constraint is resolvable.
@@ -155,7 +155,7 @@ public interface StateHelper {
 	 * @return <code>true</code> if the constraint can be resolved,
 	 * <code>false</code> otherwise
 	 */
-	public boolean isResolvable(HostSpecification specification);
+    boolean isResolvable(HostSpecification specification);
 
 	/**
 	 * Sorts the given array of <strong>resolved</strong> bundles in pre-requisite order. If A
@@ -170,7 +170,7 @@ public interface StateHelper {
 	 * @param toSort an array of bundles to be sorted
 	 * @return any cycles found
 	 */
-	public Object[][] sortBundles(BundleDescription[] toSort);
+    Object[][] sortBundles(BundleDescription[] toSort);
 
 	/**
 	 * Returns a list of all packages that the specified bundle has access to which are
@@ -182,7 +182,7 @@ public interface StateHelper {
 	 * @return a list of all packages that the specified bundle has access to which are
 	 * exported by other bundles.
 	 */
-	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle);
+    ExportPackageDescription[] getVisiblePackages(BundleDescription bundle);
 
 	/**
 	 * Returns a list of all packages that the specified bundle has access to which are
@@ -200,7 +200,7 @@ public interface StateHelper {
 	 * @see StateHelper#VISIBLE_INCLUDE_ALL_HOST_WIRES
 	 * @since 3.3
 	 */
-	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle, int options);
+    ExportPackageDescription[] getVisiblePackages(BundleDescription bundle, int options);
 
 	/**
 	 * Returns the access code that the specified <code>BundleDescription</code> has to the
@@ -211,5 +211,5 @@ public interface StateHelper {
 	 * @see StateHelper#ACCESS_ENCOURAGED
 	 * @see StateHelper#ACCESS_DISCOURAGED
 	 */
-	public int getAccessCode(BundleDescription bundle, ExportPackageDescription export);
+    int getAccessCode(BundleDescription bundle, ExportPackageDescription export);
 }

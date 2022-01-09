@@ -285,7 +285,7 @@ public abstract class Resource extends PlatformObject implements IResource, ICor
 			}
 		}
 
-		return status.isOK() ? Status.OK_STATUS : (IStatus) status;
+		return status.isOK() ? Status.OK_STATUS : status;
 	}
 
 	/**
@@ -422,7 +422,7 @@ public abstract class Resource extends PlatformObject implements IResource, ICor
 			}
 		}
 
-		return status.isOK() ? Status.OK_STATUS : (IStatus) status;
+		return status.isOK() ? Status.OK_STATUS : status;
 	}
 
 	/**
@@ -1539,7 +1539,7 @@ public abstract class Resource extends PlatformObject implements IResource, ICor
 			String message = NLS.bind(Messages.resources_moveNotProject, getFullPath(), description.getName());
 			throw new ResourceException(IResourceStatus.INVALID_VALUE, getFullPath(), message, null);
 		}
-		((Project) this).move(description, updateFlags, monitor);
+		this.move(description, updateFlags, monitor);
 	}
 
 	@Override
@@ -1812,7 +1812,7 @@ public abstract class Resource extends PlatformObject implements IResource, ICor
 	 * client code, it is run "unprotected", so the workspace lock is not held.
 	 * Returns true if resources were actually moved, and false otherwise.
 	 */
-	private boolean unprotectedMove(ResourceTree tree, final IResource destination, int updateFlags, IProgressMonitor monitor) throws CoreException, ResourceException {
+	private boolean unprotectedMove(ResourceTree tree, final IResource destination, int updateFlags, IProgressMonitor monitor) throws CoreException {
 		IMoveDeleteHook hook = workspace.getMoveDeleteHook();
 		SubMonitor progress = SubMonitor.convert(monitor, 2).checkCanceled();
 		try {

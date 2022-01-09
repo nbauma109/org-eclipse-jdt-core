@@ -37,7 +37,7 @@ public interface ConditionalPermissionInfo {
 	 * 
 	 * @since 1.1
 	 */
-	public final static String	ALLOW	= "allow";
+    String	ALLOW	= "allow";
 
 	/**
 	 * This string is used to indicate that a row in the Conditional Permission
@@ -47,7 +47,7 @@ public interface ConditionalPermissionInfo {
 	 * 
 	 * @since 1.1
 	 */
-	public final static String	DENY	= "deny";
+    String	DENY	= "deny";
 
 	/**
 	 * Returns the Condition Infos for the Conditions that must be satisfied to

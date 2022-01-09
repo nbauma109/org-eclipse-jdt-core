@@ -103,7 +103,7 @@ public final class ModuleWiring implements BundleWiring {
 		if ((BundleRevision.TYPE_FRAGMENT & revision.getTypes()) != 0) {
 			List<ModuleWire> hostWires = getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
 			// hostWires may be null if the fragment wiring is no longer valid
-			return hostWires == null ? false : !hostWires.isEmpty();
+			return hostWires != null && !hostWires.isEmpty();
 		}
 		return false;
 	}

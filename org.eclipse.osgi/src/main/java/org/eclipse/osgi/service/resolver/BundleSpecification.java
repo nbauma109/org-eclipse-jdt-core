@@ -31,12 +31,12 @@ public interface BundleSpecification extends VersionConstraint {
 	 *
 	 * @return whether this specification is exported
 	 */
-	public boolean isExported();
+    boolean isExported();
 
 	/**
 	 * Returns whether or not this bundle specificiation is optional.
 	 *
 	 * @return whether this specification is optional
 	 */
-	public boolean isOptional();
+    boolean isOptional();
 }

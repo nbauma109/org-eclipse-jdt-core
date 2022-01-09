@@ -289,8 +289,8 @@ public class FileUtil {
 			try (
 					// for performance reasons the buffer size should
 					// reflect the average length of the first Line:
-					InputStream input = new BufferedInputStream(file.getContents(), 128);
-			) {
+					InputStream input = new BufferedInputStream(file.getContents(), 128)
+            ) {
 				int c = input.read();
 				while (c != -1 && c != '\r' && c != '\n')
 					c = input.read();
@@ -399,7 +399,7 @@ public class FileUtil {
 			try {
 				if (source instanceof ByteArrayInputStream) {
 					// ByteArrayInputStream does overload transferTo avoiding buffering
-					((ByteArrayInputStream) source).transferTo(destination);
+					source.transferTo(destination);
 					subMonitor.split(1);
 				} else {
 					byte[] buffer = new byte[8192];

@@ -39,7 +39,7 @@ public interface IFileSystem extends IAdaptable {
 	 *
 	 * @return the file attributes supported by this file system.
 	 */
-	public int attributes();
+    int attributes();
 
 	/**
 	 * Returns whether this file system supports deletion
@@ -47,7 +47,7 @@ public interface IFileSystem extends IAdaptable {
 	 * @return <code>true</code> if this file system allows deletion
 	 * of files and directories, and <code>false</code> otherwise
 	 */
-	public boolean canDelete();
+    boolean canDelete();
 
 	/**
 	 * Returns whether this file system supports modification.
@@ -55,7 +55,7 @@ public interface IFileSystem extends IAdaptable {
 	 * @return <code>true</code> if this file system allows modification
 	 * of files and directories, and <code>false</code> otherwise
 	 */
-	public boolean canWrite();
+    boolean canWrite();
 
 	/**
 	 * Returns a file tree containing information about the complete sub-tree
@@ -79,7 +79,7 @@ public interface IFileSystem extends IAdaptable {
 	 * </ul>
 	 * @see IFileTree
 	 */
-	public IFileTree fetchFileTree(IFileStore root, IProgressMonitor monitor) throws CoreException;
+    IFileTree fetchFileTree(IFileStore root, IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Returns the file store in this file system corresponding to the
@@ -90,14 +90,14 @@ public interface IFileSystem extends IAdaptable {
 	 * @return The {@link IFileStore} corresponding to the given file, or <code>null</code>
 	 * @see IFileStore#toLocalFile(int, IProgressMonitor)
 	 */
-	public IFileStore fromLocalFile(java.io.File file);
+    IFileStore fromLocalFile(java.io.File file);
 
 	/**
 	 * Returns the URI scheme of this file system.
 	 *
 	 * @return the URI scheme of this file system.
 	 */
-	public String getScheme();
+    String getScheme();
 
 	/**
 	 * Returns a handle to a file store in this file system.  This is a handle-only
@@ -115,7 +115,7 @@ public interface IFileSystem extends IAdaptable {
 	 * @return A handle to a file store in this file system
 	 * @see EFS#getLocalFileSystem()
 	 */
-	public IFileStore getStore(IPath path);
+    IFileStore getStore(IPath path);
 
 	/**
 	 * Returns a handle to a file store in this file system.  This is a handle-only
@@ -126,7 +126,7 @@ public interface IFileSystem extends IAdaptable {
 	 * @param uri The URI of the file store to return.
 	 * @return A handle to a file store in this file system
 	 */
-	public IFileStore getStore(URI uri);
+    IFileStore getStore(URI uri);
 
 	/**
 	 * Returns whether this file system is case sensitive.  A case sensitive
@@ -137,6 +137,6 @@ public interface IFileSystem extends IAdaptable {
 	 * @return <code>true</code> if this file system is case sensitive, and
 	 * <code>false</code> otherwise.
 	 */
-	public boolean isCaseSensitive();
+    boolean isCaseSensitive();
 
 }

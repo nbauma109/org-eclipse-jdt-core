@@ -38,7 +38,7 @@ public interface IRegistryEventListener extends EventListener {
 	 * </p>
 	 * @param extensions extensions added to the registry
 	 */
-	public void added(IExtension[] extensions);
+    void added(IExtension[] extensions);
 
 	/**
 	 * Notifies this listener that extensions were removed from the registry.
@@ -48,7 +48,7 @@ public interface IRegistryEventListener extends EventListener {
 	 * </p>
 	 * @param extensions extensions removed from the registry
 	 */
-	public void removed(IExtension[] extensions);
+    void removed(IExtension[] extensions);
 
 	/**
 	 * Notifies this listener that extension points were added to the registry.
@@ -58,7 +58,7 @@ public interface IRegistryEventListener extends EventListener {
 	 * </p>
 	 * @param extensionPoints extension points added to the registry
 	 */
-	public void added(IExtensionPoint[] extensionPoints);
+    void added(IExtensionPoint[] extensionPoints);
 
 	/**
 	 * Notifies this listener that extension points were removed from the registry.
@@ -68,6 +68,6 @@ public interface IRegistryEventListener extends EventListener {
 	 * </p>
 	 * @param extensionPoints extension points removed from the registry
 	 */
-	public void removed(IExtensionPoint[] extensionPoints);
+    void removed(IExtensionPoint[] extensionPoints);
 
 }

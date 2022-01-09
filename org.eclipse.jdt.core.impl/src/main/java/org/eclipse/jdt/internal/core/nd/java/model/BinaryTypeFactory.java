@@ -149,7 +149,7 @@ public class BinaryTypeFactory {
 					String entryName = new String(entryNameCharArray);
 					ZipEntry ze = zip.getEntry(entryName);
 					if (ze != null) {
-						byte contents[];
+						byte[] contents;
 						try {
 							contents = org.eclipse.jdt.internal.compiler.util.Util.getZipEntryByteContent(ze, zip);
 						} catch (IOException ioe) {

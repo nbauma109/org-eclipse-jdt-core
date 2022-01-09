@@ -26,6 +26,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -458,7 +459,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 							SourceRefElement candidate = null;
 							do {
 								// check name range
-								range = ((IField)child).getNameRange();
+								range = child.getNameRange();
 								if (position <= range.getOffset() + range.getLength()) {
 									candidate = child;
 								} else {
@@ -813,11 +814,8 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		return -1;
 	}
 	boolean isSameCharacter(byte b1, byte b2) {
-		if (b1 == b2 || Character.toUpperCase((char) b1) == Character.toUpperCase((char) b2)) {
-			return true;
-		}
-		return false;
-	}
+        return b1 == b2 || Character.toUpperCase((char) b1) == Character.toUpperCase((char) b2);
+    }
 
 	/*
 	 * This method caches a list of good and bad Javadoc locations in the current eclipse session.
@@ -905,7 +903,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 						}
 						if (charsetIndex != -1) {
 							end = getIndexOf(contents, CLOSING_DOUBLE_QUOTE, charsetIndex, end);
-							encoding = new String(contents, charsetIndex, end - charsetIndex, org.eclipse.jdt.internal.compiler.util.Util.UTF_8);
+							encoding = new String(contents, charsetIndex, end - charsetIndex, StandardCharsets.UTF_8);
 						}
 					}
 				}

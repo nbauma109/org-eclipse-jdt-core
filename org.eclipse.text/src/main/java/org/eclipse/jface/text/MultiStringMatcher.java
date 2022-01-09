@@ -41,7 +41,7 @@ public class MultiStringMatcher {
 	 * Describes a match result of {@link MultiStringMatcher#indexOf(CharSequence, int)}, giving
 	 * access to the matched string and the offset in the text it was matched at.
 	 */
-	public static interface Match {
+	public interface Match {
 
 		/**
 		 * Obtains the matched string.
@@ -60,7 +60,7 @@ public class MultiStringMatcher {
 	}
 
 	/** A Builder for creating a {@link MultiStringMatcher}. */
-	public static interface Builder {
+	public interface Builder {
 
 		/**
 		 * Adds search strings to be looked for. {@code null} and empty strings in the arguments are

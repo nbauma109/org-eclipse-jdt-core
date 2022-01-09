@@ -198,7 +198,7 @@ void record(String typeLocator, char[][][] qualifiedRefs, char[][] simpleRefs, c
 void recordLocatorForType(String qualifiedTypeName, String typeLocator) {
 	this.knownPackageNames = null;
 	// in the common case, the qualifiedTypeName is a substring of the typeLocator so share the char[] by using String.substring()
-	int start = typeLocator.indexOf(qualifiedTypeName, 0);
+	int start = typeLocator.indexOf(qualifiedTypeName);
 	if (start > 0)
 		qualifiedTypeName = typeLocator.substring(start, start + qualifiedTypeName.length());
 	this.typeLocators.put(qualifiedTypeName, typeLocator);
@@ -367,8 +367,8 @@ private static ClasspathLocation[] readBinaryLocations(IProject project, DataInp
 			case BINARY_FOLDER :
 				IPath path = new Path(in.readUTF());
 				IContainer outputFolder = path.segmentCount() == 1
-					? (IContainer) root.getProject(path.toString())
-					: (IContainer) root.getFolder(path);
+					? root.getProject(path.toString())
+					: root.getFolder(path);
 				locations[i] = ClasspathLocation.forBinaryFolder(outputFolder, in.readBoolean(),
 							readRestriction(in), new Path(in.readUTF()), allLocationsForEEA, in.readBoolean());
 				break;
@@ -478,7 +478,7 @@ boolean wasStructurallyChanged(IProject prereqProject, State prereqState) {
 	if (prereqState != null) {
 		Object o = this.structuralBuildTimes.get(prereqProject.getName());
 		long previous = o == null ? 0 : ((Long) o).longValue();
-		if (previous == prereqState.lastStructuralBuildTime) return false;
+        return previous != prereqState.lastStructuralBuildTime;
 	}
 	return true;
 }

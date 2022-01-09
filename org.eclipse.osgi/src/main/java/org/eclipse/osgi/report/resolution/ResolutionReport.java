@@ -89,7 +89,7 @@ import org.osgi.service.resolver.ResolutionException;
  * @since 3.10
  */
 public interface ResolutionReport {
-	public interface Entry {
+	interface Entry {
 		enum Type {
 			/**
 			 * Indicates a resource failed to resolve because a resolver hook
@@ -153,7 +153,7 @@ public interface ResolutionReport {
 	 * that also implement the {@link Listener listener} interface will be called
 	 * to receive the resolution report associated with the resolve process.
 	 */
-	public interface Listener {
+    interface Listener {
 		void handleResolutionReport(ResolutionReport report);
 	}
 

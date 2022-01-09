@@ -39,7 +39,7 @@ public class ModulePathContainer implements IClasspathContainer{
 		List<IClasspathEntry> entries = new ArrayList<>();
 		ModuleSourcePathManager manager = JavaModelManager.getModulePathManager();
 		try {
-			AbstractModule module = (AbstractModule) ((JavaProject)this.project).getModuleDescription();
+			AbstractModule module = (AbstractModule) this.project.getModuleDescription();
 			if (module == null)
 				return new IClasspathEntry[0];
 			for (org.eclipse.jdt.internal.compiler.env.IModule.IModuleReference ref : module.getRequiredModules()) {

@@ -46,7 +46,7 @@ public class FieldInfo extends ClassFileStruct implements IFieldInfo {
 	 * @param constantPool IConstantPool
 	 * @param offset int
 	 */
-	public FieldInfo(byte classFileBytes[], IConstantPool constantPool, int offset)
+	public FieldInfo(byte[] classFileBytes, IConstantPool constantPool, int offset)
 		throws ClassFormatException {
 		final int flags = u2At(classFileBytes, 0, offset);
 		this.accessFlags = flags;

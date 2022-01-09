@@ -356,7 +356,7 @@ public class JavaModelStatus extends Status implements IJavaModelStatus, IJavaMo
 					javaProject = (IJavaProject)this.elements[0];
 					String projectName = javaProject.getElementName();
 					IPath newPath = this.path;
-					if (this.path.segment(0).toString().equals(projectName)) {
+					if (this.path.segment(0).equals(projectName)) {
 						newPath = this.path.removeFirstSegments(1);
 					}
 					return Messages.bind(Messages.classpath_disabledInclusionExclusionPatterns, new String[] {newPath.makeRelative().toString(), projectName});
@@ -365,7 +365,7 @@ public class JavaModelStatus extends Status implements IJavaModelStatus, IJavaMo
 					javaProject = (IJavaProject)this.elements[0];
 					projectName = javaProject.getElementName();
 					newPath = this.path;
-					if (this.path.segment(0).toString().equals(projectName)) {
+					if (this.path.segment(0).equals(projectName)) {
 						newPath = this.path.removeFirstSegments(1);
 					}
 					return Messages.bind(Messages.classpath_disabledMultipleOutputLocations, new String[] {newPath.makeRelative().toString(), projectName});
@@ -399,12 +399,12 @@ public class JavaModelStatus extends Status implements IJavaModelStatus, IJavaMo
 
 				case DEPRECATED_VARIABLE :
 					javaProject = (IJavaProject)this.elements[0];
-					return Messages.bind(Messages.classpath_deprecated_variable, new String[] {this.path.segment(0).toString(), javaProject.getElementName(), this.string});
+					return Messages.bind(Messages.classpath_deprecated_variable, new String[] {this.path.segment(0), javaProject.getElementName(), this.string});
 				case TEST_SOURCE_REQUIRES_SEPARATE_OUTPUT_LOCATION:
 					javaProject = (IJavaProject)this.elements[0];
 					projectName = javaProject.getElementName();
 					newPath = this.path;
-					if (this.path.segment(0).toString().equals(projectName)) {
+					if (this.path.segment(0).equals(projectName)) {
 						newPath = this.path.removeFirstSegments(1);
 					}
 					return Messages.bind(Messages.classpath_testSourceRequiresSeparateOutputFolder, new String[] {newPath.makeRelative().toString(), projectName});
@@ -412,7 +412,7 @@ public class JavaModelStatus extends Status implements IJavaModelStatus, IJavaMo
 					javaProject = (IJavaProject)this.elements[0];
 					projectName = javaProject.getElementName();
 					newPath = this.path;
-					if (this.path.segment(0).toString().equals(projectName)) {
+					if (this.path.segment(0).equals(projectName)) {
 						newPath = this.path.removeFirstSegments(1);
 					}
 					return Messages.bind(Messages.classpath_testOutputFolderMustBeSeparateFromMainOutputFolders, new String[] {newPath.makeRelative().toString(), projectName});

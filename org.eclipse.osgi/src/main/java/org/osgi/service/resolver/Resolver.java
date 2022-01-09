@@ -126,7 +126,7 @@ public interface Resolver {
 	 *         created then a ResolutionException is thrown.
 	 * @throws ResolutionException if the dynamic requirement cannot be resolved
 	 */
-	public Map<Resource,List<Wire>> resolveDynamic(ResolveContext context,
-			Wiring hostWiring, Requirement dynamicRequirement)
+    Map<Resource,List<Wire>> resolveDynamic(ResolveContext context,
+                                            Wiring hostWiring, Requirement dynamicRequirement)
 			throws ResolutionException;
 }

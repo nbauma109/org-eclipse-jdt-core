@@ -519,9 +519,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 			return false;
 		if ((kind & K_MASK) == commentKind)
 			return true;
-		if (kind == K_UNKNOWN && DefaultCodeFormatterConstants.TRUE.equals(this.oldCommentFormatOption))
-			return true;
-		return false;
+		return kind == K_UNKNOWN && DefaultCodeFormatterConstants.TRUE.equals(this.oldCommentFormatOption);
 	}
 
 	@Override

@@ -309,10 +309,8 @@ public final class PluginVersionIdentifier {
 			return true;
 		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent()) && (getServiceComponent() > id.getServiceComponent()))
 			return true;
-		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent()) && (getServiceComponent() == id.getServiceComponent()) && (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0))
-			return true;
-		return false;
-	}
+        return (getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent()) && (getServiceComponent() == id.getServiceComponent()) && (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0);
+    }
 
 	/**
 	 * Compares two version identifiers for compatibility.
@@ -346,10 +344,8 @@ public final class PluginVersionIdentifier {
 			return true;
 		if (getServiceComponent() < id.getServiceComponent())
 			return false;
-		if (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0)
-			return true;
-		return false;
-	}
+        return getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0;
+    }
 
 	/**
 	 * Compares two version identifiers for equivalency.
@@ -379,10 +375,8 @@ public final class PluginVersionIdentifier {
 			return true;
 		if (getServiceComponent() < id.getServiceComponent())
 			return false;
-		if (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0)
-			return true;
-		return false;
-	}
+        return getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0;
+    }
 
 	/**
 	 * Compares two version identifiers for perfect equality.
@@ -400,10 +394,8 @@ public final class PluginVersionIdentifier {
 	public boolean isPerfect(PluginVersionIdentifier id) {
 		if (id == null)
 			return false;
-		if ((getMajorComponent() != id.getMajorComponent()) || (getMinorComponent() != id.getMinorComponent()) || (getServiceComponent() != id.getServiceComponent()) || (!getQualifierComponent().equals(id.getQualifierComponent())))
-			return false;
-		return true;
-	}
+        return (getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent()) && (getServiceComponent() == id.getServiceComponent()) && (getQualifierComponent().equals(id.getQualifierComponent()));
+    }
 
 	/**
 	 * Compares two version identifiers for order using multi-decimal
@@ -417,10 +409,9 @@ public final class PluginVersionIdentifier {
 	public boolean isGreaterThan(PluginVersionIdentifier id) {
 
 		if (id == null) {
-			if (getMajorComponent() == 0 && getMinorComponent() == 0 && getServiceComponent() == 0 && getQualifierComponent().equals("")) //$NON-NLS-1$
-				return false;
-			return true;
-		}
+            //$NON-NLS-1$
+            return getMajorComponent() != 0 || getMinorComponent() != 0 || getServiceComponent() != 0 || !getQualifierComponent().equals("");
+        }
 
 		if (getMajorComponent() > id.getMajorComponent())
 			return true;
@@ -434,11 +425,9 @@ public final class PluginVersionIdentifier {
 			return true;
 		if (getServiceComponent() < id.getServiceComponent())
 			return false;
-		if (getQualifierComponent().compareTo(id.getQualifierComponent()) > 0)
-			return true;
-		return false;
+        return getQualifierComponent().compareTo(id.getQualifierComponent()) > 0;
 
-	}
+    }
 
 	/**
 	 * Returns the string representation of this version identifier. 

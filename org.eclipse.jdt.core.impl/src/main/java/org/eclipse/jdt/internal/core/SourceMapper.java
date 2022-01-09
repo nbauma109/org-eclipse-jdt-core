@@ -138,12 +138,9 @@ public class SourceMapper
 			} else if (!this.name.equals(other.name))
 				return false;
 			if (this.parent == null) {
-				if (other.parent != null)
-					return false;
-			} else if (!this.parent.equals(other.parent))
-				return false;
-			return true;
-		}
+                return other.parent == null;
+			} else return this.parent.equals(other.parent);
+        }
 		@Override
 		public String toString() {
 			StringBuffer buffer = new StringBuffer();
@@ -712,7 +709,7 @@ public class SourceMapper
 			System.out.println("Found " + size + " root paths");	//$NON-NLS-1$ //$NON-NLS-2$
 			int i = 0;
 			for (Iterator iterator = this.rootPaths.iterator(); iterator.hasNext();) {
-				System.out.println("root[" + i + "]=" + ((String) iterator.next()));//$NON-NLS-1$ //$NON-NLS-2$
+				System.out.println("root[" + i + "]=" + iterator.next());//$NON-NLS-1$ //$NON-NLS-2$
 				i++;
 			}
 		}
@@ -1349,11 +1346,7 @@ public class SourceMapper
 			}
 		}
 		char[][] parameters = (char[][]) this.parameterNames.get(method);
-		if (parameters == null) {
-			return null;
-		} else {
-			return parameters;
-		}
+        return parameters;
 	}
 
 	/**
@@ -1419,7 +1412,7 @@ public class SourceMapper
 			int lastDollar = classFileName.lastIndexOf('$');
 			for (int i = 0; i <= lastDollar; i++)
 				newClassFileName.append(classFileName.charAt(i));
-			newClassFileName.append(Integer.toString(this.anonymousCounter));
+			newClassFileName.append(this.anonymousCounter);
 			PackageFragment pkg = (PackageFragment) classFile.getParent();
 			return new BinaryType(new ClassFile(pkg, newClassFileName.toString()), typeName);
 		} else if (type.getElementName().equals(typeName))
@@ -1537,7 +1530,7 @@ public class SourceMapper
 				return length;
 			default :
 				// primitive type or wildcard
-				unqualifiedTypeSig.append(qualifiedTypeSig.substring(start, end));
+				unqualifiedTypeSig.append(qualifiedTypeSig, start, end);
 				return end;
 		}
 	}
@@ -1604,7 +1597,7 @@ public class SourceMapper
 				char[] fullName = info.getName();
 				if (isAnonymousClass) {
 					String eltName = this.binaryTypeOrModule.getParent().getElementName();
-					eltName = eltName.substring(eltName.lastIndexOf('$') + 1, eltName.length());
+					eltName = eltName.substring(eltName.lastIndexOf('$') + 1);
 					try {
 						this.anonymousClassName = Integer.parseInt(eltName);
 					} catch(NumberFormatException e) {

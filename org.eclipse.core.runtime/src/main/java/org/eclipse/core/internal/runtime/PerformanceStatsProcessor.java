@@ -114,18 +114,18 @@ public class PerformanceStatsProcessor extends Job {
 			int runCount = stats.getRunCount();
 			if (runCount > 0) {
 				out.print("Run count: "); //$NON-NLS-1$
-				out.print(Integer.toString(runCount));
+				out.print(runCount);
 				out.print(" ("); //$NON-NLS-1$
-				out.print(Integer.toString((int) (runCount * 100.0 / totalCount)));
+				out.print((int) (runCount * 100.0 / totalCount));
 				out.println(" % of total)"); //$NON-NLS-1$
 			}
 
 			long runTime = stats.getRunningTime();
 			if (runTime > 0) {
 				out.print("Duration (ms): "); //$NON-NLS-1$
-				out.print(Long.toString(runTime));
+				out.print(runTime);
 				out.print(" ("); //$NON-NLS-1$
-				out.print(Integer.toString((int) (runTime * 100.0 / totalTime)));
+				out.print((int) (runTime * 100.0 / totalTime));
 				out.println(" % of total)"); //$NON-NLS-1$
 			}
 			out.println(""); //$NON-NLS-1$

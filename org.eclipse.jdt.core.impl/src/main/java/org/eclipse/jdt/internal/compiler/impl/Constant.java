@@ -491,7 +491,7 @@ public abstract class Constant implements TypeIds, OperatorIds {
 				if (rightId == T_JavaLangString) {
 					//String are interned in th compiler==>thus if two string constant
 					//get to be compared, it is an equal on the vale which is done
-					return BooleanConstant.fromValue(((StringConstant)left).hasSameValue(right));
+					return BooleanConstant.fromValue(left.hasSameValue(right));
 				}
 				break;
 			case T_null :
@@ -1202,13 +1202,13 @@ public abstract class Constant implements TypeIds, OperatorIds {
 				break;
 			case T_JavaLangString :
 				switch (rightId){
-					case T_char :	return StringConstant.fromValue(left.stringValue() + String.valueOf(right.charValue()));
-					case T_float:	return StringConstant.fromValue(left.stringValue() + String.valueOf(right.floatValue()));
-					case T_double:	return StringConstant.fromValue(left.stringValue() + String.valueOf(right.doubleValue()));
+					case T_char :	return StringConstant.fromValue(left.stringValue() + right.charValue());
+					case T_float:	return StringConstant.fromValue(left.stringValue() + right.floatValue());
+					case T_double:	return StringConstant.fromValue(left.stringValue() + right.doubleValue());
 					case T_byte:	return StringConstant.fromValue(left.stringValue() + String.valueOf(right.byteValue()));
 					case T_short:	return StringConstant.fromValue(left.stringValue() + String.valueOf(right.shortValue()));
-					case T_int:		return StringConstant.fromValue(left.stringValue() + String.valueOf(right.intValue()));
-					case T_long:	return StringConstant.fromValue(left.stringValue() + String.valueOf(right.longValue()));
+					case T_int:		return StringConstant.fromValue(left.stringValue() + right.intValue());
+					case T_long:	return StringConstant.fromValue(left.stringValue() + right.longValue());
 					case T_JavaLangString:	return StringConstant.fromValue(left.stringValue() + right.stringValue());
 					case T_boolean:	return StringConstant.fromValue(left.stringValue() + right.booleanValue());
 				}

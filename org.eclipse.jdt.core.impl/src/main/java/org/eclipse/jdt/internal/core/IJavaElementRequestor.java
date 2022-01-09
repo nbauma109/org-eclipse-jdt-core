@@ -28,13 +28,13 @@ import org.eclipse.jdt.core.IType;
  * <code>true</code> to <code>#isCancelled</code>.
  */
 public interface IJavaElementRequestor {
-public void acceptField(IField field);
-public void acceptInitializer(IInitializer initializer);
-public void acceptMemberType(IType type);
-public void acceptMethod(IMethod method);
-public void acceptPackageFragment(IPackageFragment packageFragment);
-public void acceptType(IType type);
-public void acceptModule(IModuleDescription module);
+void acceptField(IField field);
+void acceptInitializer(IInitializer initializer);
+void acceptMemberType(IType type);
+void acceptMethod(IMethod method);
+void acceptPackageFragment(IPackageFragment packageFragment);
+void acceptType(IType type);
+void acceptModule(IModuleDescription module);
 /**
  * Returns <code>true</code> if this IJavaElementRequestor does
  * not want to receive any more results.

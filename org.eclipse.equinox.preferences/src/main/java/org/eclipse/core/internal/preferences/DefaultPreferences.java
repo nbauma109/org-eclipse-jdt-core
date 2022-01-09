@@ -131,7 +131,7 @@ public class DefaultPreferences extends EclipsePreferences {
 			int firstIndex = fullKey.indexOf(PATH_SEPARATOR);
 			if (id == null && firstIndex > 0) {
 				localQualifier = fullKey.substring(0, firstIndex);
-				fullPath = fullKey.substring(firstIndex, fullKey.length());
+				fullPath = fullKey.substring(firstIndex);
 			}
 			String[] splitPath = decodePath(fullPath);
 			String childPath = splitPath[0];
@@ -141,7 +141,7 @@ public class DefaultPreferences extends EclipsePreferences {
 				value = translatePreference(value, translations);
 				if (EclipsePreferences.DEBUG_PREFERENCE_SET)
 					PrefsMessages.message("Setting default preference: " + (new Path(absolutePath()).append(childPath).append(key)) + '=' + value); //$NON-NLS-1$
-				((EclipsePreferences) internalNode(childPath.toString(), false, null)).internalPut(key, value);
+				((EclipsePreferences) internalNode(childPath, false, null)).internalPut(key, value);
 			}
 		}
 	}

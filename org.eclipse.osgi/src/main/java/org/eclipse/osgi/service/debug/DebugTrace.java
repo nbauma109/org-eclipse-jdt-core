@@ -50,7 +50,7 @@ public interface DebugTrace {
 	 * trace statement is printed (e.g., "/debug/myComponent"), or <code>null</code>
 	 * @param message The trace message to display
 	 */
-	public void trace(final String option, final String message);
+    void trace(final String option, final String message);
 
 	/**
 	 * Traces a message and exception for the specified option.
@@ -60,7 +60,7 @@ public interface DebugTrace {
 	 * @param message The trace message to display
 	 * @param error The exception to trace
 	 */
-	public void trace(final String option, final String message, final Throwable error);
+    void trace(final String option, final String message, final Throwable error);
 
 	/**
 	 * Adds a trace message showing a thread stack dump for the current class and
@@ -69,7 +69,7 @@ public interface DebugTrace {
 	 * @param option The name of the boolean option that will control whether the
 	 * trace statement is printed (e.g., "/debug/myComponent"), or <code>null</code>
 	 */
-	public void traceDumpStack(final String option);
+    void traceDumpStack(final String option);
 
 	/**
 	 * Add a trace message level stating that a method is being executed for the specified option.
@@ -77,7 +77,7 @@ public interface DebugTrace {
 	 * @param option The name of the boolean option that will control whether the
 	 * trace statement is printed (e.g., "/debug/myComponent"), or <code>null</code>
 	 */
-	public void traceEntry(final String option);
+    void traceEntry(final String option);
 
 	/**
 	 * Add a trace message level stating that a method with the specified argument
@@ -89,7 +89,7 @@ public interface DebugTrace {
 	 * @param methodArgument
 	 *            The single argument for the method being executed
 	 */
-	public void traceEntry(final String option, final Object methodArgument);
+    void traceEntry(final String option, final Object methodArgument);
 
 	/**
 	 * Add a trace message level stating that a method with the specified arguments
@@ -101,7 +101,7 @@ public interface DebugTrace {
 	 * @param methodArguments
 	 *            A list of object arguments for the method being executed
 	 */
-	public void traceEntry(final String option, final Object[] methodArguments);
+    void traceEntry(final String option, final Object[] methodArguments);
 
 	/**
 	 * Add a trace message level stating that a method has completed execution for the specified option.
@@ -109,7 +109,7 @@ public interface DebugTrace {
 	 * @param option The name of the boolean option that will control whether the
 	 * trace statement is printed (e.g., "/debug/myComponent"), or <code>null</code>
 	 */
-	public void traceExit(final String option);
+    void traceExit(final String option);
 
 	/**
 	 * Add a trace message level stating that a method with the specified result value
@@ -120,5 +120,5 @@ public interface DebugTrace {
 	 * trace statement is printed (e.g., "/debug/myComponent"), or <code>null</code>
 	 * @param result The result being returned from the method that was executed
 	 */
-	public void traceExit(final String option, final Object result);
+    void traceExit(final String option, final Object result);
 }

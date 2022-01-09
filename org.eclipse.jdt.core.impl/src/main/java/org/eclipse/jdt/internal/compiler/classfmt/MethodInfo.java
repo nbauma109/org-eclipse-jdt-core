@@ -41,7 +41,7 @@ public class MethodInfo extends ClassFileStruct implements IBinaryMethod, Compar
 	protected volatile char[][] argumentNames;
 	protected long version;
 
-public static MethodInfo createMethod(byte classFileBytes[], int offsets[], int offset, long version) {
+public static MethodInfo createMethod(byte[] classFileBytes, int[] offsets, int offset, long version) {
 	MethodInfo methodInfo = new MethodInfo(classFileBytes, offsets, offset, version);
 	int attributesCount = methodInfo.u2At(6);
 	int readOffset = 8;
@@ -223,7 +223,7 @@ static AnnotationInfo[][] decodeParamAnnotations(int offset, boolean runtimeVisi
  * @param offset int
  * @param version class file version
  */
-protected MethodInfo (byte classFileBytes[], int offsets[], int offset, long version) {
+protected MethodInfo (byte[] classFileBytes, int[] offsets, int offset, long version) {
 	super(classFileBytes, offsets, offset);
 	this.accessFlags = -1;
 	this.signatureUtf8Offset = -1;

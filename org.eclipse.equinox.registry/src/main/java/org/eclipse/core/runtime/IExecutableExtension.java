@@ -119,5 +119,5 @@ public interface IExecutableExtension {
 	 * @exception CoreException if error(s) detected during initialization processing
 	 * @see IConfigurationElement#createExecutableExtension(String)
 	 */
-	public void setInitializationData(IConfigurationElement config, String propertyName, Object data) throws CoreException;
+    void setInitializationData(IConfigurationElement config, String propertyName, Object data) throws CoreException;
 }

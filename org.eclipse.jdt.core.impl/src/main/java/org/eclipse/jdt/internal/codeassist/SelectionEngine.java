@@ -995,13 +995,13 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 			if (parsedUnit != null) {
 				if(DEBUG) {
 					System.out.println("SELECTION - Diet AST :"); //$NON-NLS-1$
-					System.out.println(parsedUnit.toString());
+					System.out.println(parsedUnit);
 				}
 
 				// scan the package & import statements first
 				if (parsedUnit.currentPackage instanceof SelectionOnPackageReference) {
 					char[][] tokens =
-						((SelectionOnPackageReference) parsedUnit.currentPackage).tokens;
+						parsedUnit.currentPackage.tokens;
 					this.noProposal = false;
 					this.requestor.acceptPackage(CharOperation.concatWith(tokens, '.'));
 					return;
@@ -1011,7 +1011,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 					for (int i = 0, length = imports.length; i < length; i++) {
 						ImportReference importReference = imports[i];
 						if (importReference instanceof SelectionOnImportReference) {
-							char[][] tokens = ((SelectionOnImportReference) importReference).tokens;
+							char[][] tokens = importReference.tokens;
 							this.noProposal = false;
 							this.requestor.acceptPackage(CharOperation.concatWith(tokens, '.'));
 							this.nameEnvironment.findTypes(CharOperation.concatWith(tokens, '.'), false, false, IJavaSearchConstants.TYPE, this);
@@ -1080,7 +1080,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 								node = parseBlockStatements(parsedUnit, selectionSourceStart);
 							if(DEBUG) {
 								System.out.println("SELECTION - AST :"); //$NON-NLS-1$
-								System.out.println(parsedUnit.toString());
+								System.out.println(parsedUnit);
 							}
 							parsedUnit.resolve();
 							if (node != null) {
@@ -1132,7 +1132,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 			for (PackageVisibilityStatement pv : pvs) {
 				if (pv.pkgRef instanceof SelectionOnPackageVisibilityReference) {
 					this.noProposal = false;
-					this.requestor.acceptPackage(CharOperation.concatWith(((SelectionOnPackageVisibilityReference) pv.pkgRef).tokens, '.'));
+					this.requestor.acceptPackage(CharOperation.concatWith(pv.pkgRef.tokens, '.'));
 				}
 			}
 		}
@@ -1543,7 +1543,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 		if (node instanceof AbstractMethodDeclaration) {
 			((AbstractMethodDeclaration)node).traverse(new Visitor(), (ClassScope)null);
 		} else {
-			((FieldDeclaration)node).traverse(new Visitor(), (MethodScope)null);
+			((FieldDeclaration)node).traverse(new Visitor(), null);
 		}
 	}
 
@@ -1592,7 +1592,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				if (parsedUnit != null && parsedUnit.types != null) {
 					if(DEBUG) {
 						System.out.println("SELECTION - Diet AST :"); //$NON-NLS-1$
-						System.out.println(parsedUnit.toString());
+						System.out.println(parsedUnit);
 					}
 					// find the type declaration that corresponds to the original source type
 					while (context.isLambda() && context.getParent() != null) {
@@ -1899,8 +1899,8 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				MethodBinding overridden =  findOverriddenMethodInType(currType, method);
 				if (overridden == null)
 					return InheritDocVisitor.CONTINUE;
-				TypeBinding args[] = overridden.parameters;
-				String names[] = new String[args.length];
+				TypeBinding[] args = overridden.parameters;
+				String[] names = new String[args.length];
 				for (int i = 0; i < args.length; i++) {
 					names[i] = Signature.createTypeSignature(args[i].sourceName(), false);
 				}

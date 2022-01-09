@@ -25,6 +25,6 @@ public interface AuthorizationListener extends EventListener {
 	/**
 	 * Called when an AuthorizationEvent has occurred
 	 */
-	public void authorizationEvent(AuthorizationEvent event);
+    void authorizationEvent(AuthorizationEvent event);
 
 }

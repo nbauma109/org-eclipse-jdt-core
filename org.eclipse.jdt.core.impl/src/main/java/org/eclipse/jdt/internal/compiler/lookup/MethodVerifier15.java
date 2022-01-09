@@ -62,9 +62,7 @@ MethodVerifier15(LookupEnvironment environment) {
 protected boolean canOverridingMethodDifferInErasure(MethodBinding overridingMethod, MethodBinding inheritedMethod) {
 	if (overridingMethod.areParameterErasuresEqual(inheritedMethod))
 		return false;  // no further change in signature is possible due to parameterization.
-	if (overridingMethod.declaringClass.isRawType())
-		return false;  // no parameterization is happening anyways.
-	return true;
+    return !overridingMethod.declaringClass.isRawType();  // no parameterization is happening anyways.
 }
 @Override
 boolean canSkipInheritedMethods() {
@@ -861,8 +859,7 @@ boolean detectNameClash(MethodBinding current, MethodBinding inherited, boolean 
 		return false;
 	original = inherited.original();  // For error reporting use, inherited.original()
 	problemReporter(current).methodNameClash(current, inherited.declaringClass.isRawType() ? inherited : original, severity);
-	if (severity == ProblemSeverities.Warning) return false;
-	return true;
+    return severity != ProblemSeverities.Warning;
 }
 boolean doTypeVariablesClash(MethodBinding one, MethodBinding substituteTwo) {
 	// one has type variables and substituteTwo did not pass bounds check in computeSubstituteMethod()
@@ -957,8 +954,7 @@ boolean isAcceptableReturnTypeOverride(MethodBinding currentMethod, MethodBindin
 	   		//$FALL-THROUGH$
 		default :
 			if (originalInheritedReturnType.isTypeVariable())
-				if (((TypeVariableBinding) originalInheritedReturnType).declaringElement == originalInherited)
-					return false;
+                return ((TypeVariableBinding) originalInheritedReturnType).declaringElement != originalInherited;
 			return true;
 	}
 }
@@ -999,12 +995,9 @@ boolean isUnsafeReturnTypeOverride(MethodBinding currentMethod, MethodBinding in
 			if (!areTypesEqual(currentParams[i], inheritedParams[i]))
 				return true;
 	}
-	if (currentMethod.typeVariables == Binding.NO_TYPE_VARIABLES
-		&& inheritedMethod.original().typeVariables != Binding.NO_TYPE_VARIABLES
-		&& currentMethod.returnType.erasure().findSuperTypeOriginatingFrom(inheritedMethod.returnType.erasure()) != null) {
-			return true;
-	}
-	return false;
+    return currentMethod.typeVariables == Binding.NO_TYPE_VARIABLES
+            && inheritedMethod.original().typeVariables != Binding.NO_TYPE_VARIABLES
+            && currentMethod.returnType.erasure().findSuperTypeOriginatingFrom(inheritedMethod.returnType.erasure()) != null;
 }
 @Override
 boolean reportIncompatibleReturnTypeError(MethodBinding currentMethod, MethodBinding inheritedMethod) {

@@ -83,12 +83,9 @@ public class ModuleFinder {
 			String[] list = file.list(new FilenameFilter() {
 				@Override
 				public boolean accept(File dir, String name) {
-					if (dir == file && (name.equalsIgnoreCase(IModule.MODULE_INFO_CLASS)
-							|| name.equalsIgnoreCase(IModule.MODULE_INFO_JAVA))) {
-						return true;
-					}
-					return false;
-				}
+                    return dir == file && (name.equalsIgnoreCase(IModule.MODULE_INFO_CLASS)
+                            || name.equalsIgnoreCase(IModule.MODULE_INFO_JAVA));
+                }
 			});
 			if (list.length > 0) {
 				String fileName = list[0];

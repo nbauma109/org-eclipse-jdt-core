@@ -1338,12 +1338,12 @@ protected void verifyDuplicationAndOrder(int length, TypeBinding[] argumentTypes
 @Override
 public boolean doesNotCompleteNormally() {
 	if (!this.tryBlock.doesNotCompleteNormally()) {
-		return (this.finallyBlock != null) ? this.finallyBlock.doesNotCompleteNormally() : false;
+		return this.finallyBlock != null && this.finallyBlock.doesNotCompleteNormally();
 	}
 	if (this.catchBlocks != null) {
 		for (int i = 0; i < this.catchBlocks.length; i++) {
 			if (!this.catchBlocks[i].doesNotCompleteNormally()) {
-				return (this.finallyBlock != null) ? this.finallyBlock.doesNotCompleteNormally() : false;
+				return this.finallyBlock != null && this.finallyBlock.doesNotCompleteNormally();
 			}
 		}
 	}
@@ -1352,14 +1352,12 @@ public boolean doesNotCompleteNormally() {
 @Override
 public boolean completesByContinue() {
 	if (this.tryBlock.completesByContinue()) {
-		return (this.finallyBlock == null) ? true :
-			!this.finallyBlock.doesNotCompleteNormally() || this.finallyBlock.completesByContinue();
+		return this.finallyBlock == null || !this.finallyBlock.doesNotCompleteNormally() || this.finallyBlock.completesByContinue();
 	}
 	if (this.catchBlocks != null) {
 		for (int i = 0; i < this.catchBlocks.length; i++) {
 			if (this.catchBlocks[i].completesByContinue()) {
-				return (this.finallyBlock == null) ? true :
-					!this.finallyBlock.doesNotCompleteNormally() || this.finallyBlock.completesByContinue();
+				return this.finallyBlock == null || !this.finallyBlock.doesNotCompleteNormally() || this.finallyBlock.completesByContinue();
 			}
 		}
 	}
@@ -1368,12 +1366,12 @@ public boolean completesByContinue() {
 @Override
 public boolean canCompleteNormally() {
 	if (this.tryBlock.canCompleteNormally()) {
-		return (this.finallyBlock != null) ? this.finallyBlock.canCompleteNormally() : true;
+		return this.finallyBlock == null || this.finallyBlock.canCompleteNormally();
 	}
 	if (this.catchBlocks != null) {
 		for (int i = 0; i < this.catchBlocks.length; i++) {
 			if (this.catchBlocks[i].canCompleteNormally()) {
-				return (this.finallyBlock != null) ? this.finallyBlock.canCompleteNormally() : true;
+				return this.finallyBlock == null || this.finallyBlock.canCompleteNormally();
 			}
 		}
 	}
@@ -1382,14 +1380,12 @@ public boolean canCompleteNormally() {
 @Override
 public boolean continueCompletes() {
 	if (this.tryBlock.continueCompletes()) {
-		return (this.finallyBlock == null) ? true :
-			this.finallyBlock.canCompleteNormally() || this.finallyBlock.continueCompletes();
+		return this.finallyBlock == null || this.finallyBlock.canCompleteNormally() || this.finallyBlock.continueCompletes();
 	}
 	if (this.catchBlocks != null) {
 		for (int i = 0; i < this.catchBlocks.length; i++) {
 			if (this.catchBlocks[i].continueCompletes()) {
-				return (this.finallyBlock == null) ? true :
-					this.finallyBlock.canCompleteNormally() || this.finallyBlock.continueCompletes();
+				return this.finallyBlock == null || this.finallyBlock.canCompleteNormally() || this.finallyBlock.continueCompletes();
 			}
 		}
 	}

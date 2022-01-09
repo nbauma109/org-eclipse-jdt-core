@@ -732,7 +732,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 //	   When this procedure is entered, distance, misspell_index and
 //	   repair_code are assumed to be initialized.
 //
-	private PrimaryRepairInfo checkPrimaryDistance(int stck[], int stack_top, PrimaryRepairInfo repair) {
+	private PrimaryRepairInfo checkPrimaryDistance(int[] stck, int stack_top, PrimaryRepairInfo repair) {
 		int i, j, k, next_state, max_pos, act, root, symbol, tok;
 
 		//
@@ -1064,7 +1064,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 //	   the name index of the highest level nonterminal that can
 //	   directly or indirectly produce the candidate.
 //
-	private int getTermIndex(int stck[], int stack_top, int tok, int buffer_position) {
+	private int getTermIndex(int[] stck, int stack_top, int tok, int buffer_position) {
 		//
 		// Initialize stack index of temp_stack and initialize maximum
 		// position of state stack that is still useful.
@@ -1328,7 +1328,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 		return(count * 10 / ((n < len ? len : n) + num_errors));
 	}
 
-	private PrimaryRepairInfo scopeTrial(int stck[], int stack_top, PrimaryRepairInfo repair) {
+	private PrimaryRepairInfo scopeTrial(int[] stck, int stack_top, PrimaryRepairInfo repair) {
 	    this.stateSeen = new int[this.stackLength];
 	    for (int i = 0; i < this.stackLength; i++)
 	        this.stateSeen[i] = NIL;
@@ -1347,7 +1347,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 	    return repair;
 	}
 
-	private void scopeTrialCheck(int stck[], int stack_top, PrimaryRepairInfo repair, int indx) {
+	private void scopeTrialCheck(int[] stck, int stack_top, PrimaryRepairInfo repair, int indx) {
 		if(indx > 20) return; // avoid too much recursive call to improve performance
 
 		int act = stck[stack_top];
@@ -1516,7 +1516,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 //	   simple insertion or substitution of a nonterminal are tried
 //	   in CHECK_PRIMARY_DISTANCE as part of primary recovery.
 //
-	private boolean secondaryCheck(int stck[], int stack_top, int buffer_position, int distance) {
+	private boolean secondaryCheck(int[] stck, int stack_top, int buffer_position, int distance) {
 		int top, j;
 
 		for (top = stack_top - 1; top >= 0; top--) {
@@ -1531,10 +1531,8 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 	    repair.bufferPosition = buffer_position + 1;
 	    repair.distance = distance;
 	    repair = scopeTrial(stck, stack_top, repair);
-	    if ((repair.distance - buffer_position) > MIN_DISTANCE && repair.distance > distance)
-	         return true;
-		return false;
-	}
+        return (repair.distance - buffer_position) > MIN_DISTANCE && repair.distance > distance;
+    }
 
 
 //
@@ -1781,7 +1779,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 //	   configuration yields a better misplacement recovery than
 //	   the best misplacement recovery computed previously.
 //
-	private SecondaryRepairInfo misplacementRecovery(int stck[], int stack_top, int last_index, SecondaryRepairInfo repair, boolean stack_flag) {
+	private SecondaryRepairInfo misplacementRecovery(int[] stck, int stack_top, int last_index, SecondaryRepairInfo repair, boolean stack_flag) {
 		int  previous_loc = this.buffer[2];
 		int stack_deletions = 0;
 
@@ -1812,7 +1810,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 //	   configuration yields a better secondary recovery than the
 //	   best misplacement recovery computed previously.
 //
-	private SecondaryRepairInfo secondaryRecovery(int stck[],int stack_top, int last_index, SecondaryRepairInfo repair, boolean stack_flag) {
+	private SecondaryRepairInfo secondaryRecovery(int[] stck, int stack_top, int last_index, SecondaryRepairInfo repair, boolean stack_flag) {
 		int previous_loc;
 		int stack_deletions = 0;
 
@@ -1928,7 +1926,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 //	   been consumed, or an error is encountered. Return the number
 //	   of tokens that were expended before the parse blocked.
 //
-	private int parseCheck(int stck[], int stack_top, int first_token, int buffer_position) {
+	private int parseCheck(int[] stck, int stack_top, int first_token, int buffer_position) {
 		int max_pos;
 		int indx;
 		int ct;

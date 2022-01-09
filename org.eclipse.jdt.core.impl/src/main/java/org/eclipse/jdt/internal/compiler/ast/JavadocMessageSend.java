@@ -82,7 +82,7 @@ public class JavadocMessageSend extends MessageSend {
 		}
 		this.actualReceiverType = scope.environment().convertToRawType(this.receiver.resolvedType, true /*force the conversion of enclosing types*/);
 		ReferenceBinding enclosingType = scope.enclosingReceiverType();
-		if (enclosingType==null ? false : enclosingType.isCompatibleWith(this.actualReceiverType)) {
+		if (enclosingType != null && enclosingType.isCompatibleWith(this.actualReceiverType)) {
 			this.bits |= ASTNode.SuperAccess;
 		}
 

@@ -35,5 +35,5 @@ public interface IStateListener {
 	 * @param oldValue
 	 *            The old value; may be anything.
 	 */
-	public void handleStateChange(State state, Object oldValue);
+    void handleStateChange(State state, Object oldValue);
 }

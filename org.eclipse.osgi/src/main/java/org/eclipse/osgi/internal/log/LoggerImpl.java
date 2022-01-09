@@ -294,7 +294,7 @@ public class LoggerImpl implements Logger {
 		StackTraceElement location = getLocation();
 		Arguments processedArguments = new Arguments(arguments);
 		String message = processedArguments.isEmpty() ? format : formatMessage(format, processedArguments);
-		logServiceImpl.getFactory().log(logServiceImpl.getBundle(), name, location, processedArguments.serviceReference(), level, level.ordinal(), message.toString(), processedArguments.serviceReference(), processedArguments.throwable());
+		logServiceImpl.getFactory().log(logServiceImpl.getBundle(), name, location, processedArguments.serviceReference(), level, level.ordinal(), message, processedArguments.serviceReference(), processedArguments.throwable());
 	}
 
 	private StackTraceElement getLocation() {

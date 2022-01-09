@@ -302,9 +302,7 @@ final class ModuleResolver {
 					return true;
 				}
 				Object resolution = requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
-				if (!PackageNamespace.RESOLUTION_DYNAMIC.equals(resolution)) {
-					return true;
-				}
+                return !PackageNamespace.RESOLUTION_DYNAMIC.equals(resolution);
 			}
 			return false;
 		});

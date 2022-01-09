@@ -255,7 +255,7 @@ public class AppCommands implements CommandProvider {
 			String arg = null;
 			while ((arg = intp.nextArgument()) != null)
 				argList.add(arg);
-			String[] args = argList.size() == 0 ? null : (String[]) argList.toArray(new String[argList.size()]);
+			String[] args = argList.size() == 0 ? null : argList.toArray(new String[argList.size()]);
 			try {
 				HashMap<String, Object> launchArgs = new HashMap<>(1);
 				if (args != null)

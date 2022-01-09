@@ -138,7 +138,7 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 			if (wrapped == root) {
 				return "/"; //$NON-NLS-1$
 			}
-			return wrapped.absolutePath().substring(root.absolutePath().length(), wrapped.absolutePath().length());
+			return wrapped.absolutePath().substring(root.absolutePath().length());
 		}
 
 		@Override

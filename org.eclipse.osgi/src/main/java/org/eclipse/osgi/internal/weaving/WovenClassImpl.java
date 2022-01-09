@@ -211,10 +211,8 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 			return false;
 		if ((checkBytes[2] & 0xBA) != 0xBA)
 			return false;
-		if ((checkBytes[3] & 0xBE) != 0xBE)
-			return false;
-		return true;
-	}
+        return (checkBytes[3] & 0xBE) == 0xBE;
+    }
 
 	private void notifyWovenClassListeners() {
 		final HookContext<WovenClassListener> context = (hook, hookRegistration) -> {
@@ -254,7 +252,7 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 						return null;
 					});
 				} catch (PrivilegedActionException e) {
-					throw (RuntimeException) e.getException();
+					throw e.getException();
 				}
 			}
 		} finally {

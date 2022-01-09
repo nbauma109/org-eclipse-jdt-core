@@ -36,7 +36,7 @@ public interface IExecutionListener {
 	 * @param exception
 	 *            The exception that occurred; never <code>null</code>.
 	 */
-	public void notHandled(String commandId, NotHandledException exception);
+    void notHandled(String commandId, NotHandledException exception);
 
 	/**
 	 * Notifies the listener that a command has failed to complete execution.
@@ -47,8 +47,8 @@ public interface IExecutionListener {
 	 * @param exception
 	 *            The exception that occurred; never <code>null</code>.
 	 */
-	public void postExecuteFailure(String commandId,
-			ExecutionException exception);
+    void postExecuteFailure(String commandId,
+                            ExecutionException exception);
 
 	/**
 	 * Notifies the listener that a command has completed execution
@@ -60,7 +60,7 @@ public interface IExecutionListener {
 	 * @param returnValue
 	 *            The return value from the command; may be <code>null</code>.
 	 */
-	public void postExecuteSuccess(String commandId, Object returnValue);
+    void postExecuteSuccess(String commandId, Object returnValue);
 
 	/**
 	 * Notifies the listener that a command is about to execute.
@@ -72,5 +72,5 @@ public interface IExecutionListener {
 	 *            The event that will be passed to the <code>execute</code>
 	 *            method; never <code>null</code>.
 	 */
-	public void preExecute(String commandId, ExecutionEvent event);
+    void preExecute(String commandId, ExecutionEvent event);
 }

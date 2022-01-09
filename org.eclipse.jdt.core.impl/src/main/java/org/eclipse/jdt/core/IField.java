@@ -37,7 +37,7 @@ public interface IField extends IMember, IAnnotatable {
  * @exception JavaModelException if this element does not exist or if an
  *      exception occurs while accessing its corresponding resource
  */
-public Object getConstant() throws JavaModelException;
+Object getConstant() throws JavaModelException;
 /**
  * Returns the simple name of this field.
  * @return the simple name of this field.

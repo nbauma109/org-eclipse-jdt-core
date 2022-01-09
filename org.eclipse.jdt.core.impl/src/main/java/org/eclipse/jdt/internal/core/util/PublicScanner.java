@@ -65,7 +65,7 @@ public class PublicScanner implements IScanner, ITerminalSymbols {
 
 	//source should be viewed as a window (aka a part)
 	//of a entire very large stream
-	public char source[];
+	public char[] source;
 
 	//unicode support
 	public char[] withoutUnicodeBuffer;
@@ -2478,11 +2478,7 @@ public final void pushLineSeparator() {
 public final void pushUnicodeLineSeparator() {
 	// cr 000D
 	if (this.currentCharacter == '\r') {
-		if (this.source[this.currentPosition] == '\n') {
-			this.wasAcr = false;
-		} else {
-			this.wasAcr = true;
-		}
+        this.wasAcr = this.source[this.currentPosition] != '\n';
 	} else {
 		// lf 000A
 		if (this.currentCharacter == '\n') { //must merge eventual cr followed by lf

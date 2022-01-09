@@ -42,7 +42,7 @@ public interface IExecutionListenerWithChecks extends IExecutionListener {
 	 * @param exception
 	 *            The exception that occurred; never <code>null</code>.
 	 */
-	public void notDefined(String commandId, NotDefinedException exception);
+    void notDefined(String commandId, NotDefinedException exception);
 
 	/**
 	 * Notifies the listener that an attempt was made to execute a command that
@@ -54,5 +54,5 @@ public interface IExecutionListenerWithChecks extends IExecutionListener {
 	 * @param exception
 	 *            The exception that occurred; never <code>null</code>.
 	 */
-	public void notEnabled(String commandId, NotEnabledException exception);
+    void notEnabled(String commandId, NotEnabledException exception);
 }

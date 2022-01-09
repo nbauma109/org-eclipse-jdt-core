@@ -22,8 +22,8 @@ public final class HashtableOfStringAndInt implements Cloneable {
 	public static final int MISSING_ELEMENT = Integer.MIN_VALUE;
 
 	// to avoid using Enumerations, walk the individual tables skipping nulls
-	private String keyTable[];
-	private int valueTable[];
+	private String[] keyTable;
+	private int[] valueTable;
 
 	private int elementSize; // number of elements in the table
 	private int threshold;
@@ -142,7 +142,7 @@ public final class HashtableOfStringAndInt implements Cloneable {
 		int object;
 		for (int i = 0, length = valueTable.length; i < length; i++)
 			if ((object = valueTable[i]) != MISSING_ELEMENT)
-				s += new String(keyTable[i]) + " -> " + object + "\n"; //$NON-NLS-2$ //$NON-NLS-1$
+				s += keyTable[i] + " -> " + object + "\n"; //$NON-NLS-2$ //$NON-NLS-1$
 		return s;
 	}
 

@@ -2375,7 +2375,7 @@ protected int fallBackToSpringForward(Statement unused) {
 protected int resumeAfterRecovery() {
 	if (requireExtendedRecovery()) {
 		if (this.unstackedAct == ERROR_ACTION) {
-			int mode = fallBackToSpringForward((Statement) null);
+			int mode = fallBackToSpringForward(null);
 			if (mode == RESUME && !safeToResume()) {
 				mode = HALT; // emergency halt to prevent infinite recovery attempts
 			}

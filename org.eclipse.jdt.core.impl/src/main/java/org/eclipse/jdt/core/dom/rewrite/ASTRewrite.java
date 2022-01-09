@@ -878,7 +878,7 @@ public class ASTRewrite {
 		buf.append("Events:\n"); //$NON-NLS-1$
 		// be extra careful of uninitialized or mangled instances
 		if (this.eventStore != null) {
-			buf.append(this.eventStore.toString());
+			buf.append(this.eventStore);
 		}
 		return buf.toString();
 	}

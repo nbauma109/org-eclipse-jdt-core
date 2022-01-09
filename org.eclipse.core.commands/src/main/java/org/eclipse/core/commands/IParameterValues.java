@@ -36,5 +36,5 @@ public interface IParameterValues {
 	 *         to the actual value of the parameter (<code>String</code>).
 	 */
 	@SuppressWarnings("rawtypes")
-	public Map getParameterValues();
+    Map getParameterValues();
 }

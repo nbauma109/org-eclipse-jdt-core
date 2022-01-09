@@ -43,10 +43,8 @@ public class ModelProviderDescriptor implements IModelProviderDescriptor {
 	}
 
 	private boolean convert(EvaluationResult eval) {
-		if (eval == EvaluationResult.FALSE)
-			return false;
-		return true;
-	}
+        return eval != EvaluationResult.FALSE;
+    }
 
 	protected void fail(String reason) throws CoreException {
 		throw new ResourceException(new Status(IStatus.ERROR, ResourcesPlugin.PI_RESOURCES, 1, reason, null));

@@ -221,15 +221,15 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 					flowInfo = analyseNullAssertion(currentScope, argument, flowContext, flowInfo, true);
 					break;
 				case ARG_NONNULL_IF_TRUE:
-					recordFlowUpdateOnResult(((SingleNameReference) argument).localVariableBinding(), true, false);
+					recordFlowUpdateOnResult(argument.localVariableBinding(), true, false);
 					flowInfo = argument.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
 					break;
 				case ARG_NONNULL_IF_TRUE_NEGATABLE:
-					recordFlowUpdateOnResult(((SingleNameReference) argument).localVariableBinding(), true, true);
+					recordFlowUpdateOnResult(argument.localVariableBinding(), true, true);
 					flowInfo = argument.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
 					break;
 				case ARG_NULL_IF_TRUE:
-					recordFlowUpdateOnResult(((SingleNameReference) argument).localVariableBinding(), false, true);
+					recordFlowUpdateOnResult(argument.localVariableBinding(), false, true);
 					flowInfo = argument.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
 					break;
 				default:
@@ -1140,7 +1140,7 @@ public boolean isPolyExpression(MethodBinding resolutionCandidate) {
 public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t, Scope scope) {
 	if (super.sIsMoreSpecific(s, t, scope))
 		return true;
-	return isPolyExpression() ? !s.isBaseType() && t.isBaseType() : false;
+	return isPolyExpression() && !s.isBaseType() && t.isBaseType();
 }
 
 @Override

@@ -24,5 +24,5 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
  * @since 3.3
  */
 public interface ICompilationUnitLocator {
-	public ICompilationUnit fromIFile(IFile file);
+	ICompilationUnit fromIFile(IFile file);
 }

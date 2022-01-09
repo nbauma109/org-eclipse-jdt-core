@@ -48,7 +48,7 @@ public interface IBuffer {
  * </p>
  * @since 3.4
  */
-public interface ITextEditCapability {
+interface ITextEditCapability {
 	/**
 	 * Applies a text edit to this underlying buffer.
 	 *
@@ -60,7 +60,7 @@ public interface ITextEditCapability {
 	 * <li>The provided edit can not be applied as there is a problem with the text edit locations ({@link IJavaModelStatusConstants#BAD_TEXT_EDIT_LOCATION})}.</li>
 	 * </ul>
 	 */
-	public UndoEdit applyTextEdit(TextEdit edit, IProgressMonitor monitor) throws JavaModelException;
+    UndoEdit applyTextEdit(TextEdit edit, IProgressMonitor monitor) throws JavaModelException;
 }
 
 
@@ -71,7 +71,7 @@ public interface ITextEditCapability {
  *
  * @param listener the listener of buffer changes
  */
-public void addBufferChangedListener(IBufferChangedListener listener);
+void addBufferChangedListener(IBufferChangedListener listener);
 /**
  * Appends the given character array to the contents of the buffer.
  * This buffer will now have unsaved changes.
@@ -82,7 +82,7 @@ public void addBufferChangedListener(IBufferChangedListener listener);
  *
  * @param text the given character array to append to contents of the buffer
  */
-public void append(char[] text);
+void append(char[] text);
 /**
  * Appends the given string to the contents of the buffer.
  * This buffer will now have unsaved changes.
@@ -93,7 +93,7 @@ public void append(char[] text);
  *
  * @param text the <code>String</code> to append to the contents of the buffer
  */
-public void append(String text);
+void append(String text);
 /**
  * Closes the buffer. Any unsaved changes are lost. Reports a buffer changed event
  * with a 0 offset and a 0 length. When this event is fired, the buffer should already
@@ -102,7 +102,7 @@ public void append(String text);
  * Further operations on the buffer are not allowed, except for close.  If an
  * attempt is made to close an already closed buffer, the second attempt has no effect.
  */
-public void close();
+void close();
 /**
  * Returns the character at the given position in this buffer.
  * <p>
@@ -111,7 +111,7 @@ public void close();
  * @param position a zero-based source offset in this buffer
  * @return the character at the given position in this buffer
  */
-public char getChar(int position);
+char getChar(int position);
 /**
  * Returns the contents of this buffer as a character array, or <code>null</code> if
  * the buffer has not been initialized.
@@ -126,7 +126,7 @@ public char getChar(int position);
  *
  * @return the characters contained in this buffer
  */
-public char[] getCharacters();
+char[] getCharacters();
 /**
  * Returns the contents of this buffer as a <code>String</code>. Like all strings,
  * the result is an immutable value object., It can also answer <code>null</code> if
@@ -136,7 +136,7 @@ public char[] getCharacters();
  *
  * @return the contents of this buffer as a <code>String</code>
  */
-public String getContents();
+String getContents();
 /**
  * Returns number of characters stored in this buffer.
  * <p>
@@ -144,13 +144,13 @@ public String getContents();
  *
  * @return the number of characters in this buffer
  */
-public int getLength();
+int getLength();
 /**
  * Returns the Java openable element owning of this buffer.
  *
  * @return the openable element owning this buffer
  */
-public IOpenable getOwner();
+IOpenable getOwner();
 /**
  * Returns the given range of text in this buffer.
  * <p>
@@ -162,7 +162,7 @@ public IOpenable getOwner();
  * @return the given range of text in this buffer
  * @exception IndexOutOfBoundsException when buffer is out of synch
  */
-public String getText(int offset, int length) throws IndexOutOfBoundsException;
+String getText(int offset, int length) throws IndexOutOfBoundsException;
 /**
  * Returns the underlying resource for which this buffer was opened,
  * or <code>null</code> if this buffer was not opened on a resource.
@@ -170,7 +170,7 @@ public String getText(int offset, int length) throws IndexOutOfBoundsException;
  * @return the underlying resource for this buffer, or <code>null</code>
  *  if none.
  */
-public IResource getUnderlyingResource();
+IResource getUnderlyingResource();
 /**
  * Returns whether this buffer has been modified since it
  * was opened or since it was last saved.
@@ -184,26 +184,26 @@ public IResource getUnderlyingResource();
  * @return a <code>boolean</code> indicating presence of unsaved changes (in
  *   the absence of any underlying resource, it will always return <code>true</code>).
  */
-public boolean hasUnsavedChanges();
+boolean hasUnsavedChanges();
 /**
  * Returns whether this buffer has been closed.
  *
  * @return a <code>boolean</code> indicating whether this buffer is closed.
  */
-public boolean isClosed();
+boolean isClosed();
 /**
  * Returns whether this buffer is read-only.
  *
  * @return a <code>boolean</code> indicating whether this buffer is read-only
  */
-public boolean isReadOnly();
+boolean isReadOnly();
 /**
  * Removes the given listener from this buffer.
  * Has no effect if an identical listener is not registered or if the buffer is closed.
  *
  * @param listener the listener
  */
-public void removeBufferChangedListener(IBufferChangedListener listener);
+void removeBufferChangedListener(IBufferChangedListener listener);
 /**
  * Replaces the given range of characters in this buffer with the given text.
  * <code>position</code> and <code>position + length</code> must be in the range [0, getLength()].
@@ -215,7 +215,7 @@ public void removeBufferChangedListener(IBufferChangedListener listener);
  * @param length the length of the affected text range in this buffer
  * @param text the replacing text as a character array
  */
-public void replace(int position, int length, char[] text);
+void replace(int position, int length, char[] text);
 /**
  * Replaces the given range of characters in this buffer with the given text.
  * <code>position</code> and <code>position + length</code> must be in the range [0, getLength()].
@@ -227,7 +227,7 @@ public void replace(int position, int length, char[] text);
  * @param length the length of the affected text range in this buffer
  * @param text the replacing text as a <code>String</code>
  */
-public void replace(int position, int length, String text);
+void replace(int position, int length, String text);
 /**
  * Saves the contents of this buffer to its underlying resource. If
  * successful, this buffer will have no unsaved changes.
@@ -259,7 +259,7 @@ public void replace(int position, int length, String text);
  *
  * @see org.eclipse.core.resources.IFile#setContents(java.io.InputStream, boolean, boolean, org.eclipse.core.runtime.IProgressMonitor)
  */
-public void save(IProgressMonitor progress, boolean force) throws JavaModelException;
+void save(IProgressMonitor progress, boolean force) throws JavaModelException;
 /**
  * Sets the contents of this buffer to the given character array.
  * This buffer will now have unsaved changes.
@@ -272,7 +272,7 @@ public void save(IProgressMonitor progress, boolean force) throws JavaModelExcep
  *
  * @param contents the new contents of this buffer as a character array
  */
-public void setContents(char[] contents);
+void setContents(char[] contents);
 /**
  * Sets the contents of this buffer to the given <code>String</code>.
  * This buffer will now have unsaved changes.
@@ -285,5 +285,5 @@ public void setContents(char[] contents);
  *
  * @param contents the new contents of this buffer as a <code>String</code>
  */
-public void setContents(String contents);
+void setContents(String contents);
 }

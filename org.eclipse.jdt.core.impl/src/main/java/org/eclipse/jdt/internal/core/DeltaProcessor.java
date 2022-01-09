@@ -171,7 +171,7 @@ public class DeltaProcessor {
 			if (this.rootPath == null) {
 				buffer.append("null"); //$NON-NLS-1$
 			} else {
-				buffer.append(this.rootPath.toString());
+				buffer.append(this.rootPath);
 			}
 			buffer.append("\nincluding="); //$NON-NLS-1$
 			if (this.inclusionPatterns == null) {
@@ -1909,7 +1909,7 @@ public class DeltaProcessor {
 		while (this.currentElement != null) {
 			IPath currentElementPath = null;
 			if (this.currentElement instanceof IPackageFragmentRoot) {
-				currentElementPath = ((IPackageFragmentRoot)this.currentElement).getPath();
+				currentElementPath = this.currentElement.getPath();
 			} else {
 				IResource currentElementResource = this.currentElement.resource();
 				if (currentElementResource != null) {

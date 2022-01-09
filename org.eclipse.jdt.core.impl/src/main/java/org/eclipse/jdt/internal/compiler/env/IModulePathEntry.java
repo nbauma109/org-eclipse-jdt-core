@@ -87,7 +87,7 @@ public interface IModulePathEntry {
 	 *
 	 * @return true if this is an automatic module, false otherwise
 	 */
-	public default boolean isAutomaticModule() {
+	default boolean isAutomaticModule() {
 		return false;
 	}
 }

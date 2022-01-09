@@ -74,7 +74,7 @@ protected void initializeRegions() {
  * Compute this type hierarchy.
  */
 @Override
-protected void compute() throws JavaModelException, CoreException {
+protected void compute() throws CoreException {
 	HierarchyBuilder builder = new RegionBasedHierarchyBuilder(this);
 	builder.build(this.computeSubtypes);
 }

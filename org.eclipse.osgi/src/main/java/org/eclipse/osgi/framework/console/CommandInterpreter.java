@@ -35,7 +35,7 @@ public interface CommandInterpreter {
 	 * will get "world" as the first argument.
 	 * @return the next argument or null if no arguments are left.
 	 */
-	public String nextArgument();
+    String nextArgument();
 
 	/**
 	 * Execute a command line as if it came from the end user
@@ -43,19 +43,19 @@ public interface CommandInterpreter {
 	 * @param cmd The command line to execute.
 	 * @return the result of the command.
 	 */
-	public Object execute(String cmd);
+    Object execute(String cmd);
 
 	/**
 	 * Prints an object to the outputstream
 	 *
 	 * @param o	the object to be printed
 	 */
-	public void print(Object o);
+    void print(Object o);
 
 	/**
 	 * Prints an empty line to the outputstream
 	 */
-	public void println();
+    void println();
 
 	/**
 	 * Prints an object to the output medium (appended with newline character).
@@ -68,13 +68,13 @@ public interface CommandInterpreter {
 	 *
 	 * @param	o	the object to be printed
 	 */
-	public void println(Object o);
+    void println(Object o);
 
 	/**
 	 * Print a stack trace including nested exceptions.
 	 * @param t The offending exception
 	 */
-	public void printStackTrace(Throwable t);
+    void printStackTrace(Throwable t);
 
 	/**
 	 * Prints the given dictionary sorted by keys.
@@ -82,7 +82,7 @@ public interface CommandInterpreter {
 	 * @param dic	the dictionary to print
 	 * @param title	the header to print above the key/value pairs
 	 */
-	public void printDictionary(Dictionary<?, ?> dic, String title);
+    void printDictionary(Dictionary<?, ?> dic, String title);
 
 	/**
 	 * Prints the given bundle resource if it exists
@@ -90,5 +90,5 @@ public interface CommandInterpreter {
 	 * @param bundle	the bundle containing the resource
 	 * @param resource	the resource to print
 	 */
-	public void printBundleResource(Bundle bundle, String resource);
+    void printBundleResource(Bundle bundle, String resource);
 }

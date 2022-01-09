@@ -39,7 +39,7 @@ public interface IFileTree {
 	 * array if the store has no children.
 	 * @see IFileStore#childInfos(int, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IFileInfo[] getChildInfos(IFileStore store);
+    IFileInfo[] getChildInfos(IFileStore store);
 
 	/**
 	 * Returns an {@link IFileStore} instance for each file and directory contained
@@ -52,7 +52,7 @@ public interface IFileTree {
 	 * @return The children of the store, or an empty array if the store has no children.
 	 * @see IFileStore#childStores(int, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IFileStore[] getChildStores(IFileStore store);
+    IFileStore[] getChildStores(IFileStore store);
 
 	/**
 	 * Returns information about this file at the time this file tree was created.
@@ -67,11 +67,11 @@ public interface IFileTree {
 	 * @return IFileInfo the IFileInfo for the given store
 	 * @see IFileStore#fetchInfo(int, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IFileInfo getFileInfo(IFileStore store);
+    IFileInfo getFileInfo(IFileStore store);
 
 	/***
 	 * Returns the root of this tree
 	 * @return An IFileStore representing the root of the tree
 	 */
-	public IFileStore getTreeRoot();
+    IFileStore getTreeRoot();
 }

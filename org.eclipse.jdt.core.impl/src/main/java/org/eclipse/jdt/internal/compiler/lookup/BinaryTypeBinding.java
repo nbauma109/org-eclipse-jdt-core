@@ -2134,10 +2134,7 @@ private void scanTypeForNullDefaultAnnotation(IBinaryType binaryType, PackageBin
 
 boolean setNullDefault(int newNullDefault) {
 	this.defaultNullness = newNullDefault;
-	if (newNullDefault != Binding.NO_NULL_DEFAULT) {
-		return true;
-	}
-	return false;
+    return newNullDefault != Binding.NO_NULL_DEFAULT;
 }
 
 /** given an application of @NonNullByDefault convert the annotation argument (if any) into a bitvector a la {@link Binding#NullnessDefaultMASK} */

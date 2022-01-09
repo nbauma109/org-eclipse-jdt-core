@@ -153,9 +153,8 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 			 * we could only get this exception if the ServiceReference was
 			 * invalid
 			 */
-			IllegalArgumentException iae = new IllegalArgumentException("unexpected InvalidSyntaxException: " + e.getMessage());
-			iae.initCause(e);
-			throw iae;
+			IllegalArgumentException iae = new IllegalArgumentException("unexpected InvalidSyntaxException: " + e.getMessage(), e);
+            throw iae;
 		}
 	}
 
@@ -182,7 +181,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		this.trackClass = clazz;
 		this.customizer = (customizer == null) ? this : customizer;
 		// we call clazz.toString to verify clazz is non-null!
-		this.listenerFilter = "(" + Constants.OBJECTCLASS + "=" + clazz.toString() + ")";
+		this.listenerFilter = "(" + Constants.OBJECTCLASS + "=" + clazz + ")";
 		try {
 			this.filter = context.createFilter(listenerFilter);
 		} catch (InvalidSyntaxException e) {
@@ -190,9 +189,8 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 			 * we could only get this exception if the clazz argument was
 			 * malformed
 			 */
-			IllegalArgumentException iae = new IllegalArgumentException("unexpected InvalidSyntaxException: " + e.getMessage());
-			iae.initCause(e);
-			throw iae;
+			IllegalArgumentException iae = new IllegalArgumentException("unexpected InvalidSyntaxException: " + e.getMessage(), e);
+            throw iae;
 		}
 	}
 
@@ -575,7 +573,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		}
 		int index = 0;
 		if (length > 1) { /* if more than one service, select highest ranking */
-			int rankings[] = new int[length];
+			int[] rankings = new int[length];
 			int count = 0;
 			int maxRanking = Integer.MIN_VALUE;
 			for (int i = 0; i < length; i++) {

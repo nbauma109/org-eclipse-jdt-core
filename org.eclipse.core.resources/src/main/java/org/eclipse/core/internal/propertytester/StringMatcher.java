@@ -40,7 +40,7 @@ public class StringMatcher {
 	/**
 	 * The pattern split into segments separated by *
 	 */
-	private String segments[];
+	private String[] segments;
 
 	/**
 	 * StringMatcher constructor takes in a String object that is a simple

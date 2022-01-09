@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.compiler.codegen.AnnotationTargetTypeConstants;
  */
 public interface IBinaryTypeAnnotation {
 
-	static int[] NO_TYPE_PATH = new int[0];
+	int[] NO_TYPE_PATH = new int[0];
 
 /**
  * @return the annotation

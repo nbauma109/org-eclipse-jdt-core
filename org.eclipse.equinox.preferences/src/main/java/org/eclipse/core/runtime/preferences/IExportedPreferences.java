@@ -34,6 +34,6 @@ public interface IExportedPreferences extends IEclipsePreferences {
 	 * @return <code>true</code> if this node is an export root
 	 * 	and <code>false</code> otherwise
 	 */
-	public boolean isExportRoot();
+    boolean isExportRoot();
 
 }

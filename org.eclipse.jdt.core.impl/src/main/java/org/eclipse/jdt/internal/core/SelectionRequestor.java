@@ -127,7 +127,7 @@ private void acceptBinaryMethod(
 				addElement(method);
 				if(SelectionEngine.DEBUG){
 					System.out.print("SELECTION - accept method("); //$NON-NLS-1$
-					System.out.print(method.toString());
+					System.out.print(method);
 					System.out.println(")"); //$NON-NLS-1$
 				}
 			} else {
@@ -226,7 +226,7 @@ public void acceptType(char[] packageName, char[] typeName, int modifiers, boole
 		addElement(type);
 		if(SelectionEngine.DEBUG){
 			System.out.print("SELECTION - accept type("); //$NON-NLS-1$
-			System.out.print(type.toString());
+			System.out.print(type);
 			System.out.println(")"); //$NON-NLS-1$
 		}
 	}
@@ -249,7 +249,7 @@ public void acceptType(IType type) {
 	addElement(type);
 	if(SelectionEngine.DEBUG){
 		System.out.print("SELECTION - accept type("); //$NON-NLS-1$
-		System.out.print(type.toString());
+		System.out.print(type);
 		System.out.println(")"); //$NON-NLS-1$
 	}
 }
@@ -289,7 +289,7 @@ public void acceptField(char[] declaringTypePackageName, char[] declaringTypeNam
 						addElement(fields[i]);
 						if(SelectionEngine.DEBUG){
 							System.out.print("SELECTION - accept field("); //$NON-NLS-1$
-							System.out.print(field.toString());
+							System.out.print(field);
 							System.out.println(")"); //$NON-NLS-1$
 						}
 						return; // only one method is possible
@@ -324,7 +324,7 @@ public void acceptField(char[] declaringTypePackageName, char[] declaringTypeNam
 				addElement(field);
 				if(SelectionEngine.DEBUG){
 					System.out.print("SELECTION - accept field("); //$NON-NLS-1$
-					System.out.print(field.toString());
+					System.out.print(field);
 					System.out.println(")"); //$NON-NLS-1$
 				}
 			}
@@ -363,7 +363,7 @@ public void acceptLocalField(FieldBinding fieldBinding) {
 			addElement(field);
 			if(SelectionEngine.DEBUG){
 				System.out.print("SELECTION - accept field("); //$NON-NLS-1$
-				System.out.print(field.toString());
+				System.out.print(field);
 				System.out.println(")"); //$NON-NLS-1$
 			}
 		}
@@ -396,7 +396,7 @@ public void acceptLocalMethod(MethodBinding methodBinding) {
 			addElement(res);
 			if(SelectionEngine.DEBUG){
 				System.out.print("SELECTION - accept method("); //$NON-NLS-1$
-				System.out.print(res.toString());
+				System.out.print(res);
 				System.out.println(")"); //$NON-NLS-1$
 			}
 		} else if(methodBinding.selector == TypeConstants.INIT && res.getElementType() == IJavaElement.TYPE) {
@@ -445,7 +445,7 @@ public void acceptLocalTypeParameter(TypeVariableBinding typeVariableBinding) {
 			addElement(typeParameter);
 			if(SelectionEngine.DEBUG){
 				System.out.print("SELECTION - accept type parameter("); //$NON-NLS-1$
-				System.out.print(typeParameter.toString());
+				System.out.print(typeParameter);
 				System.out.println(")"); //$NON-NLS-1$
 			}
 		}
@@ -462,7 +462,7 @@ public void acceptLocalMethodTypeParameter(TypeVariableBinding typeVariableBindi
 			addElement(typeParameter);
 			if(SelectionEngine.DEBUG){
 				System.out.print("SELECTION - accept type parameter("); //$NON-NLS-1$
-				System.out.print(typeParameter.toString());
+				System.out.print(typeParameter);
 				System.out.println(")"); //$NON-NLS-1$
 			}
 		}
@@ -506,7 +506,7 @@ public void acceptLocalVariable(LocalVariableBinding binding, org.eclipse.jdt.in
 		addElement(localVar);
 		if(SelectionEngine.DEBUG){
 			System.out.print("SELECTION - accept local variable("); //$NON-NLS-1$
-			System.out.print(localVar.toString());
+			System.out.print(localVar);
 			System.out.println(")"); //$NON-NLS-1$
 		}
 	}
@@ -654,7 +654,7 @@ protected void acceptSourceMethod(
 						 addElement(comp);
 						 if(SelectionEngine.DEBUG){
 								System.out.print("SELECTION - accept field("); //$NON-NLS-1$
-								System.out.print(comp.toString());
+								System.out.print(comp);
 								System.out.println(")"); //$NON-NLS-1$
 						 }
 					 }
@@ -668,7 +668,7 @@ protected void acceptSourceMethod(
 			addElement(type);
 			if(SelectionEngine.DEBUG){
 				System.out.print("SELECTION - accept type("); //$NON-NLS-1$
-				System.out.print(type.toString());
+				System.out.print(type);
 				System.out.println(")"); //$NON-NLS-1$
 			}
 		}
@@ -711,7 +711,7 @@ protected void acceptSourceMethod(
 			addElement(method);
 			if(SelectionEngine.DEBUG){
 				System.out.print("SELECTION - accept method("); //$NON-NLS-1$
-				System.out.print(method.toString());
+				System.out.print(method);
 				System.out.println(")"); //$NON-NLS-1$
 			}
 		}
@@ -745,7 +745,7 @@ protected void acceptMethodDeclaration(IType type, char[] selector, int start, i
 	addElement(type);
 	if(SelectionEngine.DEBUG){
 		System.out.print("SELECTION - accept type("); //$NON-NLS-1$
-		System.out.print(type.toString());
+		System.out.print(type);
 		System.out.println(")"); //$NON-NLS-1$
 	}
 	return;
@@ -768,14 +768,14 @@ public void acceptTypeParameter(char[] declaringTypePackageName, char[] declarin
 			addElement(type);
 			if(SelectionEngine.DEBUG){
 				System.out.print("SELECTION - accept type("); //$NON-NLS-1$
-				System.out.print(type.toString());
+				System.out.print(type);
 				System.out.println(")"); //$NON-NLS-1$
 			}
 		} else {
 			addElement(typeParameter);
 			if(SelectionEngine.DEBUG){
 				System.out.print("SELECTION - accept type parameter("); //$NON-NLS-1$
-				System.out.print(typeParameter.toString());
+				System.out.print(typeParameter);
 				System.out.println(")"); //$NON-NLS-1$
 			}
 		}
@@ -812,7 +812,7 @@ public void acceptMethodTypeParameter(char[] declaringTypePackageName, char[] de
 			addElement(type);
 			if(SelectionEngine.DEBUG){
 				System.out.print("SELECTION - accept type("); //$NON-NLS-1$
-				System.out.print(type.toString());
+				System.out.print(type);
 				System.out.println(")"); //$NON-NLS-1$
 			}
 		} else {
@@ -821,14 +821,14 @@ public void acceptMethodTypeParameter(char[] declaringTypePackageName, char[] de
 				addElement(method);
 				if(SelectionEngine.DEBUG){
 					System.out.print("SELECTION - accept method("); //$NON-NLS-1$
-					System.out.print(method.toString());
+					System.out.print(method);
 					System.out.println(")"); //$NON-NLS-1$
 				}
 			} else {
 				addElement(typeParameter);
 				if(SelectionEngine.DEBUG){
 					System.out.print("SELECTION - accept method type parameter("); //$NON-NLS-1$
-					System.out.print(typeParameter.toString());
+					System.out.print(typeParameter);
 					System.out.println(")"); //$NON-NLS-1$
 				}
 			}
@@ -1041,7 +1041,7 @@ protected IType resolveTypeByLocation(char[] packageName, char[] typeName, int a
 	IType type= null;
 
 	// TODO (david) post 3.0 should remove isOpen check, and investigate reusing ICompilationUnit#getElementAt. may need to optimize #getElementAt to remove recursions
-	if (this.openable instanceof CompilationUnit && ((CompilationUnit)this.openable).isOpen()) {
+	if (this.openable instanceof CompilationUnit && this.openable.isOpen()) {
 		CompilationUnit wc = (CompilationUnit) this.openable;
 		try {
 			if(((packageName == null || packageName.length == 0) && wc.getPackageDeclarations().length == 0) ||

@@ -95,12 +95,8 @@ class WireImpl implements Wire
         {
             return false;
         }
-        if (this.m_cap != other.getCapability()
-            && (this.m_cap == null || !this.m_cap.equals(other.getCapability())))
-        {
-            return false;
-        }
-        return true;
+        return this.m_cap == other.getCapability()
+                || (this.m_cap != null && this.m_cap.equals(other.getCapability()));
     }
 
     @Override

@@ -14,20 +14,20 @@
 package org.eclipse.jdt.internal.compiler.util;
 
 public interface SuffixConstants {
-	public final static String EXTENSION_class = "class"; //$NON-NLS-1$
-	public final static String EXTENSION_CLASS = "CLASS"; //$NON-NLS-1$
-	public final static String EXTENSION_java = "java"; //$NON-NLS-1$
-	public final static String EXTENSION_JAVA = "JAVA"; //$NON-NLS-1$
-	public final static String EXTENSION_jmod = "jmod"; //$NON-NLS-1$
-	public final static String EXTENSION_JMOD = "JMOD"; //$NON-NLS-1$
+	String EXTENSION_class = "class"; //$NON-NLS-1$
+	String EXTENSION_CLASS = "CLASS"; //$NON-NLS-1$
+	String EXTENSION_java = "java"; //$NON-NLS-1$
+	String EXTENSION_JAVA = "JAVA"; //$NON-NLS-1$
+	String EXTENSION_jmod = "jmod"; //$NON-NLS-1$
+	String EXTENSION_JMOD = "JMOD"; //$NON-NLS-1$
 
-	public final static String SUFFIX_STRING_class = "." + EXTENSION_class; //$NON-NLS-1$
-	public final static String SUFFIX_STRING_CLASS = "." + EXTENSION_CLASS; //$NON-NLS-1$
-	public final static String SUFFIX_STRING_java = "." + EXTENSION_java; //$NON-NLS-1$
-	public final static String SUFFIX_STRING_JAVA = "." + EXTENSION_JAVA; //$NON-NLS-1$
+	String SUFFIX_STRING_class = "." + EXTENSION_class; //$NON-NLS-1$
+	String SUFFIX_STRING_CLASS = "." + EXTENSION_CLASS; //$NON-NLS-1$
+	String SUFFIX_STRING_java = "." + EXTENSION_java; //$NON-NLS-1$
+	String SUFFIX_STRING_JAVA = "." + EXTENSION_JAVA; //$NON-NLS-1$
 
-	public final static char[] SUFFIX_class = SUFFIX_STRING_class.toCharArray();
-	public final static char[] SUFFIX_CLASS = SUFFIX_STRING_CLASS.toCharArray();
-	public final static char[] SUFFIX_java = SUFFIX_STRING_java.toCharArray();
-	public final static char[] SUFFIX_JAVA = SUFFIX_STRING_JAVA.toCharArray();
+	char[] SUFFIX_class = SUFFIX_STRING_class.toCharArray();
+	char[] SUFFIX_CLASS = SUFFIX_STRING_CLASS.toCharArray();
+	char[] SUFFIX_java = SUFFIX_STRING_java.toCharArray();
+	char[] SUFFIX_JAVA = SUFFIX_STRING_JAVA.toCharArray();
 }

@@ -24,12 +24,12 @@ package org.eclipse.jdt.internal.compiler.env;
  */
 public interface ITypeAnnotationWalker {
 
-	public static final IBinaryAnnotation[] NO_ANNOTATIONS = new IBinaryAnnotation[0];
+	IBinaryAnnotation[] NO_ANNOTATIONS = new IBinaryAnnotation[0];
 	/**
 	 * A no-effect annotation walker, all walking methods are implemented as identity-functions.
 	 * At the end of any walk an empty array of annotations is returned.
 	 */
-	public static final ITypeAnnotationWalker EMPTY_ANNOTATION_WALKER = new ITypeAnnotationWalker() {
+    ITypeAnnotationWalker EMPTY_ANNOTATION_WALKER = new ITypeAnnotationWalker() {
 		@Override
 		public ITypeAnnotationWalker toField() { return this; }
 		@Override
@@ -61,24 +61,24 @@ public interface ITypeAnnotationWalker {
 	};
 
 	/** Walk to a field. */
-	public abstract ITypeAnnotationWalker toField();
+    ITypeAnnotationWalker toField();
 
 
 	/** Walk to the return type of a method. */
-	public abstract ITypeAnnotationWalker toMethodReturn();
+    ITypeAnnotationWalker toMethodReturn();
 
 	/**
 	 * Walk to the receiver type of a method.
 	 * Note: Type annotations on receiver are not currently used by the compiler.
 	 */
-	public abstract ITypeAnnotationWalker toReceiver();
+    ITypeAnnotationWalker toReceiver();
 
 	/**
 	 * Walk to the type parameter of the given rank.
 	 * @param isClassTypeParameter whether we are looking for a class type parameter (else: method type parameter)
 	 * @param rank rank of the type parameter
 	 */
-	public abstract ITypeAnnotationWalker toTypeParameter(boolean isClassTypeParameter, int rank);
+    ITypeAnnotationWalker toTypeParameter(boolean isClassTypeParameter, int rank);
 
 	/**
 	 * Walk to the bounds of a type parameter of either a class or a method (signaled by isClassTypeParameter).
@@ -86,44 +86,44 @@ public interface ITypeAnnotationWalker {
 	 * @param isClassTypeParameter whether we are looking at a class type parameter (else: method type parameter)
 	 * @param parameterRank rank of the type parameter.
 	 */
-	public abstract ITypeAnnotationWalker toTypeParameterBounds(boolean isClassTypeParameter, int parameterRank);
+    ITypeAnnotationWalker toTypeParameterBounds(boolean isClassTypeParameter, int parameterRank);
 
 	/**
 	 * Detail of {@link #toTypeParameterBounds(boolean, int)}: walk to the bounds
 	 * of the previously selected type parameter.
 	 * @param boundIndex
 	 */
-	public abstract ITypeAnnotationWalker toTypeBound(short boundIndex);
+    ITypeAnnotationWalker toTypeBound(short boundIndex);
 
 	/** Walk to the specified supertype either index based or name based:
 	 * @param index -1 is superclass, else index into the list of superinterfaces
 	 * @param superTypeSignature name and type arguments of the super type to visit
 	 */
-	public abstract ITypeAnnotationWalker toSupertype(short index, char[] superTypeSignature);
+    ITypeAnnotationWalker toSupertype(short index, char[] superTypeSignature);
 
 	/** Walk to the index'th visible formal method parameter (i.e., not counting synthetic args). */
-	public abstract ITypeAnnotationWalker toMethodParameter(short index);
+    ITypeAnnotationWalker toMethodParameter(short index);
 
 	/**
 	 * Walk to the throws type at the given index.
 	 */
-	public abstract ITypeAnnotationWalker toThrows(int index);
+    ITypeAnnotationWalker toThrows(int index);
 
 	/** Walk to the type argument of the given rank. */
-	public abstract ITypeAnnotationWalker toTypeArgument(int rank);
+    ITypeAnnotationWalker toTypeArgument(int rank);
 
 	/** Walk to the bound of a wildcard. */
-	public abstract ITypeAnnotationWalker toWildcardBound();
+    ITypeAnnotationWalker toWildcardBound();
 
 	/**
 	 * Descend down one level of array dimensions.
 	 */
-	public abstract ITypeAnnotationWalker toNextArrayDimension();
+    ITypeAnnotationWalker toNextArrayDimension();
 
 	/**
 	 * Descend down one level of type nesting.
 	 */
-	public abstract ITypeAnnotationWalker toNextNestedType();
+    ITypeAnnotationWalker toNextNestedType();
 
 	/**
 	 * Retrieve the type annotations at the current position
@@ -131,6 +131,6 @@ public interface ITypeAnnotationWalker {
 	 * @param currentTypeId the id of the type being annotated; 0 signals don't care / unknown;
 	 * 		 -1 signals if annotating a wildcard or a use of a type variable.
 	 */
-	public abstract IBinaryAnnotation[] getAnnotationsAtCursor(int currentTypeId, boolean mayApplyArrayContentsDefaultNullness);
+    IBinaryAnnotation[] getAnnotationsAtCursor(int currentTypeId, boolean mayApplyArrayContentsDefaultNullness);
 
 }

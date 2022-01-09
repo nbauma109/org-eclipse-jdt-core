@@ -88,7 +88,7 @@ public class ModuleInfoBuilder {
 			moduleUpdater.addModuleUpdate(module.getElementName(),  m -> m.setPackageNames(namesSet), UpdateKind.MODULE);
 		}
 		if (!classFileAttributes.isEmpty()) {
-			throw new IllegalArgumentException("Unsupported key(s): "+classFileAttributes.keySet().toString()); //$NON-NLS-1$
+			throw new IllegalArgumentException("Unsupported key(s): "+ classFileAttributes.keySet()); //$NON-NLS-1$
 		}
 	}
 

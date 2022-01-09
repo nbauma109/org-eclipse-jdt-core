@@ -325,7 +325,7 @@ public class ResolverImpl implements Resolver
 
         public Collection<Resource> getRelatedResources(Resource resource) {
             Collection<Resource> related =  m_relatedResources.get(resource);
-            return related == null ? Collections.<Resource> emptyList() : related;
+            return related == null ? Collections.emptyList() : related;
         }
 
         public void setRelatedResources(Resource resource, Collection<Resource> related) {
@@ -1811,7 +1811,7 @@ public class ResolverImpl implements Resolver
                 }
                 else
                 {
-                    sources.put(sourceCap, Collections.<Capability>emptySet());
+                    sources.put(sourceCap, Collections.emptySet());
                 }
             }
         }
@@ -1877,7 +1877,7 @@ public class ResolverImpl implements Resolver
         if (!session.getContext().getWirings().containsKey(unwrappedResource)
             && !wireMap.containsKey(unwrappedResource))
         {
-            wireMap.put(unwrappedResource, Collections.<Wire>emptyList());
+            wireMap.put(unwrappedResource, Collections.emptyList());
 
             List<Wire> packageWires = new ArrayList<Wire>();
             List<Wire> bundleWires = new ArrayList<Wire>();
@@ -2025,18 +2025,14 @@ public class ResolverImpl implements Resolver
         {
             return false;
         }
-        if (HostNamespace.HOST_NAMESPACE.equals(fragmentReq.getNamespace()))
-        {
-            return false;
-        }
-        return true;
+        return !HostNamespace.HOST_NAMESPACE.equals(fragmentReq.getNamespace());
     }
 
     private static Map<Resource, List<Wire>> populateDynamicWireMap(
         ResolveSession session, Map<Resource,
         List<Wire>> wireMap, Candidates allCandidates)
     {
-        wireMap.put(session.getDynamicHost(), Collections.<Wire>emptyList());
+        wireMap.put(session.getDynamicHost(), Collections.emptyList());
 
         List<Wire> packageWires = new ArrayList<Wire>();
 
@@ -2250,7 +2246,7 @@ public class ResolverImpl implements Resolver
                 return Collections.emptySet();
             }
             Set<Capability> result = m_rootCauses.get(req);
-            return result == null ? Collections.<Capability>emptySet() : result;
+            return result == null ? Collections.emptySet() : result;
         }
 
         @Override
@@ -2393,7 +2389,7 @@ public class ResolverImpl implements Resolver
                         Object namespaceVal = export.getAttributes().get(export.getNamespace());
                         if (namespaceVal != null)
                         {
-                            sb.append(namespaceVal.toString());
+                            sb.append(namespaceVal);
                         }
                         else
                         {
@@ -2494,7 +2490,7 @@ public class ResolverImpl implements Resolver
                         throwable.compareAndSet(null, t);
                     }
                 }
-            }, (Void) null);
+            }, null);
             // must have a happens-first to add the task to awaiting
             awaiting.add(task);
             try

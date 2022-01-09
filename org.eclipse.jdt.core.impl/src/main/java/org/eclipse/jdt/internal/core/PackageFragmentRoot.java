@@ -126,7 +126,7 @@ public void attachSource(IPath sourcePath, IPath rootPath, IProgressMonitor moni
 			//set the property to the path of the mapped source
 			Util.setSourceAttachmentProperty(
 				getPath(),
-				sourcePath.toString()
+				sourcePath
 				+ (rootPath == null ? "" : (ATTACHMENT_PROPERTY_DELIMITER + rootPath.toString()))); //$NON-NLS-1$
 		}
 		if (rootNeedsToBeClosed) {
@@ -435,7 +435,7 @@ public char[][] fullInclusionPatternChars() {
 public String getElementName() {
 	IResource res = resource();
 	if (res instanceof IFolder)
-		return ((IFolder) res).getName();
+		return res.getName();
 	return ""; //$NON-NLS-1$
 }
 /**

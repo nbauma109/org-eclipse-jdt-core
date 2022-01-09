@@ -180,7 +180,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	private static final String EXTERNAL_FILES_CACHE = "externalFilesCache";  //$NON-NLS-1$
 	private static final String ASSUMED_EXTERNAL_FILES_CACHE = "assumedExternalFilesCache";  //$NON-NLS-1$
 
-	public static enum ArchiveValidity {
+	public enum ArchiveValidity {
 		INVALID, VALID;
 
 		public boolean isValid() {
@@ -1121,7 +1121,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		// Create a jar package fragment root only if on the classpath
 		IPath resourcePath = file.getFullPath();
 		try {
-			IClasspathEntry entry = ((JavaProject)project).getClasspathEntryFor(resourcePath);
+			IClasspathEntry entry = project.getClasspathEntryFor(resourcePath);
 			if (entry != null) {
 				return project.getPackageFragmentRoot(file);
 			}
@@ -1563,7 +1563,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		public String toString() {
 			StringBuilder buffer = new StringBuilder();
 			buffer.append("Info for "); //$NON-NLS-1$
-			buffer.append(((JavaElement)this.workingCopy).toStringWithAncestors());
+			buffer.append(this.workingCopy.toStringWithAncestors());
 			buffer.append("\nUse count = "); //$NON-NLS-1$
 			buffer.append(this.useCount);
 			buffer.append("\nProblem requestor:\n  "); //$NON-NLS-1$
@@ -2929,11 +2929,8 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 
 	private boolean isArchiveStateKnownToBeValid(IPath path) throws CoreException {
 		ArchiveValidity validity = getArchiveValidity(path);
-		if (validity == null || validity == ArchiveValidity.INVALID) {
-			return false; // chance the file has become accessible/readable now.
-		}
-		return true;
-	}
+        return validity != null && validity != ArchiveValidity.INVALID; // chance the file has become accessible/readable now.
+    }
 
 	/*
 	 * Returns whether there is a temporary cache for the current thread.
@@ -4589,7 +4586,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		Long delta = Long.valueOf(System.currentTimeMillis() - start);
 		Long length = Long.valueOf(getVariableAndContainersFile().length());
 		String pattern = "{0} {1} bytes in variablesAndContainers.dat in {2}ms"; //$NON-NLS-1$
-		String message = MessageFormat.format(pattern, new Object[]{action, length, delta});
+		String message = MessageFormat.format(pattern, action, length, delta);
 
 		System.out.println(message);
 	}

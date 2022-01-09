@@ -39,7 +39,7 @@ public interface ComponentInstance<S> {
 	 * component configuration will be deactivated. If the component
 	 * configuration has already been deactivated, this method does nothing.
 	 */
-	public void dispose();
+    void dispose();
 
 	/**
 	 * Returns the component instance of the activated component configuration.
@@ -47,5 +47,5 @@ public interface ComponentInstance<S> {
 	 * @return The component instance or {@code null} if the component
 	 *         configuration has been deactivated.
 	 */
-	public S getInstance();
+    S getInstance();
 }

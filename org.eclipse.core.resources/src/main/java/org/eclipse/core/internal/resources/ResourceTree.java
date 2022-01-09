@@ -867,7 +867,7 @@ class ResourceTree implements IResourceTree {
 				// The .project file is deleted at the end of the operation.
 				try {
 					IFileStore projectStore = localManager.getStore(project);
-					IFileStore members[] = projectStore.childStores(EFS.NONE, null);
+					IFileStore[] members = projectStore.childStores(EFS.NONE, null);
 					for (IFileStore member : members) {
 						if (!IProjectDescription.DESCRIPTION_FILE_NAME.equals(member.getName())) {
 							member.delete(EFS.NONE, Policy.subMonitorFor(monitor, Policy.totalWork * 7 / 8 / members.length));

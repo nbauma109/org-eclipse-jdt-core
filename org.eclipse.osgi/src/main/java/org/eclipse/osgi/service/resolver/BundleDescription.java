@@ -34,21 +34,21 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * does not have a symbolic name.
 	 */
 	@Override
-	public String getSymbolicName();
+    String getSymbolicName();
 
 	/**
 	 * Returns the arbitrary attributes for this bundle description.
 	 * @return the arbitrary attributes for this bundle description
 	 * @since 3.7
 	 */
-	public Map<String, Object> getAttributes();
+    Map<String, Object> getAttributes();
 
 	/**
 	 * The location string for this bundle.
 	 * @return The bundle location or null if the bundle description
 	 * does not have a location
 	 */
-	public String getLocation();
+    String getLocation();
 
 	/**
 	 * Returns an array of bundle specifications defined by the Require-Bundle
@@ -56,7 +56,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 *
 	 * @return an array of bundle specifications
 	 */
-	public BundleSpecification[] getRequiredBundles();
+    BundleSpecification[] getRequiredBundles();
 
 	/**
 	 * Returns an array of export package descriptions defined by the Export-Package clauses.
@@ -65,13 +65,13 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 *
 	 * @return an array of export package descriptions
 	 */
-	public ExportPackageDescription[] getExportPackages();
+    ExportPackageDescription[] getExportPackages();
 
 	/**
 	 * Returns an array of import package specifications defined by the Import-Package clause.
 	 * @return an array of import package specifications
 	 */
-	public ImportPackageSpecification[] getImportPackages();
+    ImportPackageSpecification[] getImportPackages();
 
 	/**
 	 * Returns an array of dynamic import package specifications that have been added
@@ -80,27 +80,27 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * @see State#addDynamicImportPackages(BundleDescription, ImportPackageSpecification[])
 	 * @since 3.7
 	 */
-	public ImportPackageSpecification[] getAddedDynamicImportPackages();
+    ImportPackageSpecification[] getAddedDynamicImportPackages();
 
 	/**
 	 * Returns an array of generic specifications constraints required by this bundle.
 	 * @return an array of generic specifications
 	 * @since 3.2
 	 */
-	public GenericSpecification[] getGenericRequires();
+    GenericSpecification[] getGenericRequires();
 
 	/**
 	 * Returns an array of generic descriptions for the capabilities of this bundle.
 	 * @return an array of generic descriptions
 	 * @since 3.2
 	 */
-	public GenericDescription[] getGenericCapabilities();
+    GenericDescription[] getGenericCapabilities();
 
 	/**
 	 * Returns true if this bundle has one or more dynamically imported packages.
 	 * @return true if this bundle has one or more dynamically imported packages.
 	 */
-	public boolean hasDynamicImports();
+    boolean hasDynamicImports();
 
 	/**
 	 * Returns all the exported packages from this bundle that have been selected by
@@ -110,7 +110,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * @return the selected list of packages that this bundle exports.  If the bundle is
 	 * unresolved or has no shared packages then an empty array is returned.
 	 */
-	public ExportPackageDescription[] getSelectedExports();
+    ExportPackageDescription[] getSelectedExports();
 
 	/**
 	 * Returns all the capabilities provided by ths bundle that have been selected by
@@ -121,7 +121,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * unresolved or has no capabilities then an empty array is returned.
 	 * @since 3.7
 	 */
-	public GenericDescription[] getSelectedGenericCapabilities();
+    GenericDescription[] getSelectedGenericCapabilities();
 
 	/**
 	 * Returns all the bundle descriptions that satisfy all the require bundles for this bundle.
@@ -129,7 +129,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * returned.
 	 * @return the bundles descriptions that satisfy all the require bundles for this bundle.
 	 */
-	public BundleDescription[] getResolvedRequires();
+    BundleDescription[] getResolvedRequires();
 
 	/**
 	 * Returns all the export packages that satisfy all the imported packages for this bundle.
@@ -137,7 +137,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * returned.
 	 * @return the exported packages that satisfy all the imported packages for this bundle.
 	 */
-	public ExportPackageDescription[] getResolvedImports();
+    ExportPackageDescription[] getResolvedImports();
 
 	/**
 	 * Returns all the capabilities that satisfy all the capability requirements for this
@@ -147,14 +147,14 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * returned.
 	 * @since 3.7
 	 */
-	public GenericDescription[] getResolvedGenericRequires();
+    GenericDescription[] getResolvedGenericRequires();
 
 	/**
 	 * Returns true if this bundle is resolved in its host state.
 	 *
 	 * @return true if this bundle is resolved in its host state.
 	 */
-	public boolean isResolved();
+    boolean isResolved();
 
 	/**
 	 * Returns the state object which hosts this bundle. null is returned if
@@ -162,7 +162,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 *
 	 * @return the state object which hosts this bundle.
 	 */
-	public State getContainingState();
+    State getContainingState();
 
 	/**
 	 * Returns the string representation of this bundle.
@@ -170,7 +170,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * @return String representation of this bundle.
 	 */
 	@Override
-	public String toString();
+    String toString();
 
 	/**
 	 * Returns the host for this bundle. null is returned if this bundle is not
@@ -178,7 +178,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 *
 	 * @return the host for this bundle.
 	 */
-	public HostSpecification getHost();
+    HostSpecification getHost();
 
 	/**
 	 * Returns the numeric id of this bundle.  Typically a bundle description
@@ -187,14 +187,14 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 *
 	 * @return the numeric id of this bundle description
 	 */
-	public long getBundleId();
+    long getBundleId();
 
 	/**
 	 * Returns all fragments known to this bundle (regardless resolution status).
 	 *
 	 * @return an array of BundleDescriptions containing all known fragments
 	 */
-	public BundleDescription[] getFragments();
+    BundleDescription[] getFragments();
 
 	/**
 	 * Returns whether this bundle is a singleton.  Singleton bundles require
@@ -207,7 +207,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * @return <code>true</code>, if this bundle is a singleton,
 	 * <code>false</code> otherwise
 	 */
-	public boolean isSingleton();
+    boolean isSingleton();
 
 	/**
 	 * Returns whether this bundle is pending a removal.  A bundle is pending
@@ -216,7 +216,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * @return <code>true</code>, if this bundle is pending a removal,
 	 * <code>false</code> otherwise
 	 */
-	public boolean isRemovalPending();
+    boolean isRemovalPending();
 
 	/**
 	 * Returns all bundles which depend on this bundle.  A bundle depends on
@@ -225,26 +225,26 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * of the bundle.
 	 * @return all bundles which depend on this bundle.
 	 */
-	public BundleDescription[] getDependents();
+    BundleDescription[] getDependents();
 
 	/**
 	 * Returns the platform filter in the form of an LDAP filter
 	 * @return the platfomr filter in the form of an LDAP filter
 	 */
-	public String getPlatformFilter();
+    String getPlatformFilter();
 
 	/**
 	 * Returns true if this bundle allows fragments to attach
 	 * @return true if this bundle allows fragments to attach
 	 */
-	public boolean attachFragments();
+    boolean attachFragments();
 
 	/**
 	 * Returns true if this bundle allows fragments to attach dynamically
 	 * after it has been resolved.
 	 * @return true if this bundle allows fragments to attach dynamically
 	 */
-	public boolean dynamicFragments();
+    boolean dynamicFragments();
 
 	/**
 	 * Returns the list of execution environments that are required by
@@ -253,7 +253,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * @since 3.2
 	 * @return the list of execution environments that are required.
 	 */
-	public String[] getExecutionEnvironments();
+    String[] getExecutionEnvironments();
 
 	/**
 	 *  Returns the native code specification for this bundle.  A value
@@ -262,7 +262,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * @return the native code specification.
 	 * @since 3.4
 	 */
-	public NativeCodeSpecification getNativeCodeSpecification();
+    NativeCodeSpecification getNativeCodeSpecification();
 
 	/**
 	 * Returns the export packages that satisfy imported packages for this bundle description
@@ -272,5 +272,5 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * @return all substituted exports for this bundle description
 	 * @since 3.4
 	 */
-	public ExportPackageDescription[] getSubstitutedExports();
+    ExportPackageDescription[] getSubstitutedExports();
 }

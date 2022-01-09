@@ -29,9 +29,9 @@ public interface ContentProvider {
 	/**
 	 * The type of the provided content
 	 */
-	public enum Type {
-		REFERENCE, CONNECT, DEFAULT;
-	}
+    enum Type {
+		REFERENCE, CONNECT, DEFAULT
+    }
 
 	/**
 	 * A file of the content, may be {@code null}

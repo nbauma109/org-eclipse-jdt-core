@@ -226,7 +226,7 @@ public class TemplateReaderWriter {
 		} catch (ParserConfigurationException e) {
 			Assert.isTrue(false);
 		} catch (SAXException e) {
-			throw (IOException)new IOException("Could not read template file").initCause(e); //$NON-NLS-1$
+			throw (IOException) new IOException("Could not read template file", e); //$NON-NLS-1$
 		}
 
 		return null; // dummy
@@ -392,7 +392,7 @@ public class TemplateReaderWriter {
 		StringBuilder buf= new StringBuilder();
 		int k= 0;
 		while (idx != -1) {
-			buf.append(str.substring(k, idx));
+			buf.append(str, k, idx);
 			for (k= idx + 1; k < str.length() && !Character.isWhitespace(str.charAt(k)); k++) {
 				// loop
 			}

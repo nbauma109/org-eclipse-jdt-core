@@ -60,7 +60,7 @@ public long u4At(int relativeOffset) {
 }
 public char[] utf8At(int relativeOffset, int bytesAvailable) {
 	int length = bytesAvailable;
-	char outputBuf[] = new char[bytesAvailable];
+	char[] outputBuf = new char[bytesAvailable];
 	int outputPos = 0;
 	int readOffset = this.structOffset + relativeOffset;
 

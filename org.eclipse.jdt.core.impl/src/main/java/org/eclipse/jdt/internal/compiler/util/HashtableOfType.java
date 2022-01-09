@@ -18,8 +18,8 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 
 public final class HashtableOfType {
 	// to avoid using Enumerations, walk the individual tables skipping nulls
-	public char[] keyTable[];
-	public ReferenceBinding valueTable[];
+	public char[][] keyTable;
+	public ReferenceBinding[] valueTable;
 
 	public int elementSize; // number of elements in the table
 	int threshold;
@@ -128,7 +128,7 @@ public String toString() {
 	ReferenceBinding type;
 	for (int i = 0, length = this.valueTable.length; i < length; i++)
 		if ((type = this.valueTable[i]) != null)
-			s += type.toString() + "\n"; //$NON-NLS-1$
+			s += type + "\n"; //$NON-NLS-1$
 	return s;
 }
 }

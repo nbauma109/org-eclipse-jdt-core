@@ -723,7 +723,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		// static field accessed through receiver? legal but unoptimal (optional warning)
 		if (!(isImplicitThisRcv
 				|| (this.receiver instanceof NameReference
-					&& (((NameReference) this.receiver).bits & Binding.TYPE) != 0))) {
+					&& (this.receiver.bits & Binding.TYPE) != 0))) {
 			scope.problemReporter().nonStaticAccessToStaticField(this, fieldBinding);
 		}
 		ReferenceBinding declaringClass = this.binding.declaringClass;

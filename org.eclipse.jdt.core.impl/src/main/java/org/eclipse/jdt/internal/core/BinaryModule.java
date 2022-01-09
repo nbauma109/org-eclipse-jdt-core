@@ -89,7 +89,7 @@ public class BinaryModule extends BinaryMember implements AbstractModule {
 		SourceMapper mapper= getSourceMapper();
 		if (mapper != null) {
 			// ensure the class file's buffer is open so that source ranges are computed
-			((ModularClassFile)getClassFile()).getBuffer();
+			getClassFile().getBuffer();
 
 			return mapper.getSourceRange(this);
 		} else {

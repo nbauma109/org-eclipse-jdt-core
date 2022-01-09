@@ -45,7 +45,7 @@ public interface IDOMType extends IDOMMember {
  *
  * @exception IllegalArgumentException if <code>null</code> is specified
  */
-public void addSuperInterface(String interfaceName) throws IllegalArgumentException;
+void addSuperInterface(String interfaceName) throws IllegalArgumentException;
 
 /**
  * Returns the formal type parameters for this type.
@@ -70,7 +70,7 @@ String[] getTypeParameters();
  * @return the name of this type
  */
 @Override
-public String getName();
+String getName();
 /**
  * Returns the name of this type's superclass. The syntax for a superclass name
  * is specified by Super in ClassDeclaration (JLS2 8.1). Type names must be
@@ -82,7 +82,7 @@ public String getName();
  * @return the superclass name, or <code>null</code> if this type represents
  *   an interface or if no superclass has been assigned to this class
  */
-public String getSuperclass();
+String getSuperclass();
 /**
  * Returns the names of interfaces that this type implements or extends,
  * in the order in which they are listed in the source, or an empty array
@@ -99,13 +99,13 @@ public String getSuperclass();
  *
  * @return the list of interface names
  */
-public String[] getSuperInterfaces();
+String[] getSuperInterfaces();
 /**
  * Returns whether this type is a class.
  *
  * @return <code>true</code> for classes, and <code>false</code> for interfaces
  */
-public boolean isClass();
+boolean isClass();
 
 /**
  * Returns whether this type represents an enumeration class ("enum" instead of "class").
@@ -133,7 +133,7 @@ boolean isAnnotation();
  *
  * @param b <code>true</code> for classes, and <code>false</code> for interfaces
  */
-public void setClass(boolean b);
+void setClass(boolean b);
 
 /**
  * Sets whether this type represents an enumeration class.
@@ -145,7 +145,7 @@ public void setClass(boolean b);
  * @param b <code>true</code> for enum classes, and <code>false</code> otherwise
  * @since 3.0
  */
-public void setEnum(boolean b);
+void setEnum(boolean b);
 
 /**
  * Sets whether this type represents an annotation type ("@interface" instead of "interface").
@@ -157,7 +157,7 @@ public void setEnum(boolean b);
  * @param b <code>true</code> for an annotation type, and <code>false</code> otherwise
  * @since 3.0
  */
-public void setAnnotation(boolean b);
+void setAnnotation(boolean b);
 
 /**
  * Sets the formal type parameters for this type.
@@ -182,7 +182,7 @@ void setTypeParameters(String[] typeParameters);
  * @exception IllegalArgumentException if <code>null</code> is specified
  */
 @Override
-public void setName(String name) throws IllegalArgumentException;
+void setName(String name) throws IllegalArgumentException;
 /**
  * Sets the name of this type's superclass. Has no effect if this type
  * represents an interface. A <code>null</code> name indicates that no
@@ -196,7 +196,7 @@ public void setName(String name) throws IllegalArgumentException;
  * @param superclassName the superclass name, or <code>null</code> if this type
  *   should have to no explicitly specified superclass
  */
-public void setSuperclass(String superclassName);
+void setSuperclass(String superclassName);
 /**
  * Sets the names of interfaces that this type implements or extends,
  * in the order in which they are to be listed in the source. An empty array
@@ -213,5 +213,5 @@ public void setSuperclass(String superclassName);
  *
  * @param interfaceNames the list of interface names
  */
-public void setSuperInterfaces(String[] interfaceNames);
+void setSuperInterfaces(String[] interfaceNames);
 }

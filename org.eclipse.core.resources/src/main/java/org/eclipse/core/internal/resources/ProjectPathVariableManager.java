@@ -34,7 +34,7 @@ import org.eclipse.osgi.util.NLS;
 public class ProjectPathVariableManager implements IPathVariableManager, IManager {
 
 	private Resource resource;
-	private ProjectVariableProviderManager.Descriptor variableProviders[] = null;
+	private ProjectVariableProviderManager.Descriptor[] variableProviders = null;
 
 	/**
 	 * Constructor for the class.
@@ -313,7 +313,7 @@ public class ProjectPathVariableManager implements IPathVariableManager, IManage
 	@Override
 	public void setValue(String varName, IPath newValue) throws CoreException {
 		if (newValue == null)
-			setURIValue(varName, (URI) null);
+			setURIValue(varName, null);
 		else
 			setURIValue(varName, URIUtil.toURI(newValue));
 	}

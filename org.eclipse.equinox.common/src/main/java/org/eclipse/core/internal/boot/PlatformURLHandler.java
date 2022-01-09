@@ -72,7 +72,7 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 
 	public static void register(String type, Class<?> connectionClass) {
 		try {
-			Constructor<?> c = connectionClass.getConstructor(new Class[] {URL.class});
+			Constructor<?> c = connectionClass.getConstructor(URL.class);
 			connectionType.put(type, c);
 		} catch (NoSuchMethodException e) {
 			//don't register connection classes that don't conform to the spec

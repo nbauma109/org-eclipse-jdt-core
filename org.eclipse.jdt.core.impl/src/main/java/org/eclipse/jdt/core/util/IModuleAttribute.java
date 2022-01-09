@@ -54,7 +54,7 @@ public interface IModuleAttribute extends IClassFileAttribute {
 	 *
 	 * @return the module version string
 	 */
-	public char[] getModuleVersionValue();
+    char[] getModuleVersionValue();
 
 	/**
 	 * Answer back the requires count.

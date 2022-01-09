@@ -61,7 +61,7 @@ abstract class ConstraintFormula extends ReductionResult {
 	// for debug toString():
 	protected void appendTypeName(StringBuffer buf, TypeBinding type) {
 		if (type instanceof CaptureBinding18)
-			buf.append(type.toString()); // contains more info than readable name
+			buf.append(type); // contains more info than readable name
 		else
 			buf.append(type.readableName());
 	}

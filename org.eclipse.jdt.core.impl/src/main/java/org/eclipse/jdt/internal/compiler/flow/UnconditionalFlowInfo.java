@@ -94,7 +94,7 @@ public class UnconditionalFlowInfo extends FlowInfo {
 
 	// extra segments
 	public static final int extraLength = 8;
-	public long extra[][];
+	public long[][] extra;
 		// extra bit fields for larger numbers of fields/variables
 		// extra[0] holds definiteInits values, extra[1] potentialInits, etc.
 		// extra[1+1]... corresponds to nullBits1 ...

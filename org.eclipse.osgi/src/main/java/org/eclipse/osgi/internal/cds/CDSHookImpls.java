@@ -72,7 +72,7 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		}
 		try {
 			// check if weaving hook modified the class bytes
-			byte originalClassBytes[] = entry.getBytes();
+			byte[] originalClassBytes = entry.getBytes();
 			if (originalClassBytes != classbytes) {
 				// weaving hook has potentially modified the class bytes
 				boolean modified = false;

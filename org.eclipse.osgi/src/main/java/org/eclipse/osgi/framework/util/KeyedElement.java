@@ -30,18 +30,18 @@ public interface KeyedElement {
 	 * Returns the hash code of the key
 	 * @return the hash code of the key
 	 */
-	public int getKeyHashCode();
+    int getKeyHashCode();
 
 	/**
 	 * Compares this element with a specified element
 	 * @param other the element to compare with
 	 * @return returns true if the specified element equals this element
 	 */
-	public boolean compare(KeyedElement other);
+    boolean compare(KeyedElement other);
 
 	/**
 	 * Returns the key for this element
 	 * @return the key for this element
 	 */
-	public Object getKey();
+    Object getKey();
 }

@@ -669,9 +669,7 @@ public final class ServicePermission extends BasicPermission {
 				final Object key = e.getKey();
 				if ((k == key) || ((k != null) && k.equals(key))) {
 					final Object value = e.getValue();
-					if ((v == value) || ((v != null) && v.equals(value))) {
-						return true;
-					}
+                    return (v == value) || ((v != null) && v.equals(value));
 				}
 				return false;
 			}

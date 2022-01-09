@@ -242,7 +242,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	}
 
 	private static void loadLocks(File locksData) throws IOException {
-		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(locksData));) {
+		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(locksData))) {
 
 			int dataVersion = in.readInt();
 			if (dataVersion != DATA_VERSION)

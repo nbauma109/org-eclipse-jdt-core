@@ -72,7 +72,7 @@ public class CharacterLiteral extends Expression {
 	 * The literal string, including quotes and escapes; defaults to the
 	 * literal for the character 'X'.
 	 */
-	private String escapedValue = "\'X\'";//$NON-NLS-1$
+	private String escapedValue = "'X'";//$NON-NLS-1$
 
 	/**
 	 * Creates a new unparented character literal node owned by the given AST.

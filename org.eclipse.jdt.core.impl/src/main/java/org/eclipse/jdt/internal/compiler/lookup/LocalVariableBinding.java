@@ -281,7 +281,7 @@ public class LocalVariableBinding extends VariableBinding {
 		String s = super.toString();
 		switch (this.useFlag){
 			case USED:
-				s += "[pos: " + String.valueOf(this.resolvedPosition) + "]"; //$NON-NLS-2$ //$NON-NLS-1$
+				s += "[pos: " + this.resolvedPosition + "]"; //$NON-NLS-2$ //$NON-NLS-1$
 				break;
 			case UNUSED:
 				s += "[pos: unused]"; //$NON-NLS-1$
@@ -290,13 +290,13 @@ public class LocalVariableBinding extends VariableBinding {
 				s += "[pos: fake_used]"; //$NON-NLS-1$
 				break;
 		}
-		s += "[id:" + String.valueOf(this.id) + "]"; //$NON-NLS-2$ //$NON-NLS-1$
+		s += "[id:" + this.id + "]"; //$NON-NLS-2$ //$NON-NLS-1$
 		if (this.initializationCount > 0) {
 			s += "[pc: "; //$NON-NLS-1$
 			for (int i = 0; i < this.initializationCount; i++) {
 				if (i > 0)
 					s += ", "; //$NON-NLS-1$
-				s += String.valueOf(this.initializationPCs[i << 1]) + "-" + ((this.initializationPCs[(i << 1) + 1] == -1) ? "?" : String.valueOf(this.initializationPCs[(i<< 1) + 1])); //$NON-NLS-2$ //$NON-NLS-1$
+				s += this.initializationPCs[i << 1] + "-" + ((this.initializationPCs[(i << 1) + 1] == -1) ? "?" : String.valueOf(this.initializationPCs[(i<< 1) + 1])); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 			s += "]"; //$NON-NLS-1$
 		}

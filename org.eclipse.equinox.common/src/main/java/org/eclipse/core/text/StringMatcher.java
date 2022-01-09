@@ -35,7 +35,7 @@ public final class StringMatcher {
 
 	private boolean fHasTrailingStar;
 
-	private String fSegments[]; // the given pattern is split into * separated segments
+	private String[] fSegments; // the given pattern is split into * separated segments
 
 	/* Minimum length required for a match: shorter texts cannot possibly match. */
 	private int fBound = 0;

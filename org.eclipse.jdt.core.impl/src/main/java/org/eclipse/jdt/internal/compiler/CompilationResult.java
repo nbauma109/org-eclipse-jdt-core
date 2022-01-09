@@ -56,8 +56,8 @@ import org.eclipse.jdt.internal.compiler.util.Util;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class CompilationResult {
 
-	public CategorizedProblem problems[];
-	public CategorizedProblem tasks[];
+	public CategorizedProblem[] problems;
+	public CategorizedProblem[] tasks;
 	public int problemCount;
 	public int taskCount;
 	public ICompilationUnit compilationUnit;
@@ -69,7 +69,7 @@ public class CompilationResult {
 	public char[][] rootReferences;
 	public boolean hasAnnotations = false;
 	public boolean hasFunctionalTypes = false;
-	public int lineSeparatorPositions[];
+	public int[] lineSeparatorPositions;
 	public RecoveryScannerData recoveryScannerData;
 	public Map compiledTypes = new Hashtable(11);
 	public int unitIndex, totalUnitsKnown;

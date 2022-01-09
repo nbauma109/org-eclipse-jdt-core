@@ -221,7 +221,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			int pendingNum = pending.get();
 			if (pendingNum > fileLimit) {
 				if (debug.DEBUG_BUNDLE_FILE) {
-					Debug.println("MRUBundleFileList: Applying back pressure before opening: " + toString()); //$NON-NLS-1$
+					Debug.println("MRUBundleFileList: Applying back pressure before opening: " + this); //$NON-NLS-1$
 				}
 				// delay to allow the closer to catchup
 				try {

@@ -226,7 +226,7 @@ protected Object peekAtInfo(IJavaElement element) {
  */
 protected void putInfo(IJavaElement element, Object info) {
 	if (DEBUG_CACHE_INSERTIONS) {
-		System.out.println(Thread.currentThread() + " cache putInfo (" + getElementType(element) + " " + element.toString() + ", " + info + ")");  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+		System.out.println(Thread.currentThread() + " cache putInfo (" + getElementType(element) + " " + element + ", " + info + ")");  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
 	}
 	switch (element.getElementType()) {
 		case IJavaElement.JAVA_MODEL:

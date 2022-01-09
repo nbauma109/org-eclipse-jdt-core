@@ -446,7 +446,7 @@ public abstract class Plugin implements BundleActivator {
 		if (debugOptions == null)
 			return debug;
 		// if platform debugging is enabled, check to see if this plugin is enabled for debugging
-		return debugOptions.isDebugEnabled() ? InternalPlatform.getDefault().getBooleanOption(key, false) : false;
+		return debugOptions.isDebugEnabled() && InternalPlatform.getDefault().getBooleanOption(key, false);
 	}
 
 	/**

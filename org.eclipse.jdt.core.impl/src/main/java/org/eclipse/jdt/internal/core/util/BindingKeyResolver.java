@@ -171,11 +171,11 @@ public class BindingKeyResolver extends BindingKeyParser {
 		Binding annotationType = ((BindingKeyResolver) this.types.get(size-1)).compilerBinding;
 		AnnotationBinding[] annotationBindings;
 		if (this.compilerBinding == null && this.typeBinding instanceof ReferenceBinding) {
-			annotationBindings = ((ReferenceBinding) this.typeBinding).getAnnotations();
+			annotationBindings = this.typeBinding.getAnnotations();
 		} else if (this.compilerBinding instanceof MethodBinding) {
-			annotationBindings = ((MethodBinding) this.compilerBinding).getAnnotations();
+			annotationBindings = this.compilerBinding.getAnnotations();
 		} else if (this.compilerBinding instanceof VariableBinding) {
-			annotationBindings = ((VariableBinding) this.compilerBinding).getAnnotations();
+			annotationBindings = this.compilerBinding.getAnnotations();
 		} else {
 			return;
 		}
@@ -249,7 +249,7 @@ public class BindingKeyResolver extends BindingKeyParser {
 							CaptureBinding captureBinding = (CaptureBinding) binding;
 							if (captureBinding.end == position && captureBinding.wildcard == wildcardBinding) {
 								if (captureBinding instanceof CaptureBinding18) {
-									if (((CaptureBinding18)captureBinding).captureID != capture18id)
+									if (captureBinding.captureID != capture18id)
 										return false;
 								}
 								this.capture = captureBinding;

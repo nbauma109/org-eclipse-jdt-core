@@ -272,7 +272,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		 * The instance must be compared by identity (==, not equals) and must not
 		 * be leaked outside this class.
 		 */
-		private final static String NULL_CONFIG = new String("org.eclipse.equinox.configuration.null.value"); //$NON-NLS-1$
+		private final static String NULL_CONFIG = "org.eclipse.equinox.configuration.null.value"; //$NON-NLS-1$
 		private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
 
 		private final boolean useSystemProperties;
@@ -285,7 +285,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			this.exceptions = exceptions;
 			this.initialConfig = initialConfiguration == null ? new HashMap<>(0) : new HashMap<>(initialConfiguration);
 			Object useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
-			this.useSystemProperties = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
+			this.useSystemProperties = useSystemPropsValue != null && Boolean.parseBoolean(useSystemPropsValue.toString());
 			Properties tempConfiguration = useSystemProperties ? EquinoxContainer.secureAction.getProperties() : new Properties();
 			// do this the hard way to handle null values
 			for (Map.Entry<String, ?> initialEntry : this.initialConfig.entrySet()) {
@@ -426,7 +426,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 						if (prop == null) {
 							try {
 								// try using the System.getenv method if it exists (bug 126921)
-								Method getenv = System.class.getMethod("getenv", new Class[] {String.class}); //$NON-NLS-1$
+								Method getenv = System.class.getMethod("getenv", String.class); //$NON-NLS-1$
 								prop = (String) getenv.invoke(null, new Object[] {var});
 							} catch (Throwable t) {
 								// do nothing;

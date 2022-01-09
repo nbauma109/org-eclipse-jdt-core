@@ -42,7 +42,7 @@ void addDocumentNames(String substring, SimpleSet results) {
 				results.add(paths[i]);
 	} else {
 		for (int i = 0, l = referenceTables.length; i < l; i++)
-			if (referenceTables[i] != null && ((String) paths[i]).startsWith(substring, 0))
+			if (referenceTables[i] != null && ((String) paths[i]).startsWith(substring))
 				results.add(paths[i]);
 	}
 }

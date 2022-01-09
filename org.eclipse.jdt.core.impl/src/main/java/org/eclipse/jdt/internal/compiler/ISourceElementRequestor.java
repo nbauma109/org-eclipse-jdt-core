@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 @SuppressWarnings("rawtypes")
 public interface ISourceElementRequestor {
 
-	public static class ModuleInfo {
+	class ModuleInfo {
 		public int declarationStart;
 		public int modifiers;
 		public char[] name;
@@ -67,19 +67,19 @@ public interface ISourceElementRequestor {
 		public ModuleDeclaration node;
 		public char[][] categories;
 	}
-	public static class RequiresInfo {
+	class RequiresInfo {
 		public char[] moduleName;
 		public int modifiers;
 	}
-	public static class PackageExportInfo {
+	class PackageExportInfo {
 		public char[] pkgName;
 		public char[][] targets;
 	}
-	public static class ServicesInfo {
+	class ServicesInfo {
 		public char[] serviceName;
 		public char[][] implNames;
 	}
-	public static class TypeInfo {
+	class TypeInfo {
 		public boolean typeAnnotated;
 		public int declarationStart;
 		public int modifiers;
@@ -99,7 +99,7 @@ public interface ISourceElementRequestor {
 		public HashMap childrenCategories = new HashMap();
 	}
 
-	public static class TypeParameterInfo {
+	class TypeParameterInfo {
 		public boolean typeAnnotated;
 		public int declarationStart;
 		public int declarationEnd;
@@ -109,7 +109,7 @@ public interface ISourceElementRequestor {
 		public char[][] bounds;
 	}
 
-	public static class MethodInfo {
+	class MethodInfo {
 		public boolean typeAnnotated;
 		public boolean isCanonicalConstr;
 		public boolean isConstructor;
@@ -134,7 +134,7 @@ public interface ISourceElementRequestor {
 		public TypeDeclaration enclosingType;
 	}
 
-	public static class ParameterInfo {
+	class ParameterInfo {
 		public int modifiers;
 		public int declarationStart;
 		public int declarationEnd;
@@ -142,7 +142,7 @@ public interface ISourceElementRequestor {
 		public int nameSourceEnd;
 		public char[] name;
 	}
-	public static class FieldInfo {
+	class FieldInfo {
 		public boolean isRecordComponent;
 		public boolean typeAnnotated;
 		public int declarationStart;

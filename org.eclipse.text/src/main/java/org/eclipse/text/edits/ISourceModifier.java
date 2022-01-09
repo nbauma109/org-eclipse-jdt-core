@@ -38,7 +38,7 @@ public interface ISourceModifier {
 	 * @return an array of <code>ReplaceEdits</code>
 	 *  describing the modifications.
 	 */
-	public ReplaceEdit[] getModifications(String source);
+    ReplaceEdit[] getModifications(String source);
 
 	/**
 	 * Creates a copy of this source modifier object. The copy will
@@ -48,5 +48,5 @@ public interface ISourceModifier {
 	 *
 	 * @return the copy of the source modifier
 	 */
-	public ISourceModifier copy();
+    ISourceModifier copy();
 }

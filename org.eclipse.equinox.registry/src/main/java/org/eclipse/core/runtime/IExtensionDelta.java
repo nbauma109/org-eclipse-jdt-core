@@ -29,13 +29,13 @@ public interface IExtensionDelta {
 	 * extension point.
 	 * @see IExtensionDelta#getKind()
 	 */
-	public int ADDED = 1;
+    int ADDED = 1;
 	/**
 	 * Delta kind constant indicating that an extension has been removed from an
 	 * extension point.
 	 * @see IExtensionDelta#getKind()
 	 */
-	public int REMOVED = 2;
+    int REMOVED = 2;
 
 	/**
 	 * The kind of this extension delta.
@@ -44,19 +44,19 @@ public interface IExtensionDelta {
 	 * @see #ADDED
 	 * @see #REMOVED
 	 */
-	public int getKind();
+    int getKind();
 
 	/**
 	 * Returns the affected extension.
 	 *
 	 * @return the affected extension
 	 */
-	public IExtension getExtension();
+    IExtension getExtension();
 
 	/**
 	 * Returns the affected extension point.
 	 *
 	 * @return the affected extension point
 	 */
-	public IExtensionPoint getExtensionPoint();
+    IExtensionPoint getExtensionPoint();
 }

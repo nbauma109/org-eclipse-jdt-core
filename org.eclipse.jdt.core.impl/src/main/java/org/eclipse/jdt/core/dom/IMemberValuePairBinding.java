@@ -30,14 +30,14 @@ public interface IMemberValuePairBinding extends IBinding {
  * @return the name of the member
  */
 @Override
-public String getName();
+String getName();
 
 /**
  * Returns the method binding corresponding to the named annotation type member.
  *
  * @return the method binding for the annotation type member
  */
-public IMethodBinding getMethodBinding();
+IMethodBinding getMethodBinding();
 
 /**
  * Returns the resolved value. Resolved values are represented as follows:
@@ -53,11 +53,11 @@ public IMethodBinding getMethodBinding();
  *
  * @return the resolved value, or <code>null</code> if none exists
  */
-public Object getValue();
+Object getValue();
 
 /**
  * @return <code>true</code> iff this member value pair's value is the default value.
  *         Returns <code>false</code> otherwise.
  */
-public boolean isDefault();
+boolean isDefault();
 }

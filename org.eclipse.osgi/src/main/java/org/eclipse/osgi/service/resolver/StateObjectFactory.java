@@ -41,7 +41,7 @@ public interface StateObjectFactory {
 	 * states.  This is particularly useful when using the resolver outside the context
 	 * of a running Equinox framework.
 	 */
-	public static final StateObjectFactory defaultFactory = new StateObjectFactoryProxy();
+    StateObjectFactory defaultFactory = new StateObjectFactoryProxy();
 
 	/**
 	 * Creates an empty state. The returned state does not have an
@@ -50,7 +50,7 @@ public interface StateObjectFactory {
 	 * @return the created state
 	 * @deprecated use {@link #createState(boolean) }
 	 */
-	public State createState();
+    State createState();
 
 	/**
 	 * Creates an empty state with or without a resolver.
@@ -59,7 +59,7 @@ public interface StateObjectFactory {
 	 * @return the created state
 	 * @since 3.2
 	 */
-	public State createState(boolean resolver);
+    State createState(boolean resolver);
 
 	/**
 	 * Creates a new state that is a copy of the given state. The returned state
@@ -71,7 +71,7 @@ public interface StateObjectFactory {
 	 * @param state a state to be copied
 	 * @return the created state
 	 */
-	public State createState(State state);
+    State createState(State state);
 
 	/**
 	 * Creates a bundle description from the given parameters.
@@ -94,7 +94,7 @@ public interface StateObjectFactory {
 	 * @return the created bundle description
 	 * @deprecated use {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton);
+    BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton);
 
 	/**
 	 * Creates a bundle description from the given parameters.
@@ -123,7 +123,7 @@ public interface StateObjectFactory {
 	 * @return the created bundle description
 	 * @deprecated use {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
+    BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
 
 	/**
 	 * Creates a bundle description from the given parameters.
@@ -145,7 +145,7 @@ public interface StateObjectFactory {
 	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
 	 * @return the created bundle description
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
+    BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
 
 	/**
 	 * Creates a bundle description from the given parameters.
@@ -169,7 +169,7 @@ public interface StateObjectFactory {
 	 * @return the created bundle description
 	 * @since 3.4
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
+    BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
 
 	/**
 	 * Creates a bundle description from the given parameters.
@@ -190,7 +190,7 @@ public interface StateObjectFactory {
 	 * @return the created bundle description
 	 * @since 3.8
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
+    BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
 
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
@@ -204,7 +204,7 @@ public interface StateObjectFactory {
 	 * @return a bundle description derived from the given information
 	 * @throws BundleException if an error occurs while reading the manifest
 	 */
-	public BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest, String location, long id) throws BundleException;
+    BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest, String location, long id) throws BundleException;
 
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
@@ -218,7 +218,7 @@ public interface StateObjectFactory {
 	 * @throws BundleException if an error occurs while reading the manifest
 	 * @deprecated use {@link #createBundleDescription(State, Dictionary, String, long)}
 	 */
-	public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id) throws BundleException;
+    BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id) throws BundleException;
 
 	/**
 	 * Creates a bundle description that is a copy of the given description.
@@ -227,7 +227,7 @@ public interface StateObjectFactory {
 	 * @param original the bundle description to be copied
 	 * @return the created bundle description
 	 */
-	public BundleDescription createBundleDescription(BundleDescription original);
+    BundleDescription createBundleDescription(BundleDescription original);
 
 	/**
 	 * Creates a bundle specification from the given parameters.
@@ -239,7 +239,7 @@ public interface StateObjectFactory {
 	 * @return the created bundle specification
 	 * @see VersionConstraint for information on the available match rules
 	 */
-	public BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange, boolean export, boolean optional);
+    BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange, boolean export, boolean optional);
 
 	/**
 	 * Creates a bundle specification that is a copy of the given constraint.
@@ -247,7 +247,7 @@ public interface StateObjectFactory {
 	 * @param original the constraint to be copied
 	 * @return the created bundle specification
 	 */
-	public BundleSpecification createBundleSpecification(BundleSpecification original);
+    BundleSpecification createBundleSpecification(BundleSpecification original);
 
 	/**
 	 * Creates bundle specifications from the given declaration.  The declaration uses
@@ -256,7 +256,7 @@ public interface StateObjectFactory {
 	 * @return the bundle specifications
 	 * @since 3.8
 	 */
-	public List<BundleSpecification> createBundleSpecifications(String declaration);
+    List<BundleSpecification> createBundleSpecifications(String declaration);
 
 	/**
 	 * Creates a host specification from the given parameters.
@@ -266,7 +266,7 @@ public interface StateObjectFactory {
 	 * @return the created host specification
 	 * @see VersionConstraint for information on the available match rules
 	 */
-	public HostSpecification createHostSpecification(String hostSymbolicName, VersionRange hostVersionRange);
+    HostSpecification createHostSpecification(String hostSymbolicName, VersionRange hostVersionRange);
 
 	/**
 	 * Creates host specifications from the given declaration.  The declaration uses
@@ -275,7 +275,7 @@ public interface StateObjectFactory {
 	 * @return the host specifications
 	 * @since 3.8
 	 */
-	public List<HostSpecification> createHostSpecifications(String declaration);
+    List<HostSpecification> createHostSpecifications(String declaration);
 
 	/**
 	 * Creates a host specification that is a copy of the given constraint.
@@ -283,7 +283,7 @@ public interface StateObjectFactory {
 	 * @param original the constraint to be copied
 	 * @return the created host specification
 	 */
-	public HostSpecification createHostSpecification(HostSpecification original);
+    HostSpecification createHostSpecification(HostSpecification original);
 
 	/**
 	 * Creates an import package specification from the given parameters.
@@ -297,14 +297,14 @@ public interface StateObjectFactory {
 	 * @param importer the importing bundle (may be <code>null</code>)
 	 * @return the created package specification
 	 */
-	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, ?> directives, Map<String, ?> attributes, BundleDescription importer);
+    ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, ?> directives, Map<String, ?> attributes, BundleDescription importer);
 
 	/**
 	 * Creates an import package specification that is a copy of the given import package
 	 * @param original the import package to be copied
 	 * @return the created package specification
 	 */
-	public ImportPackageSpecification createImportPackageSpecification(ImportPackageSpecification original);
+    ImportPackageSpecification createImportPackageSpecification(ImportPackageSpecification original);
 
 	/**
 	 * Creates an import package specifications from the given declaration.  The declaration uses
@@ -313,7 +313,7 @@ public interface StateObjectFactory {
 	 * @return the import package specifications
 	 * @since 3.8
 	 */
-	public List<ImportPackageSpecification> createImportPackageSpecifications(String declaration);
+    List<ImportPackageSpecification> createImportPackageSpecifications(String declaration);
 
 	/**
 	 * Used by the Resolver to dynamically create ExportPackageDescription objects during the resolution process.
@@ -328,7 +328,7 @@ public interface StateObjectFactory {
 	 * @param exporter the exporter of the package (may be <code>null</code>)
 	 * @return the created package
 	 */
-	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter);
+    ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter);
 
 	/**
 	 * Creates a generic description from the given parameters
@@ -339,7 +339,7 @@ public interface StateObjectFactory {
 	 * @return the created generic description
 	 * @deprecated use {@link #createGenericDescription(String, String, Version, Map)}
 	 */
-	public GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes);
+    GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes);
 
 	/**
 	 * Creates a generic description from the given parameters
@@ -350,7 +350,7 @@ public interface StateObjectFactory {
 	 * @return the created generic description
 	 * @since 3.7
 	 */
-	public GenericDescription createGenericDescription(String type, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier);
+    GenericDescription createGenericDescription(String type, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier);
 
 	/**
 	 * Creates generic descriptions from the given declaration.  The declaration uses
@@ -359,7 +359,7 @@ public interface StateObjectFactory {
 	 * @return the generic descriptions
 	 * @since 3.8
 	 */
-	public List<GenericDescription> createGenericDescriptions(String declaration);
+    List<GenericDescription> createGenericDescriptions(String declaration);
 
 	/**
 	 * Creates a generic specification from the given parameters
@@ -371,7 +371,7 @@ public interface StateObjectFactory {
 	 * @return the created generic specification
 	 * @throws InvalidSyntaxException if the matching filter is invalid
 	 */
-	public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter, boolean optional, boolean multiple) throws InvalidSyntaxException;
+    GenericSpecification createGenericSpecification(String name, String type, String matchingFilter, boolean optional, boolean multiple) throws InvalidSyntaxException;
 
 	/**
 	 * Creates generic specifications from the given declaration.  The declaration uses
@@ -380,7 +380,7 @@ public interface StateObjectFactory {
 	 * @return the generic specifications
 	 * @since 3.8
 	 */
-	public List<GenericSpecification> createGenericSpecifications(String declaration);
+    List<GenericSpecification> createGenericSpecifications(String declaration);
 
 	/**
 	 * Creates a native code specification from the given parameters
@@ -389,7 +389,7 @@ public interface StateObjectFactory {
 	 * @return the created native code specification
 	 * @since 3.4
 	 */
-	public NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions, boolean optional);
+    NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions, boolean optional);
 
 	/**
 	 * Creates a native code description from the given parameters
@@ -403,14 +403,14 @@ public interface StateObjectFactory {
 	 * @throws InvalidSyntaxException if the selection filter is invalid
 	 * @since 3.4
 	 */
-	public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors, String[] osNames, VersionRange[] osVersions, String[] languages, String filter) throws InvalidSyntaxException;
+    NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors, String[] osNames, VersionRange[] osVersions, String[] languages, String filter) throws InvalidSyntaxException;
 
 	/**
 	 * Creates an export package specification that is a copy of the given constraint
 	 * @param original the export package to be copied
 	 * @return the created package
 	 */
-	public ExportPackageDescription createExportPackageDescription(ExportPackageDescription original);
+    ExportPackageDescription createExportPackageDescription(ExportPackageDescription original);
 
 	/**
 	 * Creates export package descriptions from the given declaration.  The declaration uses
@@ -419,7 +419,7 @@ public interface StateObjectFactory {
 	 * @return the export package descriptions
 	 * @since 3.8
 	 */
-	public List<ExportPackageDescription> createExportPackageDescriptions(String declaration);
+    List<ExportPackageDescription> createExportPackageDescriptions(String declaration);
 
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.
@@ -433,7 +433,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @since 3.1
 	 */
-	public void writeState(State state, OutputStream stream) throws IOException;
+    void writeState(State state, OutputStream stream) throws IOException;
 
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.
@@ -447,7 +447,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @see #writeState(State, OutputStream)
 	 */
-	public void writeState(State state, DataOutputStream stream) throws IOException;
+    void writeState(State state, DataOutputStream stream) throws IOException;
 
 	/**
 	 * Persists the given state in the given directory.
@@ -459,7 +459,7 @@ public interface StateObjectFactory {
 	 * @throws IllegalArgumentException if the state provided was not created by
 	 * this factory
 	 */
-	public void writeState(State state, File stateDirectory) throws IOException;
+    void writeState(State state, File stateDirectory) throws IOException;
 
 	/**
 	 * Reads a persisted state from the given stream. Closes the stream.
@@ -471,7 +471,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #readState(File)} instead
 	 * @since 3.1
 	 */
-	public State readState(InputStream stream) throws IOException;
+    State readState(InputStream stream) throws IOException;
 
 	/**
 	 * Reads a persisted state from the given stream. Closes the stream.
@@ -483,7 +483,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #readState(File)} instead
 	 * @see #readState(InputStream)
 	 */
-	public State readState(DataInputStream stream) throws IOException;
+    State readState(DataInputStream stream) throws IOException;
 
 	/**
 	 * Reads a persisted state from the given directory.
@@ -493,9 +493,9 @@ public interface StateObjectFactory {
 	 * @throws IOException if an IOException happens while reading the state from
 	 * the stream
 	 */
-	public State readState(File stateDirectory) throws IOException;
+    State readState(File stateDirectory) throws IOException;
 
-	static class StateObjectFactoryProxy implements StateObjectFactory {
+	class StateObjectFactoryProxy implements StateObjectFactory {
 		private static final String IMPL_NAME = "org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl"; //$NON-NLS-1$
 		private Object monitor = new Object();
 		private StateObjectFactory implementation;

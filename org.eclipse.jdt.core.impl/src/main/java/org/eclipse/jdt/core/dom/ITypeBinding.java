@@ -65,7 +65,7 @@ public interface ITypeBinding extends IBinding {
 	 * </ul>
 	 * @since 3.3
 	 */
-	public ITypeBinding createArrayType(int dimension);
+    ITypeBinding createArrayType(int dimension);
 
 	/**
 	 * Returns the binary name of this type binding.
@@ -81,7 +81,7 @@ public interface ITypeBinding extends IBinding {
 	 * if the binary name is unknown
 	 * @since 3.0
 	 */
-	public String getBinaryName();
+    String getBinaryName();
 
 	/**
 	 * Returns the bound of this wildcard type if it has one.
@@ -93,7 +93,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getTypeBounds()
 	 * @since 3.1
 	 */
-	public ITypeBinding getBound();
+    ITypeBinding getBound();
 
 	/**
 	 * Returns the generic type associated with this wildcard type, if it has one.
@@ -103,7 +103,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #isWildcardType()
 	 * @since 3.5
 	 */
-	public ITypeBinding getGenericTypeOfWildcardType();
+    ITypeBinding getGenericTypeOfWildcardType();
 
 	/**
 	 * Returns the rank associated with this wildcard type. The rank of this wild card type is the relative
@@ -114,7 +114,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #isWildcardType()
 	 * @since 3.5
 	 */
-	public int getRank();
+    int getRank();
 
 	/**
 	 * Returns the binding representing the component type of this array type,
@@ -127,7 +127,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getElementType()
 	 * @since 3.2
 	 */
-	public ITypeBinding getComponentType();
+    ITypeBinding getComponentType();
 
 	/**
 	 * Returns a list of bindings representing all the fields declared
@@ -146,7 +146,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return the list of bindings for the field members of this type,
 	 *   or the empty list if this type does not have field members
 	 */
-	public IVariableBinding[] getDeclaredFields();
+    IVariableBinding[] getDeclaredFields();
 
 	/**
 	 * Returns a list of method bindings representing all the methods and
@@ -165,7 +165,7 @@ public interface ITypeBinding extends IBinding {
 	 *   declared by this class, interface, enum type, or annotation type,
 	 *   or the empty list if this type does not declare any methods or constructors
 	 */
-	public IMethodBinding[] getDeclaredMethods();
+    IMethodBinding[] getDeclaredMethods();
 
 	/**
 	 * Returns the declared modifiers for this class or interface binding
@@ -184,7 +184,7 @@ public interface ITypeBinding extends IBinding {
 	 * delegated to the method <code>getModifiers</code>. Clients should call
 	 * <code>getModifiers</code> method directly.
 	 */
-	public int getDeclaredModifiers();
+    int getDeclaredModifiers();
 
 	/**
 	 * Returns a list of type bindings representing all the types declared as
@@ -200,7 +200,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return the list of type bindings for the member types of this type,
 	 *   or the empty list if this type does not have member types
 	 */
-	public ITypeBinding[] getDeclaredTypes();
+    ITypeBinding[] getDeclaredTypes();
 
 	/**
 	 * Returns the type binding representing the class, interface, or enum
@@ -227,7 +227,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return the binding of the type that declares this type, or
 	 * <code>null</code> if none
 	 */
-	public ITypeBinding getDeclaringClass();
+    ITypeBinding getDeclaringClass();
 
 	/**
 	 * Returns the method binding representing the method that declares this binding
@@ -252,7 +252,7 @@ public interface ITypeBinding extends IBinding {
 	 * <code>null</code> if none
 	 * @since 3.1
 	 */
-	public IMethodBinding getDeclaringMethod();
+    IMethodBinding getDeclaringMethod();
 
 	/**
 	 * If this type binding represents a local type, possibly an anonymous class, then:
@@ -276,7 +276,7 @@ public interface ITypeBinding extends IBinding {
 	 * or null for non-local type bindings.
 	 * @since 3.11
 	 */
-	public IBinding getDeclaringMember();
+    IBinding getDeclaringMember();
 
 	/**
 	 * Returns the binding of the module associated with the package in which
@@ -296,7 +296,7 @@ public interface ITypeBinding extends IBinding {
 	 *
 	 * @since 3.14
 	 */
-	public default IModuleBinding getModule() {
+	default IModuleBinding getModule() {
 		return null;
 	}
 	/**
@@ -306,7 +306,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return the number of dimension of this array type binding, or
 	 *   <code>0</code> if this is not an array type
 	 */
-	public int getDimensions();
+    int getDimensions();
 
 	/**
 	 * Returns the binding representing the element type of this array type,
@@ -319,7 +319,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return the element type binding, or <code>null</code> if this is
 	 *   not an array type
 	 */
-	public ITypeBinding getElementType();
+    ITypeBinding getElementType();
 
 	/**
 	 * Returns the erasure of this type binding.
@@ -347,7 +347,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return the erasure type binding
 	 * @since 3.1
 	 */
-	public ITypeBinding getErasure();
+    ITypeBinding getErasure();
 
 	/**
 	 * Returns the single abstract method that constitutes the single function
@@ -364,7 +364,7 @@ public interface ITypeBinding extends IBinding {
 	 *
 	 * @since 3.10
 	 */
-	public IMethodBinding getFunctionalInterfaceMethod();
+    IMethodBinding getFunctionalInterfaceMethod();
 
 	/**
 	 * Returns a list of type bindings representing the direct superinterfaces
@@ -396,7 +396,7 @@ public interface ITypeBinding extends IBinding {
 	 *   class or enum, or interfaces extended by this interface, or otherwise
 	 *   the empty list
 	 */
-	public ITypeBinding[] getInterfaces();
+    ITypeBinding[] getInterfaces();
 
 	/**
 	 * Returns the compiled modifiers for this class, interface, enum,
@@ -412,7 +412,7 @@ public interface ITypeBinding extends IBinding {
 	 * type or a recovered type.
 	 */
 	@Override
-	public int getModifiers();
+    int getModifiers();
 
 	/**
 	 * Returns the unqualified name of the type represented by this binding
@@ -460,7 +460,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getQualifiedName()
 	 */
 	@Override
-	public String getName();
+    String getName();
 
 	/**
 	 * Returns the binding for the package in which this type is declared.
@@ -475,7 +475,7 @@ public interface ITypeBinding extends IBinding {
 	 * binding represents a primitive type, an array type, the null type,
 	 * a type variable, a wildcard type, a capture binding.
 	 */
-	public IPackageBinding getPackage();
+    IPackageBinding getPackage();
 
 	/**
 	 * Returns the fully qualified name of the type represented by this
@@ -537,7 +537,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getName()
 	 * @since 2.1
 	 */
-	public String getQualifiedName();
+    String getQualifiedName();
 
 	/**
 	 * Returns the type binding for the superclass of the type represented
@@ -566,7 +566,7 @@ public interface ITypeBinding extends IBinding {
 	 *    or <code>null</code> if none
 	 * @see AST#resolveWellKnownType(String)
 	 */
-	public ITypeBinding getSuperclass();
+    ITypeBinding getSuperclass();
 
 	/**
 	 * Returns the type annotations that this type reference is annotated with. Since JLS8,
@@ -589,7 +589,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getKey()
 	 * @since 3.10
 	 */
-	public IAnnotationBinding[] getTypeAnnotations();
+    IAnnotationBinding[] getTypeAnnotations();
 
 	/**
 	 * Returns the type arguments of this generic type instance, or the
@@ -611,7 +611,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #isRawType()
 	 * @since 3.1
 	 */
-	public ITypeBinding[] getTypeArguments();
+    ITypeBinding[] getTypeArguments();
 
 	/**
 	 * Returns the upper type bounds of this type variable, wildcard, capture, or intersectionType.
@@ -633,7 +633,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #isIntersectionType()
 	 * @since 3.1
 	 */
-	public ITypeBinding[] getTypeBounds();
+    ITypeBinding[] getTypeBounds();
 
 	/**
 	 * Returns the binding for the type declaration corresponding to this type
@@ -655,7 +655,7 @@ public interface ITypeBinding extends IBinding {
 	 * @since 3.1
 	 * @see #isEqualTo(IBinding)
 	 */
-	public ITypeBinding getTypeDeclaration();
+    ITypeBinding getTypeDeclaration();
 
 	/**
 	 * Returns the type parameters of this class or interface type binding.
@@ -672,7 +672,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #isTypeVariable()
 	 * @since 3.1
 	 */
-	public ITypeBinding[] getTypeParameters();
+    ITypeBinding[] getTypeParameters();
 
 	/**
 	 * Returns the corresponding wildcard binding of this capture binding.
@@ -683,7 +683,7 @@ public interface ITypeBinding extends IBinding {
 	 * binding, <code>null</code> otherwise
 	 * @since 3.1
 	 */
-	public ITypeBinding getWildcard();
+    ITypeBinding getWildcard();
 
 	/**
 	 * Returns whether this type binding represents an annotation type.
@@ -695,7 +695,7 @@ public interface ITypeBinding extends IBinding {
 	 *    and <code>false</code> otherwise
 	 * @since 3.1
 	 */
-	public boolean isAnnotation();
+    boolean isAnnotation();
 
 	/**
 	 * Returns whether this type binding represents an anonymous class.
@@ -708,7 +708,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return <code>true</code> if this type binding is for an anonymous class,
 	 *   and <code>false</code> otherwise
 	 */
-	public boolean isAnonymous();
+    boolean isAnonymous();
 
 	/**
 	 * Returns whether this type binding represents an array type.
@@ -718,7 +718,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getElementType()
 	 * @see #getDimensions()
 	 */
-	public boolean isArray();
+    boolean isArray();
 
 	/**
 	 * Returns whether an expression of this type can be assigned to a variable
@@ -733,7 +733,7 @@ public interface ITypeBinding extends IBinding {
 	 *   variable of the given type, and <code>false</code> otherwise
 	 * @since 3.1
 	 */
-	public boolean isAssignmentCompatible(ITypeBinding variableType);
+    boolean isAssignmentCompatible(ITypeBinding variableType);
 
 	/**
 	 * Returns whether this type binding represents a capture binding.
@@ -762,7 +762,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getWildcard()
 	 * @since 3.1
 	 */
-	public boolean isCapture();
+    boolean isCapture();
 
 	/**
 	 * Returns whether this type is cast compatible with the given type,
@@ -782,7 +782,7 @@ public interface ITypeBinding extends IBinding {
 	 * given type, and <code>false</code> otherwise
 	 * @since 3.1
 	 */
-	public boolean isCastCompatible(ITypeBinding type);
+    boolean isCastCompatible(ITypeBinding type);
 
 	/**
 	 * Returns whether this type binding represents a class type or a recovered binding.
@@ -790,7 +790,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return <code>true</code> if this object represents a class or a recovered binding,
 	 *    and <code>false</code> otherwise
 	 */
-	public boolean isClass();
+    boolean isClass();
 
 	/**
 	 * Returns whether this type binding represents an enum type.
@@ -799,7 +799,7 @@ public interface ITypeBinding extends IBinding {
 	 *    and <code>false</code> otherwise
 	 * @since 3.1
 	 */
-	public boolean isEnum();
+    boolean isEnum();
 
 	/**
 	 * Returns whether this type binding represents a record type.
@@ -808,7 +808,7 @@ public interface ITypeBinding extends IBinding {
 	 *    and <code>false</code> otherwise
 	 * @since 3.26
 	 */
-	public boolean isRecord();
+    boolean isRecord();
 
 	/**
 	 * Returns whether this type binding originated in source code.
@@ -821,7 +821,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return <code>true</code> if the type is in source code,
 	 *    and <code>false</code> otherwise
 	 */
-	public boolean isFromSource();
+    boolean isFromSource();
 
 	/**
 	 * Returns whether this type binding represents a declaration of
@@ -845,7 +845,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getTypeParameters()
 	 * @since 3.1
 	 */
-	public boolean isGenericType();
+    boolean isGenericType();
 
 	/**
 	 * Returns whether this type binding represents an interface type.
@@ -856,7 +856,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return <code>true</code> if this object represents an interface,
 	 *    and <code>false</code> otherwise
 	 */
-	public boolean isInterface();
+    boolean isInterface();
 
 	/**
 	 * Returns whether this type binding represents an intersection binding.
@@ -878,7 +878,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see ITypeBinding#isWildcardType()
 	 * @since 3.12
 	 */
-	public boolean isIntersectionType();
+    boolean isIntersectionType();
 
 	/**
 	 * Returns whether this type binding represents a local class.
@@ -898,7 +898,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return <code>true</code> if this type binding is for a local class or
 	 * enum type, and <code>false</code> otherwise
 	 */
-	public boolean isLocal();
+    boolean isLocal();
 
 	/**
 	 * Returns whether this type binding represents a member class or
@@ -912,7 +912,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return <code>true</code> if this type binding is for a member class,
 	 *   interface, enum, or annotation type, and <code>false</code> otherwise
 	 */
-	public boolean isMember();
+    boolean isMember();
 
 	/**
 	 * Returns whether this type binding represents a nested class, interface,
@@ -927,7 +927,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return <code>true</code> if this type binding is for a nested class,
 	 *   interface, enum, or annotation type, and <code>false</code> otherwise
 	 */
-	public boolean isNested();
+    boolean isNested();
 
 	/**
 	 * Returns whether this type binding represents the null type.
@@ -938,7 +938,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return <code>true</code> if this type binding is for the null type,
 	 *   and <code>false</code> otherwise
 	 */
-	public boolean isNullType();
+    boolean isNullType();
 
 	/**
 	 * Returns whether this type binding represents an instance of
@@ -963,7 +963,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getTypeDeclaration()
 	 * @since 3.1
 	 */
-	public boolean isParameterizedType();
+    boolean isParameterizedType();
 
 	/**
 	 * Returns whether this type binding represents a primitive type.
@@ -977,7 +977,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return <code>true</code> if this type binding is for a primitive type,
 	 *   and <code>false</code> otherwise
 	 */
-	public boolean isPrimitive();
+    boolean isPrimitive();
 
 	/**
 	 * Returns whether this type binding represents an instance of
@@ -1005,7 +1005,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getTypeArguments()
 	 * @since 3.1
 	 */
-	public boolean isRawType();
+    boolean isRawType();
 
 	/**
 	 * Returns whether this type is subtype compatible with the given type,
@@ -1020,7 +1020,7 @@ public interface ITypeBinding extends IBinding {
 	 * given type, and <code>false</code> otherwise
 	 * @since 3.1
 	 */
-	public boolean isSubTypeCompatible(ITypeBinding type);
+    boolean isSubTypeCompatible(ITypeBinding type);
 
 	/**
 	 * Returns whether this type binding represents a top-level class,
@@ -1034,7 +1034,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return <code>true</code> if this type binding is for a top-level class,
 	 *   interface, enum, or annotation type, and <code>false</code> otherwise
 	 */
-	public boolean isTopLevel();
+    boolean isTopLevel();
 
 	/**
 	 * Returns whether this type binding represents a type variable.
@@ -1053,7 +1053,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getTypeBounds()
 	 * @since 3.1
 	 */
-	public boolean isTypeVariable();
+    boolean isTypeVariable();
 
 	/**
 	 * Returns whether this wildcard type is an upper bound
@@ -1067,7 +1067,7 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getBound()
 	 * @since 3.1
 	 */
-	public boolean isUpperbound();
+    boolean isUpperbound();
 
 	/**
 	 * Returns whether this type binding represents a wildcard type. A wildcard
@@ -1085,6 +1085,6 @@ public interface ITypeBinding extends IBinding {
 	 * @see #getBound()
 	 * @see #isUpperbound()
 	 */
-	public boolean isWildcardType();
+    boolean isWildcardType();
 
 }

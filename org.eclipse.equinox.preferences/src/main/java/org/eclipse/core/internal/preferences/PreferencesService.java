@@ -217,7 +217,7 @@ public class PreferencesService implements IPreferencesService {
 	}
 
 	private boolean containsKeys(IEclipsePreferences aRoot) throws BackingStoreException {
-		final boolean result[] = new boolean[] {false};
+		final boolean[] result = new boolean[] {false};
 		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
 			@Override
 			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
@@ -727,13 +727,13 @@ public class PreferencesService implements IPreferencesService {
 	 * Take the preference tree and trim it so it only holds values applying to the given filters.
 	 * Then export the resulting tree to the given output stream.
 	 */
-	private void internalExport(IEclipsePreferences node, IPreferenceFilter filters[], OutputStream output) throws BackingStoreException, CoreException {
+	private void internalExport(IEclipsePreferences node, IPreferenceFilter[] filters, OutputStream output) throws BackingStoreException, CoreException {
 		ArrayList<IEclipsePreferences> trees = new ArrayList<>();
 		for (IPreferenceFilter filter : filters) {
 			trees.add(trimTree(node, filter));
 		}
 		IEclipsePreferences toExport = mergeTrees(trees.toArray(new IEclipsePreferences[trees.size()]));
-		exportPreferences(toExport, output, (String[]) null);
+		exportPreferences(toExport, output, null);
 	}
 
 	/*

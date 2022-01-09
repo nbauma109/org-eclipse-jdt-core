@@ -33,7 +33,7 @@ public interface CertificateVerifierFactory {
 	 * @return a certificate verifier for the specified content of a repository
 	 * @throws IOException if an IO exception occurs while reading the repository
 	 */
-	public CertificateVerifier getVerifier(File content) throws IOException;
+    CertificateVerifier getVerifier(File content) throws IOException;
 
 	/**
 	 * Returns a certificate verifier for the specified bundle.
@@ -41,5 +41,5 @@ public interface CertificateVerifierFactory {
 	 * @return a certificate verifier for the specified bundle.
 	 * @throws IOException if an IO exception occurs while reading the bundle content
 	 */
-	public CertificateVerifier getVerifier(Bundle bundle) throws IOException;
+    CertificateVerifier getVerifier(Bundle bundle) throws IOException;
 }

@@ -91,7 +91,7 @@ public class BundleSignerCondition {
 			}
 		}
 
-		boolean negate = (args.length == 2) ? "!".equals(args[1]) : false;
+		boolean negate = args.length == 2 && "!".equals(args[1]);
 		return negate ^ match ? Condition.TRUE : Condition.FALSE;
 	}
 

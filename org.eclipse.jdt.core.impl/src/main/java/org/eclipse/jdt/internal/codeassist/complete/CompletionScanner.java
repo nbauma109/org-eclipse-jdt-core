@@ -66,10 +66,7 @@ protected boolean isAtAssistIdentifier() {
 	if (this.cursorLocation < this.startPosition && this.currentPosition == this.startPosition) { // fake empty identifier got issued
 		return true;
 	}
-	if (this.cursorLocation+1 >= this.startPosition && this.cursorLocation < this.currentPosition) {
-		return true;
-	}
-	return false;
+	return this.cursorLocation + 1 >= this.startPosition && this.cursorLocation < this.currentPosition;
 }
 /*
  * Truncate the current identifier if it is containing the cursor location. Since completion is performed

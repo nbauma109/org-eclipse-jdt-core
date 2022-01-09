@@ -78,8 +78,7 @@ public final class DisabledInfo {
 			return false;
 		DisabledInfo other = (DisabledInfo) obj;
 		if (getBundle() == other.getBundle() && getPolicyName().equals(other.getPolicyName())) {
-			if (getMessage() == null ? other.getMessage() == null : getMessage().equals(other.getMessage()))
-				return true;
+            return getMessage() == null ? other.getMessage() == null : getMessage().equals(other.getMessage());
 		}
 		return false;
 	}

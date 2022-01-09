@@ -38,7 +38,7 @@ public class FieldInfo extends ClassFileStruct implements IBinaryField, Comparab
 	protected Object wrappedConstantValue;
 	protected long version;
 
-public static FieldInfo createField(byte classFileBytes[], int offsets[], int offset, long version) {
+public static FieldInfo createField(byte[] classFileBytes, int[] offsets, int offset, long version) {
 	FieldInfo fieldInfo = new FieldInfo(classFileBytes, offsets, offset, version);
 
 	int attributesCount = fieldInfo.u2At(6);
@@ -107,7 +107,7 @@ public static FieldInfo createField(byte classFileBytes[], int offsets[], int of
  * @param offset int
  * @param version class file version
  */
-protected FieldInfo (byte classFileBytes[], int offsets[], int offset, long version) {
+protected FieldInfo (byte[] classFileBytes, int[] offsets, int offset, long version) {
 	super(classFileBytes, offsets, offset);
 	this.accessFlags = -1;
 	this.signatureUtf8Offset = -1;

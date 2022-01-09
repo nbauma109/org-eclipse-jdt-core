@@ -23,8 +23,8 @@ public final class HashtableOfIntValues implements Cloneable {
 	public static final int NO_VALUE = Integer.MIN_VALUE;
 
 	// to avoid using Enumerations, walk the individual tables skipping nulls
-	public char[] keyTable[];
-	public int valueTable[];
+	public char[][] keyTable;
+	public int[] valueTable;
 
 	public int elementSize; // number of elements in the table
 	int threshold;

@@ -66,7 +66,7 @@ public class Queue {
 	public Iterator elements() {
 		/**/
 		if (isEmpty())
-			return new ArrayList(0).iterator();
+			return Collections.emptyIterator();
 
 		/* if head < tail we can use the same array */
 		if (head <= tail)

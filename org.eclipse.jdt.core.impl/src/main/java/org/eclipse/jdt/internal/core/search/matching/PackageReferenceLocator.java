@@ -247,7 +247,7 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
 		if (typeBinding instanceof ArrayBinding)
 			typeBinding = ((ArrayBinding) typeBinding).leafComponentType;
 		if (typeBinding instanceof ProblemReferenceBinding)
-			typeBinding = ((ProblemReferenceBinding) typeBinding).closestMatch();
+			typeBinding = typeBinding.closestMatch();
 		if (typeBinding instanceof ReferenceBinding) {
 			PackageBinding pkgBinding = ((ReferenceBinding) typeBinding).fPackage;
 			if (pkgBinding != null)

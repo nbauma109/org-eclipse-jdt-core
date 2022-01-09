@@ -249,7 +249,7 @@ public interface TypeConstants {
 	char[][] JAVA_LANG_RUNTIME_OBJECTMETHODS = {JAVA, LANG, RUNTIME, "ObjectMethods".toCharArray()}; //$NON-NLS-1$
 	char[][] JAVA_LANG_RUNTIME_SWITCHBOOTSTRAPS = {JAVA, LANG, RUNTIME, "SwitchBootstraps".toCharArray()}; //$NON-NLS-1$
 	// known helper functions for closing a Closeable (all receive a Closeable as their first argument):
-	public static class CloseMethodRecord {
+    class CloseMethodRecord {
 		public char[][] typeName;
 		public char[] selector;
 		public int numCloseableArgs;
@@ -506,7 +506,7 @@ public interface TypeConstants {
 	int CONSTRAINT_SUPER = 2;		// Actual >> Formal
 
 	// status of bound checks
-	public static enum BoundCheckStatus {
+    enum BoundCheckStatus {
 		OK, NULL_PROBLEM, UNCHECKED, MISMATCH;
 		/** true if no problem or only a null problem. */
 		boolean isOKbyJLS() {
@@ -549,13 +549,13 @@ public interface TypeConstants {
 
 
 	// synthetic package-info name
-	public static final char[] PACKAGE_INFO_NAME = "package-info".toCharArray(); //$NON-NLS-1$
-	public static final char[] MODULE_INFO_NAME = "module-info".toCharArray(); //$NON-NLS-1$
-	public static final String MODULE_INFO_NAME_STRING = "module-info"; //$NON-NLS-1$
-	public static final char[] MODULE_INFO_FILE_NAME = "module-info.java".toCharArray(); //$NON-NLS-1$
-	public static final char[] MODULE_INFO_CLASS_NAME = "module-info.class".toCharArray(); //$NON-NLS-1$
-	public static final String MODULE_INFO_FILE_NAME_STRING = "module-info.java"; //$NON-NLS-1$
-	public static final String MODULE_INFO_CLASS_NAME_STRING = "module-info.class"; //$NON-NLS-1$
+    char[] PACKAGE_INFO_NAME = "package-info".toCharArray(); //$NON-NLS-1$
+	char[] MODULE_INFO_NAME = "module-info".toCharArray(); //$NON-NLS-1$
+	String MODULE_INFO_NAME_STRING = "module-info"; //$NON-NLS-1$
+	char[] MODULE_INFO_FILE_NAME = "module-info.java".toCharArray(); //$NON-NLS-1$
+	char[] MODULE_INFO_CLASS_NAME = "module-info.class".toCharArray(); //$NON-NLS-1$
+	String MODULE_INFO_FILE_NAME_STRING = "module-info.java"; //$NON-NLS-1$
+	String MODULE_INFO_CLASS_NAME_STRING = "module-info.class"; //$NON-NLS-1$
 	// java.base module name
 	char[] JAVA_BASE = "java.base".toCharArray(); //$NON-NLS-1$
 	String META_INF_MANIFEST_MF = "META-INF/MANIFEST.MF"; //$NON-NLS-1$

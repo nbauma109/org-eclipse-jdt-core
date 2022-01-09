@@ -154,10 +154,8 @@ class BoundSet {
 			if(this.dependencies != null && this.dependencies.contains(beta))
 				return true;
 			if (this.inverseBounds != null) {
-				if (this.inverseBounds.containsKey(beta)) {
-					// TODO: not yet observed in tests
-					return true;
-				}
+                // TODO: not yet observed in tests
+                return this.inverseBounds.containsKey(beta);
 			}
 			return false;
 		}
@@ -760,10 +758,8 @@ class BoundSet {
 		if (newConstraint != null)
 			return newConstraint;
 		newConstraint = combineSameSameWithProperType(boundT, boundS, firstBounds, nextBounds);
-		if (newConstraint != null)
-			return newConstraint;
-		return null;
-	}
+        return newConstraint;
+    }
 
 	// pre: boundLeft.left != boundRight.left
 	private ConstraintTypeFormula combineSameSameWithProperType(TypeBound boundLeft, TypeBound boundRight,
@@ -993,8 +989,7 @@ class BoundSet {
 		}
 		if (result != null) {
 			if (result instanceof ConstraintFormula) {
-				if (!reduceOneConstraint(context, (ConstraintFormula) result))
-					return false;
+                return reduceOneConstraint(context, (ConstraintFormula) result);
 			} else if (result instanceof ConstraintFormula[]) {
 				ConstraintFormula[] resultArray = (ConstraintFormula[]) result;
 				for (int i = 0; i < resultArray.length; i++)
@@ -1037,15 +1032,12 @@ class BoundSet {
 		}
 		if (betaIsInCaptureLhs) { // swap α and β in the rule text to cover "then β depends on the resolution of α"
 			ThreeSets sets = this.boundsPerVariable.get(beta);
-			if (sets != null && sets.hasDependency(alpha))
-				return true;
+            return sets != null && sets.hasDependency(alpha);
 		} else {
 			ThreeSets sets = this.boundsPerVariable.get(alpha);
-			if (sets != null && sets.hasDependency(beta))
-				return true;
+            return sets != null && sets.hasDependency(beta);
 		}
-		return false;
-	}
+    }
 
 	List<Set<InferenceVariable>> computeConnectedComponents(InferenceVariable[] inferenceVariables) {
 		// create all dependency edges (as bi-directional):

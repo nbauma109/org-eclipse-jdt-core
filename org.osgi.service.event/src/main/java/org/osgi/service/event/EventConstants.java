@@ -55,7 +55,7 @@ public interface EventConstants {
 	 * 
 	 * @see Event
 	 */
-	public static final String	EVENT_TOPIC					= "event.topics";
+    String	EVENT_TOPIC					= "event.topics";
 
 	/**
 	 * Service Registration property specifying a filter to further select
@@ -79,7 +79,7 @@ public interface EventConstants {
 	 * @see Event
 	 * @see Filter
 	 */
-	public static final String	EVENT_FILTER				= "event.filter";
+    String	EVENT_FILTER				= "event.filter";
 
 	/**
 	 * Service Registration property specifying the delivery qualities requested
@@ -96,7 +96,7 @@ public interface EventConstants {
 	 * @see #DELIVERY_ASYNC_UNORDERED
 	 * @since 1.3
 	 */
-	public static final String	EVENT_DELIVERY				= "event.delivery";
+    String	EVENT_DELIVERY				= "event.delivery";
 
 	/**
 	 * Event Handler delivery quality value specifying the Event Handler
@@ -112,7 +112,7 @@ public interface EventConstants {
 	 * @see #EVENT_DELIVERY
 	 * @since 1.3
 	 */
-	public static final String	DELIVERY_ASYNC_ORDERED		= "async.ordered";
+    String	DELIVERY_ASYNC_ORDERED		= "async.ordered";
 
 	/**
 	 * Event Handler delivery quality value specifying the Event Handler does
@@ -129,20 +129,20 @@ public interface EventConstants {
 	 * @see #EVENT_DELIVERY
 	 * @since 1.3
 	 */
-	public static final String	DELIVERY_ASYNC_UNORDERED	= "async.unordered";
+    String	DELIVERY_ASYNC_UNORDERED	= "async.unordered";
 
 	/**
 	 * The Distinguished Names of the signers of the bundle relevant to the
 	 * event. The type of the value for this event property is {@code String} or
 	 * {@code Collection} of {@code String}.
 	 */
-	public static final String	BUNDLE_SIGNER				= "bundle.signer";
+    String	BUNDLE_SIGNER				= "bundle.signer";
 
 	/**
 	 * The Bundle Symbolic Name of the bundle relevant to the event. The type of
 	 * the value for this event property is {@code String}.
 	 */
-	public static final String	BUNDLE_SYMBOLICNAME			= "bundle.symbolicName";
+    String	BUNDLE_SYMBOLICNAME			= "bundle.symbolicName";
 
 	/**
 	 * The Bundle id of the bundle relevant to the event. The type of the value
@@ -150,7 +150,7 @@ public interface EventConstants {
 	 * 
 	 * @since 1.1
 	 */
-	public static final String	BUNDLE_ID					= "bundle.id";
+    String	BUNDLE_ID					= "bundle.id";
 
 	/**
 	 * The Bundle object of the bundle relevant to the event. The type of the
@@ -158,7 +158,7 @@ public interface EventConstants {
 	 * 
 	 * @since 1.1
 	 */
-	public static final String	BUNDLE						= "bundle";
+    String	BUNDLE						= "bundle";
 
 	/**
 	 * The version of the bundle relevant to the event. The type of the value
@@ -166,20 +166,20 @@ public interface EventConstants {
 	 * 
 	 * @since 1.2
 	 */
-	public static final String	BUNDLE_VERSION				= "bundle.version";
+    String	BUNDLE_VERSION				= "bundle.version";
 
 	/**
 	 * The forwarded event object. Used when rebroadcasting an event that was
 	 * sent via some other event mechanism. The type of the value for this event
 	 * property is {@code Object}.
 	 */
-	public static final String	EVENT						= "event";
+    String	EVENT						= "event";
 
 	/**
 	 * An exception or error. The type of the value for this event property is
 	 * {@code Throwable}.
 	 */
-	public static final String	EXCEPTION					= "exception";
+    String	EXCEPTION					= "exception";
 
 	/**
 	 * The name of the exception type. Must be equal to the name of the class of
@@ -188,7 +188,7 @@ public interface EventConstants {
 	 * 
 	 * @since 1.1
 	 */
-	public static final String	EXCEPTION_CLASS				= "exception.class";
+    String	EXCEPTION_CLASS				= "exception.class";
 
 	/**
 	 * The exception message. Must be equal to the result of calling
@@ -196,44 +196,44 @@ public interface EventConstants {
 	 * {@link #EXCEPTION}. The type of the value for this event property is
 	 * {@code String}.
 	 */
-	public static final String	EXCEPTION_MESSAGE			= "exception.message";
+    String	EXCEPTION_MESSAGE			= "exception.message";
 
 	/**
 	 * A human-readable message that is usually not localized. The type of the
 	 * value for this event property is {@code String}.
 	 */
-	public static final String	MESSAGE						= "message";
+    String	MESSAGE						= "message";
 
 	/**
 	 * A service reference. The type of the value for this event property is
 	 * {@link ServiceReference}.
 	 */
-	public static final String	SERVICE						= "service";
+    String	SERVICE						= "service";
 
 	/**
 	 * A service's id. The type of the value for this event property is
 	 * {@code Long}.
 	 */
-	public static final String	SERVICE_ID					= Constants.SERVICE_ID;
+    String	SERVICE_ID					= Constants.SERVICE_ID;
 
 	/**
 	 * A service's objectClass. The type of the value for this event property is
 	 * {@code String[]}.
 	 */
-	public static final String	SERVICE_OBJECTCLASS			= "service.objectClass";
+    String	SERVICE_OBJECTCLASS			= "service.objectClass";
 
 	/**
 	 * A service's persistent identity. The type of the value for this event
 	 * property is {@code String} or {@code Collection} of {@code String}.
 	 */
-	public static final String	SERVICE_PID					= Constants.SERVICE_PID;
+    String	SERVICE_PID					= Constants.SERVICE_PID;
 
 	/**
 	 * The time when the event occurred, as reported by
 	 * {@code System.currentTimeMillis()}. The type of the value for this event
 	 * property is {@code Long}.
 	 */
-	public static final String	TIMESTAMP					= "timestamp";
+    String	TIMESTAMP					= "timestamp";
 
 	/**
 	 * The name of the implementation capability for the Event Admin
@@ -241,14 +241,14 @@ public interface EventConstants {
 	 * 
 	 * @since 1.4
 	 */
-	public static final String	EVENT_ADMIN_IMPLEMENTATION			= "osgi.event";
+    String	EVENT_ADMIN_IMPLEMENTATION			= "osgi.event";
 	/**
 	 * The version of the implementation capability for the Event Admin
 	 * specification
 	 * 
 	 * @since 1.4
 	 */
-	public static final String	EVENT_ADMIN_SPECIFICATION_VERSION	= "1.4";
+    String	EVENT_ADMIN_SPECIFICATION_VERSION	= "1.4";
 
 	/**
 	 * This constant was released with an incorrectly spelled name. It has been
@@ -256,5 +256,5 @@ public interface EventConstants {
 	 * 
 	 * @deprecated As of 1.1. Replaced by {@link #EXCEPTION_CLASS}.
 	 */
-	public static final String	EXECPTION_CLASS				= "exception.class";
+    String	EXECPTION_CLASS				= "exception.class";
 }

@@ -124,7 +124,7 @@ public @interface Requirement {
 	/**
 	 * Cardinality for this requirement.
 	 */
-	public enum Cardinality {
+    enum Cardinality {
 		/**
 		 * Indicates if the requirement can only be wired a single time.
 		 */
@@ -162,7 +162,7 @@ public @interface Requirement {
 	/**
 	 * Resolution for this requirement.
 	 */
-	public enum Resolution {
+    enum Resolution {
 		/**
 		 * A mandatory requirement forbids the bundle to resolve when the
 		 * requirement is not satisfied.

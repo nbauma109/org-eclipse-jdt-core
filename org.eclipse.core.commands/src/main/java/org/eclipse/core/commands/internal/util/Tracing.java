@@ -58,7 +58,7 @@ public final class Tracing {
 		if (message != null) {
 			buffer.append(message);
 		}
-		System.out.println(buffer.toString());
+		System.out.println(buffer);
 	}
 
 	/**

@@ -550,7 +550,7 @@ public FlowContext getTargetContextForBreakLabel(char[] labelName) {
 		char[] currentLabelName;
 		if (((currentLabelName = current.labelName()) != null)
 			&& CharOperation.equals(currentLabelName, labelName)) {
-			((LabeledStatement)current.associatedNode).bits |= ASTNode.LabelUsed;
+			current.associatedNode.bits |= ASTNode.LabelUsed;
 			if (lastNonReturningSubRoutine == null)
 				return current;
 			return lastNonReturningSubRoutine;
@@ -580,7 +580,7 @@ public FlowContext getTargetContextForContinueLabel(char[] labelName) {
 
 		char[] currentLabelName;
 		if ((currentLabelName = current.labelName()) != null && CharOperation.equals(currentLabelName, labelName)) {
-			((LabeledStatement)current.associatedNode).bits |= ASTNode.LabelUsed;
+			current.associatedNode.bits |= ASTNode.LabelUsed;
 
 			// matching label found
 			if ((lastContinuable != null)

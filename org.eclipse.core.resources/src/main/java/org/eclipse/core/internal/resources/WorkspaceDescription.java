@@ -64,7 +64,7 @@ public class WorkspaceDescription extends ModelObject implements IWorkspaceDescr
 	public String[] getBuildOrder(boolean makeCopy) {
 		if (buildOrder == null)
 			return null;
-		return makeCopy ? (String[]) buildOrder.clone() : buildOrder;
+		return makeCopy ? buildOrder.clone() : buildOrder;
 	}
 
 	public long getDeltaExpiration() {
@@ -156,7 +156,7 @@ public class WorkspaceDescription extends ModelObject implements IWorkspaceDescr
 	 */
 	@Override
 	public void setBuildOrder(String[] value) {
-		buildOrder = (value == null) ? null : (String[]) value.clone();
+		buildOrder = (value == null) ? null : value.clone();
 	}
 
 	/**

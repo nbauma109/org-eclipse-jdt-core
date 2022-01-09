@@ -94,7 +94,7 @@ public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 		}
 		int index = comp.indexOf("1."); //$NON-NLS-1$
 		if (index != -1) {
-			return comp.substring(index + 2, comp.length());
+			return comp.substring(index + 2);
 		} else {
 			return comp;
 		}
@@ -113,7 +113,7 @@ public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 		Path modPath = this.fs.getPath(this.releaseCode + (this.ctSym.isJRE12Plus() ? "" : "-modules")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (Files.exists(modPath)) {
 			this.modulePath = modPath;
-			this.modPathString = this.zipFilename + "|"+ modPath.toString(); //$NON-NLS-1$
+			this.modPathString = this.zipFilename + "|"+ modPath; //$NON-NLS-1$
 		}
 
 		if (!Files.exists(this.releasePath.resolve(this.releaseCode))) {

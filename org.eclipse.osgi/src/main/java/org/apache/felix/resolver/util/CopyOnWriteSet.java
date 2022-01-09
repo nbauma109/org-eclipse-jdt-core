@@ -154,8 +154,7 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         try {
             return (CopyOnWriteSet<E>) super.clone();
         } catch (CloneNotSupportedException exc) {
-            InternalError e = new InternalError();
-            e.initCause(exc);
+            InternalError e = new InternalError(exc);
             throw e; //should never happen since we are cloneable
         }
     }
@@ -239,7 +238,7 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
     @SuppressWarnings("unchecked")
     public static <T,U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
         T[] copy;
-        if ((Object) newType == Object[].class) {
+        if (newType == Object[].class) {
             copy = (T[]) new Object[newLength];
         } else {
             copy = (T[]) Array.newInstance(newType.getComponentType(), newLength);

@@ -72,9 +72,7 @@ public class WrapExecutor {
 			WrapInfo other = (WrapInfo) obj;
 			if (this.indent != other.indent)
 				return false;
-			if (this.wrapTokenIndex != other.wrapTokenIndex)
-				return false;
-			return true;
+			return this.wrapTokenIndex == other.wrapTokenIndex;
 		}
 
 	}
@@ -323,9 +321,7 @@ public class WrapExecutor {
 			int start = token.originalStart;
 			boolean inDisableFormat = this.tm2.getDisableFormatTokenPairs().stream()
 					.anyMatch(p -> p[0].originalStart <= start && p[1].originalStart >= start);
-			if (inDisableFormat)
-				return false;
-			return true;
+			return !inDisableFormat;
 		}
 	}
 

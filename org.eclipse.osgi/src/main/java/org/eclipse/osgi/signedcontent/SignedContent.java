@@ -46,42 +46,42 @@ public interface SignedContent {
 	 * </p>
 	 * @return all entries of the content
 	 */
-	public SignedContentEntry[] getSignedEntries();
+    SignedContentEntry[] getSignedEntries();
 
 	/**
 	 * Returns the signed entry for the specified name.
 	 * @param name the name of the entry
 	 * @return the entry or null if the entry could not be found
 	 */
-	public SignedContentEntry getSignedEntry(String name);
+    SignedContentEntry getSignedEntry(String name);
 
 	/**
 	 * Returns all the signer infos for this <code>SignedContent</code>.  If the content
 	 * is not signed then an empty array is returned.
 	 * @return all the signer infos for this <code>SignedContent</code>
 	 */
-	public SignerInfo[] getSignerInfos();
+    SignerInfo[] getSignerInfos();
 
 	/**
 	 * Returns true if the content is signed; false otherwise.  This is a convenience method
 	 * equivalent to calling <code>{@link #getSignerInfos()}.length &gt; 0</code>
 	 * @return true if the content is signed
 	 */
-	public boolean isSigned();
+    boolean isSigned();
 
 	/**
 	 * Returns the signing time for the signer info.  If no TSA signers exist then null is returned
 	 * @param signerInfo the signer info to get the signing time for
 	 * @return the signing time
 	 */
-	public Date getSigningTime(SignerInfo signerInfo);
+    Date getSigningTime(SignerInfo signerInfo);
 
 	/**
 	 * Returns the TSA signer info used to authenticate the signer time of a signer info.
 	 * @param signerInfo the signer info to get the TSA signer for
 	 * @return the TSA signer info
 	 */
-	public SignerInfo getTSASignerInfo(SignerInfo signerInfo);
+    SignerInfo getTSASignerInfo(SignerInfo signerInfo);
 
 	/**
 	 * Checks if the certificates are valid for the specified signer.  If the signer has a singing time
@@ -91,5 +91,5 @@ public interface SignedContent {
 	 * @throws CertificateExpiredException if one of the certificates of this signer is expired
 	 * @throws CertificateNotYetValidException if one of the certificates of this signer is not yet valid
 	 */
-	public void checkValidity(SignerInfo signerInfo) throws CertificateExpiredException, CertificateNotYetValidException;
+    void checkValidity(SignerInfo signerInfo) throws CertificateExpiredException, CertificateNotYetValidException;
 }

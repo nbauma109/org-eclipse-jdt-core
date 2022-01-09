@@ -461,7 +461,7 @@ public class LocalMetaArea implements ICoreConstants {
 		if (projectLocation == null && prjRefs.length == 0 && buildConfigs.length == 0 && configRefs.isEmpty())
 			return;
 		//write the private metadata file
-		try (SafeChunkyOutputStream output = new SafeChunkyOutputStream(file); DataOutputStream dataOut = new DataOutputStream(output);) {
+		try (SafeChunkyOutputStream output = new SafeChunkyOutputStream(file); DataOutputStream dataOut = new DataOutputStream(output)) {
 			if (projectLocation == null)
 				dataOut.writeUTF(""); //$NON-NLS-1$
 			else

@@ -81,7 +81,7 @@ public class BundleLocationCondition {
 		}
 		Dictionary<String, String> matchProps = new Hashtable<String, String>(2);
 		matchProps.put("location", bundleLocation);
-		boolean negate = (args.length == 2) ? "!".equals(args[1]) : false;
+		boolean negate = args.length == 2 && "!".equals(args[1]);
 		return (negate ^ filter.match(matchProps)) ? Condition.TRUE : Condition.FALSE;
 	}
 

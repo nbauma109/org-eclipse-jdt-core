@@ -19,68 +19,68 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 
 public interface IModule {
 
-	public static IModuleReference[] NO_MODULE_REFS = new IModuleReference[0];
-	public static IPackageExport[] NO_EXPORTS = new IPackageExport[0];
-	public static char[][] NO_USES = new char[0][];
-	public static IService[] NO_PROVIDES = new IService[0];
-	public static IModule[] NO_MODULES = new IModule[0];
-	public static IPackageExport[] NO_OPENS = new IPackageExport[0];
+	IModuleReference[] NO_MODULE_REFS = new IModuleReference[0];
+	IPackageExport[] NO_EXPORTS = new IPackageExport[0];
+	char[][] NO_USES = new char[0][];
+	IService[] NO_PROVIDES = new IService[0];
+	IModule[] NO_MODULES = new IModule[0];
+	IPackageExport[] NO_OPENS = new IPackageExport[0];
 
-	public String MODULE_INFO = "module-info"; //$NON-NLS-1$
-	public String MODULE_INFO_JAVA = "module-info.java"; //$NON-NLS-1$
-	public String MODULE_INFO_CLASS = "module-info.class"; //$NON-NLS-1$
+	String MODULE_INFO = "module-info"; //$NON-NLS-1$
+	String MODULE_INFO_JAVA = "module-info.java"; //$NON-NLS-1$
+	String MODULE_INFO_CLASS = "module-info.class"; //$NON-NLS-1$
 
-	public char[] name();
+	char[] name();
 
-	public IModuleReference[] requires();
+	IModuleReference[] requires();
 
-	public IPackageExport[] exports();
+	IPackageExport[] exports();
 
-	public char[][] uses();
+	char[][] uses();
 
-	public IService[] provides();
+	IService[] provides();
 
 	/*
 	 * the opens package statement is very similar to package export statement, hence
 	 * the same internal models are being used here.
 	 */
-	public IPackageExport[] opens();
+    IPackageExport[] opens();
 
-	public interface IModuleReference {
-		public char[] name();
-		public default boolean isTransitive() {
+	interface IModuleReference {
+		char[] name();
+		default boolean isTransitive() {
 			return (getModifiers() & ClassFileConstants.ACC_TRANSITIVE) != 0;
 		}
-		public int getModifiers();
-		public default boolean isStatic() {
+		int getModifiers();
+		default boolean isStatic() {
 			return (getModifiers() & ClassFileConstants.ACC_STATIC_PHASE) != 0;
 		}
 	}
 
-	public interface IPackageExport {
-		public char[] name();
-		public char[][] targets();
-		public default boolean isQualified() {
+	interface IPackageExport {
+		char[] name();
+		char[][] targets();
+		default boolean isQualified() {
 			char[][] targets = targets();
 			return targets != null && targets.length > 0;
 		}
 	}
 
-	public interface IService {
-		public char[] name();
+	interface IService {
+		char[] name();
 		char[][] with();
 	}
 
-	public default boolean isAutomatic() {
+	default boolean isAutomatic() {
 		return false;
 	}
-	public default boolean isAutoNameFromManifest() {
+	default boolean isAutoNameFromManifest() {
 		return false;
 	}
-	public abstract boolean isOpen();
+	boolean isOpen();
 
 
-	public static IModule createAutomatic(char[] moduleName, boolean fromManifest) {
+	static IModule createAutomatic(char[] moduleName, boolean fromManifest) {
 		final class AutoModule implements IModule {
 			char[] name;
 			boolean nameFromManifest;
@@ -134,7 +134,7 @@ public interface IModule {
 		return new AutoModule(moduleName, fromManifest);
 	}
 
-	public static IModule createAutomatic(String fileName, boolean isFile, Manifest manifest) {
+	static IModule createAutomatic(String fileName, boolean isFile, Manifest manifest) {
 		boolean fromManifest = true;
 		char[] inferredName = AutomaticModuleNaming.determineAutomaticModuleNameFromManifest(manifest);
 		if (inferredName == null) {

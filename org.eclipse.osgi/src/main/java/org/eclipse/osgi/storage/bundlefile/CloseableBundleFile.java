@@ -135,7 +135,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 					doOpen();
 					closed = false;
 					if (debug.DEBUG_BUNDLE_FILE_OPEN) {
-						Debug.println("OPENED bundle file - " + toString()); //$NON-NLS-1$
+						Debug.println("OPENED bundle file - " + this); //$NON-NLS-1$
 					}
 				}
 			} else {
@@ -363,7 +363,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 				mruListRemove();
 				postClose();
 				if (debug.DEBUG_BUNDLE_FILE_CLOSE) {
-					Debug.println("CLOSED bundle file - " + toString()); //$NON-NLS-1$
+					Debug.println("CLOSED bundle file - " + this); //$NON-NLS-1$
 				}
 			}
 		} finally {

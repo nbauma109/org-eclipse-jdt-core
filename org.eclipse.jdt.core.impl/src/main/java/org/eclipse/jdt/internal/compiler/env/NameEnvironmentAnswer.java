@@ -70,16 +70,16 @@ public class NameEnvironmentAnswer {
 			baseString = "IBinaryType " + fileName; //$NON-NLS-1$
 		}
 		if (this.compilationUnit != null) {
-			baseString = "ICompilationUnit " + this.compilationUnit.toString(); //$NON-NLS-1$
+			baseString = "ICompilationUnit " + this.compilationUnit; //$NON-NLS-1$
 		}
 		if (this.sourceTypes != null) {
 			baseString = Arrays.toString(this.sourceTypes);
 		}
 		if (this.accessRestriction != null) {
-			baseString += " " + this.accessRestriction.toString(); //$NON-NLS-1$
+			baseString += " " + this.accessRestriction; //$NON-NLS-1$
 		}
 		if (this.externalAnnotationPath != null) {
-			baseString += " extPath=" + this.externalAnnotationPath.toString(); //$NON-NLS-1$
+			baseString += " extPath=" + this.externalAnnotationPath; //$NON-NLS-1$
 		}
 		if (this.moduleName != null) {
 			baseString += " module=" + String.valueOf(this.moduleName); //$NON-NLS-1$

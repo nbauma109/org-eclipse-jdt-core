@@ -30,5 +30,5 @@ public interface IElementChangedListener {
  *
  * @param event the change event
  */
-public void elementChanged(ElementChangedEvent event);
+void elementChanged(ElementChangedEvent event);
 }

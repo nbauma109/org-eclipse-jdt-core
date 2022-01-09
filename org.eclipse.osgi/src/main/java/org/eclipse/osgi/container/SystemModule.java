@@ -67,7 +67,7 @@ public abstract class SystemModule extends Module {
 				lockedStarted = false;
 				ResolutionReport report;
 				try {
-					report = getRevisions().getContainer().resolve(Collections.singletonList((Module) this), true);
+					report = getRevisions().getContainer().resolve(Collections.singletonList(this), true);
 				} finally {
 					lockStateChange(ModuleEvent.STARTED);
 					lockedStarted = true;
@@ -231,7 +231,7 @@ public abstract class SystemModule extends Module {
 			}
 		} catch (InterruptedException e) {
 			getRevisions().getContainer().adaptor.publishContainerEvent(ContainerEvent.ERROR, this, e);
-			throw new BundleException(Msg.Module_LockError + toString(), BundleException.STATECHANGE_ERROR, e);
+			throw new BundleException(Msg.Module_LockError + this, BundleException.STATECHANGE_ERROR, e);
 		}
 
 	}

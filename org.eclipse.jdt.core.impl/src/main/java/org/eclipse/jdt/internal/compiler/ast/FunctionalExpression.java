@@ -129,11 +129,9 @@ public abstract class FunctionalExpression extends Expression {
 			if (method != null) { // when called from type inference
 				if (typeVariable.declaringElement == method)
 					return false;
-				if (method.isConstructor() && typeVariable.declaringElement == method.declaringClass)
-					return false;
+                return !method.isConstructor() || typeVariable.declaringElement != method.declaringClass;
 			} else { // for internal calls
-				if (typeVariable.declaringElement instanceof MethodBinding)
-					return false;
+                return !(typeVariable.declaringElement instanceof MethodBinding);
 			}
 		}
 		return true;
@@ -295,10 +293,8 @@ public abstract class FunctionalExpression extends Expression {
 
 		VisibilityInspector inspector = new VisibilityInspector(this, scope, shouldChatter);
 
-		boolean status = true;
-		if (!inspector.visible(sam.returnType))
-			status = false;
-		if (!inspector.visible(sam.parameters))
+		boolean status = inspector.visible(sam.returnType);
+        if (!inspector.visible(sam.parameters))
 			status = false;
 		if (!inspector.visible(sam.thrownExceptions))
 			status = false;

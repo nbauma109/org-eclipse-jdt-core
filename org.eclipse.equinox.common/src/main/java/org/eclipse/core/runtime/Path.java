@@ -235,7 +235,7 @@ public class Path implements IPath, Cloneable {
 				//remove leading slash from device part to handle output of URL.getFile()
 				int start = fullPath.charAt(0) == SEPARATOR ? 1 : 0;
 				devicePart = fullPath.substring(start, i + 1);
-				fullPath = fullPath.substring(i + 1, fullPath.length());
+				fullPath = fullPath.substring(i + 1);
 			}
 		}
 		initialize(devicePart, fullPath, forWindows);
@@ -949,7 +949,7 @@ public class Path implements IPath, Cloneable {
 	@Override
 	public IPath makeUNC(boolean toUNC) {
 		// if we are already in the right form then just return
-		if (!(toUNC ^ isUNC()))
+		if (toUNC == isUNC())
 			return this;
 
 		int newSeparators = this.flags;

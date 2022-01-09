@@ -27,5 +27,5 @@ public interface ILegacyPreferences {
 	 * @param object - plugin to initialize
 	 * @param name - ID of the plugin to be initialized
 	 */
-	public Object init(Object object, String name);
+    Object init(Object object, String name);
 }

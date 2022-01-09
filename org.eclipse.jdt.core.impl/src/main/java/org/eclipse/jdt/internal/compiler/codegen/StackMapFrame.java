@@ -332,9 +332,9 @@ public class StackMapFrame {
 		String pattern = "[pc : {0} locals: {1} stack items: {2}\nlocals: {3}\nstack: {4}\n]"; //$NON-NLS-1$
 		int localsLength = frame.locals == null ? 0 : frame.locals.length;
 		buffer.append(MessageFormat.format(pattern,
-				new Object[] { Integer.toString(frame.pc), Integer.toString(frame.getNumberOfLocals()),
-						Integer.toString(frame.numberOfStackItems), print(frame.locals, localsLength),
-						print(frame.stackItems, frame.numberOfStackItems) }));
+                Integer.toString(frame.pc), Integer.toString(frame.getNumberOfLocals()),
+                Integer.toString(frame.numberOfStackItems), print(frame.locals, localsLength),
+                print(frame.stackItems, frame.numberOfStackItems)));
 	}
 
 	private String print(VerificationTypeInfo[] infos, int length) {
